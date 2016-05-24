@@ -142,8 +142,8 @@ public class SpringPropertyProblem implements ReconcileProblem, FixableProblem {
 	}
 
 	private void addProvidedFixes(QuickfixContext context, List<ICompletionProposal> proposals) {
-		if (getProblemFixer()!=null) {
-			getProblemFixer().contributeFixes(context, this, proposals);
+		if (problemFixer!=null) {
+			problemFixer.contributeFixes(context, this, proposals);
 		}
 	}
 
@@ -191,5 +191,9 @@ public class SpringPropertyProblem implements ReconcileProblem, FixableProblem {
 
 	public void setProblemFixer(ProblemFixer problemFixer) {
 		this.problemFixer = problemFixer;
+	}
+
+	public int getEnd() {
+		return getOffset()+getLength();
 	}
 }

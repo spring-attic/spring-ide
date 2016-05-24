@@ -17,11 +17,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.text.IRegion;
 import org.springframework.ide.eclipse.editor.support.util.CollectionUtil;
+import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.util.YamlIndentUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 import org.springframework.ide.eclipse.editor.support.yaml.path.KeyAliases;
@@ -296,6 +298,13 @@ public class YamlStructureParser {
 			return parent.getRoot();
 		}
 
+		public SDocNode getDocNode() {
+			SNode it = this;
+			while (it!=null && !(it instanceof SDocNode)) {
+				it = it.getParent();
+			}
+			return (SDocNode) it;
+		}
 	}
 
 	public class SRootNode extends SChildBearingNode {
@@ -679,6 +688,71 @@ public class YamlStructureParser {
 			return offset> getColonOffset() && offset<=getTreeEnd();
 		}
 
+		/**
+		 * Gets the raw text of the 'stuff' assigned to the key in this node.
+		 * This includes all the text starting from the ':' upto the very end of this node,
+		 * including the text for this node's children (if any).
+		 */
+		public String getValue() {
+			int start = getColonOffset()+1;
+			int end = getTreeEnd();
+			String indentedText = StringUtil.trimEnd(doc.textBetween(start, end));
+			List<SNode> children = getChildren();
+			int indent = determineIndentation(children);
+			if (indent>0) {
+				return stripIndentation(indent, indentedText);
+			}
+			return indentedText;
+		}
+
+		private String stripIndentation(int indent, String indentedText) {
+			StringBuilder out = new StringBuilder();
+			Pattern NEWLINE = Pattern.compile("(\\n|\\r)+");
+			boolean first = true;
+			Matcher matcher = NEWLINE.matcher(indentedText);
+			int pos = 0;
+			while (matcher.find()) {
+				int newline = matcher.start();
+				int newline_end = matcher.end();
+				String line = indentedText.substring(pos, newline);
+				if (first) {
+					first = false;
+				} else {
+					line = stripIndentationFromLine(indent, line);
+				}
+				out.append(line);
+				out.append(indentedText.substring(newline, newline_end));
+				pos = newline_end;
+			}
+			out.append(stripIndentationFromLine(indent, indentedText.substring(pos)));
+			return out.toString();
+		}
+
+		private String stripIndentationFromLine(int indent, String line) {
+			int start = 0;
+			while (start<line.length() && start < indent && line.charAt(start)==' ') {
+				start++;
+			}
+			return line.substring(start);
+		}
+
+		/**
+		 * Determine the indentation of a block of children.
+		 */
+		private int determineIndentation(List<SNode> children) {
+			//The tricky bit is that the block may start with comment nodes which provide no hints about the indentation
+			//indicated by indentation level = -1
+			//So... we must take indentation from the first node that actually has one
+			if (children!=null) {
+				for (SNode c : children) {
+					int indent = c.getIndent();
+					if (indent>=0) {
+						return indent;
+					}
+				}
+			}
+			return -1; //Couldn't determine it.
+		}
 	}
 
 	private Iterable<String> getKeyAliases(String key) {

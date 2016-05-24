@@ -38,7 +38,7 @@ import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.util.ProcessListenerAdapter;
 import org.springframework.ide.eclipse.boot.util.ProcessTracker;
-import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 
 public abstract class AbstractBootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 

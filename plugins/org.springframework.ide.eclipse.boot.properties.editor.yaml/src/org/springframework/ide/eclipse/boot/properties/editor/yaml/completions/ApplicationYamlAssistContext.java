@@ -39,7 +39,6 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.Bean
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypedProperty;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile.IndexNavigator;
-import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory.ScoreableProposal;
 import org.springframework.ide.eclipse.editor.support.completions.DocumentEdits;
 import org.springframework.ide.eclipse.editor.support.completions.ProposalApplier;
@@ -47,6 +46,7 @@ import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.util.CollectionUtil;
 import org.springframework.ide.eclipse.editor.support.util.DocumentRegion;
 import org.springframework.ide.eclipse.editor.support.util.FuzzyMatcher;
+import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 import org.springframework.ide.eclipse.editor.support.yaml.completions.AbstractYamlAssistContext;
 import org.springframework.ide.eclipse.editor.support.yaml.completions.TopLevelAssistContext;

@@ -68,7 +68,7 @@ import org.springframework.ide.eclipse.boot.core.Repo;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
-import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

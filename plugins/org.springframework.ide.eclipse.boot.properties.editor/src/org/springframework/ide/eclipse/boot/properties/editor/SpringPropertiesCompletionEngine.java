@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor;
 
-import static org.springframework.ide.eclipse.boot.util.StringUtil.camelCaseToHyphens;
+import static org.springframework.ide.eclipse.editor.support.util.StringUtil.camelCaseToHyphens;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -52,7 +52,6 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.Bean
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypedProperty;
 import org.springframework.ide.eclipse.boot.util.Log;
-import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.completions.DocumentEdits;
 import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
 import org.springframework.ide.eclipse.editor.support.completions.ProposalApplier;
@@ -62,6 +61,7 @@ import org.springframework.ide.eclipse.editor.support.util.CollectionUtil;
 import org.springframework.ide.eclipse.editor.support.util.DocumentRegion;
 import org.springframework.ide.eclipse.editor.support.util.FuzzyMatcher;
 import org.springframework.ide.eclipse.editor.support.util.PrefixFinder;
+import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 
 import com.google.common.collect.ImmutableList;
 

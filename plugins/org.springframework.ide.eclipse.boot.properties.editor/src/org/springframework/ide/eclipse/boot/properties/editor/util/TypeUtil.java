@@ -50,10 +50,10 @@ import org.springframework.ide.eclipse.boot.properties.editor.metadata.StsValueH
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProviderRegistry.ValueProviderStrategy;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.AlwaysFailingParser;
 import org.springframework.ide.eclipse.boot.util.Log;
-import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.util.CollectionUtil;
 import org.springframework.ide.eclipse.editor.support.util.EnumValueParser;
 import org.springframework.ide.eclipse.editor.support.util.HtmlSnippet;
+import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.util.ValueParser;
 
 import com.google.common.collect.ImmutableList;

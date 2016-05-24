@@ -28,8 +28,8 @@ import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.MavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
-import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springframework.ide.eclipse.core.SpringCore;
+import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 public class EnableDisableBootDevtools implements IObjectActionDelegate {

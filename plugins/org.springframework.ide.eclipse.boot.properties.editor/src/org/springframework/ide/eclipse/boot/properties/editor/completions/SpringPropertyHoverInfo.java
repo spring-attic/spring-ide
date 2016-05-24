@@ -24,8 +24,8 @@ import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCo
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo.PropertySource;
-import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.util.HtmlSnippet;
+import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 
 /**
  * Information object that is displayed in SpringPropertiesTextHover's information

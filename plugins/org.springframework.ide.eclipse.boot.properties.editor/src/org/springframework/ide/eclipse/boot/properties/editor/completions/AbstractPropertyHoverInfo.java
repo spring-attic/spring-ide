@@ -10,17 +10,17 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.completions;
 
-import static org.springframework.ide.eclipse.boot.util.StringUtil.arrayToCommaDelimitedString;
-import static org.springframework.ide.eclipse.boot.util.StringUtil.collectionToCommaDelimitedString;
+import static org.springframework.ide.eclipse.editor.support.util.StringUtil.arrayToCommaDelimitedString;
+import static org.springframework.ide.eclipse.editor.support.util.StringUtil.collectionToCommaDelimitedString;
 
 import java.util.Collection;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.properties.editor.util.JavaTypeLinks;
-import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.util.HtmlBuffer;
 import org.springframework.ide.eclipse.editor.support.util.HtmlSnippet;
+import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 
 /**
  * @author Kris De Volder

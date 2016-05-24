@@ -18,9 +18,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
-import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestYmlSchema;
 import org.springframework.ide.eclipse.editor.support.hover.DescriptionProviders;
+import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YType;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeFactory.YBeanType;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeFactory.YSeqType;

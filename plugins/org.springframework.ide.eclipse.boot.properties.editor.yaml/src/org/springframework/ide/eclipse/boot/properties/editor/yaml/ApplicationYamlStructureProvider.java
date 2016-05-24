@@ -12,7 +12,7 @@ package org.springframework.ide.eclipse.boot.properties.editor.yaml;
 
 import java.util.Collections;
 
-import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.path.KeyAliases;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 

@@ -254,4 +254,15 @@ public class YamlPath {
 		return false;
 	}
 
+	public YamlPath commonPrefix(YamlPath other) {
+		ArrayList<YamlPathSegment> common = new ArrayList<>(this.size());
+		for (int i = 0; i < this.size(); i++) {
+			YamlPathSegment s = this.getSegment(i);
+			if (s.equals(other.getSegment(i))) {
+				common.add(s);
+			}
+		}
+		return new YamlPath(common);
+	}
+
 }

@@ -33,7 +33,8 @@ Require-Bundle: org.eclipse.core.resources,
  com.fasterxml.jackson.core.jackson-annotations,
  org.eclipse.ui.forms,
  org.springframework.ide.eclipse.boot.wizard,
- org.springframework.ide.eclipse.core
+ org.springframework.ide.eclipse.core,
+ org.springframework.ide.eclipse.editor.support
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.boot.core,

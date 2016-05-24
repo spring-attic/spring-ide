@@ -15,8 +15,8 @@ import java.util.regex.Pattern;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
+import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 /**

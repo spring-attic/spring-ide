@@ -21,6 +21,15 @@ import org.eclipse.swt.graphics.Point;
  */
 public interface ProposalApplier {
 
+	/**
+	 * {@link ProposalApplier} that does nothing whatsoever.
+	 */
+	static ProposalApplier NULL = new ProposalApplier() {
+		@Override public Point getSelection(IDocument document) { return null; }
+		@Override public void apply(IDocument doc) {}
+		@Override public String toString() { return "NULL";};
+	};
+
 	Point getSelection(IDocument document) throws Exception;
 	void apply(IDocument doc) throws Exception;
 

@@ -49,8 +49,8 @@ import org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurati
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.util.ILaunchConfigurationTabSection;
 import org.springframework.ide.eclipse.boot.launch.util.TextCellEditorWithContentProposal;
-import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.completions.ProposalProcessor;
+import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;

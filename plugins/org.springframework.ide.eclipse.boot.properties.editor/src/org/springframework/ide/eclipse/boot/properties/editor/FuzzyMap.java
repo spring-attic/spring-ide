@@ -18,8 +18,8 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
-import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.util.FuzzyMatcher;
+import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 
 /**
  * A collection of data that can be searched with a simple 'fuzzy' string

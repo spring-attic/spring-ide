@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
-import static org.springframework.ide.eclipse.boot.util.StringUtil.trimEnd;
+import static org.springframework.ide.eclipse.editor.support.util.StringUtil.trimEnd;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertElements;
 
 import java.util.Arrays;
@@ -18,17 +18,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
-import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.RelaxedNameConfig;
-import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertyIndex;
-import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
-import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProviderRegistry;
-import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertyIndexProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtilProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.ApplicationYamlStructureProvider;
@@ -37,6 +34,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile.App
 import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
+import org.springframework.ide.eclipse.editor.support.util.UserInteractions;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlAssistContextProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlCompletionEngine;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlASTProvider;
@@ -139,4 +137,5 @@ public class ApplicationYamlEditorTestHarness extends YamlOrPropertyEditorTestHa
 	protected HoverInfoProvider getHoverProvider() {
 		return null;
 	}
+
 }

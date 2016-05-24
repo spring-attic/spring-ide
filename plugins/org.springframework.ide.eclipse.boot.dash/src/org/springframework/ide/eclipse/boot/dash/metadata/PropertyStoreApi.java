@@ -11,7 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.metadata;
 
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.ArrayEncoder;
 
 /**

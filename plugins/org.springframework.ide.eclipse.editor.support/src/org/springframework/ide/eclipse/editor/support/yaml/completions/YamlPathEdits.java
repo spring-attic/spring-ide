@@ -156,4 +156,12 @@ public class YamlPathEdits extends DocumentEdits {
 		return !textBefore.trim().isEmpty();
 	}
 
+	/**
+	 * Deletes this node, and all of its children.
+	 */
+	public void deleteNode(SNode node) throws Exception {
+		delete(node.getStart(), node.getTreeEnd());
+		deleteLineBackwardAtOffset(node.getStart());
+	}
+
 }

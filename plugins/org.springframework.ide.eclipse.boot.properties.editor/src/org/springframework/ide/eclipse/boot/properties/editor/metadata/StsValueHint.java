@@ -11,8 +11,8 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.springframework.boot.configurationmetadata.Deprecation;
 import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.ide.eclipse.boot.util.Log;
-import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.util.HtmlSnippet;
+import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 
 import static org.springframework.ide.eclipse.boot.properties.editor.metadata.DeprecationUtil.*;
 

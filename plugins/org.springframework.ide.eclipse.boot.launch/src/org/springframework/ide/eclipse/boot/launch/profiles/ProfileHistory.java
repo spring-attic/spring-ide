@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch.profiles;
 
+import static org.springframework.ide.eclipse.editor.support.util.StringUtil.*;
+
 import java.util.Arrays;
 import java.util.LinkedList;
 
@@ -20,8 +22,6 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.launch.IProfileHistory;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.ArrayEncoder;
-
-import static org.springframework.ide.eclipse.boot.util.StringUtil.*;
 
 
 /**

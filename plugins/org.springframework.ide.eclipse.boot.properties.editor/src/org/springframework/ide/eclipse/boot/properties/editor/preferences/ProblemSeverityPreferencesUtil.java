@@ -19,9 +19,9 @@ import org.osgi.service.prefs.BackingStoreException;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType;
-import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity;
 import org.springframework.ide.eclipse.editor.support.reconcile.ProblemType;
+import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 
 /**
  * @author Kris De Volder

@@ -189,7 +189,12 @@ public abstract class AbstractYamlSourceViewerConfiguration extends YEditSourceV
 	}
 
 	protected final QuickfixContext getQuickfixContext(ISourceViewer sourceViewer) {
-		return new DefaultQuickfixContext(getPluginId(), getPreferencesStore(), sourceViewer, new DefaultUserInteractions(getShell()));
+		return new DefaultQuickfixContext(
+				getPluginId(),
+				getPreferencesStore(),
+				sourceViewer,
+				new DefaultUserInteractions(getShell())
+		);
 	}
 
 	protected abstract String getPluginId();

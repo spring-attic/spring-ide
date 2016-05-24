@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
+import org.springframework.ide.eclipse.boot.properties.editor.quickfix.ReplaceDeprecatedPropertyQuickfix;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
@@ -30,8 +31,8 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.BeanPropertyNameMode;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypedProperty;
-import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.reconcile.IProblemCollector;
+import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.util.ValueParser;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeRef;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeRef.Kind;
@@ -355,6 +356,8 @@ public class ApplicationYamlASTReconciler implements YamlASTReconciler {
 	private void deprecatedProperty(PropertyInfo property, Node keyNode) {
 		SpringPropertyProblem problem = deprecatedPropertyProblem(property.getId(), null, keyNode,
 				property.getDeprecationReplacement(), property.getDeprecationReason());
+		problem.setMetadata(property);
+		problem.setProblemFixer(ReplaceDeprecatedYamlQuickfix.FIXER);
 		problems.accept(problem);
 	}
 

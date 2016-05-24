@@ -27,7 +27,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProv
 import org.springframework.ide.eclipse.boot.properties.editor.util.FluxJdtSearch;
 import org.springframework.ide.eclipse.boot.properties.editor.util.LimitedTimeCache;
 import org.springframework.ide.eclipse.boot.util.Log;
-import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 
 import reactor.core.publisher.Mono;
 

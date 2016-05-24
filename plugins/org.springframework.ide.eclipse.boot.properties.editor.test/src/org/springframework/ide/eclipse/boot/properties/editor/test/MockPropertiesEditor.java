@@ -41,7 +41,12 @@ public class MockPropertiesEditor extends MockEditor {
 	}
 
 	public void assertText(String expected) {
-		assertEquals(expected, getText());
+		if (expected.contains(CURSOR)) {
+			assertEquals(expected, getText());
+		} else {
+			//assume the test doesn't care about cursor position so ignore it
+			assertEquals(expected, getRawText());
+		}
 	}
 
 

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.editor.support.yaml;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;

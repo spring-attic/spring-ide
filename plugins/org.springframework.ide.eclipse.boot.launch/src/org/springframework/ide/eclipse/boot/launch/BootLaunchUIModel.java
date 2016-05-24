@@ -17,7 +17,7 @@ import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfiguratio
 import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.ANSI_CONSOLE_OUTPUT;
 
 import org.springframework.ide.eclipse.boot.launch.livebean.EnableJmxFeaturesModel;
-import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;

@@ -11,7 +11,7 @@
 package org.springframework.ide.eclipse.boot.core;
 
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrDependencySpec.DependencyInfo;
-import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.ui.Ilabelable;
 
 public class MavenCoordinates implements IMavenCoordinates, Ilabelable {

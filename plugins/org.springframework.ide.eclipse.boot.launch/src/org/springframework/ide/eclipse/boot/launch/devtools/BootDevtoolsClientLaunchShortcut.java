@@ -39,7 +39,7 @@ import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
-import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 
 @SuppressWarnings("restriction")
 public class BootDevtoolsClientLaunchShortcut implements ILaunchShortcut {

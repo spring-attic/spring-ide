@@ -52,7 +52,6 @@ import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProv
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertyIndexProvider;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.boot.test.MockPrefsStore;
-import org.springframework.ide.eclipse.boot.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
 import org.springframework.ide.eclipse.editor.support.reconcile.DefaultSeverityProvider;
@@ -62,6 +61,7 @@ import org.springframework.ide.eclipse.editor.support.reconcile.ProblemType;
 import org.springframework.ide.eclipse.editor.support.reconcile.QuickfixContext;
 import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
 import org.springframework.ide.eclipse.editor.support.reconcile.SeverityProvider;
+import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.util.UserInteractions;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 

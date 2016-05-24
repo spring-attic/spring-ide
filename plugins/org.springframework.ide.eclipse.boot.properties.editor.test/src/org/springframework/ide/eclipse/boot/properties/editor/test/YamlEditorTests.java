@@ -16,9 +16,11 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.CachingValueProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
-import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
+import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 
 /**
  * @author Kris De Volder
@@ -2457,6 +2459,315 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		);
 	}
 
+	public void testDeprecatedPropertyQuickfixSimple() throws Exception {
+		//A simple case for starters. The path edits aren't too complicated since there's
+		//just the one property in the file and only the last part of the 'path' changes.
+		//So this is a simple 'in-place' edit.
+
+		data("my.old-name", "java.lang.String", null, "Old and deprecated name");
+		deprecate("my.old-name", "my.new-name", null);
+
+		{
+			MockPropertiesEditor editor = newEditor(
+					"# a comment\n"+
+					"my:\n" +
+					"  old-name: foo\n"
+			);
+
+			ReconcileProblem problem = assertProblem(editor, "old-name");
+			ICompletionProposal fix = assertFirstQuickfix(editor, problem, "Change to 'my.new-name'");
+			editor.apply(fix);
+			editor.assertText(
+					"# a comment\n"+
+					"my:\n"+
+					"  new-name: foo\n"
+			);
+		}
+
+		{
+			MockPropertiesEditor editor = newEditor(
+					"# a comment\n"+
+					"my:\n" +
+					"  old-name: foo\n" +
+					"your: stuff"
+			);
+
+			ReconcileProblem problem = assertProblem(editor, "old-name");
+			ICompletionProposal fix = assertFirstQuickfix(editor, problem, "Change to 'my.new-name'");
+			editor.apply(fix);
+			editor.assertText(
+					"# a comment\n"+
+					"my:\n"+
+					"  new-name: foo\n"+
+					"your: stuff"
+			);
+		}
+
+		{	// Don't move prop if it doesn't need to be moved
+			MockPropertiesEditor editor = newEditor(
+					"# a comment\n"+
+					"my:\n" +
+					"  old-name: foo\n" +
+					"  other: bar\n"
+			);
+
+			ReconcileProblem problem = assertProblem(editor, "old-name");
+			ICompletionProposal fix = assertFirstQuickfix(editor, problem, "Change to 'my.new-name'");
+			editor.apply(fix);
+			editor.assertText(
+					"# a comment\n"+
+					"my:\n"+
+					"  new-name: foo\n" +
+					"  other: bar\n"
+			);
+		}
+	}
+
+	public void testDeprecatedPropertyQuickfixMovingValue() throws Exception {
+		data("my.old-name", "java.lang.String", null, "Old and deprecated name");
+		deprecate("my.old-name", "your.new-name", null);
+
+		data("my.stuff", "java.lang.String", null, "Old and deprecated name");
+		deprecate("my.stuff", "my.for-sale.stuff", null);
+
+		data("my.long.path.with.many.pieces", "java.lang.String", null, "Old");
+		deprecate("my.long.path.with.many.pieces", "my.path.with.many.pieces", null);
+
+		{
+			MockPropertiesEditor editor = newEditor(
+					"# a comment\n"+
+					"my:\n" +
+					"  long:\n"+
+					"    path:\n"+
+					"      with:\n"+
+					"        many:\n"+
+					"          pieces: foo\n"
+			);
+
+			ReconcileProblem problem = assertProblem(editor, "pieces");
+			ICompletionProposal fix = assertFirstQuickfix(editor, problem, "Change to 'my.path.with.many.pieces'");
+			editor.apply(fix);
+			editor.assertText(
+					"# a comment\n"+
+					"my:\n" +
+					"  path:\n"+
+					"    with:\n"+
+					"      many:\n"+
+					"        pieces: foo"
+			);
+		}
+
+		{
+			MockPropertiesEditor editor = newEditor(
+					"# a comment\n"+
+					"my:\n" +
+					"  long:\n"+
+					"    path:\n"+
+					"      with:\n"+
+					"        many:\n"+
+					"          cannot: remove this\n"+
+					"          pieces: foo\n"
+			);
+
+			ReconcileProblem problem = assertProblem(editor, "pieces");
+			ICompletionProposal fix = assertFirstQuickfix(editor, problem, "Change to 'my.path.with.many.pieces'");
+			editor.apply(fix);
+			editor.assertText(
+					"# a comment\n"+
+					"my:\n" +
+					"  long:\n"+
+					"    path:\n"+
+					"      with:\n"+
+					"        many:\n"+
+					"          cannot: remove this\n"+
+					"  path:\n"+
+					"    with:\n"+
+					"      many:\n"+
+					"        pieces: foo"
+			);
+		}
+
+		{
+			MockPropertiesEditor editor = newEditor(
+					"# a comment\n"+
+					"my:\n" +
+					"  stuff: foo\n"
+			);
+
+			ReconcileProblem problem = assertProblem(editor, "stuff");
+			ICompletionProposal fix = assertFirstQuickfix(editor, problem, "Change to 'my.for-sale.stuff'");
+			editor.apply(fix);
+			editor.assertText(
+					"# a comment\n"+
+					"my:\n" +
+					"  for-sale:\n"+
+					"    stuff: foo"
+			);
+		}
+
+		{
+			MockPropertiesEditor editor = newEditor(
+					"# a comment\n"+
+					"my:\n" +
+					"  old-name: foo\n"
+			);
+
+			ReconcileProblem problem = assertProblem(editor, "old-name");
+			ICompletionProposal fix = assertFirstQuickfix(editor, problem, "Change to 'your.new-name'");
+			editor.apply(fix);
+			editor.assertText(
+					"# a comment\n"+
+					"your:\n"+
+					"  new-name: foo"
+			);
+		}
+
+		{
+			MockPropertiesEditor editor = newEditor(
+					"# a comment\n"+
+					"my:\n" +
+					"  old-name: foo\n" +
+					"your:\n" +
+					"  goodies: nice"
+			);
+
+			ReconcileProblem problem = assertProblem(editor, "old-name");
+			ICompletionProposal fix = assertFirstQuickfix(editor, problem, "Change to 'your.new-name'");
+			editor.apply(fix);
+			editor.assertText(
+					"# a comment\n"+
+					"your:\n"+
+					"  goodies: nice\n"+
+					"  new-name: foo"
+			);
+		}
+
+		{
+			MockPropertiesEditor editor = newEditor(
+					"# a comment\n"+
+					"your:\n" +
+					"  goodies: nice\n" +
+					"my:\n" +
+					"  other: stuff\n" +
+					"  old-name: foo\n"
+			);
+
+			ReconcileProblem problem = assertProblem(editor, "old-name");
+			ICompletionProposal fix = assertFirstQuickfix(editor, problem, "Change to 'your.new-name'");
+			editor.apply(fix);
+			editor.assertText(
+					"# a comment\n"+
+					"your:\n"+
+					"  goodies: nice\n"+
+					"  new-name: foo\n" +
+					"my:\n" +
+					"  other: stuff"
+			);
+		}
+	}
+
+	public void testDeprecatedPropertyQuickfixMovingIndentedValue() throws Exception {
+		data("my.old-name", "java.lang.String", null, "Old and deprecated name");
+		deprecate("my.old-name", "your.new-name", null); //same indent level
+
+		data("my.stuff", "java.lang.String", null, "Old and deprecated name");
+		deprecate("my.stuff", "my.long.path.with.many.pieces", null); // deeper indent level
+
+		data("my.long.path.with.many.pieces", "java.lang.String", null, "Old");
+		deprecate("my.long.path.with.many.pieces", "short.path", null); //shallower level
+
+		{
+			MockPropertiesEditor editor = newEditor(
+					"# a comment\n"+
+					"my:\n" +
+					"  long:\n"+
+					"    path:\n"+
+					"      with:\n"+
+					"        many:\n"+
+					"          pieces: >\n"+
+					"            foo spread over\n"+
+					"            several lines\n" +
+					"            of text\n"+
+					"short:\n"+
+					"  stuff: goes here\n"
+			);
+			ReconcileProblem problem = assertProblem(editor, "pieces");
+			ICompletionProposal fix = assertFirstQuickfix(editor, problem, "Change to 'short.path'");
+			editor.apply(fix);
+			editor.assertText(
+					"# a comment\n"+
+					"short:\n"+
+					"  stuff: goes here\n" +
+					"  path: >\n" +
+					"    foo spread over\n"+
+					"    several lines\n" +
+					"    of text\n"
+			);
+		}
+
+		{
+			MockPropertiesEditor editor = newEditor(
+					"# a comment\n"+
+					"my:\n" +
+					"  long:\n"+
+					"    bits: go here\n"+
+					"  stuff: >\n" +
+					"    foo spread over\n"+
+					"      several lines\n" +
+					"     of text\n"
+			);
+			ReconcileProblem problem = assertProblem(editor, "stuff");
+			ICompletionProposal fix = assertFirstQuickfix(editor, problem, "Change to 'my.long.path.with.many.pieces'");
+			editor.apply(fix);
+			editor.assertText(
+					"# a comment\n"+
+					"my:\n" +
+					"  long:\n"+
+					"    bits: go here\n"+
+					"    path:\n" +
+					"      with:\n" +
+					"        many:\n"+
+					"          pieces: >\n" +
+					"            foo spread over\n"+
+					"              several lines\n" +
+					"             of text"
+			);
+		}
+		{
+			MockPropertiesEditor editor = newEditor(
+					"# a comment\n"+
+					"my:\n" +
+					"  long:\n"+
+					"    path:\n"+
+					"      with:\n"+
+					"        many:\n"+
+					"          pieces:\n"+
+					"# some\n" +
+					"          - foo spread over\n"+
+					"              #confusing\n" +
+					"          - several lines\n" +
+					"            #comments\n" +
+					"          - of text\n"+
+					"short:\n"+
+					"  stuff: goes here\n"
+			);
+			ReconcileProblem problem = assertProblem(editor, "pieces");
+			ICompletionProposal fix = assertFirstQuickfix(editor, problem, "Change to 'short.path'");
+			editor.apply(fix);
+			editor.assertText(
+					"# a comment\n"+
+					"short:\n"+
+					"  stuff: goes here\n" +
+					"  path:\n" +
+					"    # some\n" +
+					"    - foo spread over\n"+
+					"        #confusing\n" +
+					"    - several lines\n" +
+					"      #comments\n" +
+					"    - of text\n"
+			);
+		}
+	}
 
 	public void testReconcileDuplicateProperties() throws Exception {
 		defaultTestData();

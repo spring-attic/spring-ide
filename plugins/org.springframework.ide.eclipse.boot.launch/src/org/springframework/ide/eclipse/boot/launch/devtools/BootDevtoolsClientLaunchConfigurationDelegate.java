@@ -40,7 +40,7 @@ import org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurati
 import org.springframework.ide.eclipse.boot.launch.util.WaitFor;
 import org.springframework.ide.eclipse.boot.util.ProcessListenerAdapter;
 import org.springframework.ide.eclipse.boot.util.ProcessTracker;
-import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 
 @SuppressWarnings("restriction")

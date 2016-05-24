@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.util;
+package org.springframework.ide.eclipse.editor.support.util;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;

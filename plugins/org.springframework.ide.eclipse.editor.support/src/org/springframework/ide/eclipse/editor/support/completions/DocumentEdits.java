@@ -316,4 +316,9 @@ public class DocumentEdits implements ProposalApplier {
 		return line.getOffset()+line.getLength();
 	}
 
+	public void replace(int start, int end, String newText) {
+		delete(start, end);
+		insert(start, newText);
+	}
+
 }

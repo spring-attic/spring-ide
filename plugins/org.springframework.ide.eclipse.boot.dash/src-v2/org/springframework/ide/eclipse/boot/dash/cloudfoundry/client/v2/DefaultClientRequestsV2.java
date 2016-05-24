@@ -85,7 +85,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.IApplicati
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springframework.ide.eclipse.boot.util.Log;
-import org.springframework.ide.eclipse.boot.util.StringUtil;
+import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springframework.util.StringUtils;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshHost;

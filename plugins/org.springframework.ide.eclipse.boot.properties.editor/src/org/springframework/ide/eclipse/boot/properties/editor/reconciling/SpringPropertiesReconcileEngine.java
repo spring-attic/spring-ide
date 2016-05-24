@@ -14,7 +14,7 @@ import static org.springframework.ide.eclipse.boot.properties.editor.SpringPrope
 import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType.PROP_DEPRECATED;
 import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType.PROP_UNKNOWN_PROPERTY;
 import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem.problem;
-import static org.springframework.ide.eclipse.boot.util.StringUtil.commonPrefix;
+import static org.springframework.ide.eclipse.editor.support.util.StringUtil.commonPrefix;
 
 import java.util.Map;
 import java.util.regex.Pattern;
