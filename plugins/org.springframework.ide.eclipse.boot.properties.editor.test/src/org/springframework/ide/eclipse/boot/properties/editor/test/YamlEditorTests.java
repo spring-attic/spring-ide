@@ -3260,7 +3260,38 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 			// =>
 			/*NONE*/
 		);
+	}
 
+	public void testClassReferenceInValueLink() throws Exception {
+		MockPropertiesEditor editor;
+		useProject(createPredefinedMavenProject("boot13_with_mongo"));
+
+		editor = newEditor(
+			"spring:\n" +
+			"  data:\n" +
+			"    mongodb:\n" +
+			"      field-naming-strategy: org.springframework.data.mapping.model.PropertyNameFieldNamingStrategy\n"
+		);
+		assertLinkTargets(editor, "org.springframework.data.mapping.model.PropertyNameFieldNamingStrategy", "org.springframework.data.mapping.model.PropertyNameFieldNamingStrategy");
+
+		editor = newEditor(
+			"spring:\n" +
+			"  data:\n" +
+			"    mongodb:\n" +
+			"      field-naming-strategy:\n" +
+			"        org.springframework.data.mapping.model.PropertyNameFieldNamingStrategy\n"
+		);
+		assertLinkTargets(editor, "org.springframework.data.mapping.model.PropertyNameFieldNamingStrategy", "org.springframework.data.mapping.model.PropertyNameFieldNamingStrategy");
+
+		//Linking should also work for types that aren't valid based on the constraints
+		editor = newEditor(
+				"spring:\n" +
+				"  data:\n" +
+				"    mongodb:\n" +
+				"      field-naming-strategy: java.lang.String\n" +
+				"#more stuff"
+		);
+		assertLinkTargets(editor, "java.lang.String", "java.lang.String");
 	}
 
 	public void test_STS_3335_reconcile_list_nested_in_Map_of_String() throws Exception {

@@ -1344,15 +1344,23 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testClassReferenceInValueLink() throws Exception {
+		MockPropertiesEditor editor;
 		useProject(createPredefinedMavenProject("boot13_with_mongo"));
 
-		MockPropertiesEditor editor;
 		editor = newEditor(
 				"#stuff\n" +
 				"spring.data.mongodb.field-naming-strategy=org.springframework.data.mapping.model.PropertyNameFieldNamingStrategy\n" +
 				"#more stuff"
 		);
 		assertLinkTargets(editor, "org.springframework.data.mapping.model.PropertyNameFieldNamingStrategy", "org.springframework.data.mapping.model.PropertyNameFieldNamingStrategy");
+
+		//Linking should also work for types that aren't valid based on the constraints
+		editor = newEditor(
+				"#stuff\n" +
+				"spring.data.mongodb.field-naming-strategy=java.lang.String\n" +
+				"#more stuff"
+		);
+		assertLinkTargets(editor, "java.lang.String", "java.lang.String");
 	}
 
 	public void testCommaListReconcile() throws Exception {
