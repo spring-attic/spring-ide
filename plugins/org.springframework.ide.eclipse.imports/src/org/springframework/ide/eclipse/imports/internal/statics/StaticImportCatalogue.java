@@ -10,7 +10,7 @@
  *     Spring IDE Developers - initial public API
  *     
  *******************************************************************************/
-package org.springframework.ide.eclipse.ui.imports;
+package org.springframework.ide.eclipse.imports.internal.statics;
 
 public abstract class StaticImportCatalogue {
 

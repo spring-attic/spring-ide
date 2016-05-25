@@ -19,7 +19,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.ui.imports;
+package org.springframework.ide.eclipse.imports.internal.statics;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,13 +34,14 @@ import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.core.search.processing.IJob;
 import org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock.Key;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.ui.preferences.IWorkingCopyManager;
 import org.eclipse.ui.preferences.WorkingCopyManager;
 import org.osgi.service.prefs.BackingStoreException;
-import org.springframework.ide.eclipse.ui.SpringUIPlugin;
+import org.springframework.ide.eclipse.imports.ImportsActivator;
 
 /**
  * Loads Types containing statics into Eclipse Static Import favourites
@@ -54,7 +55,7 @@ import org.springframework.ide.eclipse.ui.SpringUIPlugin;
  */
 public class SpringStaticImportFavourites {
 
-	public static final String SPRING_IDE_IMPORT_STATICS_INSTANCE_SCOPE = SpringUIPlugin.PLUGIN_ID
+	public static final String SPRING_IDE_IMPORT_STATICS_INSTANCE_SCOPE = ImportsActivator.PLUGIN_ID
 			+ ".importStaticsInstanceScope";
 
 	private static final Key PREF_CODEASSIST_FAVORITE_STATIC_MEMBERS = getJDTUIKey(
@@ -89,6 +90,7 @@ public class SpringStaticImportFavourites {
 			}
 		};
 
+		job.setPriority(Job.INTERACTIVE);
 		job.schedule();
 	}
 
@@ -136,7 +138,7 @@ public class SpringStaticImportFavourites {
 	}
 
 	protected static Key getSpringIDEImportStaticsKey(String key) {
-		return getKey(SpringUIPlugin.PLUGIN_ID, key);
+		return getKey(ImportsActivator.PLUGIN_ID, key);
 	}
 
 	protected List<String> mergeWithExisting(List<String> favorites, IScopeContext context) {
@@ -185,7 +187,7 @@ public class SpringStaticImportFavourites {
 			if (status.isOK()) {
 				validated.add(asWildCard(val));
 			} else {
-				SpringUIPlugin.log(status);
+				ImportsActivator.log(status);
 			}
 		}
 
@@ -234,7 +236,7 @@ public class SpringStaticImportFavourites {
 			try {
 				manager.applyChanges();
 			} catch (BackingStoreException e) {
-				SpringUIPlugin.log(e);
+				ImportsActivator.log(e);
 			}
 		}
 

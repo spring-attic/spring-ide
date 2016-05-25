@@ -116,7 +116,7 @@
    <extension
          point="org.eclipse.ui.handlers">
       <handler
-            class="org.springframework.ide.eclipse.boot.dash.views.ShowBootDashboardHanlder"
+            class="org.springframework.ide.eclipse.boot.dash.views.ShowBootDashboardHandler"
             commandId="org.springframework.ide.eclipse.boot.dash.ShowBootDashboard">
       </handler>
    </extension>
