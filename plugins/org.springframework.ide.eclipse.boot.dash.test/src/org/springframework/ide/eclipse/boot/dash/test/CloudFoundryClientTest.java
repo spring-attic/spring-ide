@@ -437,7 +437,7 @@ public class CloudFoundryClientTest {
 
 	@Test
 	public void getServices() throws Exception {
-		RetryUtil.retryWhen("getServices", 3, FLAKY_SERVICE_BROKER,
+		RetryUtil.retryWhen("getServices", 5, FLAKY_SERVICE_BROKER,
 			() -> {
 				String[] serviceNames = new String[3];
 				Set<String> userProvided = new HashSet<>();
@@ -492,7 +492,7 @@ public class CloudFoundryClientTest {
 
 	@Test
 	public void testServiceCreateAndDelete() throws Exception {
-		RetryUtil.retryWhen("testServiceCreateAndDelete", 3, FLAKY_SERVICE_BROKER, () -> {
+		RetryUtil.retryWhen("testServiceCreateAndDelete", 5, FLAKY_SERVICE_BROKER, () -> {
 			String[] serviceNames = new String[2];
 			for (int i = 0; i < serviceNames.length; i++) {
 				serviceNames[i] = services.randomServiceName();
@@ -521,7 +521,7 @@ public class CloudFoundryClientTest {
 
 	@Test
 	public void testGetBoundServices() throws Exception {
-		RetryUtil.retryWhen("testGetBoundServices", 3, FLAKY_SERVICE_BROKER, () -> {
+		RetryUtil.retryWhen("testGetBoundServices", 5, FLAKY_SERVICE_BROKER, () -> {
 			String appName = appHarness.randomAppName();
 			String service1 = services.createTestService();
 			String service2 = services.createTestService();
