@@ -20,6 +20,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.IViewDescriptor;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.util.Log;
 
 /**
  * Action for showing/opening a specific Eclipse view
@@ -61,7 +62,7 @@ public class ShowViewAction extends Action {
 				try {
 					window.getActivePage().showView(viewId, null, IWorkbenchPage.VIEW_VISIBLE);
 				} catch (PartInitException e) {
-					BootDashActivator.log(e);
+					Log.log(e);
 				}
 			} else {
 				BootDashActivator.getDefault().getLog().log(new Status(IStatus.ERROR, BootDashActivator.PLUGIN_ID, "Cannot find workbench window with active page"));
