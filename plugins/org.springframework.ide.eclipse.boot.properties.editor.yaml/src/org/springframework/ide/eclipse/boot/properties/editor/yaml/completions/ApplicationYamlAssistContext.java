@@ -285,6 +285,15 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 		@Override
 		public HoverInfo getValueHoverInfo(YamlDocument doc, DocumentRegion valueRegion) {
 			String value = valueRegion.toString();
+
+			if (TypeUtil.isClass(type)) {
+				//Special case. We want hovers/hyperlinks even if the class is not a valid hint (as long as it is a class)
+				StsValueHint hint = StsValueHint.className(value.toString(), typeUtil);
+				if (hint!=null) {
+					return new ValueHintHoverInfo(hint);
+				}
+			}
+
 			Collection<StsValueHint> hints = getHintValues(value, doc, valueRegion.getEnd(), EnumCaseMode.ALIASED);
 			//The hints where found by fuzzy match so they may not actually match exactly!
 			for (StsValueHint h : hints) {
