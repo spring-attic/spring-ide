@@ -6,10 +6,15 @@ import javax.inject.Provider;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IType;
 import org.springframework.boot.configurationmetadata.Deprecation;
 import org.springframework.boot.configurationmetadata.ValueHint;
+import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.editor.support.util.HtmlSnippet;
 import org.springframework.ide.eclipse.editor.support.util.StringUtil;
@@ -49,6 +54,18 @@ public class StsValueHint {
 		this.deprecation = deprecation;
 	}
 
+	/**
+	 * Creates a hint out of an IJavaElement.
+	 */
+	public static StsValueHint create(String value, IJavaElement javaElement) {
+		return new StsValueHint(value, javaDocSnippet(javaElement), DeprecationUtil.extract(javaElement)) {
+			@Override
+			public IJavaElement getJavaElement() {
+				return javaElement;
+			}
+		};
+	}
+
 	public static StsValueHint create(String value) {
 		return new StsValueHint(value, EMPTY_DESCRIPTION_PROVIDER, null);
 	}
@@ -57,11 +74,26 @@ public class StsValueHint {
 		return new StsValueHint(""+hint.getValue(), textSnippet(hint.getDescription()), null);
 	}
 
-	public static StsValueHint create(String value, IField enumField) {
-		return new StsValueHint(value, javaDocSnippet(enumField), DeprecationUtil.extract(enumField)) {
+	public static StsValueHint className(String fqName, TypeUtil typeUtil) {
+		try {
+			IJavaProject jp = typeUtil.getJavaProject();
+			if (jp!=null) {
+				IType type = jp.findType(fqName, new NullProgressMonitor());
+				if (type!=null) {
+					return create(type);
+				}
+			}
+		} catch (Exception e) {
+			Log.log(e);
+		}
+		return null;
+	}
+
+	public static StsValueHint create(IType klass) {
+		return new StsValueHint(klass.getFullyQualifiedName(), javaDocSnippet(klass), DeprecationUtil.extract(klass)) {
 			@Override
 			public IJavaElement getJavaElement() {
-				return enumField;
+				return klass;
 			}
 		};
 	}
@@ -87,11 +119,11 @@ public class StsValueHint {
 		return description;
 	}
 
-	public static Provider<HtmlSnippet> javaDocSnippet(IField f) {
+	public static Provider<HtmlSnippet> javaDocSnippet(IJavaElement je) {
 		return () -> {
 			try {
 				@SuppressWarnings("restriction")
-				String htmlText = getHTMLContent(f, true);
+				String htmlText = getHTMLContent(je, true);
 				if (StringUtil.hasText(htmlText)) {
 					return HtmlSnippet.raw(htmlText);
 				}
@@ -113,6 +145,16 @@ public class StsValueHint {
 
 	public IJavaElement getJavaElement() {
 		return null;
+	}
+
+	public StsValueHint prefixWith(String prefix) {
+		StsValueHint it = this;
+		return new StsValueHint(prefix+getValue(), description, deprecation) {
+			@Override
+			public IJavaElement getJavaElement() {
+				return it.getJavaElement();
+			}
+		};
 	}
 
 

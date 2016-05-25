@@ -362,6 +362,21 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 			String propertyName = fuzzySearchPrefix.getPrefix(doc, valuePartitionStart); //note: no need to skip whitespace backwards.
 											//because value partition includes whitespace around the assignment
 
+			Type type = getValueType(propertyName);
+			if (TypeUtil.isArray(type) || TypeUtil.isList(type)) {
+				//It is useful to provide content assist for the values in the list when entering a list
+				type = TypeUtil.getDomainType(type);
+			}
+			if (TypeUtil.isClass(type)) {
+				//Special case. We want to provide hoverinfos more liberally than what's suggested for completions (i.e. even class names
+				//that are not suggested by the hints because they do not meet subtyping constraints should be hoverable and linkable!
+				StsValueHint hint = StsValueHint.className(valueString, typeUtil);
+				if (hint!=null) {
+					return new ValueHintHoverInfo(hint);
+				}
+			}
+			//Hack: pretend to invoke content-assist at the end of the value text. This should provide hints applicable to that value
+			// then show hoverinfo based on that. That way we can avoid duplication a lot of similar logic to compute hoverinfos and hyperlinks.
 			Collection<StsValueHint> hints = getValueHints(valueString, propertyName, EnumCaseMode.ALIASED);
 			if (hints!=null) {
 				for (StsValueHint h : hints) {
@@ -452,12 +467,7 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 			if (prop!=null) {
 				HintProvider hintProvider = prop.getHints(typeUtil, false);
 				if (!HintProviders.isNull(hintProvider)) {
-					List<ValueHint> hints = hintProvider.getValueHints(query);
-					if (CollectionUtil.hasElements(hints)) {
-						for (ValueHint h : hints) {
-							allHints.add(StsValueHint.create(h));
-						}
-					}
+					allHints.addAll(hintProvider.getValueHints(query));
 				}
 			}
 		}

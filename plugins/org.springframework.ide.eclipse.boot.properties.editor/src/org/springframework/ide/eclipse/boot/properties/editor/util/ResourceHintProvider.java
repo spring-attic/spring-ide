@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.boot.properties.editor.util;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -22,6 +21,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.CachingValueProvider;
+import org.springframework.ide.eclipse.boot.properties.editor.metadata.StsValueHint;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProviderRegistry.ValueProviderStrategy;
 import org.springframework.ide.eclipse.boot.util.JavaProjectUtil;
 import org.springframework.ide.eclipse.boot.util.Log;
@@ -61,7 +61,7 @@ public class ResourceHintProvider implements ValueProviderStrategy {
 	};
 
 	@Override
-	public Flux<ValueHint> getValues(IJavaProject javaProject, String query) {
+	public Flux<StsValueHint> getValues(IJavaProject javaProject, String query) {
 		for (String prefix : CLASSPATH_PREFIXES) {
 			if (query.startsWith(prefix)) {
 				return classpathHints
@@ -72,9 +72,9 @@ public class ResourceHintProvider implements ValueProviderStrategy {
 		return Flux.fromIterable(urlPrefixHints);
 	}
 
-	final private ImmutableList<ValueHint> urlPrefixHints = ImmutableList.copyOf(
+	final private ImmutableList<StsValueHint> urlPrefixHints = ImmutableList.copyOf(
 			Arrays.stream(URL_PREFIXES)
-			.map(ValueHint::withValue)
+			.map(StsValueHint::create)
 			.collect(Collectors.toList())
 	);
 
@@ -82,7 +82,7 @@ public class ResourceHintProvider implements ValueProviderStrategy {
 
 	private static class ClasspathHints extends CachingValueProvider {
 		@Override
-		protected Flux<ValueHint> getValuesAsycn(IJavaProject javaProject, String query) {
+		protected Flux<StsValueHint> getValuesAsycn(IJavaProject javaProject, String query) {
 			return getClasspathResourcePaths(javaProject)
 			.map((path) -> path.toString())
 			.filter((path) ->
@@ -90,7 +90,7 @@ public class ResourceHintProvider implements ValueProviderStrategy {
 				0!=FuzzyMatcher.matchScore(query, path)
 			)
 			.distinct()
-			.map((path) -> ValueHint.withValue(path));
+			.map((path) -> StsValueHint.create(path));
 		}
 
 		private Flux<IPath> getClasspathResourcePaths(IJavaProject javaProject) {

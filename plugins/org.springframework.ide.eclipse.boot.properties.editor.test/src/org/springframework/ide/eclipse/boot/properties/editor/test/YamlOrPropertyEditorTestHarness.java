@@ -936,7 +936,6 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 	 * <p>
 	 * Will do nothing if source for given type is already available. Will
 	 * fail if cannot obtain source code for the type.
-	 * @return
 	 */
 	public String downloadSources(IType element) throws Exception {
 		IClasspathManager buildpathManager = MavenJdtPlugin.getDefault().getBuildpathManager();

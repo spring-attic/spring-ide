@@ -20,6 +20,6 @@ import org.springframework.ide.eclipse.editor.support.yaml.path.YamlNavigable;
  * @author Kris De Volder
  */
 public interface HintProvider extends YamlNavigable<HintProvider> {
-	List<ValueHint> getValueHints(String query);
+	List<StsValueHint> getValueHints(String query);
 	List<TypedProperty> getPropertyHints(String query);
 }

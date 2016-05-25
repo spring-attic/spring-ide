@@ -56,9 +56,9 @@ public class ValueProviderRegistry {
 	private Map<String, Function<Map<String, Object>, ValueProviderStrategy>> registry = new HashMap<>();
 
 	public interface ValueProviderStrategy {
-		Flux<ValueHint> getValues(IJavaProject javaProject, String query);
+		Flux<StsValueHint> getValues(IJavaProject javaProject, String query);
 
-		default Collection<ValueHint> getValuesNow(IJavaProject javaProject, String query) {
+		default Collection<StsValueHint> getValuesNow(IJavaProject javaProject, String query) {
 			return this.getValues(javaProject, query)
 			.take(CachingValueProvider.TIMEOUT)
 			.toList()

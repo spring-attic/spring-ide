@@ -310,12 +310,7 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 			{
 				HintProvider hintProvider = getHintProvider();
 				if (hintProvider!=null) {
-					List<ValueHint> hints = hintProvider.getValueHints(query);
-					if (CollectionUtil.hasElements(hints)) {
-						for (ValueHint h : hints) {
-							allHints.add(StsValueHint.create(h));
-						}
-					}
+					allHints.addAll(hintProvider.getValueHints(query));
 				}
 			}
 			return allHints;

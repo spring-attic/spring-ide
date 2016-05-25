@@ -81,9 +81,9 @@ public abstract class CachingValueProvider implements ValueProviderStrategy {
 	private class CacheEntry {
 		boolean isComplete = false;
 		int count = 0;
-		Flux<ValueHint> values;
+		Flux<StsValueHint> values;
 
-		public CacheEntry(String query, Flux<ValueHint> producer) {
+		public CacheEntry(String query, Flux<StsValueHint> producer) {
 			values = producer
 //			.doOnNext((e) -> {
 //				count++;
@@ -106,7 +106,7 @@ public abstract class CachingValueProvider implements ValueProviderStrategy {
 	}
 
 	@Override
-	public final Flux<ValueHint> getValues(IJavaProject javaProject, String query) {
+	public final Flux<StsValueHint> getValues(IJavaProject javaProject, String query) {
 //		debug("CA query: "+query);
 		Tuple2<String, String> key = key(javaProject, query);
 		CacheEntry cached = cache.get(key);
@@ -121,7 +121,7 @@ public abstract class CachingValueProvider implements ValueProviderStrategy {
 	 * <p>
 	 * Falls back on doing a full-blown search if there's no usable 'prefix-query' in the cache.
 	 */
-	private Flux<ValueHint> getValuesIncremental(IJavaProject javaProject, String query) {
+	private Flux<StsValueHint> getValuesIncremental(IJavaProject javaProject, String query) {
 //		debug("trying to solve "+query+" incrementally");
 		String subquery = query;
 		while (subquery.length()>=1) {
@@ -143,7 +143,7 @@ public abstract class CachingValueProvider implements ValueProviderStrategy {
 		return getValuesAsycn(javaProject, query);
 	}
 
-	protected abstract Flux<ValueHint> getValuesAsycn(IJavaProject javaProject, String query);
+	protected abstract Flux<StsValueHint> getValuesAsycn(IJavaProject javaProject, String query);
 
 	private Tuple2<String,String> key(IJavaProject javaProject, String query) {
 		return Tuple.of(javaProject==null?null:javaProject.getElementName(), query);

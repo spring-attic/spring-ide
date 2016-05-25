@@ -680,11 +680,11 @@ public class TypeUtil {
 	public static void valueHints(String typeName, Provider<String[]> provider) {
 		valueHints(typeName, new ValueProviderStrategy() {
 			@Override
-			public Flux<ValueHint> getValues(IJavaProject javaProject, String query) {
+			public Flux<StsValueHint> getValues(IJavaProject javaProject, String query) {
 				String[] values = provider.get();
 				if (ArrayUtils.hasElements(values)) {
 					return Flux.fromArray(values)
-					.map(ValueHint::withValue);
+					.map(StsValueHint::create);
 				}
 				return Flux.empty();
 			}
@@ -888,10 +888,7 @@ public class TypeUtil {
 			}
 			ValueProviderStrategy valueHinter = VALUE_HINTERS.get(type.getErasure());
 			if (valueHinter!=null) {
-				Collection<ValueHint> rawHints = valueHinter.getValuesNow(javaProject, query);
-				return rawHints.stream()
-						.map(StsValueHint::create)
-						.collect(Collectors.toList());
+				return valueHinter.getValuesNow(javaProject, query);
 			}
 		}
 		return null;
@@ -914,6 +911,13 @@ public class TypeUtil {
 			type = getDomainType(type);
 		}
 		return dim;
+	}
+
+	public static boolean isClass(Type type) {
+		if (type!=null) {
+			return CLASS_TYPE_NAME.equals(type.getErasure());
+		}
+		return false;
 	}
 
 

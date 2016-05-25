@@ -31,7 +31,17 @@ public class DeprecationUtil {
 	/**
 	 * Extract {@link Deprecation} info from annotations on a {@link IJavaElement}
 	 */
-	public static Deprecation extract(IAnnotatable m) {
+	public static Deprecation extract(IJavaElement je) {
+		if (je instanceof IAnnotatable) {
+			return extract((IAnnotatable)je);
+		}
+		return null;
+	}
+
+	/**
+	 * Extract {@link Deprecation} info from annotations on a {@link IJavaElement}
+	 */
+	private static Deprecation extract(IAnnotatable m) {
 		try {
 			for (IAnnotation a : m.getAnnotations()) {
 				if (DEPRECATED_ANOT_NAMES.contains(a.getElementName())) {

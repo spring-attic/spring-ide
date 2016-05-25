@@ -42,7 +42,7 @@ public class HintProviders {
 		}
 
 		@Override
-		public List<ValueHint> getValueHints(String query) {
+		public List<StsValueHint> getValueHints(String query) {
 			return ImmutableList.of();
 		}
 
@@ -85,7 +85,7 @@ public class HintProviders {
 				}
 			}
 
-			public List<ValueHint> getValueHints(String query) {
+			public List<StsValueHint> getValueHints(String query) {
 				return ImmutableList.of();
 			}
 
@@ -111,7 +111,7 @@ public class HintProviders {
 			}
 
 			@Override
-			public List<ValueHint> getValueHints(String query) {
+			public List<StsValueHint> getValueHints(String query) {
 				return valueHints.getValueHints(query);
 			}
 
@@ -142,7 +142,7 @@ public class HintProviders {
 			}
 
 			@Override
-			public List<ValueHint> getValueHints(String query) {
+			public List<StsValueHint> getValueHints(String query) {
 				return valueProvider.getValueHints(query);
 			}
 
@@ -183,7 +183,7 @@ public class HintProviders {
 			}
 
 			@Override
-			public List<ValueHint> getValueHints(String query) {
+			public List<StsValueHint> getValueHints(String query) {
 				if (dimensionAware) {
 					//pickier, completions only suggested in the domain of map, but not for map itself.
 					return ImmutableList.of();
@@ -194,10 +194,10 @@ public class HintProviders {
 
 			@Override
 			public List<TypedProperty> getPropertyHints(String query) {
-				List<ValueHint> keyHints = keyProvider.getValueHints(query);
+				List<StsValueHint> keyHints = keyProvider.getValueHints(query);
 				if (CollectionUtil.hasElements(keyHints)) {
 					List<TypedProperty> props = new ArrayList<>(keyHints.size());
-					for (ValueHint keyHint : keyHints) {
+					for (StsValueHint keyHint : keyHints) {
 						Object key = keyHint.getValue();
 						if (key instanceof String) {
 							props.add(new TypedProperty((String)key, valueType, null));

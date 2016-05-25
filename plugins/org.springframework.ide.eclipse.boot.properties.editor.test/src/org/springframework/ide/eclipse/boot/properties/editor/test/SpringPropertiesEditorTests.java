@@ -1343,6 +1343,18 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		);
 	}
 
+	public void testClassReferenceInValueLink() throws Exception {
+		useProject(createPredefinedMavenProject("boot13_with_mongo"));
+
+		MockPropertiesEditor editor;
+		editor = newEditor(
+				"#stuff\n" +
+				"spring.data.mongodb.field-naming-strategy=org.springframework.data.mapping.model.PropertyNameFieldNamingStrategy\n" +
+				"#more stuff"
+		);
+		assertLinkTargets(editor, "org.springframework.data.mapping.model.PropertyNameFieldNamingStrategy", "org.springframework.data.mapping.model.PropertyNameFieldNamingStrategy");
+	}
+
 	public void testCommaListReconcile() throws Exception {
 		MockPropertiesEditor editor;
 		IProject p = createPredefinedMavenProject("demo-enum");

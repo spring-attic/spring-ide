@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.properties.editor.metadata;
 
 import java.util.function.Function;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
@@ -68,22 +69,20 @@ public abstract class JdtSearchingValueProvider extends CachingValueProvider {
 		return SearchPattern.createPattern(wildCardedQuery, searchFor, limitTo, matchRule);
 	}
 
-	public static Mono<String> getFQName(SearchMatch match) {
-		Object element = match.getElement();
+	protected String asStringValue(IJavaElement element) {
 		if (element instanceof IType) {
 			IType type = (IType) element;
-			return Mono.justOrEmpty(type.getFullyQualifiedName());
+			return type.getFullyQualifiedName();
 		} else if (element instanceof IPackageFragment) {
 			IPackageFragment pkg = (IPackageFragment) element;
-			return Mono.justOrEmpty(pkg.getElementName());
+			return pkg.getElementName();
 		}
-		return Mono.empty();
+		return null;
 	}
 
-	public static ValueHint hint(String fqName) {
-		ValueHint h = new ValueHint();
-		h.setValue(fqName);
-		return h;
+	protected StsValueHint hint(IJavaElement e) {
+		String fqName = asStringValue(e);
+		return fqName==null?null:StsValueHint.create(fqName, e);
 	}
 
 	protected abstract SearchPattern toPattern(String query);
@@ -92,25 +91,27 @@ public abstract class JdtSearchingValueProvider extends CachingValueProvider {
 	}
 
 	@Override
-	public Flux<ValueHint> getValuesAsycn(IJavaProject javaProject, String query) {
+	public Flux<StsValueHint> getValuesAsycn(IJavaProject javaProject, String query) {
 		try {
 			return new FluxJdtSearch()
 			.scope(getScope(javaProject))
 			.pattern(toPattern(query))
 			.search()
 			.flatMap(getPostProcessor())
-			.filter((fqName) -> 0!=FuzzyMatcher.matchScore(query, fqName))
-			.distinct()
-			.map((fqName) -> {
-//				debug("distinct["+query+"]: "+fqName);
-				return hint(fqName);
-			});
+			.filter((hint) ->  0!=FuzzyMatcher.matchScore(query, hint.getValue()))
+			.distinct(StsValueHint::getValue);
 		} catch (Exception e) {
 			return Flux.error(e);
 		}
 	}
 
-	protected Function<SearchMatch, Mono<String>> getPostProcessor() {
-		return JdtSearchingValueProvider::getFQName;
+	protected Function<SearchMatch, Mono<StsValueHint>> getPostProcessor() {
+		return (match) -> {
+			Object e = match.getElement();
+			if (e instanceof IJavaElement) {
+				return Mono.justOrEmpty(hint((IJavaElement)e));
+			}
+			return Mono.empty();
+		};
 	}
 }

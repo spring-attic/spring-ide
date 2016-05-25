@@ -60,13 +60,15 @@ public class BasicHintProvider implements HintProvider {
 	}
 
 	@Override
-	public List<ValueHint> getValueHints(String query) {
-		Builder<ValueHint> builder = ImmutableList.builder();
+	public List<StsValueHint> getValueHints(String query) {
+		Builder<StsValueHint> builder = ImmutableList.builder();
 		if (CollectionUtil.hasElements(valueHints)) {
-			builder.addAll(valueHints);
+			for (ValueHint hint : valueHints) {
+				builder.add(StsValueHint.create(hint));
+			}
 		}
 		if (valueProvider!=null) {
-			Collection<ValueHint> provided = valueProvider.getValuesNow(javaProject, query);
+			Collection<StsValueHint> provided = valueProvider.getValuesNow(javaProject, query);
 			if (CollectionUtil.hasElements(provided)) {
 				builder.addAll(provided);
 			}

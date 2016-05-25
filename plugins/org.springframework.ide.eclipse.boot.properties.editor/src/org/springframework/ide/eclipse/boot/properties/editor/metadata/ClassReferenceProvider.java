@@ -78,14 +78,14 @@ public class ClassReferenceProvider extends JdtSearchingValueProvider {
 	/**
 	 * Filter that drops all search matches that are not concrete types.
 	 */
-	private static Mono<String> filterConcreteTypes(SearchMatch match) {
+	private Mono<StsValueHint> filterConcreteTypes(SearchMatch match) {
 		Object element = match.getElement();
 		if (element instanceof IType) {
 			IType type = (IType) element;
 			if (isAbstract(type)) {
 				return Mono.empty();
 			}
-			return Mono.justOrEmpty(type.getFullyQualifiedName());
+			return Mono.justOrEmpty(hint(type));
 		}
 		return Mono.empty();
 	}
@@ -100,9 +100,9 @@ public class ClassReferenceProvider extends JdtSearchingValueProvider {
 	}
 
 	@Override
-	protected Function<SearchMatch, Mono<String>> getPostProcessor() {
+	protected Function<SearchMatch, Mono<StsValueHint>> getPostProcessor() {
 		if (concrete) {
-			return ClassReferenceProvider::filterConcreteTypes;
+			return this::filterConcreteTypes;
 		}
 		return super.getPostProcessor();
 	}
