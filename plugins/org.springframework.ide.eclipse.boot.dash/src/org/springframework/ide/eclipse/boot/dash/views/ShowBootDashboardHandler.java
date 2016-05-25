@@ -20,7 +20,7 @@ import org.eclipse.core.commands.ExecutionException;
  * @author Alex Boyko
  *
  */
-public class ShowBootDashboardHanlder extends AbstractHandler {
+public class ShowBootDashboardHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
