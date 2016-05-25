@@ -99,7 +99,7 @@ public class ApplicationYamlEditorTestHarness extends YamlOrPropertyEditorTestHa
 	}
 
 	public void assertCompletionsDisplayString(String editorText, String... completionsLabels) throws Exception {
-		MockPropertiesEditor editor = newEditor(editorText);
+		YamlEditor editor = newEditor(editorText);
 		ICompletionProposal[] completions = getCompletions(editor);
 		String[] actualLabels = new String[completions.length];
 		for (int i = 0; i < actualLabels.length; i++) {
@@ -115,12 +115,12 @@ public class ApplicationYamlEditorTestHarness extends YamlOrPropertyEditorTestHa
 			}
 
 	public void assertNoCompletions(String text) throws Exception {
-		MockPropertiesEditor editor = newEditor(text);
+		YamlEditor editor = newEditor(text);
 		assertEquals(0, getCompletions(editor).length);
 	}
 
 	public void assertCompletion(String before, String after) throws Exception {
-		MockPropertiesEditor editor = newEditor(before);
+		YamlEditor editor = newEditor(before);
 		ICompletionProposal completion = getFirstCompletion(editor);
 		editor.apply(completion);
 		String actual = editor.getText();
@@ -131,6 +131,11 @@ public class ApplicationYamlEditorTestHarness extends YamlOrPropertyEditorTestHa
 		public YamlEditor(String string) {
 			super(string, structureProvider, parser, ApplicationYamlEditorTestHarness.this.hoverProvider);
 		}
+	}
+
+	@Override
+	protected YamlEditor newEditor(String editorContents) {
+		return new YamlEditor(editorContents);
 	}
 
 	@Override

@@ -73,7 +73,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 	public void testEmptyPrefixProposalsSortedAlpabetically() throws Exception {
 		defaultTestData();
-		MockPropertiesEditor editor = newEditor("");
+		MockEditor editor = newEditor("");
 		ICompletionProposal[] completions = getCompletions(editor);
 		assertTrue(completions.length>100); //should be many proposals
 		String previous = null;
@@ -146,7 +146,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 	public void testHoverInfos() throws Exception {
 		defaultTestData();
-		MockPropertiesEditor editor = newEditor(
+		MockEditor editor = newEditor(
 				"#foo\n" +
 				"# bar\n" +
 				"server.port=8080\n" +
@@ -162,7 +162,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 	public void testHoverInfosWithSpaces() throws Exception {
 		defaultTestData();
-		MockPropertiesEditor editor = newEditor(
+		MockEditor editor = newEditor(
 				"#foo\n" +
 				"# bar\n"+
 				"\n" +
@@ -180,7 +180,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	public void testHoverLongAndShort() throws Exception {
 		data("server.port", INTEGER, 8080, "Port where server listens for http.");
 		data("server.port.fancy", BOOLEAN, 8080, "Whether the port is fancy.");
-		MockPropertiesEditor editor = newEditor(
+		MockEditor editor = newEditor(
 				"server.port=8080\n" +
 				"server.port.fancy=true\n"
 		);
@@ -213,7 +213,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 
-		MockPropertiesEditor editor = newEditor(
+		MockEditor editor = newEditor(
 				"server.port=888\n" +
 				"spring.datasource.login-timeout=1000\n" +
 				"flyway.init-sqls=a,b,c\n"
@@ -238,7 +238,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 
-		MockPropertiesEditor editor = newEditor(
+		MockEditor editor = newEditor(
 				"logging.level.com.acme=INFO\n"
 		);
 		assertLinkTargets(editor, "level",
@@ -249,7 +249,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 	public void testReconcile() throws Exception {
 		defaultTestData();
-		MockPropertiesEditor editor = newEditor(
+		MockEditor editor = newEditor(
 				"server.port=8080\n" +
 				"server.port.extracrap=8080\n" +
 				"logging.level.com.acme=INFO\n" +
@@ -270,7 +270,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		useProject(jp);
 		assertNotNull(jp.findType("demo.Foo"));
 
-		MockPropertiesEditor editor = newEditor(
+		MockEditor editor = newEditor(
 				"token.bad.guy=problem\n"+
 				"volder.foo.list[0].name=Kris\n" +
 				"volder.foo.list[0].description=Kris\n" +
@@ -314,7 +314,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 	public void testReconcileArrayNotation() throws Exception {
 		defaultTestData();
-		MockPropertiesEditor editor = newEditor(
+		MockEditor editor = newEditor(
 				"borked=bad+\n" + //token problem, to make sure reconciler is working
 				"security.user.role[0]=foo\n" +
 				"security.user.role[${one}]=foo"
@@ -327,7 +327,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 	public void testReconcileArrayNotationError() throws Exception {
 		defaultTestData();
-		MockPropertiesEditor editor = newEditor(
+		MockEditor editor = newEditor(
 				"security.user.role[bork]=foo\n" +
 				"security.user.role[1=foo\n" +
 				"security.user.role[1]crap=foo\n" +
@@ -346,7 +346,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	public void testRelaxedNameReconciling() throws Exception {
 		data("connection.remote-host", "java.lang.String", "service.net", null);
 		data("foo-bar.name", "java.lang.String", null, null);
-		MockPropertiesEditor editor = newEditor(
+		MockEditor editor = newEditor(
 				"bork=foo\n" +
 				"connection.remote-host=alternate.net\n" +
 				"connection.remoteHost=alternate.net\n" +
@@ -364,7 +364,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		// around because the relaxed names aren't same length as the
 		// canonical ids.
 		data("foo-bar-zor.enabled", "java.lang.Boolean", null, null);
-		MockPropertiesEditor editor = newEditor(
+		MockEditor editor = newEditor(
 				"fooBarZor.enabled=notBoolean\n" +
 				"fooBarZor.enabled.subprop=true\n"
 		);
@@ -381,7 +381,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 	public void testReconcileValues() throws Exception {
 		defaultTestData();
-		MockPropertiesEditor editor = newEditor(
+		MockEditor editor = newEditor(
 				"server.port=badPort\n" +
 				"liquibase.enabled=nuggels"
 		);
@@ -393,7 +393,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 	public void testNoReconcileInterpolatedValues() throws Exception {
 		defaultTestData();
-		MockPropertiesEditor editor = newEditor(
+		MockEditor editor = newEditor(
 				"server.port=${port}\n" +
 				"liquibase.enabled=nuggels"
 		);
@@ -407,7 +407,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		ignoreProblem(PROP_DUPLICATE_KEY); //ignore deliberate abuse of dups
 
 		defaultTestData();
-		MockPropertiesEditor editor = newEditor(
+		MockEditor editor = newEditor(
 				"server.port  =   badPort\n" +
 				"liquibase.enabled   nuggels  \n" +
 				"liquibase.enabled   : snikkers"
@@ -423,7 +423,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	public void testReconcileWithExtraSpaces() throws Exception {
 		defaultTestData();
 		//Same test as previous but with extra spaces to make things more confusing
-		MockPropertiesEditor editor = newEditor(
+		MockEditor editor = newEditor(
 				"   server.port   =  8080  \n" +
 				"\n" +
 				"  server.port.extracrap = 8080\n" +
@@ -488,7 +488,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		assertNotNull(jp.findType("demo.Color"));
 
 		data("foo.color", "demo.Color", null, "A foonky colour");
-		MockPropertiesEditor editor = newEditor(
+		MockEditor editor = newEditor(
 				"foo.color=BLUE\n"+
 				"foo.color=RED\n"+
 				"foo.color=GREEN\n"+
@@ -527,7 +527,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 		assertNotNull(jp.findType("demo.Color"));
 
-		MockPropertiesEditor editor = newEditor(
+		MockEditor editor = newEditor(
 				"foo.name-colors.jacket=BLUE\n" +
 				"foo.name-colors.hat=RED\n" +
 				"foo.name-colors.pants=GREEN\n" +
@@ -583,7 +583,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		assertNotNull(jp.findType("demo.Color"));
 		assertNotNull(jp.findType("demo.ColorData"));
 
-		MockPropertiesEditor editor = newEditor(
+		MockEditor editor = newEditor(
 				"foo.color-names.RED=Rood\n"+
 				"foo.color-names.GREEN=Groen\n"+
 				"foo.color-names.BLUE=Blauw\n" +
@@ -640,7 +640,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		assertNotNull(jp.findType("demo.Color"));
 		assertNotNull(jp.findType("demo.ColorData"));
 
-		MockPropertiesEditor editor = newEditor(
+		MockEditor editor = newEditor(
 			"foo.data.bogus=Something\n" +
 			"foo.data.wavelen=3.0\n" +
 			"foo.data.wavelen=not a double\n" +
@@ -679,7 +679,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		data("enummap", "java.util.Map<java.lang.String,demo.Color>", null, "map of enums");
 		data("pojomap", "java.util.Map<java.lang.String,demo.ColorData>", null, "map of pojos");
 
-		MockPropertiesEditor editor = newEditor(
+		MockEditor editor = newEditor(
 				"atommap.something.with.dots=Vaporize\n" +
 				"atommap.something.with.bracket[0]=Brackelate\n" +
 				"objectmap.other.with.dots=Objectify\n" +
@@ -714,7 +714,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		assertNotNull(jp.findType("demo.Color"));
 		assertNotNull(jp.findType("demo.ColorData"));
 
-		MockPropertiesEditor editor = newEditor(
+		MockEditor editor = newEditor(
 				"foo.color-names.BLUE.dot=Blauw\n"+
 				"foo.color-data.RED.name=Good\n"+
 				"foo.color-data.GREEN.bad=Bad\n"+
@@ -743,7 +743,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 		data("simple.pants.size", "demo.ClothingSize", null, "The simple pant's size");
 
-		MockPropertiesEditor editor = newEditor(
+		MockEditor editor = newEditor(
 				"simple.pants.size=NOT_A_SIZE\n"+
 				"simple.pants.size=EXTRA_SMALL\n"+
 				"simple.pants.size=extra-small\n"+
@@ -843,7 +843,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 	public void testReconcileDeprecatedProperty() throws Exception {
 		data("error.path", "java.lang.String", null, "Path of the error controller.");
-		MockPropertiesEditor editor = newEditor(
+		MockEditor editor = newEditor(
 				"# a comment\n"+
 				"error.path=foo\n"
 		);
@@ -891,7 +891,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 	public void testDeprecatedPropertyHoverInfo() throws Exception {
 		data("error.path", "java.lang.String", null, "Path of the error controller.");
-		MockPropertiesEditor editor = newEditor(
+		MockEditor editor = newEditor(
 				"# a comment\n"+
 				"error.path=foo\n"
 		);
@@ -915,7 +915,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		data("error.path", "java.lang.String", null, "Path of the error controller.");
 		deprecate("error.path", "server.error.path", null);
 
-		MockPropertiesEditor editor = newEditor(
+		MockEditor editor = newEditor(
 				"# a comment\n"+
 				"error.path=foo\n"
 		);
@@ -934,7 +934,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		useProject(jp);
 		data("foo", "demo.Deprecater", null, "A Bean with deprecated properties");
 
-		MockPropertiesEditor editor = newEditor(
+		MockEditor editor = newEditor(
 				"# comment\n" +
 				"foo.name=Old faithfull\n" +
 				"foo.new-name=New and fancy\n" +
@@ -1133,7 +1133,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 
 
 	public void test_STS_3335_reconcile_list_nested_in_Map_of_String() throws Exception {
-		MockPropertiesEditor editor;
+		MockEditor editor;
 		useProject(createPredefinedMavenProject("demo-sts-4335"));
 
 		editor = newEditor(
@@ -1344,7 +1344,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testClassReferenceInValueLink() throws Exception {
-		MockPropertiesEditor editor;
+		MockEditor editor;
 		useProject(createPredefinedMavenProject("boot13_with_mongo"));
 
 		editor = newEditor(
@@ -1364,7 +1364,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testCommaListReconcile() throws Exception {
-		MockPropertiesEditor editor;
+		MockEditor editor;
 		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
@@ -1433,7 +1433,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testReconcileDuplicateKey() throws Exception {
-		MockPropertiesEditor editor;
+		MockEditor editor;
 		data("some.property", "java.lang.String", null, "yada");
 		data("some.other.property", "java.lang.String", null, "yada");
 
@@ -1499,7 +1499,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		useProject(createPredefinedMavenProject("demo-enum"));
 		data("my.background", "demo.Color", null, "Color to use as default background.");
 
-		MockPropertiesEditor editor;
+		MockEditor editor;
 
 		editor = newEditor(
 				"my.background: RED"
@@ -1518,7 +1518,7 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		useProject(createPredefinedMavenProject("demo-enum"));
 		data("my.background", "demo.Color", null, "Color to use as default background.");
 
-		MockPropertiesEditor editor;
+		MockEditor editor;
 
 		editor = newEditor(
 				"my.background: RED"

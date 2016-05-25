@@ -2468,7 +2468,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		deprecate("my.old-name", "my.new-name", null);
 
 		{
-			MockPropertiesEditor editor = newEditor(
+			YamlEditor editor = newEditor(
 					"# a comment\n"+
 					"my:\n" +
 					"  old-name: foo\n"
@@ -2485,7 +2485,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		}
 
 		{
-			MockPropertiesEditor editor = newEditor(
+			MockEditor editor = newEditor(
 					"# a comment\n"+
 					"my:\n" +
 					"  old-name: foo\n" +
@@ -2504,7 +2504,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		}
 
 		{	// Don't move prop if it doesn't need to be moved
-			MockPropertiesEditor editor = newEditor(
+			MockEditor editor = newEditor(
 					"# a comment\n"+
 					"my:\n" +
 					"  old-name: foo\n" +
@@ -2534,7 +2534,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		deprecate("my.long.path.with.many.pieces", "my.path.with.many.pieces", null);
 
 		{
-			MockPropertiesEditor editor = newEditor(
+			MockEditor editor = newEditor(
 					"# a comment\n"+
 					"my:\n" +
 					"  long:\n"+
@@ -2558,7 +2558,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		}
 
 		{
-			MockPropertiesEditor editor = newEditor(
+			MockEditor editor = newEditor(
 					"# a comment\n"+
 					"my:\n" +
 					"  long:\n"+
@@ -2588,7 +2588,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		}
 
 		{
-			MockPropertiesEditor editor = newEditor(
+			MockEditor editor = newEditor(
 					"# a comment\n"+
 					"my:\n" +
 					"  stuff: foo\n"
@@ -2606,7 +2606,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		}
 
 		{
-			MockPropertiesEditor editor = newEditor(
+			MockEditor editor = newEditor(
 					"# a comment\n"+
 					"my:\n" +
 					"  old-name: foo\n"
@@ -2623,7 +2623,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		}
 
 		{
-			MockPropertiesEditor editor = newEditor(
+			MockEditor editor = newEditor(
 					"# a comment\n"+
 					"my:\n" +
 					"  old-name: foo\n" +
@@ -2643,7 +2643,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		}
 
 		{
-			MockPropertiesEditor editor = newEditor(
+			MockEditor editor = newEditor(
 					"# a comment\n"+
 					"your:\n" +
 					"  goodies: nice\n" +
@@ -2677,7 +2677,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		deprecate("my.long.path.with.many.pieces", "short.path", null); //shallower level
 
 		{
-			MockPropertiesEditor editor = newEditor(
+			MockEditor editor = newEditor(
 					"# a comment\n"+
 					"my:\n" +
 					"  long:\n"+
@@ -2706,7 +2706,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		}
 
 		{
-			MockPropertiesEditor editor = newEditor(
+			MockEditor editor = newEditor(
 					"# a comment\n"+
 					"my:\n" +
 					"  long:\n"+
@@ -2734,7 +2734,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 			);
 		}
 		{
-			MockPropertiesEditor editor = newEditor(
+			MockEditor editor = newEditor(
 					"# a comment\n"+
 					"my:\n" +
 					"  long:\n"+
@@ -3263,7 +3263,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 	}
 
 	public void testClassReferenceInValueLink() throws Exception {
-		MockPropertiesEditor editor;
+		MockEditor editor;
 		useProject(createPredefinedMavenProject("boot13_with_mongo"));
 
 		editor = newEditor(

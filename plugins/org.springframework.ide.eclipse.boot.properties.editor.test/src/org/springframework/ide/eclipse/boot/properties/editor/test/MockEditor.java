@@ -52,12 +52,12 @@ public class MockEditor {
 
 	public MockEditor(String text, HoverInfoProvider hoverProvider) {
 		this.hoverProvider = hoverProvider;
-		selectionStart = text.indexOf(MockPropertiesEditor.CURSOR);
+		selectionStart = text.indexOf(MockEditor.CURSOR);
 		if (selectionStart>=0) {
-			text = text.substring(0,selectionStart) + text.substring(selectionStart+MockPropertiesEditor.CURSOR.length());
-			selectionEnd = text.indexOf(MockPropertiesEditor.CURSOR, selectionStart);
+			text = text.substring(0,selectionStart) + text.substring(selectionStart+MockEditor.CURSOR.length());
+			selectionEnd = text.indexOf(MockEditor.CURSOR, selectionStart);
 			if (selectionEnd>=0) {
-				text = text.substring(0, selectionEnd) + text.substring(selectionEnd+MockPropertiesEditor.CURSOR.length());
+				text = text.substring(0, selectionEnd) + text.substring(selectionEnd+MockEditor.CURSOR.length());
 			} else {
 				selectionEnd = selectionStart;
 			}
@@ -75,9 +75,9 @@ public class MockEditor {
 	 */
 	public String getText() {
 		String text = document.get();
-		text = text.substring(0, selectionEnd) + MockPropertiesEditor.CURSOR + text.substring(selectionEnd);
+		text = text.substring(0, selectionEnd) + MockEditor.CURSOR + text.substring(selectionEnd);
 		if (selectionStart<selectionEnd) {
-			text = text.substring(0,selectionStart) + MockPropertiesEditor.CURSOR + text.substring(selectionStart);
+			text = text.substring(0,selectionStart) + MockEditor.CURSOR + text.substring(selectionStart);
 		}
 		return deWindowsify(text);
 	}
@@ -189,5 +189,14 @@ public class MockEditor {
 		IRegion r = getHoverRegion(offset);
 		String actual = textUnder(r);
 		assertEquals(expect, actual);
+	}
+
+	public void assertText(String expected) {
+		if (expected.contains(CURSOR)) {
+			assertEquals(expected, getText());
+		} else {
+			//assume the test doesn't care about cursor position so ignore it
+			assertEquals(expected, getRawText());
+		}
 	}
 }
