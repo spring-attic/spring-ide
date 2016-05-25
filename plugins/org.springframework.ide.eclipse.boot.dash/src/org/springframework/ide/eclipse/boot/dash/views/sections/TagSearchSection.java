@@ -56,7 +56,7 @@ public class TagSearchSection extends PageSection implements Disposable {
 	@Override
 	public void createContents(Composite page) {
 		tagsSearchBox = new Text(page, SWT.SINGLE | SWT.BORDER | SWT.SEARCH | SWT.ICON_CANCEL);
-		tagsSearchBox.setMessage("Type tags to match");
+		tagsSearchBox.setMessage("Type tags, projects, or working set names to match (incl. * and ? wildcards)");
 		tagsSearchBox.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
 		tagsSearchBox.addModifyListener(new ModifyListener() {
 			@Override
