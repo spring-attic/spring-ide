@@ -103,6 +103,7 @@
         <module>plugins/org.springframework.ide.eclipse.cloudfoundry.manifest.editor</module>
         <module>plugins/org.springsource.ide.eclipse.commons.cloudfoundry.client.v2</module> <!--TODO: move to commons -->
 		<module>plugins/org.springframework.ide.eclipse.boot.wizard</module>
+        <module>features/org.springframework.ide.eclipse.boot.feature</module>
         <module>features/org.springframework.ide.eclipse.boot.dash.feature</module>
         
 		<!-- core -->
@@ -219,6 +220,7 @@
 		<module>features/org.springframework.ide.eclipse.maven.feature.source</module>
 		<module>features/org.springframework.ide.eclipse.roo.feature.source</module>
 		<module>features/org.springframework.ide.eclipse.data.feature.source</module>
+        <module>features/org.springframework.ide.eclipse.boot.feature.source</module>
         <module>features/org.springframework.ide.eclipse.boot.dash.feature.source</module>
 
 		<!-- site -->
