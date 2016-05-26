@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2013 VMware, Inc.
+ *  Copyright (c) 2013, 2016 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -15,8 +15,8 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.springframework.ide.eclipse.wizard.gettingstarted.content.GettingStartedContent;
-import org.springframework.ide.eclipse.wizard.gettingstarted.content.ReferenceApp;
+import org.springframework.ide.eclipse.boot.wizard.content.GettingStartedContent;
+import org.springframework.ide.eclipse.boot.wizard.content.ReferenceApp;
 
 /**
  * @author Kris De Volder
