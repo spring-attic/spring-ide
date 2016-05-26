@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2013 VMware, Inc.
+ *  Copyright (c) 2013, 2016 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -13,17 +13,17 @@ package org.springsource.ide.eclipse.commons.gettingstarted.tests;
 import java.io.File;
 import java.util.List;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.springframework.ide.eclipse.wizard.gettingstarted.content.CodeSet;
-import org.springframework.ide.eclipse.wizard.gettingstarted.content.GithubRepoContent;
+import org.springframework.ide.eclipse.boot.wizard.content.CodeSet;
+import org.springframework.ide.eclipse.boot.wizard.content.GithubRepoContent;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.UIThreadDownloadDisallowed;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * This tests performs a quick validation that downloaded Guides zip file contains

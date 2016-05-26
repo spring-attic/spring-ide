@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2013 GoPivotal, Inc.
+ *  Copyright (c) 2013, 2016 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -10,26 +10,26 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.commons.gettingstarted.tests;
 
-import java.util.List;
+import static org.springframework.ide.eclipse.boot.wizard.importing.ImportUtils.importConfig;
+import static org.springsource.ide.eclipse.commons.tests.util.StsTestUtil.assertNoErrors;
+import static org.springsource.ide.eclipse.commons.tests.util.StsTestUtil.setAutoBuilding;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.springframework.ide.eclipse.wizard.gettingstarted.content.BuildType;
-import org.springframework.ide.eclipse.wizard.gettingstarted.content.CodeSet;
-import org.springframework.ide.eclipse.wizard.gettingstarted.content.ReferenceApp;
-import org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportStrategy;
+import org.springframework.ide.eclipse.boot.wizard.content.BuildType;
+import org.springframework.ide.eclipse.boot.wizard.content.CodeSet;
+import org.springframework.ide.eclipse.boot.wizard.content.ReferenceApp;
+import org.springframework.ide.eclipse.boot.wizard.importing.ImportStrategy;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 
-import static org.springsource.ide.eclipse.commons.tests.util.StsTestUtil.setAutoBuilding;
-import static org.springsource.ide.eclipse.commons.tests.util.StsTestUtil.assertNoErrors;
-import static org.springframework.ide.eclipse.wizard.gettingstarted.importing.ImportUtils.importConfig;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 /**
  * A BuildSample test checks that a particular sample project builds properly

@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2013 VMware, Inc.
+ *  Copyright (c) 2013, 2016 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -13,15 +13,15 @@ package org.springsource.ide.eclipse.commons.gettingstarted.tests;
 import java.io.File;
 import java.io.IOException;
 
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+import org.springframework.ide.eclipse.boot.wizard.content.CodeSet;
+import org.springframework.ide.eclipse.boot.wizard.content.ReferenceApp;
+import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.UIThreadDownloadDisallowed;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-import org.springframework.ide.eclipse.wizard.gettingstarted.content.CodeSet;
-import org.springframework.ide.eclipse.wizard.gettingstarted.content.ReferenceApp;
-import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.UIThreadDownloadDisallowed;
 
 /**
  * This tests performs a quick validation that downloaded zip file contains

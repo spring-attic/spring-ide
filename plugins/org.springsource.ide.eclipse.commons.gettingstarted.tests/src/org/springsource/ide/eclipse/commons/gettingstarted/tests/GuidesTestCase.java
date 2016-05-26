@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2013 VMware, Inc.
+ *  Copyright (c) 2013, 2016 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -10,18 +10,18 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.commons.gettingstarted.tests;
 
-import junit.framework.TestCase;
-
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.springframework.ide.eclipse.wizard.gettingstarted.content.GithubRepoContent;
+import org.springframework.ide.eclipse.boot.wizard.content.GithubRepoContent;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
+
+import junit.framework.TestCase;
 
 /**
  * Some infrastucture shared among different dynamically generated testcases for
