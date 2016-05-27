@@ -25,21 +25,21 @@ public static void main(String[] args) throws Exception {
    -->
 <template
     id="org.springframework.ide.eclipse.boot.templates.assert.notNull.Spring"
-    name="notnull[spring]"
+    name="notnull"
     description="Assert that a variable is not null, using Spring's Assert class"
     context="boot-statements">
 Assert.notNull(${name:localVar}, "${name} must not be null");${:import(org.springframework.util.Assert)}
 </template>
 <template
     id="org.springframework.ide.eclipse.boot.templates.assert.notNull.JUnit"
-    name="notnull[junit]"
+    name="notnull"
     description="Assert that a variable is not null, using JUnit's Assert class"
     context="boot-statements">
 Assert.notNull(${name:localVar}, "${name} must not be null");${:import(org.junit.Assert)}
 </template>
 <template
     id="org.springframework.ide.eclipse.boot.templates.license.appache"
-    name="apache_license"
+    name="asl"
     description="Appache Copyright License embedded in Java Comments"
     context="java">
 /*
@@ -62,6 +62,16 @@ Assert.notNull(${name:localVar}, "${name} must not be null");${:import(org.junit
 <!-- TODO: This template generates garbage when use on a fresh class. See eclipse bug: 
      https://bugs.eclipse.org/bugs/show_bug.cgi?id=494691 
  -->
+ 
+<template
+    id="org.springframework.ide.eclipse.boot.templates.cprops"
+    name="cprops"
+    description="@ConfiguratioonProperties"
+    context="boot">
+${:import(org.springframework.boot.context.properties.ConfigurationProperties)}
+@ConfigurationProperties("${prefix}")
+</template>
+ 
 <template
     id="org.springframework.ide.eclipse.boot.templates.jurwm"
     name="jurwm"
@@ -75,7 +85,7 @@ ${:import(org.junit.runner.RunWith,org.mockito.runners.MockitoJUnitRunner)}
     id="org.springframework.ide.eclipse.boot.templates.jumock"
     name="jumock"
     description="@Mock field"
-    context="boot-members">
+    context="java-members">
 ${:import(org.mockito.Mock)}@Mock ${Type} ${mockName};
 </template>
 
@@ -84,7 +94,7 @@ ${:import(org.mockito.Mock)}@Mock ${Type} ${mockName};
     id="org.springframework.ide.eclipse.boot.templates.jumockmvcwac"
     name="jumockmvcwac"
     description="JUnit MockMvc with WebApplicationContext setup"
-    context="boot-members">
+    context="java-members">
 ${standardImports:import(org.junit.Before,org.springframework.beans.factory.annotation.Autowired,org.springframework.test.web.servlet.MockMvc,org.springframework.test.web.servlet.setup.MockMvcBuilders,org.springframework.web.context.WebApplicationContext)}
 ${:importStatic('org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*','org.springframework.test.web.servlet.result.MockMvcResultHandlers.*','org.springframework.test.web.servlet.result.MockMvcResultMatchers.*')}
 
@@ -104,7 +114,7 @@ ${:importStatic('org.springframework.test.web.servlet.request.MockMvcRequestBuil
 </template>
 
 <template
-    id="org.springframework.ide.eclipse.boot.templates.jumockmvcwac"
+    id="org.springframework.ide.eclipse.boot.templates.noformat"
     name="formatter-off"
     description="Disable formatter with @formatter:of/on tags"
     context="java">
@@ -144,6 +154,17 @@ private static final Logger ${log} = LoggerFactory.getLogger(${enclosing_type}.c
     description="log a WARNING using slf4jlogger declared in this class"
     context="boot-statements">
     ${log:field(org.slf4j.Logger)}.warn("${warning}");
+</template>
+
+<template
+	id="org.springframework.ide.eclipse.boot.templates.rtexchange"
+	name="rtex"
+	description="Call restTemplate.exchange"
+	context="boot-statements">
+ResponseEntity&lt;PagedResources&lt;?&gt;&gt; result = restTemplate.exchange("", 
+     HttpMethod.GET, 
+     new HttpEntity&lt;Void&gt;((Void) null),
+     new ParameterizedTypeReference&lt;PagedResources&lt;${cursor}&gt;&gt;() {});
 </template>
 
 </templates>
