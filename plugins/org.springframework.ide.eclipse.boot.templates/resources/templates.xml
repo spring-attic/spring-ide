@@ -25,17 +25,17 @@ public static void main(String[] args) throws Exception {
    -->
 <template
     id="org.springframework.ide.eclipse.boot.templates.assert.notNull.Spring"
-    name="notnull"
+    name="notnull[spring]"
     description="Assert that a variable is not null, using Spring's Assert class"
     context="boot-statements">
-Assert.notNull(${name:localVar}, "${name} must not be null");${:import(org.springframework.util.Assert)}
+Assert.notNull(${name:var}, "${name} must not be null");${:import(org.springframework.util.Assert)}
 </template>
 <template
     id="org.springframework.ide.eclipse.boot.templates.assert.notNull.JUnit"
-    name="notnull"
+    name="notnull[junit]"
     description="Assert that a variable is not null, using JUnit's Assert class"
     context="boot-statements">
-Assert.notNull(${name:localVar}, "${name} must not be null");${:import(org.junit.Assert)}
+Assert.assertNotNull("${name:var} must not be null", ${name});${:import(org.junit.Assert)}
 </template>
 <template
     id="org.springframework.ide.eclipse.boot.templates.license.apache"
