@@ -99,6 +99,7 @@
 		<module>plugins/org.springframework.ide.eclipse.boot.properties.editor</module>
 		<module>plugins/org.springframework.ide.eclipse.boot.properties.editor.yaml</module>
 		<module>plugins/org.springframework.ide.eclipse.boot.properties.editor.test</module>
+		<module>plugins/org.springframework.ide.eclipse.boot.templates</module>
 		<module>plugins/org.springframework.ide.eclipse.editor.support</module>
         <module>plugins/org.springframework.ide.eclipse.cloudfoundry.manifest.editor</module>
         <module>plugins/org.springsource.ide.eclipse.commons.cloudfoundry.client.v2</module> <!--TODO: move to commons -->
