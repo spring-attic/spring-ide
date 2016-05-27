@@ -12,6 +12,4 @@ Require-Bundle: org.eclipse.jdt.core,
  org.springsource.ide.eclipse.commons.frameworks.core,
  org.eclipse.ui.editors,
  org.eclipse.ui.workbench
-Bundle-Activator: BootTemplatesActivator
-Bundle-ActivationPolicy: lazy
 Bundle-Vendor: Pivotal Inc

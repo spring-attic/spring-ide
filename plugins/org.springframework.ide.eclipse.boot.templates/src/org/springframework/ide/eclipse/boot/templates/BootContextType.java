@@ -20,14 +20,14 @@ import org.eclipse.jface.text.templates.TemplateVariableResolver;
 import org.eclipse.ui.editors.text.templates.ContributionContextTypeRegistry;
 
 /**
- * The context type for templates inside SWT code.
+ * The context type for templates inside 'Spring Boot' code.
  * The same class is used for several context types:
  * <dl>
  * <li>templates for all Java code locations</li>
  * <li>templates for member locations</li>
  * <li>templates for statement locations</li>
  * </dl>
- * @since 3.4
+ * @since 3.8.0
  */
 @SuppressWarnings("restriction")
 public class BootContextType extends AbstractJavaContextType {
@@ -39,17 +39,17 @@ public class BootContextType extends AbstractJavaContextType {
 	}
 
 	/**
-	 * The context type id for templates working on all Java code locations in SWT projects
+	 * The context type id for templates working on all Java code locations in Boot projects
 	 */
 	public static final String ID_ALL= "boot"; //$NON-NLS-1$
 
 	/**
-	 * The context type id for templates working on member locations in SWT projects
+	 * The context type id for templates working on member locations in Boot projects
 	 */
 	public static final String ID_MEMBERS= "boot-members"; //$NON-NLS-1$
 
 	/**
-	 * The context type id for templates working on statement locations in SWT projects
+	 * The context type id for templates working on statement locations in Boot projects
 	 */
 	public static final String ID_STATEMENTS= "boot-statements"; //$NON-NLS-1$
 

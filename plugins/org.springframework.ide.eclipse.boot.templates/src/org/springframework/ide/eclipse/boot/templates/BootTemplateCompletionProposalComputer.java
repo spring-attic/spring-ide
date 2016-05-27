@@ -26,9 +26,9 @@ import org.eclipse.jface.text.templates.TemplateContextType;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager;
 
 /**
- * Computer that computes the template proposals for the SWT context type.
+ * Computer that computes the template proposals for the 'Boot' context type.
  *
- * @since 3.4
+ * @since 3.8.0
  */
 @SuppressWarnings("restriction")
 public class BootTemplateCompletionProposalComputer extends AbstractTemplateCompletionProposalComputer {
@@ -52,7 +52,7 @@ public class BootTemplateCompletionProposalComputer extends AbstractTemplateComp
 	 */
 	private IJavaProject fCachedJavaProject;
 	/**
-	 * Is org.eclipse.swt.SWT on class path of <code>fJavaProject</code>. Invalid
+	 * Is the 'context type' on class path of <code>fJavaProject</code>. Invalid
 	 * if <code>fJavaProject</code> is <code>false</code>.
 	 */
 	private boolean fIsContextTypeOnClasspath;
@@ -104,7 +104,7 @@ public class BootTemplateCompletionProposalComputer extends AbstractTemplateComp
 	}
 
 	/**
-	 * Tells whether SWT is on the given project's class path.
+	 * Tells whether 'context type' is on the given project's class path.
 	 *
 	 * @param javaProject the Java project
 	 * @return <code>true</code> if the given project's class path
