@@ -38,9 +38,9 @@ Assert.notNull(${name:localVar}, "${name} must not be null");${:import(org.sprin
 Assert.notNull(${name:localVar}, "${name} must not be null");${:import(org.junit.Assert)}
 </template>
 <template
-    id="org.springframework.ide.eclipse.boot.templates.license.appache"
+    id="org.springframework.ide.eclipse.boot.templates.license.apache"
     name="asl"
-    description="Appache Copyright License embedded in Java Comments"
+    description="Apache Copyright License embedded in Java Comments"
     context="java">
 /*
  * Copyright ${year} the original author or authors.
@@ -66,7 +66,7 @@ Assert.notNull(${name:localVar}, "${name} must not be null");${:import(org.junit
 <template
     id="org.springframework.ide.eclipse.boot.templates.cprops"
     name="cprops"
-    description="@ConfiguratioonProperties"
+    description="@ConfigurationProperties"
     context="boot">
 ${:import(org.springframework.boot.context.properties.ConfigurationProperties)}
 @ConfigurationProperties("${prefix}")
