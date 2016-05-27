@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+<!-- contexts:
+ java-statements : inside methods. I.e. place where you can type a statement
+ java-members : inside a type. I.e. place where you can type a method (or other 'member'  declaration)
+ ...more...?
+ -->
+ 
+ <!-- TODO: It was suggested that @SpringBootApplication annotation should be added to the
+     class if its not there yet, when invoking this template  -->
+<template
+    id="org.springframework.ide.eclipse.boot.templates.main"
+    name="main"
+    description="Spring Boot main method"
+    context="boot-members">
+public static void main(String[] args) throws Exception {
+        SpringApplication.run(${enclosing_type}.class, args);
+}${:import(org.springframework.boot.SpringApplication)}
+</template>
+
+<!-- TODO: is it possible to unify the two templates below and somehow use the right one
+  depending on context? I.e.
+    - when method is annotated with @Test use the junit one
+    - otherwise use the Spring one
+   -->
+<template
+    id="org.springframework.ide.eclipse.boot.templates.assert.notNull.Spring"
+    name="notnull[spring]"
+    description="Assert that a variable is not null, using Spring's Assert class"
+    context="boot-statements">
+Assert.notNull(${name:localVar}, "${name} must not be null");${:import(org.springframework.util.Assert)}
+</template>
+<template
+    id="org.springframework.ide.eclipse.boot.templates.assert.notNull.JUnit"
+    name="notnull[junit]"
+    description="Assert that a variable is not null, using JUnit's Assert class"
+    context="boot-statements">
+Assert.notNull(${name:localVar}, "${name} must not be null");${:import(org.junit.Assert)}
+</template>
+<template
+    id="org.springframework.ide.eclipse.boot.templates.license.appache"
+    name="apache_license"
+    description="Appache Copyright License embedded in Java Comments"
+    context="java">
+/*
+ * Copyright ${year} the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+</template>
+
+<!-- TODO: This template generates garbage when use on a fresh class. See eclipse bug: 
+     https://bugs.eclipse.org/bugs/show_bug.cgi?id=494691 
+ -->
+<template
+    id="org.springframework.ide.eclipse.boot.templates.jurwm"
+    name="jurwm"
+    description="@RunWith(MockitoJUnitRunner.class)"
+    context="java">
+${:import(org.junit.runner.RunWith,org.mockito.runners.MockitoJUnitRunner)}
+@RunWith(MockitoJUnitRunner.class)
+</template>
+
+<template
+    id="org.springframework.ide.eclipse.boot.templates.jumock"
+    name="jumock"
+    description="@Mock field"
+    context="boot-members">
+${:import(org.mockito.Mock)}@Mock ${Type} ${mockName};
+</template>
+
+<!-- TODO: disable in boot 1.4 (can we make template somehow detect this and disable itself?) -->
+<template
+    id="org.springframework.ide.eclipse.boot.templates.jumockmvcwac"
+    name="jumockmvcwac"
+    description="JUnit MockMvc with WebApplicationContext setup"
+    context="boot-members">
+${standardImports:import(org.junit.Before,org.springframework.beans.factory.annotation.Autowired,org.springframework.test.web.servlet.MockMvc,org.springframework.test.web.servlet.setup.MockMvcBuilders,org.springframework.web.context.WebApplicationContext)}
+${:importStatic('org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*','org.springframework.test.web.servlet.result.MockMvcResultHandlers.*','org.springframework.test.web.servlet.result.MockMvcResultMatchers.*')}
+
+    @Autowired
+    WebApplicationContext context;
+    
+    MockMvc mockMvc;
+    
+    // @formatter:off
+    @Before
+    public void setup() {
+        mockMvc = MockMvcBuilders
+                .webAppContextSetup(context)
+                .build();
+    }
+    // @formatter:on
+</template>
+
+<template
+    id="org.springframework.ide.eclipse.boot.templates.jumockmvcwac"
+    name="formatter-off"
+    description="Disable formatter with @formatter:of/on tags"
+    context="java">
+// @formatter:off
+${cursor} ${line_selection}
+// @formatter:on
+</template>
+
+<template
+    id="org.springframework.ide.eclipse.boot.templates.slf4j.logger"
+    name="logger"
+    description="static Logger field using slf4j"
+    context="boot-members">
+${:import(org.slf4j.Logger,org.slf4j.LoggerFactory)}
+private static final Logger ${log} = LoggerFactory.getLogger(${enclosing_type}.class);
+</template>
+
+<template
+    id="org.springframework.ide.eclipse.boot.templates.slf4j.loginfo"
+    name="logi"
+    description="log an INFO message using slf4jlogger declared in this class"
+    context="boot-statements">
+    ${log:field(org.slf4j.Logger)}.info("${message}");
+</template>
+
+<template
+    id="org.springframework.ide.eclipse.boot.templates.slf4j.logerror"
+    name="loge"
+    description="log an ERROR message using slf4jlogger declared in this class"
+    context="boot-statements">
+    ${log:field(org.slf4j.Logger)}.error("${message}", ${exception:var(java.lang.Throwable)});
+</template>
+
+<template
+    id="org.springframework.ide.eclipse.boot.templates.slf4j.logwarn"
+    name="logw"
+    description="log a WARNING using slf4jlogger declared in this class"
+    context="boot-statements">
+    ${log:field(org.slf4j.Logger)}.warn("${warning}");
+</template>
+
+</templates>

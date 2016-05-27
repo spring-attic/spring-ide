@@ -24,3 +24,4 @@ Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.boot.properties.editor.yaml,
  org.springframework.ide.eclipse.boot.properties.editor.yaml.completions,
  org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile
+Bundle-Vendor: Pivotal Inc

@@ -196,15 +196,4 @@
     </enablement>
   </decorator>
 </extension>
-
-	<!-- Java editor templates -->
-	<extension
-         point="org.eclipse.ui.editors.templates">
-    <include
-          file="resources/templates.xml">
-    </include>
-    </extension>
-	
-	
-
 </plugin>

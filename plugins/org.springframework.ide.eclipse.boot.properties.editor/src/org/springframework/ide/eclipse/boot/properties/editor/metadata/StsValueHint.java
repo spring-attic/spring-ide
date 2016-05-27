@@ -127,7 +127,7 @@ public class StsValueHint {
 				if (StringUtil.hasText(htmlText)) {
 					return HtmlSnippet.raw(htmlText);
 				}
-			} catch (CoreException e) {
+			} catch (Exception e) {
 				Log.log(e);
 			}
 			return EMPTY_DESCRIPTION;
