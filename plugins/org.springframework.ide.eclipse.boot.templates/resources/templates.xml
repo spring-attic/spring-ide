@@ -116,7 +116,7 @@ ${:importStatic('org.springframework.test.web.servlet.request.MockMvcRequestBuil
 <template
     id="org.springframework.ide.eclipse.boot.templates.noformat"
     name="formatter-off"
-    description="Disable formatter with @formatter:of/on tags"
+    description="Disable formatter with formatter:off/on tags"
     context="java">
 // @formatter:off
 ${cursor} ${line_selection}
@@ -161,7 +161,8 @@ private static final Logger ${log} = LoggerFactory.getLogger(${enclosing_type}.c
 	name="rtex"
 	description="Call restTemplate.exchange"
 	context="boot-statements">
-ResponseEntity&lt;PagedResources&lt;?&gt;&gt; result = restTemplate.exchange("", 
+${:import(org.springframework.core.ParameterizedTypeReference,org.springframework.hateoas.PagedResources,org.springframework.http.HttpEntity,org.springframework.http.HttpMethod,org.springframework.http.ResponseEntity)}
+ResponseEntity&lt;PagedResources&lt;?&gt;&gt; result = ${restTemplate:var(org.springframework.web.client.RestTemplate)}.exchange("", 
      HttpMethod.GET, 
      new HttpEntity&lt;Void&gt;((Void) null),
      new ParameterizedTypeReference&lt;PagedResources&lt;${cursor}&gt;&gt;() {});
