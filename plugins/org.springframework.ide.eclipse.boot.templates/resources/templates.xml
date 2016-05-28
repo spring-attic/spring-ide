@@ -94,7 +94,7 @@ ${:import(org.mockito.Mock)}@Mock ${Type} ${mockName};
     id="org.springframework.ide.eclipse.boot.templates.jumockmvcwac"
     name="jumockmvcwac"
     description="JUnit MockMvc with WebApplicationContext setup"
-    context="java-members">
+    context="boot-members">
 ${standardImports:import(org.junit.Before,org.springframework.beans.factory.annotation.Autowired,org.springframework.test.web.servlet.MockMvc,org.springframework.test.web.servlet.setup.MockMvcBuilders,org.springframework.web.context.WebApplicationContext)}
 ${:importStatic('org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*','org.springframework.test.web.servlet.result.MockMvcResultHandlers.*','org.springframework.test.web.servlet.result.MockMvcResultMatchers.*')}
 
