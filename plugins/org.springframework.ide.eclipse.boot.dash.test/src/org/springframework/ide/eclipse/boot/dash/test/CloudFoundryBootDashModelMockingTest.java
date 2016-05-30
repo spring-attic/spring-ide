@@ -89,6 +89,7 @@ import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCFApplication;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCFSpace;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.RunStateHistory;
+import org.springframework.ide.eclipse.boot.dash.test.util.ZipDiff;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.CustmomizeTargetLabelAction;
@@ -1518,8 +1519,9 @@ public class CloudFoundryBootDashModelMockingTest {
 	private void assertDeployedBytes(File referenceJar, MockCFApplication app) throws IOException {
 		try (InputStream actualBits = app.getBits()) {
 			try (InputStream expectedBits = new BufferedInputStream(new FileInputStream(referenceJar))) {
+				ZipDiff zipDiff = new ZipDiff(expectedBits);
 				try {
-					assertEqualStreams(expectedBits, actualBits);
+					zipDiff.assertEqual(actualBits);
 				} catch (Throwable e) {
 					System.out.println("Failed: "+ExceptionUtil.getMessage(e));
 					saveArtefacts(referenceJar, app);
