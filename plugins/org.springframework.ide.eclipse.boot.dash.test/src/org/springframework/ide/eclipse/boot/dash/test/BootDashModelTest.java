@@ -332,6 +332,7 @@ public class BootDashModelTest {
 		waitForState(element, RunState.INACTIVE);
 		waitForState(childElement, RunState.INACTIVE);
 
+		waitForJobsToComplete();
 		//4 changes:  INACTIVE -> STARTING, STARTING -> RUNNING, livePort(set), actualInstances
 		verify(oldListener, times(4)).stateChanged(element);
 		verify(oldListener, times(4)).stateChanged(childElement);
@@ -843,7 +844,7 @@ public class BootDashModelTest {
 		IProject project = element.getProject();
 
 		if (tagsToSet==null || tagsToSet.length==0) {
-			element.setTags(new LinkedHashSet<String>(Arrays.asList("foo", "bar")));
+			element.setTags(new LinkedHashSet<>(Arrays.asList("foo", "bar")));
 			assertFalse(element.getTags().isEmpty());
 		} else {
 			assertArrayEquals(new String[]{}, element.getTags().toArray(new String[0]));
@@ -862,7 +863,7 @@ public class BootDashModelTest {
 
 	private LinkedHashSet<String> linkedHashSet(String[] tagsToSet) {
 		if (tagsToSet!=null) {
-			return new LinkedHashSet<String>(Arrays.asList(tagsToSet));
+			return new LinkedHashSet<>(Arrays.asList(tagsToSet));
 		}
 		return null;
 	}
@@ -920,7 +921,7 @@ public class BootDashModelTest {
 			BootDashElement element = getElement(info.name);
 			IProject project = element.getProject();
 			if (info.tags != null && info.tags.length > 0) {
-				element.setTags(new LinkedHashSet<String>(Arrays.asList(info.tags)));
+				element.setTags(new LinkedHashSet<>(Arrays.asList(info.tags)));
 			}
 			if (info.workingSet != null && !info.workingSet.isEmpty() && project != null) {
 				List<IProject> projects = wsMap.get(info.workingSet);
@@ -1139,7 +1140,7 @@ public class BootDashModelTest {
 
 	private void assertModelElements(String... expectedElementNames) {
 		Set<BootDashElement> elements = model.getElements().getValue();
-		Set<String> names = new HashSet<String>();
+		Set<String> names = new HashSet<>();
 		for (BootDashElement e : elements) {
 			names.add(e.getName());
 		}
