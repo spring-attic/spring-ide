@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.reactivestreams.Publisher;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 
 import reactor.core.publisher.Flux;
@@ -191,8 +192,7 @@ public class ReactorUtils {
 				public T next() {
 					return holdingPen.remove().t1;
 				}
-			})
-			.delaySubscription(bufferTime);
+			});
 
 			public SorterAccumulator next(Flux<Tuple2<T, Long>> window) {
 				window.subscribe(holdingPen::add);
@@ -202,12 +202,19 @@ public class ReactorUtils {
 			public Flux<T> getReleased() {
 				return released;
 			}
+
+			public Publisher<? extends T> drain() {
+				return Flux.fromIterable(holdingPen)
+				.map(Tuple2::getT1);
+			}
 		}
 
+		SorterAccumulator sorter = new SorterAccumulator();
 		return timestamp(stream)
 		.window(bufferTime)
-		.scan(new SorterAccumulator(), SorterAccumulator::next)
-		.flatMap(SorterAccumulator::getReleased, 1);
+		.scan(sorter, SorterAccumulator::next)
+		.flatMap(SorterAccumulator::getReleased, 1)
+		.concatWith(sorter.drain());
 	}
 
 }
