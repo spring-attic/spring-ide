@@ -11,7 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.console;
 
 import org.cloudfoundry.doppler.LogMessage;
-import org.cloudfoundry.doppler.LogMessage.MessageType;
+import org.cloudfoundry.doppler.MessageType;
 import org.eclipse.swt.SWT;
 
 public class LogType {

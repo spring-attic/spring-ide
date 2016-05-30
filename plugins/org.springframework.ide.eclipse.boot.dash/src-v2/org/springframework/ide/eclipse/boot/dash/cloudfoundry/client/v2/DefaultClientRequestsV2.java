@@ -42,7 +42,6 @@ import org.cloudfoundry.operations.applications.GetApplicationEnvironmentsReques
 import org.cloudfoundry.operations.applications.GetApplicationRequest;
 import org.cloudfoundry.operations.applications.LogsRequest;
 import org.cloudfoundry.operations.applications.PushApplicationRequest;
-import org.cloudfoundry.operations.applications.PushApplicationRequest.PushApplicationRequestBuilder;
 import org.cloudfoundry.operations.applications.RestartApplicationRequest;
 import org.cloudfoundry.operations.applications.SetEnvironmentVariableApplicationRequest;
 import org.cloudfoundry.operations.applications.StartApplicationRequest;
@@ -50,11 +49,10 @@ import org.cloudfoundry.operations.applications.StopApplicationRequest;
 import org.cloudfoundry.operations.organizations.OrganizationDetail;
 import org.cloudfoundry.operations.organizations.OrganizationInfoRequest;
 import org.cloudfoundry.operations.organizations.OrganizationSummary;
+import org.cloudfoundry.operations.routes.Level;
 import org.cloudfoundry.operations.routes.ListRoutesRequest;
-import org.cloudfoundry.operations.routes.ListRoutesRequest.Level;
 import org.cloudfoundry.operations.routes.MapRouteRequest;
 import org.cloudfoundry.operations.routes.Route;
-import org.cloudfoundry.operations.routes.Route.RouteBuilder;
 import org.cloudfoundry.operations.routes.UnmapRouteRequest;
 import org.cloudfoundry.operations.services.BindServiceInstanceRequest;
 import org.cloudfoundry.operations.services.CreateServiceInstanceRequest;
@@ -690,7 +688,11 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	private Mono<Void> mapRoute(Mono<Set<String>> domains, String appName, String desiredUrl) {
 		debug("mapRoute: "+appName+" -> "+desiredUrl);
 		return toRoute(domains, desiredUrl)
-		.then((Route route) -> mapRoute(appName, route));
+		.then((Route route) -> mapRoute(appName, route))
+		.doOnError((e) -> {
+			Log.info("mapRoute FAILED!");
+			Log.log(e);
+		});
 	}
 
 	private Mono<Void> mapRoute(String appName, Route route) {
@@ -715,11 +717,14 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 					while (host.endsWith(".")) {
 						host = host.substring(0, host.length()-1);
 					}
-					RouteBuilder route = Route.builder();
+					Route.Builder route = Route.builder();
 					route.domain(d);
 					if (StringUtils.hasText(host)) {
 						route.host(host);
 					}
+					route.path("");
+					route.space(params.getSpaceName());
+					route.id(UUID.randomUUID().toString());
 					return Mono.just(route.build());
 				}
 			}
@@ -776,10 +781,10 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	private Mono<Void> unmapRoute(String appName, Route route) {
 		String path = route.getPath();
-		if (!StringUtil.hasText(path)) {
-			//client doesn't like to get 'empty string' it will complain that route doesn't exist.
-			path = null;
-		}
+//		if (!StringUtil.hasText(path)) {
+//			//client doesn't like to get 'empty string' it will complain that route doesn't exist.
+//			path = null;
+//		}
 		return operations.routes().unmap(UnmapRouteRequest.builder()
 			.applicationName(appName)
 			.domain(route.getDomain())
@@ -804,7 +809,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		});
 	}
 
-	private static PushApplicationRequestBuilder toPushRequest(CFPushArguments params) {
+	private static PushApplicationRequest.Builder toPushRequest(CFPushArguments params) {
 		return PushApplicationRequest.builder()
 		.name(params.getAppName())
 		.memory(params.getMemory())

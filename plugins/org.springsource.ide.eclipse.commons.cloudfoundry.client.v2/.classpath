@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry exported="true" kind="lib" path="dependencies/aopalliance-1.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-client-2.0.0.BUILD-SNAPSHOT.jar" sourcepath="sources/cloudfoundry-client-2.0.0.BUILD-SNAPSHOT-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-client-spring-2.0.0.BUILD-SNAPSHOT.jar" sourcepath="sources/cloudfoundry-client-spring-2.0.0.BUILD-SNAPSHOT-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-client-2.0.0.BUILD-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-client-spring-2.0.0.BUILD-SNAPSHOT.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-operations-2.0.0.BUILD-SNAPSHOT.jar" sourcepath="sources/cloudfoundry-operations-2.0.0.BUILD-SNAPSHOT-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-util-2.0.0.BUILD-SNAPSHOT.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/commons-codec-1.9.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/commons-lang-2.6.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/commons-logging-1.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/evo-inflector-1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/jackson-annotations-2.6.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/jackson-core-2.6.5.jar"/>
@@ -30,7 +29,7 @@
 	<classpathentry exported="true" kind="lib" path="dependencies/spring-expression-4.2.5.RELEASE.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/spring-security-config-3.2.8.RELEASE.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/spring-security-core-3.2.8.RELEASE.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/spring-security-oauth2-2.0.9.RELEASE.jar" sourcepath="/home/kdvolder/.m2/repository/org/springframework/security/oauth/spring-security-oauth2/2.0.9.RELEASE/spring-security-oauth2-2.0.9.RELEASE-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/spring-security-oauth2-2.0.9.RELEASE.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/spring-security-web-3.2.8.RELEASE.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/spring-web-4.2.5.RELEASE.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/spring-webmvc-4.0.9.RELEASE.jar"/>
