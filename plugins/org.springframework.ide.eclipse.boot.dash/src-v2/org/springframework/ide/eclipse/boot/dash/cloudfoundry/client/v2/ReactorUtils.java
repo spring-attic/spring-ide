@@ -126,7 +126,7 @@ public class ReactorUtils {
 	 * one of the exceptions is propagated.
 	 */
 	public static Mono<Void> safeMerge(Flux<Mono<Void>> operations, int concurrency) {
-		AtomicReference<Throwable> failure =  new AtomicReference<Throwable>(null);
+		AtomicReference<Throwable> failure =  new AtomicReference<>(null);
 		return Flux.merge(
 			operations
 			.map((Mono<Void> op) -> {
@@ -179,7 +179,10 @@ public class ReactorUtils {
 			final Flux<T> released = Flux.fromIterable(() -> new Iterator<T>() {
 				@Override
 				public boolean hasNext() {
-					Tuple2<T, Long> nxt = holdingPen.peek();
+					Tuple2<T, Long> nxt;
+					synchronized (holdingPen) {
+						nxt = holdingPen.peek();
+					}
 					return nxt!=null && isOldEnough(nxt);
 				}
 
@@ -190,12 +193,18 @@ public class ReactorUtils {
 
 				@Override
 				public T next() {
-					return holdingPen.remove().t1;
+					synchronized (holdingPen) {
+						return holdingPen.remove().t1;
+					}
 				}
 			});
 
 			public SorterAccumulator next(Flux<Tuple2<T, Long>> window) {
-				window.subscribe(holdingPen::add);
+				window.subscribe((e) -> {
+					synchronized (holdingPen) {
+						holdingPen.add(e);
+					}
+				});
 				return this;
 			}
 
@@ -213,7 +222,7 @@ public class ReactorUtils {
 		return timestamp(stream)
 		.window(bufferTime)
 		.scan(sorter, SorterAccumulator::next)
-		.flatMap(SorterAccumulator::getReleased, 1)
+		.flatMap(SorterAccumulator::getReleased, 1) //TODO: better use concatMap here? Should be equivalent but more efficient.
 		.concatWith(sorter.drain());
 	}
 
