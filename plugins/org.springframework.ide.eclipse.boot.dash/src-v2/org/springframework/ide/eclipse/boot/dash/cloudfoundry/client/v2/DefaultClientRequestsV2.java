@@ -52,7 +52,6 @@ import org.cloudfoundry.operations.organizations.OrganizationSummary;
 import org.cloudfoundry.operations.routes.Level;
 import org.cloudfoundry.operations.routes.ListRoutesRequest;
 import org.cloudfoundry.operations.routes.MapRouteRequest;
-import org.cloudfoundry.operations.routes.Route;
 import org.cloudfoundry.operations.routes.UnmapRouteRequest;
 import org.cloudfoundry.operations.services.BindServiceInstanceRequest;
 import org.cloudfoundry.operations.services.CreateServiceInstanceRequest;
@@ -688,14 +687,14 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	private Mono<Void> mapRoute(Mono<Set<String>> domains, String appName, String desiredUrl) {
 		debug("mapRoute: "+appName+" -> "+desiredUrl);
 		return toRoute(domains, desiredUrl)
-		.then((Route route) -> mapRoute(appName, route))
+		.then((CFRoute route) -> mapRoute(appName, route))
 		.doOnError((e) -> {
 			Log.info("mapRoute FAILED!");
 			Log.log(e);
 		});
 	}
 
-	private Mono<Void> mapRoute(String appName, Route route) {
+	private Mono<Void> mapRoute(String appName, CFRoute route) {
 		MapRouteRequest mapRouteReq = MapRouteRequest.builder()
 				.applicationName(appName)
 				.domain(route.getDomain())
@@ -708,7 +707,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		);
 	}
 
-	private Mono<Route> toRoute(Mono<Set<String>> domains, String desiredUrl) {
+	private Mono<CFRoute> toRoute(Mono<Set<String>> domains, String desiredUrl) {
 		return domains.then((ds) -> {
 			for (String d : ds) {
 				//TODO: we assume that there's no 'path' component for now, which simpiflies things. What if there is a path component?
@@ -717,14 +716,11 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 					while (host.endsWith(".")) {
 						host = host.substring(0, host.length()-1);
 					}
-					Route.Builder route = Route.builder();
+					CFRoute.Builder route = CFRoute.builder();
 					route.domain(d);
 					if (StringUtils.hasText(host)) {
 						route.host(host);
 					}
-					route.path("");
-					route.space(params.getSpaceName());
-					route.id(UUID.randomUUID().toString());
 					return Mono.just(route.build());
 				}
 			}
@@ -762,7 +758,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		.then();
 	}
 
-	private String getUrl(Route route) {
+	private String getUrl(CFRoute route) {
 		String url = route.getDomain();
 		if (route.getHost()!=null) {
 			url = route.getHost() + "." + url;
@@ -779,7 +775,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		return url;
 	}
 
-	private Mono<Void> unmapRoute(String appName, Route route) {
+	private Mono<Void> unmapRoute(String appName, CFRoute route) {
 		String path = route.getPath();
 //		if (!StringUtil.hasText(path)) {
 //			//client doesn't like to get 'empty string' it will complain that route doesn't exist.
@@ -794,7 +790,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		);
 	}
 
-	public Flux<Route> getExistingRoutes(String appName) {
+	public Flux<CFRoute> getExistingRoutes(String appName) {
 		return operations.routes().list(ListRoutesRequest.builder()
 				.level(Level.SPACE)
 				.build()
@@ -802,7 +798,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		.flatMap((route) -> {
 			for (String app : route.getApplications()) {
 				if (app.equals(appName)) {
-					return Mono.just(route);
+					return Mono.just(new CFRoute(route));
 				}
 			};
 			return Mono.empty();
