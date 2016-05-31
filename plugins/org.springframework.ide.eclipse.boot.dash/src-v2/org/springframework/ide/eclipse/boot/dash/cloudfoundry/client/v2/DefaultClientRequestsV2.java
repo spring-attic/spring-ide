@@ -24,14 +24,19 @@ import java.util.function.Predicate;
 
 import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.client.v2.applications.ApplicationEntity;
+import org.cloudfoundry.client.v2.applications.GetApplicationResponse;
 import org.cloudfoundry.client.v2.applications.UpdateApplicationRequest;
+import org.cloudfoundry.client.v2.applications.UpdateApplicationResponse;
 import org.cloudfoundry.client.v2.buildpacks.ListBuildpacksRequest;
+import org.cloudfoundry.client.v2.buildpacks.ListBuildpacksResponse;
 import org.cloudfoundry.client.v2.domains.DomainResource;
 import org.cloudfoundry.client.v2.domains.ListDomainsRequest;
+import org.cloudfoundry.client.v2.domains.ListDomainsResponse;
 import org.cloudfoundry.client.v2.info.GetInfoRequest;
 import org.cloudfoundry.client.v2.info.GetInfoResponse;
 import org.cloudfoundry.client.v2.serviceinstances.DeleteServiceInstanceRequest;
 import org.cloudfoundry.client.v2.stacks.GetStackRequest;
+import org.cloudfoundry.client.v2.stacks.GetStackResponse;
 import org.cloudfoundry.client.v2.userprovidedserviceinstances.DeleteUserProvidedServiceInstanceRequest;
 import org.cloudfoundry.doppler.LogMessage;
 import org.cloudfoundry.operations.CloudFoundryOperations;
@@ -137,8 +142,8 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 
 	private CFClientParams params;
-	private SpringCloudFoundryClient client ;
-	private CloudFoundryOperations operations;
+	private SpringCloudFoundryClient _client ;
+	private CloudFoundryOperations _operations;
 	private Mono<String> orgId;
 
 	private Mono<GetInfoResponse> info;
@@ -151,17 +156,19 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		this.clients = clients;
 		this.params = params;
 		this.v1 = new DefaultClientRequestsV1(params);
-		this.client = clients.getOrCreate(params.getUsername(), params.getPassword(), params.getHost());
-		this.operations = new CloudFoundryOperationsBuilder()
-				.cloudFoundryClient(client)
+		this._client = clients.getOrCreate(params.getUsername(), params.getPassword(), params.getHost());
+		debug(">>> creating cf operations");
+		this._operations = new CloudFoundryOperationsBuilder()
+				.cloudFoundryClient(_client)
 				.dopplerClient(ReactorDopplerClient.builder()
-						.cloudFoundryClient((ConnectionContextSupplier)client)
+						.cloudFoundryClient((ConnectionContextSupplier)_client)
 						.build())
 				.target(params.getOrgName(), params.getSpaceName())
 				.build();
+		debug("<<< creating cf operations");
 
 		this.orgId = getOrgId();
-		this.info = client.info().get(GetInfoRequest.builder().build()).cache();
+		this.info = client_getInfo().cache();
 	}
 
 	private Mono<String> getOrgId() {
@@ -169,25 +176,13 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		if (orgName==null) {
 			return Mono.error(new IOException("No organization targetted"));
 		} else {
-			return operations.organizations().get(OrganizationInfoRequest.builder()
-					.name(params.getOrgName())
-					.build()
-			)
-			.map(OrganizationDetail::getId)
-			.cache();
+			return operations_getOrgId().cache();
 		}
 	}
 
 	@Override
 	public List<CFApplication> getApplicationsWithBasicInfo() throws Exception {
-		return ReactorUtils.get(operations.applications()
-		.list()
-		.map((appSummary) ->
-			CFWrappingV2.wrap(appSummary, getApplicationExtras(appSummary.getName()))
-		)
-		.toList()
-		.map(ImmutableList::copyOf)
-		);
+		return ReactorUtils.get(operations_listApps());
 	}
 
 	private ApplicationExtras getApplicationExtras(String appName) {
@@ -195,10 +190,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		Mono<UUID> appIdMono = getApplicationId(appName);
 		Mono<ApplicationEntity> entity = appIdMono
 			.then((appId) ->
-				client.applicationsV2().get(org.cloudfoundry.client.v2.applications.GetApplicationRequest.builder()
-					.applicationId(appId.toString())
-					.build()
-				)
+				client_getApplication(appId)
 			)
 			.map((appResource) -> appResource.getEntity())
 			.cache();
@@ -209,16 +201,13 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 				DefaultClientRequestsV2.this.getEnv(appName)
 		);
 		Mono<String> buildpack = prefetch("buildpack",
-				entity.then((e) -> just(e.getBuildpack()))
+				entity.then((e) -> Mono.justOrEmpty(e.getBuildpack()))
 		);
 
 		Mono<String> stack = prefetch("stack",
-			entity.then((e) -> just(e.getStackId()))
+			entity.then((e) -> Mono.justOrEmpty(e.getStackId()))
 			.then((stackId) -> {
-				return client.stacks().get(GetStackRequest.builder()
-						.stackId(stackId)
-						.build()
-				);
+				return client_getStack(stackId);
 			}).map((response) -> {
 				return response.getEntity().getName();
 			})
@@ -292,13 +281,14 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	@Override
 	public List<CFServiceInstance> getServices() throws Exception {
 		return ReactorUtils.get(GET_SERVICES_TIMEOUT, CancelationTokens.NULL,
-			operations
-			.services()
-			.listInstances()
-			.doOnNext(System.out::println)
-			.map(CFWrappingV2::wrap)
-			.toList()
-			.map(ImmutableList::copyOf)
+			log("operations.services.listInstances()",
+				_operations
+				.services()
+				.listInstances()
+				.map(CFWrappingV2::wrap)
+				.toList()
+				.map(ImmutableList::copyOf)
+			)
 		);
 	}
 
@@ -323,13 +313,14 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	@Override
 	public Cancellation streamLogs(String appName, IApplicationLogConsole logConsole) throws Exception {
-
-		Flux<LogMessage> stream = operations.applications()
-		.logs(LogsRequest.builder()
-			.name(appName)
-			// BUG: show recent appears to throw exception with PWS. May be fixed in the future, but now only "pure" streaming is supported
-			.recent(false)
-			.build()
+		Flux<LogMessage> stream = log("operations.applications.logs()",
+			_operations.applications()
+			.logs(LogsRequest.builder()
+				.name(appName)
+				// BUG: show recent appears to throw exception with PWS. May be fixed in the future, but now only "pure" streaming is supported
+				.recent(false)
+				.build()
+			)
 		)
 		.retry(falseAfter(Duration.ofMinutes(1)));
 
@@ -376,9 +367,11 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	@Override
 	public void stopApplication(String appName) throws Exception {
 		ReactorUtils.get(
-			operations.applications().stop(StopApplicationRequest.builder()
-				.name(appName)
-				.build()
+			log("operations.applications.stop(name="+appName+")",
+				_operations.applications().stop(StopApplicationRequest.builder()
+					.name(appName)
+					.build()
+				)
 			)
 		);
 	}
@@ -386,16 +379,18 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	@Override
 	public void restartApplication(String appName, CancelationToken cancelationToken) throws Exception {
 		ReactorUtils.get(APP_START_TIMEOUT, cancelationToken,
-			operations.applications().restart(RestartApplicationRequest.builder()
+			log("operations.applications().restart(name="+appName+")",
+				_operations.applications().restart(RestartApplicationRequest.builder()
 					.name(appName)
 					.build())
+			)
 		);
 	}
 
 	@Override
 	public void logout() {
-		operations = null;
-		client = null;
+		_operations = null;
+		_client = null;
 		if (v1!=null) {
 			v1.logout();
 			v1 = null;
@@ -403,16 +398,18 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	public boolean isLoggedOut() {
-		return client==null;
+		return _client==null;
 	}
 
 	@Override
 	public List<CFStack> getStacks() throws Exception {
 		return ReactorUtils.get(
-			operations.stacks()
-			.list()
-			.map(CFWrappingV2::wrap)
-			.toList()
+			log("operations.stacks().list()",
+				_operations.stacks()
+				.list()
+				.map(CFWrappingV2::wrap)
+				.toList()
+			)
 		);
 	}
 
@@ -464,25 +461,24 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	private Mono<CloudFoundryOperations> operationsFor(OrganizationSummary org) {
-		debug("Creating operations for "+org);
-		return Mono.fromCallable(() -> new CloudFoundryOperationsBuilder()
-				.cloudFoundryClient(client)
-				.target(org.getName())
-				.build()
-		);
+		return client_createOperations(org);
 	}
 
 	@Override
 	public List<CFSpace> getSpaces() throws Exception {
 		return ReactorUtils.get(
-			operations.organizations()
-			.list()
+			log("operations.organizations().list()",
+				_operations.organizations()
+				.list()
+			)
 			.flatMap((OrganizationSummary org) -> {
 				return operationsFor(org).flatMap((operations) ->
-					operations
-					.spaces()
-					.list()
-					.map((space) -> CFWrappingV2.wrap(org, space))
+					log("operations.spaces.list(org="+org.getId()+")",
+						operations
+						.spaces()
+						.list()
+						.map((space) -> CFWrappingV2.wrap(org, space))
+					)
 				);
 			})
 			.toList()
@@ -495,11 +491,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		//XXX CF V2: getHealthcheck (via operations API)
 		// See: https://www.pivotaltracker.com/story/show/116462215
 		return ReactorUtils.get(
-			client.applicationsV2()
-			.get(org.cloudfoundry.client.v2.applications.GetApplicationRequest.builder()
-					.applicationId(appGuid.toString())
-					.build()
-					)
+			client_getApplication(appGuid)
 			.map((response) -> response.getEntity().getHealthCheckType())
 		);
 	}
@@ -509,12 +501,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		//XXX CF V2: setHealthCheck (via operations API)
 		// See: https://www.pivotaltracker.com/story/show/116462369
 		ReactorUtils.get(
-			client.applicationsV2()
-			.update(UpdateApplicationRequest.builder()
-					.applicationId(guid.toString())
-					.healthCheckType(hcType)
-					.build()
-			)
+			client_setHealthCheck(guid, hcType)
 		);
 	}
 
@@ -530,11 +517,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	private Flux<DomainResource> requestDomains(String orgId) {
 		return PaginationUtils.requestResources((page) ->
-			client.domains().list(ListDomainsRequest.builder()
-				.page(page)
-				//						.owningOrganizationId(orgId)
-				.build()
-			)
+			client_listDomains(page)
 		);
 	}
 
@@ -543,11 +526,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		//XXX CF V2: getBuilpacks using 'operations' API.
 		return ReactorUtils.get(
 			PaginationUtils.requestResources((page) -> {
-				return client.buildpacks()
-				.list(ListBuildpacksRequest.builder()
-					.page(page)
-					.build()
-				);
+				return client_listBuildpacks(page);
 			})
 			.map(CFWrappingV2::wrap)
 			.toList()
@@ -585,11 +564,15 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	@Override
 	public void deleteApplication(String appName) throws Exception {
-		ReactorUtils.get(operations.applications().delete(DeleteApplicationRequest
-				.builder()
-				.name(appName)
-				.build()
-		));
+		ReactorUtils.get(
+			log("operations.applications().delete(name="+appName+")",
+				_operations.applications().delete(DeleteApplicationRequest
+					.builder()
+					.name(appName)
+					.build()
+				)
+			)
+		);
 	}
 
 	@Override
@@ -605,16 +588,15 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	public void push(CFPushArguments params, CancelationToken cancelationToken) throws Exception {
 		debug("Pushing app starting: "+params.getAppName());
 		//XXX CF V2: push should use 'manifest' in a future version of V2
+		PushApplicationRequest pushRequest = toPushRequest(params)
+				.noStart(true)
+				.noRoute(true)
+				.build();
 		ReactorUtils.get(APP_START_TIMEOUT, cancelationToken,
-			operations.applications()
-			.push(dump(toPushRequest(params)
-					.noStart(true)
-					.noRoute(true)
-					.build()
-			))
-			.doOnError((e) -> debug("operations.push ERROR:" + ExceptionUtil.getMessage(e)))
-			.doOnCancel(() -> debug("operations.push CANCEL"))
-			.doOnSuccess((x) -> debug("operations.push SUCCESS "+x))
+			log("operations.applications().push("+pushRequest+")",
+				_operations.applications()
+				.push(pushRequest)
+			)
 			.then(getApplicationDetail(params.getAppName()))
 			.then(appDetail -> {
 				return Flux.merge(
@@ -636,15 +618,12 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	private Mono<ApplicationDetail> getApplicationDetail(String appName) {
-		return operations.applications().get(GetApplicationRequest.builder()
+		return log("operations.applications.get(name="+appName+")",
+			_operations.applications().get(GetApplicationRequest.builder()
 				.name(appName)
 				.build()
+			)
 		);
-	}
-
-	private <T> T dump(T x) {
-		debug(""+x);
-		return x;
 	}
 
 	public Mono<Void> setRoutes(ApplicationDetail appDetails, Collection<String> desiredUrls) {
@@ -701,9 +680,8 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 				.host(route.getHost())
 				.path(route.getPath())
 				.build();
-		debug("mapRoute: "+mapRouteReq);
-		return operations.routes().map(
-				mapRouteReq
+		return log("operations.routes.map("+mapRouteReq+")",
+			_operations.routes().map(mapRouteReq)
 		);
 	}
 
@@ -781,19 +759,23 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 //			//client doesn't like to get 'empty string' it will complain that route doesn't exist.
 //			path = null;
 //		}
-		return operations.routes().unmap(UnmapRouteRequest.builder()
+		UnmapRouteRequest req = UnmapRouteRequest.builder()
 			.applicationName(appName)
 			.domain(route.getDomain())
 			.host(route.getHost())
 			.path(path)
-			.build()
+			.build();
+		return log("operations.routes.unmap("+req+")",
+			_operations.routes().unmap(req)
 		);
 	}
 
 	public Flux<CFRoute> getExistingRoutes(String appName) {
-		return operations.routes().list(ListRoutesRequest.builder()
+		return log("operations.routes.list(level=SPACE)",
+			_operations.routes().list(ListRoutesRequest.builder()
 				.level(Level.SPACE)
 				.build()
+			)
 		)
 		.flatMap((route) -> {
 			for (String app : route.getApplications()) {
@@ -841,8 +823,9 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	public Flux<String> getBoundServices(String appName) {
-		return operations.services()
-		.listInstances()
+		return log("operations.services.listInstances()",
+			_operations.services().listInstances()
+		)
 		.filter((service) -> isBoundTo(service, appName))
 		.map(ServiceInstance::getName);
 	}
@@ -866,38 +849,46 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	private Flux<Void> bindServices(String appName, Set<String> services) {
 		return Flux.fromIterable(services)
-				.flatMap((service) -> {
-					return operations.services().bind(BindServiceInstanceRequest.builder()
-							.applicationName(appName)
-							.serviceInstanceName(service)
-							.build()
-					);
+		.flatMap((service) -> {
+			return log("operations.services().bind(appName="+appName+", services="+services+")",
+				_operations.services().bind(BindServiceInstanceRequest.builder()
+					.applicationName(appName)
+					.serviceInstanceName(service)
+					.build()
+				)
+			);
 		});
 	}
 
 	private Flux<Void> unbindServices(String appName, Set<String> toUnbind) {
 		return Flux.fromIterable(toUnbind)
 		.flatMap((service) -> {
-			return operations.services().unbind(UnbindServiceInstanceRequest.builder()
+			return log("operations.services.unbind(appName="+appName+", serviceInstanceName="+service+")",
+				_operations.services().unbind(UnbindServiceInstanceRequest.builder()
 					.applicationName(appName)
 					.serviceInstanceName(service)
 					.build()
-					);
+				)
+			);
 		});
 	}
 
 	protected Mono<Void> startApp(String appName) {
-		return operations.applications()
-		.start(StartApplicationRequest.builder()
-			.name(appName)
-			.build()
+		return log("operations.applications.start(name="+appName+")",
+			_operations.applications()
+			.start(StartApplicationRequest.builder()
+				.name(appName)
+				.build()
+			)
 		);
 	}
 
 	private Mono<UUID> getApplicationId(String appName) {
-		return operations.applications().get(GetApplicationRequest.builder()
+		return log("operations.applications.get(name="+appName+")",
+			_operations.applications().get(GetApplicationRequest.builder()
 				.name(appName)
 				.build()
+			)
 		).map((app) -> UUID.fromString(app.getId()));
 	}
 
@@ -906,12 +897,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	public Mono<Void> setEnvVars(UUID appId, Map<String, String> environment) {
-		return client.applicationsV2()
-		.update(UpdateApplicationRequest.builder()
-				.applicationId(appId.toString())
-				.environmentJsons(environment)
-				.build())
-		.after();
+		return client_setEnv(appId, environment);
 	}
 
 	public Mono<Void> setEnvVars(String appName, Map<String, String> environment) {
@@ -919,35 +905,39 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		.then((applicationId) -> setEnvVars(applicationId, environment));
 	}
 
-	protected Publisher<? extends Object> setEnvVar(String appName, String var, String value) {
-		System.out.println("Set var starting: "+var +" = "+value);
-		return operations.applications()
-				.setEnvironmentVariable(SetEnvironmentVariableApplicationRequest.builder()
-						.name(appName)
-						.variableName(var)
-						.variableValue(value)
-						.build()
-						)
-				.after(() -> {
-					System.out.println("Set var complete: "+var +" = "+value);
-					return Mono.empty();
-				});
-	}
+//	protected Publisher<? extends Object> setEnvVar(String appName, String var, String value) {
+//		System.out.println("Set var starting: "+var +" = "+value);
+//		return operations.applications()
+//				.setEnvironmentVariable(SetEnvironmentVariableApplicationRequest.builder()
+//						.name(appName)
+//						.variableName(var)
+//						.variableValue(value)
+//						.build()
+//						)
+//				.after(() -> {
+//					System.out.println("Set var complete: "+var +" = "+value);
+//					return Mono.empty();
+//				});
+//	}
 
 	public Mono<Void> createService(String name, String service, String plan) {
-		return operations.services().createInstance(CreateServiceInstanceRequest.builder()
+		return log("operations.services.createInstance(instanceName="+name+",serviceName="+service+",planName="+plan+")",
+			_operations.services().createInstance(CreateServiceInstanceRequest.builder()
 				.serviceInstanceName(name)
 				.serviceName(service)
 				.planName(plan)
 				.build()
+			)
 		);
 	}
 
 	public Mono<Void> createUserProvidedService(String name, Map<String, Object> credentials) {
-		return operations.services().createUserProvidedInstance(CreateUserProvidedServiceInstanceRequest.builder()
+		return log("operations.services.createUserProvidedInstance(name="+name+")",
+			_operations.services().createUserProvidedInstance(CreateUserProvidedServiceInstanceRequest.builder()
 				.name(name)
 				.credentials(credentials)
 				.build()
+			)
 		);
 	}
 
@@ -965,32 +955,29 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	protected Mono<Void> deleteServiceInstance(ServiceInstance s) {
 		switch (s.getType()) {
 		case MANAGED:
-			return client.serviceInstances().delete(DeleteServiceInstanceRequest.builder()
-					.serviceInstanceId(s.getId())
-					.build()
-			)
-			.after();
+			return client_deleteServiceInstance(s);
 		case USER_PROVIDED:
-			return client.userProvidedServiceInstances().delete(DeleteUserProvidedServiceInstanceRequest.builder()
-					.userProvidedServiceInstanceId(s.getId())
-					.build()
-			);
+			return client_deleteUserProvidedService(s);
 		default:
 			return Mono.error(new IllegalStateException("Unknown service type: "+s.getType()));
 		}
 	}
 
 	protected Mono<ServiceInstance> getService(String serviceName) {
-		return operations.services().getInstance(GetServiceInstanceRequest.builder()
+		return log("operations.services.getInstance(name="+serviceName+")",
+			_operations.services().getInstance(GetServiceInstanceRequest.builder()
 				.name(serviceName)
 				.build()
+			)
 		);
 	}
 
 	public Mono<Map<String,String>> getEnv(String appName) {
-		return operations.applications().getEnvironments(GetApplicationEnvironmentsRequest.builder()
+		return log("operations.applications.getEnvironments(appName="+appName+")",
+			_operations.applications().getEnvironments(GetApplicationEnvironmentsRequest.builder()
 				.name(appName)
 				.build()
+			)
 		)
 		.map((envs) -> envs.getUserProvided())
 		.map(this::dropObjectsFromMap);
@@ -1007,11 +994,165 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 			try {
 				builder.put(entry.getKey(), (String) entry.getValue());
 			} catch (ClassCastException e) {
-				BootActivator.log(e);
+				Log.log(e);
 			}
 		}
 		return builder.build();
 	}
 
+	//////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// calls to client and operations with 'logging'.
+
+	private <T> Flux<T> log(String msg, Flux<T> flux) {
+		if (DEBUG) {
+			return flux
+			.doOnSubscribe((sub) -> debug(">>> "+msg))
+			.doOnComplete(() -> {
+				debug("<<< "+msg+" OK");
+			})
+			.doOnCancel(() -> {
+				debug("<<< "+msg+" CANCEL");
+			})
+			.doOnError((error) -> {
+				debug("<<< "+msg+" ERROR: "+ExceptionUtil.getMessage(error));
+			});
+		} else {
+			return flux;
+		}
+	}
+
+	private <T> Mono<T> log(String msg, Mono<T> mono) {
+		if (DEBUG) {
+			return mono
+			.doOnSubscribe((sub) -> debug(">>> "+msg))
+			.doOnCancel(() -> debug("<<< "+msg+" CANCEL"))
+			.doOnSuccess((data) -> {
+				debug("<<< "+msg+" OK");
+			})
+			.doOnError((error) -> {
+				debug("<<< "+msg+" ERROR: "+ExceptionUtil.getMessage(error));
+			});
+		} else {
+			return mono;
+		}
+	}
+
+	private Mono<GetInfoResponse> client_getInfo() {
+		return log("client.info().get()",
+				_client.info().get(GetInfoRequest.builder().build())
+		);
+	}
+
+	private Mono<String> operations_getOrgId() {
+		return log("operations.organizations.get(name="+params.getOrgName()+")",
+				_operations.organizations().get(OrganizationInfoRequest.builder()
+				.name(params.getOrgName())
+				.build()
+			)
+			.map(OrganizationDetail::getId)
+		);
+	}
+
+	private Mono<ImmutableList<CFApplication>> operations_listApps() {
+		return log("operations.applications.list()",
+			_operations.applications()
+			.list()
+			.map((appSummary) ->
+				CFWrappingV2.wrap(appSummary, getApplicationExtras(appSummary.getName()))
+			)
+			.toList()
+			.map(ImmutableList::copyOf)
+		);
+	}
+
+	private Mono<GetApplicationResponse> client_getApplication(UUID appId) {
+		return log("client.applicationsV2.get(id="+appId+")",
+			_client.applicationsV2()
+			.get(org.cloudfoundry.client.v2.applications.GetApplicationRequest.builder()
+					.applicationId(appId.toString())
+					.build()
+			)
+		);
+	}
+
+	private Mono<GetStackResponse> client_getStack(String stackId) {
+		return log("client.stacks.get(id="+stackId+")",
+			_client.stacks().get(GetStackRequest.builder()
+				.stackId(stackId)
+				.build()
+			)
+		);
+	}
+
+	private Mono<UpdateApplicationResponse> client_setHealthCheck(UUID guid, String hcType) {
+		return log("client.applicationsV2.update(id="+guid+", hcType="+hcType+")",
+		_client.applicationsV2()
+			.update(UpdateApplicationRequest.builder()
+				.applicationId(guid.toString())
+				.healthCheckType(hcType)
+				.build()
+			)
+		);
+	}
+
+	private Mono<ListDomainsResponse> client_listDomains(Integer page) {
+		return log("client.domains.list(page="+page+")",
+			_client.domains().list(ListDomainsRequest.builder()
+				.page(page)
+				//						.owningOrganizationId(orgId)
+				.build()
+			)
+		);
+	}
+
+	private Mono<ListBuildpacksResponse> client_listBuildpacks(Integer page) {
+		return log("client.buildpacks.list(page="+page+")",
+			_client.buildpacks()
+			.list(ListBuildpacksRequest.builder()
+				.page(page)
+				.build()
+			)
+		);
+	}
+
+	private Mono<Void> client_setEnv(UUID appId, Map<String, String> environment) {
+		return log("client.applicationsV2.update(id="+appId+", env=...)",
+			_client.applicationsV2()
+			.update(UpdateApplicationRequest.builder()
+				.applicationId(appId.toString())
+				.environmentJsons(environment)
+				.build())
+			.then()
+		);
+	}
+
+	private Mono<Void> client_deleteServiceInstance(ServiceInstance s) {
+		return log("client.serviceInstances.delete(id="+s.getId()+")",
+			_client.serviceInstances().delete(DeleteServiceInstanceRequest.builder()
+					.serviceInstanceId(s.getId())
+					.build()
+			)
+			.then()
+		);
+	}
+
+	private Mono<Void> client_deleteUserProvidedService(ServiceInstance s) {
+		return log("client.userProvidedServiceInstances.delete(id="+s.getId()+")",
+			_client.userProvidedServiceInstances().delete(DeleteUserProvidedServiceInstanceRequest.builder()
+				.userProvidedServiceInstanceId(s.getId())
+				.build()
+			)
+		);
+	}
+
+	private Mono<CloudFoundryOperations> client_createOperations(OrganizationSummary org) {
+		return log("client.createOperations(org="+org.getName()+")",
+			Mono.fromCallable(() -> new CloudFoundryOperationsBuilder()
+				.cloudFoundryClient(_client)
+				.target(org.getName())
+				.build()
+			)
+		);
+	}
 
 }
