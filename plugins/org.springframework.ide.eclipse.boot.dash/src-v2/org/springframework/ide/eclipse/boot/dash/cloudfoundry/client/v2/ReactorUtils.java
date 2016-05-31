@@ -222,7 +222,7 @@ public class ReactorUtils {
 		return timestamp(stream)
 		.window(bufferTime)
 		.scan(sorter, SorterAccumulator::next)
-		.flatMap(SorterAccumulator::getReleased, 1) //TODO: better use concatMap here? Should be equivalent but more efficient.
+		.concatMap(SorterAccumulator::getReleased)
 		.concatWith(sorter.drain());
 	}
 
