@@ -59,11 +59,10 @@ Assert.assertNotNull("${name:var} must not be null", ${name});${:import(org.juni
  */
 </template>
 
-<!-- TODO: This template generates garbage when use on a fresh class. See eclipse bug: 
+<!-- TODO: These two templates generate garbage when used on a fresh class. See eclipse bug: 
      https://bugs.eclipse.org/bugs/show_bug.cgi?id=494691 
- -->
- 
-<template
+     When that bug is fixed... uncomment them. 
+ <template
     id="org.springframework.ide.eclipse.boot.templates.cprops"
     name="cprops"
     description="@ConfigurationProperties"
@@ -80,6 +79,7 @@ ${:import(org.springframework.boot.context.properties.ConfigurationProperties)}
 ${:import(org.junit.runner.RunWith,org.mockito.runners.MockitoJUnitRunner)}
 @RunWith(MockitoJUnitRunner.class)
 </template>
+ -->
 
 <template
     id="org.springframework.ide.eclipse.boot.templates.jumock"
