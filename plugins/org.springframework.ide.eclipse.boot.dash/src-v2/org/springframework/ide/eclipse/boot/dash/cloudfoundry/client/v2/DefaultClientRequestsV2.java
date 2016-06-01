@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.cloudfoundry.client.CloudFoundryClient;
@@ -48,7 +49,6 @@ import org.cloudfoundry.operations.applications.GetApplicationRequest;
 import org.cloudfoundry.operations.applications.LogsRequest;
 import org.cloudfoundry.operations.applications.PushApplicationRequest;
 import org.cloudfoundry.operations.applications.RestartApplicationRequest;
-import org.cloudfoundry.operations.applications.SetEnvironmentVariableApplicationRequest;
 import org.cloudfoundry.operations.applications.StartApplicationRequest;
 import org.cloudfoundry.operations.applications.StopApplicationRequest;
 import org.cloudfoundry.operations.organizations.OrganizationDetail;
@@ -69,8 +69,6 @@ import org.cloudfoundry.reactor.util.ConnectionContextSupplier;
 import org.cloudfoundry.spring.client.SpringCloudFoundryClient;
 import org.cloudfoundry.util.PaginationUtils;
 import org.osgi.framework.Version;
-import org.reactivestreams.Publisher;
-import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationRunningStateTracker;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
@@ -87,7 +85,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.IApplicati
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springframework.ide.eclipse.boot.util.Log;
-import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springframework.util.StringUtils;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshHost;
@@ -304,7 +301,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		.flatMap((CFApplication appSummary) -> {
 			return getApplicationDetail(appSummary.getName())
 			.otherwise((error) -> {
-				BootDashActivator.log(ExceptionUtil.coreException("getting application details for '"+appSummary.getName()+"' failed", error));
+				Log.log(ExceptionUtil.coreException("getting application details for '"+appSummary.getName()+"' failed", error));
 				return Mono.empty();
 			})
 			.map((ApplicationDetail appDetails) -> CFWrappingV2.wrap((CFApplicationSummaryData)appSummary, appDetails));
@@ -322,7 +319,8 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 				.build()
 			)
 		)
-		.retry(falseAfter(Duration.ofMinutes(1)));
+		.retryWhen(retryInterval(Duration.ofMillis(500), Duration.ofMinutes(1)))
+		;
 
 		 Cancellation cancellation = ReactorUtils.sort(
 				stream,
@@ -344,6 +342,27 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 //		} finally {
 //			Thread.currentThread().setContextClassLoader(contextClassLoader);
 //		}
+	}
+
+
+	/**
+	 * Creates a retry 'signal factory' to be used with Flux.retryWhen.
+	 * <p>
+	 * @param timeBetween How much time to wait before retrying after a failure
+	 * @param duration If this much time has elapsed when the error happens there will be no further retries.
+	 * @return Functon that can be passed to retryWhen.
+	 */
+	private Function<Flux<Throwable>, Flux<Long>> retryInterval(Duration timeBetween, Duration duration) {
+		Predicate<Throwable> falseAfterDuration = falseAfter(duration);
+		return (errors) -> {
+			return errors.flatMap((error) -> {
+				if (falseAfterDuration.test(error)) {
+					return Mono.delay(timeBetween);
+				} else {
+					return Mono.error(error);
+				}
+			});
+		};
 	}
 
 	private Predicate<Throwable> falseAfter(Duration timeToWait) {
