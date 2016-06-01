@@ -490,7 +490,9 @@ public class BootDashModelTest {
 			waitForState(element, RunState.STARTING);
 			waitForState(element, RunState.DEBUGGING);
 
-			assertEquals(changedPort, element.getLivePort());
+			ACondition.waitFor("port after restart", 1000, () -> {
+				assertEquals(changedPort, element.getLivePort());
+			});
 			setContents(props, "server.port="+defaultPort);
 			StsTestUtil.assertNoErrors(element.getProject());
 			   //builds the project... should trigger devtools to 'refresh'.
