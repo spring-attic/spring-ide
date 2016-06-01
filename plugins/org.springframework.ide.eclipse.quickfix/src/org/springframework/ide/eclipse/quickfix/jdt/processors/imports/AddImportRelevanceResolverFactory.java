@@ -53,14 +53,16 @@ public class AddImportRelevanceResolverFactory {
 
 		return new AddImportRelevanceResolver(cu, proposals, boost) {
 
-			protected VariableDeclarationStatement getVariableDeclarationStatement(ASTNode statementNode) {
+			protected VariableDeclarationStatement getVariableDeclarationStatement(ASTNode selectedNode) {
 				// Go two levels up:
-				ASTNode parent = statementNode.getParent();
-				if (parent instanceof VariableDeclarationStatement) {
-					return (VariableDeclarationStatement) parent;
-				}
-				else if (parent.getParent() instanceof VariableDeclarationStatement) {
-					return (VariableDeclarationStatement) parent.getParent();
+				if (selectedNode != null) {
+					ASTNode parent = selectedNode.getParent();
+					if (parent instanceof VariableDeclarationStatement) {
+						return (VariableDeclarationStatement) parent;
+					}
+					else if (parent.getParent() instanceof VariableDeclarationStatement) {
+						return (VariableDeclarationStatement) parent.getParent();
+					}
 				}
 				return null;
 			}
@@ -72,19 +74,28 @@ public class AddImportRelevanceResolverFactory {
 				if (statement != null) {
 
 					List<?> frags = statement.fragments();
-					for (Object content : frags) {
-						if (content instanceof VariableDeclarationFragment) {
-							VariableDeclarationFragment frag = (VariableDeclarationFragment) content;
-							Expression exp = frag.getInitializer();
-							ITypeBinding binding = exp.resolveTypeBinding();
-							String qualifiedName = binding.getQualifiedName();
+					if (frags != null) {
+						for (Object content : frags) {
+							if (content instanceof VariableDeclarationFragment) {
+								VariableDeclarationFragment frag = (VariableDeclarationFragment) content;
+								Expression exp = frag.getInitializer();
+								if (exp != null) {
+									ITypeBinding binding = exp.resolveTypeBinding();
 
-							for (IJavaCompletionProposal prop : proposals) {
-								if (prop instanceof AddImportCorrectionProposal) {
-									AddImportCorrectionProposal corrProposal = (AddImportCorrectionProposal) prop;
-									String propQuali = corrProposal.getQualifiedTypeName();
-									if (qualifiedName.contains(propQuali)) {
-										return corrProposal;
+									if (binding != null) {
+										String qualifiedName = binding.getQualifiedName();
+
+										if (qualifiedName != null) {
+											for (IJavaCompletionProposal prop : proposals) {
+												if (prop instanceof AddImportCorrectionProposal) {
+													AddImportCorrectionProposal corrProposal = (AddImportCorrectionProposal) prop;
+													String propQuali = corrProposal.getQualifiedTypeName();
+													if (qualifiedName.contains(propQuali)) {
+														return corrProposal;
+													}
+												}
+											}
+										}
 									}
 								}
 							}

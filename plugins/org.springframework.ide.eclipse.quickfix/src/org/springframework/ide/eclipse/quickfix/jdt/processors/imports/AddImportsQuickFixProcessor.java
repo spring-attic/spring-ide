@@ -79,50 +79,59 @@ public class AddImportsQuickFixProcessor extends QuickFixProcessor {
 	public IJavaCompletionProposal[] getCorrections(IInvocationContext context, IProblemLocation[] locations)
 			throws CoreException {
 
-		ICompilationUnit cu = context.getCompilationUnit();
+		ICompilationUnit cu = context != null ? context.getCompilationUnit() : null;
 
-		// BUG: when first invoking quickfix, JDT and STS quickfix processor are
-		// already loaded since the quickfix processors are loaded by the JDT
-		// registry (JavaCorrectionsProcessor)
-		// lazily. This will result in duplicate proposals. To avoid this, so
-		// far
-		// the only solution is to only allow one or the other to contribute
-		// proposals, BUT NOT BOTH.
-		// Therefore if the JDT processor is being removed below, it means it
-		// has already been loaded, so don't return any
-		// proposals. ONLY return
-		// proposals if the JDT process was removed in a PREVIOUS run
-		if (JDTQuickFixProcessorHelper.getInstance().removeJDTQuickFixProcessor(cu)) {
-			return null;
-		}
-
-		// Get the JDT proposals
-		IJavaCompletionProposal[] proposals = super.getCorrections(context, locations);
-
-		List<IJavaCompletionProposal> proposalsFromJDT = Arrays.asList(proposals);
 
 		try {
-			recomputeProposalRelevance(context, locations, proposalsFromJDT);
+			// BUG: when first invoking quickfix, JDT and STS quickfix processor are
+			// already loaded since the quickfix processors are loaded by the JDT
+			// registry (JavaCorrectionsProcessor)
+			// lazily. This will result in duplicate proposals. To avoid this, so
+			// far
+			// the only solution is to only allow one or the other to contribute
+			// proposals, BUT NOT BOTH.
+			// Therefore if the JDT processor is being removed below, it means it
+			// has already been loaded, so don't return any
+			// proposals. ONLY return
+			// proposals if the JDT process was removed in a PREVIOUS run
+			if (JDTQuickFixProcessorHelper.getInstance().removeJDTQuickFixProcessor(cu)) {
+				return null;
+			}
+		}
+		catch (Throwable e) {
+			// Any errors while handling the default JDT processor should not
+			// propagate to avoid interfering with quickfix operation.
+			Activator.log(e);
+		}
+
+		// Get the proposals only if the default JDT processor has been removed
+		// to
+		// avoid duplicate entries
+		if (JDTQuickFixProcessorHelper.getInstance().isJDTProcessorRemoved()) {
+			IJavaCompletionProposal[] proposals = super.getCorrections(context, locations);
+
+			if (proposals != null && proposals.length > 0) {
+				List<IJavaCompletionProposal> proposalsFromJDT = Arrays.asList(proposals);
+
+				try {
+					recomputeProposalRelevance(context, locations, proposalsFromJDT);
+				}
+				catch (Throwable e) {
+					Activator.log(e);
+				}
+			}
+
 			return proposals;
 		}
-		catch (Exception e) {
-			Activator.log(e);
-			// If any errors occur, add the JDT processor again so that it can
-			// provide proposals
-			// NOTE: This has NOT been tested. It is unknown if by adding the
-			// processor back
-			// it will still be invoked IN TIME to still provide proposals. It
-			// may already be too late to add it back by the time the quickfix
-			// popup appears.
-			JDTQuickFixProcessorHelper.getInstance().addJDTQuickFixProcessor(cu);
-		}
-
-		// If any error occurs don't return any proposals
 		return null;
+
 	}
 
-	private void recomputeProposalRelevance(IInvocationContext context, IProblemLocation[] locations,
+	protected void recomputeProposalRelevance(IInvocationContext context, IProblemLocation[] locations,
 			List<IJavaCompletionProposal> proposalsFromJDT) throws Exception {
+		if (context == null || locations == null || proposalsFromJDT == null) {
+			return;
+		}
 		Set<Integer> handledProblems = new HashSet<Integer>();
 		for (int i = 0; i < locations.length; i++) {
 			IProblemLocation problem = locations[i];
@@ -135,7 +144,7 @@ public class AddImportsQuickFixProcessor extends QuickFixProcessor {
 					ICompilationUnit cu = context.getCompilationUnit();
 
 					ASTNode selectedNode = problem.getCoveringNode(context.getASTRoot());
-					if (selectedNode != null) {
+					if (selectedNode != null && cu != null) {
 						int kind = evaluateTypeKind(selectedNode, cu.getJavaProject());
 
 						List<AddImportRelevanceResolver> relevanceResolvers = getFactory().getResolvers(cu,
