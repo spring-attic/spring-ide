@@ -12,9 +12,13 @@
 
 package org.springframework.ide.eclipse.boot.templates;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.internal.corext.template.java.AbstractJavaContextType;
+import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.TemplateVariableResolver;
 import org.eclipse.ui.editors.text.templates.ContributionContextTypeRegistry;
@@ -88,6 +92,26 @@ public class BootContextType extends AbstractJavaContextType {
 		java.util.Iterator<TemplateVariableResolver> iter= parent.resolvers();
 		while (iter.hasNext())
 			this.addResolver(iter.next());
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType#createContext(org.eclipse.jface.text.IDocument, int, int, org.eclipse.jdt.core.ICompilationUnit)
+	 */
+	@Override
+	public CompilationUnitContext createContext(IDocument document, int offset, int length, ICompilationUnit compilationUnit) {
+		BootJavaContext javaContext= new BootJavaContext(this, document, offset, length, compilationUnit);
+		initializeContext(javaContext);
+		return javaContext;
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType#createContext(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.Position, org.eclipse.jdt.core.ICompilationUnit)
+	 */
+	@Override
+	public CompilationUnitContext createContext(IDocument document, Position completionPosition, ICompilationUnit compilationUnit) {
+		BootJavaContext javaContext= new BootJavaContext(this, document, completionPosition, compilationUnit);
+		initializeContext(javaContext);
+		return javaContext;
 	}
 
 }
