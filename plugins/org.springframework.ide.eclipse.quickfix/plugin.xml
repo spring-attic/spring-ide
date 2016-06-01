@@ -312,6 +312,11 @@ public ${String} ${get}(${}) {
            </markerType>
         </handledMarkerTypes>
      </quickFixProcessor>
+     <quickFixProcessor
+            name="STS Add Imports Quick Fix Processor"
+            class="org.springframework.ide.eclipse.quickfix.jdt.processors.imports.AddImportsQuickFixProcessor"
+            id="org.springframework.ide.eclipse.quickfix.jdt.AddImportsQuickFixProcessor">
+      </quickFixProcessor>
   </extension>
   <extension
         point="org.eclipse.ui.workbench.texteditor.hyperlinkDetectors">
