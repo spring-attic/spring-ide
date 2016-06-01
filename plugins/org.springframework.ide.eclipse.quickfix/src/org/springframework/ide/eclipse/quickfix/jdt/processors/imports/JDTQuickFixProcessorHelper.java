@@ -58,11 +58,11 @@ public class JDTQuickFixProcessorHelper {
 	 * no action or changes are performed on the JDT quickfix processor registry
 	 * (e.g. JDT quickfix processor was already disabled from a previous run)
 	 */
-	public synchronized boolean removeJDTQuickFixProcessor(ICompilationUnit cu) {
+	public synchronized boolean removeJDTQuickFixProcessor(ICompilationUnit cu) throws Exception {
 
-		// The JDT processor was already removed and cached. No further action
-		// to perform.
-		if (this.jdtProcessorDescriptor != null) {
+		// No further action if processor was already removed or there is no cu,
+		// or JDT processor should not be removed
+		if (this.jdtProcessorDescriptor != null || cu == null || !enableRemovalOfJDTProcessor()) {
 			return false;
 		}
 
@@ -84,14 +84,16 @@ public class JDTQuickFixProcessorHelper {
 									descriptors.length);
 							ContributedProcessorDescriptor foundJDTProcessorToRemove = null;
 							for (ContributedProcessorDescriptor desc : descriptors) {
-								IQuickFixProcessor curr = (IQuickFixProcessor) desc.getProcessor(cu,
+								IQuickFixProcessor processor = (IQuickFixProcessor) desc.getProcessor(cu,
 										IQuickFixProcessor.class);
-								if (!curr.getClass().getName()
-										.equals("org.eclipse.jdt.internal.ui.text.correction.QuickFixProcessor")) {
-									edited.add(desc);
-								}
-								else {
-									foundJDTProcessorToRemove = desc;
+								if (processor != null) {
+									if (!processor.getClass().getName()
+											.equals("org.eclipse.jdt.internal.ui.text.correction.QuickFixProcessor")) {
+										edited.add(desc);
+									}
+									else {
+										foundJDTProcessorToRemove = desc;
+									}
 								}
 							}
 
@@ -104,7 +106,6 @@ public class JDTQuickFixProcessorHelper {
 					}
 				}
 			}
-
 			catch (SecurityException e) {
 				Activator.log(e);
 			}
@@ -120,6 +121,10 @@ public class JDTQuickFixProcessorHelper {
 		}
 
 		return false;
+	}
+
+	public synchronized boolean isJDTProcessorRemoved() {
+		return jdtProcessorDescriptor != null;
 	}
 
 	/**
@@ -225,5 +230,9 @@ public class JDTQuickFixProcessorHelper {
 		}
 
 		return bundle;
+	}
+
+	public synchronized boolean enableRemovalOfJDTProcessor() {
+		return true;
 	}
 }
