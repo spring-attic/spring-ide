@@ -345,21 +345,19 @@ public class CloudFoundryBootDashModelIntegrationTest {
 
 
 	@Test public void testDeployManifestWithAbsolutePathAttribute() throws Exception {
-		final String appName = appHarness.randomAppName();
 		CFClientParams targetParams = CfTestTargetParams.fromEnv();
 		IProject project = projects.createProject("to-deploy");
 
-		File zipFile = getTestZip("testapp");
+		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
 
+		File zipFile = getTestZip("testapp");
+		final String appName = appHarness.randomAppName();
 		IFile manifestFile = createFile(project, "manifest.yml",
 				"applications:\n" +
 				"- name: "+appName+"\n" +
 				"  path: "+zipFile.getAbsolutePath() + "\n" +
 				"  buildpack: staticfile_buildpack"
 		);
-
-		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
-
 		harness.answerDeploymentPrompt(ui, manifestFile);
 		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
 
