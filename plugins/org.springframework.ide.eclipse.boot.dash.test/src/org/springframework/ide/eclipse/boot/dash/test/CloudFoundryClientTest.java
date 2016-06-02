@@ -91,7 +91,7 @@ public class CloudFoundryClientTest {
 
 	private static final String CFAPPS_IO = "cfapps.io";
 
-	private static final Predicate<Throwable> FLAKY_SERVICE_BROKER = (e) -> {
+	public static final Predicate<Throwable> FLAKY_SERVICE_BROKER = (e) -> {
 		String msg = ExceptionUtil.getMessage(e).toLowerCase();
 		return msg.contains("500")
 			|| msg.contains("502")

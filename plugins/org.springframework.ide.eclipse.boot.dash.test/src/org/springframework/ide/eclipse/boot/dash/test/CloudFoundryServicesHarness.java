@@ -26,6 +26,8 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import com.google.common.collect.ImmutableMap;
 
+import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryClientTest.FLAKY_SERVICE_BROKER;
+
 public class CloudFoundryServicesHarness implements Disposable {
 
 	private static final Duration CREATE_SERVICE_TIMEOUT = Duration.ofMinutes(1);
@@ -49,9 +51,11 @@ public class CloudFoundryServicesHarness implements Disposable {
 		return name;
 	}
 
-	public String createTestService() {
+	public String createTestService() throws Exception {
 		String name = randomServiceName();
-		client.createService(name, "cloudamqp", "lemur").get(CREATE_SERVICE_TIMEOUT);
+		RetryUtil.retryWhen("createTestService["+name+"]", 5, FLAKY_SERVICE_BROKER, () -> {
+			client.createService(name, "cloudamqp", "lemur").get(CREATE_SERVICE_TIMEOUT);
+		});
 		return name;
 	}
 
