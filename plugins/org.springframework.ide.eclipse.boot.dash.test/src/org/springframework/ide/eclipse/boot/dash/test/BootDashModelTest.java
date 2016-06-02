@@ -322,7 +322,12 @@ public class BootDashModelTest {
 		waitForState(childElement, runState);
 
 		ElementStateListener oldListener = listener;
+
+		ACondition.waitFor("listener calls", 1000, () ->
+			verify(oldListener, times(4)).stateChanged(element)
+		);
 		model.removeElementStateListener(oldListener);
+
 //		System.out.println("Element state listener REMOVED");
 
 		listener = mock(ElementStateListener.class);
@@ -332,7 +337,6 @@ public class BootDashModelTest {
 		waitForState(element, RunState.INACTIVE);
 		waitForState(childElement, RunState.INACTIVE);
 
-		waitForJobsToComplete();
 		//4 changes:  INACTIVE -> STARTING, STARTING -> RUNNING, livePort(set), actualInstances
 		verify(oldListener, times(4)).stateChanged(element);
 		verify(oldListener, times(4)).stateChanged(childElement);
@@ -426,6 +430,9 @@ public class BootDashModelTest {
 		waitForState(element, runState);
 
 		ElementStateListener oldListener = listener;
+		ACondition.waitFor("listener calls", 1000, () ->
+			verify(oldListener, times(4)).stateChanged(element)
+		);
 		model.removeElementStateListener(oldListener);
 		//System.out.println("Element state listener REMOVED");
 
