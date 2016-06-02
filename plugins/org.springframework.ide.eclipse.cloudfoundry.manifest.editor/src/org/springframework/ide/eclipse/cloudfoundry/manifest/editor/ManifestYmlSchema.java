@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.cloudfoundry.manifest.editor;
 
+import java.util.Collection;
 import java.util.Set;
 
 import javax.inject.Provider;
@@ -33,12 +34,14 @@ public class ManifestYmlSchema implements YamlSchema {
 
 	private final YBeanType TOPLEVEL_TYPE;
 	private final YTypeUtil TYPE_UTIL;
+	private final Provider<Collection<YValueHint>> buildpackProvider;
 
 	private static final Set<String> TOPLEVEL_EXCLUDED = ImmutableSet.of(
 		"name", "host", "hosts"
 	);
 
-	public ManifestYmlSchema() {
+	public ManifestYmlSchema(Provider<Collection<YValueHint>> buildpackProvider) {
+		this.buildpackProvider = buildpackProvider;
 		YTypeFactory f = new YTypeFactory();
 		TYPE_UTIL = f.TYPE_UTIL;
 
@@ -49,18 +52,11 @@ public class ManifestYmlSchema implements YamlSchema {
 		YAtomicType t_path = f.yatomic("Path");
 
 		YAtomicType t_buildpack = f.yatomic("Buildpack");
-		t_buildpack.addHints(
-				//TODO: get these from CF somehow instead of hard-coding this list.
-				"go_buildpack",
-				"ruby_buildpack",
-				"staticfile_buildpack",
-				"nodejs_buildpack",
-				"python_buildpack",
-				"php_buildpack",
-				"liberty_buildpack",
-				"binary_buildpack",
-				"java_buildpack"
-		);
+		
+		
+		String[] buildpacks = getBuildpackHints();
+		
+		t_buildpack.addHints(buildpacks);
 
 		YAtomicType t_boolean = f.yenum("boolean", "true", "false");
 		YType t_string = f.yatomic("String");
@@ -128,5 +124,40 @@ public class ManifestYmlSchema implements YamlSchema {
 	@Override
 	public YTypeUtil getTypeUtil() {
 		return TYPE_UTIL;
+	}
+	
+	protected String[] getBuildpackHints() {
+
+		String[] buildpacks = null;
+		
+		if (buildpackProvider != null) {
+			Collection<YValueHint> hints = buildpackProvider.get();
+			if (hints != null && !hints.isEmpty()) {
+				int size = hints.size();
+
+				buildpacks = new String[size];
+				int index = 0;
+				for (YValueHint bp : hints) {
+					if (index < size) {
+						buildpacks[index++] = bp.getValue();
+					}
+				}
+			}
+		}
+
+		if (buildpacks == null || buildpacks.length == 0) {
+			buildpacks = new String[] { 
+					"java_buildpack",
+					"ruby_buildpack", 
+					"staticfile_buildpack", 
+					"nodejs_buildpack",
+					"python_buildpack", 
+					"php_buildpack", 
+					"liberty_buildpack", 
+					"binary_buildpack",
+					"go_buildpack"
+					};
+		}
+		return buildpacks;
 	}
 }
