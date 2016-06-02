@@ -80,7 +80,7 @@ public class ManifestYmlSchemaTest {
 			"timeout"
 	};
 
-	ManifestYmlSchema schema = new ManifestYmlSchema();
+	ManifestYmlSchema schema = new ManifestYmlSchema(null);
 
 	@Test
 	public void toplevelProperties() throws Exception {
