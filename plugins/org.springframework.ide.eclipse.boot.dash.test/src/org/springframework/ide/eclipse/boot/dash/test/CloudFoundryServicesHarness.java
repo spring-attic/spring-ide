@@ -14,6 +14,7 @@ import static org.apache.commons.lang.RandomStringUtils.randomAlphabetic;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -26,6 +27,8 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import com.google.common.collect.ImmutableMap;
 
 public class CloudFoundryServicesHarness implements Disposable {
+
+	private static final Duration CREATE_SERVICE_TIMEOUT = Duration.ofMinutes(1);
 
 	private DefaultClientRequestsV2 client;
 
@@ -42,13 +45,13 @@ public class CloudFoundryServicesHarness implements Disposable {
 
 	public String createTestUserProvidedService() {
 		String name = randomServiceName();
-		client.createUserProvidedService(name, ImmutableMap.of()).get();
+		client.createUserProvidedService(name, ImmutableMap.of()).get(CREATE_SERVICE_TIMEOUT);
 		return name;
 	}
 
 	public String createTestService() {
 		String name = randomServiceName();
-		client.createService(name, "cloudamqp", "lemur").get();
+		client.createService(name, "cloudamqp", "lemur").get(CREATE_SERVICE_TIMEOUT);
 		return name;
 	}
 
