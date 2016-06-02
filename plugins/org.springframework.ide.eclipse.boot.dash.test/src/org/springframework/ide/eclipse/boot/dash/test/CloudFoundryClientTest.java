@@ -618,7 +618,7 @@ public class CloudFoundryClientTest {
 			push(params);
 		});
 
-		ACondition.waitFor("push", TimeUnit.MINUTES.toMillis(3), () -> {
+		ACondition.waitFor("push", TimeUnit.MINUTES.toMillis(4), () -> {
 			assertTrue(pushResult.isDone());
 		});
 		pushResult.get();
@@ -903,7 +903,7 @@ public class CloudFoundryClientTest {
 	}
 
 	private Future<Void> doAsync(Thunk task) {
-		CompletableFuture<Void> result = new CompletableFuture<Void>();
+		CompletableFuture<Void> result = new CompletableFuture<>();
 		Job job = new Job("Async task") {
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
