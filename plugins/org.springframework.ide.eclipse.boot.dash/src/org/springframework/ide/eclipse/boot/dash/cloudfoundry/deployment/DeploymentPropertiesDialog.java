@@ -456,7 +456,9 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		model.getFileLabel().addListener(new UIValueListener<String>() {
 			@Override
 			protected void uiGotValue(LiveExpression<String> exp, String value) {
-				fileLabel.setText(exp.getValue());
+				if (!fileLabel.isDisposed()) {
+					fileLabel.setText(exp.getValue());
+				}
 			}
 		});
 

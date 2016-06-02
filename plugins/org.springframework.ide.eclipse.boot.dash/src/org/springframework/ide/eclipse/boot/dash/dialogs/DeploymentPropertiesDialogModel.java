@@ -198,6 +198,8 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 	public class FileDeploymentPropertiesDialogModel extends AbstractSubModel {
 
+		private boolean inputConnected = false;
+
 		{
 			onDispose((d) -> {
 				saveOrDiscardIfNeeded();
@@ -221,7 +223,15 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 				boolean changed = currentInput == null || !currentInput.getFile().equals(file);
 				if (changed) {
 					saveOrDiscardIfNeeded(currentInput);
-					return file == null ? null : new FileEditorInput(file);
+					if (file != null) {
+						FileEditorInput input = new FileEditorInput(file);
+						// Connect input to doc provider here when editor input has changed
+						TextFileDocumentProvider provider = getTextDocumentProvider(input);
+						if (provider != null) {
+							connect(provider, input);
+						}
+						return input;
+					}
 				}
 				return null;
 			}
@@ -235,21 +245,12 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 			@Override
 			protected IDocument compute() {
-				try {
-					FileEditorInput input = editorInput.getValue();
-					if (input != null) {
-						TextFileDocumentProvider provider = getTextDocumentProvider(input.getFile());
-						if (provider != null) {
-							IDocument doc = provider.getDocument(input);
-							if (doc == null) {
-								provider.connect(input);
-								doc = provider.getDocument(input);
-							}
-							return doc;
-						}
+				FileEditorInput input = editorInput.getValue();
+				if (input != null) {
+					TextFileDocumentProvider provider = getTextDocumentProvider(input);
+					if (provider != null) {
+						return provider.getDocument(input);
 					}
-				} catch (Exception e) {
-					Log.log(e);
 				}
 				return new Document("");
 			}
@@ -264,7 +265,7 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 			protected String compute() {
 				FileEditorInput input = editorInput.getValue();
 				if (input != null) {
-					boolean dirty = getTextDocumentProvider(input.getFile()).canSaveDocument(input);
+					boolean dirty = getTextDocumentProvider(input).canSaveDocument(input);
 					return editorInput.getValue().getFile().getFullPath().toOSString() + (dirty ? "*" : "");
 				}
 				return "";
@@ -362,8 +363,8 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 		}
 
 		private void saveOrDiscardIfNeeded(FileEditorInput file) {
-			TextFileDocumentProvider docProvider = file == null ? null : getTextDocumentProvider(file.getFile());
-			if (docProvider != null && file != null && file.exists()) {
+			TextFileDocumentProvider docProvider = file == null ? null : getTextDocumentProvider(file);
+			if (docProvider != null && file != null && file.exists() && inputConnected) {
 				if (docProvider.canSaveDocument(file) && ui.confirmOperation("Changes Detected", "Manifest file '" + file.getFile().getFullPath().toOSString()
 								+ "' has been changed. Do you want to save changes or discard them?", new String[] {"Save", "Discard"}, 0) == 0) {
 					try {
@@ -379,24 +380,22 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 						Log.log(e);
 					}
 				}
-				docProvider.disconnect(file);
+				disconnect(docProvider, file);
 			}
 		}
 
-		private TextFileDocumentProvider getTextDocumentProvider(IFile file) {
-			if (file != null) {
-				IDocumentProvider docProvider = DocumentProviderRegistry.getDefault().getDocumentProvider(new FileEditorInput(file));
-				if (docProvider instanceof TextFileDocumentProvider) {
-					TextFileDocumentProvider textDocProvider = (TextFileDocumentProvider) docProvider;
-					if (!docProviders.contains(textDocProvider)) {
-						textDocProvider.addElementStateListener(dirtyStateListener);
-						onDispose((d) -> {
-							textDocProvider.removeElementStateListener(dirtyStateListener);
-						});
-						docProviders.add(textDocProvider);
-					}
-					return textDocProvider;
+		private TextFileDocumentProvider getTextDocumentProvider(FileEditorInput input) {
+			IDocumentProvider docProvider = DocumentProviderRegistry.getDefault().getDocumentProvider(input);
+			if (docProvider instanceof TextFileDocumentProvider) {
+				TextFileDocumentProvider textDocProvider = (TextFileDocumentProvider) docProvider;
+				if (!docProviders.contains(textDocProvider)) {
+					textDocProvider.addElementStateListener(dirtyStateListener);
+					onDispose((d) -> {
+						textDocProvider.removeElementStateListener(dirtyStateListener);
+					});
+					docProviders.add(textDocProvider);
 				}
+				return textDocProvider;
 			}
 			return null;
 		}
@@ -404,7 +403,7 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 		public IAnnotationModel getAnnotationModel() {
 			FileEditorInput input = editorInput.getValue();
 			if (input != null) {
-				TextFileDocumentProvider provider = getTextDocumentProvider(input.getFile());
+				TextFileDocumentProvider provider = getTextDocumentProvider(input);
 				if (provider != null) {
 					return provider.getAnnotationModel(input);
 				}
@@ -425,6 +424,44 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 		@Override
 		IFile getManifest() {
 			return getFile();
+		}
+
+		private void connect(TextFileDocumentProvider provider, FileEditorInput input) {
+			if (!inputConnected) {
+				try {
+					provider.connect(input);
+					inputConnected = true;
+				} catch (CoreException e) {
+					Log.log(e);
+				}
+			} else {
+				throw new IllegalStateException("Attempting to connect input '" + input.getFile().getName() + "' while previous input is still connected.");
+			}
+		}
+
+		private void disconnect(TextFileDocumentProvider provider, FileEditorInput input) {
+			if (inputConnected) {
+				provider.disconnect(input);
+				inputConnected = false;
+			} else {
+				throw new IllegalStateException("Attempting to disconnect input '" + input.getFile().getName() + "' while no inputs are connected");
+			}
+		}
+
+		void reopenSameFile() {
+			try {
+				FileEditorInput input = editorInput.getValue();
+				if (input != null) {
+					TextFileDocumentProvider provider = getTextDocumentProvider(input);
+					if (provider != null) {
+						connect(provider, input);
+					}
+				}
+				// Update the document such that it's the document coming from the doc provider
+				document.refresh();
+			} catch (Exception e) {
+				Log.log(e);
+			}
 		}
 
 	}
@@ -614,6 +651,7 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 		try {
 			return getDeploymentProperties()!=null;
 		} catch (Exception e) {
+			fileModel.reopenSameFile();
 			ui.errorPopup("Invalid YAML content", ExceptionUtil.getMessage(e));
 			return false;
 		}

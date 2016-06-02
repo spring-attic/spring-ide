@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.springframework.ide.eclipse.boot.dash.test.BootDashModelTest.waitForJobsToComplete;
@@ -33,6 +34,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.ui.editors.text.TextFileDocumentProvider;
+import org.eclipse.ui.part.FileEditorInput;
+import org.eclipse.ui.texteditor.DocumentProviderRegistry;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -60,16 +64,16 @@ import org.yaml.snakeyaml.Yaml;
 
 /**
  * Tests for {@link DeploymentPropertiesDialogModel}
- * 
+ *
  * @author Alex Boyko
  *
  */
 public class DeploymentPropertiesDialogModelTests {
-	
+
 	private static final int DISCARD_BUTTON_ID = 1;
 
 	private static final int SAVE_BUTTON_ID = 0;
-	
+
 	private static final String UNKNOWN_DEPLOYMENT_MANIFEST_TYPE_MUST_BE_EITHER_FILE_OR_MANUAL = "Unknown deployment manifest type. Must be either 'File' or 'Manual'.";
 	private static final String NO_SUPPORT_TO_DETERMINE_APP_NAMES = "Support for determining application names is unavailable";
 	private static final String MANIFEST_DOES_NOT_CONTAIN_DEPLOYMENT_PROPERTIES_FOR_APPLICATION_WITH_NAME = "Manifest does not contain deployment properties for application with name ''{0}''.";
@@ -78,7 +82,7 @@ public class DeploymentPropertiesDialogModelTests {
 	private static final String CURRENT_GENERATED_DEPLOYMENT_MANIFEST = "Current generated deployment manifest.";
 	private static final String CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM = "Choose an existing deployment manifest YAML file from the local file system.";
 	private static final String DEPLOYMENT_MANIFEST_FILE_NOT_SELECTED = "Deployment manifest file not selected.";
-	
+
 	public static final String DEFAULT_BUILDPACK = "java_buildpack_offline";
 
 	public static final List<CFCloudDomain> SPRING_CLOUD_DOMAINS = Arrays.<CFCloudDomain>asList(new MockCFDomain("springsource.org"));
@@ -94,7 +98,7 @@ public class DeploymentPropertiesDialogModelTests {
 	private UserInteractions ui;
 	private DeploymentPropertiesDialogModel model;
 	private AppNameReconciler reconciler;
-	
+
 	////////////////////////////////////////////////////////////
 
 	@Before
@@ -115,10 +119,10 @@ public class DeploymentPropertiesDialogModelTests {
 		}
 		waitForJobsToComplete();
 	}
-	
+
 	private AppNameReconciler addAppNameReconcilingFeature(final DeploymentPropertiesDialogModel model) {
 		final AppNameReconciler appNameReconciler = new AppNameReconciler(new YamlASTProvider(new Yaml()), model.getDeployedAppName());
-		
+
 		// File manifest
 		model.getFileDocument().addListener(new ValueListener<IDocument>() {
 			@Override
@@ -132,20 +136,20 @@ public class DeploymentPropertiesDialogModelTests {
 				}
 			}
 		});
-		
+
 		// Manual manifest
 		AppNameAnnotationModel appNameAnnotationModel = new AppNameAnnotationModel();
 		model.setManualAppNameAnnotationModel(appNameAnnotationModel);
 		appNameReconciler.reconcile(model.getManualDocument(), appNameAnnotationModel, new NullProgressMonitor());
-		
+
 		return appNameReconciler;
 	}
-	
+
 	private void createDialogModel(IProject project, CFApplication deployedApp) {
 		model = new DeploymentPropertiesDialogModel(ui, createCloudDataMap(), project, deployedApp);
 		reconciler = addAppNameReconcilingFeature(model);
 	}
-	
+
 	private static CFApplication createCfApp(String name, int memory) {
 		CFApplication cfApp = mock(CFApplication.class);
 		Mockito.when(cfApp.getName()).thenReturn(name);
@@ -164,35 +168,35 @@ public class DeploymentPropertiesDialogModelTests {
 		Mockito.when(cfApp.getUris()).thenReturn(Arrays.asList(new String[] {"myapp." + SPRING_CLOUD_DOMAINS.get(0)}));
 		return cfApp;
 	}
-	
+
 	@Test public void testNoTypeSelected() throws Exception {
 		IProject project = projects.createProject("p1");
 		createDialogModel(project, null);
-		
+
 		assertFalse(model.isManualManifestType());
 		assertFalse(model.isFileManifestType());
-		
+
 		ValidationResult validationResult = model.getValidator().getValue();
 		assertEquals(IStatus.ERROR, validationResult.status);
 		assertEquals(UNKNOWN_DEPLOYMENT_MANIFEST_TYPE_MUST_BE_EITHER_FILE_OR_MANUAL, validationResult.msg);
-		
+
 		CloudApplicationDeploymentProperties deploymentProperties = model.getDeploymentProperties();
 		assertTrue(deploymentProperties == null);
 	}
 
 	@Test public void testManualTypeSelected() throws Exception {
 		IProject project = projects.createProject("p1");
-		createDialogModel(project, null);		
+		createDialogModel(project, null);
 		model.type.setValue(ManifestType.MANUAL);
-		
+
 		assertTrue(model.isManualManifestType());
 		assertFalse(model.isManualManifestReadOnly());
-		
+
 		ValidationResult validationResult = model.getValidator().getValue();
 		assertEquals(IStatus.INFO, validationResult.status);
 		assertEquals(ENTER_DEPLOYMENT_MANIFEST_YAML_MANUALLY, validationResult.msg);
 		assertNotNull(model.getManualAnnotationModel());
-		
+
 		CloudApplicationDeploymentProperties deploymentProperties = model.getDeploymentProperties();
 		assertNotNull(deploymentProperties);
 		assertEquals(project.getName(), deploymentProperties.getAppName());
@@ -201,18 +205,18 @@ public class DeploymentPropertiesDialogModelTests {
 	@Test public void testManualTypeForDeployedApp() throws Exception {
 		IProject project = projects.createProject("p1");
 		CFApplication deployedApp = createCfApp("my-test-app", 512);
-		
-		createDialogModel(project, deployedApp);		
+
+		createDialogModel(project, deployedApp);
 		model.type.setValue(ManifestType.MANUAL);
-		
+
 		assertTrue(model.isManualManifestType());
 		assertTrue(model.isManualManifestReadOnly());
 		assertNotNull(model.getManualAnnotationModel());
-		
+
 		ValidationResult validationResult = model.getValidator().getValue();
 		assertEquals(IStatus.INFO, validationResult.status);
 		assertEquals(CURRENT_GENERATED_DEPLOYMENT_MANIFEST, validationResult.msg);
-		
+
 		CloudApplicationDeploymentProperties deploymentProperties = model.getDeploymentProperties();
 		assertNotNull(deploymentProperties);
 		assertEquals(deploymentProperties.getAppName(), deployedApp.getName());
@@ -223,32 +227,32 @@ public class DeploymentPropertiesDialogModelTests {
 	public void testManualTypeManifestTextWhenAppDeployed() throws Exception {
 		IProject project = projects.createProject("p1");
 		CFApplication deployedApp = createCfApp("my-test-app", 512);
-		
-		createDialogModel(project, deployedApp);		
+
+		createDialogModel(project, deployedApp);
 		model.type.setValue(ManifestType.MANUAL);
-		
+
 		assertTrue(model.isManualManifestType());
 		assertTrue(model.isManualManifestReadOnly());
-		
+
 		model.setManualManifest("some text");
 	}
 
 	@Test public void testManualTypeSetManifestText() throws Exception {
 		IProject project = projects.createProject("p1");
-		createDialogModel(project, null);		
+		createDialogModel(project, null);
 		model.type.setValue(ManifestType.MANUAL);
-		
+
 		assertTrue(model.isManualManifestType());
 		assertFalse(model.isManualManifestReadOnly());
-		
+
 		ValidationResult validationResult = model.getValidator().getValue();
 		assertEquals(IStatus.INFO, validationResult.status);
 		assertEquals(ENTER_DEPLOYMENT_MANIFEST_YAML_MANUALLY, validationResult.msg);
-		
+
 		CloudApplicationDeploymentProperties deploymentProperties = model.getDeploymentProperties();
 		assertNotNull(deploymentProperties);
 		assertEquals(project.getName(), deploymentProperties.getAppName());
-		
+
 		String newText = "Some text";
 		model.setManualManifest(newText);
 		assertEquals(newText, model.getManualDocument().get());
@@ -261,7 +265,7 @@ public class DeploymentPropertiesDialogModelTests {
 
 	@Test public void testNoAppNameAnnotationModel() throws Exception {
 		IProject project = projects.createProject("p1");
-		IFile file = createFile(project, "manifest.yml", 				
+		IFile file = createFile(project, "manifest.yml",
 				"applications:\n" +
 				"- name: " + project.getName() + "\n" +
 				"  memory: 512M\n"
@@ -269,7 +273,7 @@ public class DeploymentPropertiesDialogModelTests {
 		model = new DeploymentPropertiesDialogModel(ui, createCloudDataMap(), project, null);
 		model.setSelectedManifest(file);
 		model.type.setValue(ManifestType.MANUAL);
-		
+
 		ValidationResult validationResult = model.getValidator().getValue();
 		assertEquals(IStatus.ERROR, validationResult.status);
 		assertEquals(NO_SUPPORT_TO_DETERMINE_APP_NAMES, validationResult.msg);
@@ -282,10 +286,10 @@ public class DeploymentPropertiesDialogModelTests {
 
 	@Test public void testFileManifestFileNotSelected() throws Exception {
 		IProject project = projects.createProject("p1");
-		createDialogModel(project, null);		
+		createDialogModel(project, null);
 		model.type.setValue(ManifestType.FILE);
 		assertEquals(null, model.getFileAnnotationModel());
-		
+
 		ValidationResult validationResult = model.getValidator().getValue();
 		assertEquals(IStatus.ERROR, validationResult.status);
 		assertEquals(DEPLOYMENT_MANIFEST_FILE_NOT_SELECTED, validationResult.msg);
@@ -294,42 +298,42 @@ public class DeploymentPropertiesDialogModelTests {
 	@Test public void testFileManifestNonYamlFileSelected() throws Exception {
 		IProject project = projects.createProject("p1");
 		IFile file = createFile(project, "manifest.yml", "Some text content!");
-		createDialogModel(project, null);		
+		createDialogModel(project, null);
 		model.type.setValue(ManifestType.FILE);
 		model.setSelectedManifest(file);
-		
+
 		assertNotNull(model.getFileAnnotationModel());
 
 		ValidationResult validationResult = model.getValidator().getValue();
 		assertEquals(IStatus.ERROR, validationResult.status);
 		assertEquals(MANIFEST_DOES_NOT_HAVE_ANY_APPLICATION_DEFINED, validationResult.msg);
 	}
-	
+
 	@Test public void testFileManifestFolderSelected() throws Exception {
 		IProject project = projects.createProject("p1");
-		createDialogModel(project, null);		
+		createDialogModel(project, null);
 		model.type.setValue(ManifestType.FILE);
 		model.setSelectedManifest(project);
-		
+
 		assertEquals(null, model.getFileAnnotationModel());
 
 		ValidationResult validationResult = model.getValidator().getValue();
 		assertEquals(IStatus.ERROR, validationResult.status);
 		assertEquals(DEPLOYMENT_MANIFEST_FILE_NOT_SELECTED, validationResult.msg);
 	}
-	
+
 	@Test public void testFileManifestFileSelected() throws Exception {
 		IProject project = projects.createProject("p1");
 		String appNameFromFile = "app-name-from-file";
-		IFile file = createFile(project, "manifest.yml", 				
+		IFile file = createFile(project, "manifest.yml",
 				"applications:\n" +
 				"- name: " + appNameFromFile + "\n" +
 				"  memory: 512M\n"
 		);
-		createDialogModel(project, null);		
+		createDialogModel(project, null);
 		model.setSelectedManifest(file);
 		model.type.setValue(ManifestType.FILE);
-		
+
 		assertNotNull(model.getFileAnnotationModel());
 
 		ValidationResult validationResult = model.getValidator().getValue();
@@ -344,99 +348,99 @@ public class DeploymentPropertiesDialogModelTests {
 	@Test public void testSwitchingManifestTypeAndFiles() throws Exception {
 		IProject project = projects.createProject("p1");
 		String appNameFromFile = "app-name-from-file";
-		IFile validFile = createFile(project, "manifest.yml", 				
+		IFile validFile = createFile(project, "manifest.yml",
 				"applications:\n" +
 				"- name: " + appNameFromFile + "\n" +
 				"  memory: 512M\n"
 		);
-		IFile invalidFile = createFile(project, "text.yml", "Some text");				
-		
-		createDialogModel(project, null);		
+		IFile invalidFile = createFile(project, "text.yml", "Some text");
+
+		createDialogModel(project, null);
 		model.type.setValue(ManifestType.MANUAL);
-		
+
 		ValidationResult validationResult = model.getValidator().getValue();
 		assertEquals(IStatus.INFO, validationResult.status);
 		assertEquals(ENTER_DEPLOYMENT_MANIFEST_YAML_MANUALLY, validationResult.msg);
-		
+
 		model.type.setValue(ManifestType.FILE);
 		validationResult = model.getValidator().getValue();
 		assertEquals(IStatus.ERROR, validationResult.status);
 		assertEquals(DEPLOYMENT_MANIFEST_FILE_NOT_SELECTED, validationResult.msg);
-		
+
 		model.setSelectedManifest(validFile);
 		validationResult = model.getValidator().getValue();
 		assertEquals(IStatus.INFO, validationResult.status);
 		assertEquals(CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
-		
+
 		model.type.setValue(ManifestType.MANUAL);
 		validationResult = model.getValidator().getValue();
 		assertEquals(IStatus.INFO, validationResult.status);
 		assertEquals(ENTER_DEPLOYMENT_MANIFEST_YAML_MANUALLY, validationResult.msg);
-		
+
 		model.type.setValue(ManifestType.FILE);
 		validationResult = model.getValidator().getValue();
 		assertEquals(IStatus.INFO, validationResult.status);
 		assertEquals(CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
-		
+
 		model.setSelectedManifest(project);
 		validationResult = model.getValidator().getValue();
 		assertEquals(IStatus.ERROR, validationResult.status);
 		assertEquals(DEPLOYMENT_MANIFEST_FILE_NOT_SELECTED, validationResult.msg);
-		
+
 		model.setSelectedManifest(invalidFile);
 		validationResult = model.getValidator().getValue();
 		assertEquals(IStatus.ERROR, validationResult.status);
 		assertEquals(MANIFEST_DOES_NOT_HAVE_ANY_APPLICATION_DEFINED, validationResult.msg);
 	}
-	
+
 	@Test public void testValidSingleAppFileSelectedForDeployedApp() throws Exception {
 		String appName = "my-test-app";
 		IProject project = projects.createProject("p1");
 		CFApplication deployedApp = createCfApp(appName, 512);
-		
-		IFile validFileSingleName = createFile(project, "manifest.yml", 				
+
+		IFile validFileSingleName = createFile(project, "manifest.yml",
 				"applications:\n" +
 				"- name: " + appName + "\n" +
 				"  memory: 512M\n"
 		);
-		
-		createDialogModel(project, deployedApp);		
+
+		createDialogModel(project, deployedApp);
 		model.type.setValue(ManifestType.FILE);
-		
+
 		model.setSelectedManifest(validFileSingleName);
-		
+
 		ValidationResult validationResult = model.getValidator().getValue();
 		assertEquals(IStatus.INFO, validationResult.status);
-		assertEquals(CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);		
+		assertEquals(CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
 	}
 
 	@Test public void testInvalidSingleAppFileSelectedForDeployedApp() throws Exception {
 		String appName = "my-test-app";
 		IProject project = projects.createProject("p1");
 		CFApplication deployedApp = createCfApp(appName, 512);
-		
-		IFile invalidFileSingleName = createFile(project, "manifest.yml", 				
+
+		IFile invalidFileSingleName = createFile(project, "manifest.yml",
 				"applications:\n" +
 				"- name: someApp\n" +
 				"  memory: 512M\n"
 		);
-		
-		createDialogModel(project, deployedApp);		
+
+		createDialogModel(project, deployedApp);
 		model.type.setValue(ManifestType.FILE);
-		
+
 		model.setSelectedManifest(invalidFileSingleName);
-		
+
 		ValidationResult validationResult = model.getValidator().getValue();
 		assertEquals(IStatus.ERROR, validationResult.status);
-		assertEquals(MessageFormat.format(MANIFEST_DOES_NOT_CONTAIN_DEPLOYMENT_PROPERTIES_FOR_APPLICATION_WITH_NAME, appName), validationResult.msg);		
+		assertEquals(MessageFormat.format(MANIFEST_DOES_NOT_CONTAIN_DEPLOYMENT_PROPERTIES_FOR_APPLICATION_WITH_NAME, appName), validationResult.msg);
 	}
 
 	@Test public void testValidMultiAppFileSelectedForDeployedApp() throws Exception {
 		String appName = "my-test-app";
 		IProject project = projects.createProject("p1");
 		CFApplication deployedApp = createCfApp(appName, 512);;
-		
-		IFile validFileMultiName = createFile(project, "manifest.yml", 				
+
+		IFile validFileMultiName = createFile(project, "manifest.yml",
 				"applications:\n" +
 				"- name: " + project.getName() + "\n" +
 				"  memory: 512M\n" +
@@ -445,16 +449,16 @@ public class DeploymentPropertiesDialogModelTests {
 				"- name: someApp\n" +
 				"  memory: 512M\n"
 		);
-		
-		createDialogModel(project, deployedApp);		
+
+		createDialogModel(project, deployedApp);
 		model.type.setValue(ManifestType.FILE);
-		
+
 		model.setSelectedManifest(validFileMultiName);
-		
+
 		ValidationResult validationResult = model.getValidator().getValue();
 		assertEquals(IStatus.INFO, validationResult.status);
 		assertEquals(CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
-		
+
 		CloudApplicationDeploymentProperties deploymentProperties = model.getDeploymentProperties();
 		assertNotNull(deploymentProperties);
 		assertEquals(deployedApp.getName(), deploymentProperties.getAppName());
@@ -464,8 +468,8 @@ public class DeploymentPropertiesDialogModelTests {
 		String appName = "my-test-app";
 		IProject project = projects.createProject("p1");
 		CFApplication deployedApp = createCfApp(appName, 512);
-		
-		IFile invalidFileMultiName = createFile(project, "manifest.yml", 				
+
+		IFile invalidFileMultiName = createFile(project, "manifest.yml",
 				"applications:\n" +
 				"- name: " + project.getName() + "\n" +
 				"  memory: 512M\n" +
@@ -474,26 +478,26 @@ public class DeploymentPropertiesDialogModelTests {
 				"- name: someApp\n" +
 				"  memory: 512M\n"
 		);
-		
-		createDialogModel(project, deployedApp);		
+
+		createDialogModel(project, deployedApp);
 		model.type.setValue(ManifestType.FILE);
-		
+
 		model.setSelectedManifest(invalidFileMultiName);
-		
+
 		ValidationResult validationResult = model.getValidator().getValue();
 		assertEquals(IStatus.ERROR, validationResult.status);
 		assertEquals(MessageFormat.format(MANIFEST_DOES_NOT_CONTAIN_DEPLOYMENT_PROPERTIES_FOR_APPLICATION_WITH_NAME, appName), validationResult.msg);
-		
+
 		CloudApplicationDeploymentProperties deploymentProperties = model.getDeploymentProperties();
 		assertEquals(null, deploymentProperties);
 	}
-	
+
 	@Test public void testSwitchingWithDeployedApp() throws Exception {
 		String appName = "my-test-app";
 		IProject project = projects.createProject("p1");
 		CFApplication deployedApp = createCfApp(appName, 512);
-		
-		IFile validFileMultiName = createFile(project, "valid-manifest.yml", 				
+
+		IFile validFileMultiName = createFile(project, "valid-manifest.yml",
 				"applications:\n" +
 				"- name: " + project.getName() + "\n" +
 				"  memory: 512M\n" +
@@ -502,8 +506,8 @@ public class DeploymentPropertiesDialogModelTests {
 				"- name: someApp\n" +
 				"  memory: 512M\n"
 		);
-		
-		IFile invalidFileMultiName = createFile(project, "invalid-manifest.yml", 				
+
+		IFile invalidFileMultiName = createFile(project, "invalid-manifest.yml",
 				"applications:\n" +
 				"- name: " + project.getName() + "\n" +
 				"  memory: 512M\n" +
@@ -512,12 +516,12 @@ public class DeploymentPropertiesDialogModelTests {
 				"- name: someApp\n" +
 				"  memory: 512M\n"
 		);
-		
-		createDialogModel(project, deployedApp);		
-		
+
+		createDialogModel(project, deployedApp);
+
 		model.type.setValue(ManifestType.FILE);
 		model.setSelectedManifest(validFileMultiName);
-		
+
 		ValidationResult validationResult = model.getValidator().getValue();
 		assertEquals(IStatus.INFO, validationResult.status);
 		assertEquals(CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
@@ -526,14 +530,14 @@ public class DeploymentPropertiesDialogModelTests {
 		validationResult = model.getValidator().getValue();
 		assertEquals(IStatus.ERROR, validationResult.status);
 		assertEquals(MessageFormat.format(MANIFEST_DOES_NOT_CONTAIN_DEPLOYMENT_PROPERTIES_FOR_APPLICATION_WITH_NAME, appName), validationResult.msg);
-		
+
 		model.setSelectedManifest(project);
 		validationResult = model.getValidator().getValue();
 		assertEquals(IStatus.ERROR, validationResult.status);
 		assertEquals(DEPLOYMENT_MANIFEST_FILE_NOT_SELECTED, validationResult.msg);
-		
+
 		model.type.setValue(ManifestType.MANUAL);
-		assertTrue(model.isManualManifestReadOnly());		
+		assertTrue(model.isManualManifestReadOnly());
 		validationResult = model.getValidator().getValue();
 		assertEquals(IStatus.INFO, validationResult.status);
 		assertEquals(CURRENT_GENERATED_DEPLOYMENT_MANIFEST, validationResult.msg);
@@ -548,43 +552,43 @@ public class DeploymentPropertiesDialogModelTests {
 		assertEquals(IStatus.ERROR, validationResult.status);
 		assertEquals(MessageFormat.format(MANIFEST_DOES_NOT_CONTAIN_DEPLOYMENT_PROPERTIES_FOR_APPLICATION_WITH_NAME, appName), validationResult.msg);
 	}
-	
+
 	@Test(expected = OperationCanceledException.class)
 	public void testCancel() throws Exception {
 		IProject project = projects.createProject("p1");
-		createDialogModel(project, null);		
+		createDialogModel(project, null);
 		model.type.setValue(ManifestType.MANUAL);
-		
+
 		ValidationResult validationResult = model.getValidator().getValue();
 		assertEquals(IStatus.INFO, validationResult.status);
 		assertEquals(ENTER_DEPLOYMENT_MANIFEST_YAML_MANUALLY, validationResult.msg);
-		
+
 		model.cancelPressed();
-		
+
 		assertTrue(model.isCanceled());
-		
+
 		model.getDeploymentProperties();
 	}
-	
+
 	@Test public void testManifestFileLabel() throws Exception {
 		IProject project = projects.createProject("p1");
 		String appNameFromFile = "app-name-from-file";
-		IFile file = createFile(project, "manifest.yml", 				
+		IFile file = createFile(project, "manifest.yml",
 				"applications:\n" +
 				"- name: " + appNameFromFile + "\n" +
 				"  memory: 512M\n"
 		);
-		createDialogModel(project, null);		
+		createDialogModel(project, null);
 		model.setSelectedManifest(file);
 		model.setManifestType(ManifestType.FILE);
-		
+
 		assertEquals(file.getFullPath().toOSString(), model.getFileLabel().getValue());
-		
+
 		model.getFileDocument().getValue().set("some text");
 
 		assertEquals(file.getFullPath().toOSString() + "*", model.getFileLabel().getValue());
 	}
-	
+
 	@Test public void testDiscardCancelWithDirtyManifestFile() throws Exception {
 		IProject project = projects.createProject("p1");
 		String appNameFromFile = "app-name-from-file";
@@ -592,18 +596,25 @@ public class DeploymentPropertiesDialogModelTests {
 				"- name: " + appNameFromFile + "\n" +
 				"  memory: 512M\n";
 		IFile file = createFile(project, "manifest.yml", text);
-		createDialogModel(project, null);		
+		createDialogModel(project, null);
 		model.setSelectedManifest(file);
 		model.setManifestType(ManifestType.FILE);
-		
+
 		model.getFileDocument().getValue().set("some text");
-		
+
 		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(DISCARD_BUTTON_ID);
-		
+
 		model.cancelPressed();
-		
-		assertTrue(model.isCanceled());		
+
+		assertTrue(model.isCanceled());
 		assertEquals(text, IOUtil.toString(file.getContents()));
+
+		/*
+		 * Test document provider is not connected to the file input anymore
+		 */
+		FileEditorInput editorInput = new FileEditorInput(file);
+		TextFileDocumentProvider docProvider = (TextFileDocumentProvider) DocumentProviderRegistry.getDefault().getDocumentProvider(editorInput);
+		assertNull(docProvider.getDocument(editorInput));
 	}
 
 	@Test public void testSaveCancelWithDirtyManifestFile() throws Exception {
@@ -613,19 +624,26 @@ public class DeploymentPropertiesDialogModelTests {
 				"- name: " + appNameFromFile + "\n" +
 				"  memory: 512M\n";
 		IFile file = createFile(project, "manifest.yml", text);
-		createDialogModel(project, null);		
+		createDialogModel(project, null);
 		model.setSelectedManifest(file);
 		model.setManifestType(ManifestType.FILE);
-		
+
 		String newText = "some text";
 		model.getFileDocument().getValue().set(newText);
-		
+
 		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(SAVE_BUTTON_ID);
-		
+
 		model.cancelPressed();
-		
-		assertTrue(model.isCanceled());		
+
+		assertTrue(model.isCanceled());
 		assertEquals(newText, IOUtil.toString(file.getContents()));
+
+		/*
+		 * Test document provider is not connected to the file input anymore
+		 */
+		FileEditorInput editorInput = new FileEditorInput(file);
+		TextFileDocumentProvider docProvider = (TextFileDocumentProvider) DocumentProviderRegistry.getDefault().getDocumentProvider(editorInput);
+		assertNull(docProvider.getDocument(editorInput));
 	}
 
 	@Test public void testDiscardOkWithDirtyManifestFile() throws Exception {
@@ -636,23 +654,30 @@ public class DeploymentPropertiesDialogModelTests {
 				"- name: " + appNameFromFile + "\n" +
 				"  memory: " + memory + "\n";
 		IFile file = createFile(project, "manifest.yml", text);
-		createDialogModel(project, null);		
+		createDialogModel(project, null);
 		model.setSelectedManifest(file);
 		model.setManifestType(ManifestType.FILE);
-		
+
 		model.getFileDocument().getValue().set("some text");
-		
+
 		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(DISCARD_BUTTON_ID);
-		
+
 		model.okPressed();
-		
-		assertFalse(model.isCanceled());		
+
+		assertFalse(model.isCanceled());
 		assertEquals(text, IOUtil.toString(file.getContents()));
-		
+
 		CloudApplicationDeploymentProperties deploymentProperties = model.getDeploymentProperties();
 		assertNotNull(deploymentProperties);
 		assertEquals(appNameFromFile, deploymentProperties.getAppName());
 		assertEquals(memory, deploymentProperties.getMemory());
+
+		/*
+		 * Test document provider is not connected to the file input anymore
+		 */
+		FileEditorInput editorInput = new FileEditorInput(file);
+		TextFileDocumentProvider docProvider = (TextFileDocumentProvider) DocumentProviderRegistry.getDefault().getDocumentProvider(editorInput);
+		assertNull(docProvider.getDocument(editorInput));
 	}
 
 	@Test public void testSaveOkWithDirtyManifestFile() throws Exception {
@@ -669,25 +694,33 @@ public class DeploymentPropertiesDialogModelTests {
 				"  memory: " + newMemory + "\n";
 
 		IFile file = createFile(project, "manifest.yml", text);
-		createDialogModel(project, null);		
+		createDialogModel(project, null);
 		model.setSelectedManifest(file);
 		model.setManifestType(ManifestType.FILE);
-		
+
 		model.getFileDocument().getValue().set(newText);
 		// Reconcile to pick the new app name (Simulate what happens in the editor)
 		reconciler.reconcile(model.getFileDocument().getValue(), model.getFileAppNameAnnotationModel().getValue(), new NullProgressMonitor());
-		
+
 		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(SAVE_BUTTON_ID);
-		
+
 		model.okPressed();
-		
-		assertFalse(model.isCanceled());		
+
+		assertFalse(model.isCanceled());
 		assertEquals(newText, IOUtil.toString(file.getContents()));
-		
+
 		CloudApplicationDeploymentProperties deploymentProperties = model.getDeploymentProperties();
 		assertNotNull(deploymentProperties);
 		assertEquals(newAppName, deploymentProperties.getAppName());
 		assertEquals(newMemory, deploymentProperties.getMemory());
+
+		/*
+		 * Test document provider is not connected to the file input anymore
+		 */
+		FileEditorInput editorInput = new FileEditorInput(file);
+		TextFileDocumentProvider docProvider = (TextFileDocumentProvider) DocumentProviderRegistry.getDefault().getDocumentProvider(editorInput);
+		assertNull(docProvider.getDocument(editorInput));
+
 	}
 
 	@Test public void testDiscardOnDirtyManifestFileSwitch() throws Exception {
@@ -698,28 +731,28 @@ public class DeploymentPropertiesDialogModelTests {
 				"- name: " + appNameFromFile + "\n" +
 				"  memory: " + memory + "\n";
 		IFile file = createFile(project, "manifest.yml", text);
-		createDialogModel(project, null);		
+		createDialogModel(project, null);
 		model.setSelectedManifest(file);
 		model.setManifestType(ManifestType.FILE);
-		
+
 		model.getFileDocument().getValue().set("some text");
-		
+
 		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(DISCARD_BUTTON_ID);
-		
+
 		model.setSelectedManifest(project);
-		
+
 		assertEquals(text, IOUtil.toString(file.getContents()));
 
 		model.setSelectedManifest(file);
-		
+
 		assertEquals(text, model.getFileDocument().getValue().get());
-		
+
 		CloudApplicationDeploymentProperties deploymentProperties = model.getDeploymentProperties();
 		assertNotNull(deploymentProperties);
 		assertEquals(appNameFromFile, deploymentProperties.getAppName());
 		assertEquals(memory, deploymentProperties.getMemory());
 	}
-	
+
 	@Test public void testSaveOnDirtyManifestFileSwitch() throws Exception {
 		IProject project = projects.createProject("p1");
 		String appName = "app-name-from-file";
@@ -734,27 +767,79 @@ public class DeploymentPropertiesDialogModelTests {
 				"  memory: " + newMemory + "\n";
 
 		IFile file = createFile(project, "manifest.yml", text);
-		createDialogModel(project, null);		
+		createDialogModel(project, null);
 		model.setSelectedManifest(file);
 		model.setManifestType(ManifestType.FILE);
-		
+
 		model.getFileDocument().getValue().set(newText);
 		// Reconcile to pick the new app name (Simulate what happens in the editor)
 		reconciler.reconcile(model.getFileDocument().getValue(), model.getFileAppNameAnnotationModel().getValue(), new NullProgressMonitor());
-		
+
 		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(SAVE_BUTTON_ID);
-		
+
 		model.setSelectedManifest(project);
-		
+
 		assertEquals(newText, IOUtil.toString(file.getContents()));
-		
+
 		model.setSelectedManifest(file);
-		
+
 		assertEquals(newText, model.getFileDocument().getValue().get());
-		
+
 		CloudApplicationDeploymentProperties deploymentProperties = model.getDeploymentProperties();
 		assertNotNull(deploymentProperties);
 		assertEquals(newAppName, deploymentProperties.getAppName());
 		assertEquals(newMemory, deploymentProperties.getMemory());
 	}
+
+	@Test public void testRecoverFromInvalidManifest() throws Exception {
+		IProject project = projects.createProject("p1");
+		String newAppName = "new-app";
+		int newMemory = 768;
+		String newText = "applications:\n" +
+				"- name: " + newAppName + "\n" +
+				"  memory: " + newMemory + "\n";
+
+		IFile file = createFile(project, "manifest.yml", "");
+		createDialogModel(project, null);
+		model.setSelectedManifest(file);
+		model.setManifestType(ManifestType.FILE);
+
+		model.getFileDocument().getValue().set(newText);
+		assertTrue(model.getFileLabel().getValue().endsWith("*"));
+
+		// Reconcile to pick the new app name (Simulate what happens in the editor)
+		reconciler.reconcile(model.getFileDocument().getValue(), model.getFileAppNameAnnotationModel().getValue(), new NullProgressMonitor());
+
+		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(DISCARD_BUTTON_ID);
+
+		model.okPressed();
+
+		assertFalse(model.isCanceled());
+		assertEquals("", IOUtil.toString(file.getContents()));
+		assertFalse(model.getFileLabel().getValue().endsWith("*"));
+
+		model.getFileDocument().getValue().set(newText);
+		assertTrue(model.getFileLabel().getValue().endsWith("*"));
+
+		Mockito.reset(ui);
+		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(SAVE_BUTTON_ID);
+
+		model.okPressed();
+
+		assertFalse(model.isCanceled());
+		assertEquals(newText, IOUtil.toString(file.getContents()));
+
+		CloudApplicationDeploymentProperties deploymentProperties = model.getDeploymentProperties();
+		assertEquals(newAppName, deploymentProperties.getAppName());
+		assertEquals(newMemory, deploymentProperties.getMemory());
+
+		/*
+		 * Test document provider is not connected to the file input anymore
+		 */
+		FileEditorInput editorInput = new FileEditorInput(file);
+		TextFileDocumentProvider docProvider = (TextFileDocumentProvider) DocumentProviderRegistry.getDefault().getDocumentProvider(editorInput);
+		assertNull(docProvider.getDocument(editorInput));
+
+	}
+
 }
