@@ -2,8 +2,8 @@ package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.util.Comparator;
 
-import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
+import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 
 public interface BootDashModel {
 

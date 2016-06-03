@@ -20,6 +20,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
+import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
+
 import com.google.common.collect.ImmutableSet;
 
 /**

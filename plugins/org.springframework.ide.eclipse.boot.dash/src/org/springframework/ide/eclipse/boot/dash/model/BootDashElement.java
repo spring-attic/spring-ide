@@ -15,9 +15,9 @@ import java.util.List;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
-import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
+import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 
 import com.google.common.collect.ImmutableSet;
 

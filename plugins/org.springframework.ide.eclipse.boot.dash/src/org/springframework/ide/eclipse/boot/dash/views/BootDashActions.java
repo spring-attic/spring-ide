@@ -27,7 +27,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTar
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeployToCloudFoundryTargetAction;
 import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
-import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
@@ -38,6 +37,7 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.LocalRunTa
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKInstallManager;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;

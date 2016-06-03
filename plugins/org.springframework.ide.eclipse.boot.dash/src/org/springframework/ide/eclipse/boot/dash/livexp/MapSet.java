@@ -14,6 +14,8 @@ import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 
+import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
+
 /**
  * Represents a Set constructed by applying a function to each element of another
  * set.

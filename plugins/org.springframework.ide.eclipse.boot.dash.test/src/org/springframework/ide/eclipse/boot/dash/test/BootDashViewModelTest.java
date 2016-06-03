@@ -37,7 +37,6 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
@@ -59,6 +58,7 @@ import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelega
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
@@ -495,7 +495,7 @@ public class BootDashViewModelTest {
 	@Test
 	public void testGetSectionByTargetId() throws Exception {
 		BootDashViewModel view = mock(BootDashViewModel.class);
-		LiveSet<BootDashModel> sections = new LiveSet<>();
+		LiveSetVariable<BootDashModel> sections = new LiveSetVariable<BootDashModel>();
 		when(view.getSectionModels()).thenReturn(sections);
 		when(view.getSectionByTargetId(anyString())).thenCallRealMethod();
 

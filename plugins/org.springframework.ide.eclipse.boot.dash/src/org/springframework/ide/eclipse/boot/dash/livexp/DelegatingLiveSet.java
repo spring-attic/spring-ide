@@ -18,26 +18,22 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
 import com.google.common.collect.ImmutableSet;
 
+import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
+
 /**
- * A LiveSet (i.e. LiveExp<Set<T>>) which is defined as mirroring the
+ * A {@link ObservableSet} which is defined as mirroring the
  * contents of a delegate.
  * <p>
  * This delegate is initially null and can be set repeatedly.
  * <p>
  * When delegate is null the DelegatingSet will be empty, when set
- * to point to non-null LiveSet then its contents will be equal to the
+ * to point to non-null ObservableSet then its contents will be equal to the
  * contents of the delegate.
  *
  * @author Kris De Volder
  */
 public class DelegatingLiveSet<T> extends ObservableSet<T> {
 
-	//TODO: This implementation is known to be buggy.
-	// Because it is a basic LiveExpression it doesn't properly respond to
-	// changes in delegate if the delegate keeps returning the same
-	// object (but with mutated contents).
-
-	@SuppressWarnings("unchecked")
 	public DelegatingLiveSet() {
 	}
 

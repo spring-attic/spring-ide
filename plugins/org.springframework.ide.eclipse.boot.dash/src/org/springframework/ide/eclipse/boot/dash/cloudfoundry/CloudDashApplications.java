@@ -13,11 +13,11 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 import java.util.Collection;
 
 import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
-import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
-import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
+import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;

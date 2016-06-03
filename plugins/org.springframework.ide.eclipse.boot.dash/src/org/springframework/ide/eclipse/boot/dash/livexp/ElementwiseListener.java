@@ -17,6 +17,8 @@ import java.util.Set;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
+import com.google.common.collect.ImmutableSet;
+
 /**
  * An 'adapter' class that can used to create a ValueListener on a LiveSet which provides methods
  * that get called when individual elements get added or removed to the set (whereas the
@@ -24,17 +26,17 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
  *
  * @author Kris De Volder
  */
-public abstract class ElementwiseListener<T> implements ValueListener<Set<T>> {
+public abstract class ElementwiseListener<T> implements ValueListener<ImmutableSet<T>> {
 
 	private Set<T> lastState = Collections.emptySet();
 
 	@Override
-	public final void gotValue(LiveExpression<Set<T>> exp, Set<T> newState) {
+	public final void gotValue(LiveExpression<ImmutableSet<T>> exp, ImmutableSet<T> newState) {
 		Set<T> removed;
 		Set<T> added;
 		synchronized (this) {
 			//compute the 'diffs' inside synch block
-			newState = new LinkedHashSet<T>(newState); //use a 'snapshot' because the set may change.
+			//newState = new LinkedHashSet<T>(newState); //use a 'snapshot' because the set may change.
 			added = minus(newState, lastState);
 			removed = minus(lastState, newState);
 			lastState = newState;
@@ -51,11 +53,11 @@ public abstract class ElementwiseListener<T> implements ValueListener<Set<T>> {
 		}
 	}
 
-	protected abstract void added(LiveExpression<Set<T>> exp, T e);
-	protected abstract void removed(LiveExpression<Set<T>> exp, T e);
+	protected abstract void added(LiveExpression<ImmutableSet<T>> exp, T e);
+	protected abstract void removed(LiveExpression<ImmutableSet<T>> exp, T e);
 
 	private Set<T> minus(Set<T> set, Set<T> subtract) {
-		LinkedHashSet<T> diff = new LinkedHashSet<T>(set);
+		LinkedHashSet<T> diff = new LinkedHashSet<>(set);
 		diff.removeAll(subtract);
 		return diff;
 	}

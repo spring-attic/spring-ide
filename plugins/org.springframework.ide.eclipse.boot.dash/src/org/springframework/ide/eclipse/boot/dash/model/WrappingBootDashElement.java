@@ -23,18 +23,18 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
-import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.ActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.TypeLookup;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
-import org.springframework.ide.eclipse.boot.dash.util.Utils;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
+import org.springframework.ide.eclipse.boot.dash.util.Utils;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
 import com.google.common.collect.ImmutableList;
@@ -139,12 +139,12 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 		try {
 			String[] tags = getPersistentProperties().get(TAGS_KEY, (String[])null);
 			if (tags!=null) {
-				return new LinkedHashSet<String>(Arrays.asList(tags));
+				return new LinkedHashSet<>(Arrays.asList(tags));
 			}
 		} catch (Exception e) {
 			BootDashActivator.log(e);
 		}
-		return new LinkedHashSet<String>();
+		return new LinkedHashSet<>();
 	}
 
 	@Override

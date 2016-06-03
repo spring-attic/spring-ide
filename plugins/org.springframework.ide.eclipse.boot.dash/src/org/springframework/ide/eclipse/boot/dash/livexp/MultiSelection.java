@@ -15,7 +15,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.Assert;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
-import com.google.common.collect.ImmutableSet;
+import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 
 /**
  * Represents a selection of zero or more elements of type T in some UI component.
@@ -107,7 +107,7 @@ public final class MultiSelection<T> {
 	}
 
 	public static <T> MultiSelection<T> from(Class<T> type, ObservableSet<T> elements) {
-		return new MultiSelection<T>(type, elements);
+		return new MultiSelection<>(type, elements);
 	}
 
 	public Set<T> getValue() {

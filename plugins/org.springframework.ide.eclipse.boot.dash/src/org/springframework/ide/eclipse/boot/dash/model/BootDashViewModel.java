@@ -20,17 +20,18 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugStrategyManager;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshDebugSupport;
-import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.util.TreeAwareFilter;
 import org.springframework.ide.eclipse.boot.util.ProcessTracker;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 import org.springsource.ide.eclipse.commons.livexp.util.Filters;
 
 import com.google.common.base.Function;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * @author Kris De Volder
@@ -56,7 +57,7 @@ public class BootDashViewModel extends AbstractDisposable {
 	 * added by adding them to the runTarget's LiveSet.
 	 */
 	public BootDashViewModel(BootDashModelContext context, RunTargetType... runTargetTypes) {
-		runTargets = new LiveSetVariable<RunTarget>(new LinkedHashSet<RunTarget>(), AsyncMode.SYNC);
+		runTargets = new LiveSetVariable<>(new LinkedHashSet<RunTarget>(), AsyncMode.SYNC);
 		this.context = context;
 		models = new BootDashModelManager(context, this, runTargets);
 
@@ -69,7 +70,7 @@ public class BootDashViewModel extends AbstractDisposable {
 		this.modelComparator = new BootModelComparator(orderedRunTargetTypes);
 		this.targetComparator = new RunTargetComparator(orderedRunTargetTypes);
 
-		this.runTargetTypes = new LinkedHashSet<RunTargetType>(orderedRunTargetTypes);
+		this.runTargetTypes = new LinkedHashSet<>(orderedRunTargetTypes);
 		filterBox = new BootDashElementsFilterBoxModel();
 		toggleFiltersModel = new ToggleFiltersModel(context);
 		LiveExpression<Filter<BootDashElement>> baseFilter = filterBox.getFilter();
@@ -109,7 +110,7 @@ public class BootDashViewModel extends AbstractDisposable {
 		models.removeElementStateListener(l);
 	}
 
-	public LiveExpression<Set<BootDashModel>> getSectionModels() {
+	public LiveExpression<ImmutableSet<BootDashModel>> getSectionModels() {
 		return models.getModels();
 	}
 

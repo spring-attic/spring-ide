@@ -15,12 +15,12 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Ilabelable;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
@@ -71,7 +71,7 @@ public class ToggleFiltersModel {
 
 	public ToggleFiltersModel(IPropertyStore propertyStore) {
 		this.persistentProperties = new PropertyStoreApi(propertyStore);
-		this.selectedFilters = new LiveSetVariable<FilterChoice>(restoreFilters(), AsyncMode.SYNC);
+		this.selectedFilters = new LiveSetVariable<>(restoreFilters(), AsyncMode.SYNC);
 		this.compositeFilter = new LiveExpression<Filter<BootDashElement>>() {
 			{
 				dependsOn(selectedFilters);

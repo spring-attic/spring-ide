@@ -18,6 +18,8 @@ import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 
+import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
+
 /**
  * An observable set that contains the results of applying a mapping function onto
  * the values of an ObservableSet of LiveExps.

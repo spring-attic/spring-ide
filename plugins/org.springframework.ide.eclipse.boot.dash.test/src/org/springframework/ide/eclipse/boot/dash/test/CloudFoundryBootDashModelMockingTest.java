@@ -16,13 +16,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-
-import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertContains;
-
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -34,6 +30,7 @@ import static org.springframework.ide.eclipse.boot.dash.test.BootDashModelTest.w
 import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.APP_DELETE_TIMEOUT;
 import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.APP_DEPLOY_TIMEOUT;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
+import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertContains;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.createFile;
 
 import java.io.BufferedInputStream;
@@ -73,7 +70,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTar
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
-import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -101,6 +97,7 @@ import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthChec
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;

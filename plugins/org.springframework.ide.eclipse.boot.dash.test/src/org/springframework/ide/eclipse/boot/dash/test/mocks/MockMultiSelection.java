@@ -12,9 +12,9 @@ package org.springframework.ide.eclipse.boot.dash.test.mocks;
 
 import java.util.Collection;
 
-import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 
 import com.google.common.collect.ImmutableSet;
 

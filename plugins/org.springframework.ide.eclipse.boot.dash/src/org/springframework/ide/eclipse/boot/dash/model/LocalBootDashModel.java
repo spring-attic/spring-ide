@@ -19,8 +19,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.dash.devtools.DevtoolsPortRefresher;
-import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
-import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchConfRunStateTracker;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchConfigurationTracker;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
@@ -33,6 +31,8 @@ import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ProjectCha
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ProjectChangeListenerManager.ProjectChangeListener;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
+import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
@@ -85,7 +85,7 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 
 	void init() {
 		if (elements==null) {
-			this.elements = new LiveSetVariable<BootDashElement>(AsyncMode.SYNC);
+			this.elements = new LiveSetVariable<>(AsyncMode.SYNC);
 			WorkspaceListener workspaceListener = new WorkspaceListener();
 			this.openCloseListenerManager = new ProjectChangeListenerManager(workspace, workspaceListener);
 			this.classpathListenerManager = new ClasspathListenerManager(workspaceListener);
@@ -130,7 +130,7 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 	}
 
 	void updateElementsFromWorkspace() {
-		Set<BootDashElement> newElements = new HashSet<BootDashElement>();
+		Set<BootDashElement> newElements = new HashSet<>();
 		for (IProject p : this.workspace.getRoot().getProjects()) {
 			BootDashElement element = projectElementFactory.createOrGet(p);
 			if (element!=null) {

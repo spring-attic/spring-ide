@@ -13,13 +13,9 @@ package org.springframework.ide.eclipse.boot.dash.model;
 import java.util.Comparator;
 
 import org.eclipse.core.runtime.ListenerList;
-import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
-import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
-
-import static org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode.*;
+import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 
 public abstract class AbstractBootDashModel extends AbstractDisposable implements BootDashModel {
 

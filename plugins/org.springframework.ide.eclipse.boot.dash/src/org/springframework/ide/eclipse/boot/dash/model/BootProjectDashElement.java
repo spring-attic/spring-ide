@@ -16,7 +16,6 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
-import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
@@ -26,6 +25,7 @@ import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathL
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager.ClasspathListener;
 import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 

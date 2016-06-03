@@ -58,11 +58,9 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.livexp.ElementwiseListener;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
-import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.livexp.ui.ReflowUtil;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
@@ -81,6 +79,7 @@ import org.springframework.ide.eclipse.boot.dash.views.RunStateAction;
 import org.springframework.ide.eclipse.boot.properties.editor.util.ArrayUtils;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
@@ -223,12 +222,12 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 	/**
 	 * Listener which adds element set listener to each section model.
 	 */
-	final private ValueListener<Set<BootDashModel>> ELEMENTS_SET_LISTENER_ADAPTER = new ElementwiseListener<BootDashModel>() {
-		protected void added(LiveExpression<Set<BootDashModel>> exp, BootDashModel e) {
+	final private ValueListener<ImmutableSet<BootDashModel>> ELEMENTS_SET_LISTENER_ADAPTER = new ElementwiseListener<BootDashModel>() {
+		protected void added(LiveExpression<ImmutableSet<BootDashModel>> exp, BootDashModel e) {
 			e.getElements().addListener(ELEMENTS_SET_LISTENER);
 			e.addModelStateListener(MODEL_STATE_LISTENER);
 		}
-		protected void removed(LiveExpression<Set<BootDashModel>> exp, BootDashModel e) {
+		protected void removed(LiveExpression<ImmutableSet<BootDashModel>> exp, BootDashModel e) {
 			e.getElements().removeListener(ELEMENTS_SET_LISTENER);
 			e.removeModelStateListener(MODEL_STATE_LISTENER);
 		}

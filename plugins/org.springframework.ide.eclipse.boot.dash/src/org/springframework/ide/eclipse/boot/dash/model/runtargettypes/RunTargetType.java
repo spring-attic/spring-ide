@@ -11,12 +11,12 @@
 package org.springframework.ide.eclipse.boot.dash.model.runtargettypes;
 
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.model.Nameable;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.util.template.Templates;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 
 /**
  * A run target type represents a type of 'deployment environment' to which

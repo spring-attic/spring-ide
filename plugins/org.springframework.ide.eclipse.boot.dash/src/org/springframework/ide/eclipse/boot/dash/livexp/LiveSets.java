@@ -20,6 +20,8 @@ import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Sets;
 
+import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
+
 /**
  * @author Kris De Volder
  */
@@ -40,7 +42,7 @@ public class LiveSets {
 		} else if (e2==EMPTY_SET) {
 			return (ObservableSet<R>) e1;
 		} else {
-			return new LiveUnion<R, A, B>(e1, e2);
+			return new LiveUnion<>(e1, e2);
 		}
 	}
 

@@ -11,12 +11,12 @@
 package org.springframework.ide.eclipse.boot.dash.views;
 
 import org.eclipse.jface.action.IAction;
-import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.ToggleFiltersModel;
 import org.springframework.ide.eclipse.boot.dash.model.ToggleFiltersModel.FilterChoice;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
 import com.google.common.collect.ImmutableSet;

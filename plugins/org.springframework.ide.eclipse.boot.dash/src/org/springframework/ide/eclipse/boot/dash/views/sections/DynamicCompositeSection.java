@@ -23,9 +23,9 @@ import org.eclipse.swt.widgets.Control;
 import org.springframework.ide.eclipse.boot.dash.livexp.DelegatingLiveSet;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
-import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.livexp.ui.ReflowUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
@@ -48,7 +48,7 @@ public class DynamicCompositeSection<M> extends PageSection implements MultiSele
 	/**
 	 * Keeps track of sections per model.
 	 */
-	private Map<M, SubSection> sectionsMap = new LinkedHashMap<M, SubSection>();
+	private Map<M, SubSection> sectionsMap = new LinkedHashMap<>();
 
 	/**
 	 * Keeps track of the selected elements
@@ -76,7 +76,7 @@ public class DynamicCompositeSection<M> extends PageSection implements MultiSele
 	public <T> DynamicCompositeSection(IPageWithSections owner, LiveExpression<Set<M>> models, SectionFactory<M> sectionFactory, Class<T> selectionType) {
 		super(owner);
 		this.models = models;
-		DelegatingLiveSet<T> _elements = new DelegatingLiveSet<T>();
+		DelegatingLiveSet<T> _elements = new DelegatingLiveSet<>();
 		this.elements = _elements;
 		this.sectionFactory = sectionFactory;
 		this.selectionType = selectionType;
@@ -111,11 +111,11 @@ public class DynamicCompositeSection<M> extends PageSection implements MultiSele
 		Set<M> currentModels = models.getValue();
 
 		//Missing: current models for which we have no section
-		Set<M> missing = new LinkedHashSet<M>(currentModels);
+		Set<M> missing = new LinkedHashSet<>(currentModels);
 		missing.removeAll(sectionsMap.keySet());
 
 		//Extra: current sections for which there is no more model
-		Set<M> extra = new HashSet<M>();
+		Set<M> extra = new HashSet<>();
 		extra.addAll(sectionsMap.keySet());
 		extra.removeAll(currentModels);
 
@@ -156,11 +156,11 @@ public class DynamicCompositeSection<M> extends PageSection implements MultiSele
 	}
 
 	private void createSectionFor(M m) {
-		Set<Control> oldWidgets = new HashSet<Control>(Arrays.asList(composite.getChildren()));
+		Set<Control> oldWidgets = new HashSet<>(Arrays.asList(composite.getChildren()));
 		SubSection s = new SubSection();
 		s.section = sectionFactory.create(m);
 		s.section.createContents(composite);
-		s.ui = new HashSet<Control>(Arrays.asList(composite.getChildren()));
+		s.ui = new HashSet<>(Arrays.asList(composite.getChildren()));
 		s.ui.removeAll(oldWidgets);
 		sectionsMap.put(m, s);
 	}

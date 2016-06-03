@@ -19,10 +19,11 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.ListenerList;
-import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
+import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
@@ -38,7 +39,7 @@ import com.google.common.collect.ImmutableSet;
  */
 public class BootDashModelManager implements Disposable {
 
-	private LiveSet<BootDashModel> models;
+	private LiveSetVariable<BootDashModel> models;
 	private Map<String, BootDashModel> modelsPerTargetId;
 	private ObservableSet<RunTarget> targets;
 	private RunTargetChangeListener targetListener;
@@ -54,10 +55,10 @@ public class BootDashModelManager implements Disposable {
 		this.targets = targets;
 	}
 
-	public LiveExpression<Set<BootDashModel>> getModels() {
+	public LiveExpression<ImmutableSet<BootDashModel>> getModels() {
 		if (models == null) {
-			models = new LiveSet<BootDashModel>(new LinkedHashSet<BootDashModel>());
-			modelsPerTargetId = new LinkedHashMap<String, BootDashModel>();
+			models = new LiveSetVariable<>(new LinkedHashSet<BootDashModel>());
+			modelsPerTargetId = new LinkedHashMap<>();
 			targets.addListener(targetListener = new RunTargetChangeListener());
 		}
 		return models;
@@ -68,7 +69,7 @@ public class BootDashModelManager implements Disposable {
 		@Override
 		public void gotValue(LiveExpression<ImmutableSet<RunTarget>> exp, ImmutableSet<RunTarget> actualRunTargets) {
 			synchronized (modelsPerTargetId) {
-				Map<String, RunTarget> currentTargetsPerId = new LinkedHashMap<String, RunTarget>();
+				Map<String, RunTarget> currentTargetsPerId = new LinkedHashMap<>();
 				if (actualRunTargets != null) {
 					for (RunTarget runTarget : actualRunTargets) {
 						String id = runTarget.getId();
@@ -82,7 +83,7 @@ public class BootDashModelManager implements Disposable {
 				boolean hasChanged = false;
 
 				// Add models for new targets
-				Set<BootDashModel> modelsToKeep = new LinkedHashSet<BootDashModel>();
+				Set<BootDashModel> modelsToKeep = new LinkedHashSet<>();
 
 				for (Entry<String, RunTarget> entry : currentTargetsPerId.entrySet()) {
 					if (modelsPerTargetId.get(entry.getKey()) == null) {
@@ -146,8 +147,8 @@ public class BootDashModelManager implements Disposable {
 					}
 				}
 			};
-			getModels().addListener(new ValueListener<Set<BootDashModel>>() {
-				public void gotValue(LiveExpression<Set<BootDashModel>> exp, Set<BootDashModel> models) {
+			getModels().addListener(new ValueListener<ImmutableSet<BootDashModel>>() {
+				public void gotValue(LiveExpression<ImmutableSet<BootDashModel>> exp, ImmutableSet<BootDashModel> models) {
 					for (BootDashModel m : models) {
 						m.addElementStateListener(upstreamElementStateListener);
 					}

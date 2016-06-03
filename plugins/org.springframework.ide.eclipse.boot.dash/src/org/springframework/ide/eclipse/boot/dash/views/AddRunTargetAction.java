@@ -11,10 +11,10 @@
 package org.springframework.ide.eclipse.boot.dash.views;
 
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 
 public class AddRunTargetAction extends AbstractBootDashAction {
 

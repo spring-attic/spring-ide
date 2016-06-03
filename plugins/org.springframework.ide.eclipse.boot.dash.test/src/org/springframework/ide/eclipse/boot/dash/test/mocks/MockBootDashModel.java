@@ -10,17 +10,17 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test.mocks;
 
-import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetVariable;
-import org.springframework.ide.eclipse.boot.dash.livexp.ObservableSet;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import static org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode.SYNC;
+
 import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
-
-import static org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode.*;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
+import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 
 /**
  * We use mostly use mockito to mock BootDashModel, but some test cases need
