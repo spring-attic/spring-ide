@@ -21,8 +21,10 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PerspectiveAdapter;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.springsource.ide.eclipse.commons.ui.ImageDescriptorRegistry;
@@ -54,6 +56,10 @@ public class SpringUIPlugin extends AbstractUIPlugin {
 
 	public static final String SPRING_EXPLORER_CONTENT_PROVIDER_ID = PLUGIN_ID
 			+ ".navigator.springExplorerContent";
+	
+	private static final String SPRING_PERSPECTIVE_ID = "com.springsource.sts.ide.perspective";
+	private static final String ECLEMMA_COVERAGE_ACTION_SET = "com.mountainminds.eclemma.ui.CoverageActionSet";
+	private static final String ECLEMMA_UI_BUNDLE_ID = "com.mountainminds.eclemma.ui";
 
 	/** The shared instance. */
 	private static SpringUIPlugin plugin;
@@ -88,6 +94,41 @@ public class SpringUIPlugin extends AbstractUIPlugin {
 			imageDescriptorRegistry = null;
 		}
 		super.stop(context);
+	}
+	
+	
+
+	@Override
+	public void start(BundleContext context) throws Exception {
+		super.start(context);
+		addEclemmaActionSetToSpringPerspective();
+	}
+	
+	/*
+	 * Add Eclemma action set to Spring perspective is Eclemma UI plugin is vailable 
+	 */
+	private void addEclemmaActionSetToSpringPerspective() {
+		if (Platform.getBundle(ECLEMMA_UI_BUNDLE_ID) != null) {
+			final IWorkbenchWindow activeWorkbenchWindow = getWorkbench().getActiveWorkbenchWindow();
+			IWorkbenchPage activePage = activeWorkbenchWindow.getActivePage();
+			if (SPRING_PERSPECTIVE_ID.equals(activePage.getPerspective().getId())) {
+				activePage.showActionSet(ECLEMMA_COVERAGE_ACTION_SET);
+			} else {
+				activeWorkbenchWindow.addPerspectiveListener(new PerspectiveAdapter() {
+					@Override
+					public void perspectiveActivated(IWorkbenchPage page, IPerspectiveDescriptor perspectiveDescriptor) {
+						super.perspectiveActivated(page, perspectiveDescriptor);
+						if (SPRING_PERSPECTIVE_ID.equals(perspectiveDescriptor.getId())) {
+							page.showActionSet(ECLEMMA_COVERAGE_ACTION_SET);
+							/*
+							 * Yes, this listener can be removed while listener body is being executed :-)
+							 */
+							activeWorkbenchWindow.removePerspectiveListener(this);
+				        }
+					}
+				});
+			}
+		}
 	}
 
 	public static ImageDescriptorRegistry getImageDescriptorRegistry() {
