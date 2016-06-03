@@ -10,6 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.cloudfoundry.manifest.editor;
 
+import java.util.Collection;
+
+import javax.inject.Provider;
+
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
@@ -58,5 +62,20 @@ public class ManifestEditorActivator extends AbstractUIPlugin {
 	public static void log(Throwable e) {
 		getDefault().getLog().log(ExceptionUtil.status(e));
 	}
+	
+	
+	/*
+	 * 
+	 * "Framework" to contribute value hints into manifest editor
+	 */
+	
+	private Provider<Collection<YValueHint>> buildpackProvider;
 
+	public void setBuildpackProvider(Provider<Collection<YValueHint>> buildpackProvider) {
+		this.buildpackProvider = buildpackProvider;
+	}
+	
+	public Provider<Collection<YValueHint>> getBuildpackProvider() {
+		return this.buildpackProvider;
+	}
 }

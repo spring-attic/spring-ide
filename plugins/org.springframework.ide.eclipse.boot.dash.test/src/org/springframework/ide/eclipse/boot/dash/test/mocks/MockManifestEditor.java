@@ -47,7 +47,7 @@ public class MockManifestEditor extends MockYamlEditor {
 		Yaml yaml = new Yaml();
 		YamlStructureProvider structureProvider = YamlStructureProvider.DEFAULT;
 		YamlASTProvider astProvider = new YamlASTProvider(yaml);
-		YamlSchema schema = new ManifestYmlSchema();
+		YamlSchema schema = new ManifestYmlSchema(null);
 		YamlAssistContextProvider assistContextProvider = new SchemaBasedYamlAssistContextProvider(schema);
 		HoverInfoProvider hoverProvider = new YamlHoverInfoProvider(astProvider, structureProvider, assistContextProvider);
 	}

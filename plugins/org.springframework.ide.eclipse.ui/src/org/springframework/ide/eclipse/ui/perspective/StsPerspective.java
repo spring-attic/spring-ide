@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.ui.perspective;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.search.ui.NewSearchUI;
@@ -29,8 +30,18 @@ import org.eclipse.ui.texteditor.templates.TemplatesView;
  * @version 2.3.0
  */
 public class StsPerspective implements IPerspectiveFactory {
+	
+	private static final String ECLEMMA_COVERAGE_ACTION_SET = "com.mountainminds.eclemma.ui.CoverageActionSet";
+	private static final String ECLEMMA_UI_BUNDLE_ID = "com.mountainminds.eclemma.ui";
 
 	public void createInitialLayout(IPageLayout layout) {
+		/*
+		 * Install Eclemma action set on Spring perspective if Eclemma is available
+		 */
+		if (Platform.getBundle(ECLEMMA_UI_BUNDLE_ID) != null) {
+			layout.addActionSet(ECLEMMA_COVERAGE_ACTION_SET);
+		}
+		
 		String editorArea = layout.getEditorArea();
 
 		IFolderLayout folder = layout.createFolder("left", IPageLayout.LEFT, (float) 0.25, editorArea); //$NON-NLS-1$

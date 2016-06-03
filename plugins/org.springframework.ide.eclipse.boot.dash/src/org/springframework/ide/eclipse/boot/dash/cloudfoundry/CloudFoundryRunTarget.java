@@ -102,6 +102,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 			this.buildpacks = null;
 			this.stacks = null;
 			cachedClient.setValue(createClient());
+			this.buildpacks = getClient().getBuildpacks();
 		} catch (Exception e) {
 			cachedClient.setValue(null);
 			throw e;
@@ -235,7 +236,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 		return "https://api.run.pivotal.io".equals(getUrl());
 	}
 
-	private String getUrl() {
+	public String getUrl() {
 		String url = targetProperties.getUrl();
 		while (url.endsWith("/")) {
 			url = url.substring(0, url.length()-1);
@@ -248,23 +249,25 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 		return client.getSshClientSupport();
 	}
 
+	public List<CFBuildpack> getBuildpacks() throws Exception {
+		return this.buildpacks;
+	}
+
 	public String getBuildpack(IProject project) {
 		// Only support Java project for now
 		IJavaProject javaProject = JavaCore.create(project);
 
 		if (javaProject != null) {
 			try {
-				if (this.buildpacks == null) {
-					// Cache it to avoid frequent calls to CF
-					this.buildpacks = getClient().getBuildpacks();
-				}
 
-				if (this.buildpacks != null) {
+
+				List<CFBuildpack> buildpacks = getBuildpacks();
+				if (buildpacks != null) {
 					String javaBuildpack = null;
 					// Only chose a java build iff ONE java buildpack exists
 					// that contains the java_buildpack pattern.
 
-					for (CFBuildpack bp : this.buildpacks) {
+					for (CFBuildpack bp : buildpacks) {
 						// iterate through all buildpacks to make sure only
 						// ONE java buildpack exists
 						if (bp.getName().contains("java_buildpack")) {

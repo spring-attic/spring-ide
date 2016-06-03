@@ -30,7 +30,7 @@ import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructu
  */
 public class ManifestYamlSourceViewerConfiguration extends AbstractYamlSourceViewerConfiguration {
 
-	private ManifestYmlSchema schema = new ManifestYmlSchema();
+	private ManifestYmlSchema schema = new ManifestYmlSchema(ManifestEditorActivator.getDefault().getBuildpackProvider());
 	private YamlAssistContextProvider assistContextProvider = new SchemaBasedYamlAssistContextProvider(schema);
 
 	public ManifestYamlSourceViewerConfiguration(Provider<Shell> shellProvider) {
