@@ -138,7 +138,7 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 		final ObservableSet<T> summary = new ObservableSet<T>() {
 			@Override
 			protected ImmutableSet<T> compute() {
-				Builder<T> builder = ImmutableSortedSet.naturalOrder();
+				ImmutableSet.Builder<T> builder = ImmutableSortedSet.naturalOrder();
 				add(builder, BootProjectDashElement.this);
 				for (BootDashElement child : getCurrentChildren()) {
 					add(builder, child);
@@ -146,7 +146,7 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 				return builder.build();
 			}
 
-			protected void add(Builder<T> builder, BootDashElement child) {
+			protected void add(ImmutableSet.Builder<T> builder, BootDashElement child) {
 				T v = getter.apply(child);
 				if (v!=null) {
 					builder.add(v);

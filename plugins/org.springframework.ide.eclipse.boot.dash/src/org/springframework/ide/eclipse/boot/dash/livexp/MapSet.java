@@ -42,7 +42,7 @@ public class MapSet<S, T> extends ObservableSet<T> {
 
 	@Override
 	protected ImmutableSet<T> compute() {
-		Builder<T> builder = new ImmutableSet.Builder<>();
+		ImmutableSet.Builder<T> builder = ImmutableSet.builder();
 		for (S a : input.getValues()) {
 			T v = function.apply(a);
 			//Check for null, generally google collections don't allow nulls (which is good)
