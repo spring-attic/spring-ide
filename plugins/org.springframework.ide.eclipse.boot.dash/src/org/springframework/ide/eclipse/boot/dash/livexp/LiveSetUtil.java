@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.livexp;
 
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveSets;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 
 import com.google.common.base.Function;
@@ -23,16 +24,28 @@ import com.google.common.collect.Sets;
 /**
  * @author Kris De Volder
  */
-public class LiveSets {
+public class LiveSetUtil {
 
+	/**
+	 * Deprecated: moved to commons see {@link LiveSets}
+	 */
 	@SuppressWarnings("rawtypes")
+	@Deprecated
 	private static final ObservableSet EMPTY_SET = (ObservableSet) ObservableSet.constant(ImmutableSet.of());
 
+	/**
+	 * Deprecated: moved to commons see {@link LiveSets}
+	 */
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public static <T> ObservableSet<T> emptySet(Class<T> t) {
 		return EMPTY_SET;
 	}
 
+	/**
+	 * Deprecated: moved to commons see {@link LiveSets}
+	 */
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public static <R, A extends R, B extends R> ObservableSet<R> union(ObservableSet<A> e1, ObservableSet<B> e2) {
 		if (e1==EMPTY_SET) {
@@ -43,8 +56,6 @@ public class LiveSets {
 			return new LiveUnion<>(e1, e2);
 		}
 	}
-
-	//////////////////////////////////////////////////////////////////////
 
 	private static class LiveUnion<T, A extends T, B extends T> extends ObservableSet<T> {
 

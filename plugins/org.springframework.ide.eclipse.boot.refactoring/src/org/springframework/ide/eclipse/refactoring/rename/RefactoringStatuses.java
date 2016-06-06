@@ -15,7 +15,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 public class RefactoringStatuses {
-	
+
 	public static RefactoringStatus error(Exception e) {
 		return RefactoringStatus.create(ExceptionUtil.status(e));
 	}
@@ -23,12 +23,17 @@ public class RefactoringStatuses {
 	public static RefactoringStatus error(String string) {
 		return RefactoringStatus.createErrorStatus(string);
 	}
-	
+
 	public static final RefactoringStatus OK = RefactoringStatus.create(Status.OK_STATUS);
 
 	public static RefactoringStatus fatal(Throwable e) {
 		return RefactoringStatus.createFatalErrorStatus(ExceptionUtil.getMessage(e));
 	}
+
+	public static RefactoringStatus warn(String msg) {
+		return RefactoringStatus.createWarningStatus(msg);
+	}
+
 	public static RefactoringStatus fatal(String msg) {
 		return RefactoringStatus.createFatalErrorStatus(msg);
 	}

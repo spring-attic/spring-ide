@@ -77,7 +77,7 @@ import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDia
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel.Result;
 import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
-import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
+import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetUtil;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
@@ -149,7 +149,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 
 	private final LiveSetVariable<CloudServiceInstanceDashElement> services = new LiveSetVariable<>(AsyncMode.SYNC);
 	private final CloudDashApplications applications = new CloudDashApplications(this);
-	private final ObservableSet<BootDashElement> allElements = LiveSets.union(applications.getApplications(), services);
+	private final ObservableSet<BootDashElement> allElements = LiveSetUtil.union(applications.getApplications(), services);
 
 	private BootDashModelConsoleManager consoleManager;
 

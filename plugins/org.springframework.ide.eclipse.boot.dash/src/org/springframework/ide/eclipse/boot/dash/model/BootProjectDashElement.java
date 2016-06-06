@@ -15,7 +15,7 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
-import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
+import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetUtil;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
@@ -179,7 +179,7 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 	@Override
 	public ObservableSet<BootDashElement> getChildren() {
 		if (children==null) {
-			children = LiveSets.mapSync(getBootDashModel().launchConfTracker.getConfigs(delegate),
+			children = LiveSetUtil.mapSync(getBootDashModel().launchConfTracker.getConfigs(delegate),
 					new Function<ILaunchConfiguration, BootDashElement>() {
 						public BootDashElement apply(ILaunchConfiguration input) {
 							return childFactory.createOrGet(input);

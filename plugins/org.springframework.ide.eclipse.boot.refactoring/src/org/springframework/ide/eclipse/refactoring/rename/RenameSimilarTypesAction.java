@@ -33,7 +33,7 @@ public class RenameSimilarTypesAction extends ObjectActionDelegate implements IW
 		Shell shell = getShell();
 		if (fTarget != null && shell != null) {
 			RenameSimilarTypesModel model = new RenameSimilarTypesModel();
-			model.setTarget(fTarget);
+			model.setOldName(fTarget.getElementName());
 			model.setNewName(fTarget.getElementName());
 			String dialogTitle = model.getDialogTitle();
 			run(new RenameSimilarTypesWizard(model, dialogTitle), shell, dialogTitle);
@@ -66,7 +66,7 @@ public class RenameSimilarTypesAction extends ObjectActionDelegate implements IW
 	}
 
 	//////// cruft below //////////////////////////
-	
+
 	private IType fTarget = null;
 
 	private IWorkbenchWindow window= null;
@@ -86,7 +86,7 @@ public class RenameSimilarTypesAction extends ObjectActionDelegate implements IW
 		}
 		return super.getWorkbenchWindow();
 	}
-	
+
 	private Shell getShell() {
 		IWorkbenchWindow w = getWorkbenchWindow();
 		if (w!=null) {

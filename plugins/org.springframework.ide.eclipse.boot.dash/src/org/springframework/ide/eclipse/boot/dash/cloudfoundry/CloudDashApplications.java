@@ -13,7 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 import java.util.Collection;
 
 import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
-import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
+import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetUtil;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
@@ -47,7 +47,7 @@ public class CloudDashApplications extends AbstractDisposable {
 				return new CloudAppDashElement(model, appName, model.getPropertyStore());
 			}
 		};
-		applications = LiveSets.map(appNames, AsyncMode.SYNC, AsyncMode.ASYNC, new Function<String, CloudAppDashElement>() {
+		applications = LiveSetUtil.map(appNames, AsyncMode.SYNC, AsyncMode.ASYNC, new Function<String, CloudAppDashElement>() {
 			@Override
 			public CloudAppDashElement apply(String appName) {
 				return factory.createOrGet(appName);

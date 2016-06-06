@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
+import org.springframework.ide.eclipse.boot.dash.livexp.LiveSetUtil;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.ActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
@@ -202,7 +202,7 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 
 	@Override
 	public ObservableSet<BootDashElement> getChildren() {
-		return LiveSets.emptySet(BootDashElement.class);
+		return LiveSetUtil.emptySet(BootDashElement.class);
 	}
 
 	@Override

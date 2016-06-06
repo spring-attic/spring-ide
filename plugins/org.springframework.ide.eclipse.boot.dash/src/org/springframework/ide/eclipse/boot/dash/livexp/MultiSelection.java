@@ -25,7 +25,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 public final class MultiSelection<T> {
 
 	public static <T> MultiSelection<T> empty(Class<T> type) {
-		return new MultiSelection<T>(type, LiveSets.emptySet(type));
+		return new MultiSelection<T>(type, LiveSetUtil.emptySet(type));
 	}
 
 	/**
@@ -33,14 +33,14 @@ public final class MultiSelection<T> {
 	 */
 	public static <T> MultiSelection<T> singletonOrEmpty(Class<T> type,
 			LiveExpression<T> singleSelection) {
-		return new MultiSelection<T>(type, LiveSets.singletonOrEmpty(singleSelection));
+		return new MultiSelection<T>(type, LiveSetUtil.singletonOrEmpty(singleSelection));
 	}
 
 
 
 	public static <T> MultiSelection<T> union(MultiSelection<T> a, MultiSelection<T> b) {
 		Assert.isLegal(a.getElementType().equals(b.getElementType()));
-		return from(a.getElementType(), LiveSets.union(a.getElements(), b.getElements()));
+		return from(a.getElementType(), LiveSetUtil.union(a.getElements(), b.getElements()));
 	}
 
 	private final Class<T> elementType;
@@ -66,7 +66,7 @@ public final class MultiSelection<T> {
 			return converted;
 		} else {
 			//Selection may contain objects that are not instances of retainType.
-			return from(retainType, LiveSets.filter(getElements(), retainType));
+			return from(retainType, LiveSetUtil.filter(getElements(), retainType));
 		}
 	}
 

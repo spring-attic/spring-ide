@@ -10,102 +10,95 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.refactoring.rename;
 
-import java.util.List;
+import static org.springframework.ide.eclipse.refactoring.rename.RefactoringStatuses.OK;
+import static org.springframework.ide.eclipse.refactoring.rename.RefactoringStatuses.*;
+import static org.springframework.ide.eclipse.refactoring.rename.RefactoringStatuses.fatal;
+
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.springframework.util.StringUtils;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
-import org.springframework.util.StringUtils;
-
-import com.google.common.collect.ImmutableList;
-
-import static org.springframework.ide.eclipse.refactoring.rename.RefactoringStatuses.*;
+import com.google.common.collect.ImmutableSet;
 
 public class RenameSimilarTypesRefactoring extends Refactoring {
 
 	public static final String REFACTORING_NAME = "Rename Similar Types";
-	
+
 	public static final Pattern CLASS_NAME = Pattern.compile(
 			"\\p{javaJavaIdentifierStart}\\p{javaJavaIdentifierPart}*"
 	);
 
+	private IJavaProject project;
+
 	/**
-	 * The 'main' type being renamed.
+	 * Name fragment to look for.
 	 */
-	private IType fTarget;
+	private String oldName;
+
+	/**
+	 * What to replace the fragment with.
+	 */
 	private String newName;
-	
-	private List<IType> similarTypes = ImmutableList.of();
+
+	/**
+	 * All types selected for renaming.
+	 */
+	private Set<IType> targets;
+
+	private ImmutableSet<IType> foundTypes;
+
+
+
+	public void setOldName(String oldName) {
+		this.oldName = oldName;
+	}
 
 	public void setNewName(String newName) {
 		this.newName = newName;
-	}
-	public void setTarget(IType target) {
-		this.fTarget = target;
 	}
 	@Override
 	public String getName() {
 		return REFACTORING_NAME;
 	}
+
 	@Override
-	public RefactoringStatus checkInitialConditions(IProgressMonitor pm)
-			throws CoreException, OperationCanceledException {
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		try {
-			if (fTarget==null) {
-				return fatal("No target type to rename selected");
-			}
-			if (fTarget.isAnonymous()) {
-				return fatal("Anonymous types can't be renamed");
-			}
-			if (!fTarget.exists()) {
-				return fatal("Type '"+fTarget.getFullyQualifiedName()+"' doesn't exist");
+			if (!StringUtils.hasText(oldName)) {
+				return error("Old name is not defined");
 			}
 			if (!StringUtils.hasText(newName)) {
 				return fatal("New name is not defined");
 			}
-			if (newName.equals(fTarget.getElementName())) {
-				return error("New name '"+newName+"' is the same as the old name");
+			if (newName.equals(oldName)) {
+				return warn("New name '"+newName+"' is the same as the old name");
+			}
+			if (foundTypes.isEmpty()) {
+				return error("No types matching '"+oldName+"' found");
+			}
+			if (targets.isEmpty()) {
+				return warn("No types are selected for renaming");
 			}
 			if (!CLASS_NAME.matcher(newName).matches()) {
-				return fatal("'"+newName+"' is not a valid class name");
-			}
-			String newFqName = getNewFqName();
-			IType newType = getJavaProject().findType(newFqName, new NullProgressMonitor());
-			if (newType!=null && newType.exists()) {
-				return fatal("A type with name '"+newFqName+"' already exists");
+				return fatal("'"+newName+"' is not a valid type name");
 			}
 			return OK;
 		} catch (Exception e) {
 			return fatal(e);
 		}
 	}
-	
-	private IJavaProject getJavaProject() {
-		if (fTarget!=null) {
-			return fTarget.getJavaProject();
-		}
-		return null;
-	}
-	/**
-	 * Determines the new fqName for the target type
-	 */
-	private String getNewFqName() {
-		String fqName = fTarget.getFullyQualifiedName();
-		String replaceName = fTarget.getElementName();
-		fqName = fqName.substring(0, fqName.length()-replaceName.length()) 
-				+ newName;
-		return fqName;
-	}
+
 	@Override
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm)
 			throws CoreException, OperationCanceledException {
@@ -116,9 +109,12 @@ public class RenameSimilarTypesRefactoring extends Refactoring {
 		throw ExceptionUtil.coreException("The refactoring has not been implemented yet!");
 	}
 
-	/////////////////////////////////////////////////////////
+	public void setSelectedTypes(Set<IType> value) {
+		this.targets = value;
+	}
 
-
-
+	public void setFoundTypes(ImmutableSet<IType> value) {
+		this.foundTypes = value;
+	}
 
 }
