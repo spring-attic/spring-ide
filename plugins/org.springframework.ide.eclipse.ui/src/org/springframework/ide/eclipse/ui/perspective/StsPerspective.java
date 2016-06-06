@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.ui.perspective;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.search.ui.NewSearchUI;
@@ -20,6 +21,7 @@ import org.eclipse.ui.IPerspectiveFactory;
 import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.ui.progress.IProgressConstants;
 import org.eclipse.ui.texteditor.templates.TemplatesView;
+import org.springframework.ide.eclipse.ui.SpringUIPlugin;
 
 /**
  * Default perspective for STS
@@ -31,6 +33,10 @@ import org.eclipse.ui.texteditor.templates.TemplatesView;
 public class StsPerspective implements IPerspectiveFactory {
 	
 	public void createInitialLayout(IPageLayout layout) {
+		
+		if (Platform.getBundle(SpringUIPlugin.ECLEMMA_UI_BUNDLE_ID) != null) {
+			layout.addActionSet(SpringUIPlugin.ECLEMMA_COVERAGE_ACTION_SET);
+		}
 		
 		String editorArea = layout.getEditorArea();
 
