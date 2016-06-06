@@ -82,7 +82,7 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 	 * How long to wait for a deployed app to show up in the model? This should
 	 * be relatively short.
 	 */
-	public static final long APP_IS_VISIBLE_TIMEOUT = 10_000;
+	public static final long APP_IS_VISIBLE_TIMEOUT = 20_000;
 
 	/**
 	 * How long to wait for a deployed app to transition to running state.
