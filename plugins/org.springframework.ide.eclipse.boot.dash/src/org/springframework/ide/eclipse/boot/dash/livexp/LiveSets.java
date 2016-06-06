@@ -12,15 +12,13 @@ package org.springframework.ide.eclipse.boot.dash.livexp;
 
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Sets;
-
-import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 
 /**
  * @author Kris De Volder
@@ -101,6 +99,7 @@ public class LiveSets {
 		};
 	}
 
+	@SuppressWarnings("unchecked")
 	public static <A,R> ObservableSet<R> map(ObservableSet<A> input, AsyncMode asyncRefresh, AsyncMode asyncEvents, Function<A, R> function) {
 		if (input==EMPTY_SET) {
 			return EMPTY_SET;
@@ -133,7 +132,7 @@ public class LiveSets {
 			}
 
 			@Override
-			protected Builder<R> immutableSetBuilder() {
+			protected ImmutableSortedSet.Builder<R> immutableSetBuilder() {
 				return ImmutableSortedSet.naturalOrder();
 			}
 		};

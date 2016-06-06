@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Refactoring
+Bundle-SymbolicName: org.springframework.ide.eclipse.boot.refactoring;singleton:=true
+Bundle-Version: 3.8.0.qualifier
+Bundle-Vendor: Pivotal Inc
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.jdt.core,
+ com.google.guava,
+ org.eclipse.core.runtime,
+ org.eclipse.ltk.ui.refactoring,
+ org.eclipse.ltk.core.refactoring,
+ org.springsource.ide.eclipse.commons.livexp,
+ org.springframework.core,
+ org.eclipse.jdt.debug.ui,
+ org.springsource.ide.eclipse.commons.frameworks.core,
+ org.eclipse.core.resources,
+ io.projectreactor.reactor-core,
+ org.reactivestreams.reactive-streams;bundle-version="1.0.0",
+ org.springframework.ide.eclipse.boot

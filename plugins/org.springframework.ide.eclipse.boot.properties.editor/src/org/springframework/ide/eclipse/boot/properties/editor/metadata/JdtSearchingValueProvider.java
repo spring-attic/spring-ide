@@ -23,8 +23,8 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProviderRegistry.ValueProviderStrategy;
-import org.springframework.ide.eclipse.boot.properties.editor.util.FluxJdtSearch;
 import org.springframework.ide.eclipse.editor.support.util.FuzzyMatcher;
+import org.springsource.ide.eclipse.commons.frameworks.core.async.FluxJdtSearch;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

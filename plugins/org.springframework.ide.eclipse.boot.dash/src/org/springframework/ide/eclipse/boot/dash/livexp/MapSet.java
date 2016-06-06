@@ -10,11 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.livexp;
 
+import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
+
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSet.Builder;
-
-import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 
 /**
  * Represents a Set constructed by applying a function to each element of another
@@ -42,7 +41,7 @@ public class MapSet<S, T> extends ObservableSet<T> {
 
 	@Override
 	protected ImmutableSet<T> compute() {
-		Builder<T> builder = new ImmutableSet.Builder<>();
+		ImmutableSet.Builder<T> builder = ImmutableSet.builder();
 		for (S a : input.getValues()) {
 			T v = function.apply(a);
 			//Check for null, generally google collections don't allow nulls (which is good)

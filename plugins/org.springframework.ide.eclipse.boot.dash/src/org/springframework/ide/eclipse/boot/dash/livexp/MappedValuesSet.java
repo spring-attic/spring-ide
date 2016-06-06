@@ -71,7 +71,7 @@ public abstract class MappedValuesSet<T, R> extends ObservableSet<R> {
 
 	@Override
 	protected ImmutableSet<R> compute() {
-		Builder<R> builder = immutableSetBuilder();
+		ImmutableSet.Builder<R> builder = immutableSetBuilder();
 		for (LiveExpression<T> exp : target.getValues()) {
 			R val = applyFun(exp.getValue());
 			if (val!=null) {
@@ -86,7 +86,7 @@ public abstract class MappedValuesSet<T, R> extends ObservableSet<R> {
 	 * be constructed to hold the mapped values. For example, a subclass may want to use ImmutableSortedSet instead
 	 * of a plain ImmutableSet which iterates elements in unpredictable order.
 	 */
-	protected Builder<R> immutableSetBuilder() {
+	protected ImmutableSet.Builder<R> immutableSetBuilder() {
 		//TODO: pull up to superclass and use consistently anywhere a ObservableSet needs to
 		// construct a immutable set?
 		return ImmutableSet.builder();
