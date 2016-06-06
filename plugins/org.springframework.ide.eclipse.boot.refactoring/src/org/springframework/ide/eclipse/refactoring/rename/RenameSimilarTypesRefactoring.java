@@ -29,6 +29,8 @@ import org.springframework.util.StringUtils;
 
 import com.google.common.collect.ImmutableList;
 
+import static org.springframework.ide.eclipse.refactoring.rename.RefactoringStatuses.*;
+
 public class RenameSimilarTypesRefactoring extends Refactoring {
 
 	public static final String REFACTORING_NAME = "Rename Similar Types";
@@ -60,31 +62,31 @@ public class RenameSimilarTypesRefactoring extends Refactoring {
 			throws CoreException, OperationCanceledException {
 		try {
 			if (fTarget==null) {
-				return error("No target type to rename selected");
+				return fatal("No target type to rename selected");
 			}
 			if (fTarget.isAnonymous()) {
-				return error("Anonymous types can't be renamed");
+				return fatal("Anonymous types can't be renamed");
 			}
 			if (!fTarget.exists()) {
-				return error("Type '"+fTarget.getFullyQualifiedName()+"' doesn't exist");
+				return fatal("Type '"+fTarget.getFullyQualifiedName()+"' doesn't exist");
 			}
 			if (!StringUtils.hasText(newName)) {
-				return error("New name is not defined");
+				return fatal("New name is not defined");
 			}
 			if (newName.equals(fTarget.getElementName())) {
 				return error("New name '"+newName+"' is the same as the old name");
 			}
 			if (!CLASS_NAME.matcher(newName).matches()) {
-				return error("'"+newName+"' is not a valid class name");
+				return fatal("'"+newName+"' is not a valid class name");
 			}
 			String newFqName = getNewFqName();
 			IType newType = getJavaProject().findType(newFqName, new NullProgressMonitor());
 			if (newType!=null && newType.exists()) {
-				return error("A type with name '"+newFqName+"' already exists");
+				return fatal("A type with name '"+newFqName+"' already exists");
 			}
 			return OK;
 		} catch (Exception e) {
-			return error(e);
+			return fatal(e);
 		}
 	}
 	
@@ -116,15 +118,6 @@ public class RenameSimilarTypesRefactoring extends Refactoring {
 
 	/////////////////////////////////////////////////////////
 
-	private RefactoringStatus error(Exception e) {
-		return RefactoringStatus.create(ExceptionUtil.status(e));
-	}
-
-	private RefactoringStatus error(String string) {
-		return RefactoringStatus.createErrorStatus(string);
-	}
-	
-	private static final RefactoringStatus OK = RefactoringStatus.create(Status.OK_STATUS);
 
 
 
