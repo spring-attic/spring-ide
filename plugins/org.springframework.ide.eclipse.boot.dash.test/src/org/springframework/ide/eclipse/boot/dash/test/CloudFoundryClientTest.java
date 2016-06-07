@@ -522,11 +522,11 @@ public class CloudFoundryClientTest {
 	@Test
 	public void testGetBoundServices() throws Exception {
 		RetryUtil.retryWhen("testGetBoundServices", 5, FLAKY_SERVICE_BROKER, () -> {
-			String appName = appHarness.randomAppName();
 			String service1 = services.createTestService();
 			String service2 = services.createTestService();
 			String service3 = services.createTestService();
 
+			String appName = appHarness.randomAppName();
 			CFPushArguments params = new CFPushArguments();
 			params.setAppName(appName);
 			params.setApplicationData(getTestZip("testapp"));
@@ -814,10 +814,10 @@ public class CloudFoundryClientTest {
 	}
 
 	@Test public void startCanBeCanceled() throws Exception {
-		String appName = appHarness.randomAppName();
 		IProject project = projects.createBootWebProject("slow-starter");
 		File jarFile = BootJarPackagingTest.packageAsJar(project, ui);
 
+		String appName = appHarness.randomAppName();
 		try (CFPushArguments params = new CFPushArguments()) {
 			params.setAppName(appName);
 			params.setRoutes(appName+"."+CFAPPS_IO);
