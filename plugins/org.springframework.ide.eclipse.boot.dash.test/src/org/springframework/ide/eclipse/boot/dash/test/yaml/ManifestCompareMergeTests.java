@@ -129,6 +129,33 @@ public class ManifestCompareMergeTests {
 	}
 
 	@Test
+	public void test_memory_4() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setUris(Collections.singletonList("test-app.springsource.org"));
+		props.setMemory(2048);
+		performMergeTest(getTestFile("mergeTestsData/memory-4.yml"), props, null);
+	}
+
+	@Test
+	public void test_memory_5() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setUris(Collections.singletonList("test-app.springsource.org"));
+		props.setMemory(2048);
+		performMergeTest(getTestFile("mergeTestsData/memory-5.yml"), props, null);
+	}
+
+	@Test
+	public void test_memory_6() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setUris(Collections.singletonList("test-app.springsource.org"));
+		props.setMemory(3000);
+		performMergeTest(getTestFile("mergeTestsData/memory-5.yml"), props, getTestFile("mergeTestsData/memory-6-expected.yml"));
+	}
+
+	@Test
 	public void test_appNameNoMatch_1() throws Exception {
 		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
 		props.setAppName("app1");
