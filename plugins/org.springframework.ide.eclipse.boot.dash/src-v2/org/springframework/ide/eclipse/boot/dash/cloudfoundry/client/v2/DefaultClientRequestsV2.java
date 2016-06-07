@@ -65,6 +65,7 @@ import org.cloudfoundry.operations.services.GetServiceInstanceRequest;
 import org.cloudfoundry.operations.services.ServiceInstance;
 import org.cloudfoundry.operations.services.UnbindServiceInstanceRequest;
 import org.cloudfoundry.reactor.doppler.ReactorDopplerClient;
+import org.cloudfoundry.reactor.uaa.ReactorUaaClient;
 import org.cloudfoundry.reactor.util.ConnectionContextSupplier;
 import org.cloudfoundry.spring.client.SpringCloudFoundryClient;
 import org.cloudfoundry.util.PaginationUtils;
@@ -145,21 +146,23 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	private Mono<GetInfoResponse> info;
 
-	@Deprecated
-	private DefaultClientRequestsV1 v1;
 	private CloudFoundryClientCache clients;
 
 	public DefaultClientRequestsV2(CloudFoundryClientCache clients, CFClientParams params) throws Exception {
 		this.clients = clients;
 		this.params = params;
-		this.v1 = new DefaultClientRequestsV1(params);
 		this._client = clients.getOrCreate(params.getUsername(), params.getPassword(), params.getHost());
 		debug(">>> creating cf operations");
 		this._operations = new CloudFoundryOperationsBuilder()
 				.cloudFoundryClient(_client)
 				.dopplerClient(ReactorDopplerClient.builder()
-						.cloudFoundryClient((ConnectionContextSupplier)_client)
-						.build())
+					.cloudFoundryClient((ConnectionContextSupplier)_client)
+					.build()
+				)
+				.uaaClient(ReactorUaaClient.builder()
+					.cloudFoundryClient(_client)
+					.build()
+				)
 				.target(params.getOrgName(), params.getSpaceName())
 				.build();
 		debug("<<< creating cf operations");
@@ -410,10 +413,6 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	public void logout() {
 		_operations = null;
 		_client = null;
-		if (v1!=null) {
-			v1.logout();
-			v1 = null;
-		}
 	}
 
 	public boolean isLoggedOut() {
@@ -473,8 +472,11 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 			@Override
 			public String getSshCode() throws Exception {
-				return v1.getSshClientSupport().getSshCode();
-//				throw new OperationNotSupportedException("CF V2 client doesn't support SSH access yet");
+				return ReactorUtils.get(
+					log("operations.advanced.sshCode()",
+						_operations.advanced().sshCode()
+					)
+				);
 			}
 		};
 	}
@@ -501,7 +503,6 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 				);
 			})
 			.collectList()
-//			.log("getSpaces")
 		);
 	}
 
