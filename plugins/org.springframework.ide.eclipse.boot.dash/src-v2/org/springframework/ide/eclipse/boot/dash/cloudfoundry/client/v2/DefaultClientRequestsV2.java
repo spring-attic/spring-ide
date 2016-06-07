@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2;
 
-import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ReactorUtils.just;
-
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Collection;
@@ -70,7 +68,6 @@ import org.cloudfoundry.reactor.util.ConnectionContextSupplier;
 import org.cloudfoundry.spring.client.SpringCloudFoundryClient;
 import org.cloudfoundry.util.PaginationUtils;
 import org.osgi.framework.Version;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationRunningStateTracker;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
@@ -81,7 +78,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceIn
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1.DefaultClientRequestsV1;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.IApplicationLogConsole;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
@@ -146,10 +142,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	private Mono<GetInfoResponse> info;
 
-	private CloudFoundryClientCache clients;
-
 	public DefaultClientRequestsV2(CloudFoundryClientCache clients, CFClientParams params) throws Exception {
-		this.clients = clients;
 		this.params = params;
 		this._client = clients.getOrCreate(params.getUsername(), params.getPassword(), params.getHost());
 		debug(">>> creating cf operations");
@@ -214,11 +207,11 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		);
 		Mono<Integer> timeout = prefetch("timeout",
 				entity
-				.then((v) -> just(v.getHealthCheckTimeout()))
+				.then((v) -> Mono.justOrEmpty(v.getHealthCheckTimeout()))
 		);
 
 		Mono<String> command = prefetch("command",
-				entity.then((e) -> just(e.getCommand()))
+				entity.then((e) -> Mono.justOrEmpty(e.getCommand()))
 		);
 
 		return new ApplicationExtras() {
