@@ -158,7 +158,10 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 			String[] values = storedValue.split(BUILDPACK_SEPARATOR);
 			if (values != null) {
 				for (String val : values) {
-					bpVals.add(val.trim());
+					val = val.trim();
+					if (val.length() > 0) {
+						bpVals.add(val);
+					}
 				}
 			}
 		}
