@@ -262,7 +262,7 @@ public class ApplicationManifestHandler {
 
 		List<?> applicationsList = (List<?>) applicationsObj;
 
-		List<Map<?, ?>> applications = new ArrayList<Map<?, ?>>();
+		List<Map<?, ?>> applications = new ArrayList<>();
 
 		// Use only the first application entry
 		if (!applicationsList.isEmpty()) {
@@ -327,7 +327,7 @@ public class ApplicationManifestHandler {
 
 			List<Map<?, ?>> appMaps = getApplications(allResults);
 
-			List<CloudApplicationDeploymentProperties> properties = new ArrayList<CloudApplicationDeploymentProperties>();
+			List<CloudApplicationDeploymentProperties> properties = new ArrayList<>();
 
 			if (appMaps == null) {
 				CloudApplicationDeploymentProperties props = getDeploymentProperties(allResults, allResults, subMonitor);
@@ -392,18 +392,18 @@ public class ApplicationManifestHandler {
 
 	@SuppressWarnings("unchecked")
 	public static Map<Object, Object> toYaml(DeploymentProperties properties, Map<String, Object> cloudData) {
-		Map<Object, Object> deploymentInfoYaml = new LinkedHashMap<Object, Object>();
+		Map<Object, Object> deploymentInfoYaml = new LinkedHashMap<>();
 
 		Object applicationsObj = deploymentInfoYaml.get(APPLICATIONS_PROP);
 		List<Map<Object, Object>> applicationsList = null;
 		if (applicationsObj == null) {
-			applicationsList = new ArrayList<Map<Object, Object>>();
+			applicationsList = new ArrayList<>();
 			deploymentInfoYaml.put(APPLICATIONS_PROP, applicationsList);
 		} else if (applicationsObj instanceof List<?>) {
 			applicationsList = (List<Map<Object, Object>>) applicationsObj;
 		}
 
-		Map<Object, Object> application = new LinkedHashMap<Object, Object>();
+		Map<Object, Object> application = new LinkedHashMap<>();
 		applicationsList.add(application);
 
 		application.put(NAME_PROP, properties.getAppName());
@@ -521,7 +521,7 @@ public class ApplicationManifestHandler {
 			return;
 		}
 
-		Map<String, String> loadedVars = new HashMap<String, String>();
+		Map<String, String> loadedVars = new HashMap<>();
 
 		for (Entry<?, ?> entry : propertiesMap.entrySet()) {
 			if ((entry.getKey() instanceof String)) {
@@ -544,7 +544,7 @@ public class ApplicationManifestHandler {
 			CloudApplicationDeploymentProperties properties) {
 
 		Object yamlElementObj = allResults.get(SERVICES_PROP);
-		List<String> cloudServices = new ArrayList<String>();
+		List<String> cloudServices = new ArrayList<>();
 
 		if (yamlElementObj instanceof List<?>) {
 			addServices((List<?>) yamlElementObj, cloudServices);
@@ -792,56 +792,51 @@ public class ApplicationManifestHandler {
 		}
 	}
 
-	protected Integer readMemoryValue(Map<?, ?> application, Map<Object, Object> allResults,
+	protected int readMemoryValue(Map<?, ?> application, Map<Object, Object> allResults,
 			String propertyKey) throws Exception {
-
-		int result = -1;
-
-		// First see if there is a "common" memory value that applies to all
-		// applications:
-
+		// Check if value in integer form
 		Integer memoryVal = getValue(application, propertyKey, Integer.class);
-		if (memoryVal == null) {
-			memoryVal = getValue(allResults, propertyKey, Integer.class);
-		}
-
-		// If not in Integer form, try String as the memory may end in with a
-		// 'G' or 'M'
-		if (memoryVal == null) {
-			String memoryStringVal = getValue(application, propertyKey, String.class);
-			if (memoryStringVal == null) {
-				memoryStringVal = getValue(allResults, propertyKey, String.class);
-			}
-			if (memoryStringVal != null && memoryStringVal.length() > 0) {
-				memoryVal = convertMemory(memoryStringVal);
-			}
-		}
-
 		if (memoryVal != null) {
-			switch (memoryVal.intValue()) {
-			case 1:
-				result = 1024;
-				break;
-			case 2:
-				result = 2048;
-				break;
-			default:
-				result = memoryVal.intValue();
-				break;
+			return memoryVal.intValue();
+		}
+
+		// If not in Integer form, try String as the memory may end in with a 'G' or 'M'
+		String memoryStringVal = getValue(application, propertyKey, String.class);
+		if (memoryStringVal == null) {
+			// Check if there is memory property set for all apps if nothing set for the app specifically
+			memoryVal = getValue(allResults, propertyKey, Integer.class);
+			if (memoryVal == null) {
+				// Not in integer form
+				memoryStringVal = getValue(allResults, propertyKey, String.class);
+			} else {
+				// Integer form? Return the value right away
+				return memoryVal.intValue();
 			}
 		}
 
-		return result;
+		// Should only get here if memory value not in integer form
+		if (memoryStringVal != null && memoryStringVal.length() > 0) {
+			// Parse non-integer memory value
+			return convertMemory(memoryStringVal);
+		}
+
+		// No memory property specified? Assume the default
+		return DeploymentProperties.DEFAULT_MEMORY;
 	}
 
 	public static int convertMemory(String memoryStringVal) throws CoreException {
-		char memoryIndicator[] = { 'M', 'G', 'm', 'g' };
+		String memoryIndicator[] = { "m", "g", "mb", "gb" };
 		int gIndex = -1;
+		boolean gb = false;
 
-		for (char indicator : memoryIndicator) {
-			gIndex = memoryStringVal.indexOf(indicator);
-			if (gIndex >= 0) {
-				break;
+		for (String indicator : memoryIndicator) {
+			int beginIndex = memoryStringVal.length() - indicator.length();
+			if (beginIndex >= 0) {
+				if (indicator.equalsIgnoreCase(memoryStringVal.substring(beginIndex))) {
+					gIndex = beginIndex;
+					gb = indicator.charAt(0) == 'g';
+					break;
+				}
 			}
 		}
 
@@ -855,7 +850,7 @@ public class ApplicationManifestHandler {
 		}
 
 		try {
-			return Integer.valueOf(memoryStringVal);
+			return Integer.valueOf(memoryStringVal) * (gb ? 1024 : 1);
 		} catch (NumberFormatException e) {
 			throw ExceptionUtil.coreException("Failed to parse memory due to: " + e.getMessage());
 		}

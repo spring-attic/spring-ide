@@ -18,20 +18,22 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.junit.Test;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentProperties;
 
 /**
  * Tests for parsing YAML deployment manifest into
  * {@link CloudApplicationDeploymentProperties}
- * 
+ *
  * @author Alex Boyko
  *
  */
 public class Yaml2DeploymentProperties {
-	
+
 	private static CloudApplicationDeploymentProperties readDeploymentProperties(final String filePath) throws Exception {
 		ApplicationManifestHandler handler = new ApplicationManifestHandler(null, ManifestCompareMergeTests.createCloudDataMap()) {
 			@Override
@@ -41,7 +43,7 @@ public class Yaml2DeploymentProperties {
 		};
 		return handler.load(new NullProgressMonitor()).get(0);
 	}
-	
+
 	@Test
 	public void test_no_route_1() throws Exception {
 		CloudApplicationDeploymentProperties props = readDeploymentProperties("manifest-parse-data/no-route-1.yml");
@@ -322,4 +324,67 @@ public class Yaml2DeploymentProperties {
 		assertEquals("stack1", props.getStack());
 	}
 
+	@Test
+	public void test_memory_1() throws Exception {
+		CloudApplicationDeploymentProperties props = readDeploymentProperties("manifest-parse-data/memory-1.yml");
+		assertEquals("Uris sets not equal", DeploymentProperties.DEFAULT_MEMORY, props.getMemory());
+	}
+
+	@Test
+	public void test_memory_2() throws Exception {
+		CloudApplicationDeploymentProperties props = readDeploymentProperties("manifest-parse-data/memory-2.yml");
+		assertEquals("Uris sets not equal", 768, props.getMemory());
+	}
+
+	@Test
+	public void test_memory_3() throws Exception {
+		CloudApplicationDeploymentProperties props = readDeploymentProperties("manifest-parse-data/memory-3.yml");
+		assertEquals("Uris sets not equal", 768, props.getMemory());
+	}
+
+	@Test
+	public void test_memory_4() throws Exception {
+		CloudApplicationDeploymentProperties props = readDeploymentProperties("manifest-parse-data/memory-4.yml");
+		assertEquals("Uris sets not equal", 768, props.getMemory());
+	}
+
+	@Test
+	public void test_memory_5() throws Exception {
+		CloudApplicationDeploymentProperties props = readDeploymentProperties("manifest-parse-data/memory-5.yml");
+		assertEquals("Uris sets not equal", 1024, props.getMemory());
+	}
+
+	@Test
+	public void test_memory_6() throws Exception {
+		CloudApplicationDeploymentProperties props = readDeploymentProperties("manifest-parse-data/memory-6.yml");
+		assertEquals("Uris sets not equal", 1024, props.getMemory());
+	}
+
+	@Test(expected=CoreException.class)
+	public void test_memory_7() throws Exception {
+		readDeploymentProperties("manifest-parse-data/memory-7.yml");
+	}
+
+	@Test(expected=CoreException.class)
+	public void test_memory_8() throws Exception {
+		readDeploymentProperties("manifest-parse-data/memory-8.yml");
+	}
+
+	@Test
+	public void test_memory_9() throws Exception {
+		CloudApplicationDeploymentProperties props = readDeploymentProperties("manifest-parse-data/memory-9.yml");
+		assertEquals("Uris sets not equal", 3072, props.getMemory());
+	}
+
+	@Test
+	public void test_memory_10() throws Exception {
+		CloudApplicationDeploymentProperties props = readDeploymentProperties("manifest-parse-data/memory-10.yml");
+		assertEquals("Uris sets not equal", 4096, props.getMemory());
+	}
+
+	@Test
+	public void test_memory_11() throws Exception {
+		CloudApplicationDeploymentProperties props = readDeploymentProperties("manifest-parse-data/memory-11.yml");
+		assertEquals("Uris sets not equal", 1500, props.getMemory());
+	}
 }
