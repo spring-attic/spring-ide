@@ -497,7 +497,7 @@ public class BootDashModelTest {
 			waitForState(element, RunState.STARTING);
 			waitForState(element, RunState.DEBUGGING);
 
-			ACondition.waitFor("port after restart", 1000, () -> {
+			ACondition.waitFor("port after restart", 5000, () -> {
 				assertEquals(changedPort, element.getLivePort());
 			});
 			setContents(props, "server.port="+defaultPort);
