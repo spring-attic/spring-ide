@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.cloudfoundry.manifest.editor;
+package org.springframework.ide.eclipse.editor.support.yaml.schema;
 
 public class BasicYValueHint implements YValueHint {
 

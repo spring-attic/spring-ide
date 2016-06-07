@@ -10,8 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -21,13 +22,28 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.util.Log;
-import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.BasicYValueHint;
-import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.YValueHint;
+import org.springframework.ide.eclipse.editor.support.yaml.schema.BasicYValueHint;
+import org.springframework.ide.eclipse.editor.support.yaml.schema.YValueHint;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
+
+import com.google.common.collect.ImmutableSet;
 
 public class BootDashBuildpackHintProvider implements Provider<Collection<YValueHint>> {
 
 	private BootDashViewModel model;
+
+	public static final YValueHint[] DEFAULT_BUILDPACK_VALUES = new YValueHint[] {
+			createHint("java_buildpack"),
+			createHint("ruby_buildpack"),
+			createHint("staticfile_buildpack"),
+			createHint("nodejs_buildpack"),
+			createHint("python_buildpack"),
+			createHint("php_buildpack"),
+			createHint("liberty_buildpack"),
+			createHint("binary_buildpack"),
+			createHint("go_buildpack")
+	};
+
 
 	public BootDashBuildpackHintProvider(BootDashViewModel model) {
 		this.model = model;
@@ -36,16 +52,17 @@ public class BootDashBuildpackHintProvider implements Provider<Collection<YValue
 	@Override
 	public Collection<YValueHint> get() {
 		LiveSetVariable<RunTarget> runTargets = model.getRunTargets();
-		Set<YValueHint> buildPacks = new HashSet<>();
+		Set<YValueHint> buildPacks = new LinkedHashSet<>();
 		if (runTargets != null) {
-			for (RunTarget target : runTargets.getValue()) {
+			ImmutableSet<RunTarget> targetValues = runTargets.getValue();
+			for (RunTarget target : targetValues) {
 				if (target instanceof CloudFoundryRunTarget) {
 					CloudFoundryRunTarget cfTarget = (CloudFoundryRunTarget) target;
 					try {
 						List<CFBuildpack> targetBuildpacks = cfTarget.getBuildpacks();
 						if (targetBuildpacks != null) {
 							for (CFBuildpack existingBp : targetBuildpacks) {
-								YValueHint ymlBuildpack = new BasicYValueHint(existingBp.getName(), cfTarget.getUrl());
+								YValueHint ymlBuildpack = createHint(existingBp.getName(), cfTarget.getUrl());
 								buildPacks.add(ymlBuildpack);
 							}
 						}
@@ -55,7 +72,18 @@ public class BootDashBuildpackHintProvider implements Provider<Collection<YValue
 				}
 			}
 		}
+
+		if (buildPacks.isEmpty()) {
+			return Arrays.asList(DEFAULT_BUILDPACK_VALUES);
+		}
 		return buildPacks;
 	}
 
+	public static YValueHint createHint(String value, String label) {
+		return new BasicYValueHint(value, label);
+	}
+
+	public static YValueHint createHint(String value) {
+		return createHint(value, null);
+	}
 }

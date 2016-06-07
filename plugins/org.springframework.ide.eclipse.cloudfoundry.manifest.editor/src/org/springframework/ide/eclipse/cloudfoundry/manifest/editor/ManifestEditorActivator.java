@@ -16,6 +16,7 @@ import javax.inject.Provider;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.springframework.ide.eclipse.editor.support.yaml.schema.YValueHint;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 
 public class ManifestEditorActivator extends AbstractUIPlugin {
