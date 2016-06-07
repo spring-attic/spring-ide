@@ -79,12 +79,12 @@ public class CFApplicationSummaryData implements CFApplication {
 
 	@Override
 	public List<String> getServices() {
-		return extras.getServices().get();
+		return extras.getServices().block();
 	}
 
 	@Override
 	public String getBuildpackUrl() {
-		return extras.getBuildpack().get();
+		return extras.getBuildpack().block();
 	}
 
 	@Override
@@ -104,22 +104,22 @@ public class CFApplicationSummaryData implements CFApplication {
 
 	@Override
 	public Integer getTimeout() {
-		return extras.getTimeout().get();
+		return extras.getTimeout().block();
 	}
 
 	@Override
 	public String getCommand() {
-		return extras.getCommand().get();
+		return extras.getCommand().block();
 	}
 
 	@Override
 	public String getStack() {
-		return extras.getStack().get();
+		return extras.getStack().block();
 	}
 
 	@Override
 	public Map<String, String> getEnvAsMap() {
-		return extras.getEnv().get();
+		return extras.getEnv().block();
 	}
 
 }

@@ -202,12 +202,12 @@ public class CloudFoundryClientTest {
 		//works correctly.
 		//To avoid this test case from failing too often we retry it a few times.
 		RetryUtil.retryTimes("testPushAndBindServices", 4, () -> {
-			String appName = appHarness.randomAppName();
 
 			String service1 = services.createTestService();
 			String service2 = services.createTestService();
 			String service3 = services.createTestService(); //An extra unused service (makes this a better test).
 
+			String appName = appHarness.randomAppName();
 			CFPushArguments params = new CFPushArguments();
 			params.setAppName(appName);
 			params.setApplicationData(getTestZip("testapp"));
@@ -217,19 +217,19 @@ public class CloudFoundryClientTest {
 
 			assertEquals(ImmutableSet.of(service1, service2), getBoundServiceNames(appName));
 
-			client.bindAndUnbindServices(appName, ImmutableList.of(service1)).get();
+			client.bindAndUnbindServices(appName, ImmutableList.of(service1)).block();
 			assertEquals(ImmutableSet.of(service1), getBoundServiceNames(appName));
 
-			client.bindAndUnbindServices(appName, ImmutableList.of(service2)).get();
+			client.bindAndUnbindServices(appName, ImmutableList.of(service2)).block();
 			assertEquals(ImmutableSet.of(service2), getBoundServiceNames(appName));
 
-			client.bindAndUnbindServices(appName, ImmutableList.of()).get();
+			client.bindAndUnbindServices(appName, ImmutableList.of()).block();
 			assertEquals(ImmutableSet.of(), getBoundServiceNames(appName));
 		});
 	}
 
 	private Set<String> getBoundServiceNames(String appName) throws Exception {
-		return client.getBoundServicesSet(appName).get();
+		return client.getBoundServicesSet(appName).block();
 	}
 
 	@Test
@@ -358,15 +358,15 @@ public class CloudFoundryClientTest {
 		});
 
 		{
-			Map<String, String> env = client.getEnv(appName).get();
+			Map<String, String> env = client.getEnv(appName).block();
 			assertEquals("foo_value", env.get("foo"));
 			assertEquals("bar_value", env.get("bar"));
 			assertEquals(2, env.size());
 		}
 
-		client.setEnvVars(appName, ImmutableMap.of("other", "value")).get();
+		client.setEnvVars(appName, ImmutableMap.of("other", "value")).block();
 		{
-			Map<String, String> env = client.getEnv(appName).get();
+			Map<String, String> env = client.getEnv(appName).block();
 			assertEquals("value", env.get("other"));
 			assertEquals(1, env.size());
 		}
@@ -501,17 +501,17 @@ public class CloudFoundryClientTest {
 				String serviceName = serviceNames[i];
 				if (i%2==0) {
 					System.out.println("Create service: "+serviceName);
-					client.createService(serviceName, "cloudamqp", "lemur").get();
+					client.createService(serviceName, "cloudamqp", "lemur").block();
 				} else {
 					System.out.println("Create user-provided service: "+serviceName);
-					client.createUserProvidedService(serviceName, ImmutableMap.of()).get();
+					client.createUserProvidedService(serviceName, ImmutableMap.of()).block();
 				}
 			}
 
 			List<CFServiceInstance> services = client.getServices();
 			assertServices(services, serviceNames);
 			for (String serviceName : serviceNames) {
-				client.deleteServiceAsync(serviceName).get();
+				client.deleteServiceAsync(serviceName).block();
 				System.out.println("Deleted service: "+serviceName);
 			}
 
@@ -557,9 +557,9 @@ public class CloudFoundryClientTest {
 
 		Set<String> names = Flux.fromIterable(domains)
 			.map(CFCloudDomain::getName)
-			.toList()
+			.collectList()
 			.map(ImmutableSet::copyOf)
-			.get();
+			.block();
 		assertContains(names,
 				"projectreactor.org",
 				"projectreactor.io",
@@ -574,9 +574,9 @@ public class CloudFoundryClientTest {
 
 		Set<String> names = Flux.fromIterable(buildpacks)
 				.map(CFBuildpack::getName)
-				.toList()
+				.collectList()
 				.map(ImmutableSet::copyOf)
-				.get();
+				.block();
 
 		assertContains(names,
 			"staticfile_buildpack",
@@ -592,9 +592,9 @@ public class CloudFoundryClientTest {
 
 		Set<String> names = Flux.fromIterable(stacks)
 			.map(CFStack::getName)
-			.toList()
+			.collectList()
 			.map(ImmutableSet::copyOf)
-			.get();
+			.block();
 
 		assertContains(names,
 				"cflinuxfs2"

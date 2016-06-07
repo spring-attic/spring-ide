@@ -580,7 +580,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 						}),
 						5 //limit concurrency to avoid flooding/choking request broker
 					)
-					.get(timeout);
+					.block(timeout);
 				} finally {
 					mon.done();
 				}

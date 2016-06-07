@@ -55,7 +55,7 @@ public class ReactorUtils {
 	 */
 	public static <T> T get(Mono<T> mono) throws Exception {
 		try {
-			return mono.get();
+			return mono.block();
 		} catch (Exception e) {
 //			BootActivator.log(new Exception(e));
 			throw new IOException(e);
@@ -70,9 +70,9 @@ public class ReactorUtils {
 	 * to the line where 'get' was called.
 	 */
 	public static <T> T get(Duration timeout, CancelationToken cancelationToken, Mono<T> mono) throws Exception {
-		return Mono.any(mono, toMono(cancelationToken))
+		return Mono.first(mono, toMono(cancelationToken))
 		.otherwise(errorFilter(cancelationToken))
-		.get(timeout);
+		.block(timeout);
 	}
 
 	/**
@@ -113,7 +113,7 @@ public class ReactorUtils {
 	public static Mono<Void> sequence(Mono<Void>... tasks) {
 		Mono<Void> seq = Mono.empty();
 		for (Mono<Void> t : tasks) {
-			seq = seq.after(t);
+			seq = seq.then(t);
 		}
 		return seq;
 	}

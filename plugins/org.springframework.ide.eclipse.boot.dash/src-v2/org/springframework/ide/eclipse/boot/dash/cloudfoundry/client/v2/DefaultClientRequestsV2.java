@@ -283,7 +283,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 				.services()
 				.listInstances()
 				.map(CFWrappingV2::wrap)
-				.toList()
+				.collectList()
 				.map(ImmutableList::copyOf)
 			)
 		);
@@ -427,7 +427,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 				_operations.stacks()
 				.list()
 				.map(CFWrappingV2::wrap)
-				.toList()
+				.collectList()
 			)
 		);
 	}
@@ -500,7 +500,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 					)
 				);
 			})
-			.toList()
+			.collectList()
 //			.log("getSpaces")
 		);
 	}
@@ -530,7 +530,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		return ReactorUtils.get(
 			orgId.flatMap(this::requestDomains)
 			.map(CFWrappingV2::wrap)
-			.toList()
+			.collectList()
 		);
 	}
 
@@ -548,7 +548,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 				return client_listBuildpacks(page);
 			})
 			.map(CFWrappingV2::wrap)
-			.toList()
+			.collectList()
 		);
 	}
 
@@ -573,7 +573,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	public Version getApiVersion() {
 		return info
 		.map((i) -> new Version(i.getApiVersion()))
-		.get();
+		.block();
 	}
 
 	@Override
@@ -728,7 +728,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	private Mono<Set<String>> getDomainNames() {
 		return orgId.flatMap(this::requestDomains)
 		.map((r) -> r.getEntity().getName())
-		.toList()
+		.collectList()
 		.map(ImmutableSet::copyOf);
 	}
 
@@ -835,7 +835,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 						unbindServices(appName, toUnbind)
 				);
 			})
-			.after();
+			.then();
 		} catch (Exception e) {
 			return Mono.error(e);
 		}
@@ -851,13 +851,13 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	public Mono<Set<String>> getBoundServicesSet(String appName) {
 		return getBoundServices(appName)
-		.toList()
+		.collectList()
 		.map(ImmutableSet::copyOf);
 	}
 
 	public Mono<List<String>> getBoundServicesList(String appName) {
 		return getBoundServices(appName)
-		.toList()
+		.collectList()
 		.map(ImmutableList::copyOf);
 	}
 
@@ -1079,7 +1079,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 			.map((appSummary) ->
 				CFWrappingV2.wrap(appSummary, getApplicationExtras(appSummary.getName()))
 			)
-			.toList()
+			.collectList()
 			.map(ImmutableList::copyOf)
 		);
 	}

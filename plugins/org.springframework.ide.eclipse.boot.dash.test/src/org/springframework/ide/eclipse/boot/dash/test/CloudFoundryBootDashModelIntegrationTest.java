@@ -338,7 +338,7 @@ public class CloudFoundryBootDashModelIntegrationTest {
 			}
 		};
 
-		Set<String> actualServices = client.getBoundServicesSet(appName).get();
+		Set<String> actualServices = client.getBoundServicesSet(appName).block();
 
 		assertEquals(ImmutableSet.copyOf(bindServices), actualServices);
 	}

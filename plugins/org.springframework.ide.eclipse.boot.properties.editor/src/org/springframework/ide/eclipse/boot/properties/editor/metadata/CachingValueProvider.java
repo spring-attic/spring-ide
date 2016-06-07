@@ -20,7 +20,6 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.LimitedTimeCa
 import org.springframework.ide.eclipse.editor.support.util.FuzzyMatcher;
 
 import reactor.core.publisher.Flux;
-import reactor.core.scheduler.Timer;
 import reactor.core.tuple.Tuple;
 import reactor.core.tuple.Tuple2;
 
@@ -55,11 +54,6 @@ public abstract class CachingValueProvider implements ValueProviderStrategy {
 //			System.out.println(string);
 //		}
 //	}
-
-	{
-		Timer.global(); //TODO: this shouldn't be needed in later release of reactor. Reactor version *after* 2.5.0.M3 should
-						// create and use global timer automatically.
-	}
 
 	private static final Duration DEFAULT_TIMEOUT = Duration.ofMillis(1000);
 

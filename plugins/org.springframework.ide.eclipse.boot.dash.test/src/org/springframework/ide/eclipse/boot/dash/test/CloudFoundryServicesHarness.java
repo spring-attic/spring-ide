@@ -47,14 +47,14 @@ public class CloudFoundryServicesHarness implements Disposable {
 
 	public String createTestUserProvidedService() {
 		String name = randomServiceName();
-		client.createUserProvidedService(name, ImmutableMap.of()).get(CREATE_SERVICE_TIMEOUT);
+		client.createUserProvidedService(name, ImmutableMap.of()).block(CREATE_SERVICE_TIMEOUT);
 		return name;
 	}
 
 	public String createTestService() throws Exception {
 		String name = randomServiceName();
 		RetryUtil.retryWhen("createTestService["+name+"]", 5, FLAKY_SERVICE_BROKER, () -> {
-			client.createService(name, "cloudamqp", "lemur").get(CREATE_SERVICE_TIMEOUT);
+			client.createService(name, "cloudamqp", "lemur").block(CREATE_SERVICE_TIMEOUT);
 		});
 		return name;
 	}
@@ -67,7 +67,7 @@ public class CloudFoundryServicesHarness implements Disposable {
 					System.out.println("delete service: "+serviceName);
 					try {
 						RetryUtil.retryTimes("delete sercice "+serviceName, 3, () -> {
-							this.client.deleteServiceAsync(serviceName).get();
+							this.client.deleteServiceAsync(serviceName).block();
 						});
 					} catch (Exception e) {
 						System.out.println("Failed to delete ["+serviceName+"]: "+ExceptionUtil.getMessage(e));

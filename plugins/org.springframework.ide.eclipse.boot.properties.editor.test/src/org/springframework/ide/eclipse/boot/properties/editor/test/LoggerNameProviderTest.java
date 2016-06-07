@@ -154,7 +154,7 @@ public class LoggerNameProviderTest {
 	}
 
 	private List<String> getResults(CachingValueProvider p, String query) {
-		return p.getValues(project, query).stream()
+		return p.getValues(project, query).toStream()
 		.map((h) -> h.getValue().toString())
 		.collect(Collectors.toList());
 	}

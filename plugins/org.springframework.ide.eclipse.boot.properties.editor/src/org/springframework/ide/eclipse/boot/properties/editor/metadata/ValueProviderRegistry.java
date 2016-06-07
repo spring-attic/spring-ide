@@ -61,8 +61,8 @@ public class ValueProviderRegistry {
 		default Collection<StsValueHint> getValuesNow(IJavaProject javaProject, String query) {
 			return this.getValues(javaProject, query)
 			.take(CachingValueProvider.TIMEOUT)
-			.toList()
-			.get();
+			.collectList()
+			.block();
 		}
 	}
 

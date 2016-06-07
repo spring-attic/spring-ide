@@ -96,9 +96,9 @@ public class RenameSimilarTypesModel {
 			.flatMap((match) -> {
 				return Mono.just(t);
 			})
-			.toList()
+			.collectList()
 			.map(ImmutableSet::copyOf)
-			.get();
+			.block();
 		}
 		return ImmutableSet.of();
 	}

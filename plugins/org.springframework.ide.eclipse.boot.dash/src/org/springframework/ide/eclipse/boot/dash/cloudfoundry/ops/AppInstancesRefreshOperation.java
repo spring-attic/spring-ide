@@ -46,8 +46,8 @@ public class AppInstancesRefreshOperation extends CloudOperation {
 				long timeToWait = 1000*30;
 				model.getRunTarget().getClient().getApplicationDetails(appsToLookUp)
 				.doOnNext(this.model::updateApplication)
-				.after()
-				.get(timeToWait);
+				.then()
+				.block(timeToWait);
 			}
 			model.setBaseRefreshState(RefreshState.READY);
 		} catch (Exception e) {
