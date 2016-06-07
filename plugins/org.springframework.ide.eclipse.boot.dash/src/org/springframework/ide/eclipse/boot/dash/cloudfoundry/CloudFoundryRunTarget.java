@@ -102,7 +102,9 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 			this.buildpacks = null;
 			this.stacks = null;
 			cachedClient.setValue(createClient());
-			this.buildpacks = getClient().getBuildpacks();
+			if (getClient() != null) {
+				this.buildpacks = getClient().getBuildpacks();
+			}
 		} catch (Exception e) {
 			cachedClient.setValue(null);
 			throw e;
@@ -249,6 +251,14 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 		return client.getSshClientSupport();
 	}
 
+	/**
+	 * Returns list of cached buildpacks. It does NOT fetch updated buildpacks from CF as this method may
+	 * be called in cases where fast list of buildpacks is required (e.g values that show in pop-up UI).
+	 * <p/>
+	 * Do NOT use this method to fetch buildpacks from CF
+	 * @return list of CACHED buildpacks, or null if none cached yet.
+	 * @throws Exception
+	 */
 	public List<CFBuildpack> getBuildpacks() throws Exception {
 		return this.buildpacks;
 	}

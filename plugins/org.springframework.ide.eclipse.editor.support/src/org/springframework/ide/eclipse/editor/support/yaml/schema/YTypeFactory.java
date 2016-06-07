@@ -12,10 +12,13 @@ package org.springframework.ide.eclipse.editor.support.yaml.schema;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Provider;
 
@@ -23,8 +26,6 @@ import org.springframework.ide.eclipse.editor.support.hover.DescriptionProviders
 import org.springframework.ide.eclipse.editor.support.util.EnumValueParser;
 import org.springframework.ide.eclipse.editor.support.util.HtmlSnippet;
 import org.springframework.ide.eclipse.editor.support.util.ValueParser;
-
-import com.google.common.collect.ImmutableSet;
 
 /**
  * Static utility method for creating YType objects representing either
@@ -120,6 +121,7 @@ public class YTypeFactory {
 		private List<YTypedProperty> propertyList = new ArrayList<>();
 		private final List<String> hints = new ArrayList<>();
 		private Map<String, YTypedProperty> cachedPropertyMap;
+		private Provider<Collection<YValueHint>> hintProvider;
 
 		public boolean isSequenceable() {
 			return false;
@@ -137,8 +139,30 @@ public class YTypeFactory {
 			return null;
 		}
 
+		public void addHintProvider(Provider<Collection<YValueHint>> hintProvider) {
+			this.hintProvider = hintProvider;
+		}
+
 		public String[] getHintValues() {
-			return hints.toArray(new String[hints.size()]);
+			Collection<YValueHint> providerHints = hintProvider != null ? hintProvider.get() : null;
+
+			if (providerHints == null || providerHints.isEmpty()) {
+				return hints.toArray(new String[hints.size()]);
+			} else {
+				// Only merge if there are provider hints to merge
+				Set<String> mergedHints = new LinkedHashSet<>();
+
+				// Add type hints first
+				for (String val : hints) {
+					mergedHints.add(val);
+				}
+
+				// merge the provider hints
+				for (YValueHint val : providerHints) {
+					mergedHints.add(val.getValue());
+				}
+				return mergedHints.toArray(new String[mergedHints.size()]);
+			}
 		}
 
 		public final List<YTypedProperty> getProperties() {

@@ -23,6 +23,7 @@ import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeFactory.Y
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeFactory.YBeanType;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeFactory.YTypedPropertyImpl;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeUtil;
+import org.springframework.ide.eclipse.editor.support.yaml.schema.YValueHint;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YamlSchema;
 
 import com.google.common.collect.ImmutableSet;
@@ -53,10 +54,7 @@ public class ManifestYmlSchema implements YamlSchema {
 
 		YAtomicType t_buildpack = f.yatomic("Buildpack");
 		
-		
-		String[] buildpacks = getBuildpackHints();
-		
-		t_buildpack.addHints(buildpacks);
+		t_buildpack.addHintProvider(this.buildpackProvider);
 
 		YAtomicType t_boolean = f.yenum("boolean", "true", "false");
 		YType t_string = f.yatomic("String");
@@ -124,40 +122,5 @@ public class ManifestYmlSchema implements YamlSchema {
 	@Override
 	public YTypeUtil getTypeUtil() {
 		return TYPE_UTIL;
-	}
-	
-	protected String[] getBuildpackHints() {
-
-		String[] buildpacks = null;
-		
-		if (buildpackProvider != null) {
-			Collection<YValueHint> hints = buildpackProvider.get();
-			if (hints != null && !hints.isEmpty()) {
-				int size = hints.size();
-
-				buildpacks = new String[size];
-				int index = 0;
-				for (YValueHint bp : hints) {
-					if (index < size) {
-						buildpacks[index++] = bp.getValue();
-					}
-				}
-			}
-		}
-
-		if (buildpacks == null || buildpacks.length == 0) {
-			buildpacks = new String[] { 
-					"java_buildpack",
-					"ruby_buildpack", 
-					"staticfile_buildpack", 
-					"nodejs_buildpack",
-					"python_buildpack", 
-					"php_buildpack", 
-					"liberty_buildpack", 
-					"binary_buildpack",
-					"go_buildpack"
-					};
-		}
-		return buildpacks;
 	}
 }
