@@ -6,14 +6,14 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     Pivotal, Inc. - initial API and implementation
+ *     Phil Webb - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.cloudfoundry.manifest.editor;
+package org.springframework.ide.eclipse.boot.restart;
 
-public interface YValueHint {
+public interface RestartConstants {
 
-	String getValue();
+	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.boot.restart"; //$NON-NLS-1$;
 
-	String getLabel();
+	String IMG_RESTART_ICON = "IMG_RESTART_ICON"; //$NON-NLS-1$
 
 }

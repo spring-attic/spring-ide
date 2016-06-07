@@ -21,6 +21,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.util.Log;
+import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.BasicYValueHint;
 import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.YValueHint;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 
@@ -44,7 +45,7 @@ public class BootDashBuildpackHintProvider implements Provider<Collection<YValue
 						List<CFBuildpack> targetBuildpacks = cfTarget.getBuildpacks();
 						if (targetBuildpacks != null) {
 							for (CFBuildpack existingBp : targetBuildpacks) {
-								YValueHint ymlBuildpack = new YValueHint(existingBp.getName(), cfTarget.getUrl());
+								YValueHint ymlBuildpack = new BasicYValueHint(existingBp.getName(), cfTarget.getUrl());
 								buildPacks.add(ymlBuildpack);
 							}
 						}

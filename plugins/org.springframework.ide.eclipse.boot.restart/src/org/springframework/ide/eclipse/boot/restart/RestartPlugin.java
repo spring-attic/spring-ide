@@ -6,14 +6,18 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     Pivotal, Inc. - initial API and implementation
+ *     Phil Webb - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.cloudfoundry.manifest.editor;
+package org.springframework.ide.eclipse.boot.restart;
 
-public interface YValueHint {
+import org.eclipse.jface.resource.ImageRegistry;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
 
-	String getValue();
+public class RestartPlugin extends AbstractUIPlugin {
 
-	String getLabel();
+	@Override
+	protected ImageRegistry createImageRegistry() {
+		return RestartPluginImages.initializeImageRegistry();
+	}
 
 }
