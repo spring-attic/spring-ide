@@ -63,6 +63,8 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDoma
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshClientSupport;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshHost;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultCloudFoundryClientFactoryV2;
@@ -74,8 +76,6 @@ import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.boot.util.RetryUtil;
 import org.springframework.ide.eclipse.boot.util.Thunk;
 import org.springframework.ide.eclipse.editor.support.util.StringUtil;
-import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
-import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshHost;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;

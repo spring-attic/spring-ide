@@ -32,12 +32,12 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicati
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceStats;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.HealthChecks;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ApplicationExtras;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFApplicationDetailData;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFApplicationSummaryData;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
-import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 
 import com.google.common.collect.ImmutableList;
@@ -94,7 +94,7 @@ public class MockCFApplication {
 		this.cancelationTokens = new CancelationTokens();
 	}
 
-	private String healthCheck=HealthCheckSupport.HC_PORT;
+	private String healthCheck=HealthChecks.HC_PORT;
 	private ImmutableList<CFInstanceStats> stats = ImmutableList.of();
 
 	private CancelationTokens cancelationTokens;

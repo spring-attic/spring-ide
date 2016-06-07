@@ -10,12 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
-import org.cloudfoundry.client.lib.CloudFoundryException;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
-
 public class CloudErrors {
 
 	/**
@@ -54,88 +48,19 @@ public class CloudErrors {
 	}
 
 	public static boolean hasCloudError(Exception e, String error) {
-
-		CloudFoundryException cloudError = getCloudFoundryError(e);
-
-		if (cloudError != null) {
-			return hasCloudError(cloudError, error);
-		} else {
-			return hasError(e, error);
-		}
-	}
-
-	protected static CloudFoundryException getCloudFoundryError(Throwable t) {
-		if (t == null) {
-			return null;
-		}
-		CloudFoundryException cloudException = null;
-		if (t instanceof CloudFoundryException) {
-			cloudException = (CloudFoundryException) t;
-		} else {
-			Throwable cause = t.getCause();
-			if (cause instanceof CloudFoundryException) {
-				cloudException = (CloudFoundryException) cause;
-			}
-		}
-		return cloudException;
-	}
-
-	protected static boolean isHostTaken(Exception e) {
-		if (isBadRequest(e)) {
-			CloudFoundryException cfe = (CloudFoundryException) e;
-			return hasCloudError(cfe, "host") && hasCloudError(cfe, "taken");
-		}
-		return false;
+		return hasError(e, error);
 	}
 
 	public static void checkAndRethrowCloudException(Exception e, String errorPrefix) throws Exception {
 		// Special case for CF exceptions:
 		// CF exceptions may not contain the error in the message but rather
 		// the description
-		if (e instanceof CloudFoundryException) {
-			String message = null;
-			if (isHostTaken(e)) {
-				message = "Another URL is required: the host is already taken by another existing application. Please change the URL, and restart or redeploy the application.";
-			} else {
-				message = resolveCloudError((CloudFoundryException) e);
-			}
-			if (errorPrefix != null) {
-				message = errorPrefix + ": " + message;
-			}
-			IStatus status = ExceptionUtil.status(e, message);
-			throw new CoreException(status);
-		} else {
-			throw e;
-		}
-	}
-
-	protected static boolean hasCloudError(CloudFoundryException e, String pattern) {
-		String message = e.getDescription();
-		if (message != null && message.contains(pattern)) {
-			return true;
-		}
-		return hasError(e, pattern);
+		throw e;
 	}
 
 	protected static boolean hasError(Exception exception, String pattern) {
 		String message = exception.getMessage();
 		return message != null && message.contains(pattern);
-	}
-
-	protected static String getCloudErrorMessage(CloudFoundryException e) {
-		String message = e.getDescription();
-		if (message == null || message.trim().length() == 0) {
-			message = e.getMessage();
-		}
-		return message;
-	}
-
-	protected static String resolveCloudError(CloudFoundryException e) {
-		String message = getCloudErrorMessage(e);
-		if (message == null || message.trim().length() == 0) {
-			message = "Cloud operation failure of type: " + e.getClass().getName();
-		}
-		return message;
 	}
 
 }

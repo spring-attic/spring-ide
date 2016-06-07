@@ -38,6 +38,8 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshClientSupport;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshHost;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
@@ -48,8 +50,6 @@ import org.springframework.ide.eclipse.boot.launch.util.WaitFor;
 import org.springframework.ide.eclipse.boot.util.ProcessListenerAdapter;
 import org.springframework.ide.eclipse.boot.util.ProcessTracker;
 import org.springframework.util.Assert;
-import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
-import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshHost;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 
@@ -226,7 +226,7 @@ public class SshDebugLaunchConfigurationDelegate extends AbstractBootLaunchConfi
 				abort(LaunchingMessages.JavaRemoteApplicationLaunchConfigurationDelegate_Connector_not_specified_2, null, IJavaLaunchConfigurationConstants.ERR_CONNECTOR_NOT_AVAILABLE);
 			}
 
-			final Map<String, String> argMap = new HashMap<String, String>();
+			final Map<String, String> argMap = new HashMap<>();
 
 			int connectTimeout = Platform.getPreferencesService().getInt(
 					LaunchingPlugin.ID_PLUGIN,
