@@ -127,14 +127,16 @@ public class MissingConfigurationProcessorRule extends BootValidationRule {
 		}
 
 		public void visit(ICompilationUnit compilationUnit, IProgressMonitor mon) throws Exception {
-			IType[] types = compilationUnit.getAllTypes();
-			mon.beginTask(compilationUnit.getElementName(), types.length);
-			try {
-				for (IType t : types) {
-					visit(t, new SubProgressMonitor(mon, 1));
+			if (compilationUnit.exists()) {
+				IType[] types = compilationUnit.getAllTypes();
+				mon.beginTask(compilationUnit.getElementName(), types.length);
+				try {
+					for (IType t : types) {
+						visit(t, new SubProgressMonitor(mon, 1));
+					}
+				} finally {
+					mon.done();
 				}
-			} finally {
-				mon.done();
 			}
 		}
 
