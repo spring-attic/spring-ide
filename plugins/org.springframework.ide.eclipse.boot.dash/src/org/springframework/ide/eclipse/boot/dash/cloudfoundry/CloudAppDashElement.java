@@ -34,6 +34,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicati
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceStats;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.HealthChecks;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
@@ -55,7 +56,6 @@ import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springframework.ide.eclipse.boot.dash.util.LogSink;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
-import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
@@ -82,7 +82,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 
 	private CancelationTokens cancelationTokens;
 
-	private final LiveVariable<String> healthCheck = new LiveVariable<>(HealthCheckSupport.HC_PORT);
+	private final LiveVariable<String> healthCheck = new LiveVariable<>(HealthChecks.HC_PORT);
 	private final CloudFoundryRunTarget cloudTarget;
 	private final CloudFoundryBootDashModel cloudModel;
 	private PropertyStoreApi persistentProperties;
@@ -203,7 +203,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 					"Local project not associated to CF app '" + getName() + "'"));
 		}
 
-		new SetHealthCheckOperation(this, HealthCheckSupport.HC_NONE, ui, /* confirmChange */true, cancelationToken)
+		new SetHealthCheckOperation(this, HealthChecks.HC_NONE, ui, /* confirmChange */true, cancelationToken)
 				.run(monitor);
 
 		if (!DevtoolsUtil.isEnvVarSetupForRemoteClient(envVars, DevtoolsUtil.getSecret(getProject()))) {

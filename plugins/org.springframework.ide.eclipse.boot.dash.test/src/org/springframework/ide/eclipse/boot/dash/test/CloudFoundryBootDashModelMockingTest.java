@@ -68,6 +68,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElemen
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.HealthChecks;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
@@ -93,7 +94,6 @@ import org.springframework.ide.eclipse.boot.dash.views.CustomizeTargetLabelDialo
 import org.springframework.ide.eclipse.boot.test.AutobuildingEnablement;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.util.StringUtils;
-import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -253,10 +253,10 @@ public class CloudFoundryBootDashModelMockingTest {
 		waitForApps(target, "foo");
 
 		CloudAppDashElement appElement = harness.getCfTargetModel().getApplication("foo");
-		assertEquals(HealthCheckSupport.HC_PORT, appElement.getHealthCheck());
+		assertEquals(HealthChecks.HC_PORT, appElement.getHealthCheck());
 
 
-		foo.setHealthCheck(HealthCheckSupport.HC_NONE);
+		foo.setHealthCheck(HealthChecks.HC_NONE);
 
 		target.refresh(ui);
 
@@ -267,7 +267,7 @@ public class CloudFoundryBootDashModelMockingTest {
 				assertEquals(ImmutableSet.of("foo"), appNames);
 
 				CloudAppDashElement appElement = harness.getCfTargetModel().getApplication("foo");
-				assertEquals(HealthCheckSupport.HC_NONE, appElement.getHealthCheck());
+				assertEquals(HealthChecks.HC_NONE, appElement.getHealthCheck());
 
 				return true;
 			}

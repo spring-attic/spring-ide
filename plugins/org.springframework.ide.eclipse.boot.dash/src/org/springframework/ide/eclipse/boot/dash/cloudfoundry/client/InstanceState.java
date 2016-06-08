@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2016 Pivotal, Inc.
+ * Copyright (c) 2009-2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,20 +10,21 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client;
 
-import org.cloudfoundry.client.lib.CloudFoundryOperations;
+/**
+ * Enum used for the state of an instance
+ *
+ * Note: copied over from CF V1 client code.
+ *
+ * @author Thomas Risberg
+ */
+public enum InstanceState {
+	DOWN, STARTING, RUNNING, CRASHED, FLAPPING, UNKNOWN;
 
-public abstract class BasicRequest extends ClientRequest<Void> {
-
-	public BasicRequest(CloudFoundryOperations client, String appName, String requestName) {
-		super(client, appName, requestName, null);
+	public static InstanceState valueOfWithDefault(String s) {
+		try {
+			return InstanceState.valueOf(s);
+		} catch (IllegalArgumentException e) {
+			return InstanceState.UNKNOWN;
+		}
 	}
-
-	@Override
-	protected Void doRun(CloudFoundryOperations client) throws Exception {
-		runRequest(client);
-		return null;
-	}
-
-	protected abstract void runRequest(CloudFoundryOperations client) throws Exception;
-
 }

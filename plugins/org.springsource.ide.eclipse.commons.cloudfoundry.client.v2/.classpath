@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry exported="true" kind="lib" path="dependencies/aopalliance-1.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-client-2.0.0.BUILD-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-client-2.0.0.BUILD-SNAPSHOT.jar" sourcepath="sources/cloudfoundry-client-2.0.0.BUILD-SNAPSHOT-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-client-spring-2.0.0.BUILD-SNAPSHOT.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-operations-2.0.0.BUILD-SNAPSHOT.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-util-2.0.0.BUILD-SNAPSHOT.jar"/>

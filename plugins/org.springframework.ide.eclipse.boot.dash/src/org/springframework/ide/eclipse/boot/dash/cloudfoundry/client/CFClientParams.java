@@ -12,7 +12,6 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client;
 
 import java.net.URI;
 
-import org.cloudfoundry.client.lib.HttpProxyConfiguration;
 import org.eclipse.core.runtime.Assert;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
@@ -70,11 +69,6 @@ public class CFClientParams {
 
 	public boolean isSelfsigned() {
 		return isSelfSigned;
-	}
-
-	public HttpProxyConfiguration getProxyConf() {
-		//TODO: there's no support for this, but probably there should be.
-		return null;
 	}
 
 	public String getApiUrl() {

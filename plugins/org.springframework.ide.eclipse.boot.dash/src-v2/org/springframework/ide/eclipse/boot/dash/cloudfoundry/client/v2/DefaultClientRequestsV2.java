@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2;
 
-import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ReactorUtils.just;
-
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Collection;
@@ -65,11 +63,11 @@ import org.cloudfoundry.operations.services.GetServiceInstanceRequest;
 import org.cloudfoundry.operations.services.ServiceInstance;
 import org.cloudfoundry.operations.services.UnbindServiceInstanceRequest;
 import org.cloudfoundry.reactor.doppler.ReactorDopplerClient;
+import org.cloudfoundry.reactor.uaa.ReactorUaaClient;
 import org.cloudfoundry.reactor.util.ConnectionContextSupplier;
 import org.cloudfoundry.spring.client.SpringCloudFoundryClient;
 import org.cloudfoundry.util.PaginationUtils;
 import org.osgi.framework.Version;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationRunningStateTracker;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
@@ -80,14 +78,13 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceIn
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1.DefaultClientRequestsV1;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshClientSupport;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshHost;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.IApplicationLogConsole;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.util.StringUtils;
-import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
-import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshHost;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import com.google.common.collect.ImmutableList;
@@ -145,21 +142,20 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	private Mono<GetInfoResponse> info;
 
-	@Deprecated
-	private DefaultClientRequestsV1 v1;
-	private CloudFoundryClientCache clients;
-
 	public DefaultClientRequestsV2(CloudFoundryClientCache clients, CFClientParams params) throws Exception {
-		this.clients = clients;
 		this.params = params;
-		this.v1 = new DefaultClientRequestsV1(params);
 		this._client = clients.getOrCreate(params.getUsername(), params.getPassword(), params.getHost());
 		debug(">>> creating cf operations");
 		this._operations = new CloudFoundryOperationsBuilder()
 				.cloudFoundryClient(_client)
 				.dopplerClient(ReactorDopplerClient.builder()
-						.cloudFoundryClient((ConnectionContextSupplier)_client)
-						.build())
+					.cloudFoundryClient((ConnectionContextSupplier)_client)
+					.build()
+				)
+				.uaaClient(ReactorUaaClient.builder()
+					.cloudFoundryClient(_client)
+					.build()
+				)
 				.target(params.getOrgName(), params.getSpaceName())
 				.build();
 		debug("<<< creating cf operations");
@@ -211,11 +207,11 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		);
 		Mono<Integer> timeout = prefetch("timeout",
 				entity
-				.then((v) -> just(v.getHealthCheckTimeout()))
+				.then((v) -> Mono.justOrEmpty(v.getHealthCheckTimeout()))
 		);
 
 		Mono<String> command = prefetch("command",
-				entity.then((e) -> just(e.getCommand()))
+				entity.then((e) -> Mono.justOrEmpty(e.getCommand()))
 		);
 
 		return new ApplicationExtras() {
@@ -410,10 +406,6 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	public void logout() {
 		_operations = null;
 		_client = null;
-		if (v1!=null) {
-			v1.logout();
-			v1 = null;
-		}
 	}
 
 	public boolean isLoggedOut() {
@@ -473,8 +465,11 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 			@Override
 			public String getSshCode() throws Exception {
-				return v1.getSshClientSupport().getSshCode();
-//				throw new OperationNotSupportedException("CF V2 client doesn't support SSH access yet");
+				return ReactorUtils.get(
+					log("operations.advanced.sshCode()",
+						_operations.advanced().sshCode()
+					)
+				);
 			}
 		};
 	}
@@ -501,7 +496,6 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 				);
 			})
 			.collectList()
-//			.log("getSpaces")
 		);
 	}
 

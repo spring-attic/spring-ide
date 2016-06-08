@@ -18,7 +18,6 @@ import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.IApplicationLogConsole;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
-import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 
 import reactor.core.flow.Cancellation;
 import reactor.core.publisher.Flux;
