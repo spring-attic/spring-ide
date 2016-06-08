@@ -107,6 +107,7 @@ public class AppNameReconciler {
 		monitor.beginTask("Calculating application names", 100);
 		try {
 			YamlFileAST ast = fParser.getAST(document);
+			String contents = document.get();
 			List<Node> rootList = ast.getNodes();
 			monitor.worked(70);
 			if (rootList.size() == 1) {
@@ -123,7 +124,7 @@ public class AppNameReconciler {
 						 */
 						annotationsMap.put(new AppNameAnnotation(node.getValue(), true),
 								new Position(root.getStartMark().getIndex(),
-										getLastWhiteCharIndex(document.get(), root.getEndMark().getIndex())
+										getLastWhiteCharIndex(contents, root.getEndMark().getIndex())
 												- root.getStartMark().getIndex()));
 					}
 				} else {
@@ -136,7 +137,7 @@ public class AppNameReconciler {
 							/*
 							 * Add application name annotation entry
 							 */
-							annotationsMap.put(new AppNameAnnotation(node.getValue()), new Position(appNode.getStartMark().getIndex(), getLastWhiteCharIndex(document.get(), appNode.getEndMark().getIndex()) - appNode.getStartMark().getIndex()));
+							annotationsMap.put(new AppNameAnnotation(node.getValue()), new Position(appNode.getStartMark().getIndex(), getLastWhiteCharIndex(contents, appNode.getEndMark().getIndex()) - appNode.getStartMark().getIndex()));
 						}
 					}
 				}

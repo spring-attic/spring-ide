@@ -30,6 +30,7 @@ import java.util.UUID;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -121,7 +122,20 @@ public class DeploymentPropertiesDialogModelTests {
 	}
 
 	private AppNameReconciler addAppNameReconcilingFeature(final DeploymentPropertiesDialogModel model) {
-		final AppNameReconciler appNameReconciler = new AppNameReconciler(new YamlASTProvider(new Yaml()), model.getDeployedAppName());
+		final AppNameReconciler appNameReconciler = new AppNameReconciler(new YamlASTProvider(new Yaml()), model.getDeployedAppName()) {
+
+			@Override
+			public void reconcile(IDocument document, AppNameAnnotationModel annotationModel,
+					IProgressMonitor monitor) {
+				try {
+					waitForJobsToComplete();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				super.reconcile(document, annotationModel, monitor);
+			}
+
+		};
 
 		// File manifest
 		model.getFileDocument().addListener(new ValueListener<IDocument>() {
