@@ -22,13 +22,10 @@ import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashC
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.TAGS;
 
-import java.io.StringWriter;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -61,8 +58,6 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
 public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTargetWithProperties {
 
-	private static final String EMPTY = "";
-
 	private CloudFoundryTargetProperties targetProperties;
 
 	// Cache these to avoid frequent client calls
@@ -87,7 +82,6 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 
 	private static final String APPS_MANAGER_HOST = "APPS_MANAGER_HOST";
 	private static final String BUILDPACKS = "BUILDPACKS";
-	private static final String BUILDPACK_SEPARATOR = " ";
 
 	@Override
 	public EnumSet<RunState> supportedGoalStates() {
@@ -130,43 +124,21 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 
 	protected void persistBuildpacks(List<CFBuildpack> buildpacks) throws Exception {
 		PropertyStoreApi properties = getPersistentProperties();
+
 		if (properties != null) {
-			if (buildpacks == null) {
-				buildpacks = new ArrayList<>();
-			}
-			String value = serialiseBuilpack(buildpacks);
-			properties.put(BUILDPACKS, value);
-		}
-	}
 
-	protected String serialiseBuilpack(List<CFBuildpack> buildpacks) {
-		if (buildpacks == null || buildpacks.isEmpty()) {
-			return EMPTY;
-		}
-		StringWriter writer = new StringWriter();
-		for (CFBuildpack bp : buildpacks) {
-			writer.append(BUILDPACK_SEPARATOR);
-			writer.append(bp.getName());
-		}
-		return writer.toString();
-	}
-
-	protected Collection<String> deserialisedBuildpackValues(String storedValue) {
-		Set<String> bpVals = new LinkedHashSet<>();
-
-		if (storedValue != null) {
-			String[] values = storedValue.split(BUILDPACK_SEPARATOR);
-			if (values != null) {
-				for (String val : values) {
-					val = val.trim();
-					if (val.length() > 0) {
-						bpVals.add(val);
-					}
+			String[] buildpackVals = null;
+			if (buildpacks != null && !buildpacks.isEmpty()) {
+				buildpackVals = new String[buildpacks.size()];
+				for (int i = 0; i < buildpacks.size(); i++) {
+					buildpackVals[i] = buildpacks.get(i).getName();
 				}
 			}
+
+			properties.put(BUILDPACKS, buildpackVals);
 		}
-		return bpVals;
 	}
+
 
 	public boolean isConnected() {
 		return cachedClient.getValue() != null;
@@ -308,8 +280,10 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	public Collection<String> getBuildpackValues() throws Exception {
 		PropertyStoreApi properties = getPersistentProperties();
 		if (properties != null) {
-			String buildPackVals = properties.get(BUILDPACKS);
-			return deserialisedBuildpackValues(buildPackVals);
+			String[] buildPackVals = properties.get(BUILDPACKS, (String[]) null);
+			if (buildPackVals != null) {
+				return Arrays.asList(buildPackVals);
+			}
 		}
 		return null;
 	}
