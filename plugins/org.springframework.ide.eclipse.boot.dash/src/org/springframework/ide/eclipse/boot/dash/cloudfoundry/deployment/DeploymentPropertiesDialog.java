@@ -635,6 +635,13 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 	@Override
 	public boolean close() {
+		if (getReturnCode() == IDialogConstants.CANCEL_ID) {
+			model.cancelPressed();
+		} else {
+			if (!model.okPressed()) {
+				return false;
+			}
+		}
 		getDialogBoundsSettings().put(DIALOG_LIST_HEIGHT_SETTING, ((GridData)fileGroup.getLayoutData()).heightHint);
 		boolean close = super.close();
 		dispose();
@@ -665,19 +672,6 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		if (fileYamlAppNameAnnotationSupport != null) {
 			fileYamlAppNameAnnotationSupport.dispose();
 		}
-	}
-
-	@Override
-	protected void okPressed() {
-		if (model.okPressed()) {
-			super.okPressed();
-		}
-	}
-
-	@Override
-	protected void cancelPressed() {
-		model.cancelPressed();
-		super.cancelPressed();
 	}
 
 	// TODO: this should be replaced with TreeViewer.getStructuredSelection once we drop support for Eclipse 4.4
