@@ -78,13 +78,13 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceIn
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshClientSupport;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshHost;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.IApplicationLogConsole;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.util.StringUtils;
-import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
-import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshHost;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import com.google.common.collect.ImmutableList;
@@ -166,7 +166,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	private Mono<String> getOrgId() {
 		String orgName = params.getOrgName();
-		if (orgName==null) {A
+		if (orgName==null) {
 			return Mono.error(new IOException("No organization targetted"));
 		} else {
 			return operations_getOrgId().cache();

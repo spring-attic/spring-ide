@@ -1,7 +1,5 @@
 /*******************************************************************************
- * Copied from Spring Tool Suite. Original license:
- * 
- * Copyright (c) 2015 Pivotal Software, Inc.
+ * Copyright (c) 2015, 2016 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,7 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client;
 /**
  * Info object containing various bits of info about the host to which an ssh
  * client may wish to connect.
- * 
+ *
  * @author Kris De Volder
  */
 public class SshHost {
