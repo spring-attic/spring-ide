@@ -13,12 +13,10 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.inject.Provider;
 
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.util.Log;
@@ -59,10 +57,10 @@ public class BootDashBuildpackHintProvider implements Provider<Collection<YValue
 				if (target instanceof CloudFoundryRunTarget) {
 					CloudFoundryRunTarget cfTarget = (CloudFoundryRunTarget) target;
 					try {
-						List<CFBuildpack> targetBuildpacks = cfTarget.getBuildpacks();
+						Collection<String> targetBuildpacks = cfTarget.getBuildpackValues();
 						if (targetBuildpacks != null) {
-							for (CFBuildpack existingBp : targetBuildpacks) {
-								YValueHint ymlBuildpack = createHint(existingBp.getName(), cfTarget.getUrl());
+							for (String existingBp : targetBuildpacks) {
+								YValueHint ymlBuildpack = createHint(existingBp, cfTarget.getUrl());
 								buildPacks.add(ymlBuildpack);
 							}
 						}

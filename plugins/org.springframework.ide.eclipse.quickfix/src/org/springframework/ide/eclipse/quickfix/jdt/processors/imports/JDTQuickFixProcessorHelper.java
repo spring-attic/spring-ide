@@ -14,6 +14,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -35,7 +36,17 @@ import org.springframework.ide.eclipse.quickfix.Activator;
  */
 public class JDTQuickFixProcessorHelper {
 
+	/**
+	 * This disables the STS quickfix for organising imports and retains the
+	 * default JDT quickfix processor in the JDT registry. To do so, the
+	 * following needs to be passed as a VM arg to STS/Eclipse:
+	 * -Denable.sts.quickfix.imports=false
+	 */
+	public static final String ENABLE_STS_QUICKFIX_IMPORTS = "enable.sts.quickfix.imports";
+
 	private ContributedProcessorDescriptor jdtProcessorDescriptor = null;
+
+	private Boolean removeJDTQuickFixProcessor = null;
 
 	private static JDTQuickFixProcessorHelper instance;
 
@@ -62,7 +73,7 @@ public class JDTQuickFixProcessorHelper {
 
 		// No further action if processor was already removed or there is no cu,
 		// or JDT processor should not be removed
-		if (this.jdtProcessorDescriptor != null || cu == null || !enableRemovalOfJDTProcessor()) {
+		if (this.jdtProcessorDescriptor != null || cu == null || !shouldRemoveJDTQuickfixProcessor()) {
 			return false;
 		}
 
@@ -232,7 +243,21 @@ public class JDTQuickFixProcessorHelper {
 		return bundle;
 	}
 
-	public synchronized boolean enableRemovalOfJDTProcessor() {
-		return true;
+	/**
+	 *
+	 * @return true if the JDT quickfix processor should be removed. False
+	 * otherwise, meaning that the JDT quickfix processor will remained
+	 * registered in JDT.
+	 */
+	public synchronized boolean shouldRemoveJDTQuickfixProcessor() {
+
+		if (removeJDTQuickFixProcessor == null) {
+			Properties properties = System.getProperties();
+
+			removeJDTQuickFixProcessor = properties == null || !properties.containsKey(ENABLE_STS_QUICKFIX_IMPORTS)
+					|| !"false".equals(properties.getProperty(ENABLE_STS_QUICKFIX_IMPORTS));
+		}
+
+		return removeJDTQuickFixProcessor;
 	}
 }

@@ -22,8 +22,13 @@ import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashC
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.TAGS;
 
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -56,12 +61,13 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
 public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTargetWithProperties {
 
+	private static final String EMPTY = "";
+
 	private CloudFoundryTargetProperties targetProperties;
 
 	// Cache these to avoid frequent client calls
 	private List<CFCloudDomain> domains;
 	private List<CFSpace> spaces;
-	private List<CFBuildpack> buildpacks;
 	private List<CFStack> stacks;
 
 	private LiveVariable<ClientRequests> cachedClient;
@@ -80,6 +86,8 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	private static final BootDashColumn[] ALL_COLUMNS = { RUN_STATE_ICN, NAME, PROJECT, INSTANCES, HOST, DEFAULT_PATH, TAGS };
 
 	private static final String APPS_MANAGER_HOST = "APPS_MANAGER_HOST";
+	private static final String BUILDPACKS = "BUILDPACKS";
+	private static final String BUILDPACK_SEPARATOR = " ";
 
 	@Override
 	public EnumSet<RunState> supportedGoalStates() {
@@ -99,11 +107,10 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 		try {
 			this.domains = null;
 			this.spaces = null;
-			this.buildpacks = null;
 			this.stacks = null;
 			cachedClient.setValue(createClient());
 			if (getClient() != null) {
-				this.buildpacks = getClient().getBuildpacks();
+				persistBuildpacks(getClient().getBuildpacks());
 			}
 		} catch (Exception e) {
 			cachedClient.setValue(null);
@@ -114,12 +121,51 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	public void disconnect() {
 		this.domains = null;
 		this.spaces = null;
-		this.buildpacks = null;
 		this.stacks = null;
 		if (getClient() != null) {
 			getClient().logout();
 			cachedClient.setValue(null);
 		}
+	}
+
+	protected void persistBuildpacks(List<CFBuildpack> buildpacks) throws Exception {
+		PropertyStoreApi properties = getPersistentProperties();
+		if (properties != null) {
+			if (buildpacks == null) {
+				buildpacks = new ArrayList<>();
+			}
+			String value = serialiseBuilpack(buildpacks);
+			properties.put(BUILDPACKS, value);
+		}
+	}
+
+	protected String serialiseBuilpack(List<CFBuildpack> buildpacks) {
+		if (buildpacks == null || buildpacks.isEmpty()) {
+			return EMPTY;
+		}
+		StringWriter writer = new StringWriter();
+		for (CFBuildpack bp : buildpacks) {
+			writer.append(BUILDPACK_SEPARATOR);
+			writer.append(bp.getName());
+		}
+		return writer.toString();
+	}
+
+	protected Collection<String> deserialisedBuildpackValues(String storedValue) {
+		Set<String> bpVals = new LinkedHashSet<>();
+
+		if (storedValue != null) {
+			String[] values = storedValue.split(BUILDPACK_SEPARATOR);
+			if (values != null) {
+				for (String val : values) {
+					val = val.trim();
+					if (val.length() > 0) {
+						bpVals.add(val);
+					}
+				}
+			}
+		}
+		return bpVals;
 	}
 
 	public boolean isConnected() {
@@ -256,11 +302,16 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	 * be called in cases where fast list of buildpacks is required (e.g values that show in pop-up UI).
 	 * <p/>
 	 * Do NOT use this method to fetch buildpacks from CF
-	 * @return list of CACHED buildpacks, or null if none cached yet.
+	 * @return Collection of CACHED buildpacks, or null if none cached yet.
 	 * @throws Exception
 	 */
-	public List<CFBuildpack> getBuildpacks() throws Exception {
-		return this.buildpacks;
+	public Collection<String> getBuildpackValues() throws Exception {
+		PropertyStoreApi properties = getPersistentProperties();
+		if (properties != null) {
+			String buildPackVals = properties.get(BUILDPACKS);
+			return deserialisedBuildpackValues(buildPackVals);
+		}
+		return null;
 	}
 
 	public String getBuildpack(IProject project) {
@@ -271,18 +322,18 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 			try {
 
 
-				List<CFBuildpack> buildpacks = getBuildpacks();
+				Collection<String> buildpacks = getBuildpackValues();
 				if (buildpacks != null) {
 					String javaBuildpack = null;
 					// Only chose a java build iff ONE java buildpack exists
 					// that contains the java_buildpack pattern.
 
-					for (CFBuildpack bp : buildpacks) {
+					for (String bp : buildpacks) {
 						// iterate through all buildpacks to make sure only
 						// ONE java buildpack exists
-						if (bp.getName().contains("java_buildpack")) {
+						if (bp.contains("java_buildpack")) {
 							if (javaBuildpack == null) {
-								javaBuildpack = bp.getName();
+								javaBuildpack = bp;
 							} else {
 								// If more than two buildpacks contain
 								// "java_buildpack", do not chose any. Let CF buildpack
