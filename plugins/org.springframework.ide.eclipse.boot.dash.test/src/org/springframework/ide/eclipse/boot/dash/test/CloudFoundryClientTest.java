@@ -501,7 +501,7 @@ public class CloudFoundryClientTest {
 				String serviceName = serviceNames[i];
 				if (i%2==0) {
 					System.out.println("Create service: "+serviceName);
-					client.createService(serviceName, "cloudamqp", "lemur").block();
+					client.createService(serviceName, "cloudamqp", "lemur").block(CloudFoundryServicesHarness.CREATE_SERVICE_TIMEOUT);
 				} else {
 					System.out.println("Create user-provided service: "+serviceName);
 					client.createUserProvidedService(serviceName, ImmutableMap.of()).block();
