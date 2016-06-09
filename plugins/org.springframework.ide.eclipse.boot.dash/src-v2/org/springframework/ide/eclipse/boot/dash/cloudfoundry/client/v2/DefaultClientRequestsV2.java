@@ -21,6 +21,8 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+
+
 import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.client.v2.applications.ApplicationEntity;
 import org.cloudfoundry.client.v2.applications.GetApplicationResponse;
@@ -67,6 +69,7 @@ import org.cloudfoundry.reactor.uaa.ReactorUaaClient;
 import org.cloudfoundry.reactor.util.ConnectionContextSupplier;
 import org.cloudfoundry.spring.client.SpringCloudFoundryClient;
 import org.cloudfoundry.util.PaginationUtils;
+import org.eclipse.core.runtime.Platform;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationRunningStateTracker;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
@@ -96,6 +99,10 @@ import com.google.common.collect.Sets;
 import reactor.core.flow.Cancellation;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.util.Logger;
+import reactor.core.util.Logger.Extension;
+
+import org.slf4j.helpers.MessageFormatter;
 
 /**
  * @author Kris De Volder
@@ -107,9 +114,23 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	private static final Duration GET_SERVICES_TIMEOUT = Duration.ofSeconds(60);
 
 	private static final boolean DEBUG = true;//(""+Platform.getLocation()).contains("kdvolder");
+	private static final boolean DEBUG_REACTOR = (""+Platform.getLocation()).contains("kdvolder")
+			|| (""+Platform.getLocation()).contains("bamboo");
+
 	private static void debug(String string) {
 		if (DEBUG) {
 			System.out.println(string);
+		}
+	}
+
+	static {
+		if (DEBUG_REACTOR) {
+			Logger.enableExtension(new Extension() {
+				@Override
+				public void log(String category, java.util.logging.Level level, String msg, Object... arguments) {
+					debug(category +"["+level + "] : "+MessageFormatter.format(msg, arguments).getMessage());
+				}
+			});
 		}
 	}
 
