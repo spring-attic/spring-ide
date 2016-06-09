@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Reactor-core Repackaged for STS
+Bundle-SymbolicName: io.projectreactor.reactor-core
+Bundle-Version: 2.5.0.BUILD-20160607_135537-677repack
+Bundle-Vendor: Pivotal Inc
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ClassPath: .,
+ lib/reactor-core-2.5.0.BUILD-20160607.135537-677.jar,
+ lib/slf4j-simple-1.7.16.jar
+Import-Package: org.reactivestreams;version="[1.0.0,2.0.0)",
+ org.slf4j
+Export-Package: reactor.core.converter,
+ reactor.core.flow,
+ reactor.core.publisher,
+ reactor.core.queue,
+ reactor.core.scheduler,
+ reactor.core.state,
+ reactor.core.subscriber,
+ reactor.core.test,
+ reactor.core.tuple,
+ reactor.core.util
