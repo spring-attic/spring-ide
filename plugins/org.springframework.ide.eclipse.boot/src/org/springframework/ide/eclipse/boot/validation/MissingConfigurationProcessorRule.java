@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.IMarkerResolutionGenerator2;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
@@ -144,7 +145,7 @@ public class MissingConfigurationProcessorRule extends BootValidationRule {
 			IMethod[] methods = t.getMethods();
 			mon.beginTask(t.getElementName(), 1+methods.length);
 			try {
-				IAnnotation annot = t.getAnnotation("ConfigurationProperties");
+				IAnnotation annot = getAnnotation(t);
 				if (annot!=null && annot.exists()) {
 					visit(annot);
 					mon.worked(1);
@@ -155,6 +156,26 @@ public class MissingConfigurationProcessorRule extends BootValidationRule {
 			} finally {
 				mon.done();
 			}
+		}
+
+		private IAnnotation getAnnotation(IType t) {
+			try {
+				IAnnotation[] all = t.getAnnotations();
+				if (all!=null) {
+					for (IAnnotation a : all) {
+						String name = a.getElementName();
+						//name could be fully qualified or simple, so check for both
+						if ("org.springframework.boot.context.properties.ConfigurationProperties".equals(name)
+						|| "ConfigurationProperties".equals(name)
+						) {
+							return a;
+						}
+					}
+				}
+			} catch (JavaModelException e) {
+				BootActivator.log(e);
+			}
+			return null;
 		}
 
 		private void visit(IAnnotation annot) throws Exception {
