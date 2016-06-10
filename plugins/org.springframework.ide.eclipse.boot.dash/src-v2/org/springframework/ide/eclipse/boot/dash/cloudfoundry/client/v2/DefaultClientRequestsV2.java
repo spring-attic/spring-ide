@@ -21,8 +21,6 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-
-
 import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.client.v2.applications.ApplicationEntity;
 import org.cloudfoundry.client.v2.applications.GetApplicationResponse;
@@ -41,7 +39,7 @@ import org.cloudfoundry.client.v2.stacks.GetStackResponse;
 import org.cloudfoundry.client.v2.userprovidedserviceinstances.DeleteUserProvidedServiceInstanceRequest;
 import org.cloudfoundry.doppler.LogMessage;
 import org.cloudfoundry.operations.CloudFoundryOperations;
-import org.cloudfoundry.operations.CloudFoundryOperationsBuilder;
+import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.applications.ApplicationDetail;
 import org.cloudfoundry.operations.applications.DeleteApplicationRequest;
 import org.cloudfoundry.operations.applications.GetApplicationEnvironmentsRequest;
@@ -71,6 +69,7 @@ import org.cloudfoundry.spring.client.SpringCloudFoundryClient;
 import org.cloudfoundry.util.PaginationUtils;
 import org.eclipse.core.runtime.Platform;
 import org.osgi.framework.Version;
+import org.slf4j.helpers.MessageFormatter;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationRunningStateTracker;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
@@ -101,8 +100,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.util.Logger;
 import reactor.core.util.Logger.Extension;
-
-import org.slf4j.helpers.MessageFormatter;
 
 /**
  * @author Kris De Volder
@@ -167,7 +164,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		this.params = params;
 		this._client = clients.getOrCreate(params.getUsername(), params.getPassword(), params.getHost());
 		debug(">>> creating cf operations");
-		this._operations = new CloudFoundryOperationsBuilder()
+		this._operations = DefaultCloudFoundryOperations.builder()
 				.cloudFoundryClient(_client)
 				.dopplerClient(ReactorDopplerClient.builder()
 					.cloudFoundryClient((ConnectionContextSupplier)_client)
@@ -177,12 +174,23 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 					.cloudFoundryClient(_client)
 					.build()
 				)
-				.target(params.getOrgName(), params.getSpaceName())
+				.organization(params.getOrgName())
+				.space(params.getSpaceName())
 				.build();
 		debug("<<< creating cf operations");
 
 		this.orgId = getOrgId();
 		this.info = client_getInfo().cache();
+	}
+
+	private Mono<CloudFoundryOperations> client_createOperations(OrganizationSummary org) {
+		return log("client.createOperations(org="+org.getName()+")",
+			Mono.fromCallable(() -> DefaultCloudFoundryOperations.builder()
+				.cloudFoundryClient(_client)
+				.organization(org.getName())
+				.build()
+			)
+		);
 	}
 
 	private Mono<String> getOrgId() {
@@ -1174,16 +1182,6 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		return log("client.userProvidedServiceInstances.delete(id="+s.getId()+")",
 			_client.userProvidedServiceInstances().delete(DeleteUserProvidedServiceInstanceRequest.builder()
 				.userProvidedServiceInstanceId(s.getId())
-				.build()
-			)
-		);
-	}
-
-	private Mono<CloudFoundryOperations> client_createOperations(OrganizationSummary org) {
-		return log("client.createOperations(org="+org.getName()+")",
-			Mono.fromCallable(() -> new CloudFoundryOperationsBuilder()
-				.cloudFoundryClient(_client)
-				.target(org.getName())
 				.build()
 			)
 		);
