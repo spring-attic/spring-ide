@@ -56,6 +56,7 @@ import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springframework.ide.eclipse.boot.dash.util.LogSink;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
@@ -122,7 +123,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		try {
 			getCloudModel().getElementConsoleManager().showConsole(this);
 		} catch (Exception e) {
-			BootDashActivator.log(e);
+			Log.log(e);
 		}
 	}
 
@@ -577,10 +578,9 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 	public void print(String msg, LogType type) {
 		try {
 			BootDashModelConsoleManager consoles = getCloudModel().getElementConsoleManager();
-			consoles.showConsole(this);
 			consoles.writeToConsole(this, msg+"\n", type);
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 		}
 	}
 
