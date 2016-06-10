@@ -167,5 +167,46 @@ ResponseEntity&lt;PagedResources&lt;?&gt;&gt; result = ${restTemplate:var(org.sp
      new HttpEntity&lt;Void&gt;((Void) null),
      new ParameterizedTypeReference&lt;PagedResources&lt;${cursor}&gt;&gt;() {});
 </template>
-
+<template 
+	id="org.springframework.ide.eclipse.boot.templates.spring-snapshots"
+	name="spring-snapshots"
+	description="Spring snapshot repositories"
+	context="org.eclipse.m2e.editor.xml.templates.contextType.project">
+	&lt;repositories&gt;
+		&lt;repository&gt;
+			&lt;id&gt;spring-snapshots&lt;/id&gt;
+			&lt;name&gt;Spring Snapshots&lt;/name&gt;
+			&lt;url&gt;https://repo.spring.io/snapshot&lt;/url&gt;
+			&lt;snapshots&gt;
+				&lt;enabled&gt;true&lt;/enabled&gt;
+			&lt;/snapshots&gt;
+		&lt;/repository&gt;
+		&lt;repository&gt;
+			&lt;id&gt;spring-milestones&lt;/id&gt;
+			&lt;name&gt;Spring Milestones&lt;/name&gt;
+			&lt;url&gt;https://repo.spring.io/milestone&lt;/url&gt;
+			&lt;snapshots&gt;
+				&lt;enabled&gt;false&lt;/enabled&gt;
+			&lt;/snapshots&gt;
+		&lt;/repository&gt;
+	&lt;/repositories&gt;
+	&lt;pluginRepositories&gt;
+		&lt;pluginRepository&gt;
+			&lt;id&gt;spring-snapshots&lt;/id&gt;
+			&lt;name&gt;Spring Snapshots&lt;/name&gt;
+			&lt;url&gt;https://repo.spring.io/snapshot&lt;/url&gt;
+			&lt;snapshots&gt;
+				&lt;enabled&gt;true&lt;/enabled&gt;
+			&lt;/snapshots&gt;
+		&lt;/pluginRepository&gt;
+		&lt;pluginRepository&gt;
+			&lt;id&gt;spring-milestones&lt;/id&gt;
+			&lt;name&gt;Spring Milestones&lt;/name&gt;
+			&lt;url&gt;https://repo.spring.io/milestone&lt;/url&gt;
+			&lt;snapshots&gt;
+				&lt;enabled&gt;false&lt;/enabled&gt;
+			&lt;/snapshots&gt;
+		&lt;/pluginRepository&gt;
+	&lt;/pluginRepositories&gt;
+</template>
 </templates>
