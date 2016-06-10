@@ -116,14 +116,12 @@ ${:importStatic('org.springframework.test.web.servlet.request.MockMvcRequestBuil
     
     MockMvc mockMvc;
     
-    // @formatter:off
     @Before
     public void setup() {
         mockMvc = MockMvcBuilders
                 .webAppContextSetup(context)
                 .build();
     }
-    // @formatter:on
 </template>
 
 <template
