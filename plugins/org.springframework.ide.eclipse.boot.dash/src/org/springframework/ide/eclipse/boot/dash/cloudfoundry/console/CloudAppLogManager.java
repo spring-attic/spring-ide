@@ -50,6 +50,21 @@ public class CloudAppLogManager extends BootDashModelConsoleManager {
 		ApplicationLogConsole console = getExisitingConsole(runTarget.getTargetProperties(), appName);
 		if (console != null) {
 			console.writeApplicationLog(message, type);
+			
+			// To avoid console "jumping", only show console
+			// if none are visible
+			showIfNoOtherConsoles(console);
+		}
+	}
+
+	/**
+	 * Only shows the given console if no other console is visible. This avoid
+	 * "jumping" between consoles when multiple consoles are streaming in
+	 * parallel.
+	 */
+	protected void showIfNoOtherConsoles(IConsole console) {
+		IConsole[] consoles = consoleManager.getConsoles();
+		if (consoles == null || consoles.length == 0) {
 			consoleManager.showConsoleView(console);
 		}
 	}
@@ -121,7 +136,7 @@ public class CloudAppLogManager extends BootDashModelConsoleManager {
 			appConsole.setAttribute(ATT_APP_NAME, appName);
 			appConsole.setAttribute(APP_CONSOLE_ID, getConsoleId(targetProperties, appName));
 
-			ConsolePlugin.getDefault().getConsoleManager().addConsoles(new IConsole[] { appConsole });
+			consoleManager.addConsoles(new IConsole[] { appConsole });
 
 			connectLoggregator(appConsole, appName);
 		}
