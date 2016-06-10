@@ -18,11 +18,24 @@ public static void main(String[] args) throws Exception {
 }${:import(org.springframework.boot.SpringApplication)}
 </template>
 
-<!-- TODO: is it possible to unify the two templates below and somehow use the right one
-  depending on context? I.e.
-    - when method is annotated with @Test use the junit one
-    - otherwise use the Spring one
-   -->
+<template
+    id="org.springframework.ide.eclipse.boot.templates.expectedexception.decl"
+    name="eerule"
+    description="Declare a @Rule ExpectedException field [test]"
+    context="boot-members">
+${:import(org.junit.Rule,org.junit.rules.ExpectedException)}
+@Rule
+ExpectedException thrown = ExpectedException.none();
+</template>
+<template
+    id="org.springframework.ide.eclipse.boot.templates.expectedexception.use"
+    name="eerule"
+    description="Add an Exception to an ExpectedException rule [test]"
+    context="boot-statements">
+${thrown:field(org.junit.rules.ExpectedException)}.expect(${Exception}.class);
+${thrown:field(org.junit.rules.ExpectedException)}.expectMessage("${cursor}");
+</template>
+
 <template
     id="org.springframework.ide.eclipse.boot.templates.assert.notNull.Spring"
     name="notnull"
