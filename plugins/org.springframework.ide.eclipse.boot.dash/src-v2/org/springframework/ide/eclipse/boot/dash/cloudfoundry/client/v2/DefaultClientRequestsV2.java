@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
@@ -23,6 +24,7 @@ import java.util.function.Predicate;
 
 import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.client.v2.applications.ApplicationEntity;
+import org.cloudfoundry.client.v2.applications.CreateApplicationRequest;
 import org.cloudfoundry.client.v2.applications.GetApplicationResponse;
 import org.cloudfoundry.client.v2.applications.UpdateApplicationRequest;
 import org.cloudfoundry.client.v2.applications.UpdateApplicationResponse;
@@ -62,6 +64,8 @@ import org.cloudfoundry.operations.services.CreateUserProvidedServiceInstanceReq
 import org.cloudfoundry.operations.services.GetServiceInstanceRequest;
 import org.cloudfoundry.operations.services.ServiceInstance;
 import org.cloudfoundry.operations.services.UnbindServiceInstanceRequest;
+import org.cloudfoundry.operations.spaces.GetSpaceRequest;
+import org.cloudfoundry.operations.spaces.SpaceDetail;
 import org.cloudfoundry.reactor.doppler.ReactorDopplerClient;
 import org.cloudfoundry.reactor.uaa.ReactorUaaClient;
 import org.cloudfoundry.reactor.util.ConnectionContextSupplier;
@@ -111,9 +115,9 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	private static final Duration APP_START_TIMEOUT = Duration.ofMillis(ApplicationRunningStateTracker.APP_START_TIMEOUT);
 	private static final Duration GET_SERVICES_TIMEOUT = Duration.ofSeconds(60);
 
-	private static final boolean DEBUG = true;//(""+Platform.getLocation()).contains("kdvolder");
-	private static final boolean DEBUG_REACTOR = (""+Platform.getLocation()).contains("kdvolder")
-			|| (""+Platform.getLocation()).contains("bamboo");
+	private static final boolean DEBUG = false;//(""+Platform.getLocation()).contains("kdvolder");
+	private static final boolean DEBUG_REACTOR = false;//(""+Platform.getLocation()).contains("kdvolder")
+									//|| (""+Platform.getLocation()).contains("bamboo");
 
 	private static void debug(String string) {
 		if (DEBUG) {
@@ -163,6 +167,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	private Mono<String> orgId;
 	private Mono<GetInfoResponse> info;
+	private Mono<String> spaceId;
 
 	public DefaultClientRequestsV2(CloudFoundryClientCache clients, CFClientParams params) throws Exception {
 		this.params = params;
@@ -185,8 +190,10 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		debug("<<< creating cf operations");
 
 		this.orgId = getOrgId();
+		this.spaceId = getSpaceId();
 		this.info = client_getInfo().cache();
 	}
+
 
 	private Mono<CloudFoundryOperations> client_createOperations(OrganizationSummary org) {
 		return log("client.createOperations(org="+org.getName()+")",
@@ -204,6 +211,20 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 			return Mono.error(new IOException("No organization targetted"));
 		} else {
 			return operations_getOrgId().cache();
+		}
+	}
+
+	private Mono<String> getSpaceId() {
+		String spaceName = params.getSpaceName();
+		if (spaceName==null) {
+			return Mono.error(new IOException("No space targetted"));
+		} else {
+			return _operations.spaces().get(GetSpaceRequest.builder()
+				.name(params.getSpaceName())
+				.build()
+			)
+			.map(SpaceDetail::getId)
+			.cache();
 		}
 	}
 
@@ -635,38 +656,104 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		);
 	}
 
+	public Mono<Void> ifApplicationExists(String appName, Function<UUID, Mono<Void>> then, Mono<Void> els) throws Exception {
+		return getApplicationMono(appName)
+		.map((app) -> Optional.of(app.getGuid()))
+		.otherwiseIfEmpty(Mono.just(Optional.empty()))
+		.then((Optional<UUID> uuid) -> {
+			if (uuid.isPresent()) {
+				return then.apply(uuid.get());
+			} else {
+				return els;
+			}
+		});
+	}
+
 	@Override
 	public void push(CFPushArguments params, CancelationToken cancelationToken) throws Exception {
-		debug("Pushing app starting: "+params.getAppName());
-		//XXX CF V2: push should use 'manifest' in a future version of V2
-		PushApplicationRequest pushRequest = toPushRequest(params)
-				.noStart(true)
-				.noRoute(true)
-				.build();
+		String appName = params.getAppName();
 		ReactorUtils.get(APP_START_TIMEOUT, cancelationToken,
-			log("operations.applications().push("+pushRequest+")",
-				_operations.applications()
-				.push(pushRequest)
+			ifApplicationExists(appName,
+				((uuid) -> pushExisting(uuid, params)),
+				firstPush(params)
 			)
-			.then(getApplicationDetail(params.getAppName()))
-			.then(appDetail -> {
-				return Flux.merge(
-					setRoutes(appDetail, params.getRoutes()),
-					setEnvVars(appDetail, params.getEnv()),
-					bindAndUnbindServices(params.getAppName(), params.getServices())
-				)
-				.then();
-			})
-			.then(() -> {
-				if (!params.isNoStart()) {
-					return startApp(params.getAppName());
-				} else {
-					return Mono.empty();
-				}
-			})
+			.then(params.isNoStart()
+				? Mono.empty()
+				: startApp(appName)
+			)
 		);
-		debug("Pushing app succeeded: "+params.getAppName());
 	}
+
+	private Mono<Void> pushExisting(UUID appId, CFPushArguments params) {
+		return Mono.error(new IOException("Not implemented yet"));
+	}
+
+	private Mono<Void> firstPush(CFPushArguments params) {
+		String appName = params.getAppName();
+		return createApp(params)
+		.then(
+			Flux.merge(
+				setRoutes(appName, params.getRoutes()),
+				bindAndUnbindServices(appName, params.getServices())
+			).then()
+		)
+		.then(Mono.fromCallable(() -> {
+			v1.uploadApplication(appName, params.getApplicationData());
+			return "who cares";
+		}))
+		.then();
+	}
+
+	private Mono<UUID> createApp(CFPushArguments params) {
+		return spaceId.then((spaceId) -> {
+			return _client.applicationsV2().create(CreateApplicationRequest.builder()
+				.spaceId(spaceId)
+				.name(params.getAppName())
+				.memory(params.getMemory())
+				.diskQuota(params.getDiskQuota())
+				.healthCheckTimeout(params.getTimeout())
+				.buildpack(params.getBuildpack())
+				.command(params.getCommand())
+				//TODO: .stackId
+				.environmentJsons(params.getEnv())
+				.instances(params.getInstances())
+				.build()
+			);
+		})
+		.map(response -> UUID.fromString(response.getMetadata().getId()));
+	}
+
+//	public void pushV2(CFPushArguments params, CancelationToken cancelationToken) throws Exception {
+//		debug("Pushing app starting: "+params.getAppName());
+//		//XXX CF V2: push should use 'manifest' in a future version of V2
+//		PushApplicationRequest pushRequest = toPushRequest(params)
+//				.noStart(true)
+//				.noRoute(true)
+//				.build();
+//		ReactorUtils.get(APP_START_TIMEOUT, cancelationToken,
+//			log("operations.applications().push("+pushRequest+")",
+//				_operations.applications()
+//				.push(pushRequest)
+//			)
+//			.then(getApplicationDetail(params.getAppName()))
+//			.then(appDetail -> {
+//				return Flux.merge(
+//					setRoutes(appDetail, params.getRoutes()),
+//					setEnvVars(appDetail, params.getEnv()),
+//					bindAndUnbindServices(params.getAppName(), params.getServices())
+//				)
+//				.then();
+//			})
+//			.then(() -> {
+//				if (!params.isNoStart()) {
+//					return startApp(params.getAppName());
+//				} else {
+//					return Mono.empty();
+//				}
+//			})
+//		);
+//		debug("Pushing app succeeded: "+params.getAppName());
+//	}
 
 	private Mono<ApplicationDetail> getApplicationDetail(String appName) {
 		return log("operations.applications.get(name="+appName+")",
@@ -838,18 +925,18 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		});
 	}
 
-	private static PushApplicationRequest.Builder toPushRequest(CFPushArguments params) {
-		return PushApplicationRequest.builder()
-		.name(params.getAppName())
-		.memory(params.getMemory())
-		.diskQuota(params.getDiskQuota())
-		.timeout(params.getTimeout())
-		.buildpack(params.getBuildpack())
-		.command(params.getCommand())
-		.stack(params.getStack())
-		.instances(params.getInstances())
-		.application(params.getApplicationData());
-	}
+//	private static PushApplicationRequest.Builder toPushRequest(CFPushArguments params) {
+//		return PushApplicationRequest.builder()
+//		.name(params.getAppName())
+//		.memory(params.getMemory())
+//		.diskQuota(params.getDiskQuota())
+//		.timeout(params.getTimeout())
+//		.buildpack(params.getBuildpack())
+//		.command(params.getCommand())
+//		.stack(params.getStack())
+//		.instances(params.getInstances())
+//		.application(params.getApplicationData());
+//	}
 
 	public Mono<Void> bindAndUnbindServices(String appName, List<String> _services) {
 		debug("bindAndUnbindServices "+_services);

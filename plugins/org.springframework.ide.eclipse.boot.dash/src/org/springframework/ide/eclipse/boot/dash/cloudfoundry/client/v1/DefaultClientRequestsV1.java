@@ -45,6 +45,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDoma
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.BuildpackSupport;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.CloudInfoV2;
@@ -125,6 +126,22 @@ public class DefaultClientRequestsV1 {
 
 	public void logout() {
 		client.logout();
+	}
+
+	public void createApplication(final CFPushArguments params) throws Exception {
+		new BasicRequest(this.client, params.getAppName(), "Creating application") {
+			@Override
+			protected void runRequest(CloudFoundryOperations client) throws Exception {
+				client.createApplication(params.getAppName(),
+						new Staging(params.getCommand(), params.getBuildpack(),
+								params.getStack(), params.getTimeout()),
+						params.getDiskQuota(),
+						params.getMemory(),
+						params.getRoutes(),
+						params.getServices()
+				);
+			}
+		}.call();
 	}
 
 	public void createApplication(final CloudApplicationDeploymentProperties deploymentProperties) throws Exception {

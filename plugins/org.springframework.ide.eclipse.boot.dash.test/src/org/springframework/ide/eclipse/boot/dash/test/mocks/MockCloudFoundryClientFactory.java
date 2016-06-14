@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test.mocks;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -320,7 +321,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 			app.setServicesMaybe(args.getServices());
 			app.setStackMaybe(args.getStack());
 			app.setTimeoutMaybe(args.getTimeout());
-			app.setBits(IOUtil.toBytes(args.getApplicationData()));
+			app.setBits(IOUtil.toBytes(new FileInputStream(args.getApplicationData().getName())));
 			space.put(app);
 			space.getPushCount(app.getName()).increment();
 

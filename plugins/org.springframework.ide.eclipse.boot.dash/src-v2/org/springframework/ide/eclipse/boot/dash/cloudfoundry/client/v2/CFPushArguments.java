@@ -17,6 +17,7 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipFile;
 
 import org.eclipse.core.runtime.Assert;
 
@@ -41,7 +42,7 @@ public class CFPushArguments implements AutoCloseable {
 	private Map<String, String> env = ImmutableMap.of();
 	private Integer instances;
 	private List<String> services = ImmutableList.of();
-	private InputStream applicationData;
+	private ZipFile applicationData;
 	private boolean noStart = false;
 
 	public String getAppName() {
@@ -104,7 +105,7 @@ public class CFPushArguments implements AutoCloseable {
 	public void setServices(List<String> services) {
 		this.services = services;
 	}
-	public InputStream getApplicationData() {
+	public ZipFile getApplicationData() {
 		return applicationData;
 	}
 	@Override
@@ -113,9 +114,9 @@ public class CFPushArguments implements AutoCloseable {
 			applicationData.close();
 		}
 	}
-	public void setApplicationData(File archive) throws FileNotFoundException {
+	public void setApplicationData(File archive) throws Exception {
 		Assert.isLegal(applicationData==null, "Can only set this once");
-		this.applicationData = new FileInputStream(archive);
+		this.applicationData = new ZipFile(archive);
 	}
 	public boolean isNoStart() {
 		return noStart;
