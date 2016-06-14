@@ -82,6 +82,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshClientSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshHost;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1.DefaultClientRequestsV1;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.IApplicationLogConsole;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
@@ -156,12 +157,16 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	private CFClientParams params;
 	private SpringCloudFoundryClient _client ;
 	private CloudFoundryOperations _operations;
-	private Mono<String> orgId;
 
+	@Deprecated
+	private DefaultClientRequestsV1 v1;
+
+	private Mono<String> orgId;
 	private Mono<GetInfoResponse> info;
 
 	public DefaultClientRequestsV2(CloudFoundryClientCache clients, CFClientParams params) throws Exception {
 		this.params = params;
+		this.v1 = new DefaultClientRequestsV1(params);
 		this._client = clients.getOrCreate(params.getUsername(), params.getPassword(), params.getHost());
 		debug(">>> creating cf operations");
 		this._operations = DefaultCloudFoundryOperations.builder()
@@ -435,6 +440,10 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	public void logout() {
 		_operations = null;
 		_client = null;
+		if (v1!=null) {
+			v1.logout();
+			v1 = null;
+		}
 	}
 
 	public boolean isLoggedOut() {
