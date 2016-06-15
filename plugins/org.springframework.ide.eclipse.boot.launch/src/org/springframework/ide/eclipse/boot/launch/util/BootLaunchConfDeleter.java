@@ -53,7 +53,7 @@ public class BootLaunchConfDeleter {
 		this.launchMan = launchMan;
 		this.listenerManager = new ProjectDeletionListenerManager(workspace, new ProjectDeletionListener() {
 			@Override
-			public void projectAboutToBeDeleted(IProject project) {
+			public void projectWasDeleted(IProject project) {
 				handleDelete(project);
 			}
 		});
