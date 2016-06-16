@@ -84,12 +84,41 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
+import junit.framework.AssertionFailedError;
 import reactor.core.flow.Cancellation;
 import reactor.core.publisher.Flux;
 
 public class CloudFoundryClientTest {
 
-	private static final String CFAPPS_IO = "cfapps.io";
+	private String CFAPPS_IO() {
+		String org = clientParams.getOrgName();
+		if (org.equals("FrameworksAndRuntimes")) {
+			//PWS test space/org
+			return "cfapps.io";
+		} else if (org.equals("pivot-kdevolder")) {
+			//PEZ
+			return "cfapps.pez.pivotal.io";
+		}
+		throw new AssertionFailedError("unknown test environment, not sure what to expect here");
+	}
+
+	private String[] getExpectedDomains() {
+		String org = clientParams.getOrgName();
+		if (org.equals("FrameworksAndRuntimes")) {
+			//PWS test space/org
+			return new String[] {"projectreactor.org",
+					"projectreactor.io",
+					"dsyer.com"
+			};
+		} else if (org.equals("pivot-kdevolder")) {
+			//PEZ
+			return new String[] {
+					"cfapps.pez.pivotal.io",
+					"pezapp.io"
+			};
+		}
+		throw new AssertionFailedError("unknown test environment, not sure what to expect here");
+	}
 
 	public static final Predicate<Throwable> FLAKY_SERVICE_BROKER = (e) -> {
 		String msg = ExceptionUtil.getMessage(e).toLowerCase();
@@ -98,10 +127,11 @@ public class CloudFoundryClientTest {
 			;
 	};
 
-	private DefaultClientRequestsV2 client = createClient(CfTestTargetParams.fromEnv());
+	private CFClientParams clientParams = CfTestTargetParams.fromEnv();
+	private DefaultClientRequestsV2 client = createClient(clientParams);
 
 	public TestBracketter bracketer = new TestBracketter();
-	public CloudFoundryServicesHarness services = new CloudFoundryServicesHarness(client);
+	public CloudFoundryServicesHarness services = new CloudFoundryServicesHarness(clientParams, client);
 	public CloudFoundryApplicationHarness appHarness = new CloudFoundryApplicationHarness(client);
 
 	@After
@@ -249,7 +279,7 @@ public class CloudFoundryClientTest {
 			params.setAppName(appName);
 			params.setApplicationData(getTestZip("testapp"));
 			params.setBuildpack("staticfile_buildpack");
-			params.setRoutes(ImmutableList.of(appName+"."+CFAPPS_IO));
+			params.setRoutes(ImmutableList.of(appName+"."+CFAPPS_IO()));
 
 			push(params);
 		}
@@ -259,7 +289,7 @@ public class CloudFoundryClientTest {
 		CFApplicationDetail app = client.getApplication(appName);
 		assertNotNull("Expected application to exist after push: " + appName, app);
 
-		assertEquals(ImmutableSet.of(appName+"."+CFAPPS_IO), ImmutableSet.copyOf(app.getUris()));
+		assertEquals(ImmutableSet.of(appName+"."+CFAPPS_IO()), ImmutableSet.copyOf(app.getUris()));
 	}
 
 	@Test
@@ -276,7 +306,7 @@ public class CloudFoundryClientTest {
 		params.setBuildpack("staticfile_buildpack");
 
 		Set<String> routes = ImmutableSet.copyOf(Stream.of(hostNames)
-				.map((host) -> host + "." + CFAPPS_IO)
+				.map((host) -> host + "." + CFAPPS_IO())
 				.collect(Collectors.toList())
 		);
 		params.setRoutes(routes);
@@ -305,7 +335,7 @@ public class CloudFoundryClientTest {
 		params.setBuildpack("staticfile_buildpack");
 
 		Set<String> routes = ImmutableSet.copyOf(Stream.of(hostNames)
-				.map((host) -> host + "." + CFAPPS_IO)
+				.map((host) -> host + "." + CFAPPS_IO())
 				.collect(Collectors.toList())
 		);
 		params.setRoutes(routes);
@@ -340,7 +370,7 @@ public class CloudFoundryClientTest {
 
 		CFPushArguments params = new CFPushArguments();
 		params.setAppName(appName);
-		params.setRoutes(appName+"."+CFAPPS_IO);
+		params.setRoutes(appName+"."+CFAPPS_IO());
 		params.setApplicationData(getTestZip("testapp"));
 		params.setBuildpack("staticfile_buildpack");
 		params.setEnv(ImmutableMap.of(
@@ -352,7 +382,7 @@ public class CloudFoundryClientTest {
 		CFApplicationDetail app = client.getApplication(appName);
 		assertNotNull("Expected application to exist after push: " + appName, app);
 		ACondition.waitFor("app content to be availabe", 10_000, () -> {
-			String content = IOUtils.toString(new URI("http://" + appName + '.' + CFAPPS_IO + "/test.txt"));
+			String content = IOUtils.toString(new URI("http://" + appName + '.' + CFAPPS_IO() + "/test.txt"));
 			assertTrue(content.length() > 0);
 			assertTrue(content.contains("content"));
 		});
@@ -469,9 +499,10 @@ public class CloudFoundryClientTest {
 							assertEquals("user-provided", s.getService());
 							System.out.println("  user provided => OK");
 						} else {
-							assertEquals("cloudamqp", s.getService());
+							assertEquals(services.getTestServiceAndPlan()[0], s.getService());
 							System.out.println("  getService() => OK");
-							assertEquals("lemur", s.getPlan());
+							String expectPlan = services.getTestServiceAndPlan()[1];
+							assertEquals(expectPlan, s.getPlan());
 							System.out.println("  getPlan() => OK");
 							assertIsURL(s.getDashboardUrl());
 							System.out.println("  getDashboardUrl() => OK");
@@ -501,10 +532,13 @@ public class CloudFoundryClientTest {
 				String serviceName = serviceNames[i];
 				if (i%2==0) {
 					System.out.println("Create service: "+serviceName);
-					client.createService(serviceName, "cloudamqp", "lemur").block(CloudFoundryServicesHarness.CREATE_SERVICE_TIMEOUT);
+					String[] serviceInfo = services.getTestServiceAndPlan();
+					client.createService(serviceName, serviceInfo[0], serviceInfo[1])
+					.block(CloudFoundryServicesHarness.CREATE_SERVICE_TIMEOUT);
 				} else {
 					System.out.println("Create user-provided service: "+serviceName);
-					client.createUserProvidedService(serviceName, ImmutableMap.of()).block();
+					client.createUserProvidedService(serviceName, ImmutableMap.of())
+					.block();
 				}
 			}
 
@@ -551,20 +585,17 @@ public class CloudFoundryClientTest {
 
 	@Test
 	public void testGetDomains() throws Exception {
-		client = createClient(CfTestTargetParams.fromEnv());
+		CFClientParams params = CfTestTargetParams.fromEnv();
+		client = createClient(params);
 		List<CFCloudDomain> domains = client.getDomains();
-		assertEquals(CFAPPS_IO, domains.get(0).getName());
+		assertEquals(CFAPPS_IO(), domains.get(0).getName());
 
 		Set<String> names = Flux.fromIterable(domains)
 			.map(CFCloudDomain::getName)
 			.collectList()
 			.map(ImmutableSet::copyOf)
 			.block();
-		assertContains(names,
-				"projectreactor.org",
-				"projectreactor.io",
-				"dsyer.com"
-		);
+		assertContains(names, getExpectedDomains());
 	}
 
 	@Test
@@ -820,7 +851,7 @@ public class CloudFoundryClientTest {
 		String appName = appHarness.randomAppName();
 		try (CFPushArguments params = new CFPushArguments()) {
 			params.setAppName(appName);
-			params.setRoutes(appName+"."+CFAPPS_IO);
+			params.setRoutes(appName+"."+CFAPPS_IO());
 			params.setApplicationData(jarFile);
 			params.setNoStart(true);
 
@@ -861,7 +892,7 @@ public class CloudFoundryClientTest {
 		CancelationTokens cancelationTokens = new CancelationTokens();
 		try (CFPushArguments params = new CFPushArguments()) {
 			params.setAppName(appName);
-			params.setRoutes(appName+"."+CFAPPS_IO);
+			params.setRoutes(appName+"."+CFAPPS_IO());
 			params.setApplicationData(jarFile);
 
 			long starting = System.currentTimeMillis();
