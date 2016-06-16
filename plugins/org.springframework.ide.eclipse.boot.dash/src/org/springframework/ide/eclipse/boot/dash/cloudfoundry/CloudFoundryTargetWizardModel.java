@@ -43,6 +43,7 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 	private LiveVariable<String> url = new LiveVariable<>();
 	private LiveVariable<CFSpace> space = new LiveVariable<>();
 	private LiveVariable<Boolean> selfsigned = new LiveVariable<>(false);
+	private LiveVariable<Boolean> skipSslValidation = new LiveVariable<>(false);
 	private LiveVariable<String> userName = new LiveVariable<>();
 	private LiveVariable<String> password = new LiveVariable<>();
 	private LiveVariable<Boolean> storePassword = new LiveVariable<>(false);
@@ -166,6 +167,12 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 		put(SELF_SIGNED_PROP, Boolean.toString(selfsigned));
 
 		this.selfsigned.setValue(selfsigned);
+	}
+
+	public void skipSslValidation(boolean skipSsl) {
+		put(SKIP_SSL_VALIDATION_PROP, Boolean.toString(skipSsl));
+
+		this.skipSslValidation.setValue(skipSsl);
 	}
 
 	public void setUsername(String userName) {

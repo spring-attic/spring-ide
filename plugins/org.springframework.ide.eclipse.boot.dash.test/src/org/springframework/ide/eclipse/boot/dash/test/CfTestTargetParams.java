@@ -26,7 +26,8 @@ public class CfTestTargetParams {
 				fromEnv("CF_TEST_PASSWORD"),
 				false, //self signed
 				fromEnv("CF_TEST_ORG"),
-				fromEnv("CF_TEST_SPACE")
+				fromEnv("CF_TEST_SPACE"),
+				false // skip SSL validation
 		);
 	}
 

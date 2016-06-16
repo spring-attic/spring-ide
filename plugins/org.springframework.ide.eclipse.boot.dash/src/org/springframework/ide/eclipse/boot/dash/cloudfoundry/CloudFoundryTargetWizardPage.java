@@ -54,6 +54,8 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 
 	private Button trustSelfSigned;
 
+	private Button skipSslValidation;
+
 	private Button orgsSpacesButton;
 
 	private boolean canFinish = false;
@@ -207,6 +209,21 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 				wizardModel.setSelfsigned(trustSelfSigned.getSelection());
 			}
 
+		});
+
+
+		skipSslValidation = new Button(topComposite, SWT.CHECK);
+		skipSslValidation.setText("Skip SSL Validation");
+		GridDataFactory.fillDefaults().grab(false, false).applyTo(skipSslValidation);
+		skipSslValidation.setSelection(false);
+
+		skipSslValidation.addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				wizardModel.skipSslValidation(skipSslValidation.getSelection());
+			}
+			
 		});
 
 		wizardModel.addAllPropertiesListener(this);

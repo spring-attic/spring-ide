@@ -27,6 +27,7 @@ public class CFClientParams {
 	private final String username;
 	private final String password;
 	private final boolean isSelfSigned;
+	private final boolean skipSslValidation;
 
 	private String orgName; // optional
 	private String spaceName; //optional
@@ -35,7 +36,8 @@ public class CFClientParams {
 			String username, String password,
 			boolean isSelfSigned,
 			String orgName,
-			String spaceName
+			String spaceName,
+			boolean skipSslValidation
 	) {
 		Assert.isNotNull(apiUrl, "apiUrl is required");
 		Assert.isNotNull(username, "username is required");
@@ -44,6 +46,7 @@ public class CFClientParams {
 		this.username = username;
 		this.password = password;
 		this.isSelfSigned = isSelfSigned;
+		this.skipSslValidation = skipSslValidation;
 		this.orgName = orgName;
 		this.spaceName = spaceName;
 	}
@@ -55,7 +58,8 @@ public class CFClientParams {
 			targetProperties.getPassword(),
 			targetProperties.isSelfsigned(),
 			targetProperties.getOrganizationName(),
-			targetProperties.getSpaceName()
+			targetProperties.getSpaceName(),
+			targetProperties.skipSslValidation()
 		);
 	}
 
@@ -69,6 +73,10 @@ public class CFClientParams {
 
 	public boolean isSelfsigned() {
 		return isSelfSigned;
+	}
+
+	public boolean skipSslValidation() {
+		return skipSslValidation;
 	}
 
 	public String getApiUrl() {
