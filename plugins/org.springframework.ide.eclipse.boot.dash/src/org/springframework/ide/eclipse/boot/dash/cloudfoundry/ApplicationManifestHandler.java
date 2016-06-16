@@ -157,8 +157,10 @@ public class ApplicationManifestHandler {
 	public File getManifestFile() {
 		if (manifestFile != null) {
 			URI locationURI = manifestFile.getLocationURI();
-			File file = new File(locationURI);
-			return file.exists() ? file : null;
+			if (locationURI != null) {
+				File file = new File(locationURI);
+				return file.exists() ? file : null;
+			}
 		}
 		return null;
 	}
