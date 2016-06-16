@@ -27,7 +27,7 @@ public class CfTestTargetParams {
 				false, //self signed
 				fromEnv("CF_TEST_ORG"),
 				fromEnv("CF_TEST_SPACE"),
-				false // skip SSL validation
+				fromEnvBoolean("CF_TEST_SKIP_SSL")
 		);
 	}
 
@@ -35,5 +35,13 @@ public class CfTestTargetParams {
 		String value = System.getenv(name);
 		Assert.isLegal(StringUtils.hasText(value), "The environment varable '"+name+"' must be set");
 		return value;
+	}
+
+	private static boolean fromEnvBoolean(String name) {
+		String value = System.getenv(name);
+		if (value == null) {
+			return false;
+		}
+		return Boolean.parseBoolean(value);
 	}
 }
