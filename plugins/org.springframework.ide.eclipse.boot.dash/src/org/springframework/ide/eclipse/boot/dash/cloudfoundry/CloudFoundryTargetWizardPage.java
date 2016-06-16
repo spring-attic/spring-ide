@@ -52,7 +52,9 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 
 	private Text spaceValueText;
 
-	private Button trustSelfSigned;
+//	private Button trustSelfSigned;
+
+	private Button skipSslValidation;
 
 	private Button orgsSpacesButton;
 
@@ -195,16 +197,31 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 			}
 		});
 
-		trustSelfSigned = new Button(topComposite, SWT.CHECK);
-		trustSelfSigned.setText("Self-signed");
-		GridDataFactory.fillDefaults().grab(false, false).applyTo(trustSelfSigned);
-		trustSelfSigned.setSelection(false);
+//		trustSelfSigned = new Button(topComposite, SWT.CHECK);
+//		trustSelfSigned.setText("Self-signed");
+//		GridDataFactory.fillDefaults().grab(false, false).applyTo(trustSelfSigned);
+//		trustSelfSigned.setSelection(false);
+//
+//		trustSelfSigned.addSelectionListener(new SelectionAdapter() {
+//
+//			@Override
+//			public void widgetSelected(SelectionEvent e) {
+//				wizardModel.setSelfsigned(trustSelfSigned.getSelection());
+//			}
+//
+//		});
 
-		trustSelfSigned.addSelectionListener(new SelectionAdapter() {
+
+		skipSslValidation = new Button(topComposite, SWT.CHECK);
+		skipSslValidation.setText("Skip SSL Validation");
+		GridDataFactory.fillDefaults().grab(false, false).applyTo(skipSslValidation);
+		skipSslValidation.setSelection(false);
+
+		skipSslValidation.addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				wizardModel.setSelfsigned(trustSelfSigned.getSelection());
+				wizardModel.skipSslValidation(skipSslValidation.getSelection());
 			}
 
 		});

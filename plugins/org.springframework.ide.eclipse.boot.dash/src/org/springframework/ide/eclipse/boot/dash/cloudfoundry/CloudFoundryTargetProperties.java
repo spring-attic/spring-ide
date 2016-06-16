@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal Software, Inc.
+ * Copyright (c) 2015, 2016 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,7 @@ public class CloudFoundryTargetProperties extends TargetProperties {
 	public final static String ORG_PROP = "organization";
 	public final static String SPACE_PROP = "space";
 	public final static String SELF_SIGNED_PROP = "selfsigned";
+	public final static String SKIP_SSL_VALIDATION_PROP = "skipSslValidation";
 
 	public final static String ORG_GUID = "organization_guid";
 	public final static String SPACE_GUID = "space_guid";
@@ -55,6 +56,10 @@ public class CloudFoundryTargetProperties extends TargetProperties {
 
 	public boolean isSelfsigned() {
 		return map.get(SELF_SIGNED_PROP) != null && Boolean.parseBoolean(map.get(SELF_SIGNED_PROP));
+	}
+
+	public boolean skipSslValidation() {
+		return map.get(SKIP_SSL_VALIDATION_PROP) != null && Boolean.parseBoolean(map.get(SKIP_SSL_VALIDATION_PROP));
 	}
 
 	public static String getId(CloudFoundryTargetProperties cloudProps) {

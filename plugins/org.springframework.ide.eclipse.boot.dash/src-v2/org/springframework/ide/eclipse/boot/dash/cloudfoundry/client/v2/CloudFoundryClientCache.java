@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.spring.client.SpringCloudFoundryClient;
 
 /**
@@ -45,22 +44,28 @@ public class CloudFoundryClientCache {
 		public final String username;
 		public final String password;
 		public final String host;
-		public Params(String username, String password, String host) {
+		public final boolean skipSsl;
+		public Params(String username, String password, String host, boolean skipSsl) {
 			super();
 			this.username = username;
 			this.password = password;
 			this.host = host;
+			this.skipSsl = skipSsl;
 		}
+
 		@Override
 		public String toString() {
-			return "Params [username=" + username + ", host=" + host + "]";
+			return "Params [username=" + username + ", host=" + host + ", skipSsl=" + skipSsl
+					+ "]";
 		}
+
 		@Override
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
 			result = prime * result + ((host == null) ? 0 : host.hashCode());
 			result = prime * result + ((password == null) ? 0 : password.hashCode());
+			result = prime * result + (skipSsl ? 1231 : 1237);
 			result = prime * result + ((username == null) ? 0 : username.hashCode());
 			return result;
 		}
@@ -83,6 +88,8 @@ public class CloudFoundryClientCache {
 					return false;
 			} else if (!password.equals(other.password))
 				return false;
+			if (skipSsl != other.skipSsl)
+				return false;
 			if (username == null) {
 				if (other.username != null)
 					return false;
@@ -97,8 +104,8 @@ public class CloudFoundryClientCache {
 
 	private int clientCount = 0;
 
-	public synchronized SpringCloudFoundryClient getOrCreate(String username, String password, String host) {
-		Params params = new Params(username, password, host);
+	public synchronized SpringCloudFoundryClient getOrCreate(String username, String password, String host, boolean skipSsl) {
+		Params params = new Params(username, password, host, skipSsl);
 		SpringCloudFoundryClient client = cache.get(params);
 		if (client==null) {
 			clientCount++;
@@ -115,6 +122,7 @@ public class CloudFoundryClientCache {
 				.username(params.username)
 				.password(params.password)
 				.host(params.host)
+				.skipSslValidation(params.skipSsl)
 				.build();
 	}
 
