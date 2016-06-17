@@ -31,7 +31,9 @@ import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryClientT
 
 public class CloudFoundryServicesHarness implements Disposable {
 
-	public static final Duration CREATE_SERVICE_TIMEOUT = Duration.ofMinutes(1);
+	public static final Duration CREATE_SERVICE_TIMEOUT = Duration.ofMinutes(2);
+
+	private static final Duration DELETE_SERVICE_TIMEOUT = Duration.ofMinutes(2);
 
 	private DefaultClientRequestsV2 client;
 
@@ -84,7 +86,7 @@ public class CloudFoundryServicesHarness implements Disposable {
 					System.out.println("delete service: "+serviceName);
 					try {
 						RetryUtil.retryTimes("delete sercice "+serviceName, 3, () -> {
-							this.client.deleteServiceAsync(serviceName).block();
+							this.client.deleteServiceAsync(serviceName).block(DELETE_SERVICE_TIMEOUT);
 						});
 					} catch (Exception e) {
 						System.out.println("Failed to delete ["+serviceName+"]: "+ExceptionUtil.getMessage(e));
