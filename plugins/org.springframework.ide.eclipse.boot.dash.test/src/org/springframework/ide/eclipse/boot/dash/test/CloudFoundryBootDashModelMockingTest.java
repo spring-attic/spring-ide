@@ -385,7 +385,9 @@ public class CloudFoundryBootDashModelMockingTest {
 					"http://api.run.cloud.mock.com",
 					"some-user",  "his-password",
 					false,
-					orgName, spaceName
+					orgName,
+					spaceName,
+					false
 			);
 			harness.createCfTarget(params);
 		}
@@ -430,7 +432,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		String apiUrl = "http://api.some-cloud.com";
 		String username = "freddy"; String password = "whocares";
 
-		CloudFoundryBootDashModel cfModel = harness.createCfTarget(new CFClientParams(apiUrl, username, password, false, "my-org", "foo"));
+		CloudFoundryBootDashModel cfModel = harness.createCfTarget(new CFClientParams(apiUrl, username, password, false, "my-org", "foo", false));
 
 		assertEquals("http://console.some-cloud.com", cfModel.getRunTarget().getAppsManagerHost());
 		assertEquals("http://console.some-cloud.com", cfModel.getRunTarget().getAppsManagerHostDefault());
@@ -445,7 +447,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		String apiUrl = "http://api.some-cloud.com";
 		String username = "freddy"; String password = "whocares";
 
-		CloudFoundryBootDashModel cfModel = harness.createCfTarget(new CFClientParams(apiUrl, username, password, false, "my-org", "foo"));
+		CloudFoundryBootDashModel cfModel = harness.createCfTarget(new CFClientParams(apiUrl, username, password, false, "my-org", "foo", false));
 
 		cfModel.getRunTarget().setAppsManagerHost("http://totallyDifferentHost.com");
 
@@ -462,8 +464,8 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		String apiUrl = "http://api.some-cloud.com";
 		String username = "freddy"; String password = "whocares";
-		AbstractBootDashModel fooSpace = harness.createCfTarget(new CFClientParams(apiUrl, username, password, false, "my-org", "foo"));
-		AbstractBootDashModel barSpace = harness.createCfTarget(new CFClientParams(apiUrl, username, password, false, "your-org", "bar"));
+		AbstractBootDashModel fooSpace = harness.createCfTarget(new CFClientParams(apiUrl, username, password, false, "my-org", "foo", false));
+		AbstractBootDashModel barSpace = harness.createCfTarget(new CFClientParams(apiUrl, username, password, false, "your-org", "bar", false));
 
 		//check the default rendering is like it used to be before introducing templates.
 		assertEquals("my-org : foo - [http://api.some-cloud.com]", fooSpace.getDisplayName());
@@ -490,8 +492,8 @@ public class CloudFoundryBootDashModelMockingTest {
 		String apiUrl = "http://api.some-cloud.com";
 		String username = "freddy"; String password = "whocares";
 		LocalBootDashModel local = harness.getLocalModel();
-		AbstractBootDashModel fooSpace = harness.createCfTarget(new CFClientParams(apiUrl, username, password, false, "my-org", "foo"));
-		AbstractBootDashModel barSpace = harness.createCfTarget(new CFClientParams(apiUrl, username, password, false, "your-org", "bar"));
+		AbstractBootDashModel fooSpace = harness.createCfTarget(new CFClientParams(apiUrl, username, password, false, "my-org", "foo", false));
+		AbstractBootDashModel barSpace = harness.createCfTarget(new CFClientParams(apiUrl, username, password, false, "your-org", "bar", false));
 		CustmomizeTargetLabelAction action = actions.getCustomizeTargetLabelAction();
 
 		//////////// not applicable for local targets:
@@ -547,8 +549,8 @@ public class CloudFoundryBootDashModelMockingTest {
 		String apiUrl = "http://api.some-cloud.com";
 		String username = "freddy"; String password = "whocares";
 
-		AbstractBootDashModel fooSpace = harness.createCfTarget(new CFClientParams(apiUrl, username, password, false, "my-org", "foo"));
-		AbstractBootDashModel barSpace = harness.createCfTarget(new CFClientParams(apiUrl, username, password, false, "your-org", "bar"));
+		AbstractBootDashModel fooSpace = harness.createCfTarget(new CFClientParams(apiUrl, username, password, false, "my-org", "foo", false));
+		AbstractBootDashModel barSpace = harness.createCfTarget(new CFClientParams(apiUrl, username, password, false, "your-org", "bar", false));
 
 		ModelStateListener modelStateListener = mock(ModelStateListener.class);
 		fooSpace.addModelStateListener(modelStateListener);

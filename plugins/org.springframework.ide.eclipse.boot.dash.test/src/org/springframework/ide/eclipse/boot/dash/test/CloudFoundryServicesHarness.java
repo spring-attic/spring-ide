@@ -18,6 +18,7 @@ import java.time.Duration;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
 import org.springframework.ide.eclipse.boot.util.RetryUtil;
 import org.springframework.ide.eclipse.editor.support.util.StringUtil;
@@ -30,14 +31,31 @@ import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryClientT
 
 public class CloudFoundryServicesHarness implements Disposable {
 
-	public static final Duration CREATE_SERVICE_TIMEOUT = Duration.ofMinutes(1);
+	public static final Duration CREATE_SERVICE_TIMEOUT = Duration.ofMinutes(2);
+
+	private static final Duration DELETE_SERVICE_TIMEOUT = Duration.ofMinutes(2);
 
 	private DefaultClientRequestsV2 client;
 
-	public CloudFoundryServicesHarness(DefaultClientRequestsV2 client) {
+	private CFClientParams clientParams;
+
+	public CloudFoundryServicesHarness(CFClientParams clientParams, DefaultClientRequestsV2 client) {
 		this.client = client;
+		this.clientParams = clientParams;
 	}
 	private Set<String> ownedServiceNames  = new HashSet<>();
+
+	public String[] getTestServiceAndPlan() {
+		String org = clientParams.getOrgName();
+		if (org.equals("application-platform-testing")) {
+			//PWS test space/org
+			return new String[] {"cloudamqp", "lemur"};
+		} else if (org.equals("pivot-kdevolder")) {
+			//PEZ
+			return new String[] {"p-rabbitmq", "standard"};
+		}
+		return null;
+	}
 
 	public String randomServiceName() {
 		String name = StringUtil.datestamp()+"-"+randomAlphabetic(10);
@@ -54,7 +72,8 @@ public class CloudFoundryServicesHarness implements Disposable {
 	public String createTestService() throws Exception {
 		String name = randomServiceName();
 		RetryUtil.retryWhen("createTestService["+name+"]", 5, FLAKY_SERVICE_BROKER, () -> {
-			client.createService(name, "cloudamqp", "lemur").block(CREATE_SERVICE_TIMEOUT);
+			String[] serviceParams = getTestServiceAndPlan();
+			client.createService(name, serviceParams[0], serviceParams[1]).block(CREATE_SERVICE_TIMEOUT);
 		});
 		return name;
 	}
@@ -67,7 +86,7 @@ public class CloudFoundryServicesHarness implements Disposable {
 					System.out.println("delete service: "+serviceName);
 					try {
 						RetryUtil.retryTimes("delete sercice "+serviceName, 3, () -> {
-							this.client.deleteServiceAsync(serviceName).block();
+							this.client.deleteServiceAsync(serviceName).block(DELETE_SERVICE_TIMEOUT);
 						});
 					} catch (Exception e) {
 						System.out.println("Failed to delete ["+serviceName+"]: "+ExceptionUtil.getMessage(e));

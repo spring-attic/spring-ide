@@ -170,7 +170,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	public DefaultClientRequestsV2(CloudFoundryClientCache clients, CFClientParams params) throws Exception {
 		this.params = params;
 		this.v1 = new DefaultClientRequestsV1(params);
-		this._client = clients.getOrCreate(params.getUsername(), params.getPassword(), params.getHost());
+		this._client = clients.getOrCreate(params.getUsername(), params.getPassword(), params.getHost(), params.skipSslValidation());
 		debug(">>> creating cf operations");
 		this._operations = DefaultCloudFoundryOperations.builder()
 				.cloudFoundryClient(_client)

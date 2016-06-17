@@ -42,11 +42,14 @@ public class BootProjectDashElementFactory implements Disposable {
 		this.projectProperties = projectProperties;
 	}
 
-	public synchronized BootProjectDashElement createOrGet(IProject p) {
+	public BootProjectDashElement createOrGet(IProject p) {
 		if (BootPropertyTester.isBootProject(p)) {
-			BootProjectDashElement el = cache.get(p);
-			if (el==null) {
-				cache.put(p, el = new BootProjectDashElement(p, model, projectProperties, this, launchConfElementFactory));
+			BootProjectDashElement el;
+			synchronized (this) {
+				el = cache.get(p);
+				if (el==null) {
+					cache.put(p, el = new BootProjectDashElement(p, model, projectProperties, this, launchConfElementFactory));
+				}
 			}
 			return el;
 		}

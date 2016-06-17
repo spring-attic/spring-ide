@@ -80,7 +80,8 @@ public class CloudFoundryBootDashModelIntegrationTest {
 	private CloudFoundryTestHarness harness;
 
 	////////////////////////////////////////////////////////////
-	private DefaultClientRequestsV2 client = createClient(CfTestTargetParams.fromEnv());
+	private CFClientParams clientParams = CfTestTargetParams.fromEnv();
+	private DefaultClientRequestsV2 client = CloudFoundryClientTest.createClient(clientParams);
 
 	public CloudFoundryApplicationHarness appHarness = new CloudFoundryApplicationHarness(client);
 
@@ -90,16 +91,7 @@ public class CloudFoundryBootDashModelIntegrationTest {
 	@Rule
 	public TestBracketter testBracketter = new TestBracketter();
 
-	public CloudFoundryServicesHarness services = new CloudFoundryServicesHarness(client);
-
-	private static DefaultClientRequestsV2 createClient(CFClientParams fromEnv) {
-		try {
-			DefaultCloudFoundryClientFactoryV2 factory = DefaultCloudFoundryClientFactoryV2.INSTANCE;
-			return (DefaultClientRequestsV2) factory.getClient(fromEnv);
-		} catch (Exception e) {
-			throw new Error(e);
-		}
-	}
+	public CloudFoundryServicesHarness services = new CloudFoundryServicesHarness(clientParams, client);
 
 	@Before
 	public void setup() throws Exception {
@@ -339,7 +331,6 @@ public class CloudFoundryBootDashModelIntegrationTest {
 
 		assertEquals(ImmutableSet.copyOf(bindServices), actualServices);
 	}
-
 
 	@Test public void testDeployManifestWithAbsolutePathAttribute() throws Exception {
 		CFClientParams targetParams = CfTestTargetParams.fromEnv();
