@@ -41,7 +41,7 @@ public class CfTestTargetParams {
 	}
 
 	private static String fromEnvOrFile(String name) throws IOException {
-		String envVal = System.getenv(name);
+		String envVal = getEnvMaybe(name);
 		if (envVal!=null) {
 			return envVal;
 		} else {
@@ -51,8 +51,16 @@ public class CfTestTargetParams {
 		}
 	}
 
+	private static String getEnvMaybe(String name) {
+		String val = System.getenv(name);
+		if (!StringUtils.hasText(val)) {
+			val = System.getenv("bamboo_"+name);
+		}
+		return val;
+	}
+
 	private static String fromEnv(String name) {
-		String value = System.getenv(name);
+		String value = getEnvMaybe(name);
 		Assert.isLegal(StringUtils.hasText(value), "The environment varable '"+name+"' must be set");
 		return value;
 	}
