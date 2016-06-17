@@ -81,7 +81,7 @@ public class CloudFoundryBootDashModelIntegrationTest {
 
 	////////////////////////////////////////////////////////////
 	private CFClientParams clientParams = CfTestTargetParams.fromEnv();
-	private DefaultClientRequestsV2 client = createClient(clientParams);
+	private DefaultClientRequestsV2 client = CloudFoundryClientTest.createClient(clientParams);
 
 	public CloudFoundryApplicationHarness appHarness = new CloudFoundryApplicationHarness(client);
 
@@ -92,15 +92,6 @@ public class CloudFoundryBootDashModelIntegrationTest {
 	public TestBracketter testBracketter = new TestBracketter();
 
 	public CloudFoundryServicesHarness services = new CloudFoundryServicesHarness(clientParams, client);
-
-	private static DefaultClientRequestsV2 createClient(CFClientParams fromEnv) {
-		try {
-			DefaultCloudFoundryClientFactoryV2 factory = DefaultCloudFoundryClientFactoryV2.INSTANCE;
-			return (DefaultClientRequestsV2) factory.getClient(fromEnv);
-		} catch (Exception e) {
-			throw new Error(e);
-		}
-	}
 
 	@Before
 	public void setup() throws Exception {

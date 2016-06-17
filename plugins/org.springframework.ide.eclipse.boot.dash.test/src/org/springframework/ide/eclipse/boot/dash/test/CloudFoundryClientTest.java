@@ -92,7 +92,7 @@ public class CloudFoundryClientTest {
 
 	private String CFAPPS_IO() {
 		String org = clientParams.getOrgName();
-		if (org.equals("FrameworksAndRuntimes")) {
+		if (org.equals("application-platform-testing")) {
 			//PWS test space/org
 			return "cfapps.io";
 		} else if (org.equals("pivot-kdevolder")) {
@@ -104,11 +104,10 @@ public class CloudFoundryClientTest {
 
 	private String[] getExpectedDomains() {
 		String org = clientParams.getOrgName();
-		if (org.equals("FrameworksAndRuntimes")) {
+		if (org.equals("application-platform-testing")) {
 			//PWS test space/org
-			return new String[] {"projectreactor.org",
-					"projectreactor.io",
-					"dsyer.com"
+			return new String[] {
+					"cfapps.io"
 			};
 		} else if (org.equals("pivot-kdevolder")) {
 			//PEZ
@@ -148,10 +147,10 @@ public class CloudFoundryClientTest {
 
 	private UserInteractions ui = Mockito.mock(UserInteractions.class);
 
-	private static DefaultClientRequestsV2 createClient(CFClientParams fromEnv) {
+	public static DefaultClientRequestsV2 createClient(CFClientParams params) {
 		try {
 			DefaultCloudFoundryClientFactoryV2 factory = DefaultCloudFoundryClientFactoryV2.INSTANCE;
-			return (DefaultClientRequestsV2) factory.getClient(fromEnv);
+			return (DefaultClientRequestsV2) factory.getClient(params);
 		} catch (Exception e) {
 			throw new Error(e);
 		}
