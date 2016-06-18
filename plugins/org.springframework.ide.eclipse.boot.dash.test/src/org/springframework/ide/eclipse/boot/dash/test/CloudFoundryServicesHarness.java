@@ -31,9 +31,9 @@ import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryClientT
 
 public class CloudFoundryServicesHarness implements Disposable {
 
-	public static final Duration CREATE_SERVICE_TIMEOUT = Duration.ofMinutes(2);
+	public static final Duration CREATE_SERVICE_TIMEOUT = Duration.ofMinutes(1);
 
-	private static final Duration DELETE_SERVICE_TIMEOUT = Duration.ofMinutes(2);
+	private static final Duration DELETE_SERVICE_TIMEOUT = Duration.ofMinutes(1);
 
 	private DefaultClientRequestsV2 client;
 
