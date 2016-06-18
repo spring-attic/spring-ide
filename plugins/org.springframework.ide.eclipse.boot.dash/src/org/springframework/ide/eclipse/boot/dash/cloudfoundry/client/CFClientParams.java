@@ -76,14 +76,13 @@ public class CFClientParams {
 		return isSelfSigned;
 	}
 
-<<<<<<< HEAD
 	public HttpProxyConfiguration getProxyConf() {
 		//TODO: there's no support for this, but probably there should be.
 		return null;
-=======
+	}
+
 	public boolean skipSslValidation() {
 		return skipSslValidation;
->>>>>>> master
 	}
 
 	public String getApiUrl() {
