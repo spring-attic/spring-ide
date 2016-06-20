@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client;
 
 import java.net.URI;
 
+import org.cloudfoundry.client.lib.HttpProxyConfiguration;
 import org.eclipse.core.runtime.Assert;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
@@ -77,6 +78,10 @@ public class CFClientParams {
 
 	public boolean skipSslValidation() {
 		return skipSslValidation;
+	}
+
+	public HttpProxyConfiguration getProxyConf() {
+		return null;
 	}
 
 	public String getApiUrl() {
