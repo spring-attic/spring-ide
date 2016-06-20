@@ -92,7 +92,7 @@ public class DefaultClientRequestsV1 {
 				new URL(params.getApiUrl()),
 				params.getOrgName(),
 				params.getSpaceName(),
-				params.isSelfsigned()
+				params.isSelfsigned() || params.skipSslValidation()
 		);
 	}
 
