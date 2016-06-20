@@ -388,15 +388,16 @@ public class BootDashModelTest {
 		doStartBootAppWithoutLifeCycleTest(element, RunState.DEBUGGING);
 	}
 
-	private void doStartBootAppWithoutLifeCycleTest(BootProjectDashElement element, RunState runOrDebug) throws Exception {
+	private void doStartBootAppWithoutLifeCycleTest(BootProjectDashElement app, RunState runOrDebug) throws Exception {
 		try {
-			waitForState(element, RunState.INACTIVE);
-			element.restart(runOrDebug, ui);
-			waitForState(element, runOrDebug);
+			waitForState(app, RunState.INACTIVE);
+			app.restart(runOrDebug, ui);
+			waitForState(app, runOrDebug);
 		} finally {
-			element.stopAsync(ui);
-			waitForState(element, RunState.INACTIVE);
-			verifyZeroInteractions(ui);
+			ACondition.waitFor("stop hammering", 20000, () -> {
+				app.stopAsync(ui);
+				assertEquals(RunState.INACTIVE, app.getRunState());
+			});
 		}
 	}
 
