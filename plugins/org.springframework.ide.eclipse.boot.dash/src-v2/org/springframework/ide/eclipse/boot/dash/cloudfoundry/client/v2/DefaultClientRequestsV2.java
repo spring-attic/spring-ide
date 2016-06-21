@@ -104,6 +104,8 @@ import reactor.core.publisher.Mono;
 import reactor.core.util.Logger;
 import reactor.core.util.Logger.Extension;
 
+import static org.cloudfoundry.util.tuple.TupleUtils.function;
+
 /**
  * @author Kris De Volder
  * @author Nieraj Singh
@@ -738,42 +740,62 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	private Mono<UUID> createApp(CFPushArguments params) {
-		return spaceId.then((spaceId) -> {
+		return spaceId.and(getStackId(params))
+		.then(function((spaceId, stackId) -> {
 			CreateApplicationRequest req = CreateApplicationRequest.builder()
 					.spaceId(spaceId)
+					.stackId(stackId.orElse(null))
 					.name(params.getAppName())
 					.memory(params.getMemory())
 					.diskQuota(params.getDiskQuota())
 					.healthCheckTimeout(params.getTimeout())
 					.buildpack(params.getBuildpack())
 					.command(params.getCommand())
-					//TODO: .stackId
 					.environmentJsons(params.getEnv())
 					.instances(params.getInstances())
 					.build();
 			return log("client.applications.create("+req+")",
 				_client.applicationsV2().create(req)
 			);
-		})
+		}))
 		.map(response -> UUID.fromString(response.getMetadata().getId()));
 	}
 
+	private Mono<Optional<String>> getStackId(CFPushArguments params) {
+		String stackName = params.getStack();
+		if (stackName==null) {
+			return Mono.just(Optional.empty());
+		} else {
+			return log("operations.stacks.get("+stackName+")",
+				_operations.stacks().get(org.cloudfoundry.operations.stacks.GetStackRequest.builder()
+						.name(stackName)
+						.build()
+				)
+				.map((stack) -> Optional.of(stack.getName()))
+			);
+		}
+	}
+
+
 	private Mono<UUID> updateApp(UUID appId, CFPushArguments params) {
-		UpdateApplicationRequest req = UpdateApplicationRequest.builder()
-			.applicationId(appId.toString())
-			.name(params.getAppName())
-			.memory(params.getMemory())
-			.diskQuota(params.getDiskQuota())
-			.healthCheckTimeout(params.getTimeout())
-			.buildpack(params.getBuildpack())
-			.command(params.getCommand())
-			//TODO: .stackId
-			.environmentJsons(params.getEnv())
-			.instances(params.getInstances())
-			.build();
-		return log("client.applications.update("+req+")",
-			_client.applicationsV2().update(req)
-		)
+		return getStackId(params)
+		.then((stackId) -> {
+			UpdateApplicationRequest req = UpdateApplicationRequest.builder()
+				.applicationId(appId.toString())
+				.name(params.getAppName())
+				.memory(params.getMemory())
+				.diskQuota(params.getDiskQuota())
+				.healthCheckTimeout(params.getTimeout())
+				.buildpack(params.getBuildpack())
+				.command(params.getCommand())
+				.stackId(stackId.orElse(null))
+				.environmentJsons(params.getEnv())
+				.instances(params.getInstances())
+				.build();
+			return log("client.applications.update("+req+")",
+				_client.applicationsV2().update(req)
+			);
+		})
 		.then(Mono.just(appId));
 	}
 
