@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -40,7 +41,7 @@ class JsonReader {
 	private final DescriptionExtractor descriptionExtractor = new DescriptionExtractor();
 
 	public RawConfigurationMetadata read(Object origin, InputStream in, Charset charset)
-			throws IOException {
+			throws IOException, JSONException {
 		JSONObject json = readJson(in, charset);
 		List<ConfigurationMetadataSource> groups = parseAllSources(json);
 		List<ConfigurationMetadataItem> items = parseAllItems(json);
@@ -48,8 +49,8 @@ class JsonReader {
 		return new RawConfigurationMetadata(origin, groups, items, hints);
 	}
 
-	private List<ConfigurationMetadataSource> parseAllSources(JSONObject root) {
-		List<ConfigurationMetadataSource> result = new ArrayList<ConfigurationMetadataSource>();
+	private List<ConfigurationMetadataSource> parseAllSources(JSONObject root) throws JSONException {
+		List<ConfigurationMetadataSource> result = new ArrayList<>();
 		if (!root.has("groups")) {
 			return result;
 		}
@@ -61,8 +62,8 @@ class JsonReader {
 		return result;
 	}
 
-	private List<ConfigurationMetadataItem> parseAllItems(JSONObject root) {
-		List<ConfigurationMetadataItem> result = new ArrayList<ConfigurationMetadataItem>();
+	private List<ConfigurationMetadataItem> parseAllItems(JSONObject root) throws JSONException {
+		List<ConfigurationMetadataItem> result = new ArrayList<>();
 		if (!root.has("properties")) {
 			return result;
 		}
@@ -74,8 +75,8 @@ class JsonReader {
 		return result;
 	}
 
-	private List<ConfigurationMetadataHint> parseAllHints(JSONObject root) {
-		List<ConfigurationMetadataHint> result = new ArrayList<ConfigurationMetadataHint>();
+	private List<ConfigurationMetadataHint> parseAllHints(JSONObject root) throws JSONException {
+		List<ConfigurationMetadataHint> result = new ArrayList<>();
 		if (!root.has("hints")) {
 			return result;
 		}
@@ -87,7 +88,7 @@ class JsonReader {
 		return result;
 	}
 
-	private ConfigurationMetadataSource parseSource(JSONObject json) {
+	private ConfigurationMetadataSource parseSource(JSONObject json) throws JSONException {
 		ConfigurationMetadataSource source = new ConfigurationMetadataSource();
 		source.setGroupId(json.getString("name"));
 		source.setType(json.optString("type", null));
@@ -100,7 +101,7 @@ class JsonReader {
 		return source;
 	}
 
-	private ConfigurationMetadataItem parseItem(JSONObject json) {
+	private ConfigurationMetadataItem parseItem(JSONObject json) throws JSONException {
 		ConfigurationMetadataItem item = new ConfigurationMetadataItem();
 		item.setId(json.getString("name"));
 		item.setType(json.optString("type", null));
@@ -115,7 +116,7 @@ class JsonReader {
 		return item;
 	}
 
-	private ConfigurationMetadataHint parseHint(JSONObject json) {
+	private ConfigurationMetadataHint parseHint(JSONObject json) throws JSONException {
 		ConfigurationMetadataHint hint = new ConfigurationMetadataHint();
 		hint.setId(json.getString("name"));
 		if (json.has("values")) {
@@ -152,7 +153,7 @@ class JsonReader {
 		return hint;
 	}
 
-	private Deprecation parseDeprecation(JSONObject object) {
+	private Deprecation parseDeprecation(JSONObject object) throws JSONException {
 		if (object.has("deprecation")) {
 			JSONObject deprecationJsonObject = object.getJSONObject("deprecation");
 			Deprecation deprecation = new Deprecation();
@@ -164,7 +165,7 @@ class JsonReader {
 		return (object.optBoolean("deprecated") ? new Deprecation() : null);
 	}
 
-	private Object readItemValue(Object value) {
+	private Object readItemValue(Object value) throws JSONException {
 		if (value instanceof JSONArray) {
 			JSONArray array = (JSONArray) value;
 			Object[] content = new Object[array.length()];
@@ -176,7 +177,7 @@ class JsonReader {
 		return value;
 	}
 
-	private JSONObject readJson(InputStream in, Charset charset) throws IOException {
+	private JSONObject readJson(InputStream in, Charset charset) throws IOException, JSONException {
 		try {
 			StringBuilder out = new StringBuilder();
 			InputStreamReader reader = new InputStreamReader(in, charset);

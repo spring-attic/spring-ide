@@ -19,6 +19,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.text.Document;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 
@@ -47,7 +48,11 @@ public class MetaDataManipulator {
 		}
 
 		public String toString() {
-			return object.toString(indentFactor);
+			try {
+				return object.toString(indentFactor);
+			} catch (JSONException e) {
+				throw new RuntimeException(e);
+			}
 		}
 
 		@Override
