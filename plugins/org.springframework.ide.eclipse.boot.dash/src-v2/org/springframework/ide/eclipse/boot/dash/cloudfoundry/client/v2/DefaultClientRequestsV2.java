@@ -771,7 +771,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 						.name(stackName)
 						.build()
 				)
-				.map((stack) -> Optional.of(stack.getName()))
+				.map((stack) -> Optional.of(stack.getId()))
 			);
 		}
 	}
