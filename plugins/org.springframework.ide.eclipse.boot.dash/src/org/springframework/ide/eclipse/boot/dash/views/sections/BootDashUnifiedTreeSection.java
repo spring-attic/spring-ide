@@ -283,7 +283,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		tv.setContentProvider(new BootDashTreeContentProvider());
 		tv.setSorter(new BootModelViewerSorter(this.model));
 		tv.setInput(model);
-		tv.getTree().setLinesVisible(true);
+		tv.getTree().setLinesVisible(false);
 
 		stylers = new Stylers(tv.getTree().getFont());
 		tv.setLabelProvider(new BootDashTreeLabelProvider(stylers, tv));
