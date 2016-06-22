@@ -3,6 +3,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry exported="true" kind="lib" path="lib/json-20140107.jar" sourcepath="lib/json-20140107-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/org.springframework.ide.eclipse.org.json-20140107-repackaged.jar" sourcepath="lib/org.springframework.ide.eclipse.org.json-20140107-repackaged-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

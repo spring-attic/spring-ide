@@ -24,8 +24,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.springframework.ide.eclipse.org.json.JSONArray;
+import org.springframework.ide.eclipse.org.json.JSONObject;
 
 /**
  * Read standard json metadata format as {@link ConfigurationMetadataRepository}.

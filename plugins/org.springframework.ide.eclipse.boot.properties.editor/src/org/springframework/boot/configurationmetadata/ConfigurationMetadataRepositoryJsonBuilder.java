@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.json.JSONException;
+import org.springframework.ide.eclipse.org.json.JSONException;
 
 /**
  * Load a {@link ConfigurationMetadataRepository} from the content of arbitrary

@@ -18,8 +18,8 @@ import java.util.LinkedHashMap;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.text.Document;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.springframework.ide.eclipse.org.json.JSONArray;
+import org.springframework.ide.eclipse.org.json.JSONObject;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 
 /**

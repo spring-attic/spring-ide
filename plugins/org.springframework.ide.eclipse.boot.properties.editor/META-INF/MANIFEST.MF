@@ -36,7 +36,7 @@ Require-Bundle: org.eclipse.ui,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
- lib/json-20140107.jar
+ lib/org.springframework.ide.eclipse.org.json-20140107-repackaged.jar
 Export-Package: org.springframework.boot.configurationmetadata,
  org.springframework.ide.eclipse.boot.properties.editor,
  org.springframework.ide.eclipse.boot.properties.editor.completions,
