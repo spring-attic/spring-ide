@@ -31,7 +31,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.springframework.ide.eclipse.cloudfoundry.manifest.editor,
  org.springframework.ide.eclipse.core,
  org.reactivestreams.reactive-streams;bundle-version="1.0.0",
- io.projectreactor.reactor-core;bundle-version="2.5.0"
+ io.projectreactor.reactor-core;bundle-version="2.5.0.BUILD-20160622_174635-692"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.jface.resource
