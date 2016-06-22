@@ -274,6 +274,7 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 		try {
 			return wizardModel.finish();
 		} catch (Exception e) {
+			setErrorMessage(e.getMessage());
 			Log.log(e);
 		}
 		return null;

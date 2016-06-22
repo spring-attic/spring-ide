@@ -10,9 +10,12 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
+import org.eclipse.equinox.security.storage.StorageException;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
+import org.springframework.ide.eclipse.boot.util.Log;
 
 public class CloudFoundryTargetProperties extends TargetProperties {
 
@@ -60,6 +63,22 @@ public class CloudFoundryTargetProperties extends TargetProperties {
 
 	public boolean skipSslValidation() {
 		return map.get(SKIP_SSL_VALIDATION_PROP) != null && Boolean.parseBoolean(map.get(SKIP_SSL_VALIDATION_PROP));
+	}
+
+	@Override
+	public void setPassword(String password) throws CannotAccessPropertyException {
+		try {
+			super.setPassword(password);
+		} catch (CannotAccessPropertyException e) {
+			// If the cause is due to Equinox StorageException, do not propagate the error
+			// as CF targets can be created without storing password. If error is propagated,
+			// it may prevent the completion of the CF run target (e.g. in the CF run target wizard)
+			if (e.getCause() instanceof StorageException) {
+				Log.log(e.getCause());
+			} else {
+				throw e;
+			}
+		}
 	}
 
 	public static String getId(CloudFoundryTargetProperties cloudProps) {
