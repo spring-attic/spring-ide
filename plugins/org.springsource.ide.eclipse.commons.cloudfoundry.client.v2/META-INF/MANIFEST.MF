@@ -169,5 +169,5 @@ Export-Package: org.cloudfoundry,
  org.codehaus.jackson.map.jsontype,
  org.codehaus.jackson.map.jsontype.impl,
  org.codehaus.jackson.map.module
-Require-Bundle: io.projectreactor.reactor-core;bundle-version="[2.5.0.BUILD-20160622_174635-692,2.5.0.BUILD-20160622_174635-692]",
+Require-Bundle: io.projectreactor.reactor-core;bundle-version="2.5.0",
  org.reactivestreams.reactive-streams;bundle-version="1.0.0"
