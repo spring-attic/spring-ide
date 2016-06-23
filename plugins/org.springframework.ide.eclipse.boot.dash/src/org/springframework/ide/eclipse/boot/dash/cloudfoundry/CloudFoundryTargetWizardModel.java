@@ -266,7 +266,7 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 				if (interactions != null) {
 					String message = "Failed to store password in secure storage. Please check your secure storage preferences. Error: "
 							+ storageException.getMessage();
-					interactions.errorPopup("Secure Storage Error", message);
+					interactions.informationPopup("Secure Storage Error", message);
 				}
 				Log.log(storageException);
 			} else {

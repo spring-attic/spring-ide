@@ -17,6 +17,6 @@ package org.springframework.ide.eclipse.boot.dash.model;
  */
 public interface WizardModelUserInteractions {
 
-	void errorPopup(String title, String message);
+	void informationPopup(String title, String message);
 
 }

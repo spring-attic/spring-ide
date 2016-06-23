@@ -19,7 +19,7 @@ import org.eclipse.ui.progress.UIJob;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryUiUtil;
 
 public class DefaultWizardModelUserInteractions implements WizardModelUserInteractions{
-	public void errorPopup(final String title, final String message) {
+	public void informationPopup(final String title, final String message) {
 		// Open dialogue with the error but do not prevent the creation
 		// of the target
 		UIJob job = new UIJob(title) {
@@ -28,7 +28,7 @@ public class DefaultWizardModelUserInteractions implements WizardModelUserIntera
 			public IStatus runInUIThread(IProgressMonitor monitor) {
 				Shell shell = CloudFoundryUiUtil.getShell();
 				if (shell != null) {
-					MessageDialog.openError(shell, title, message);
+					MessageDialog.openInformation(shell, title, message);
 				}
 				return Status.OK_STATUS;
 			}
