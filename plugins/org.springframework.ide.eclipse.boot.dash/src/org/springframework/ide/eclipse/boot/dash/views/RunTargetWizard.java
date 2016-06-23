@@ -48,6 +48,6 @@ public class RunTargetWizard extends Wizard {
 	}
 
 	public RunTarget getRunTarget() {
-		return page != null ? page.getRunTarget() : null;
+		return page != null ? page.createRunTarget() : null;
 	}
 }

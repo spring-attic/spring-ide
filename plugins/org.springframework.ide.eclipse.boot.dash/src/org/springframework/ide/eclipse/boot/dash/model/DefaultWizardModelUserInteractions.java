@@ -1,0 +1,38 @@
+/*******************************************************************************
+ * Copyright (c) 2016 Pivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Pivotal, Inc. - initial API and implementation
+ *******************************************************************************/
+package org.springframework.ide.eclipse.boot.dash.model;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.progress.UIJob;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryUiUtil;
+
+public class DefaultWizardModelUserInteractions implements WizardModelUserInteractions{
+	public void errorPopup(final String title, final String message) {
+		// Open dialogue with the error but do not prevent the creation
+		// of the target
+		UIJob job = new UIJob(title) {
+
+			@Override
+			public IStatus runInUIThread(IProgressMonitor monitor) {
+				Shell shell = CloudFoundryUiUtil.getShell();
+				if (shell != null) {
+					MessageDialog.openError(shell, title, message);
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		job.schedule();
+	}
+}

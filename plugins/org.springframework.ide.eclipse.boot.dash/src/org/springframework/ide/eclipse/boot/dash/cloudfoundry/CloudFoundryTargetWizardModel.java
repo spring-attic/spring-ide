@@ -14,14 +14,17 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
+import org.springframework.ide.eclipse.boot.dash.model.WizardModelUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.livexp.core.CompositeValidator;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -56,11 +59,18 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 
 	private CloudFoundryClientFactory clientFactory;
 	private ImmutableSet<RunTarget> existingTargets;
+	private WizardModelUserInteractions interactions;
 
 	public CloudFoundryTargetWizardModel(RunTargetType runTargetType, CloudFoundryClientFactory clientFactory,
 			ImmutableSet<RunTarget> existingTargets, BootDashModelContext context) {
+		this(runTargetType, clientFactory, existingTargets, context, null);
+	}
+
+	public CloudFoundryTargetWizardModel(RunTargetType runTargetType, CloudFoundryClientFactory clientFactory,
+			ImmutableSet<RunTarget> existingTargets, BootDashModelContext context, WizardModelUserInteractions interactions) {
 		super(runTargetType, context);
 		Assert.isNotNull(clientFactory, "clientFactory should not be null");
+		this.interactions = interactions;
 		this.existingTargets = existingTargets == null ? ImmutableSet.<RunTarget>of() : existingTargets;
 		this.clientFactory = clientFactory;
 		// The credentials validator should be notified any time there are
@@ -246,8 +256,34 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 		String id = CloudFoundryTargetProperties.getId(this);
 		put(TargetProperties.RUN_TARGET_ID, id);
 		super.setStorePassword(storePassword.getValue());
-		super.setPassword(password.getValue());
+
+		try {
+			super.setPassword(password.getValue());
+		} catch (Exception e) {
+			final StorageException storageException = getStorageException(e);
+			// Allow run target to be created on storage exceptions as the run target can still be created and connected
+			if (storageException != null) {
+				if (interactions != null) {
+					String message = "Failed to store password in secure storage. Please check your secure storage preferences. Error: "
+							+ storageException.getMessage();
+					interactions.errorPopup("Secure Storage Error", message);
+				}
+				Log.log(storageException);
+			} else {
+				throw e;
+			}
+		}
 		return (CloudFoundryRunTarget) getRunTargetType().createRunTarget(this);
+	}
+
+	protected StorageException getStorageException(Exception e) {
+		if (e instanceof StorageException) {
+			return (StorageException) e;
+		}
+		if (e.getCause() instanceof StorageException) {
+			return (StorageException) e.getCause();
+		}
+		return null;
 	}
 
 	class CredentialsValidator extends Validator {

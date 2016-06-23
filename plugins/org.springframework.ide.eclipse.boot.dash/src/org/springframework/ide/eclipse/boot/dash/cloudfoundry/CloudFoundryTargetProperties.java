@@ -65,22 +65,6 @@ public class CloudFoundryTargetProperties extends TargetProperties {
 		return map.get(SKIP_SSL_VALIDATION_PROP) != null && Boolean.parseBoolean(map.get(SKIP_SSL_VALIDATION_PROP));
 	}
 
-	@Override
-	public void setPassword(String password) throws CannotAccessPropertyException {
-		try {
-			super.setPassword(password);
-		} catch (CannotAccessPropertyException e) {
-			// If the cause is due to Equinox StorageException, do not propagate the error
-			// as CF targets can be created without storing password. If error is propagated,
-			// it may prevent the completion of the CF run target (e.g. in the CF run target wizard)
-			if (e.getCause() instanceof StorageException) {
-				Log.log(e.getCause());
-			} else {
-				throw e;
-			}
-		}
-	}
-
 	public static String getId(CloudFoundryTargetProperties cloudProps) {
 		return getId(cloudProps.getUsername(), cloudProps.getUrl(), cloudProps.getOrganizationName(),
 				cloudProps.getSpaceName());
