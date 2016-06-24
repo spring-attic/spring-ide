@@ -66,7 +66,7 @@ public class CfTestTargetParams {
 	}
 
 	private static boolean fromEnvBoolean(String name) {
-		String value = System.getenv(name);
+		String value = getEnvMaybe(name);
 		if (value == null) {
 			return false;
 		}
