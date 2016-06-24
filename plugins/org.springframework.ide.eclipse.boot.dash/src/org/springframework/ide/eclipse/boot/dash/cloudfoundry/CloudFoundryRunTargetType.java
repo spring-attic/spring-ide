@@ -17,6 +17,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
+import org.springframework.ide.eclipse.boot.dash.model.DefaultWizardModelUserInteractions;
+import org.springframework.ide.eclipse.boot.dash.model.WizardModelUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.AbstractRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
@@ -34,16 +36,21 @@ public class CloudFoundryRunTargetType extends AbstractRunTargetType {
 
 	private final BootDashModelContext context;
 
+	private WizardModelUserInteractions interactions;
+
 	public CloudFoundryRunTargetType(BootDashModelContext context, CloudFoundryClientFactory clientFactory) {
 		super(context, "Cloud Foundry");
 		this.context = context;
 		this.clientFactory = clientFactory;
+		//TODO: Should be injected and merged with other user interactions, but required too much
+		// refactoring to implement in limited time
+		this.interactions = new DefaultWizardModelUserInteractions();
 	}
 
 	@Override
 	public void openTargetCreationUi(LiveSetVariable<RunTarget> targets) {
 		CloudFoundryTargetWizardModel model = new CloudFoundryTargetWizardModel(this, clientFactory,
-				targets.getValues(), context);
+				targets.getValues(), context, interactions);
 		RunTargetWizard wizard = new RunTargetWizard(model);
 		Shell shell = CloudFoundryUiUtil.getShell();
 		if (shell != null) {

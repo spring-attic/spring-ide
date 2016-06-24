@@ -66,6 +66,8 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 
 	private SetSpaceValListener setSpaceValListener = null;
 
+	private RunTarget runTarget = null;
+
 	public CloudFoundryTargetWizardPage(CloudFoundryTargetWizardModel model) {
 		super("Add a Cloud Foundry Target");
 		this.wizardModel = model;
@@ -270,13 +272,20 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 		return canFinish;
 	}
 
-	public RunTarget getRunTarget() {
-		try {
-			return wizardModel.finish();
-		} catch (Exception e) {
-			Log.log(e);
+	/**
+	 * Creates a run target ONCE.
+	 * @return created run target. Returns cached target if already created.
+	 */
+	public RunTarget createRunTarget() {
+		// Cache to avoid creating run target multiple times in the same wizard session
+		if (runTarget == null) {
+			try {
+				runTarget = wizardModel.finish();
+			} catch (Exception e) {
+				setErrorMessage(e.getMessage());
+			}
 		}
-		return null;
+		return runTarget;
 	}
 
 	/*
