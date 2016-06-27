@@ -72,6 +72,7 @@ public class StsPerspective implements IPerspectiveFactory {
 		outputfolder.addPlaceholder(JavaUI.ID_SOURCE_VIEW);
 		outputfolder.addPlaceholder(NewSearchUI.SEARCH_VIEW_ID);
 		outputfolder.addPlaceholder(IPageLayout.ID_BOOKMARKS);
+		outputfolder.addPlaceholder("org.eclipse.ui.views.PropertySheet");
 		outputfolder.addPlaceholder("com.springsource.sts.ide.metadata.ui.RequestMappingView");
 		outputfolder.addPlaceholder("com.springsource.sts.roo.ui.rooShellView");
 		outputfolder.addPlaceholder("*");
