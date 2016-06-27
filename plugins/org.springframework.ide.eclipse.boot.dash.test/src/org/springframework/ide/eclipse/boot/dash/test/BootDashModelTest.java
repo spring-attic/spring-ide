@@ -100,8 +100,8 @@ import com.google.common.collect.ImmutableSet;
 public class BootDashModelTest {
 
 	private static final long MODEL_UPDATE_TIMEOUT = 10000; // short, should be nearly instant
-	private static final long RUN_STATE_CHANGE_TIMEOUT = 20000;
-	private static final long MAVEN_BUILD_TIMEOUT = 20000;
+	private static final long RUN_STATE_CHANGE_TIMEOUT = 40000;
+	private static final long MAVEN_BUILD_TIMEOUT = 40000;
 
 	private SpringBootCore springBootCore = SpringBootCore.getDefault(); // should be getting this via projects harness?
 	private TestBootDashModelContext context;
