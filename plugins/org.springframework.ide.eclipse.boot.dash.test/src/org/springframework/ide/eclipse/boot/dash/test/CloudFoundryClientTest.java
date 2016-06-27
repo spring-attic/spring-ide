@@ -283,28 +283,56 @@ public class CloudFoundryClientTest {
 		//To avoid this test case from failing too often we retry it a few times.
 		RetryUtil.retryTimes("testPushAndBindServices", 4, () -> {
 
-			String service1 = services.createTestService();
-			String service2 = services.createTestService();
-			String service3 = services.createTestService(); //An extra unused service (makes this a better test).
+			if (!services.testServiceIsSingleton()) {
+				String service1 = services.createTestService();
+				String service2 = services.createTestService();
+				String service3 = services.createTestService(); //An extra unused service (makes this a better test).
 
-			String appName = appHarness.randomAppName();
-			CFPushArguments params = new CFPushArguments();
-			params.setAppName(appName);
-			params.setApplicationData(getTestZip("testapp"));
-			params.setBuildpack("staticfile_buildpack");
-			params.setServices(ImmutableList.of(service1, service2));
-			push(params);
+				String appName = appHarness.randomAppName();
+				CFPushArguments params = new CFPushArguments();
+				params.setAppName(appName);
+				params.setApplicationData(getTestZip("testapp"));
+				params.setBuildpack("staticfile_buildpack");
+				params.setServices(ImmutableList.of(service1, service2));
+				push(params);
 
-			assertEquals(ImmutableSet.of(service1, service2), getBoundServiceNames(appName));
+				assertEquals(ImmutableSet.of(service1, service2), getBoundServiceNames(appName));
 
-			client.bindAndUnbindServices(appName, ImmutableList.of(service1)).block();
-			assertEquals(ImmutableSet.of(service1), getBoundServiceNames(appName));
+				client.bindAndUnbindServices(appName, ImmutableList.of(service1)).block();
+				assertEquals(ImmutableSet.of(service1), getBoundServiceNames(appName));
 
-			client.bindAndUnbindServices(appName, ImmutableList.of(service2)).block();
-			assertEquals(ImmutableSet.of(service2), getBoundServiceNames(appName));
+				client.bindAndUnbindServices(appName, ImmutableList.of(service2)).block();
+				assertEquals(ImmutableSet.of(service2), getBoundServiceNames(appName));
 
-			client.bindAndUnbindServices(appName, ImmutableList.of()).block();
-			assertEquals(ImmutableSet.of(), getBoundServiceNames(appName));
+				client.bindAndUnbindServices(appName, ImmutableList.of()).block();
+				assertEquals(ImmutableSet.of(), getBoundServiceNames(appName));
+			} else {
+				// On tan we don't have as much to work with. The 'auto-scaler' service has limitation that
+				// only one instance can be bound to a app which breaks the test. So run a 'reduced' version
+				// of the test instead.
+				String service1 = services.createTestService();
+				String service2 = services.createTestService();
+				String service3 = services.createTestService(); //An extra unused service (makes this a better test).
+
+				String appName = appHarness.randomAppName();
+				CFPushArguments params = new CFPushArguments();
+				params.setAppName(appName);
+				params.setApplicationData(getTestZip("testapp"));
+				params.setBuildpack("staticfile_buildpack");
+				params.setServices(ImmutableList.of(service1));
+				push(params);
+
+				assertEquals(ImmutableSet.of(service1), getBoundServiceNames(appName));
+
+				client.bindAndUnbindServices(appName, ImmutableList.of(service1)).block();
+				assertEquals(ImmutableSet.of(service1), getBoundServiceNames(appName));
+
+				client.bindAndUnbindServices(appName, ImmutableList.of(service2)).block();
+				assertEquals(ImmutableSet.of(service2), getBoundServiceNames(appName));
+
+				client.bindAndUnbindServices(appName, ImmutableList.of()).block();
+				assertEquals(ImmutableSet.of(), getBoundServiceNames(appName));
+			}
 		});
 	}
 

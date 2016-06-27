@@ -61,6 +61,17 @@ public class CloudFoundryServicesHarness implements Disposable {
 		return null;
 	}
 
+	public boolean testServiceIsSingleton() {
+		String org = clientParams.getOrgName();
+		String api = clientParams.getApiUrl();
+		if (api.contains("api.tan.")) {
+			//TAN RGB
+			return true;
+		}
+		return false;
+	}
+
+
 	public String randomServiceName() {
 		String name = StringUtil.datestamp()+"-"+randomAlphabetic(10);
 		ownedServiceNames.add(name);
@@ -112,4 +123,5 @@ public class CloudFoundryServicesHarness implements Disposable {
 		assertTrue(!client.isLoggedOut());
 		deleteOwnedServices();
 	}
+
 }
