@@ -47,12 +47,16 @@ public class CloudFoundryServicesHarness implements Disposable {
 
 	public String[] getTestServiceAndPlan() {
 		String org = clientParams.getOrgName();
+		String api = clientParams.getApiUrl();
 		if (org.equals("application-platform-testing")) {
 			//PWS test space/org
 			return new String[] {"cloudamqp", "lemur"};
-		} else if (org.equals("pivot-kdevolder")) {
+		} else if (api.contains("api.run.pez.")) {
 			//PEZ
 			return new String[] {"p-rabbitmq", "standard"};
+		} else if (api.contains("api.tan.")) {
+			//TAN RGB
+			return new String[] {"app-autoscaler", "bronze"};
 		}
 		return null;
 	}
