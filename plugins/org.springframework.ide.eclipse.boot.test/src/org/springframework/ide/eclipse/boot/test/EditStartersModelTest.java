@@ -42,6 +42,7 @@ import java.util.Set;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits;
@@ -131,11 +132,16 @@ public class EditStartersModelTest {
 
 		wizard.removeDependency("web");
 		assertStarterDeps(wizard.dependencies.getCurrentSelection(), /* removed: "web",*/ "actuator");
-		wizard.performOk();
+		performOk(wizard);
 
 		StsTestUtil.assertNoErrors(project); //force project build
 
 		assertStarters(bootProject.getBootStarters(), "actuator");
+	}
+
+	private void performOk(EditStartersModel wizard) throws Exception {
+		wizard.performOk();
+		Job.getJobManager().join(EditStartersModel.JOB_FAMILY, null);
 	}
 
 	/**
@@ -154,9 +160,7 @@ public class EditStartersModelTest {
 
 		wizard.addDependency("actuator");
 		assertStarterDeps(wizard.dependencies.getCurrentSelection(), "web", "actuator");
-		wizard.performOk();
-
-		Job.getJobManager().join(EditStartersModel.JOB_FAMILY, null);
+		performOk(wizard);
 
 		assertUsageCounts(bootProject, popularities, "actuator:1");
 
@@ -179,9 +183,7 @@ public class EditStartersModelTest {
 		final ISpringBootProject bootProject = springBootCore.project(project);
 		EditStartersModel wizard = createWizard(project);
 		wizard.addDependency("restdocs");
-		wizard.performOk();
-
-		Job.getJobManager().join(EditStartersModel.JOB_FAMILY, null);
+		performOk(wizard);
 
 		StsTestUtil.assertNoErrors(project); //force project build
 
@@ -207,9 +209,7 @@ public class EditStartersModelTest {
 		final ISpringBootProject bootProject = springBootCore.project(project);
 		EditStartersModel wizard = createWizard(project);
 		wizard.addDependency("cloud-eureka");
-		wizard.performOk();
-
-		Job.getJobManager().join(EditStartersModel.JOB_FAMILY, null);
+		performOk(wizard);
 
 		System.out.println(">>> pom.xml (after dialog closed)");
 		System.out.println(IOUtil.toString(project.getFile("pom.xml").getContents()));
@@ -234,9 +234,8 @@ public class EditStartersModelTest {
 		EditStartersModel wizard = createWizard(project);
 		wizard.addDependency("cloud-eureka");
 		wizard.addDependency("cloud-config-client");
-		wizard.performOk();
+		performOk(wizard);
 
-		Job.getJobManager().join(EditStartersModel.JOB_FAMILY, null);
 		StsTestUtil.assertNoErrors(project); //force project build
 
 		assertStarters(bootProject.getBootStarters(), "web", "cloud-eureka", "cloud-config-client");
@@ -275,9 +274,8 @@ public class EditStartersModelTest {
 		EditStartersModel wizard = createWizard(project);
 		wizard.addDependency("cloud-eureka");
 		wizard.addDependency("vaadin");
-		wizard.performOk();
+		performOk(wizard);
 
-		Job.getJobManager().join(EditStartersModel.JOB_FAMILY, null);
 		StsTestUtil.assertNoErrors(project); //force project build
 
 		assertStarters(bootProject.getBootStarters(), "web", "cloud-eureka", "vaadin");
@@ -314,9 +312,7 @@ public class EditStartersModelTest {
 
 		EditStartersModel wizard = createWizard(project);
 		wizard.addDependency("cloud-eureka");
-		wizard.performOk();
-
-		Job.getJobManager().join(EditStartersModel.JOB_FAMILY, null);
+		performOk(wizard);
 
 		//!!! fake data may not produce a project that builds without
 		//!!! problem so don't check for build errors in this test
@@ -342,9 +338,7 @@ public class EditStartersModelTest {
 
 		EditStartersModel wizard = createWizard(project);
 		wizard.addDependency("fake-dep");
-		wizard.performOk();
-
-		Job.getJobManager().join(EditStartersModel.JOB_FAMILY, null);
+		performOk(wizard);
 
 		//!!! fake data may not produce a project that builds without
 		//!!! problem so don't check for build errors in this test
