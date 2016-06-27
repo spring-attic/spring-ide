@@ -101,7 +101,7 @@ public class CloudFoundryClientTest {
 			return "cfapps.pez.pivotal.io";
 		} else if (api.contains("api.tan.")) {
 			//TAN
-			return "cfapps.tan.springapps.io";
+			return "tan.springapps.io";
 		}
 		throw new AssertionFailedError("unknown test environment, not sure what to expect here");
 	}
