@@ -588,7 +588,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	@Override
 	public List<CFCloudDomain> getDomains() throws Exception {
 		//XXX CF V2: list domains using 'operations' api.
-		return ReactorUtils.get(
+		return ReactorUtils.get(Duration.ofMinutes(2),
 			orgId.flatMap(this::requestDomains)
 			.map(CFWrappingV2::wrap)
 			.collectList()
