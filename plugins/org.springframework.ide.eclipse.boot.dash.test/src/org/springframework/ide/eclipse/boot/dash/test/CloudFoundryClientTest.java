@@ -119,6 +119,27 @@ public class CloudFoundryClientTest {
 		throw new AssertionFailedError("unknown test environment, not sure what to expect here");
 	}
 
+	private String[] getExectedBuildpacks() {
+		String org = clientParams.getOrgName();
+		if (org.equals("application-platform-testing")) {
+			//PWS test space/org
+			return new String[] {
+				"staticfile_buildpack",
+				"java_buildpack",
+				"ruby_buildpack"
+			};
+		} else if (org.equals("pivot-kdevolder")) {
+			//TAN RGB
+			return new String[] {
+				"staticfile_buildpack",
+				"java_buildpack_offline",
+				"ruby_buildpack"
+			};
+		}
+		throw new AssertionFailedError("unknown test environment, not sure what to expect here");
+
+	}
+
 	public static final Predicate<Throwable> FLAKY_SERVICE_BROKER = (e) -> {
 		String msg = ExceptionUtil.getMessage(e).toLowerCase();
 		return msg.contains("500")
@@ -608,11 +629,7 @@ public class CloudFoundryClientTest {
 				.map(ImmutableSet::copyOf)
 				.block();
 
-		assertContains(names,
-			"staticfile_buildpack",
-			"java_buildpack",
-			"ruby_buildpack"
-		);
+		assertContains(names, getExectedBuildpacks());
 	}
 
 	@Test
