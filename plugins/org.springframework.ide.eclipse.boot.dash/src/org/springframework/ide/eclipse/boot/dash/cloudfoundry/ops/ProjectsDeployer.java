@@ -17,6 +17,7 @@ import java.util.Set;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.osgi.util.NLS;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
@@ -36,6 +37,17 @@ import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 public class ProjectsDeployer extends CloudOperation {
+
+	private static final boolean DEBUG =
+			(""+Platform.getLocation()).contains("bamboo") ||
+			(""+Platform.getLocation()).contains("kdvolder");
+
+	private static void debug(String string) {
+		if (DEBUG) {
+			System.out.println(string);
+		}
+	}
+
 
 	private final static String APP_FOUND_TITLE = "Replace Existing Application";
 
@@ -74,8 +86,11 @@ public class ProjectsDeployer extends CloudOperation {
 	}
 
 	private void deployProject(IProject project, IProgressMonitor monitor) throws Exception {
+		debug("deployProject["+project.getName()+"] starting");
 		CloudApplicationDeploymentProperties properties = model.createDeploymentProperties(project, ui, monitor);
+		debug("deployProject["+project.getName()+"] got deployment properties");
 		CloudAppDashElement cde = model.ensureApplication(properties.getAppName());
+		debug("deployProject["+project.getName()+"] created cde: "+cde.getName());
 		model.runAsynch("Deploy project '"+project.getName()+"'", properties.getAppName(), (IProgressMonitor progressMonitor) -> {
 			doDeployProject(cde, properties, project, progressMonitor);
 		}, ui);
