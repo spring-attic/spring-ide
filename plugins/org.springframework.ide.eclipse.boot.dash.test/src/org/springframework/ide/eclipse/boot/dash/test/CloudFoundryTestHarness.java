@@ -121,8 +121,8 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 		wizard.setUsername(params.getUsername());
 		wizard.setStorePassword(true);
 		wizard.setPassword(params.getPassword());
-		wizard.setSelfsigned(false);
-		wizard.skipSslValidation(false);
+		wizard.setSelfsigned(params.isSelfsigned());
+		wizard.skipSslValidation(params.skipSslValidation());
 		wizard.resolveSpaces(new MockRunnableContext());
 		wizard.setSpace(getSpace(wizard, params.getOrgName(), params.getSpaceName()));
 		assertOk(wizard.getValidator());
