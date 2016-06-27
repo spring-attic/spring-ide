@@ -90,7 +90,7 @@ import reactor.core.publisher.Flux;
 
 public class CloudFoundryClientTest {
 
-	private String CFAPPS_IO() {
+	public String CFAPPS_IO() {
 		String org = clientParams.getOrgName();
 		String api = clientParams.getApiUrl();
 		if (org.equals("application-platform-testing")) {
@@ -106,7 +106,7 @@ public class CloudFoundryClientTest {
 		throw new AssertionFailedError("unknown test environment, not sure what to expect here");
 	}
 
-	private String[] getExpectedDomains() {
+	public String[] getExpectedDomains() {
 		String org = clientParams.getOrgName();
 		String api = clientParams.getApiUrl();
 		if (org.equals("application-platform-testing")) {
@@ -129,7 +129,7 @@ public class CloudFoundryClientTest {
 		throw new AssertionFailedError("unknown test environment, not sure what to expect here");
 	}
 
-	private String[] getExectedBuildpacks() {
+	public String[] getExectedBuildpacks() {
 		String org = clientParams.getOrgName();
 		String api = clientParams.getApiUrl();
 		if (org.equals("application-platform-testing")) {
@@ -155,7 +155,19 @@ public class CloudFoundryClientTest {
 			};
 		}
 		throw new AssertionFailedError("unknown test environment, not sure what to expect here");
+	}
 
+	public String getExpectedSshHost() {
+		String org = clientParams.getOrgName();
+		String api = clientParams.getApiUrl();
+		if (org.equals("application-platform-testing")) {
+			//PWS
+			return "ssh.run.pivotal.io";
+		} else if (api.contains("api.tan.")) {
+			//TAN
+			return "ssh.tan.springapps.io";
+		}
+		throw new AssertionFailedError("unknown test environment, not sure what to expect here");
 	}
 
 	public static final Predicate<Throwable> FLAKY_SERVICE_BROKER = (e) -> {
@@ -850,7 +862,7 @@ public class CloudFoundryClientTest {
 		SshClientSupport sshSupport = client.getSshClientSupport();
 		SshHost sshHost = sshSupport.getSshHost();
 		System.out.println(sshHost);
-		assertEquals("ssh.run.pivotal.io", sshHost.getHost());
+		assertEquals(getExpectedSshHost(), sshHost.getHost());
 		assertEquals(2222, sshHost.getPort());
 		assertTrue(StringUtil.hasText(sshHost.getFingerPrint()));
 
