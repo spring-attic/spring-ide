@@ -14,12 +14,14 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 import java.util.PriorityQueue;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.reactivestreams.Publisher;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 
 import reactor.core.publisher.Flux;
@@ -73,6 +75,16 @@ public class ReactorUtils {
 		return Mono.first(mono, toMono(cancelationToken))
 		.otherwise(errorFilter(cancelationToken))
 		.block(timeout);
+	}
+
+
+	public static List<CFCloudDomain> get(Duration t, Mono<List<CFCloudDomain>> m) throws IOException {
+		try {
+			return m.block(t);
+		} catch (Exception e) {
+//			BootActivator.log(new Exception(e));
+			throw new IOException(e);
+		}
 	}
 
 	/**
@@ -225,5 +237,4 @@ public class ReactorUtils {
 		.concatMap(SorterAccumulator::getReleased)
 		.concatWith(sorter.drain());
 	}
-
 }
