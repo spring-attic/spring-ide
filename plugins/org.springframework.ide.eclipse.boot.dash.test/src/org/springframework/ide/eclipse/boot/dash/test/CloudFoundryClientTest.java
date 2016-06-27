@@ -92,18 +92,23 @@ public class CloudFoundryClientTest {
 
 	private String CFAPPS_IO() {
 		String org = clientParams.getOrgName();
+		String api = clientParams.getApiUrl();
 		if (org.equals("application-platform-testing")) {
 			//PWS test space/org
 			return "cfapps.io";
 		} else if (org.equals("pivot-kdevolder")) {
 			//PEZ
 			return "cfapps.pez.pivotal.io";
+		} else if (api.contains("api.tan.")) {
+			//TAN
+			return "cfapps.tan.springapps.io";
 		}
 		throw new AssertionFailedError("unknown test environment, not sure what to expect here");
 	}
 
 	private String[] getExpectedDomains() {
 		String org = clientParams.getOrgName();
+		String api = clientParams.getApiUrl();
 		if (org.equals("application-platform-testing")) {
 			//PWS test space/org
 			return new String[] {
@@ -115,12 +120,18 @@ public class CloudFoundryClientTest {
 					"cfapps.pez.pivotal.io",
 					"pezapp.io"
 			};
+		} else if (api.contains("api.tan.")) {
+			//TAN
+			return new String[] {
+					"cfapps.tan.springapps.io"
+			};
 		}
 		throw new AssertionFailedError("unknown test environment, not sure what to expect here");
 	}
 
 	private String[] getExectedBuildpacks() {
 		String org = clientParams.getOrgName();
+		String api = clientParams.getApiUrl();
 		if (org.equals("application-platform-testing")) {
 			//PWS test space/org
 			return new String[] {
@@ -129,7 +140,14 @@ public class CloudFoundryClientTest {
 				"ruby_buildpack"
 			};
 		} else if (org.equals("pivot-kdevolder")) {
-			//TAN RGB
+			//PEZ
+			return new String[] {
+				"staticfile_buildpack",
+				"java_buildpack_offline",
+				"ruby_buildpack"
+			};
+		} else if (api.contains("api.tan.")) {
+			//TAN
 			return new String[] {
 				"staticfile_buildpack",
 				"java_buildpack_offline",
