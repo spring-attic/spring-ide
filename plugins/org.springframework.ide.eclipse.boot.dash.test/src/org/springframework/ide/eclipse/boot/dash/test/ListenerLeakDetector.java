@@ -58,7 +58,7 @@ public class ListenerLeakDetector implements TestRule {
 
 	@SuppressWarnings("unchecked")
 	protected Set<Object> getListeners() throws Exception {
-		Set<Object> listeners = new HashSet<Object>();
+		Set<Object> listeners = new HashSet<>();
 		listeners.addAll(getDebugListeners());
 		listeners.addAll(getWorkspaceListeners());
 		return listeners;
@@ -69,7 +69,7 @@ public class ListenerLeakDetector implements TestRule {
 		Field f = DebugPlugin.class.getDeclaredField("fEventListeners");
 		f.setAccessible(true);
 		ListenerList list = (ListenerList)f.get(plugin);
-		List<Object> listeners = new ArrayList<Object>();
+		List<Object> listeners = new ArrayList<>();
 		for (Object l : list.getListeners()) {
 			if (isInteresting(l)) {
 				listeners.add(l);
@@ -85,7 +85,7 @@ public class ListenerLeakDetector implements TestRule {
 		Object[] entries = listenerList.getListeners(); //Watch out, these entries aren't the actual
 														// listeners yet.
 		if (entries!=null) {
-			List<Object> listeners = new ArrayList<Object>(entries.length);
+			List<Object> listeners = new ArrayList<>(entries.length);
 			for (int i = 0; i < entries.length; i++) {
 				Object l = getField(entries[i], "listener");
 				if (isInteresting(l)) {
@@ -103,7 +103,13 @@ public class ListenerLeakDetector implements TestRule {
 	 */
 	protected boolean isInteresting(Object l) {
 		String classname = l.getClass().getName();
-		return classname.startsWith("org.springframework.ide.eclipse.boot");
+		return classname.startsWith("org.springframework.ide.eclipse.boot") && !isIgnoredListenerClassName(classname);
+	}
+
+	private boolean isIgnoredListenerClassName(String classname) {
+		//Phill's plugin attaches listeners when console ui kicks in. Ignore those, they are only disposed if someone closes / disposes the
+		// ui associated with the console.
+		return classname.startsWith("org.springframework.ide.eclipse.boot.restart.RestartConsolePageParticipant");
 	}
 
 	private Object getField(Object self, String name) throws Exception {
