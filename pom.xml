@@ -839,6 +839,13 @@
 						<argLine>
 							-Xmx1024m -XX:MaxPermSize=256m ${test.vmargs}
 						</argLine>
+						<dependencies>
+							<dependency>
+								<type>p2-installable-unit</type>
+								<artifactId>org.eclipse.jdt.feature.group</artifactId>
+								<version>0.0.0</version>
+							</dependency>
+						</dependencies>
 					<testFailureIgnore>
 						true
 					</testFailureIgnore>

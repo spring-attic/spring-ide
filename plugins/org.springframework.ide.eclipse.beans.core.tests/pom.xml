@@ -22,13 +22,6 @@
 					<forkedProcessTimeoutInSeconds>7200</forkedProcessTimeoutInSeconds>
 					<testSuite>org.springframework.ide.eclipse.beans.core.tests</testSuite>
 					<testClass>org.springframework.ide.eclipse.beans.core.tests.AllBeansCoreTests</testClass>
-					<dependencies>
-						<dependency>
-							<type>p2-installable-unit</type>
-							<artifactId>org.eclipse.jdt.feature.group</artifactId>
-							<version>0.0.0</version>
-						</dependency>
-					</dependencies>
 				</configuration>
 			</plugin>
 
