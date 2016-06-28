@@ -51,8 +51,10 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.FixMethodOrder;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 import org.mockito.Mockito;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFAppState;
@@ -89,6 +91,7 @@ import junit.framework.AssertionFailedError;
 import reactor.core.flow.Cancellation;
 import reactor.core.publisher.Flux;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class CloudFoundryClientTest {
 
 	public String CFAPPS_IO() {
