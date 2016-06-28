@@ -123,7 +123,7 @@ public class CloudFoundryClientTest {
 		} else if (api.contains("api.tan.")) {
 			//TAN
 			return new String[] {
-					"cfapps.tan.springapps.io"
+					"tan.springapps.io"
 			};
 		}
 		throw new AssertionFailedError("unknown test environment, not sure what to expect here");
