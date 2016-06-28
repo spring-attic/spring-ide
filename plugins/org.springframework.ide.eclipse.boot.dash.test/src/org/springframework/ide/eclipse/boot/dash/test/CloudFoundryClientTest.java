@@ -50,6 +50,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -184,6 +185,11 @@ public class CloudFoundryClientTest {
 	public CloudFoundryServicesHarness services = new CloudFoundryServicesHarness(clientParams, client);
 	public CloudFoundryApplicationHarness appHarness = new CloudFoundryApplicationHarness(client);
 
+	@Before
+	public void setup() {
+		ReactorUtils.DUMP_STACK_ON_TIMEOUT = true;
+	}
+
 	@After
 	public void teardown() throws Exception {
 		appHarness.dispose(); //apps first because services still bound to apps can't be deleted!
@@ -192,6 +198,7 @@ public class CloudFoundryClientTest {
 			client.logout();
 		}
 		StsTestUtil.cleanUpProjects();
+		ReactorUtils.DUMP_STACK_ON_TIMEOUT = false;
 	}
 
 	public BootProjectTestHarness projects = new BootProjectTestHarness(ResourcesPlugin.getWorkspace());

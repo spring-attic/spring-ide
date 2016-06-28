@@ -23,6 +23,8 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.reactivestreams.Publisher;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
+import org.springframework.ide.eclipse.boot.util.Log;
+import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -33,6 +35,8 @@ import reactor.core.tuple.Tuple2;
  * @author Kris De Volder
  */
 public class ReactorUtils {
+
+	public static boolean DUMP_STACK_ON_TIMEOUT = false;
 
 	/**
 	 * Convert a {@link CancelationToken} into a Mono that raises
@@ -59,7 +63,7 @@ public class ReactorUtils {
 		try {
 			return mono.block();
 		} catch (Exception e) {
-//			BootActivator.log(new Exception(e));
+			dumpStacks();
 			throw new IOException(e);
 		}
 	}
@@ -72,9 +76,14 @@ public class ReactorUtils {
 	 * to the line where 'get' was called.
 	 */
 	public static <T> T get(Duration timeout, CancelationToken cancelationToken, Mono<T> mono) throws Exception {
-		return Mono.first(mono, toMono(cancelationToken))
-		.otherwise(errorFilter(cancelationToken))
-		.block(timeout);
+		try {
+			return Mono.first(mono, toMono(cancelationToken))
+			.otherwise(errorFilter(cancelationToken))
+			.block(timeout);
+		} catch (Exception e) {
+			dumpStacks();
+			throw new IOException(e);
+		}
 	}
 
 
@@ -82,8 +91,14 @@ public class ReactorUtils {
 		try {
 			return m.block(t);
 		} catch (Exception e) {
-//			BootActivator.log(new Exception(e));
+			dumpStacks();
 			throw new IOException(e);
+		}
+	}
+
+	private static void dumpStacks() {
+		if (DUMP_STACK_ON_TIMEOUT) {
+			System.out.println(StsTestUtil.getStackDumps().toString());
 		}
 	}
 
