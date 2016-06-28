@@ -87,7 +87,7 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 	/**
 	 * How long to wait for a deployed app to transition to running state.
 	 */
-	public static final long APP_DEPLOY_TIMEOUT = TimeUnit.MINUTES.toMillis(4);
+	public static final long APP_DEPLOY_TIMEOUT = TimeUnit.MINUTES.toMillis(6);
 
 	/**
 	 * How long to wait on retrieving request mappings from a CF app.
