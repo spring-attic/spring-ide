@@ -307,6 +307,7 @@ public class CloudFoundryClientTest {
 				client.bindAndUnbindServices(appName, ImmutableList.of()).block();
 				assertEquals(ImmutableSet.of(), getBoundServiceNames(appName));
 			} else {
+				System.out.println("Executing a 'reduced' test because test service is a 'singleton'!");
 				// On tan we don't have as much to work with. The 'auto-scaler' service has limitation that
 				// only one instance can be bound to a app which breaks the test. So run a 'reduced' version
 				// of the test instead.
@@ -324,13 +325,13 @@ public class CloudFoundryClientTest {
 
 				assertEquals(ImmutableSet.of(service1), getBoundServiceNames(appName));
 
-				client.bindAndUnbindServices(appName, ImmutableList.of(service1)).block();
+				ReactorUtils.get(client.bindAndUnbindServices(appName, ImmutableList.of(service1)));
 				assertEquals(ImmutableSet.of(service1), getBoundServiceNames(appName));
 
-				client.bindAndUnbindServices(appName, ImmutableList.of(service2)).block();
+				ReactorUtils.get(client.bindAndUnbindServices(appName, ImmutableList.of(service2)));
 				assertEquals(ImmutableSet.of(service2), getBoundServiceNames(appName));
 
-				client.bindAndUnbindServices(appName, ImmutableList.of()).block();
+				ReactorUtils.get(client.bindAndUnbindServices(appName, ImmutableList.of()));
 				assertEquals(ImmutableSet.of(), getBoundServiceNames(appName));
 			}
 		});
