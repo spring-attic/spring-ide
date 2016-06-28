@@ -936,7 +936,7 @@ public class CloudFoundryClientTest {
 		} catch (ExecutionException e) {
 			e.printStackTrace();
 			long duration = System.currentTimeMillis() - cancelTime;
-			assertEquals(OperationCanceledException.class, e.getCause().getClass());
+			assertEquals(OperationCanceledException.class, ExceptionUtil.getDeepestCause(e).getClass());
 			System.out.println("\nRestart Canceled after "+duration+" ms");
 		}
 	}
@@ -970,7 +970,7 @@ public class CloudFoundryClientTest {
 			} catch (ExecutionException e) { // real exception is wrapped in EE by Future.get
 				e.printStackTrace();
 				long duration = System.currentTimeMillis() - cancelTime;
-				assertEquals(OperationCanceledException.class, e.getCause().getClass());
+				assertEquals(OperationCanceledException.class, ExceptionUtil.getDeepestCause(e).getClass());
 				System.out.println("\nPush Canceled after: "+duration +" ms");
 			}
 		}
