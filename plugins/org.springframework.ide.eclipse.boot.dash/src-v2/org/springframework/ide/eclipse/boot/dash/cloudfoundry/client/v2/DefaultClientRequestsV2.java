@@ -1020,23 +1020,19 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	public Mono<Void> bindAndUnbindServices(String appName, List<String> _services) {
 		debug("bindAndUnbindServices "+_services);
 		Set<String> services = ImmutableSet.copyOf(_services);
-		try {
-			return getBoundServicesSet(appName)
-			.flatMap((boundServices) -> {
-				debug("boundServices = "+boundServices);
-				Set<String> toUnbind = Sets.difference(boundServices, services);
-				Set<String> toBind = Sets.difference(services, boundServices);
-				debug("toBind = "+toBind);
-				debug("toUnbind = "+toUnbind);
-				return Flux.merge(
-						bindServices(appName, toBind),
-						unbindServices(appName, toUnbind)
-				);
-			})
-			.then();
-		} catch (Exception e) {
-			return Mono.error(e);
-		}
+		return getBoundServicesSet(appName)
+		.flatMap((boundServices) -> {
+			debug("boundServices = "+boundServices);
+			Set<String> toUnbind = Sets.difference(boundServices, services);
+			Set<String> toBind = Sets.difference(services, boundServices);
+			debug("toBind = "+toBind);
+			debug("toUnbind = "+toUnbind);
+			return Flux.merge(
+					bindServices(appName, toBind),
+					unbindServices(appName, toUnbind)
+			);
+		})
+		.then();
 	}
 
 	public Flux<String> getBoundServices(String appName) {
