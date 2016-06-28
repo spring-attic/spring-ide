@@ -11,6 +11,8 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.Platform;
 import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
@@ -68,10 +70,14 @@ public class CloudDashApplications extends AbstractDisposable {
 		if (DEBUG) {
 			applications.addListener((e, v) -> {
 				debug("applications change event!");
-				debug("  event values = "+v);
-				debug("  current values = "+applications.getValues());
+				debug("  event values = "+getNames(v));
+				debug("  current values = "+getNames(applications.getValues()));
 			});
 		}
+	}
+
+	private List<String> getNames(ImmutableSet<CloudAppDashElement> v) {
+		return v.stream().map(CloudAppDashElement::getName).collect(Collectors.toList());
 	}
 
 	public void setAppNames(Collection<String> names) {
