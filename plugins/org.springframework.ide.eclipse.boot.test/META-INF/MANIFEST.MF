@@ -29,7 +29,7 @@ Require-Bundle: org.eclipse.ui,
  org.hamcrest,
  org.hamcrest.library,
  org.springframework.ide.eclipse.boot.wizard
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: GoPivotal Inc.
 Export-Package: org.springframework.ide.eclipse.boot.test,

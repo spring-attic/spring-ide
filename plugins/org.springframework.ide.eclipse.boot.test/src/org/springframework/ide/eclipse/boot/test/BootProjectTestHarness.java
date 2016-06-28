@@ -30,14 +30,12 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
 import org.osgi.framework.Version;
 import org.osgi.framework.VersionRange;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.test.util.CopyFromFolder;
+import org.springframework.ide.eclipse.boot.util.RetryUtil;
 import org.springframework.ide.eclipse.boot.wizard.NewSpringBootWizardModel;
 import org.springframework.ide.eclipse.boot.wizard.RadioGroup;
 import org.springframework.ide.eclipse.boot.wizard.RadioInfo;
@@ -179,32 +177,40 @@ public class BootProjectTestHarness {
 	}
 
 	public IProject createBootProject(final String projectName, final WizardConfigurer... extraConfs) throws Exception {
-		final Job job = new Job("Create boot project '"+projectName+"'") {
-			protected IStatus run(IProgressMonitor monitor) {
-				try {
-					NewSpringBootWizardModel wizard = new NewSpringBootWizardModel(new MockPrefsStore());
-					wizard.allowUIThread(true);
-					wizard.getProjectName().setValue(projectName);
-					wizard.getArtifactId().setValue(projectName);
-					//Note: unlike most of the rest of the wizard's behavior, the 'use default location'
-					//  checkbox and its effect is not part of the model but part of the GUI code (this is
-					//  wrong, really, but that's how it is, so we have to explictly set the project
-					//  location in the model.
-					wizard.getLocation().setValue(getDefaultProjectLocation(projectName));
-					for (WizardConfigurer extraConf : extraConfs) {
-						extraConf.apply(wizard);
+		RetryUtil.retryWhen("createBootProject("+projectName+")", 3, RetryUtil.errorWithMsg("Read timed out"), () -> {
+			final Job job = new Job("Create boot project '"+projectName+"'") {
+				protected IStatus run(IProgressMonitor monitor) {
+					try {
+						//No point doing a retry if we will just fail because project already exists!
+						IProject p = getProject(projectName);
+						if (p.exists()) {
+							p.delete(true, true, new NullProgressMonitor());
+						}
+						NewSpringBootWizardModel wizard = new NewSpringBootWizardModel(new MockPrefsStore());
+						wizard.allowUIThread(true);
+						wizard.getProjectName().setValue(projectName);
+						wizard.getArtifactId().setValue(projectName);
+						//Note: unlike most of the rest of the wizard's behavior, the 'use default location'
+						//  checkbox and its effect is not part of the model but part of the GUI code (this is
+						//  wrong, really, but that's how it is, so we have to explictly set the project
+						//  location in the model.
+						wizard.getLocation().setValue(getDefaultProjectLocation(projectName));
+						for (WizardConfigurer extraConf : extraConfs) {
+							extraConf.apply(wizard);
+						}
+						wizard.performFinish(new NullProgressMonitor());
+						return Status.OK_STATUS;
+					} catch (Throwable e) {
+						return ExceptionUtil.status(e);
 					}
-					wizard.performFinish(new NullProgressMonitor());
-					return Status.OK_STATUS;
-				} catch (Throwable e) {
-					return ExceptionUtil.status(e);
 				}
-			}
-		};
-		//job.setRule(workspace.getRuleFactory().buildRule());
-		job.schedule();
+			};
+			//job.setRule(workspace.getRuleFactory().buildRule());
+			job.schedule();
 
-		waitForImportJob(getProject(projectName), job);
+			waitForImportJob(getProject(projectName), job);
+			
+		});
 		return getProject(projectName);
 	}
 

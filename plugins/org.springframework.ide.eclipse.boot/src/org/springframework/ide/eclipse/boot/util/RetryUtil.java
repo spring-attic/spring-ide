@@ -88,4 +88,11 @@ public class RetryUtil {
 		}
 	}
 
+	public static Predicate<Throwable> errorWithMsg(String msgFrag) {
+		return (error) -> {
+			String msg = ExceptionUtil.getMessage(error);
+			return msg.contains(msgFrag);
+		};
+	}
+
 }
