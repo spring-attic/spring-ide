@@ -291,6 +291,7 @@ public class CloudFoundryClientTest {
 		RetryUtil.retryTimes("testPushAndBindServices", 4, () -> {
 
 			if (!services.testServiceIsSingleton()) {
+				System.out.println("Executing full test scenario.");
 				String service1 = services.createTestService();
 				String service2 = services.createTestService();
 				String service3 = services.createTestService(); //An extra unused service (makes this a better test).
