@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2;
 
+import static org.cloudfoundry.util.tuple.TupleUtils.function;
+
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Collection;
@@ -70,6 +72,7 @@ import org.cloudfoundry.reactor.uaa.ReactorUaaClient;
 import org.cloudfoundry.reactor.util.ConnectionContextSupplier;
 import org.cloudfoundry.spring.client.SpringCloudFoundryClient;
 import org.cloudfoundry.util.PaginationUtils;
+import org.eclipse.core.runtime.Platform;
 import org.osgi.framework.Version;
 import org.slf4j.helpers.MessageFormatter;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationRunningStateTracker;
@@ -104,8 +107,6 @@ import reactor.core.publisher.Mono;
 import reactor.core.util.Logger;
 import reactor.core.util.Logger.Extension;
 
-import static org.cloudfoundry.util.tuple.TupleUtils.function;
-
 /**
  * @author Kris De Volder
  * @author Nieraj Singh
@@ -115,7 +116,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	private static final Duration APP_START_TIMEOUT = Duration.ofMillis(ApplicationRunningStateTracker.APP_START_TIMEOUT);
 	private static final Duration GET_SERVICES_TIMEOUT = Duration.ofSeconds(60);
 
-	private static final boolean DEBUG = false; //(""+Platform.getLocation()).contains("kdvolder");
+	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder") || (""+Platform.getLocation()).contains("bamboo");
 	private static final boolean DEBUG_REACTOR = false;//(""+Platform.getLocation()).contains("kdvolder")
 									//|| (""+Platform.getLocation()).contains("bamboo");
 
