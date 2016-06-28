@@ -56,21 +56,11 @@ public class CloudFoundryServicesHarness implements Disposable {
 			return new String[] {"p-rabbitmq", "standard"};
 		} else if (api.contains("api.tan.")) {
 			//TAN RGB
-			return new String[] {"app-autoscaler", "bronze"};
+			//return new String[] {"app-autoscaler", "bronze"}; //Warning not good enough for some tests!
+			return new String[] {"p-rabbitmq", "standard"};
 		}
 		return null;
 	}
-
-	public boolean testServiceIsSingleton() {
-		String org = clientParams.getOrgName();
-		String api = clientParams.getApiUrl();
-		if (api.contains("api.tan.")) {
-			//TAN RGB
-			return true;
-		}
-		return false;
-	}
-
 
 	public String randomServiceName() {
 		String name = StringUtil.datestamp()+"-"+randomAlphabetic(10);
