@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.util.Collection;
 
+import org.eclipse.core.runtime.Platform;
 import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
@@ -36,6 +37,15 @@ import com.google.common.collect.ImmutableSet;
  */
 public class CloudDashApplications extends AbstractDisposable {
 
+	private static final boolean DEBUG = ("" + Platform.getLocation()).contains("bamboo")
+			|| ("" + Platform.getLocation()).contains("kdvolder");
+
+	private static void debug(String string) {
+		if (DEBUG) {
+			System.out.println(string);
+		}
+	}
+
 	private final LiveSetVariable<String> appNames = new LiveSetVariable<>(AsyncMode.SYNC);
 	private final ObservableSet<CloudAppDashElement> applications;
 	private final DisposingFactory<String, CloudAppDashElement> factory;
@@ -55,6 +65,13 @@ public class CloudDashApplications extends AbstractDisposable {
 		});
 		addDisposableChild(factory);
 		addDisposableChild(applications);
+		if (DEBUG) {
+			applications.addListener((e, v) -> {
+				debug("applications change event!");
+				debug("  event values = "+v);
+				debug("  current values = "+applications.getValues());
+			});
+		}
 	}
 
 	public void setAppNames(Collection<String> names) {
