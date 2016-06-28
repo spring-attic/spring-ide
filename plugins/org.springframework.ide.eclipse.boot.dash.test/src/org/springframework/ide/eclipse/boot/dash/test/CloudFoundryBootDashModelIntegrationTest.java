@@ -31,6 +31,8 @@ import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHar
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.createFile;
 
+import static org.springframework.ide.eclipse.boot.dash.test.BootDashModelTest.waitForJobsToComplete;
+
 import java.io.File;
 import java.net.URI;
 import java.util.HashMap;
@@ -339,6 +341,8 @@ public class CloudFoundryBootDashModelIntegrationTest {
 		IProject project = projects.createProject("to-deploy");
 
 		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
+
+		waitForJobsToComplete();
 
 		File zipFile = getTestZip("testapp");
 		final String appName = appHarness.randomAppName();
