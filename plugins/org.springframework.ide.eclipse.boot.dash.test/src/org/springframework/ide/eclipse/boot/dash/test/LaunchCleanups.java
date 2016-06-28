@@ -47,7 +47,7 @@ public class LaunchCleanups implements TestRule {
 		ILaunch[] launches = launchManager.getLaunches();
 		for (ILaunch l : launches) {
 			if (!l.isTerminated()) {
-				fail("Leaky test code leaves launch running? "+l);
+				fail("Leaky test code leaves launch running? "+nicerToString(l));
 			}
 			launchManager.removeLaunch(l);
 		}
@@ -55,6 +55,14 @@ public class LaunchCleanups implements TestRule {
 		for (ILaunchConfiguration conf : launchManager.getLaunchConfigurations()) {
 			conf.delete();
 		}
+	}
+
+	private String nicerToString(ILaunch l) {
+		ILaunchConfiguration c = l.getLaunchConfiguration();
+		if (c!=null) {
+			return c.getName();
+		}
+		return l.toString();
 	}
 
 }
