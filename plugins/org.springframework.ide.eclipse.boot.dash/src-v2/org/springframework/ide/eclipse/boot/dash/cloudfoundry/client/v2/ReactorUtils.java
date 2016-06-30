@@ -15,6 +15,7 @@ import java.time.Duration;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -23,8 +24,6 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.reactivestreams.Publisher;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
-import org.springframework.ide.eclipse.boot.util.Log;
-import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -98,7 +97,7 @@ public class ReactorUtils {
 
 	private static void dumpStacks() {
 		if (DUMP_STACK_ON_TIMEOUT) {
-			System.out.println(StsTestUtil.getStackDumps().toString());
+			System.out.println(getStackDumps().toString());
 		}
 	}
 
@@ -252,4 +251,21 @@ public class ReactorUtils {
 		.concatMap(SorterAccumulator::getReleased)
 		.concatWith(sorter.drain());
 	}
+
+	protected static StringBuffer getStackDumps() {
+		StringBuffer sb = new StringBuffer();
+		Map<Thread, StackTraceElement[]> traces = Thread.getAllStackTraces();
+		for (Map.Entry<Thread, StackTraceElement[]> entry : traces.entrySet()) {
+			sb.append(entry.getKey().toString());
+			sb.append("\n");
+			for (StackTraceElement element : entry.getValue()) {
+				sb.append("  ");
+				sb.append(element.toString());
+				sb.append("\n");
+			}
+			sb.append("\n");
+		}
+		return sb;
+	}
+
 }
