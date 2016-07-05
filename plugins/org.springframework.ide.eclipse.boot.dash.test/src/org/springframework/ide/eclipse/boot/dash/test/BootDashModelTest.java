@@ -86,6 +86,7 @@ import org.springframework.ide.eclipse.boot.launch.util.PortFinder;
 import org.springframework.ide.eclipse.boot.test.AutobuildingEnablement;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.WizardConfigurer;
+import org.springframework.ide.eclipse.boot.test.util.TestBracketter;
 import org.springframework.ide.eclipse.boot.ui.EnableDisableBootDevtools;
 import org.springsource.ide.eclipse.commons.frameworks.core.maintype.MainTypeFinder;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;

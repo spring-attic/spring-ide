@@ -76,6 +76,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.IApplicati
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
+import org.springframework.ide.eclipse.boot.test.util.TestBracketter;
 import org.springframework.ide.eclipse.boot.util.RetryUtil;
 import org.springframework.ide.eclipse.boot.util.Thunk;
 import org.springframework.ide.eclipse.editor.support.util.StringUtil;

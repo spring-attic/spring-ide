@@ -52,6 +52,7 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.MavenId;
@@ -61,6 +62,7 @@ import org.springframework.ide.eclipse.boot.core.SpringBootStarters;
 import org.springframework.ide.eclipse.boot.core.dialogs.EditStartersModel;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrDependencySpec;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
+import org.springframework.ide.eclipse.boot.test.util.TestBracketter;
 import org.springframework.ide.eclipse.boot.wizard.PopularityTracker;
 import org.springframework.ide.eclipse.boot.wizard.json.InitializrServiceSpec;
 import org.springframework.ide.eclipse.boot.wizard.json.InitializrServiceSpec.Dependency;
@@ -101,7 +103,8 @@ public class EditStartersModelTest {
 		StsTestUtil.cleanUpProjects();
 	}
 
-
+	@Rule
+	TestBracketter testBracketer = new TestBracketter();
 
 	/**
 	 * Tests that the EditStartersModel is parsed and that existing starters already present on the
@@ -109,7 +112,7 @@ public class EditStartersModelTest {
 	 */
 	@Test
 	public void existingStartersSelected() throws Exception {
-		IProject project = harness.createBootProject("foo", withStarters("web", "actuator"));
+		IProject project = harness.createBootProject("existingStartersSelected", withStarters("web", "actuator"));
 		ISpringBootProject bootProject = springBootCore.project(project);
 		EditStartersModel wizard = createWizard(project);
 		assertTrue(wizard.isSupported());
@@ -124,7 +127,7 @@ public class EditStartersModelTest {
 	 */
 	@Test
 	public void removeStarter() throws Exception {
-		IProject project = harness.createBootProject("foo", withStarters("web", "actuator"));
+		IProject project = harness.createBootProject("removeStarter", withStarters("web", "actuator"));
 		final ISpringBootProject bootProject = springBootCore.project(project);
 		EditStartersModel wizard = createWizard(project);
 		assertEquals(bootProject.getBootVersion(), wizard.getBootVersion());
@@ -149,7 +152,7 @@ public class EditStartersModelTest {
 	 */
 	@Test
 	public void addStarter() throws Exception {
-		IProject project = harness.createBootProject("foo", withStarters("web"));
+		IProject project = harness.createBootProject("addStarter", withStarters("web"));
 		final ISpringBootProject bootProject = springBootCore.project(project);
 		EditStartersModel wizard = createWizard(project);
 		assertEquals(bootProject.getBootVersion(), wizard.getBootVersion());
@@ -179,7 +182,7 @@ public class EditStartersModelTest {
 
 	@Test
 	public void addStarterWithTestScope() throws Exception {
-		IProject project = harness.createBootProject("foo", withStarters("web"));
+		IProject project = harness.createBootProject("addStarterWithTestScope", withStarters("web"));
 		final ISpringBootProject bootProject = springBootCore.project(project);
 		EditStartersModel wizard = createWizard(project);
 		wizard.addDependency("restdocs");
@@ -205,7 +208,7 @@ public class EditStartersModelTest {
 //	      "scope": "compile",
 //	      "bom": "cloud-bom"
 
-		IProject project = harness.createBootProject("foo", withStarters("web"));
+		IProject project = harness.createBootProject("addStarterWithBom", withStarters("web"));
 		final ISpringBootProject bootProject = springBootCore.project(project);
 		EditStartersModel wizard = createWizard(project);
 		wizard.addDependency("cloud-eureka");
@@ -223,7 +226,7 @@ public class EditStartersModelTest {
 	@Test
 	public void addMultipleStartersWithSameBom() throws Exception {
 		//This test uses more 'controlled' parameters:
-		IProject project = harness.createBootProject("foo",
+		IProject project = harness.createBootProject("addMultipleStartersWithSameBom",
 				bootVersion(BOOT_1_3_X_RELEASE), // boot version fixed
 				withStarters("web")
 		);
@@ -263,7 +266,7 @@ public class EditStartersModelTest {
 	@Test
 	public void addMultipleStartersWithDifferentBom() throws Exception {
 		//This test uses more 'controlled' parameters:
-		IProject project = harness.createBootProject("foo",
+		IProject project = harness.createBootProject("addMultipleStartersWithDifferentBom",
 				bootVersion(BOOT_1_3_X_RELEASE), // boot version fixed
 				withStarters("web")
 		);
@@ -303,7 +306,7 @@ public class EditStartersModelTest {
 	public void addBomWithSubsetOfRepos() throws Exception {
 		//This test uses more 'controlled' parameters:
 		String bootVersion = BOOT_1_3_X_RELEASE;
-		IProject project = harness.createBootProject("foo",
+		IProject project = harness.createBootProject("addBomWithSubsetOfRepos",
 				bootVersion(bootVersion), // boot version fixed
 				withStarters("web")
 		);
@@ -329,7 +332,7 @@ public class EditStartersModelTest {
 	public void addDependencyWithRepo() throws Exception {
 		//This test uses more 'controlled' parameters:
 		String bootVersion = BOOT_1_3_X_RELEASE;
-		IProject project = harness.createBootProject("foo",
+		IProject project = harness.createBootProject("addDependencyWithRepo",
 				bootVersion(bootVersion), // boot version fixed
 				withStarters("web")
 		);
@@ -357,7 +360,7 @@ public class EditStartersModelTest {
 	@Test
 	public void serviceUnavailable() throws Exception {
 		String bootVersion = BOOT_1_3_X_RELEASE;
-		IProject project = harness.createBootProject("foo",
+		IProject project = harness.createBootProject("serviceUnavailable",
 				bootVersion(bootVersion), // boot version fixed
 				withStarters("web")
 		);

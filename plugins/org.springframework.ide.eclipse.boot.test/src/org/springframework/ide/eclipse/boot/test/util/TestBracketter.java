@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.test;
+package org.springframework.ide.eclipse.boot.test.util;
 
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;

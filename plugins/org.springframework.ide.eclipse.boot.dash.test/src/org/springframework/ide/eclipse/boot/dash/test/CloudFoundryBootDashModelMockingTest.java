@@ -93,6 +93,7 @@ import org.springframework.ide.eclipse.boot.dash.views.CustmomizeTargetLabelActi
 import org.springframework.ide.eclipse.boot.dash.views.CustomizeTargetLabelDialogModel;
 import org.springframework.ide.eclipse.boot.test.AutobuildingEnablement;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
+import org.springframework.ide.eclipse.boot.test.util.TestBracketter;
 import org.springframework.util.StringUtils;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
