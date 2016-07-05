@@ -104,7 +104,7 @@ public class EditStartersModelTest {
 	}
 
 	@Rule
-	TestBracketter testBracketer = new TestBracketter();
+	public TestBracketter testBracketer = new TestBracketter();
 
 	/**
 	 * Tests that the EditStartersModel is parsed and that existing starters already present on the
