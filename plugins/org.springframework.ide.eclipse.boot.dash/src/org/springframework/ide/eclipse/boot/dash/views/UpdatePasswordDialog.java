@@ -93,14 +93,14 @@ public class UpdatePasswordDialog extends TitleAreaDialog {
 
 		final Text newPasswordText = new Text(passwordComposite, SWT.PASSWORD | SWT.BORDER);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(newPasswordText);
-		newPasswordText.setText(model.getPasswordVar().getValue() == null ? "" : model.getPasswordVar().getValue());
+		String password = model.getPasswordVar().getValue();
+		newPasswordText.setText(password == null ? "" : password);
+
 		newPasswordText.addModifyListener(new ModifyListener() {
 
 			public void modifyText(ModifyEvent e) {
 				String password = newPasswordText.getText();
 				model.getPasswordVar().setValue(password);
-
-				getButton(OK).setEnabled(password != null && password.length() > 0);
 
 				if (password == null || password.isEmpty()) {
 					setMessage(PLEASE_ENTER_A_PASSWORD, IStatus.INFO);
@@ -128,6 +128,15 @@ public class UpdatePasswordDialog extends TitleAreaDialog {
 		parent.pack(true);
 
 		return composite;
+	}
+
+	@Override
+	protected Control createContents(Composite parent) {
+		Control contents =  super.createContents(parent);
+		// Override to disable OK button if password is empty at the start
+		String password = model.getPasswordVar().getValue();
+		getButton(OK).setEnabled(password != null && password.length() > 0);
+		return contents;
 	}
 
 	@Override
