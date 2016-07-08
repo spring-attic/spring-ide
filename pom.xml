@@ -839,6 +839,7 @@
 						<argLine>
 							-Xmx1024m -XX:MaxPermSize=256m ${test.vmargs}
 						</argLine>
+						<useUIHarness>true</useUIHarness>
 						<dependencies>
 							<dependency>
 								<type>p2-installable-unit</type>
