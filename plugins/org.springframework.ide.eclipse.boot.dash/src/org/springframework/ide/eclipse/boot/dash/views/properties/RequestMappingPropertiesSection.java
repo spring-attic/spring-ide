@@ -26,7 +26,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerCell;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
@@ -97,7 +97,7 @@ public class RequestMappingPropertiesSection extends AbstractBdePropertiesSectio
 
 	private Label labelText;
 
-	private LiveVariable<BootDashElement> input = new LiveVariable<BootDashElement>();
+	private LiveVariable<BootDashElement> input = new LiveVariable<>();
 
 	private static final Object[] NO_ELEMENTS = new Object[0];
 	private TabbedPropertySheetPage page;
@@ -105,7 +105,7 @@ public class RequestMappingPropertiesSection extends AbstractBdePropertiesSectio
 	private TableViewer tv;
 	private RequestMappingLabelProvider labelProvider;
 	private Stylers stylers;
-	private ViewerSorter sorter = new ViewerSorter() {
+	private ViewerComparator sorter = new ViewerComparator() {
 
 		 @Override
 		 public int compare(Viewer viewer, Object e1, Object e2) {
@@ -147,19 +147,15 @@ public class RequestMappingPropertiesSection extends AbstractBdePropertiesSectio
 		labelText.setLayoutData(data);
 
 		this.tv = new TableViewer(composite, SWT.BORDER|SWT.FULL_SELECTION|SWT.NO_SCROLL);
-		data = new FormData();
-		data.left = new FormAttachment(0, 0);
-		data.top = new FormAttachment(0, ITabbedPropertyConstants.VSPACE);
-		data.right = new FormAttachment(100, 0);
-		data.bottom = new FormAttachment(100, 0);
-		tv.getControl().setLayoutData(data);
 
 		tv.setContentProvider(new ContentProvider());
-		tv.setSorter(sorter);
+		tv.setComparator(sorter);
 //		tv.setLabelProvider(labelProvider = new RequestMappingLabelProvider(tv.getTable().getFont(), input));
 		tv.setInput(input.getValue());
 		tv.getTable().setHeaderVisible(true);
 		stylers = new Stylers(tv.getTable().getFont());
+
+		refreshControlsVisibility();
 
 		for (RequestMappingsColumn colType : RequestMappingsColumn.values()) {
 			TableViewerColumn col = new TableViewerColumn(tv, colType.getAlignment());
@@ -222,9 +218,25 @@ public class RequestMappingPropertiesSection extends AbstractBdePropertiesSectio
 		BootDashElement bde = getBootDashElement();
 		if (bde == null || bde.getLiveRequestMappings() == null) {
 			tv.getControl().setVisible(false);
+
+			FormData data = new FormData();
+			data.left = new FormAttachment(0, 0);
+			data.top = new FormAttachment(0, 0);
+			data.right = new FormAttachment(0, 0);
+			data.bottom = new FormAttachment(0, 0);
+			tv.getControl().setLayoutData(data);
+
 			labelText.setVisible(true);
 		} else {
 			tv.getControl().setVisible(true);
+
+			FormData data = new FormData();
+			data.left = new FormAttachment(0, 0);
+			data.top = new FormAttachment(0, ITabbedPropertyConstants.VSPACE);
+			data.right = new FormAttachment(100, 0);
+			data.bottom = new FormAttachment(100, 0);
+			tv.getControl().setLayoutData(data);
+
 			labelText.setVisible(false);
 		}
 	}
