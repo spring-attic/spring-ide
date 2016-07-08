@@ -29,7 +29,7 @@
 							<requirement>
 								<type>eclipse-feature</type>
 								<id>org.eclipse.jdt.feature</id>
-								<version>0.0.0</version>
+								<versionRange>0.0.0</versionRange>
 							</requirement>
 							<requirement>
 								<type>eclipse-feature</type>
