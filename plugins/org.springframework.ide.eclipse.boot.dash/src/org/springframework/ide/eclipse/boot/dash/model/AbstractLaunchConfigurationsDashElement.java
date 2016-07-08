@@ -25,6 +25,7 @@ import java.util.concurrent.TimeoutException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -49,6 +50,7 @@ import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
 import org.springframework.ide.eclipse.boot.launch.util.SpringApplicationLifeCycleClientManager;
 import org.springframework.ide.eclipse.boot.launch.util.SpringApplicationLifecycleClient;
 import org.springframework.ide.eclipse.boot.util.Log;
+import org.springframework.ide.eclipse.boot.util.RetryUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.maintype.MainTypeFinder;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
@@ -70,7 +72,7 @@ import com.google.common.collect.ImmutableSet;
  */
 public abstract class AbstractLaunchConfigurationsDashElement<T> extends WrappingBootDashElement<T> implements Duplicatable<LaunchConfDashElement> {
 
-	private static final boolean DEBUG = false;//(""+Platform.getLocation()).contains("kdvolder");
+	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 	private static void debug(String string) {
 		if (DEBUG) {
 			System.out.println(string);
@@ -160,7 +162,7 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 
 	private void stop(boolean sync) throws Exception {
 		debug("Stopping: "+this+" "+(sync?"...":""));
-		final CompletableFuture<Void> done = sync?new CompletableFuture<Void>():null;
+		final CompletableFuture<Void> done = sync?new CompletableFuture<>():null;
 		try {
 			ImmutableSet<ILaunch> launches = getLaunches();
 			if (sync) {
@@ -487,9 +489,20 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 								cm = new SpringApplicationLifeCycleClientManager(jmxPort);
 								SpringApplicationLifecycleClient c = cm.getLifeCycleClient();
 								if (c!=null) {
-									return c.getProperty(propName, -1);
+									//Just because lifecycle bean is ready does not mean that the port property has already been set.
+									//To avoid race condition we should wait here until the port is set (some apps aren't web apps and
+									//may never get a port set, so we shouldn't wait indefinitely!)
+									return RetryUtil.retry(100, 1000, () -> {
+										int port = c.getProperty(propName, -1);
+										debug("getLivePort["+propName+":"+this.getName()+"] => "+port);
+										if (port<=0) {
+											throw new IllegalStateException("port not (yet) set");
+										}
+										return port;
+									});
 								}
 							} catch (Exception e) {
+								debug(ExceptionUtil.getMessage(e));
 								//most likely this just means the app isn't running so ignore
 							} finally {
 								if (cm!=null) {
@@ -565,7 +578,7 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 			tunnelURL = tunnelURL.substring(7);
 		}
 
-		Map<String, String> extraAttributes = new HashMap<String, String>();
+		Map<String, String> extraAttributes = new HashMap<>();
 		extraAttributes.put("spring.boot.prop.server.port", "1" + Integer.toString(port));
 		extraAttributes.put("spring.boot.prop.eureka.instance.hostname", "1" + tunnelURL);
 		extraAttributes.put("spring.boot.prop.eureka.instance.nonSecurePort", "1" + "80");
