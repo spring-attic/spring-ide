@@ -28,7 +28,7 @@
 						<extraRequirements>
 							<requirement>
 								<type>eclipse-feature</type>
-								<artifactId>org.eclipse.jdt.feature</artifactId>
+								<id>org.eclipse.jdt.feature</id>
 								<version>0.0.0</version>
 							</requirement>
 							<requirement>
