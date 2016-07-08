@@ -10,7 +10,12 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch.util;
 
+import javax.inject.Provider;
 import javax.management.remote.JMXConnector;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.debug.core.ILaunch;
+import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 
 /**
  * Creates and manages an instance of {@link SpringApplicationLifecycleClient}.
@@ -19,12 +24,32 @@ import javax.management.remote.JMXConnector;
  */
 public class SpringApplicationLifeCycleClientManager {
 
-	private int jmxPort;
+	private Provider<Integer> jmxPort;
 	private JMXConnector connector;
 	private SpringApplicationLifecycleClient client;
 
-	public SpringApplicationLifeCycleClientManager(int jmxPort) {
+	public SpringApplicationLifeCycleClientManager(Provider<Integer> jmxPort) {
 		this.jmxPort = jmxPort;
+	}
+
+	/**
+	 * Convenenience method, use ILaunch as the jmxPort provider.
+	 */
+	public SpringApplicationLifeCycleClientManager(ILaunch l) {
+		this(() -> BootLaunchConfigurationDelegate.getJMXPortAsInt(l));
+	}
+
+
+	/**
+	 * Convenenience method, use a given fixed port.
+	 */
+	public SpringApplicationLifeCycleClientManager(int resolvedPort) {
+		this(fixedPort(resolvedPort));
+	}
+
+	private static Provider<Integer> fixedPort(int resolvedPort) {
+		Assert.isLegal(resolvedPort>0, "JMX port must be > 0");
+		return () -> resolvedPort;
 	}
 
 	/**
@@ -50,7 +75,11 @@ public class SpringApplicationLifeCycleClientManager {
 	public SpringApplicationLifecycleClient getLifeCycleClient() {
 		try {
 			if (client==null) {
-				connector = SpringApplicationLifecycleClient.createLocalJmxConnector(jmxPort);
+				Integer resolvedPort = jmxPort.get();
+				if (resolvedPort==null || resolvedPort <=0) {
+					throw new IllegalStateException("JMX port not specified");
+				}
+				connector = SpringApplicationLifecycleClient.createLocalJmxConnector(resolvedPort);
 				client = new SpringApplicationLifecycleClient(
 						connector.getMBeanServerConnection(),
 						SpringApplicationLifecycleClient.DEFAULT_OBJECT_NAME

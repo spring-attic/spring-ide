@@ -60,8 +60,7 @@ public class BootLaunchUtils {
 					&& conf.getType().getIdentifier().equals(BootLaunchConfigurationDelegate.TYPE_ID)
 					&& BootLaunchConfigurationDelegate.canUseLifeCycle(conf)
 			) {
-				int jmxPort = BootLaunchConfigurationDelegate.getJMXPortAsInt(l);
-				SpringApplicationLifeCycleClientManager clientMgr = new SpringApplicationLifeCycleClientManager(jmxPort);
+				SpringApplicationLifeCycleClientManager clientMgr = new SpringApplicationLifeCycleClientManager(l);
 				SpringApplicationLifecycleClient client = clientMgr.getLifeCycleClient();
 				try {
 					if (client!=null) {
@@ -114,7 +113,7 @@ public class BootLaunchUtils {
 
 	public static List<ILaunch> getLaunches(Set<ILaunchConfiguration> configs) {
 		ILaunch[] all = DebugPlugin.getDefault().getLaunchManager().getLaunches();
-		ArrayList<ILaunch> selected = new ArrayList<ILaunch>();
+		ArrayList<ILaunch> selected = new ArrayList<>();
 		for (ILaunch l : all) {
 			ILaunchConfiguration lConf = l.getLaunchConfiguration();
 			if (lConf!=null && configs.contains(lConf)) {

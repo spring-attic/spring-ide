@@ -486,7 +486,7 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 						if (jmxPort>0) {
 							SpringApplicationLifeCycleClientManager cm = null;
 							try {
-								cm = new SpringApplicationLifeCycleClientManager(jmxPort);
+								cm = new SpringApplicationLifeCycleClientManager(() -> jmxPort);
 								SpringApplicationLifecycleClient c = cm.getLifeCycleClient();
 								if (c!=null) {
 									//Just because lifecycle bean is ready does not mean that the port property has already been set.
@@ -494,7 +494,6 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 									//may never get a port set, so we shouldn't wait indefinitely!)
 									return RetryUtil.retry(100, 1000, () -> {
 										int port = c.getProperty(propName, -1);
-										debug("getLivePort["+propName+":"+this.getName()+"] => "+port);
 										if (port<=0) {
 											throw new IllegalStateException("port not (yet) set");
 										}
