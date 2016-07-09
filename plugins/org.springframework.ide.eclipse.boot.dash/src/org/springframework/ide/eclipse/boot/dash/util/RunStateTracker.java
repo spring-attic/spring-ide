@@ -85,7 +85,7 @@ public abstract class RunStateTracker<T> extends ProcessListenerAdapter implemen
 	private Map<T, RunState> activeStates = null;
 	private Map<ILaunch, ReadyStateMonitor> readyStateTrackers = null;
 	private ProcessTracker processTracker = null;
-	private ListenerList<RunStateListener<T>> listeners = new ListenerList<>(); // listeners that are interested in us (i.e. clients)
+	private ListenerList listeners = new ListenerList(); // listeners that are interested in us (i.e. clients)
 
 	private static <T> RunState getState(Map<T, RunState> states, T p) {
 		if (states!=null) {
