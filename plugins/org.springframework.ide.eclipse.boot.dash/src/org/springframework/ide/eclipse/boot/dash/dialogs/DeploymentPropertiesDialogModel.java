@@ -808,4 +808,12 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 		manualModel.resourceAnnotationModel.setValue(annotationModel);
 	}
 
+	public IAnnotationModel getManualResourceAnnotationModel() {
+		return manualModel.resourceAnnotationModel.getValue();
+	}
+
+	public IAnnotationModel getFileResourceAnnotationModel() {
+		return fileModel.resourceAnnotationModel.getValue();
+	}
+
 }
