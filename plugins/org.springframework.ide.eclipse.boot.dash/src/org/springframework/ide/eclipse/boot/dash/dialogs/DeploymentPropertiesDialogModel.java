@@ -133,6 +133,14 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 				dependsOn(resourceAnnotationModel);
 			}
 
+			{
+				onDispose((d) -> {
+					if (attachedTo != null) {
+						attachedTo.removeAnnotationModelListener(listener);
+					}
+				});
+			}
+
 			@Override
 			protected Boolean compute() {
 				IAnnotationModel annotationModel = resourceAnnotationModel.getValue();
@@ -175,6 +183,14 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 				dependsOn(appNameAnnotationModel);
 			}
 
+			{
+				onDispose((d) -> {
+					if (attachedTo != null) {
+						attachedTo.removeAnnotationModelListener(listener);
+					}
+				});
+			}
+
 			@Override
 			protected String compute() {
 				AppNameAnnotationModel annotationModel = appNameAnnotationModel.getValue();
@@ -203,6 +219,16 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 		};
 
+		{
+			onDispose((d) -> {
+				applicationNames.dispose();
+				appNameAnnotationModel.dispose();
+				errorsInYaml.dispose();
+				resourceAnnotationModel.dispose();
+				selectedAppName.dispose();
+			});
+		}
+		
 		abstract String getManifestContents();
 
 		/**
@@ -244,12 +270,6 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 	public class FileDeploymentPropertiesDialogModel extends AbstractSubModel {
 
 		private boolean inputConnected = false;
-
-		{
-			onDispose((d) -> {
-				saveOrDiscardIfNeeded();
-			});
-		}
 
 		private final Set<TextFileDocumentProvider> docProviders = new HashSet<>();
 
@@ -404,6 +424,17 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 			public void elementContentAboutToBeReplaced(Object arg0) {
 			}
 		};
+		
+		{
+			onDispose((d) -> {
+				saveOrDiscardIfNeeded();
+				validator.dispose();
+				document.dispose();
+				editorInput.dispose();
+				fileLabel.dispose();
+				selectedFile.dispose();
+			});
+		}
 
 		private void saveOrDiscardIfNeeded() {
 			FileEditorInput input = editorInput.getValue();
@@ -572,6 +603,13 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 				return result;
 			}
 		};
+		
+		{
+			onDispose((d) -> {
+				validator.dispose();
+			});
+		}
+
 
 		ManualDeploymentPropertiesDialogModel(boolean readOnly) {
 			super();
