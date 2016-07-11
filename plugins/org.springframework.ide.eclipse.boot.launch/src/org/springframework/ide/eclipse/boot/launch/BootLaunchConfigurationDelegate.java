@@ -49,7 +49,12 @@ import org.springsource.ide.eclipse.commons.core.util.OsUtils;
  */
 public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigurationDelegate {
 
-	//private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+//	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+//	private static void debug(String string) {
+//		if (DEBUG) {
+//			System.out.println(string);
+//		}
+//	}
 
 	public static final String TYPE_ID = "org.springframework.ide.eclipse.boot.launch";
 
@@ -105,7 +110,7 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 			//shortcut for case where no boot-specific customizations are specified.
 			return super.getProgramArguments(conf);
 		}
-		ArrayList<String> args = new ArrayList<String>();
+		ArrayList<String> args = new ArrayList<>();
 		if (debugOutput) {
 			args.add("--debug");
 		}
@@ -386,8 +391,8 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		return -1;
 	}
 
-	public static int getJMXPortAsInt(ILaunch conf) {
-		String jmxPortStr = conf.getAttribute(JMX_PORT);
+	public static int getJMXPortAsInt(ILaunch launch) {
+		String jmxPortStr = launch.getAttribute(JMX_PORT);
 		if (jmxPortStr!=null) {
 			try {
 				return Integer.parseInt(jmxPortStr);

@@ -18,7 +18,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import javax.inject.Provider;
+
 import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchManager;
@@ -26,6 +29,7 @@ import org.eclipse.debug.core.model.IProcess;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.boot.util.ProcessListenerAdapter;
 import org.springframework.ide.eclipse.boot.util.ProcessTracker;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -51,7 +55,7 @@ public abstract class RunStateTracker<T> extends ProcessListenerAdapter implemen
 	}
 
 	public RunStateTracker() {
-		activeStates = new HashMap<T, RunState>();
+		activeStates = new HashMap<>();
 		processTracker = new ProcessTracker(this);
 		updateOwnerStatesAndFireEvents();
 	}
@@ -70,7 +74,7 @@ public abstract class RunStateTracker<T> extends ProcessListenerAdapter implemen
 
 	///////////////////////// stuff below is implementation cruft ////////////////////
 
-	private static final boolean DEBUG = false; //(""+Platform.getLocation()).contains("kdvolder");
+	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 
 	private static void debug(String string) {
 		if (DEBUG) {
@@ -94,7 +98,7 @@ public abstract class RunStateTracker<T> extends ProcessListenerAdapter implemen
 	}
 
 	private Map<T, RunState> getCurrentActiveStates() {
-		Map<T, RunState> states = new HashMap<T, RunState>();
+		Map<T, RunState> states = new HashMap<>();
 		for (ILaunch l : launchManager().getLaunches()) {
 			if (!l.isTerminated() && isInteresting(l)) {
 				T p = getOwner(l);
@@ -127,7 +131,7 @@ public abstract class RunStateTracker<T> extends ProcessListenerAdapter implemen
 
 	private synchronized LiveExpression<Boolean> getReadyState(ILaunch l) {
 		if (readyStateTrackers==null) {
-			readyStateTrackers = new HashMap<ILaunch, ReadyStateMonitor>();
+			readyStateTrackers = new HashMap<>();
 		}
 		ReadyStateMonitor tracker = readyStateTrackers.get(l);
 		if (tracker==null) {
@@ -148,11 +152,13 @@ public abstract class RunStateTracker<T> extends ProcessListenerAdapter implemen
 	private boolean updateInProgress;
 
 	protected ReadyStateMonitor createReadyStateTracker(ILaunch l) {
-		if (BootLaunchConfigurationDelegate.canUseLifeCycle(l)) {
-			int jmxPort = BootLaunchConfigurationDelegate.getJMXPortAsInt(l);
-			if (jmxPort>0) {
+		try {
+			if (BootLaunchConfigurationDelegate.canUseLifeCycle(l)) {
+				Provider<Integer> jmxPort = () -> BootLaunchConfigurationDelegate.getJMXPortAsInt(l);
 				return new SpringApplicationReadyStateMonitor(jmxPort);
 			}
+		} catch (Exception e) {
+			Log.log(e);
 		}
 		return DummyReadyStateMonitor.create();
 	}
@@ -212,7 +218,7 @@ public abstract class RunStateTracker<T> extends ProcessListenerAdapter implemen
 				debug("new: "+activeStates);
 
 				// Compute set of owners who's state has changed
-				Set<T> affectedOwners = new HashSet<T>(keySet(oldStates));
+				Set<T> affectedOwners = new HashSet<>(keySet(oldStates));
 				affectedOwners.addAll(keySet(activeStates));
 				Iterator<T> iter = affectedOwners.iterator();
 				while (iter.hasNext()) {

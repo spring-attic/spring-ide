@@ -1058,6 +1058,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
 		waitForApps(model, appName);
+		waitForJobsToComplete();
 
 		CloudAppDashElement app = model.getApplication(appName);
 		app.setDeploymentManifestFile(project.getFile("manifest.yml"));

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.util;
 
+import javax.inject.Provider;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -39,7 +41,7 @@ public class SpringApplicationReadyStateMonitor implements ReadyStateMonitor {
 	public static final long POLLING_INTERVAL = 500/*ms*/;
 	private SpringApplicationLifeCycleClientManager clientManager;
 
-	public SpringApplicationReadyStateMonitor(int jmxPort) {
+	public SpringApplicationReadyStateMonitor(Provider<Integer> jmxPort) {
 		this.clientManager = new SpringApplicationLifeCycleClientManager(jmxPort);
 		this.job = new Job("Ready state poller") {
 			protected IStatus run(IProgressMonitor monitor) {
@@ -77,7 +79,7 @@ public class SpringApplicationReadyStateMonitor implements ReadyStateMonitor {
 
 
 	private Job job;
-	private LiveVariable<Boolean> ready = new LiveVariable<Boolean>(false);
+	private LiveVariable<Boolean> ready = new LiveVariable<>(false);
 
 	private boolean checkReady() {
 		try {

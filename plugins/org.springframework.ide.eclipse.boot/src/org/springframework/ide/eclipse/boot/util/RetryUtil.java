@@ -95,4 +95,22 @@ public class RetryUtil {
 		};
 	}
 
+	/**
+	 * Periodically retry calling a given 'body' until a condition holds on the returned value or until timeout.
+	 * The last value will be returned.
+	 * <p>
+	 * This is just like a 'repeat until' loop. It does not handle exceptions. If an exception occurs during
+	 * any of the condition or body execution the loop is immediately aborted.
+	 */
+	public static <T> T until(long interval, long timeout, Predicate<T> condition, Callable<T> body) throws Exception {
+		long endTime = Math.max(System.currentTimeMillis()+timeout, timeout); //Math.max to guard against overflow (if timeout is Long.MAX_VALUE for example).
+		T result = body.call();
+		while (System.currentTimeMillis() < endTime && !condition.test(result)) {
+			Thread.sleep(interval);
+			result = body.call();
+		}
+		return result;
+	}
+
+	
 }
