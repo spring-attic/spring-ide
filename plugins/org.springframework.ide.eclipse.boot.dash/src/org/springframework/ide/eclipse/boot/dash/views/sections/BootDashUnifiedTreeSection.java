@@ -448,6 +448,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 			addVisible(manager, a);
 		}
 		addVisible(manager, actions.getOpenBrowserAction());
+		addVisible(manager, actions.getOpenNgrokAdminUi());
 		addVisible(manager, actions.getOpenConsoleAction());
 		addVisible(manager, actions.getOpenInPackageExplorerAction());
 		addVisible(manager, actions.getShowPropertiesViewAction());

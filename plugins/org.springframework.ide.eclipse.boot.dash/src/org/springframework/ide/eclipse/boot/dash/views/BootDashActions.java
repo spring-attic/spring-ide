@@ -58,6 +58,7 @@ public class BootDashActions {
 	private AbstractBootDashElementsAction openConsoleAction;
 	private OpenLaunchConfigAction openConfigAction;
 	private OpenInBrowserAction openBrowserAction;
+	private OpenNgrokAdminUi openNgrokAdminUi;
 	private OpenInPackageExplorer openInPackageExplorerAction;
 	private AddRunTargetAction[] addTargetActions;
 	private RefreshRunTargetAction refreshAction;
@@ -85,6 +86,7 @@ public class BootDashActions {
 
 	private DisposingFactory<RunTarget, AbstractBootDashAction> debugOnTargetActions;
 	private DisposingFactory<RunTarget, AbstractBootDashAction> runOnTargetActions;
+
 
 	public BootDashActions(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		this(
@@ -154,6 +156,7 @@ public class BootDashActions {
 		openConfigAction = new OpenLaunchConfigAction(model, elementsSelection, ui);
 		openConsoleAction = new OpenConsoleAction(elementsSelection, model, ui);
 		openBrowserAction = new OpenInBrowserAction(model, elementsSelection, ui);
+		openNgrokAdminUi = new OpenNgrokAdminUi(model, elementsSelection, ui);
 		openInPackageExplorerAction = new OpenInPackageExplorer(elementsSelection, ui);
 		addTargetActions = createAddTargetActions();
 
@@ -311,6 +314,10 @@ public class BootDashActions {
 
 	public AbstractBootDashElementsAction getOpenBrowserAction() {
 		return openBrowserAction;
+	}
+
+	public AbstractBootDashElementsAction getOpenNgrokAdminUi() {
+		return openNgrokAdminUi;
 	}
 
 	public AbstractBootDashElementsAction getOpenConsoleAction() {
