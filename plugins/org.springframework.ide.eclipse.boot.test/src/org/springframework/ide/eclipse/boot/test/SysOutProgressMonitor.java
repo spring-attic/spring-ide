@@ -2,7 +2,7 @@ package org.springframework.ide.eclipse.boot.test;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
-public class SysOutProgressMonoitor implements IProgressMonitor {
+public class SysOutProgressMonitor implements IProgressMonitor {
 
 	private String task;
 

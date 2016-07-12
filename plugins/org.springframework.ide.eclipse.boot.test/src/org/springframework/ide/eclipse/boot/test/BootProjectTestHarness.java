@@ -198,7 +198,7 @@ public class BootProjectTestHarness {
 						for (WizardConfigurer extraConf : extraConfs) {
 							extraConf.apply(wizard);
 						}
-						wizard.performFinish(new SysOutProgressMonoitor());
+						wizard.performFinish(new NullProgressMonitor()/*new SysOutProgressMonitor()*/);
 						return Status.OK_STATUS;
 					} catch (Throwable e) {
 						return ExceptionUtil.status(e);
