@@ -65,8 +65,6 @@ public interface RunTargetType extends Nameable {
 	 * Provides a Default template (see {@link Templates}) for rendering the name of targets of this type.
 	 * This default can be overriden via a persisent property set on this target. (I.e. the default is
 	 * only used if the property isn't set.
-	 * <p>
-	 * See also {@link AbstractRunTargetType}.getNameTemplateString()
 	 */
 	String getDefaultNameTemplate();
 

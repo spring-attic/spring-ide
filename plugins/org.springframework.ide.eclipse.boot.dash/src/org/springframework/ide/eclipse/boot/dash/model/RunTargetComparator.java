@@ -25,7 +25,7 @@ public class RunTargetComparator implements Comparator<RunTarget> {
 	}
 
 	public RunTargetComparator(List<RunTargetType> runTargetTypes) {
-		this(new OrderBasedComparator<RunTargetType>(
+		this(new OrderBasedComparator<>(
 				runTargetTypes.toArray(new RunTargetType[runTargetTypes.size()])));
 	}
 
@@ -36,7 +36,10 @@ public class RunTargetComparator implements Comparator<RunTarget> {
 
 		int result = typeComparator.compare(rtType1, rtType2);
 		if (result==0) {
-			result = target1.getId().compareTo(target2.getId());
+			result = target1.getDisplayName().compareTo(target2.getDisplayName());
+			if (result==0) {
+				result = target1.getId().compareTo(target2.getId());
+			}
 		}
 		return result;
 	}

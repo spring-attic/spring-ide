@@ -180,7 +180,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 			Display.getDefault().asyncExec(new Runnable() {
 				public void run() {
 					if (tv != null && !tv.getControl().isDisposed()) {
-						tv.update(model, null);
+						tv.refresh();
 						/*
 						 * TODO: ideally the above should do the repaint of
 						 * the control's area where the tree item is
