@@ -35,6 +35,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.jface.text.source.AnnotationModel;
 import org.eclipse.ui.editors.text.TextFileDocumentProvider;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.DocumentProviderRegistry;
@@ -55,6 +58,7 @@ import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDia
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCFDomain;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
+import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblemAnnotation;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlASTProvider;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -83,6 +87,7 @@ public class DeploymentPropertiesDialogModelTests {
 	private static final String CURRENT_GENERATED_DEPLOYMENT_MANIFEST = "Current generated deployment manifest.";
 	private static final String CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM = "Choose an existing deployment manifest YAML file from the local file system.";
 	private static final String DEPLOYMENT_MANIFEST_FILE_NOT_SELECTED = "Deployment manifest file not selected.";
+	private static final String MANIFEST_YAML_ERRORS = "Deployment manifest YAML has errors.";
 
 	public static final String DEFAULT_BUILDPACK = "java_buildpack_offline";
 
@@ -854,6 +859,70 @@ public class DeploymentPropertiesDialogModelTests {
 		TextFileDocumentProvider docProvider = (TextFileDocumentProvider) DocumentProviderRegistry.getDefault().getDocumentProvider(editorInput);
 		assertNull(docProvider.getDocument(editorInput));
 
+	}
+
+	@Test public void testManualManifestYamlError() throws Exception {
+		IProject project = projects.createProject("p1");
+		createDialogModel(project, null);
+		// Set resource annotation model
+		model.setManualResourceAnnotationModel(new AnnotationModel());
+		model.type.setValue(ManifestType.MANUAL);
+
+		assertTrue(model.isManualManifestType());
+		assertFalse(model.isManualManifestReadOnly());
+
+		assertNotNull(model.getManualAnnotationModel());
+
+		ValidationResult validationResult = model.getValidator().getValue();
+		assertEquals(IStatus.INFO, validationResult.status);
+		assertEquals(ENTER_DEPLOYMENT_MANIFEST_YAML_MANUALLY, validationResult.msg);
+
+		Annotation resourceAnnotation = new Annotation(ReconcileProblemAnnotation.ERROR_ANNOTATION_TYPE, false, "Some error");
+		model.getManualResourceAnnotationModel().addAnnotation(resourceAnnotation, new Position(0,0));
+
+		validationResult = model.getValidator().getValue();
+		assertEquals(IStatus.ERROR, validationResult.status);
+		assertEquals(MANIFEST_YAML_ERRORS, validationResult.msg);
+
+		model.getManualResourceAnnotationModel().removeAnnotation(resourceAnnotation);
+
+		validationResult = model.getValidator().getValue();
+		assertEquals(IStatus.INFO, validationResult.status);
+		assertEquals(ENTER_DEPLOYMENT_MANIFEST_YAML_MANUALLY, validationResult.msg);
+	}
+
+	@Test public void testFileManifestYamlError() throws Exception {
+		IProject project = projects.createProject("p1");
+		String appNameFromFile = "app-name-from-file";
+		IFile file = createFile(project, "manifest.yml",
+				"applications:\n" +
+				"- name: " + appNameFromFile + "\n" +
+				"  memory: 512M\n"
+		);
+		createDialogModel(project, null);
+		// Set resource annotation model
+		model.setFileResourceAnnotationModel(new AnnotationModel());
+		model.setSelectedManifest(file);
+		model.type.setValue(ManifestType.FILE);
+
+		assertNotNull(model.getFileAnnotationModel());
+
+		ValidationResult validationResult = model.getValidator().getValue();
+		assertEquals(IStatus.INFO, validationResult.status);
+		assertEquals(CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
+
+		Annotation resourceAnnotation = new Annotation(ReconcileProblemAnnotation.ERROR_ANNOTATION_TYPE, false, "Some error");
+		model.getFileResourceAnnotationModel().addAnnotation(resourceAnnotation, new Position(0,0));
+
+		validationResult = model.getValidator().getValue();
+		assertEquals(IStatus.ERROR, validationResult.status);
+		assertEquals(MANIFEST_YAML_ERRORS, validationResult.msg);
+
+		model.getFileResourceAnnotationModel().removeAnnotation(resourceAnnotation);
+
+		validationResult = model.getValidator().getValue();
+		assertEquals(IStatus.INFO, validationResult.status);
+		assertEquals(CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
 	}
 
 }

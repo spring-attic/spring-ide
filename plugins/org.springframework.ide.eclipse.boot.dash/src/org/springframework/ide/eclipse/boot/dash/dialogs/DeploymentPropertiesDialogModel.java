@@ -38,6 +38,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudAp
 import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.util.Log;
+import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblemAnnotation;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
@@ -58,7 +59,7 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 	public static final String CURRENT_GENERATED_DEPLOYMENT_MANIFEST = "Current generated deployment manifest.";
 	public static final String CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM = "Choose an existing deployment manifest YAML file from the local file system.";
 	public static final String DEPLOYMENT_MANIFEST_FILE_NOT_SELECTED = "Deployment manifest file not selected.";
-
+	public static final String MANIFEST_YAML_ERRORS = "Deployment manifest YAML has errors.";
 
 	public static enum ManifestType {
 		FILE,
@@ -71,10 +72,12 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 		LiveVariable<AppNameAnnotationModel> appNameAnnotationModel = new LiveVariable<>();
 
+		LiveVariable<IAnnotationModel> resourceAnnotationModel = new LiveVariable<>();
+
 		LiveExpression<List<String>> applicationNames = new LiveExpression<List<String>>() {
 
 			private AppNameAnnotationModel attachedTo = null;
-			private AppNameAnnotationModelListener listener = new AppNameAnnotationModelListener() {
+			private AnnotationModelListener listener = new AnnotationModelListener() {
 				public void modelChanged(AnnotationModelEvent event) {
 					refresh();
 				}
@@ -117,10 +120,60 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 		};
 
+		LiveExpression<Boolean> errorsInYaml = new LiveExpression<Boolean>() {
+
+			private IAnnotationModel attachedTo = null;
+			private AnnotationModelListener listener = new AnnotationModelListener() {
+				public void modelChanged(AnnotationModelEvent event) {
+					refresh();
+				}
+			};
+
+			{
+				dependsOn(resourceAnnotationModel);
+			}
+
+			{
+				onDispose((d) -> {
+					if (attachedTo != null) {
+						attachedTo.removeAnnotationModelListener(listener);
+					}
+				});
+			}
+
+			@Override
+			protected Boolean compute() {
+				IAnnotationModel annotationModel = resourceAnnotationModel.getValue();
+				attachListener(annotationModel);
+				if (annotationModel != null) {
+					for (Iterator<Annotation> itr = annotationModel.getAnnotationIterator(); itr.hasNext();) {
+						Annotation next = itr.next();
+						if (ReconcileProblemAnnotation.ERROR_ANNOTATION_TYPE == next.getType()) {
+							return Boolean.TRUE;
+						}
+					}
+				}
+				return Boolean.FALSE;
+			}
+
+			synchronized private void attachListener(IAnnotationModel annotationModel) {
+				if (attachedTo == annotationModel) {
+					return;
+				}
+				if (attachedTo != null) {
+					attachedTo.removeAnnotationModelListener(listener);
+				}
+				if (annotationModel != null) {
+					annotationModel.addAnnotationModelListener(listener);
+				}
+				attachedTo = annotationModel;
+			}
+		};
+
 		LiveExpression<String> selectedAppName = new LiveExpression<String>() {
 
 			private AppNameAnnotationModel attachedTo = null;
-			private AppNameAnnotationModelListener listener = new AppNameAnnotationModelListener() {
+			private AnnotationModelListener listener = new AnnotationModelListener() {
 				public void modelChanged(AnnotationModelEvent event) {
 					refresh();
 				}
@@ -128,6 +181,14 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 			{
 				dependsOn(appNameAnnotationModel);
+			}
+
+			{
+				onDispose((d) -> {
+					if (attachedTo != null) {
+						attachedTo.removeAnnotationModelListener(listener);
+					}
+				});
 			}
 
 			@Override
@@ -158,6 +219,16 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 		};
 
+		{
+			onDispose((d) -> {
+				applicationNames.dispose();
+				appNameAnnotationModel.dispose();
+				errorsInYaml.dispose();
+				resourceAnnotationModel.dispose();
+				selectedAppName.dispose();
+			});
+		}
+		
 		abstract String getManifestContents();
 
 		/**
@@ -199,12 +270,6 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 	public class FileDeploymentPropertiesDialogModel extends AbstractSubModel {
 
 		private boolean inputConnected = false;
-
-		{
-			onDispose((d) -> {
-				saveOrDiscardIfNeeded();
-			});
-		}
 
 		private final Set<TextFileDocumentProvider> docProviders = new HashSet<>();
 
@@ -278,6 +343,7 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 			{
 				dependsOn(editorInput);
 				dependsOn(appNameAnnotationModel);
+				dependsOn(errorsInYaml);
 				dependsOn(applicationNames);
 				dependsOn(selectedAppName);
 			}
@@ -300,16 +366,20 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 						if (applicationNames.getValue().isEmpty()) {
 							result = ValidationResult.error(MANIFEST_DOES_NOT_HAVE_ANY_APPLICATION_DEFINED);
 						} else {
-							String selectedAnnotation = selectedAppName.getValue();
-							if (appName == null) {
-								if (selectedAnnotation == null) {
-									result = ValidationResult.error(APPLICATION_NAME_NOT_SELECTED);
-								}
+							if (errorsInYaml.getValue().booleanValue()) {
+								result = ValidationResult.error(MANIFEST_YAML_ERRORS);
 							} else {
-								if (selectedAnnotation == null || !appName.equals(selectedAnnotation)) {
-									result = ValidationResult.error(MessageFormat.format(
-											MANIFEST_DOES_NOT_CONTAIN_DEPLOYMENT_PROPERTIES_FOR_APPLICATION_WITH_NAME,
-											appName));
+								String selectedAnnotation = selectedAppName.getValue();
+								if (appName == null) {
+									if (selectedAnnotation == null) {
+										result = ValidationResult.error(APPLICATION_NAME_NOT_SELECTED);
+									}
+								} else {
+									if (selectedAnnotation == null || !appName.equals(selectedAnnotation)) {
+										result = ValidationResult.error(MessageFormat.format(
+												MANIFEST_DOES_NOT_CONTAIN_DEPLOYMENT_PROPERTIES_FOR_APPLICATION_WITH_NAME,
+												appName));
+									}
 								}
 							}
 						}
@@ -354,6 +424,17 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 			public void elementContentAboutToBeReplaced(Object arg0) {
 			}
 		};
+		
+		{
+			onDispose((d) -> {
+				saveOrDiscardIfNeeded();
+				validator.dispose();
+				document.dispose();
+				editorInput.dispose();
+				fileLabel.dispose();
+				selectedFile.dispose();
+			});
+		}
 
 		private void saveOrDiscardIfNeeded() {
 			FileEditorInput input = editorInput.getValue();
@@ -478,6 +559,7 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 			{
 				dependsOn(appNameAnnotationModel);
+				dependsOn(errorsInYaml);
 				dependsOn(applicationNames);
 				dependsOn(selectedAppName);
 			}
@@ -495,16 +577,20 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 					if (applicationNames.getValue().isEmpty()) {
 						result = ValidationResult.error(MANIFEST_DOES_NOT_HAVE_ANY_APPLICATION_DEFINED);
 					} else {
-						String selectedAnnotation = selectedAppName.getValue();
-						if (appName == null) {
-							if (selectedAnnotation == null) {
-								result = ValidationResult.error(APPLICATION_NAME_NOT_SELECTED);
-							}
+						if (errorsInYaml.getValue().booleanValue()) {
+							result = ValidationResult.error(MANIFEST_YAML_ERRORS);
 						} else {
-							if (selectedAnnotation == null || !appName.equals(selectedAnnotation)) {
-								result = ValidationResult.error(MessageFormat.format(
-										MANIFEST_DOES_NOT_CONTAIN_DEPLOYMENT_PROPERTIES_FOR_APPLICATION_WITH_NAME,
-										appName));
+							String selectedAnnotation = selectedAppName.getValue();
+							if (appName == null) {
+								if (selectedAnnotation == null) {
+									result = ValidationResult.error(APPLICATION_NAME_NOT_SELECTED);
+								}
+							} else {
+								if (selectedAnnotation == null || !appName.equals(selectedAnnotation)) {
+									result = ValidationResult.error(MessageFormat.format(
+											MANIFEST_DOES_NOT_CONTAIN_DEPLOYMENT_PROPERTIES_FOR_APPLICATION_WITH_NAME,
+											appName));
+								}
 							}
 						}
 					}
@@ -517,6 +603,13 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 				return result;
 			}
 		};
+		
+		{
+			onDispose((d) -> {
+				validator.dispose();
+			});
+		}
+
 
 		ManualDeploymentPropertiesDialogModel(boolean readOnly) {
 			super();
@@ -563,7 +656,7 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 	}
 
-	private abstract class AppNameAnnotationModelListener implements IAnnotationModelListener, IAnnotationModelListenerExtension {
+	private abstract class AnnotationModelListener implements IAnnotationModelListener, IAnnotationModelListenerExtension {
 
 		@Override
 		public void modelChanged(IAnnotationModel model) {
@@ -743,6 +836,22 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 	public LiveExpression<AppNameAnnotationModel> getFileAppNameAnnotationModel() {
 		return fileModel.appNameAnnotationModel;
+	}
+
+	public void setFileResourceAnnotationModel(IAnnotationModel annotationModel) {
+		fileModel.resourceAnnotationModel.setValue(annotationModel);
+	}
+
+	public void setManualResourceAnnotationModel(IAnnotationModel annotationModel) {
+		manualModel.resourceAnnotationModel.setValue(annotationModel);
+	}
+
+	public IAnnotationModel getManualResourceAnnotationModel() {
+		return manualModel.resourceAnnotationModel.getValue();
+	}
+
+	public IAnnotationModel getFileResourceAnnotationModel() {
+		return fileModel.resourceAnnotationModel.getValue();
 	}
 
 }

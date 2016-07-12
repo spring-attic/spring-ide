@@ -564,6 +564,11 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		 * Set App Name annotation model on the dialog's model
 		 */
 		model.setManualAppNameAnnotationModel(AppNameAnnotationSupport.getAppNameAnnotationModel(manualYamlViewer));
+
+		/*
+		 * Set YAML validation annotation model (resource marker annotation model)
+		 */
+		model.setManualResourceAnnotationModel(manualYamlViewer.getAnnotationModel());
 	}
 
 	private void activateHanlders() {
@@ -621,6 +626,11 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		 * Set New App Name annotation model on the dialog's model
 		 */
 		model.setFileAppNameAnnotationModel(AppNameAnnotationSupport.getAppNameAnnotationModel(fileYamlViewer));
+
+		/*
+		 * Set YAML validation annotation model (resource marker annotation model)
+		 */
+		model.setFileResourceAnnotationModel(fileYamlViewer.getAnnotationModel());
 	}
 
 	@Override
