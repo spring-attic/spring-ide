@@ -25,7 +25,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
@@ -34,8 +33,8 @@ import org.eclipse.jface.text.templates.TemplateContext;
 import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.TemplateVariable;
 import org.eclipse.jface.text.templates.TemplateVariableResolver;
-
 import org.springframework.ide.eclipse.boot.util.Log;
+
 import com.google.common.collect.ImmutableMap;
 
 @SuppressWarnings("restriction")
