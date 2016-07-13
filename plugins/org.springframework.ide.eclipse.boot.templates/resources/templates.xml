@@ -46,9 +46,16 @@ Assert.notNull(${name:var}, "${name} must not be null");${:import(org.springfram
 <template
     id="org.springframework.ide.eclipse.boot.templates.assert.notNull.JUnit"
     name="notnull"
-    description="Assert that a variable is not null, using JUnit's Assert class. Context restriction: [test]"
+    description="Assert that a variable is not null, using JUnit's Assert class. Context restriction: [test][!assertj]"
     context="boot-statements">
 Assert.assertNotNull("${name:var} must not be null", ${name});${:import(org.junit.Assert)}
+</template>
+<template
+    id="org.springframework.ide.eclipse.boot.templates.assert.notNull.AssertJ"
+    name="notnull"
+    description="Assert that a variable is not null, using AssertJ. Context restriction: [test][assertj]"
+    context="boot-statements">
+assertThat(${name:var}).isNotNull();${:importStatic('org.assertj.core.api.Assertions.*')} 	
 </template>
 <template
     id="org.springframework.ide.eclipse.boot.templates.license.apache"

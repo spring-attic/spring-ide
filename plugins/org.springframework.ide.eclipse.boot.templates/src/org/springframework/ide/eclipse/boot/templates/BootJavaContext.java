@@ -22,7 +22,10 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
@@ -41,7 +44,8 @@ public class BootJavaContext extends JavaContext {
 	private static final Pattern CONTEXT_TAG = Pattern.compile("\\[[^\\[\\]]*\\]");
 
 	public static final Map<String, Predicate<BootJavaContext>> CONTEXT_TAG_CHECKERS = negate(ImmutableMap.of(
-			"test", BootJavaContext::isTestContext
+			"test", BootJavaContext::isTestContext,
+			"assertj", BootJavaContext::isAssertJContext
 	));
 
 	public static class ContextVariableResolver extends TemplateVariableResolver {
@@ -100,6 +104,22 @@ public class BootJavaContext extends JavaContext {
 			tags.add(text.substring(matcher.start()+1, matcher.end()-1));
 		}
 		return tags;
+	}
+
+	public boolean isAssertJContext() {
+		try {
+			ICompilationUnit cu = getCompilationUnit();
+			if (cu!=null) {
+				IJavaProject jp = cu.getJavaProject();
+				if (jp!=null) {
+					IType t = jp.findType("org.assertj.core.api.Assertions");
+					return t != null;
+				}
+			}
+		} catch (Exception e) {
+			Log.log(e);
+		}
+		return false;
 	}
 
 	public boolean isTestContext() {
