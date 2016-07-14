@@ -59,8 +59,10 @@ public class ServicesRefreshOperation extends CloudOperation{
 				success = true;
 			}
 		} catch (Exception e) {
-			//If NW is down, typically the same error will happen in parallel for refresing the aps.
+			//If Network is down, typically the same error will happen in parallel for refresing the aps.
 			//We don't want a double popup so just log this here instead of letting it fly.
+			//Note: handling this would be possible if the operations where able to parallel composed so there can
+			//be a single handler attached that is called when both of them are complete.
 			Log.log(e);
 		} finally {
 			if (!success) {
