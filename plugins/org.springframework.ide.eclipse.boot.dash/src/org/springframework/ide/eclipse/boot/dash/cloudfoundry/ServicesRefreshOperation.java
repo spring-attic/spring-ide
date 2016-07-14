@@ -19,6 +19,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceIn
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.RefreshSchedulingRule;
+import org.springframework.ide.eclipse.boot.util.Log;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
@@ -43,6 +44,7 @@ public class ServicesRefreshOperation extends CloudOperation{
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 		monitor.beginTask("Refresh services", 2);
+		boolean success = false;
 		try {
 			ClientRequests client = getClientRequests();
 			monitor.worked(1);
@@ -54,11 +56,17 @@ public class ServicesRefreshOperation extends CloudOperation{
 					services.add(elementFactory.createService(service));
 				}
 				model.setServices(services.build());
-			} else {
+				success = true;
+			}
+		} catch (Exception e) {
+			//If NW is down, typically the same error will happen in parallel for refresing the aps.
+			//We don't want a double popup so just log this here instead of letting it fly.
+			Log.log(e);
+		} finally {
+			if (!success) {
 //				debug("Resfresh Services for DISconnected client");
 				model.setServices(ImmutableSet.<CloudServiceInstanceDashElement>of());
 			}
-		} finally {
 			monitor.done();
 		}
 	}
