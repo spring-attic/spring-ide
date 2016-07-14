@@ -488,7 +488,7 @@ public class BootDashModelTest {
 			int defaultPort = 8080;
 			int changedPort = 8765;
 
-			assertEquals(defaultPort, project.getLivePort());
+			waitForPort(project, defaultPort);
 
 			IFile props = project.getProject().getFile(new Path("src/main/resources/application.properties"));
 			setContents(props, "server.port="+changedPort);
