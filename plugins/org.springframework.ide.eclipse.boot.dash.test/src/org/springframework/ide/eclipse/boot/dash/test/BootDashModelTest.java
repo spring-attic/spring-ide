@@ -78,6 +78,7 @@ import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
+import org.springframework.ide.eclipse.boot.dash.util.CollectionUtils;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashLabels;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.PropVal;
@@ -475,41 +476,45 @@ public class BootDashModelTest {
 				withStarters("devtools")
 		);
 
-		final BootDashElement element = getElement(projectName);
+		final BootDashElement project = getElement(projectName);
 		try {
-			waitForState(element, RunState.INACTIVE);
-			element.restart(RunState.RUNNING, ui);
-			waitForState(element, RunState.STARTING);
-			waitForState(element, RunState.RUNNING);
+			waitForState(project, RunState.INACTIVE);
+			project.restart(RunState.RUNNING, ui);
+			waitForState(project, RunState.STARTING);
+			waitForState(project, RunState.RUNNING);
+
+			BootDashElement launch = CollectionUtils.getSingle(project.getChildren().getValues());
 
 			int defaultPort = 8080;
 			int changedPort = 8765;
 
-			assertEquals(defaultPort, element.getLivePort());
+			assertEquals(defaultPort, project.getLivePort());
 
-			IFile props = element.getProject().getFile(new Path("src/main/resources/application.properties"));
+			IFile props = project.getProject().getFile(new Path("src/main/resources/application.properties"));
 			setContents(props, "server.port="+changedPort);
-			StsTestUtil.assertNoErrors(element.getProject());
+			StsTestUtil.assertNoErrors(project.getProject());
 			   //builds the project... should trigger devtools to 'refresh'.
 
-			waitForPort(element, changedPort);
+			waitForPort(project, changedPort);
+			waitForPort(launch, changedPort);
 
 			//Now try that this also works in debug mode...
-			element.restart(RunState.DEBUGGING, ui);
-			waitForState(element, RunState.STARTING);
-			waitForState(element, RunState.DEBUGGING);
+			project.restart(RunState.DEBUGGING, ui);
+			waitForState(project, RunState.STARTING);
+			waitForState(project, RunState.DEBUGGING);
 
-			ACondition.waitFor("port after restart", 5000, () -> {
-				assertEquals(changedPort, element.getLivePort());
-			});
+			waitForPort(project, changedPort);
+			waitForPort(launch, changedPort);
+
 			setContents(props, "server.port="+defaultPort);
-			StsTestUtil.assertNoErrors(element.getProject());
+			StsTestUtil.assertNoErrors(project.getProject());
 			   //builds the project... should trigger devtools to 'refresh'.
-			waitForPort(element, defaultPort);
+			waitForPort(project, defaultPort);
+			waitForPort(launch, defaultPort);
 
 		} finally {
-			element.stopAsync(ui);
-			waitForState(element, RunState.INACTIVE);
+			project.stopAsync(ui);
+			waitForState(project, RunState.INACTIVE);
 		}
 	}
 
