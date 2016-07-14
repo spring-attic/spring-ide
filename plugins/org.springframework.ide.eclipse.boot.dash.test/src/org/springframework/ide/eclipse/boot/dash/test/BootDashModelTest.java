@@ -467,7 +467,6 @@ public class BootDashModelTest {
 		}
 	}
 
-	@Ignore // it fails way too often and tests something that's not really important.
 	@Test public void testDevtoolsPortRefreshedOnRestart() throws Exception {
 		//Test that the local bootdash element 'liveport' is updated when boot devtools
 		// does an in-place restart of the app, changing the port that it runs on.
@@ -518,6 +517,7 @@ public class BootDashModelTest {
 		new ACondition("Wait for port to change", 5000) { //Devtools should restart really fast
 			@Override
 			public boolean test() throws Exception {
+				assertEquals(ImmutableSet.of(expectedPort), element.getLivePorts());
 				assertEquals(expectedPort, element.getLivePort());
 				return true;
 			}

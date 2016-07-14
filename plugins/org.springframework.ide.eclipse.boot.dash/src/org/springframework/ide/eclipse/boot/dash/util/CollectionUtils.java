@@ -12,7 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.util;
 
 import java.util.Collection;
 
-import org.eclipse.debug.core.ILaunchConfiguration;
+import com.google.common.collect.ImmutableSet;
 
 public class CollectionUtils {
 
@@ -25,4 +25,17 @@ public class CollectionUtils {
 		return null;
 	}
 
+	public static <T> T getAny(Collection<T> c) {
+		if (c!=null && !c.isEmpty()) {
+			for (T t : c) {
+				return t;
+			}
+		}
+		return null;
+	}
+
+	public static <T> T getAnyOr(Collection<T> c, T orElse) {
+		T it = getAny(c);
+		return it==null?orElse:it;
+	}
 }

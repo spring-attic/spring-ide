@@ -21,6 +21,7 @@ import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
+import org.springframework.ide.eclipse.boot.dash.util.CollectionUtils;
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager;
@@ -111,6 +112,11 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 	@Override
 	public ImmutableSet<ILaunchConfiguration> getLaunchConfigs() {
 		return getLaunchConfigsExp().getValues();
+	}
+
+	@Override
+	public int getLivePort() {
+		return CollectionUtils.getAnyOr(getLivePorts(), -1);
 	}
 
 	@Override
