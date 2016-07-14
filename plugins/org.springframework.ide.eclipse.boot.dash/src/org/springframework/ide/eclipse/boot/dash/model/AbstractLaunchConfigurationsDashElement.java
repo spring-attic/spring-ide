@@ -132,10 +132,6 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 		return livePort.getValue();
 	}
 
-	public LiveExpression<Integer> getLivePortExp() {
-		return livePort;
-	}
-
 	@Override
 	public String getLiveHost() {
 		return "localhost";
