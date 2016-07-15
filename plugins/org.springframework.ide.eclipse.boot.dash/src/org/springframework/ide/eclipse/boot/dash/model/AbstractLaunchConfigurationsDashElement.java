@@ -25,7 +25,6 @@ import java.util.concurrent.TimeoutException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -72,7 +71,7 @@ import com.google.common.collect.ImmutableSet;
  */
 public abstract class AbstractLaunchConfigurationsDashElement<T> extends WrappingBootDashElement<T> implements Duplicatable<LaunchConfDashElement> {
 
-	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+	private static final boolean DEBUG = false; //(""+Platform.getLocation()).contains("kdvolder");
 	private static void debug(String string) {
 		if (DEBUG) {
 			System.out.println(string);
