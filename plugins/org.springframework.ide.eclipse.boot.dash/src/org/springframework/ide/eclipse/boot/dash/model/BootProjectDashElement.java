@@ -157,20 +157,20 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 
 			@Override
 			protected ImmutableSet<T> compute() {
-//				debug("port-summary["+getName()+"]: compute()...");
+				debug("port-summary["+getName()+"]: compute()...");
 				ImmutableSet.Builder<T> builder = ImmutableSortedSet.naturalOrder();
 				for (BootDashElement child : getCurrentChildren()) {
 					add(builder, child);
 				}
 				ImmutableSet<T> result = builder.build();
-//				debug("port-summary["+getName()+"]: compute() => "+result);
+				debug("port-summary["+getName()+"]: compute() => "+result);
 				return result;
 			}
 
 			protected void add(ImmutableSet.Builder<T> builder, BootDashElement child) {
-//				debug("port-summary["+getName()+"]: add port for "+child);
+				debug("port-summary["+getName()+"]: add port for "+child);
 				T v = getter.apply(child);
-//				debug("port-summary["+getName()+"]: add port for "+child+" = "+v);
+				debug("port-summary["+getName()+"]: add port for "+child+" = "+v);
 				if (v!=null) {
 					builder.add(v);
 				}
