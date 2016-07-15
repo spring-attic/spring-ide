@@ -35,7 +35,6 @@ import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
-import com.google.common.collect.ImmutableSortedSet.Builder;
 
 /**
  * Concrete BootDashElement that wraps an IProject
@@ -44,7 +43,7 @@ import com.google.common.collect.ImmutableSortedSet.Builder;
  */
 public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElement<IProject> {
 
-	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+	private static final boolean DEBUG = Boolean.getBoolean("sts.debug.BootProjectDashElement");
 	private static void debug(String string) {
 		if (DEBUG) {
 			System.out.println(string);
@@ -158,20 +157,20 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 
 			@Override
 			protected ImmutableSet<T> compute() {
-				debug("port-summary["+getName()+"]: compute()...");
+//				debug("port-summary["+getName()+"]: compute()...");
 				ImmutableSet.Builder<T> builder = ImmutableSortedSet.naturalOrder();
 				for (BootDashElement child : getCurrentChildren()) {
 					add(builder, child);
 				}
 				ImmutableSet<T> result = builder.build();
-				debug("port-summary["+getName()+"]: compute() => "+result);
+//				debug("port-summary["+getName()+"]: compute() => "+result);
 				return result;
 			}
 
 			protected void add(ImmutableSet.Builder<T> builder, BootDashElement child) {
-				debug("port-summary["+getName()+"]: add port for "+child);
+//				debug("port-summary["+getName()+"]: add port for "+child);
 				T v = getter.apply(child);
-				debug("port-summary["+getName()+"]: add port for "+child+" = "+v);
+//				debug("port-summary["+getName()+"]: add port for "+child+" = "+v);
 				if (v!=null) {
 					builder.add(v);
 				}

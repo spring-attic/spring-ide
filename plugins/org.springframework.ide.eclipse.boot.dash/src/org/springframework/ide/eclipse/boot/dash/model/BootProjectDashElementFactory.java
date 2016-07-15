@@ -10,13 +10,16 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.MapMaker;
 
 /**
@@ -57,17 +60,23 @@ public class BootProjectDashElementFactory implements Disposable {
 	}
 
 	public void dispose() {
+		disposeAllExcept(ImmutableSet.of());
 		cache = null;
 	}
 
 	/**
-	 * Clients should call this when elements are no longer relevant
+	 * Clients should call this to allow factory to remove/dispose elements that are no longer interesting.
 	 */
-	public synchronized void disposed(IProject p) {
-		Map<IProject, BootProjectDashElement> c = cache;
-		if (c!=null) {
-			c.remove(p.getProject());
+	public synchronized void disposeAllExcept(Set<BootDashElement> toRetain) {
+		if (cache!=null) {
+			Iterator<BootProjectDashElement> iter = cache.values().iterator();
+			while (iter.hasNext()) {
+				BootProjectDashElement element = iter.next();
+				if (!toRetain.contains(element)) {
+					iter.remove();
+					element.dispose();
+				}
+			}
 		}
 	}
-
 }
