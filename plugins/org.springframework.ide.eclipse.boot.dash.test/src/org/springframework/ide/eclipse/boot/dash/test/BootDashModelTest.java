@@ -91,6 +91,7 @@ import org.springframework.ide.eclipse.boot.test.util.TestBracketter;
 import org.springframework.ide.eclipse.boot.ui.EnableDisableBootDevtools;
 import org.springsource.ide.eclipse.commons.frameworks.core.maintype.MainTypeFinder;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
@@ -449,6 +450,22 @@ public class BootDashModelTest {
 		verify(oldListener, times(4)).stateChanged(element);
 		//3 changes: RUNNING -> INACTIVE, liveport(unset), actualInstances--
 		verify(listener, times(3)).stateChanged(element);
+	}
+
+	@Test public void projectElementDisposedWhenProjectClosed() throws Exception {
+		String projectName = "testProject";
+		IProject project = createBootProject(projectName);
+		waitModelElements(projectName);
+
+		BootProjectDashElement projectElement = getElement(projectName);
+		LiveVariable<Boolean> disposed = new LiveVariable<>(false);
+		projectElement.onDispose((d) -> disposed.setValue(true));
+
+		project.close(new NullProgressMonitor());
+
+		ACondition.waitFor("Element disposed", 100, () -> {
+			assertTrue(disposed.getValue());
+		});
 	}
 
 	@Test public void testRestartRunningProcessTest() throws Exception {

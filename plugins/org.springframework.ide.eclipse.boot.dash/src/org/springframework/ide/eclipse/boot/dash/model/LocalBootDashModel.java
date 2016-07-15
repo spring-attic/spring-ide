@@ -36,6 +36,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
+import com.google.common.collect.ImmutableSet;
+
 /**
  * Model of the contents for {@link BootDashTreeView}, provides mechanism to attach listeners to model
  * and attaches itself as a workspace listener to keep the model in synch with workspace changes.
@@ -138,14 +140,7 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 			}
 		}
 		elements.replaceAll(newElements);
-		for (BootDashElement oldElement : elements.getValues()) {
-			if (!newElements.contains(oldElement)) {
-				if (oldElement instanceof Disposable) {
-					((Disposable) oldElement).dispose();
-					projectElementFactory.disposed(oldElement.getProject());
-				}
-			}
-		}
+		projectElementFactory.disposeAllExcept(newElements);
 	}
 
 	public synchronized ObservableSet<BootDashElement> getElements() {
