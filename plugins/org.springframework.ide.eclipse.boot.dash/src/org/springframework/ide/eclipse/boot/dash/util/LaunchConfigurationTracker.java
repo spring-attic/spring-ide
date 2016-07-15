@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -48,6 +49,7 @@ import com.google.common.collect.ImmutableSet.Builder;
  */
 public class LaunchConfigurationTracker implements Disposable {
 
+	private final AtomicBoolean initialized = new AtomicBoolean(false);
 	private final ILaunchManager launchManager;
 	private final ILaunchConfigurationType launchType;
 	private final Map<IProject, LiveSetVariable<ILaunchConfiguration>> configs = new HashMap<>();
@@ -64,36 +66,38 @@ public class LaunchConfigurationTracker implements Disposable {
 	}
 
 	private void init() {
-		launchManager.addLaunchConfigurationListener(launchConfListener = new ILaunchConfigurationListener() {
-			@Override
-			public void launchConfigurationRemoved(ILaunchConfiguration configuration) {
-				//Careful, do not call 'refreshIfNeeded' here. It is impossible to determine
-				// the type of a deleted config (eclipse will throw an exeption if you try)
-				//So we have to call refresh directly here.
-				refresh();
-			}
-
-			@Override
-			public void launchConfigurationChanged(ILaunchConfiguration configuration) {
-				refreshIfNeeded(configuration);
-			}
-
-			@Override
-			public void launchConfigurationAdded(ILaunchConfiguration configuration) {
-				refreshIfNeeded(configuration);
-			}
-
-			private void refreshIfNeeded(ILaunchConfiguration configuration) {
-				try {
-					if (configuration!=null && launchType.equals(configuration.getType())) {
-						refresh();
-					}
-				} catch (CoreException e) {
-					BootActivator.log(e);
+		if (initialized.compareAndSet(false, true)) {
+			launchManager.addLaunchConfigurationListener(launchConfListener = new ILaunchConfigurationListener() {
+				@Override
+				public void launchConfigurationRemoved(ILaunchConfiguration configuration) {
+					//Careful, do not call 'refreshIfNeeded' here. It is impossible to determine
+					// the type of a deleted config (eclipse will throw an exeption if you try)
+					//So we have to call refresh directly here.
+					refresh();
 				}
-			}
-		});
-		refresh();
+
+				@Override
+				public void launchConfigurationChanged(ILaunchConfiguration configuration) {
+					refreshIfNeeded(configuration);
+				}
+
+				@Override
+				public void launchConfigurationAdded(ILaunchConfiguration configuration) {
+					refreshIfNeeded(configuration);
+				}
+
+				private void refreshIfNeeded(ILaunchConfiguration configuration) {
+					try {
+						if (configuration!=null && launchType.equals(configuration.getType())) {
+							refresh();
+						}
+					} catch (CoreException e) {
+						BootActivator.log(e);
+					}
+				}
+			});
+			refresh();
+		}
 	}
 
 	private void refresh() {
@@ -105,7 +109,7 @@ public class LaunchConfigurationTracker implements Disposable {
 			refreshJob = new Job("Refresh Launch Conf Boot Dash Elements") {
 				protected IStatus run(IProgressMonitor arg0) {
 					Map<IProject, Set<ILaunchConfiguration>> newSets = new HashMap<>();
-					synchronized (this) {
+					synchronized (LaunchConfigurationTracker.this) {
 						for (IProject oldProject : configs.keySet()) {
 							//enure there's at least an empty set for any relevant project
 							//in the newSets map:
@@ -179,7 +183,7 @@ public class LaunchConfigurationTracker implements Disposable {
 	}
 
 	@Override
-	public void dispose() {
+	public synchronized void dispose() {
 		if (launchConfListener!=null) {
 			launchManager.removeLaunchConfigurationListener(launchConfListener);
 			launchConfListener = null;
