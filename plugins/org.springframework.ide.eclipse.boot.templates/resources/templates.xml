@@ -175,6 +175,14 @@ private static final Logger ${log} = LoggerFactory.getLogger(${enclosing_type}.c
 </template>
 
 <template
+    id="org.springframework.ide.eclipse.boot.templates.slf4j.logdebug"
+    name="logd"
+    description="log an DEBUG message using slf4jlogger declared in this class"
+    context="boot-statements">
+    ${log:field(org.slf4j.Logger)}.debug("${message}");
+</template>
+
+<template
 	id="org.springframework.ide.eclipse.boot.templates.rtexchange"
 	name="rtex"
 	description="Call restTemplate.exchange"
