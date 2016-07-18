@@ -34,9 +34,6 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
-import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
-
-import com.google.common.collect.ImmutableSet;
 
 /**
  * Model of the contents for {@link BootDashTreeView}, provides mechanism to attach listeners to model
