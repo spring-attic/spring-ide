@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
+import org.eclipse.debug.core.ILaunchConfiguration;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -18,6 +19,8 @@ import org.springframework.ide.eclipse.boot.dash.model.LocalRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKClient;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKLaunchTracker;
+
+import com.google.common.collect.ImmutableSet;
 
 public class OpenNgrokAdminUi extends AbstractBootDashElementsAction {
 
@@ -31,38 +34,36 @@ public class OpenNgrokAdminUi extends AbstractBootDashElementsAction {
 
 	@Override
 	public void updateVisibility() {
-		//Visible if at least one local app is selected
-		this.setVisible(
-				getSelectedElements().stream().anyMatch(this::isLocalApp)
-		);
+		// Visible if at least one local app is selected
+		this.setVisible(getSelectedElements().stream().anyMatch(this::isLocalApp));
 	}
 
 	@Override
 	public void updateEnablement() {
 		BootDashElement selected = getSingleSelectedElement();
-		this.setEnabled(
-				selected!=null &&
-				getClient(selected)!=null
-		);
+		this.setEnabled(selected != null && getClient(selected) != null);
 	}
 
 	private NGROKClient getClient(BootDashElement bde) {
 		if (isLocalApp(bde)) {
-			return NGROKLaunchTracker.get(bde.getName());
+			ImmutableSet<ILaunchConfiguration> launchConfigs = bde.getLaunchConfigs();
+			if (launchConfigs.size() == 1) {
+				return NGROKLaunchTracker.get(launchConfigs.iterator().next().getName());
+			}
 		}
 		return null;
 	}
 
 	boolean isLocalApp(BootDashElement bde) {
-		return bde!=null && bde.getTarget() instanceof LocalRunTarget;
+		return bde != null && bde.getTarget() instanceof LocalRunTarget;
 	}
 
 	@Override
 	public void run() {
 		NGROKClient client = getClient(getSingleSelectedElement());
-		if (client!=null) {
+		if (client != null) {
 			String url = client.getURL();
-			if (url!=null) {
+			if (url != null) {
 				ui.openUrl(url);
 			}
 		}
