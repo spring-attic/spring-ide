@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views.properties;
 
+import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
@@ -22,6 +23,8 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKClient;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKLaunchTracker;
 import org.springsource.ide.eclipse.commons.ui.UiUtil;
+
+import com.google.common.collect.ImmutableSet;
 
 /**
  * @author Martin Lippert
@@ -44,11 +47,14 @@ public class ExposedPropertyControl extends AbstractBdePropertyControl {
 			public void handleEvent(Event event) {
 				AbstractLaunchConfigurationsDashElement<?> bde = getLocalBootDashElement();
 				if (bde != null) {
-					String tunnelName = bde.getName();
-					NGROKClient ngrokClient = NGROKLaunchTracker.get(tunnelName);
-					if (ngrokClient != null) {
-						String addr = ngrokClient.getURL();
-						UiUtil.openUrl(addr);
+					ImmutableSet<ILaunchConfiguration> launchConfigs = bde.getLaunchConfigs();
+					if (launchConfigs.size() == 1) {
+						String tunnelName = launchConfigs.iterator().next().getName();
+						NGROKClient ngrokClient = NGROKLaunchTracker.get(tunnelName);
+						if (ngrokClient != null) {
+							String addr = ngrokClient.getURL();
+							UiUtil.openUrl(addr);
+						}
 					}
 				}
 			}
@@ -58,15 +64,20 @@ public class ExposedPropertyControl extends AbstractBdePropertyControl {
 	@Override
 	public void refreshControl() {
 		AbstractLaunchConfigurationsDashElement<?> bde = getLocalBootDashElement();
+
 		if (bde != null) {
-			String tunnelName = bde.getName();
-			NGROKClient ngrokClient = NGROKLaunchTracker.get(tunnelName);
-			if (ngrokClient != null) {
-				exposedURL.setText(ngrokClient.getTunnel().getPublic_url() + "   --- (local ngrok instance at: <a href=\"\">" + ngrokClient.getURL() + "</a>)");
+			StringBuilder labelText = new StringBuilder();
+
+			ImmutableSet<ILaunchConfiguration> configs = bde.getLaunchConfigs();
+			if (configs.size() == 1) {
+				String tunnelName = configs.iterator().next().getName();
+				NGROKClient ngrokClient = NGROKLaunchTracker.get(tunnelName);
+				if (ngrokClient != null) {
+					labelText.append(ngrokClient.getTunnel().getPublic_url() + "   --- (local ngrok instance at: <a href=\"\">" + ngrokClient.getURL() + "</a>)");
+				}
 			}
-			else {
-				exposedURL.setText("");
-			}
+
+			exposedURL.setText(labelText.toString());
 		}
 	}
 
