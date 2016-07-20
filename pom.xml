@@ -207,6 +207,10 @@
 		
 		<!-- import statics -->
 		<module>plugins/org.springframework.ide.eclipse.imports</module>
+		
+		<!-- CFT integration -->
+		<module>plugins/org.springframework.ide.eclipse.cft</module>
+		<module>features/org.springframework.ide.eclipse.cft.feature</module>
 
 		<!-- sources -->
 		<module>features/org.springframework.ide.eclipse.feature.source</module>
@@ -224,7 +228,8 @@
 		<module>features/org.springframework.ide.eclipse.data.feature.source</module>
         <module>features/org.springframework.ide.eclipse.boot.feature.source</module>
         <module>features/org.springframework.ide.eclipse.boot.dash.feature.source</module>
-
+        <module>features/org.springframework.ide.eclipse.cft.feature.source</module>
+        
 		<!-- site -->
 		<module>releng/org.springframework.ide.eclipse.site</module>
 	</modules>
