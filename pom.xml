@@ -498,6 +498,11 @@
 		  			<url>http://dist.springsource.org/snapshot/GRECLIPSE/e4.5/</url>
 				</repository>
 				<repository>
+					<id>cft</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/cft/1.0.1.M1/</url>
+				</repository>
+				<repository>
 					<id>eclipse-integration-commons</id>
 					<layout>p2</layout>
 					<url>http://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}</url>

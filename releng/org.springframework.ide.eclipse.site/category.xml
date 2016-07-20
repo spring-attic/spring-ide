@@ -99,6 +99,12 @@
 			<category name="Integrations / Spring IDE" />
 		</feature>
 
+		<feature
+			url="features/org.springframework.ide.eclipse.cft.feature_3.8.1.qualifier.jar"
+			id="org.springframework.ide.eclipse.cft.feature" version="3.8.1.qualifier">
+			<category name="Extensions / Spring IDE" />
+		</feature>	
+
 		<!-- Resources features -->
 		<feature
 			url="features/org.springframework.ide.eclipse.feature.source_3.8.1.qualifier.jar"
@@ -182,11 +188,17 @@
 			url="features/org.springframework.ide.eclipse.maven.feature.source_3.8.1.qualifier.jar"
 			id="org.springframework.ide.eclipse.maven.feature.source" version="3.8.1.qualifier">
 			<category name="Resources / Spring IDE" />
-		</feature>		
+		</feature>
 
 		<feature
 			url="features/org.springframework.ide.eclipse.data.feature.source_3.8.1.qualifier.jar"
 			id="org.springframework.ide.eclipse.data.feature.source" version="3.8.1.qualifier">
+			<category name="Resources / Spring IDE" />
+		</feature>		
+
+		<feature
+			url="features/org.springframework.ide.eclipse.cft.feature.source_3.8.1.qualifier.jar"
+			id="org.springframework.ide.eclipse.cft.feature.source" version="3.8.1.qualifier">
 			<category name="Resources / Spring IDE" />
 		</feature>		
 
