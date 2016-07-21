@@ -100,7 +100,7 @@ public class CloudFoundryClientCache {
 
 		public CFClientProvider(Params params) {
 			connection = DefaultConnectionContext.builder()
-					.proxyConfiguration(getProxy(params.host))
+					.proxyConfiguration(Optional.ofNullable(getProxy(params.host)))
 					.apiHost(params.host)
 					.skipSslValidation(params.skipSsl)
 					.build();
