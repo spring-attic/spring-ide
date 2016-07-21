@@ -10,16 +10,24 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2;
 
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.reactor.ConnectionContext;
 import org.cloudfoundry.reactor.DefaultConnectionContext;
+import org.cloudfoundry.reactor.ProxyConfiguration;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.cloudfoundry.reactor.doppler.ReactorDopplerClient;
 import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
 import org.cloudfoundry.reactor.uaa.ReactorUaaClient;
+import org.eclipse.core.net.proxy.IProxyData;
+import org.eclipse.core.net.proxy.IProxyService;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.util.Log;
+import org.springframework.util.StringUtils;
 
 /**
  * TODO: Remove this class when the 'thread leak bug' in V2 client is fixed.
@@ -49,8 +57,50 @@ public class CloudFoundryClientCache {
 		final ReactorUaaClient uaaClient;
 		final ReactorDopplerClient doppler;
 
+		private ProxyConfiguration getProxy(String host) {
+			try {
+				if (StringUtils.hasText(host)) {
+					URL url = new URL("https://"+host);
+					// In certain cases, the activator would have stopped and the plugin may
+					// no longer be available. Usually onl happens on shutdown.
+					BootDashActivator plugin = BootDashActivator.getDefault();
+					if (plugin != null) {
+						IProxyService proxyService = plugin.getProxyService();
+						if (proxyService != null) {
+							IProxyData[] selectedProxies = proxyService.select(url.toURI());
+
+							// No proxy configured or not found
+							if (selectedProxies == null || selectedProxies.length == 0) {
+								return null;
+							}
+
+							IProxyData data = selectedProxies[0];
+							int proxyPort = data.getPort();
+							String proxyHost = data.getHost();
+							String user = data.getUserId();
+							String password = data.getPassword();
+							if (proxyHost!=null) {
+								return ProxyConfiguration.builder()
+										.host(proxyHost)
+										.port(proxyPort==-1?Optional.empty():Optional.of(proxyPort))
+										.username(Optional.ofNullable(user))
+										.password(Optional.ofNullable(password))
+										.build();
+//							return proxyHost != null ? new HttpProxyConfiguration(proxyHost, proxyPort,
+//									data.isRequiresAuthentication(), user, password) : null;
+							}
+						}
+					}
+				}
+			} catch (Exception e) {
+				Log.log(e);
+			}
+			return null;
+		}
+
 		public CFClientProvider(Params params) {
 			connection = DefaultConnectionContext.builder()
+					.proxyConfiguration(getProxy(params.host))
 					.apiHost(params.host)
 					.skipSslValidation(params.skipSsl)
 					.build();
@@ -143,7 +193,6 @@ public class CloudFoundryClientCache {
 				return false;
 			return true;
 		}
-
 	}
 
 	private Map<Params, CFClientProvider> cache = new HashMap<>();
