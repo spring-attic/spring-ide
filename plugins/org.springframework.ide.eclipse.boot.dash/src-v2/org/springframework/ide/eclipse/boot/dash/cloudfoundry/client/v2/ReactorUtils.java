@@ -27,8 +27,8 @@ import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.Cancelat
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.tuple.Tuple;
-import reactor.core.tuple.Tuple2;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
 /**
  * @author Kris De Volder
@@ -177,7 +177,7 @@ public class ReactorUtils {
 	 * Attach a timestamp to each element in a Stream
 	 */
 	public static <T> Flux<Tuple2<T,Long>> timestamp(Flux<T> stream) {
-		return stream.map((e) -> Tuple.of(e, System.currentTimeMillis()));
+		return stream.map((e) -> Tuples.of(e, System.currentTimeMillis()));
 	}
 
 	/**

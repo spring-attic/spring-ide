@@ -28,7 +28,7 @@ import org.eclipse.ui.console.MessageConsole;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.util.Log;
 
-import reactor.core.flow.Cancellation;
+import reactor.core.Cancellation;
 
 @SuppressWarnings("restriction")
 public class ApplicationLogConsole extends MessageConsole implements IPropertyChangeListener, IApplicationLogConsole {
@@ -149,7 +149,7 @@ public class ApplicationLogConsole extends MessageConsole implements IPropertyCh
 		return false;
 	}
 
-	
+
 	@Override
 	public void onMessage(LogMessage log) {
 		writeLog(log);
@@ -164,7 +164,7 @@ public class ApplicationLogConsole extends MessageConsole implements IPropertyCh
 	public void onError(Throwable exception) {
 		writeApplicationLog(exception.getMessage(), LogType.CFSTDERROR);
 	}
-	
+
 	@Override
 	protected void init() {
 		super.init();

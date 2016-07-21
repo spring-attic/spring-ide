@@ -13,15 +13,14 @@ package org.springframework.ide.eclipse.boot.properties.editor.metadata;
 import java.time.Duration;
 
 import org.eclipse.jdt.core.IJavaProject;
-import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProviderRegistry.ValueProviderStrategy;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Cache;
 import org.springframework.ide.eclipse.boot.properties.editor.util.LimitedTimeCache;
 import org.springframework.ide.eclipse.editor.support.util.FuzzyMatcher;
 
 import reactor.core.publisher.Flux;
-import reactor.core.tuple.Tuple;
-import reactor.core.tuple.Tuple2;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
 /**
  * A abstract {@link ValueProviderStrategy} that is mean to help speedup successive invocations of
@@ -140,7 +139,7 @@ public abstract class CachingValueProvider implements ValueProviderStrategy {
 	protected abstract Flux<StsValueHint> getValuesAsycn(IJavaProject javaProject, String query);
 
 	private Tuple2<String,String> key(IJavaProject javaProject, String query) {
-		return Tuple.of(javaProject==null?null:javaProject.getElementName(), query);
+		return Tuples.of(javaProject==null?null:javaProject.getElementName(), query);
 	}
 
 	protected <K,V> Cache<K,V> createCache() {

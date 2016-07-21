@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
+import java.time.Duration;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -43,7 +44,7 @@ public class AppInstancesRefreshOperation extends CloudOperation {
 		this.model.setBaseRefreshState(RefreshState.loading("Fetching App Instances..."));
 		try {
 			if (!appsToLookUp.isEmpty()) {
-				long timeToWait = 1000*30;
+				Duration timeToWait = Duration.ofSeconds(30);
 				model.getRunTarget().getClient().getApplicationDetails(appsToLookUp)
 				.doOnNext(this.model::updateApplication)
 				.then()

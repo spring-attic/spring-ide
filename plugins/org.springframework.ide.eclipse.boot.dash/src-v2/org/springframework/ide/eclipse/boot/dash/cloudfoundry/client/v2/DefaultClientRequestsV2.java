@@ -69,12 +69,9 @@ import org.cloudfoundry.operations.spaces.GetSpaceRequest;
 import org.cloudfoundry.operations.spaces.SpaceDetail;
 import org.cloudfoundry.reactor.doppler.ReactorDopplerClient;
 import org.cloudfoundry.reactor.uaa.ReactorUaaClient;
-import org.cloudfoundry.reactor.util.ConnectionContextSupplier;
-import org.cloudfoundry.spring.client.SpringCloudFoundryClient;
 import org.cloudfoundry.util.PaginationUtils;
 import org.eclipse.core.runtime.Platform;
 import org.osgi.framework.Version;
-import org.slf4j.helpers.MessageFormatter;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationRunningStateTracker;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
@@ -88,6 +85,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientReque
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshClientSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshHost;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1.DefaultClientRequestsV1;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CloudFoundryClientCache.CFClientProvider;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.IApplicationLogConsole;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
@@ -101,11 +99,9 @@ import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
-import reactor.core.flow.Cancellation;
+import reactor.core.Cancellation;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.util.Logger;
-import reactor.core.util.Logger.Extension;
 
 /**
  * @author Kris De Volder
@@ -117,7 +113,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	private static final Duration GET_SERVICES_TIMEOUT = Duration.ofSeconds(60);
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder") || (""+Platform.getLocation()).contains("bamboo");
-	private static final boolean DEBUG_REACTOR = false;//(""+Platform.getLocation()).contains("kdvolder")
+//	private static final boolean DEBUG_REACTOR = false;//(""+Platform.getLocation()).contains("kdvolder")
 									//|| (""+Platform.getLocation()).contains("bamboo");
 
 	private static void debug(String string) {
@@ -126,16 +122,16 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		}
 	}
 
-	static {
-		if (DEBUG_REACTOR) {
-			Logger.enableExtension(new Extension() {
-				@Override
-				public void log(String category, java.util.logging.Level level, String msg, Object... arguments) {
-					debug(category +"["+level + "] : "+MessageFormatter.format(msg, arguments).getMessage());
-				}
-			});
-		}
-	}
+//	static {
+//		if (DEBUG_REACTOR) {
+//			Loggers.enableExtension(new Extension() {
+//				@Override
+//				public void log(String category, java.util.logging.Level level, String msg, Object... arguments) {
+//					debug(category +"["+level + "] : "+MessageFormatter.format(msg, arguments).getMessage());
+//				}
+//			});
+//		}
+//	}
 
 
 // TODO: it would be good not to create another 'threadpool' and use something like the below code
@@ -160,7 +156,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 
 	private CFClientParams params;
-	private SpringCloudFoundryClient _client ;
+	private CloudFoundryClient _client ;
 	private CloudFoundryOperations _operations;
 
 	@Deprecated
@@ -173,28 +169,21 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	public DefaultClientRequestsV2(CloudFoundryClientCache clients, CFClientParams params) throws Exception {
 		this.params = params;
 		this.v1 = new DefaultClientRequestsV1(params);
-		this._client = clients.getOrCreate(params.getUsername(), params.getPassword(), params.getHost(), params.skipSslValidation());
+		CFClientProvider provider = clients.getOrCreate(params.getUsername(), params.getPassword(), params.getHost(), params.skipSslValidation());
+		this._client = provider.client;
 		debug(">>> creating cf operations");
 		this._operations = DefaultCloudFoundryOperations.builder()
 				.cloudFoundryClient(_client)
-				.dopplerClient(ReactorDopplerClient.builder()
-					.cloudFoundryClient((ConnectionContextSupplier)_client)
-					.build()
-				)
-				.uaaClient(ReactorUaaClient.builder()
-					.cloudFoundryClient(_client)
-					.build()
-				)
+				.dopplerClient(provider.doppler)
+				.uaaClient(provider.uaaClient)
 				.organization(params.getOrgName())
 				.space(params.getSpaceName())
 				.build();
 		debug("<<< creating cf operations");
-
 		this.orgId = getOrgId();
 		this.spaceId = getSpaceId();
 		this.info = client_getInfo().cache();
 	}
-
 
 	private Mono<CloudFoundryOperations> client_createOperations(OrganizationSummary org) {
 		return log("client.createOperations(org="+org.getName()+")",
@@ -597,7 +586,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	private Flux<DomainResource> requestDomains(String orgId) {
-		return PaginationUtils.requestResources((page) ->
+		return PaginationUtils.requestClientV2Resources((page) ->
 			client_listDomains(page)
 		);
 	}
@@ -606,7 +595,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	public List<CFBuildpack> getBuildpacks() throws Exception {
 		//XXX CF V2: getBuilpacks using 'operations' API.
 		return ReactorUtils.get(
-			PaginationUtils.requestResources((page) -> {
+			PaginationUtils.requestClientV2Resources((page) -> {
 				return client_listBuildpacks(page);
 			})
 			.map(CFWrappingV2::wrap)

@@ -40,7 +40,7 @@ import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-import reactor.core.flow.Cancellation;
+import reactor.core.Cancellation;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

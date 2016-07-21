@@ -89,7 +89,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 import junit.framework.AssertionFailedError;
-import reactor.core.flow.Cancellation;
+import reactor.core.Cancellation;
 import reactor.core.publisher.Flux;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
