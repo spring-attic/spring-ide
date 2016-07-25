@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-client-2.0.0.BUILD-SNAPSHOT.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-client-reactor-2.0.0.BUILD-SNAPSHOT.jar" sourcepath="sources/cloudfoundry-client-reactor-2.0.0.BUILD-SNAPSHOT-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-operations-2.0.0.BUILD-SNAPSHOT.jar" sourcepath="sources/cloudfoundry-operations-2.0.0.BUILD-SNAPSHOT-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-util-2.0.0.BUILD-SNAPSHOT.jar" sourcepath="sources/cloudfoundry-util-2.0.0.BUILD-SNAPSHOT-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-client-reactor-2.0.0.BUILD-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-operations-2.0.0.BUILD-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-util-2.0.0.BUILD-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/commons-compress-1.12.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/evo-inflector-1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/jackson-annotations-2.8.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/jackson-core-2.8.0.jar"/>
@@ -14,8 +15,8 @@
 	<classpathentry exported="true" kind="lib" path="dependencies/jjwt-0.6.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/netty-all-4.1.3.Final.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/okio-1.8.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/reactor-ipc-0.5.0.M1.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/reactor-netty-0.5.0.M1.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/reactor-ipc-api-0.5.0.M2.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/reactor-netty-0.5.0.M2.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/slf4j-api-1.7.16.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/slf4j-simple-1.7.16.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/spring-core-4.2.7.RELEASE.jar"/>
