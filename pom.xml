@@ -207,6 +207,10 @@
 		
 		<!-- import statics -->
 		<module>plugins/org.springframework.ide.eclipse.imports</module>
+		
+		<!-- CFT integration -->
+		<module>plugins/org.springframework.ide.eclipse.cft</module>
+		<module>features/org.springframework.ide.eclipse.cft.feature</module>
 
 		<!-- sources -->
 		<module>features/org.springframework.ide.eclipse.feature.source</module>
@@ -224,7 +228,8 @@
 		<module>features/org.springframework.ide.eclipse.data.feature.source</module>
         <module>features/org.springframework.ide.eclipse.boot.feature.source</module>
         <module>features/org.springframework.ide.eclipse.boot.dash.feature.source</module>
-
+        <module>features/org.springframework.ide.eclipse.cft.feature.source</module>
+        
 		<!-- site -->
 		<module>releng/org.springframework.ide.eclipse.site</module>
 	</modules>
@@ -491,6 +496,11 @@
 		  			<id>groovy</id>
 		  			<layout>p2</layout>
 		  			<url>http://dist.springsource.org/snapshot/GRECLIPSE/e4.5/</url>
+				</repository>
+				<repository>
+					<id>cft</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/cft/1.0.1.M1/</url>
 				</repository>
 				<repository>
 					<id>eclipse-integration-commons</id>

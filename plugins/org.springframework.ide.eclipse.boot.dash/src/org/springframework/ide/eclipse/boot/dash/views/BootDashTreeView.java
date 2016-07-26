@@ -80,7 +80,7 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 
 	private MultiSelection<BootDashElement> selection = null; // lazy init
 
-	private List<ISelectionChangedListener> selectionListeners = new ArrayList<ISelectionChangedListener>();
+	private List<ISelectionChangedListener> selectionListeners = new ArrayList<>();
 
 	/*
 	 * The content provider class is responsible for providing objects to the
@@ -148,7 +148,7 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 	}
 
 	public List<BootDashElement> getSelectedElements() {
-		ArrayList<BootDashElement> elements = new ArrayList<BootDashElement>();
+		ArrayList<BootDashElement> elements = new ArrayList<>();
 		for (Object e : getRawSelection().getValue()) {
 			if (e instanceof BootDashElement) {
 				elements.add((BootDashElement) e);
@@ -171,6 +171,7 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 			manager.add(a);
 		}
 		manager.add(actions.getOpenBrowserAction());
+		manager.add(actions.getOpenNgrokAdminUi());
 		manager.add(actions.getOpenConsoleAction());
 		manager.add(actions.getOpenInPackageExplorerAction());
 		manager.add(actions.getOpenConfigAction());
@@ -291,7 +292,7 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 
 	@Override
 	protected List<IPageSection> createSections() throws CoreException {
-		List<IPageSection> sections = new ArrayList<IPageSection>();
+		List<IPageSection> sections = new ArrayList<>();
 		sections.add(new TagSearchSection(BootDashTreeView.this, model.getFilterBox().getText(), model));
 		sections.add(new BootDashUnifiedTreeSection(this, model, ui));
 

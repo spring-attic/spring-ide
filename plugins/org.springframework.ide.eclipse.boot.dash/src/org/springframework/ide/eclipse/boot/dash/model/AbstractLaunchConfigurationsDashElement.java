@@ -25,7 +25,6 @@ import java.util.concurrent.TimeoutException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -72,7 +71,7 @@ import com.google.common.collect.ImmutableSet;
  */
 public abstract class AbstractLaunchConfigurationsDashElement<T> extends WrappingBootDashElement<T> implements Duplicatable<LaunchConfDashElement> {
 
-	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+	private static final boolean DEBUG = false; //(""+Platform.getLocation()).contains("kdvolder");
 	private static void debug(String string) {
 		if (DEBUG) {
 			System.out.println(string);
@@ -130,10 +129,6 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 	@Override
 	public int getLivePort() {
 		return livePort.getValue();
-	}
-
-	public LiveExpression<Integer> getLivePortExp() {
-		return livePort;
 	}
 
 	@Override
@@ -197,7 +192,7 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 	 * Note, we could implement it here by taking the union of all launches for all launch confs,
 	 * but subclass can provide more efficient implementation so we make this abstract.
 	 */
-	protected abstract ImmutableSet<ILaunch> getLaunches();
+	public abstract ImmutableSet<ILaunch> getLaunches();
 
 	@Override
 	public void restart(RunState runningOrDebugging, UserInteractions ui) throws Exception {
@@ -231,24 +226,31 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 
 	private void start(final String runMode, UserInteractions ui) {
 		try {
-			ImmutableSet<ILaunchConfiguration> configs = getLaunchConfigs();
-			ILaunchConfiguration conf = null;
-			if (configs.isEmpty()) {
-				IType mainType = chooseMainType(ui);
-				if (mainType!=null) {
-					RunTarget target = getTarget();
-					IJavaProject jp = getJavaProject();
-					conf = target.createLaunchConfig(jp, mainType);
-				}
-			} else {
-				conf = chooseConfig(ui, configs);
-			}
+			ILaunchConfiguration conf = getOrCreateLaunchConfig(ui);
 			if (conf!=null) {
 				launch(runMode, conf);
 			}
 		} catch (Exception e) {
 			Log.log(e);
 		}
+	}
+
+	private ILaunchConfiguration getOrCreateLaunchConfig(UserInteractions ui) throws Exception {
+		ILaunchConfiguration conf = null;
+
+		ImmutableSet<ILaunchConfiguration> configs = getLaunchConfigs();
+		if (configs.isEmpty()) {
+			IType mainType = chooseMainType(ui);
+			if (mainType!=null) {
+				RunTarget target = getTarget();
+				IJavaProject jp = getJavaProject();
+				conf = target.createLaunchConfig(jp, mainType);
+			}
+		} else {
+			conf = chooseConfig(ui, configs);
+		}
+
+		return conf;
 	}
 
 	private IType chooseMainType(UserInteractions ui) throws CoreException {
@@ -561,47 +563,38 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 			port = SocketUtil.findFreePort();
 		}
 
-		String tunnelName = getName();
+		ILaunchConfiguration launchConfig = getOrCreateLaunchConfig(ui);
+		if (launchConfig != null) {
+			String tunnelName = launchConfig.getName();
 
-		NGROKTunnel tunnel = ngrokClient.startTunnel("http", Integer.toString(port));
-		NGROKLaunchTracker.add(tunnelName, ngrokClient, tunnel);
+			NGROKTunnel tunnel = ngrokClient.startTunnel("http", Integer.toString(port));
+			NGROKLaunchTracker.add(tunnelName, ngrokClient, tunnel);
 
-		if (tunnel == null) {
-			ui.errorPopup("ngrok tunnel not started", "there was a problem starting the ngrok tunnel, try again or start a tunnel manually.");
-			return;
+			if (tunnel == null) {
+				ui.errorPopup("ngrok tunnel not started", "there was a problem starting the ngrok tunnel, try again or start a tunnel manually.");
+				return;
+			}
+
+			String tunnelURL = tunnel.getPublic_url();
+
+			if (tunnelURL.startsWith("http://")) {
+				tunnelURL = tunnelURL.substring(7);
+			}
+
+			Map<String, String> extraAttributes = new HashMap<>();
+			extraAttributes.put("spring.boot.prop.server.port", "1" + Integer.toString(port));
+			extraAttributes.put("spring.boot.prop.eureka.instance.hostname", "1" + tunnelURL);
+			extraAttributes.put("spring.boot.prop.eureka.instance.nonSecurePort", "1" + "80");
+			extraAttributes.put("spring.boot.prop.eureka.client.service-url.defaultZone", "1" + eurekaInstance);
+
+			start(launchMode, launchConfig, extraAttributes);
 		}
-
-		String tunnelURL = tunnel.getPublic_url();
-
-		if (tunnelURL.startsWith("http://")) {
-			tunnelURL = tunnelURL.substring(7);
-		}
-
-		Map<String, String> extraAttributes = new HashMap<>();
-		extraAttributes.put("spring.boot.prop.server.port", "1" + Integer.toString(port));
-		extraAttributes.put("spring.boot.prop.eureka.instance.hostname", "1" + tunnelURL);
-		extraAttributes.put("spring.boot.prop.eureka.instance.nonSecurePort", "1" + "80");
-		extraAttributes.put("spring.boot.prop.eureka.client.service-url.defaultZone", "1" + eurekaInstance);
-
-		start(launchMode, ui, extraAttributes);
 	}
 
-	private void start(final String runMode, UserInteractions ui, Map<String, String> extraAttributes) {
+	private void start(final String runMode, ILaunchConfiguration launchConfig, Map<String, String> extraAttributes) {
 		try {
-			ImmutableSet<ILaunchConfiguration> configs = getLaunchConfigs();
-			ILaunchConfiguration conf = null;
-			if (configs.isEmpty()) {
-				IType mainType = chooseMainType(ui);
-				if (mainType!=null) {
-					RunTarget target = getTarget();
-					IJavaProject jp = getJavaProject();
-					conf = target.createLaunchConfig(jp, mainType);
-				}
-			} else {
-				conf = chooseConfig(ui, configs);
-			}
-			if (conf!=null) {
-				ILaunchConfigurationWorkingCopy workingCopy = conf.getWorkingCopy();
+			if (launchConfig != null) {
+				ILaunchConfigurationWorkingCopy workingCopy = launchConfig.getWorkingCopy();
 
 				removeOverriddenAttributes(workingCopy, extraAttributes);
 				addAdditionalAttributes(workingCopy, extraAttributes);
@@ -654,11 +647,16 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 	}
 
 	public void shutdownExpose() {
-		NGROKClient client = NGROKLaunchTracker.get(getName());
+		ImmutableSet<ILaunchConfiguration> launchConfigs = getLaunchConfigs();
 
-		if (client != null) {
-			client.shutdown();
-			NGROKLaunchTracker.remove(getName());
+		for (ILaunchConfiguration launchConfig : launchConfigs) {
+			String tunnelName = launchConfig.getName();
+			NGROKClient client = NGROKLaunchTracker.get(tunnelName);
+
+			if (client != null) {
+				client.shutdown();
+				NGROKLaunchTracker.remove(tunnelName);
+			}
 		}
 	}
 

@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.model;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
@@ -20,7 +21,9 @@ import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
+import org.springframework.ide.eclipse.boot.dash.util.CollectionUtils;
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager.ClasspathListener;
 import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
@@ -32,7 +35,6 @@ import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
-import com.google.common.collect.ImmutableSortedSet.Builder;
 
 /**
  * Concrete BootDashElement that wraps an IProject
@@ -40,6 +42,16 @@ import com.google.common.collect.ImmutableSortedSet.Builder;
  * @author Kris De Volder
  */
 public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElement<IProject> {
+
+	private static final boolean DEBUG = Boolean.getBoolean("sts.debug.BootProjectDashElement");
+	{
+		System.out.println("sts.debug.BootProjectDashElement="+DEBUG);
+	}
+	private static void debug(String string) {
+		if (DEBUG) {
+			System.err.println(string);
+		}
+	}
 
 	private IScopedPropertyStore<IProject> projectProperties;
 
@@ -53,6 +65,11 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 		super(context, project);
 		this.projectProperties = projectProperties;
 		this.childFactory = childFactory;
+		if (DEBUG) {
+			onDispose((e) -> {
+				debug("disposed: "+this);
+			});
+		}
 	}
 
 	@Override
@@ -100,20 +117,23 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 	}
 
 	@Override
+	public int getLivePort() {
+		return CollectionUtils.getAnyOr(getLivePorts(), -1);
+	}
+
+	@Override
 	public ImmutableSet<Integer> getLivePorts() {
 		return getLivePortsExp().getValues();
 	}
 
 	private ObservableSet<Integer> getLivePortsExp() {
 		if (ports==null) {
-			ports = createSortedLiveSummary(new Function<BootDashElement, Integer>() {
-				@Override public Integer apply(BootDashElement element) {
-					int port = element.getLivePort();
-					if (port>0) {
-						return port;
-					}
-					return null;
+			ports = createSortedLiveSummary((BootDashElement element) -> {
+				int port = element.getLivePort();
+				if (port>0) {
+					return port;
 				}
+				return null;
 			});
 			this.dependsOn(ports);
 		}
@@ -135,19 +155,25 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 	 * natural ordering.
 	 */
 	private <T extends Comparable<T>> ObservableSet<T> createSortedLiveSummary(final Function<BootDashElement, T> getter) {
+
 		final ObservableSet<T> summary = new ObservableSet<T>() {
+
 			@Override
 			protected ImmutableSet<T> compute() {
+				debug("port-summary["+getName()+"]: compute()...");
 				ImmutableSet.Builder<T> builder = ImmutableSortedSet.naturalOrder();
-				add(builder, BootProjectDashElement.this);
 				for (BootDashElement child : getCurrentChildren()) {
 					add(builder, child);
 				}
-				return builder.build();
+				ImmutableSet<T> result = builder.build();
+				debug("port-summary["+getName()+"]: compute() => "+result);
+				return result;
 			}
 
 			protected void add(ImmutableSet.Builder<T> builder, BootDashElement child) {
+				debug("port-summary["+getName()+"]: add port for "+child);
 				T v = getter.apply(child);
+				debug("port-summary["+getName()+"]: add port for "+child+" = "+v);
 				if (v!=null) {
 					builder.add(v);
 				}
@@ -197,6 +223,18 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 	}
 
 	@Override
+	public void refreshLivePorts() {
+		for (BootDashElement child : getChildren().getValues()) {
+			try {
+				((AbstractLaunchConfigurationsDashElement<?>)child).refreshLivePorts();
+			} catch (ClassCastException e) {
+				//Should be impossible (unless something changes in how elements in dash are nested)
+				Log.log(e);
+			}
+		}
+	}
+
+	@Override
 	public ImmutableSet<ILaunch> getLaunches() {
 		return ImmutableSet.copyOf(BootLaunchUtils.getLaunches(getLaunchConfigs()));
 	}
@@ -205,5 +243,4 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 	public Object getParent() {
 		return getBootDashModel();
 	}
-
 }

@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
-import java.util.Arrays;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -23,7 +21,6 @@ import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelega
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
 import org.springframework.ide.eclipse.boot.properties.editor.util.ArrayUtils;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
-import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -75,7 +72,7 @@ public class LaunchConfDashElement extends AbstractLaunchConfigurationsDashEleme
 	}
 
 	@Override
-	protected ImmutableSet<ILaunch> getLaunches() {
+	public ImmutableSet<ILaunch> getLaunches() {
 		return ImmutableSet.copyOf(BootLaunchUtils.getLaunches(ImmutableSet.of(delegate)));
 	}
 

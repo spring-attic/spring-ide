@@ -213,9 +213,7 @@ public abstract class RunStateTracker<T> extends ProcessListenerAdapter implemen
 			updateInProgress = true;
 			try {
 				Map<T, RunState> oldStates = activeStates;
-				debug("old: "+oldStates);
 				activeStates = getCurrentActiveStates();
-				debug("new: "+activeStates);
 
 				// Compute set of owners who's state has changed
 				Set<T> affectedOwners = new HashSet<>(keySet(oldStates));

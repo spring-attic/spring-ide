@@ -11,33 +11,22 @@
 package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.util.Comparator;
-import java.util.List;
 
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
-import org.springframework.ide.eclipse.boot.dash.util.OrderBasedComparator;
-
+/**
+ * Model is just a wrapper on a {@link RunTarget} so {@link BootModelComparator} should
+ * just use {@link RunTarget} comparator.
+ */
 public class BootModelComparator implements Comparator<BootDashModel> {
 
-	private Comparator<RunTargetType> typeComparator;
+	private Comparator<RunTarget> targetComparator;
 
-	public BootModelComparator(Comparator<RunTargetType> typeComparator) {
-		this.typeComparator = typeComparator;
-	}
-
-	public BootModelComparator(List<RunTargetType> runTargetTypes) {
-		this(new OrderBasedComparator<RunTargetType>(
-				runTargetTypes.toArray(new RunTargetType[runTargetTypes.size()])));
+	public BootModelComparator(Comparator<RunTarget> targetComparator) {
+		this.targetComparator = targetComparator;
 	}
 
 	public int compare(BootDashModel model1, BootDashModel model2) {
-
-		RunTargetType rtType1 = model1.getRunTarget().getType();
-		RunTargetType rtType2 = model2.getRunTarget().getType();
-
-		int result = typeComparator.compare(rtType1, rtType2);
-		if (result==0) {
-			result = model1.getRunTarget().getId().compareTo(model2.getRunTarget().getId());
-		}
-		return result;
+		RunTarget t1 = model1.getRunTarget();
+		RunTarget t2 = model2.getRunTarget();
+		return targetComparator.compare(t1, t2);
 	}
 }

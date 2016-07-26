@@ -14,6 +14,8 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.BootDashBuildpackHintProvider;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultCloudFoundryClientFactoryV2;
@@ -22,6 +24,10 @@ import org.springframework.ide.eclipse.boot.dash.model.DefaultBootDashModelConte
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestEditorActivator;
+
+import javax.inject.Inject;
+
+import org.eclipse.core.net.proxy.IProxyService;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -51,6 +57,19 @@ public class BootDashActivator extends AbstractUIPlugin {
 	 * The constructor
 	 */
 	public BootDashActivator() {
+	}
+
+	private IProxyService proxyService;
+
+	public synchronized IProxyService getProxyService() {
+		if (proxyService==null) {
+			BundleContext bc = getBundle().getBundleContext();
+			if (bc!=null) {
+				ServiceReference<IProxyService> sr = bc.getServiceReference(IProxyService.class);
+				proxyService = bc.getService(sr);
+			}
+		}
+		return proxyService;
 	}
 
 	/*

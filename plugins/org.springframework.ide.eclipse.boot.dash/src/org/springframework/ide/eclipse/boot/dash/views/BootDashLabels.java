@@ -10,9 +10,12 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
@@ -408,13 +411,26 @@ public class BootDashLabels implements Disposable {
 			case EXPOSED_URL:
 				runState = element.getRunState();
 				if (runState == RunState.RUNNING || runState == RunState.DEBUGGING) {
+					List<String> tunnelNames = new ArrayList<>();
 					if (element instanceof AbstractLaunchConfigurationsDashElement<?>) {
-						String tunnelName = element.getName();
-						NGROKClient ngrokClient = NGROKLaunchTracker.get(tunnelName);
-						if (ngrokClient != null) {
-							styledLabel = new StyledString("\u27A4 " + ngrokClient.getTunnel().getPublic_url(),stylers.darkBlue());
+						ImmutableSet<ILaunchConfiguration> launches = ((AbstractLaunchConfigurationsDashElement<?>) element).getLaunchConfigs();
+						for (ILaunchConfiguration launchConfig : launches) {
+							tunnelNames.add(launchConfig.getName());
 						}
 					}
+
+					for (String tunnelName : tunnelNames) {
+						NGROKClient ngrokClient = NGROKLaunchTracker.get(tunnelName);
+						if (ngrokClient != null) {
+							if (styledLabel == null) {
+								styledLabel = new StyledString("\u27A4 " + ngrokClient.getTunnel().getPublic_url(),stylers.darkBlue());
+							}
+							else {
+								styledLabel.append(new StyledString(" / \u27A4 " + ngrokClient.getTunnel().getPublic_url(),stylers.darkBlue()));
+							}
+						}
+					}
+
 				}
 				break;
 			default:

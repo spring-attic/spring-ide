@@ -180,7 +180,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 			Display.getDefault().asyncExec(new Runnable() {
 				public void run() {
 					if (tv != null && !tv.getControl().isDisposed()) {
-						tv.update(model, null);
+						tv.refresh();
 						/*
 						 * TODO: ideally the above should do the repaint of
 						 * the control's area where the tree item is
@@ -448,6 +448,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 			addVisible(manager, a);
 		}
 		addVisible(manager, actions.getOpenBrowserAction());
+		addVisible(manager, actions.getOpenNgrokAdminUi());
 		addVisible(manager, actions.getOpenConsoleAction());
 		addVisible(manager, actions.getOpenInPackageExplorerAction());
 		addVisible(manager, actions.getShowPropertiesViewAction());

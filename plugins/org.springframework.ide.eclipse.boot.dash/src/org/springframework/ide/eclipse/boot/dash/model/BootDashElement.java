@@ -30,7 +30,10 @@ public interface BootDashElement extends Nameable, Taggable {
 	/**
 	 * Return the port this element is running on. If the port can not
 	 * be determined or the app is not running this returns -1.
+	 * <p>
+	 * Deprecated: should use getLivePorts.
 	 */
+	@Deprecated
 	int getLivePort();
 
 	/**

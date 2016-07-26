@@ -67,8 +67,8 @@ public class BootDashViewModel extends AbstractDisposable {
 		runTargets.addListener(manager);
 
 		this.orderedRunTargetTypes = Arrays.asList(runTargetTypes);
-		this.modelComparator = new BootModelComparator(orderedRunTargetTypes);
 		this.targetComparator = new RunTargetComparator(orderedRunTargetTypes);
+		this.modelComparator = new BootModelComparator(targetComparator);
 
 		this.runTargetTypes = new LinkedHashSet<>(orderedRunTargetTypes);
 		filterBox = new BootDashElementsFilterBoxModel();

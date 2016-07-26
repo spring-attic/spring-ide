@@ -34,7 +34,10 @@ import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.create
 import static org.springframework.ide.eclipse.boot.dash.test.BootDashModelTest.waitForJobsToComplete;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -364,11 +367,22 @@ public class CloudFoundryBootDashModelIntegrationTest {
 
 		ACondition.waitFor("app to be running", APP_DEPLOY_TIMEOUT, () -> {
 			assertEquals(RunState.RUNNING, app.getRunState());
-			assertEquals("some content here\n", IOUtils.toString(new URI(app.getUrl()+"/test.txt")));
+			String url = pathJoin(app.getUrl(),"test.txt");
+			assertEquals(url, "some content here\n", IOUtils.toString(new URL(url)));
 		});
 
 		verify(ui).promptApplicationDeploymentProperties(any());
 		verifyNoMoreInteractions(ui);
+	}
+
+	private String pathJoin(String url, String append) {
+		while (url.endsWith("/")) {
+			url = url.substring(0, url.length()-1);
+		}
+		while (append.startsWith("/")) {
+			append = append.substring(1);
+		}
+		return url+"/"+append;
 	}
 
 	@Test public void deleteService() throws Exception {

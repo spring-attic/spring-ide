@@ -495,7 +495,7 @@ public class BootDashViewModelTest {
 	@Test
 	public void testGetSectionByTargetId() throws Exception {
 		BootDashViewModel view = mock(BootDashViewModel.class);
-		LiveSetVariable<BootDashModel> sections = new LiveSetVariable<BootDashModel>();
+		LiveSetVariable<BootDashModel> sections = new LiveSetVariable<>();
 		when(view.getSectionModels()).thenReturn(sections);
 		when(view.getSectionByTargetId(anyString())).thenCallRealMethod();
 
@@ -602,13 +602,13 @@ public class BootDashViewModelTest {
 	 * Create mock BootDashModel that is sufficiently fleshed-out to
 	 * allow sorting using the comparator provided by BootDashViewModel
 	 */
-	private BootDashModel sortableModel(RunTargetType type, String id) {
+	private BootDashModel sortableModel(RunTargetType type, String displayName) {
 		BootDashModel model = mock(BootDashModel.class);
 		RunTarget target = mock(RunTarget.class);
 
 		when(target.getType()).thenReturn(type);
 		when(model.getRunTarget()).thenReturn(target);
-		when(target.getId()).thenReturn(id);
+		when(target.getDisplayName()).thenReturn(displayName);
 
 		return model;
 	}

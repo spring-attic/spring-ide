@@ -78,6 +78,7 @@ import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
+import org.springframework.ide.eclipse.boot.dash.util.CollectionUtils;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashLabels;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.PropVal;
@@ -90,6 +91,7 @@ import org.springframework.ide.eclipse.boot.test.util.TestBracketter;
 import org.springframework.ide.eclipse.boot.ui.EnableDisableBootDevtools;
 import org.springsource.ide.eclipse.commons.frameworks.core.maintype.MainTypeFinder;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
@@ -450,6 +452,22 @@ public class BootDashModelTest {
 		verify(listener, times(3)).stateChanged(element);
 	}
 
+	@Test public void projectElementDisposedWhenProjectClosed() throws Exception {
+		String projectName = "testProject";
+		IProject project = createBootProject(projectName);
+		waitModelElements(projectName);
+
+		BootProjectDashElement projectElement = getElement(projectName);
+		LiveVariable<Boolean> disposed = new LiveVariable<>(false);
+		projectElement.onDispose((d) -> disposed.setValue(true));
+
+		project.close(new NullProgressMonitor());
+
+		ACondition.waitFor("Element disposed", 100, () -> {
+			assertTrue(disposed.getValue());
+		});
+	}
+
 	@Test public void testRestartRunningProcessTest() throws Exception {
 		String projectName = "testProject";
 		createBootProject(projectName);
@@ -467,7 +485,6 @@ public class BootDashModelTest {
 		}
 	}
 
-	@Ignore // it fails way too often and tests something that's not really important.
 	@Test public void testDevtoolsPortRefreshedOnRestart() throws Exception {
 		//Test that the local bootdash element 'liveport' is updated when boot devtools
 		// does an in-place restart of the app, changing the port that it runs on.
@@ -476,41 +493,45 @@ public class BootDashModelTest {
 				withStarters("devtools")
 		);
 
-		final BootDashElement element = getElement(projectName);
+		final BootDashElement project = getElement(projectName);
 		try {
-			waitForState(element, RunState.INACTIVE);
-			element.restart(RunState.RUNNING, ui);
-			waitForState(element, RunState.STARTING);
-			waitForState(element, RunState.RUNNING);
+			waitForState(project, RunState.INACTIVE);
+			project.restart(RunState.RUNNING, ui);
+			waitForState(project, RunState.STARTING);
+			waitForState(project, RunState.RUNNING);
+
+			BootDashElement launch = CollectionUtils.getSingle(project.getChildren().getValues());
 
 			int defaultPort = 8080;
 			int changedPort = 8765;
 
-			assertEquals(defaultPort, element.getLivePort());
+			waitForPort(project, defaultPort);
 
-			IFile props = element.getProject().getFile(new Path("src/main/resources/application.properties"));
+			IFile props = project.getProject().getFile(new Path("src/main/resources/application.properties"));
 			setContents(props, "server.port="+changedPort);
-			StsTestUtil.assertNoErrors(element.getProject());
+			StsTestUtil.assertNoErrors(project.getProject());
 			   //builds the project... should trigger devtools to 'refresh'.
 
-			waitForPort(element, changedPort);
+			waitForPort(project, changedPort);
+			waitForPort(launch, changedPort);
 
 			//Now try that this also works in debug mode...
-			element.restart(RunState.DEBUGGING, ui);
-			waitForState(element, RunState.STARTING);
-			waitForState(element, RunState.DEBUGGING);
+			project.restart(RunState.DEBUGGING, ui);
+			waitForState(project, RunState.STARTING);
+			waitForState(project, RunState.DEBUGGING);
 
-			ACondition.waitFor("port after restart", 5000, () -> {
-				assertEquals(changedPort, element.getLivePort());
-			});
+			waitForPort(project, changedPort);
+			waitForPort(launch, changedPort);
+
 			setContents(props, "server.port="+defaultPort);
-			StsTestUtil.assertNoErrors(element.getProject());
+			StsTestUtil.assertNoErrors(project.getProject());
 			   //builds the project... should trigger devtools to 'refresh'.
-			waitForPort(element, defaultPort);
+			waitForPort(project, defaultPort);
+			waitForPort(launch, defaultPort);
 
 		} finally {
-			element.stopAsync(ui);
-			waitForState(element, RunState.INACTIVE);
+			project.stopAsync(ui);
+			waitForState(project, RunState.INACTIVE);
 		}
 	}
 
@@ -518,6 +539,7 @@ public class BootDashModelTest {
 		new ACondition("Wait for port to change", 5000) { //Devtools should restart really fast
 			@Override
 			public boolean test() throws Exception {
+				assertEquals(ImmutableSet.of(expectedPort), element.getLivePorts());
 				assertEquals(expectedPort, element.getLivePort());
 				return true;
 			}

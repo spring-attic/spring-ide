@@ -29,7 +29,7 @@ import org.eclipse.core.runtime.jobs.Job;
  */
 public class LimitedTimeCache<K,V> implements Cache<K, V> {
 
-	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+	private static final boolean DEBUG = false; //(""+Platform.getLocation()).contains("kdvolder");
 
 	private static void debug(String string) {
 		if (DEBUG) {
