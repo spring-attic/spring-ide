@@ -12,12 +12,21 @@ package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaProject;
+import org.springframework.ide.eclipse.boot.core.cli.BootCliCommand;
+import org.springframework.ide.eclipse.boot.core.cli.BootCliUtils;
+import org.springframework.ide.eclipse.boot.core.cli.install.IBootInstall;
 import org.springframework.ide.eclipse.boot.dash.devtools.DevtoolsPortRefresher;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchConfRunStateTracker;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchConfigurationTracker;
@@ -25,6 +34,7 @@ import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManag
 import org.springframework.ide.eclipse.boot.dash.views.BootDashTreeView;
 import org.springframework.ide.eclipse.boot.dash.views.LocalElementConsoleManager;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager.ClasspathListener;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ProjectChangeListenerManager;
@@ -95,6 +105,15 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 				}
 			});
 			updateElementsFromWorkspace();
+
+			new Job("Loading local cloud services") {
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					fetchLocalServices();
+					return Status.OK_STATUS;
+				}
+			}.schedule();
+
 			this.devtoolsPortRefresher = new DevtoolsPortRefresher(this, projectElementFactory);
 		}
 	}
@@ -158,6 +177,35 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 	 */
 	public void refresh(UserInteractions ui) {
 		updateElementsFromWorkspace();
+		new Job("Loading local cloud services") {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				fetchLocalServices();
+				return Status.OK_STATUS;
+			}
+		}.schedule();
+	}
+
+	private void fetchLocalServices() {
+		try {
+			IBootInstall bootInstall = BootCliUtils.getSpringBootInstall();
+			if (BootCliUtils.supportsSpringCloud(bootInstall)) {
+				BootCliCommand cmd = new BootCliCommand(BootCliUtils.getSpringBootHome(bootInstall));
+				try {
+					cmd.execute("cloud", "--list");
+					List<BootDashElement> localServices = new LinkedList<>();
+					String[] outputLines = cmd.getOutput().split("\n");
+					for (String id : outputLines[outputLines.length - 1].split(" ")) {
+						localServices.add(new LocalCloudServiceDashElement(this, id));
+					}
+					elements.addAll(localServices);
+				} catch (RuntimeException e) {
+					Log.log(e);
+				}
+			}
+		} catch (Exception e) {
+			// ignore
+		}
 	}
 
 	@Override

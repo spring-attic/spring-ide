@@ -31,6 +31,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractLaunchConfigurationsDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.LocalCloudServiceDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKClient;
@@ -191,6 +192,22 @@ public class BootDashLabels implements Disposable {
 		if (element instanceof CloudServiceInstanceDashElement) {
 			ImageDescriptor img = BootDashActivator.getDefault().getImageRegistry().getDescriptor(BootDashActivator.SERVICE_ICON);
 			return toAnimation(img, null);
+		} else if (element instanceof LocalCloudServiceDashElement) {
+			if (column == BootDashColumn.RUN_STATE_ICN || column == BootDashColumn.TREE_VIEWER_MAIN) {
+				ImageDescriptor img;
+				switch (element.getRunState()) {
+				case RUNNING:
+					img = BootDashActivator.getDefault().getImageRegistry().getDescriptor(BootDashActivator.SERVICE_ICON);
+					return toAnimation(img, null);
+				case STARTING:
+					return getRunStateAnimation(element.getRunState());
+				default:
+					img = BootDashActivator.getDefault().getImageRegistry().getDescriptor(BootDashActivator.SERVICE_INACTIVE_ICON);
+					return toAnimation(img, null);
+				}
+			} else {
+				return NO_IMAGES;
+			}
 		}
 		try {
 			if (element != null) {

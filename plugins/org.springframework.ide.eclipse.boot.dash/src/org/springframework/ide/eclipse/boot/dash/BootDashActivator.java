@@ -36,6 +36,7 @@ public class BootDashActivator extends AbstractUIPlugin {
 	public static final String CLOUD_ICON = "cloud";
 	public static final String REFRESH_ICON = "refresh";
 	public static final String SERVICE_ICON = "service";
+	public static final String SERVICE_INACTIVE_ICON = "service-inactive";
 	public static final String BOOT_ICON = "boot";
 	public static final String CHECK_ICON = "check";
 	public static final String CHECK_GREYSCALE_ICON = "check-greyscale";
@@ -132,6 +133,7 @@ public class BootDashActivator extends AbstractUIPlugin {
 		reg.put(MANIFEST_ICON, getImageDescriptor("icons/selectmanifest.gif"));
 		reg.put(REFRESH_ICON, getImageDescriptor("/icons/refresh.gif"));
 		reg.put(SERVICE_ICON, getImageDescriptor("icons/service.png"));
+		reg.put(SERVICE_INACTIVE_ICON, getImageDescriptor("icons/service-inactive.png"));
 		reg.put(BOOT_ICON, getImageDescriptor("icons/boot-icon.png"));
 		reg.put(CHECK_ICON, getImageDescriptor("icons/check.png"));
 		reg.put(CHECK_GREYSCALE_ICON, getImageDescriptor("icons/check_greyedout.png"));

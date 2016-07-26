@@ -48,7 +48,8 @@ Require-Bundle: org.eclipse.ui,
  io.projectreactor.reactor-core;bundle-version="2.5.0",
  org.reactivestreams.reactive-streams;bundle-version="1.0.0",
  org.springframework.ide.eclipse.core,
- org.slf4j.api;bundle-version="1.7.2"
+ org.slf4j.api;bundle-version="1.7.2",
+ org.springsource.ide.eclipse.commons.core
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,

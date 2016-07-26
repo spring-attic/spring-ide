@@ -157,6 +157,18 @@
 	          sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
 	          sourcePathComputerId="org.eclipse.jdt.launching.sourceLookup.javaSourcePathComputer">
 	    </launchConfigurationType>
+     <launchConfigurationType
+           category="org.eclipse.ui.externaltools"
+           delegate="org.springframework.ide.eclipse.boot.dash.cli.LocalCloudServiceLaunchConfigurationDelegate"
+           id="org.springframework.ide.eclipse.boot.dash.cloud.cli.service"
+           modes="run"
+           name="Local Cloud Service">
+     </launchConfigurationType>
+     <launchConfigurationType
+           id="org.springsource.ide.eclipse.gradle.launch"
+           modes="run"
+           name="name">
+     </launchConfigurationType>
 	</extension>
 
     <extension

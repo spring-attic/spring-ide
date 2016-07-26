@@ -137,7 +137,7 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 	@Override
 	public LinkedHashSet<String> getTags() {
 		try {
-			String[] tags = getPersistentProperties().get(TAGS_KEY, (String[])null);
+			String[] tags = getPersistentProperties() == null ? null : getPersistentProperties().get(TAGS_KEY, (String[])null);
 			if (tags!=null) {
 				return new LinkedHashSet<>(Arrays.asList(tags));
 			}
@@ -163,7 +163,7 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 
 	@Override
 	public final String getDefaultRequestMappingPath() {
-		String storedValue = getPersistentProperties().get(DEFAULT_RM_PATH_KEY);
+		String storedValue = getPersistentProperties() == null ? null : getPersistentProperties().get(DEFAULT_RM_PATH_KEY);
 		if (storedValue!=null) {
 			return storedValue;
 		}
