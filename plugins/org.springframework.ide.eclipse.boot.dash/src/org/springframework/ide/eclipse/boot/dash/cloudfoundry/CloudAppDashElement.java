@@ -11,11 +11,17 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.net.URI;
+import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
+import org.apache.http.client.HttpClient;
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
+import org.apache.http.conn.ssl.SSLContextBuilder;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
+import org.apache.http.impl.client.HttpClients;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -26,12 +32,15 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement.CloudAppIdentity;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.OperationTracker.Task;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceStats;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.HealthChecks;
@@ -57,6 +66,7 @@ import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.Cancelat
 import org.springframework.ide.eclipse.boot.dash.util.LogSink;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springframework.ide.eclipse.boot.util.Log;
+import org.springframework.web.client.RestTemplate;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
@@ -509,6 +519,32 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		//only happens when this element is not valid anymore, but return something harmless / usable anyhow
 		return LiveExpression.constant(null);
 	}
+
+	@Override
+	protected RestTemplate getRestTemplate() {
+		CloudFoundryTargetProperties props = getTarget().getTargetProperties();
+		boolean skipSsl = props.isSelfsigned() || props.skipSslValidation();
+		if (skipSsl) {
+			HttpClient httpClient = HttpClients.custom()
+					.setHostnameVerifier(new AllowAllHostnameVerifier())
+					.setSslcontext(buildSslContext())
+					.build();
+			ClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
+			return new RestTemplate(requestFactory);
+		} else {
+			//This worked before so lets not try to fix that case.
+			return super.getRestTemplate();
+		}
+	}
+
+	private javax.net.ssl.SSLContext buildSslContext()  {
+		try {
+			return new SSLContextBuilder().useSSL().loadTrustMaterial(null, new TrustSelfSignedStrategy()).build();
+		} catch (GeneralSecurityException gse) {
+			throw new RuntimeException("An error occurred setting up the SSLContext", gse);
+		}
+	}
+
 
 	public IFile getDeploymentManifestFile() {
 		String text = getPersistentProperties().get(DEPLOYMENT_MANIFEST_FILE_PATH);
