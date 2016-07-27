@@ -22,6 +22,7 @@ import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.util.CollectionUtils;
+import org.springframework.ide.eclipse.boot.dash.util.DebugUtil;
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager;
@@ -43,7 +44,7 @@ import com.google.common.collect.ImmutableSortedSet;
  */
 public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElement<IProject> {
 
-	private static final boolean DEBUG = Boolean.getBoolean("sts.debug.BootProjectDashElement");
+	private static final boolean DEBUG = DebugUtil.isDevelopment();
 	{
 		System.out.println("sts.debug.BootProjectDashElement="+DEBUG);
 	}
