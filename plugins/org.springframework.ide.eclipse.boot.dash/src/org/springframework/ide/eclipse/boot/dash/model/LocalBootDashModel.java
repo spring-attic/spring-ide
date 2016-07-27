@@ -61,6 +61,7 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 	ClasspathListenerManager classpathListenerManager;
 
 	private final LaunchConfRunStateTracker launchConfRunStateTracker = new LaunchConfRunStateTracker();
+	private final LocalServiceRunStateTracker launchConfLocalServiceRunStateTracker = new LocalServiceRunStateTracker();
 	final LaunchConfigurationTracker launchConfTracker = new LaunchConfigurationTracker(BootLaunchConfigurationDelegate.TYPE_ID);
 
 	LiveSetVariable<BootDashElement> elements; //lazy created
@@ -145,6 +146,7 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 		}
 		launchConfTracker.dispose();
 		launchConfRunStateTracker.dispose();
+		launchConfLocalServiceRunStateTracker.dispose();
 	}
 
 	void updateElementsFromWorkspace() {
@@ -207,6 +209,10 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 
 	public LaunchConfRunStateTracker getLaunchConfRunStateTracker() {
 		return launchConfRunStateTracker;
+	}
+
+	public LocalServiceRunStateTracker getLaunchConfLocalServiceRunStateTracker() {
+		return launchConfLocalServiceRunStateTracker;
 	}
 
 	public BootProjectDashElementFactory getProjectElementFactory() {
