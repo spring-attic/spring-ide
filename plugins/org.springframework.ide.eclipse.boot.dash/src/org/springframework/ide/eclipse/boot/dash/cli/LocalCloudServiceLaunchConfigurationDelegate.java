@@ -40,7 +40,7 @@ public class LocalCloudServiceLaunchConfigurationDelegate implements ILaunchConf
 			throw new IllegalArgumentException("Local Cloud Service ID is missing from launch configuration!");
 		}
 		BootCliCommand cmd = new BootCliCommand(BootCliUtils.getSpringBootHome());
-		return Runtime.getRuntime().exec(cmd.getProcessArguments("cloud", serviceId), ENVIRONMENT, cmd.getProcessWorkingFolder());
+		return Runtime.getRuntime().exec(cmd.getProcessArguments("cloud", serviceId), /*ENVIRONMENT*/null, cmd.getProcessWorkingFolder());
 	}
 
 	@Override
