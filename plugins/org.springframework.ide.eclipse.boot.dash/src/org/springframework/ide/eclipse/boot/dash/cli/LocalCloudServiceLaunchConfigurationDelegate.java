@@ -21,13 +21,6 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 public class LocalCloudServiceLaunchConfigurationDelegate implements ILaunchConfigurationDelegate {
 
-	private static final String[] ENVIRONMENT = new String[] {
-			String.format("JAVA_HOME=%s", System.getProperty("java.home")),
-			String.format("PATH=%s", System.getenv("PATH")),
-			String.format("USERDOMAIN=%s", System.getenv("USERDOMAIN")),
-			String.format("USERNAME=%s", /*System.getenv("USERNAME")*/System.getProperty("user.name")),
-			String.format("USERPROFILE=%s", /*System.getenv("USERPROFILE")*/System.getProperty("user.home")) };
-
 	public final static String ID = "org.springframework.ide.eclipse.boot.dash.cloud.cli.service";
 
 	public final static ILaunchConfigurationType TYPE = DebugPlugin.getDefault().getLaunchManager().getLaunchConfigurationType(ID);
@@ -40,7 +33,7 @@ public class LocalCloudServiceLaunchConfigurationDelegate implements ILaunchConf
 			throw new IllegalArgumentException("Local Cloud Service ID is missing from launch configuration!");
 		}
 		BootCliCommand cmd = new BootCliCommand(BootCliUtils.getSpringBootHome());
-		return Runtime.getRuntime().exec(cmd.getProcessArguments("cloud", serviceId), /*ENVIRONMENT*/null, cmd.getProcessWorkingFolder());
+		return Runtime.getRuntime().exec(cmd.getProcessArguments("cloud", serviceId), null, cmd.getProcessWorkingFolder());
 	}
 
 	@Override
@@ -56,12 +49,14 @@ public class LocalCloudServiceLaunchConfigurationDelegate implements ILaunchConf
 					BufferedWriter writer = new BufferedWriter (new OutputStreamWriter(process.getOutputStream()));
 					try {
 						writer.write((char) 3);
+						writer.write('\n');
 						writer.flush();
+						writer.close();
 					} catch (IOException e) {
 						Log.log(e);
 					}
 					int waitAttempts = 1;
-					while (process.isAlive() && waitAttempts < 5) {
+					while (process.isAlive() && waitAttempts < 15) {
 						try {
 							Thread.sleep(500);
 						} catch (InterruptedException e) {

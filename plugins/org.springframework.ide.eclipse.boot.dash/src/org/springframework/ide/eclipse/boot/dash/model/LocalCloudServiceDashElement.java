@@ -233,6 +233,8 @@ public class LocalCloudServiceDashElement extends WrappingBootDashElement<String
 		return (LocalBootDashModel) super.getBootDashModel();
 	}
 
-
+	public String getId() {
+		return delegate;
+	}
 
 }
