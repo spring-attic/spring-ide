@@ -44,9 +44,7 @@ import com.google.common.collect.ImmutableSortedSet;
 public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElement<IProject> {
 
 	private static final boolean DEBUG = Boolean.getBoolean("sts.debug.BootProjectDashElement");
-	{
-		System.out.println("sts.debug.BootProjectDashElement="+DEBUG);
-	}
+
 	private static void debug(String string) {
 		if (DEBUG) {
 			System.err.println(string);
