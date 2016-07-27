@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.m2e.core.ui.internal.UpdateMavenProjectJob;
 import org.osgi.framework.Version;
 import org.osgi.framework.VersionRange;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
@@ -219,6 +220,9 @@ public class BootProjectTestHarness {
 			@Override
 			public boolean test() throws Exception {
 				assertOk(job.getResult());
+				if (project.hasNature("org.eclipse.m2e.core.maven2Nature")) {
+					updateMavenProjectDependencies(project);
+				}
 				StsTestUtil.assertNoErrors(project);
 				return true;
 			}
@@ -227,6 +231,19 @@ public class BootProjectTestHarness {
 
 	public IProject getProject(String projectName) {
 		return workspace.getRoot().getProject(projectName);
+	}
+	
+	public static void updateMavenProjectDependencies(IProject project) throws InterruptedException {
+		boolean refreshFromLocal = true;
+		boolean cleanProjects = true;
+		boolean updateConfig = true;
+		IProject[] projects = {project};
+		boolean offline = false;
+		boolean forceUpdateDeps = true;
+		UpdateMavenProjectJob job = new UpdateMavenProjectJob(projects, offline, forceUpdateDeps,
+				updateConfig, cleanProjects, refreshFromLocal);
+		job.schedule();
+		job.join();
 	}
 
 	public static IProject createPredefinedMavenProject(final String projectName, final String bundleName)
@@ -275,16 +292,9 @@ public class BootProjectTestHarness {
 			return project;
 		}
 
-	public static void buildMavenProject(IProject p) throws CoreException {
+	public static void buildMavenProject(IProject p) throws Exception {
 		ISpringBootProject bp = SpringBootCore.create(p);
-		Job job = bp.updateProjectConfiguration();
-		if (job!=null) {
-			try {
-				job.join();
-			} catch (InterruptedException e) {
-				throw ExceptionUtil.coreException(e);
-			}
-		}
+		updateMavenProjectDependencies(bp.getProject());
 		bp.getProject().build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
 	}
 
