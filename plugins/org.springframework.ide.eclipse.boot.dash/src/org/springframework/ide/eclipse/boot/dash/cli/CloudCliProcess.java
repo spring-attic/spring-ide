@@ -46,8 +46,8 @@ public class CloudCliProcess extends RuntimeProcess {
 	public void terminate() throws DebugException {
 		if (delegateAppPid != -1) {
 			try {
-				if (Platform.getOS() == Platform.OS_WIN32) {
-					Runtime.getRuntime().exec("Taskkill /PID " + delegateAppPid + " /F ").waitFor(500, TimeUnit.MILLISECONDS);
+				if (Platform.OS_WIN32.equals(Platform.getOS())) {
+					Runtime.getRuntime().exec("taskkill /pid " + delegateAppPid + " /t /f").waitFor(500, TimeUnit.MILLISECONDS);
 				} else {
 					Runtime.getRuntime().exec("kill -SIGINT " + delegateAppPid).waitFor(500, TimeUnit.MILLISECONDS);
 				}
