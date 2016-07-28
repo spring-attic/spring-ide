@@ -100,7 +100,7 @@ public class CloudFoundryClientCache {
 		}
 
 		public CFClientProvider(Params params) {
-			long sslTimeout = Long.getLong("sts.bootdash.cf.client.ssl.handshake.timeout", 30); //TODO: make a preference for this?
+			long sslTimeout = Long.getLong("sts.bootdash.cf.client.ssl.handshake.timeout", 60); //TODO: make a preference for this?
 			connection = DefaultConnectionContext.builder()
 					.proxyConfiguration(Optional.ofNullable(getProxy(params.host)))
 					.apiHost(params.host)
