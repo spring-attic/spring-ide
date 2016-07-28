@@ -35,7 +35,6 @@ import org.osgi.framework.Version;
 import org.osgi.framework.VersionRange;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
-import org.springframework.ide.eclipse.boot.dash.util.DebugUtil;
 import org.springframework.ide.eclipse.boot.test.util.CopyFromFolder;
 import org.springframework.ide.eclipse.boot.util.RetryUtil;
 import org.springframework.ide.eclipse.boot.wizard.NewSpringBootWizardModel;
