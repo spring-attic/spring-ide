@@ -4,7 +4,8 @@ Bundle-Name: org.springsource.ide.eclipse.commons.cloudfoundry.client.v2
 Bundle-SymbolicName: org.springsource.ide.eclipse.commons.cloudfoundry.client.v2
 Bundle-Version: 3.8.1.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Bundle-ClassPath: dependencies/cloudfoundry-client-2.0.0.BUILD-SNAPSHOT.jar,
+Bundle-ClassPath: .,
+ dependencies/cloudfoundry-client-2.0.0.BUILD-SNAPSHOT.jar,
  dependencies/cloudfoundry-client-reactor-2.0.0.BUILD-SNAPSHOT.jar,
  dependencies/cloudfoundry-operations-2.0.0.BUILD-SNAPSHOT.jar,
  dependencies/cloudfoundry-util-2.0.0.BUILD-SNAPSHOT.jar,
