@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2;
 
 import java.net.URL;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -99,9 +100,11 @@ public class CloudFoundryClientCache {
 		}
 
 		public CFClientProvider(Params params) {
+			long sslTimeout = Long.getLong("sts.bootdash.cf.client.ssl.handshake.timeout", 60); //TODO: make a preference for this?
 			connection = DefaultConnectionContext.builder()
 					.proxyConfiguration(Optional.ofNullable(getProxy(params.host)))
 					.apiHost(params.host)
+					.sslHandshakeTimeout(Duration.ofSeconds(sslTimeout))
 					.skipSslValidation(params.skipSsl)
 					.build();
 

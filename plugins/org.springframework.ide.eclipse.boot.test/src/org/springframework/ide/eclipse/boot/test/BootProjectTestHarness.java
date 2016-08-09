@@ -53,6 +53,15 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
  * @author Kris De Volder
  */
 public class BootProjectTestHarness {
+	
+	private static final boolean DEBUG = true;
+
+	private static void debug(String string) {
+		if (DEBUG) {
+			System.out.println(string);
+		}
+	}
+
 
 	public static final long BOOT_PROJECT_CREATION_TIMEOUT = 5*60*1000; // long, may download maven dependencies
 
@@ -234,6 +243,7 @@ public class BootProjectTestHarness {
 	}
 	
 	public static void updateMavenProjectDependencies(IProject project) throws InterruptedException {
+		debug("updateMavenProjectDependencies("+project.getName()+") ...");
 		boolean refreshFromLocal = true;
 		boolean cleanProjects = true;
 		boolean updateConfig = true;
@@ -244,6 +254,7 @@ public class BootProjectTestHarness {
 				updateConfig, cleanProjects, refreshFromLocal);
 		job.schedule();
 		job.join();
+		debug("updateMavenProjectDependencies("+project.getName()+") DONE");
 	}
 
 	public static IProject createPredefinedMavenProject(final String projectName, final String bundleName)
