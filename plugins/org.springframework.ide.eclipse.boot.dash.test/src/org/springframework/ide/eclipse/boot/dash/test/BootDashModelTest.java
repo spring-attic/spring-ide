@@ -530,7 +530,9 @@ public class BootDashModelTest {
 
 			System.out.println("Changing port in application.properties to "+defaultPort);
 			setContents(props, "server.port="+defaultPort);
+			System.out.println("Rebuilding project...");
 			StsTestUtil.assertNoErrors(project.getProject());
+			System.out.println("Rebuilding project... DONE");
 			   //builds the project... should trigger devtools to 'refresh'.
 			waitForPort(project, defaultPort);
 			waitForPort(launch, defaultPort);
@@ -543,7 +545,7 @@ public class BootDashModelTest {
 	}
 
 	protected void waitForPort(final BootDashElement element, final int expectedPort) throws Exception {
-		new ACondition("Wait for port to change to "+expectedPort, 5000) { //Devtools should restart really fast
+		new ACondition("Wait for port on "+element.getName()+" to change to "+expectedPort, 5000) { //Devtools should restart really fast
 			@Override
 			public boolean test() throws Exception {
 				assertEquals(ImmutableSet.of(expectedPort), element.getLivePorts());
