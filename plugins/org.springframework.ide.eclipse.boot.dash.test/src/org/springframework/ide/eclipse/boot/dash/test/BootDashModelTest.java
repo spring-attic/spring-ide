@@ -496,6 +496,7 @@ public class BootDashModelTest {
 		final BootDashElement project = getElement(projectName);
 		try {
 			waitForState(project, RunState.INACTIVE);
+			System.out.println("Starting "+project);
 			project.restart(RunState.RUNNING, ui);
 			waitForState(project, RunState.STARTING);
 			waitForState(project, RunState.RUNNING);
@@ -507,15 +508,19 @@ public class BootDashModelTest {
 
 			waitForPort(project, defaultPort);
 
+			System.out.println("Changing port in application.properties to "+changedPort);
 			IFile props = project.getProject().getFile(new Path("src/main/resources/application.properties"));
 			setContents(props, "server.port="+changedPort);
+			System.out.println("Rebuilding project...");
 			StsTestUtil.assertNoErrors(project.getProject());
+			System.out.println("Rebuilding project... DONE");
 			   //builds the project... should trigger devtools to 'refresh'.
 
 			waitForPort(project, changedPort);
 			waitForPort(launch, changedPort);
 
 			//Now try that this also works in debug mode...
+			System.out.println("Restart project in DEBUG mode...");
 			project.restart(RunState.DEBUGGING, ui);
 			waitForState(project, RunState.STARTING);
 			waitForState(project, RunState.DEBUGGING);
@@ -523,6 +528,7 @@ public class BootDashModelTest {
 			waitForPort(project, changedPort);
 			waitForPort(launch, changedPort);
 
+			System.out.println("Changing port in application.properties to "+defaultPort);
 			setContents(props, "server.port="+defaultPort);
 			StsTestUtil.assertNoErrors(project.getProject());
 			   //builds the project... should trigger devtools to 'refresh'.
@@ -530,6 +536,7 @@ public class BootDashModelTest {
 			waitForPort(launch, defaultPort);
 
 		} finally {
+			System.out.println("Cleanup: stop "+project);
 			project.stopAsync(ui);
 			waitForState(project, RunState.INACTIVE);
 		}
