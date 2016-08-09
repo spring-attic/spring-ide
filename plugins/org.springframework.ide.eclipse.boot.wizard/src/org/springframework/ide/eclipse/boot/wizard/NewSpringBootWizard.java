@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.wizard;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -251,7 +252,7 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 				}
 			}
 		};
-		//job.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
+		job.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
 		job.setPriority(Job.BUILD);
 		job.setUser(true); //shows progress in default eclipse config
 		job.schedule();
