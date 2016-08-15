@@ -199,7 +199,7 @@ public class ReactorUtils {
 		class SorterAccumulator {
 
 			final PriorityQueue<Tuple2<T, Long>> holdingPen = new PriorityQueue<>((Tuple2<T, Long> o1, Tuple2<T, Long> o2) -> {
-				return comparator.compare(o1.t1, o2.t1);
+				return comparator.compare(o1.getT1(), o2.getT1());
 			});
 
 			final Flux<T> released = Flux.fromIterable(() -> new Iterator<T>() {
@@ -213,14 +213,14 @@ public class ReactorUtils {
 				}
 
 				private boolean isOldEnough(Tuple2<T, Long> nxt) {
-					long age = System.currentTimeMillis() - nxt.t2;
+					long age = System.currentTimeMillis() - nxt.getT2();
 					return age > bufferTime.toMillis();
 				}
 
 				@Override
 				public T next() {
 					synchronized (holdingPen) {
-						return holdingPen.remove().t1;
+						return holdingPen.remove().getT1();
 					}
 				}
 			});
