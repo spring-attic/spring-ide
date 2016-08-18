@@ -67,8 +67,6 @@ import org.cloudfoundry.operations.services.ServiceInstance;
 import org.cloudfoundry.operations.services.UnbindServiceInstanceRequest;
 import org.cloudfoundry.operations.spaces.GetSpaceRequest;
 import org.cloudfoundry.operations.spaces.SpaceDetail;
-import org.cloudfoundry.reactor.doppler.ReactorDopplerClient;
-import org.cloudfoundry.reactor.uaa.ReactorUaaClient;
 import org.cloudfoundry.util.PaginationUtils;
 import org.eclipse.core.runtime.Platform;
 import org.osgi.framework.Version;
