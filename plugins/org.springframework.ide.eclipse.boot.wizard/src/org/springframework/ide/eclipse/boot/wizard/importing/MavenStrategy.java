@@ -16,12 +16,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.maven.model.Model;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.project.IMavenProjectImportResult;
@@ -66,7 +70,8 @@ public class MavenStrategy extends ImportStrategy {
 		}
 
 		public void run(IProgressMonitor mon) throws InvocationTargetException, InterruptedException {
-			mon.beginTask("Create maven project "+projectName, 4);
+			mon.beginTask("Create maven project "+projectName, 5);
+			Job.getJobManager().beginRule(getRule(), new SubProgressMonitor(mon, 1));
 			try {
 				//1: 1 copy codeset data
 				codeset.createAt(location);
@@ -85,10 +90,14 @@ public class MavenStrategy extends ImportStrategy {
 				throw new InvocationTargetException(e);
 			}
 			finally {
+				Job.getJobManager().endRule(getRule());
 				mon.done();
 			}
 		}
 
+		private ISchedulingRule getRule() {
+			return ResourcesPlugin.getWorkspace().getRoot();
+		}
 	}
 
 	@Override

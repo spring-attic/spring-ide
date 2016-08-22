@@ -252,7 +252,9 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 				}
 			}
 		};
-		job.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
+		//WARNING: Do not set a scheduling rule here. It breaks gradle import by causing a deadlock or rule conflict.
+		//job.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
+		//See: https://www.pivotaltracker.com/story/show/128781771
 		job.setPriority(Job.BUILD);
 		job.setUser(true); //shows progress in default eclipse config
 		job.schedule();
