@@ -28,6 +28,7 @@ public abstract class StaticImportCatalogue {
 			"org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors",
 			"org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers",
 			"org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers",
+			"org.springframework.restdocs.mockmvc.MockMvcRestDocumentation",
 			"org.springframework.test.web.client.match.MockRestRequestMatchers",
 			"org.springframework.test.web.client.response.MockRestResponseCreators",
 			"org.springframework.test.web.servlet.request.MockMvcRequestBuilders",
