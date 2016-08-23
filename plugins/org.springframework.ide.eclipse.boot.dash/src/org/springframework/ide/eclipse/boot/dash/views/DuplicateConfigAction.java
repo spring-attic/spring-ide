@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
@@ -23,6 +24,7 @@ public class DuplicateConfigAction extends AbstractBootDashElementsAction {
 
 	public DuplicateConfigAction(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		super(model, selection, ui);
+		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/copy.gif"));
 		this.setText("Duplicate Config");
 		this.setToolTipText("Make a copy of this element's LaunchConfiguration");
 	}
