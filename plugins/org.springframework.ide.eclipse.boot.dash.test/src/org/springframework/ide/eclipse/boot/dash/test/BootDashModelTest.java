@@ -813,7 +813,12 @@ public class BootDashModelTest {
 			rm = assertRequestMappingWithPath(mappings, "/error"); //Even empty apps should have a 'error' mapping
 			assertFalse(rm.isUserDefined());
 
-			rm = assertRequestMappingWithPath(mappings, "/mappings || /mappings.json"); //Since we are using this, it should be there.
+			rm = assertRequestMappingWithPath(mappings, "/mappings");  //Since we are using this, it should be there.
+			assertNotNull(rm.getMethod());
+			assertNotNull(rm.getType());
+			assertFalse(rm.isUserDefined());
+
+			rm = assertRequestMappingWithPath(mappings, "/mappings.json");  //Since we are using this, it should be there.
 			assertNotNull(rm.getMethod());
 			assertNotNull(rm.getType());
 			assertFalse(rm.isUserDefined());

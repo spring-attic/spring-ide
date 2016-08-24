@@ -12,13 +12,21 @@ package org.springframework.ide.eclipse.boot.dash.model.requestmappings;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.JLRMethodParser.JLRMethod;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
@@ -47,44 +55,24 @@ public class ActuatorClient {
        }
 		 */
 
-		private String key;
 		private JSONObject beanInfo;
 		private String path;
 		private JLRMethod methodData;
 
-		RequestMappingImpl(String key, JSONObject beanInfo, TypeLookup typeLookup) {
+		RequestMappingImpl(String path, JSONObject beanInfo, TypeLookup typeLookup) {
 			super(typeLookup);
-			this.key = key;
+			this.path = path;
 			this.beanInfo = beanInfo;
 		}
 
 		@Override
 		public String getPath() {
-			if (path==null) {
-				path = extractPath(key);
-			}
 			return path;
-		}
-
-		private String extractPath(String key) {
-			if (key.startsWith("{[")) { //Case 2 (see above)
-				//An almost json string. Unfortunately not really json so we can't
-				//use org.json or jackson Mapper to properly parse this.
-				int start = 2; //right after first '['
-				int end = key.indexOf(']');
-				if (end>=2) {
-					return key.substring(start, end);
-				}
-			}
-			//Case 1, or some unanticipated stuff.
-			//Assume the key is the path, which is right for Case 1
-			// and  probably more useful than null for 'unanticipated stuff'.
-			return key;
 		}
 
 		@Override
 		public String toString() {
-			return "RequestMapping("+key+")";
+			return "RequestMapping("+path+")";
 		}
 
 		@Override
@@ -129,8 +117,39 @@ public class ActuatorClient {
 			return methodData;
 		}
 
+		private static Stream<String> processOrPaths(String pathExp) {
+			if (pathExp.contains("||")) {
+				String[] paths = pathExp.split(Pattern.quote("||"));
+				ArrayList<RequestMapping> list = new ArrayList<>();
+				return Stream.of(paths).map(String::trim);
+			} else {
+				return Stream.of(pathExp);
+			}
+		}
 
 
+		private static String extractPath(String key) {
+			if (key.startsWith("{[")) { //Case 2 (see above)
+				//An almost json string. Unfortunately not really json so we can't
+				//use org.json or jackson Mapper to properly parse this.
+				int start = 2; //right after first '['
+				int end = key.indexOf(']');
+				if (end>=2) {
+					return key.substring(start, end);
+				}
+			}
+			//Case 1, or some unanticipated stuff.
+			//Assume the key is the path, which is right for Case 1
+			// and  probably more useful than null for 'unanticipated stuff'.
+			return key;
+		}
+
+
+		public static Collection<RequestMappingImpl> create(String key, JSONObject value, TypeLookup typeLookup) {
+			return processOrPaths(extractPath(key))
+					.map(path -> new RequestMappingImpl(path, value, typeLookup))
+					.collect(Collectors.toList());
+		}
 	}
 
 	private RestOperations rest;
@@ -150,7 +169,7 @@ public class ActuatorClient {
 		try {
 			String json = rest.getForObject(target+"/mappings", String.class);
 			if (json!=null) {
-				//System.out.println("Got some json:\n"+json);
+				System.out.println("Got some json:\n"+json);
 				return parse(json);
 			}
 		} catch (Exception e) {
@@ -165,11 +184,12 @@ public class ActuatorClient {
 		JSONTokener tokener = new JSONTokener(json);
 		JSONObject obj = new JSONObject(tokener);
 		Iterator<String> keys = obj.keys();
-		List<RequestMapping> result = new ArrayList<RequestMapping>();
+		List<RequestMapping> result = new ArrayList<>();
 		while (keys.hasNext()) {
-			String key = keys.next();
-			JSONObject value = obj.getJSONObject(key);
-			result.add(new RequestMappingImpl(key, value, typeLookup));
+			String rawKey = keys.next();
+			JSONObject value = obj.getJSONObject(rawKey);
+			Collection<RequestMappingImpl> mappings = RequestMappingImpl.create(rawKey, value, typeLookup);
+			result.addAll(mappings);
 		}
 		return result;
 	}
