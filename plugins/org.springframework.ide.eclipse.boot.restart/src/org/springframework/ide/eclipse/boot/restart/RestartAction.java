@@ -19,6 +19,7 @@ import java.util.Date;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.model.ILaunchConfigurationDelegate;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.internal.ui.views.console.ProcessConsole;
@@ -52,12 +53,15 @@ public class RestartAction extends Action implements IUpdate {
 		try {
 			IProcess process = this.console.getProcess();
 			ILaunchConfiguration launchConfiguration = process.getLaunch().getLaunchConfiguration();
-			ILaunchConfigurationDelegate delegate = launchConfiguration.getType().getDelegate();
-			
-			bootProject = delegate instanceof BootLaunchConfigurationDelegate;
-
-			IProject project = BootLaunchConfigurationDelegate.getProject(launchConfiguration);
-			devtools = BootPropertyTester.hasDevtools(project);
+			ILaunchConfigurationType type = launchConfiguration.getType();
+			if (type!=null) {
+				ILaunchConfigurationDelegate delegate = type.getDelegate();
+				
+				bootProject = delegate instanceof BootLaunchConfigurationDelegate;
+	
+				IProject project = BootLaunchConfigurationDelegate.getProject(launchConfiguration);
+				devtools = BootPropertyTester.hasDevtools(project);
+			}
 
 		} catch (CoreException e) {
 		}

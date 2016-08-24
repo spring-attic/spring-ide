@@ -344,6 +344,10 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 		return getBootDashModel().getLaunchConfRunStateTracker();
 	}
 
+	protected void refreshRunState() {
+		runState.refresh();
+	}
+
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	protected ILaunchConfiguration createLaunchConfigForEditing() throws Exception {

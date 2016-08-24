@@ -36,6 +36,7 @@ import org.eclipse.jdt.launching.JavaLaunchDelegate;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.boot.util.ProcessListenerAdapter;
 import org.springframework.ide.eclipse.boot.util.ProcessTracker;
 import org.springframework.ide.eclipse.editor.support.util.StringUtil;
@@ -148,7 +149,7 @@ public abstract class AbstractBootLaunchConfigurationDelegate extends JavaLaunch
 			if (type!=null) {
 				ILaunchConfiguration[] configs = lm.getLaunchConfigurations(type);
 				if (configs!=null && configs.length>0) {
-					ArrayList<ILaunchConfiguration> result = new ArrayList<ILaunchConfiguration>();
+					ArrayList<ILaunchConfiguration> result = new ArrayList<>();
 					for (ILaunchConfiguration conf : configs) {
 						if (p.equals(getProject(conf))) {
 							result.add(conf);
@@ -188,7 +189,7 @@ public abstract class AbstractBootLaunchConfigurationDelegate extends JavaLaunch
 
 	@SuppressWarnings("unchecked")
 	public static List<PropVal> getProperties(ILaunchConfiguration conf) {
-		ArrayList<PropVal> props = new ArrayList<PropVal>();
+		ArrayList<PropVal> props = new ArrayList<>();
 		try {
 			//Note: in e43 conf.getAttributes doesn't use generics yet. So to
 			//build with 4.3 we need to to some funky casting below.
@@ -281,7 +282,7 @@ public abstract class AbstractBootLaunchConfigurationDelegate extends JavaLaunch
 				return p;
 			}
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 		}
 		//debug(conf, "getProject => NULL");
 		return null;

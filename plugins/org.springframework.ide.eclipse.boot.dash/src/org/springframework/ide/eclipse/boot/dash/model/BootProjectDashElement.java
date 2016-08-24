@@ -214,6 +214,7 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 			children.addListener(new ValueListener<ImmutableSet<BootDashElement>>() {
 				public void gotValue(LiveExpression<ImmutableSet<BootDashElement>> exp, ImmutableSet<BootDashElement> value) {
 					getBootDashModel().notifyElementChanged(BootProjectDashElement.this);
+					refreshRunState();
 				}
 			});
 			addDisposableChild(children);
