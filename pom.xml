@@ -57,8 +57,7 @@
 	</distributionManagement>
 
 	<properties>
-        <misc.p2.repo.version>3.8.2.201608151946</misc.p2.repo.version> <!-- !!!Warning OLD!!! -->
-	    <!-- BROKEN: <misc.p2.repo.version>3.8.2.20160824194</misc.p2.repo.version> -->
+	    <misc.p2.repo.version>3.8.2.20160824194</misc.p2.repo.version>
 		<p2.qualifier>SNAPSHOT</p2.qualifier>
 		<p2.sign>false</p2.sign>
 		<p2.repository.name>Spring IDE</p2.repository.name>
