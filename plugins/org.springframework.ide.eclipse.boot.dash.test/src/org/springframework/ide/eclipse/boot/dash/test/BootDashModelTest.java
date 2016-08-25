@@ -43,6 +43,7 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -281,6 +282,57 @@ public class BootDashModelTest {
 		waitModelElements("testProject");
 	}
 
+
+	/**
+	 * Test that deleting a running launch conf works properly:
+	 *  1) orphaned launch is terminated
+	 *  2) BootProjectDashElement runstate is updated.
+	 */
+	@Test public void testDeleteRunningLaunchConfig() throws Exception {
+		doTestDeleteRunningLaunchConf(RunState.RUNNING);
+	}
+
+	/**
+	 * Test that deleting a running launch conf, (in debug mode) works properly:
+	 *  1) orphaned launch is terminated
+	 *  2) BootProjectDashElement runstate is updated.
+	 */
+	@Test public void testDeleteDebuggingLaunchConfig() throws Exception {
+		doTestDeleteRunningLaunchConf(RunState.DEBUGGING);
+	}
+
+	private void doTestDeleteRunningLaunchConf(RunState runState) throws Exception, CoreException {
+		String projectName = "testProject";
+		createBootProject(projectName);
+		waitModelElements(projectName);
+
+		BootProjectDashElement element = getElement(projectName);
+		element.openConfig(ui); //Ensure that at least one launch config exists.
+		verify(ui).openLaunchConfigurationDialogOnGroup(any(ILaunchConfiguration.class), any(String.class));
+		verifyNoMoreInteractions(ui);
+		ACondition.waitFor("child", 3000, () -> {
+			assertNotNull(getSingleValue(element.getCurrentChildren()));
+		});
+		LaunchConfDashElement launchConfElement = (LaunchConfDashElement) getSingleValue(element.getCurrentChildren());
+		ILaunchConfiguration launchConf = getSingleValue(launchConfElement.getLaunchConfigs());
+
+		element.restart(runState, null);
+		waitForState(element, runState);
+		waitForState(launchConfElement, runState);
+
+		ILaunch launch = getSingleValue(launchConfElement.getLaunches());
+		assertFalse(launch.isTerminated());
+
+		launchConf.delete();
+
+		ACondition.waitFor("Expectations after launchConf deleted", 2000, () -> {
+			assertTrue("launch terminated", launch.isTerminated());
+			assertEquals(ImmutableSet.of(), element.getChildren().getValues());
+			assertEquals(RunState.INACTIVE, element.getRunState());
+		});
+	}
+
+
 	/**
 	 * Test that element state listener for launch conf element is notified when it is
 	 * launched via its project.
@@ -349,9 +401,9 @@ public class BootDashModelTest {
 	}
 
 
-	private BootDashElement getSingleValue(ImmutableSet<BootDashElement> values) {
+	private <T> T getSingleValue(ImmutableSet<T> values) {
 		assertEquals("Unexpected number of values in "+values, 1, values.size());
-		for (BootDashElement e : values) {
+		for (T e : values) {
 			return e;
 		}
 		throw new IllegalStateException("This code should be unreachable");
