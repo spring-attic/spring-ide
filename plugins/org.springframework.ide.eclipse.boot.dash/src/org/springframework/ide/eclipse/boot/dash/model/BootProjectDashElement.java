@@ -22,6 +22,7 @@ import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.util.CollectionUtils;
+import org.springframework.ide.eclipse.boot.dash.util.DebugUtil;
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager;
@@ -43,10 +44,8 @@ import com.google.common.collect.ImmutableSortedSet;
  */
 public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElement<IProject> {
 
-	private static final boolean DEBUG = Boolean.getBoolean("sts.debug.BootProjectDashElement");
-	{
-		System.out.println("sts.debug.BootProjectDashElement="+DEBUG);
-	}
+	private static final boolean DEBUG = DebugUtil.isDevelopment();
+
 	private static void debug(String string) {
 		if (DEBUG) {
 			System.err.println(string);
@@ -215,6 +214,7 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 			children.addListener(new ValueListener<ImmutableSet<BootDashElement>>() {
 				public void gotValue(LiveExpression<ImmutableSet<BootDashElement>> exp, ImmutableSet<BootDashElement> value) {
 					getBootDashModel().notifyElementChanged(BootProjectDashElement.this);
+					refreshRunState();
 				}
 			});
 			addDisposableChild(children);

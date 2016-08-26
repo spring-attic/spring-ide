@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.m2e.core.ui.internal.UpdateMavenProjectJob;
 import org.osgi.framework.Version;
 import org.osgi.framework.VersionRange;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
@@ -52,6 +53,15 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
  * @author Kris De Volder
  */
 public class BootProjectTestHarness {
+	
+	private static final boolean DEBUG = true;
+
+	private static void debug(String string) {
+		if (DEBUG) {
+			System.out.println(string);
+		}
+	}
+
 
 	public static final long BOOT_PROJECT_CREATION_TIMEOUT = 5*60*1000; // long, may download maven dependencies
 
@@ -219,6 +229,9 @@ public class BootProjectTestHarness {
 			@Override
 			public boolean test() throws Exception {
 				assertOk(job.getResult());
+				if (project.hasNature("org.eclipse.m2e.core.maven2Nature")) {
+					updateMavenProjectDependencies(project);
+				}
 				StsTestUtil.assertNoErrors(project);
 				return true;
 			}
@@ -227,6 +240,21 @@ public class BootProjectTestHarness {
 
 	public IProject getProject(String projectName) {
 		return workspace.getRoot().getProject(projectName);
+	}
+	
+	public static void updateMavenProjectDependencies(IProject project) throws InterruptedException {
+		debug("updateMavenProjectDependencies("+project.getName()+") ...");
+		boolean refreshFromLocal = true;
+		boolean cleanProjects = true;
+		boolean updateConfig = true;
+		IProject[] projects = {project};
+		boolean offline = false;
+		boolean forceUpdateDeps = true;
+		UpdateMavenProjectJob job = new UpdateMavenProjectJob(projects, offline, forceUpdateDeps,
+				updateConfig, cleanProjects, refreshFromLocal);
+		job.schedule();
+		job.join();
+		debug("updateMavenProjectDependencies("+project.getName()+") DONE");
 	}
 
 	public static IProject createPredefinedMavenProject(final String projectName, final String bundleName)
@@ -275,16 +303,9 @@ public class BootProjectTestHarness {
 			return project;
 		}
 
-	public static void buildMavenProject(IProject p) throws CoreException {
+	public static void buildMavenProject(IProject p) throws Exception {
 		ISpringBootProject bp = SpringBootCore.create(p);
-		Job job = bp.updateProjectConfiguration();
-		if (job!=null) {
-			try {
-				job.join();
-			} catch (InterruptedException e) {
-				throw ExceptionUtil.coreException(e);
-			}
-		}
+		updateMavenProjectDependencies(bp.getProject());
 		bp.getProject().build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
 	}
 

@@ -98,6 +98,44 @@ public class ActuatorClientTest {
 		// These are tested in 'testRequestMappings' in BootDashModelTest
 	}
 
+	@Test public void testRequestMappingExpandOrPaths() throws Exception {
+		RestTemplate rest = mock(RestTemplate.class);
+		TypeLookup types = mock(TypeLookup.class);
+		IType type = mock(IType.class);
+
+		String json =
+				"{" +
+				"   \"{[/env || /env.json],methods=[GET],produces=[application/json]}\":{\n" +
+				"        \"bean\":\"endpointHandlerMapping\",\n" +
+				"        \"method\":\"public java.lang.Object org.springframework.boot.actuate.endpoint.mvc.EndpointMvcAdapter.invoke()\"\n" +
+				"     }\n" +
+				"}";
+		String fqTypeName = "org.springframework.boot.actuate.endpoint.mvc.EndpointMvcAdapter";
+		String methodName = "invoke";
+
+		when(rest.getForObject("http://sample/mappings", String.class))
+			.thenReturn(json);
+
+		ActuatorClient client = new ActuatorClient(new URI("http://sample"), types, rest);
+		when(types.findType(fqTypeName)).thenReturn(type);
+
+		List<RequestMapping> requestMappings = client.getRequestMappings();
+		{
+			RequestMapping rm = assertRequestMappingWithPath(requestMappings, "/env");
+			assertEquals(fqTypeName, rm.getFullyQualifiedClassName());
+			assertEquals(methodName, rm.getMethodName());
+			assertEquals(type, rm.getType());
+		}
+
+		{
+			RequestMapping rm = assertRequestMappingWithPath(requestMappings, "/env.json");
+			assertEquals(fqTypeName, rm.getFullyQualifiedClassName());
+			assertEquals(methodName, rm.getMethodName());
+			assertEquals(type, rm.getType());
+		}
+	}
+
+
 	//////////////////////////////////////////////////////////////////
 
 	private String getContents(String resourcePath) throws Exception {

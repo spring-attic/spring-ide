@@ -29,6 +29,7 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
+import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 
 /**
  * JUnit 4 'Rule' that checks whether a test registered some
@@ -119,11 +120,13 @@ public class ListenerLeakDetector implements TestRule {
 	}
 
 	protected void verify() throws Throwable {
-		Set<Object> endingListeners = getListeners();
-		for (Object l : endingListeners) {
-			if (!startingListeners.contains(l)) {
-				throw new AssertionFailedError("Leaked listener: "+l+" of class "+l.getClass().getName());
+		ACondition.waitFor("listeners removed", 2000, () -> {
+			Set<Object> endingListeners = getListeners();
+			for (Object l : endingListeners) {
+				if (!startingListeners.contains(l)) {
+					throw new AssertionFailedError("Leaked listener: "+l+" of class "+l.getClass().getName());
+				}
 			}
-		}
+		});
 	}
 }

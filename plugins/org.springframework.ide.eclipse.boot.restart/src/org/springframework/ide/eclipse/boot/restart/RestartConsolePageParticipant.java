@@ -114,8 +114,9 @@ public class RestartConsolePageParticipant implements IConsolePageParticipant,
 				DebugUIPlugin.getStandardDisplay().asyncExec(new Runnable() {
 
 					public void run() {
-						if (RestartConsolePageParticipant.this.restart != null) {
-							RestartConsolePageParticipant.this.restart.update();
+						RestartAction action = RestartConsolePageParticipant.this.restart;
+						if (action != null) {
+							action.update();
 						}
 					}
 

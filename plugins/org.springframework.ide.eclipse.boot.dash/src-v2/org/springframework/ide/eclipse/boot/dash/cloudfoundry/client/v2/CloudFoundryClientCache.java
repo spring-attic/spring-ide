@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2;
 
 import java.net.URL;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -99,9 +100,14 @@ public class CloudFoundryClientCache {
 		}
 
 		public CFClientProvider(Params params) {
+			long sslTimeout = Long.getLong("sts.bootdash.cf.client.ssl.handshake.timeout", 60); //TODO: make a preference for this?
+			Optional<Boolean> keepAlive = getBooleanSystemProp("http.keepAlive");
+			debug("cf client keepAlive = "+keepAlive);
 			connection = DefaultConnectionContext.builder()
 					.proxyConfiguration(Optional.ofNullable(getProxy(params.host)))
 					.apiHost(params.host)
+					.sslHandshakeTimeout(Duration.ofSeconds(sslTimeout))
+					.keepAlive(keepAlive)
 					.skipSslValidation(params.skipSsl)
 					.build();
 
@@ -124,7 +130,14 @@ public class CloudFoundryClientCache {
 					.connectionContext(connection)
 					.tokenProvider(tokenProvider)
 					.build();
+		}
 
+		private Optional<Boolean> getBooleanSystemProp(String name) {
+			String str = System.getProperty(name);
+			if (str!=null) {
+				return Optional.of(Boolean.valueOf(str));
+			}
+			return Optional.empty();
 		}
 	}
 

@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.ActuatorClient;
@@ -31,6 +32,7 @@ import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springframework.ide.eclipse.boot.dash.util.Utils;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
+import org.springframework.web.client.RestTemplate;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -253,7 +255,7 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 					protected ImmutableList<RequestMapping> compute() {
 						URI target = actuatorUrl.getValue();
 						if (target!=null) {
-							ActuatorClient client = new ActuatorClient(target, getTypeLookup());
+							ActuatorClient client = new ActuatorClient(target, getTypeLookup(), getRestTemplate());
 							List<RequestMapping> list = client.getRequestMappings();
 							if (list!=null) {
 								return ImmutableList.copyOf(client.getRequestMappings());
@@ -261,6 +263,7 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 						}
 						return null;
 					}
+
 				};
 				liveRequestMappings.dependsOn(actuatorUrl);
 				addElementState(liveRequestMappings);
@@ -268,6 +271,10 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 			}
 		}
 		return liveRequestMappings.getValue();
+	}
+
+	protected RestTemplate getRestTemplate() {
+		return new RestTemplate();
 	}
 
 	/**

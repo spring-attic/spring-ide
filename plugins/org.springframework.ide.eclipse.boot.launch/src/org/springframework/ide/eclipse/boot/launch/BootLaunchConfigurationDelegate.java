@@ -41,6 +41,7 @@ import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport.Featu
 import org.springframework.ide.eclipse.boot.launch.process.BootProcessFactory;
 import org.springframework.ide.eclipse.boot.launch.profiles.ProfileHistory;
 import org.springframework.ide.eclipse.boot.launch.util.PortFinder;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springsource.ide.eclipse.commons.core.util.OsUtils;
 
@@ -48,6 +49,23 @@ import org.springsource.ide.eclipse.commons.core.util.OsUtils;
  * @author Kris De Volder
  */
 public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigurationDelegate {
+
+	private static DeletedLaunchConfTerminator deletedLaunchConfTerminator = null;
+
+	public synchronized static void ensureDeletedLaunchConfTerminator() {
+		if (deletedLaunchConfTerminator==null) {
+			deletedLaunchConfTerminator = new DeletedLaunchConfTerminator(DebugPlugin.getDefault().getLaunchManager(), (ILaunch l) -> {
+				try {
+					return l!=null && Boolean.valueOf(l.getAttribute(BOOT_LAUNCH_MARKER));
+				} catch (Exception e) {
+					Log.log(e);
+					return false;
+				}
+			});
+		}
+	}
+
+
 
 //	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 //	private static void debug(String string) {
@@ -57,6 +75,12 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 //	}
 
 	public static final String TYPE_ID = "org.springframework.ide.eclipse.boot.launch";
+
+	/**
+	 * Launch attribute that helps recognize a launch as a boot launch even after the launch configuration has
+	 * been deleted.
+	 */
+	public static final String BOOT_LAUNCH_MARKER = "isBootLaunch";
 
 	public static final String ENABLE_LIVE_BEAN_SUPPORT = "spring.boot.livebean.enable";
 	public static final boolean DEFAULT_ENABLE_LIVE_BEAN_SUPPORT = true;
@@ -82,15 +106,18 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 	private ProfileHistory profileHistory = new ProfileHistory();
 
 	/**
-	 * Use threadlocal to gain access to current launch in some of the methods (i.e. getVMArguments in particualr) of the {@link AbstractBootLaunchConfigurationDelegate}
-	 * framework that, unfortunately don't pass it along as parameters. It's either this, or copy a whole bunch of code just so
-	 * we can modify it to add an extra argument.
+	 * Use threadlocal to gain access to current launch in some of the methods
+	 * (i.e. getVMArguments in particular) of the {@link AbstractBootLaunchConfigurationDelegate}
+	 * framework that, unfortunately don't pass it along as parameters. It's either this, or copy
+	 * a whole bunch of inherited code just so we can modify it to add an extra argument.
 	 */
 	private static final ThreadLocal<ILaunch> CURRENT_LAUNCH = new ThreadLocal<>();
 
 	@Override
 	public void launch(ILaunchConfiguration conf, String mode,
 			ILaunch launch, IProgressMonitor monitor) throws CoreException {
+		ensureDeletedLaunchConfTerminator();
+		launch.setAttribute(BOOT_LAUNCH_MARKER, "true");
 		CURRENT_LAUNCH.set(launch);
 		try {
 			profileHistory.updateHistory(getProject(conf), getProfile(conf));

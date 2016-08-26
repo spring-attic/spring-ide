@@ -42,6 +42,7 @@ import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKClient;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKLaunchTracker;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKTunnel;
 import org.springframework.ide.eclipse.boot.dash.util.CollectionUtils;
+import org.springframework.ide.eclipse.boot.dash.util.DebugUtil;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchConfRunStateTracker;
 import org.springframework.ide.eclipse.boot.dash.util.RunStateTracker.RunStateListener;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
@@ -71,7 +72,7 @@ import com.google.common.collect.ImmutableSet;
  */
 public abstract class AbstractLaunchConfigurationsDashElement<T> extends WrappingBootDashElement<T> implements Duplicatable<LaunchConfDashElement> {
 
-	private static final boolean DEBUG = false; //(""+Platform.getLocation()).contains("kdvolder");
+	private static final boolean DEBUG = DebugUtil.isDevelopment();
 	private static void debug(String string) {
 		if (DEBUG) {
 			System.out.println(string);
@@ -343,6 +344,10 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 		return getBootDashModel().getLaunchConfRunStateTracker();
 	}
 
+	protected void refreshRunState() {
+		runState.refresh();
+	}
+
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	protected ILaunchConfiguration createLaunchConfigForEditing() throws Exception {
@@ -477,25 +482,34 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 	}
 
 	private int getLivePort(String propName) {
+		debug("["+this.getName()+"] getLivePort("+propName+")");
 		ILaunchConfiguration conf = getActiveConfig();
+		debug("["+this.getName()+"] getLivePort("+propName+") conf = "+conf);
 		if (conf!=null && READY_STATES.contains(getRunState())) {
+			debug("["+this.getName()+"] getLivePort("+propName+") runstate ok");
 			if (BootLaunchConfigurationDelegate.canUseLifeCycle(conf)) {
+				debug("["+this.getName()+"] getLivePort("+propName+") canUseLifeCycle ok");
 				//TODO: what if there are several launches? Right now we ignore all but the first
 				// non-terminated launch.
 				for (ILaunch l : BootLaunchUtils.getLaunches(conf)) {
 					if (!l.isTerminated()) {
+						debug("["+this.getName()+"] getLivePort("+propName+") found a launch");
 						int jmxPort = BootLaunchConfigurationDelegate.getJMXPortAsInt(l);
+						debug("["+this.getName()+"] getLivePort("+propName+") jmxPort = "+jmxPort);
 						if (jmxPort>0) {
 							SpringApplicationLifeCycleClientManager cm = null;
 							try {
 								cm = new SpringApplicationLifeCycleClientManager(() -> jmxPort);
 								SpringApplicationLifecycleClient c = cm.getLifeCycleClient();
+								debug("["+this.getName()+"] getLivePort("+propName+") lifeCycleClient = "+c);
 								if (c!=null) {
 									//Just because lifecycle bean is ready does not mean that the port property has already been set.
 									//To avoid race condition we should wait here until the port is set (some apps aren't web apps and
 									//may never get a port set, so we shouldn't wait indefinitely!)
 									return RetryUtil.retry(100, 1000, () -> {
+										debug("["+this.getName()+"] getLivePort("+propName+") trying to get...");
 										int port = c.getProperty(propName, -1);
+										debug("["+this.getName()+"] getLivePort("+propName+") port = "+ port);
 										if (port<=0) {
 											throw new IllegalStateException("port not (yet) set");
 										}
@@ -515,6 +529,7 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 				}
 			}
 		}
+		debug("["+this.getName()+"] getLivePort("+propName+") => -1");
 		return -1;
 	}
 

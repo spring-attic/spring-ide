@@ -43,6 +43,7 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -60,7 +61,6 @@ import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
@@ -281,6 +281,57 @@ public class BootDashModelTest {
 		waitModelElements("testProject");
 	}
 
+
+	/**
+	 * Test that deleting a running launch conf works properly:
+	 *  1) orphaned launch is terminated
+	 *  2) BootProjectDashElement runstate is updated.
+	 */
+	@Test public void testDeleteRunningLaunchConfig() throws Exception {
+		doTestDeleteRunningLaunchConf(RunState.RUNNING);
+	}
+
+	/**
+	 * Test that deleting a running launch conf, (in debug mode) works properly:
+	 *  1) orphaned launch is terminated
+	 *  2) BootProjectDashElement runstate is updated.
+	 */
+	@Test public void testDeleteDebuggingLaunchConfig() throws Exception {
+		doTestDeleteRunningLaunchConf(RunState.DEBUGGING);
+	}
+
+	private void doTestDeleteRunningLaunchConf(RunState runState) throws Exception, CoreException {
+		String projectName = "testProject";
+		createBootProject(projectName);
+		waitModelElements(projectName);
+
+		BootProjectDashElement element = getElement(projectName);
+		element.openConfig(ui); //Ensure that at least one launch config exists.
+		verify(ui).openLaunchConfigurationDialogOnGroup(any(ILaunchConfiguration.class), any(String.class));
+		verifyNoMoreInteractions(ui);
+		ACondition.waitFor("child", 3000, () -> {
+			assertNotNull(getSingleValue(element.getCurrentChildren()));
+		});
+		LaunchConfDashElement launchConfElement = (LaunchConfDashElement) getSingleValue(element.getCurrentChildren());
+		ILaunchConfiguration launchConf = getSingleValue(launchConfElement.getLaunchConfigs());
+
+		element.restart(runState, null);
+		waitForState(element, runState);
+		waitForState(launchConfElement, runState);
+
+		ILaunch launch = getSingleValue(launchConfElement.getLaunches());
+		assertFalse(launch.isTerminated());
+
+		launchConf.delete();
+
+		ACondition.waitFor("Expectations after launchConf deleted", 2000, () -> {
+			assertTrue("launch terminated", launch.isTerminated());
+			assertEquals(ImmutableSet.of(), element.getChildren().getValues());
+			assertEquals(RunState.INACTIVE, element.getRunState());
+		});
+	}
+
+
 	/**
 	 * Test that element state listener for launch conf element is notified when it is
 	 * launched via its project.
@@ -349,9 +400,9 @@ public class BootDashModelTest {
 	}
 
 
-	private BootDashElement getSingleValue(ImmutableSet<BootDashElement> values) {
+	private <T> T getSingleValue(ImmutableSet<T> values) {
 		assertEquals("Unexpected number of values in "+values, 1, values.size());
-		for (BootDashElement e : values) {
+		for (T e : values) {
 			return e;
 		}
 		throw new IllegalStateException("This code should be unreachable");
@@ -496,6 +547,7 @@ public class BootDashModelTest {
 		final BootDashElement project = getElement(projectName);
 		try {
 			waitForState(project, RunState.INACTIVE);
+			System.out.println("Starting "+project);
 			project.restart(RunState.RUNNING, ui);
 			waitForState(project, RunState.STARTING);
 			waitForState(project, RunState.RUNNING);
@@ -507,15 +559,19 @@ public class BootDashModelTest {
 
 			waitForPort(project, defaultPort);
 
+			System.out.println("Changing port in application.properties to "+changedPort);
 			IFile props = project.getProject().getFile(new Path("src/main/resources/application.properties"));
 			setContents(props, "server.port="+changedPort);
+			System.out.println("Rebuilding project...");
 			StsTestUtil.assertNoErrors(project.getProject());
+			System.out.println("Rebuilding project... DONE");
 			   //builds the project... should trigger devtools to 'refresh'.
 
 			waitForPort(project, changedPort);
 			waitForPort(launch, changedPort);
 
 			//Now try that this also works in debug mode...
+			System.out.println("Restart project in DEBUG mode...");
 			project.restart(RunState.DEBUGGING, ui);
 			waitForState(project, RunState.STARTING);
 			waitForState(project, RunState.DEBUGGING);
@@ -523,20 +579,24 @@ public class BootDashModelTest {
 			waitForPort(project, changedPort);
 			waitForPort(launch, changedPort);
 
+			System.out.println("Changing port in application.properties to "+defaultPort);
 			setContents(props, "server.port="+defaultPort);
+			System.out.println("Rebuilding project...");
 			StsTestUtil.assertNoErrors(project.getProject());
+			System.out.println("Rebuilding project... DONE");
 			   //builds the project... should trigger devtools to 'refresh'.
 			waitForPort(project, defaultPort);
 			waitForPort(launch, defaultPort);
 
 		} finally {
+			System.out.println("Cleanup: stop "+project);
 			project.stopAsync(ui);
 			waitForState(project, RunState.INACTIVE);
 		}
 	}
 
 	protected void waitForPort(final BootDashElement element, final int expectedPort) throws Exception {
-		new ACondition("Wait for port to change", 5000) { //Devtools should restart really fast
+		new ACondition("Wait for port on "+element.getName()+" to change to "+expectedPort, 5000) { //Devtools should restart really fast
 			@Override
 			public boolean test() throws Exception {
 				assertEquals(ImmutableSet.of(expectedPort), element.getLivePorts());
@@ -804,7 +864,12 @@ public class BootDashModelTest {
 			rm = assertRequestMappingWithPath(mappings, "/error"); //Even empty apps should have a 'error' mapping
 			assertFalse(rm.isUserDefined());
 
-			rm = assertRequestMappingWithPath(mappings, "/mappings || /mappings.json"); //Since we are using this, it should be there.
+			rm = assertRequestMappingWithPath(mappings, "/mappings");  //Since we are using this, it should be there.
+			assertNotNull(rm.getMethod());
+			assertNotNull(rm.getType());
+			assertFalse(rm.isUserDefined());
+
+			rm = assertRequestMappingWithPath(mappings, "/mappings.json");  //Since we are using this, it should be there.
 			assertNotNull(rm.getMethod());
 			assertNotNull(rm.getType());
 			assertFalse(rm.isUserDefined());

@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.wizard;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -251,7 +252,9 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 				}
 			}
 		};
+		//WARNING: Do not set a scheduling rule here. It breaks gradle import by causing a deadlock or rule conflict.
 		//job.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
+		//See: https://www.pivotaltracker.com/story/show/128781771
 		job.setPriority(Job.BUILD);
 		job.setUser(true); //shows progress in default eclipse config
 		job.schedule();
