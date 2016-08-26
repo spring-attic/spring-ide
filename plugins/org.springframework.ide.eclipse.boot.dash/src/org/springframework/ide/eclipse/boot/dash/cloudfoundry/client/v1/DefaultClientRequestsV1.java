@@ -42,6 +42,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicati
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
@@ -86,7 +87,7 @@ public class DefaultClientRequestsV1 {
 	}
 
 	private static CloudFoundryOperations createClient(CFClientParams params) throws Exception {
-		CloudCredentials credentials = new CloudCredentials(params.getUsername(), params.getPassword());
+		CloudCredentials credentials = getCloudCredentials(params);
 		return getOperations(
 				credentials,
 				new URL(params.getApiUrl()),
@@ -94,6 +95,21 @@ public class DefaultClientRequestsV1 {
 				params.getSpaceName(),
 				params.isSelfsigned() || params.skipSslValidation()
 		);
+	}
+
+	private static CloudCredentials getCloudCredentials(CFClientParams params) {
+		CFCredentials creds = params.getCredentials();
+		String password = creds.getPassword();
+		String refreshToken = creds.getRefreshToken();
+		CloudCredentials credentials = null;
+		if (password!=null) {
+			credentials = new CloudCredentials(params.getUsername(), password);
+		} else if (refreshToken!=null) {
+			throw new IllegalStateException("Support for refresh token auth not yey implemented!");
+		} else {
+			throw new IllegalArgumentException("Either a password or refreshToken must be provided");
+		}
+		return credentials;
 	}
 
 	private static CloudFoundryOperations getOperations(
@@ -167,7 +183,7 @@ public class DefaultClientRequestsV1 {
 	private CloudInfoV2 getCloudInfoV2() throws Exception {
 		//cached cloudInfo as it doesn't really change and is more like a bunch of static info about how a target is configured.
 		if (this.cachedCloudInfo==null) {
-			CloudCredentials creds = new CloudCredentials(clientParams.getUsername(), clientParams.getPassword());
+			CloudCredentials creds = getCloudCredentials(clientParams);
 			HttpProxyConfiguration proxyConf = getProxyConf();
 			this.cachedCloudInfo = new CloudInfoV2(creds, client.getCloudControllerUrl(), proxyConf, clientParams.isSelfsigned());
 		}
@@ -446,8 +462,7 @@ public class DefaultClientRequestsV1 {
 	}
 
 	private BuildpackSupport getBuildpackSupport() throws Exception {
-		CloudCredentials creds = new CloudCredentials(clientParams.getUsername(),
-				clientParams.getPassword());
+		CloudCredentials creds = getCloudCredentials(clientParams);
 		HttpProxyConfiguration proxyConf = getProxyConf();
 		return BuildpackSupport.create(client, creds, proxyConf,
 				clientParams.isSelfsigned());

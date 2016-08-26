@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import org.eclipse.equinox.security.storage.StorageException;
+import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel.StoreCredentialsMode;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
@@ -77,5 +78,9 @@ public class CloudFoundryTargetProperties extends TargetProperties {
 
 	public static String getId(String userName, String url, String orgName, String spaceName) {
 		return userName + " : " + url + " : " + orgName + " : " + spaceName;
+	}
+
+	public boolean isStoreCredentials() {
+		return getStoreCredentials()!=StoreCredentialsMode.STORE_NOTHING;
 	}
 }

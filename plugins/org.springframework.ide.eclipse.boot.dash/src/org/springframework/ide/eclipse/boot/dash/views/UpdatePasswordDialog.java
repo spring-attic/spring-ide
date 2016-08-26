@@ -44,6 +44,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel;
+import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel.StoreCredentialsMode;
 
 /**
  * Dialog for setting the password and "store password" flag.
@@ -114,15 +115,17 @@ public class UpdatePasswordDialog extends TitleAreaDialog {
 
 		final Button rememberPassword = new Button(passwordComposite, SWT.CHECK);
 		rememberPassword.setText("Remember Password");
-		rememberPassword.setSelection(model.getStoreVar().getValue());
+		rememberPassword.setSelection(model.getStoreVar().getValue()==StoreCredentialsMode.STORE_PASSWORD);
 		GridDataFactory.fillDefaults().applyTo(rememberPassword);
 		rememberPassword.addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				model.getStoreVar().setValue(rememberPassword.getSelection());
+				model.getStoreVar().setValue(rememberPassword.getSelection()
+						?StoreCredentialsMode.STORE_PASSWORD
+						:StoreCredentialsMode.STORE_NOTHING
+				);
 			}
-
 		});
 
 		parent.pack(true);

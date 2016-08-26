@@ -127,7 +127,7 @@ public class CloudFoundryBootDashModelIntegrationTest {
 	public void testCreateCfTarget() throws Exception {
 		CloudFoundryBootDashModel target =  harness.createCfTarget(CfTestTargetParams.fromEnv());
 		assertNotNull(target);
-		assertNotNull(target.getRunTarget().getTargetProperties().getPassword());
+		assertNotNull(target.getRunTarget().getTargetProperties().getCredentials().getPassword());
 		assertEquals(1, harness.getCfRunTargetModels().size());
 	}
 

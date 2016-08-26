@@ -25,6 +25,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicati
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFOrganization;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
@@ -132,7 +133,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		private boolean connected = true;
 
 		public MockClient(CFClientParams params) throws Exception {
-			checkCredentials(params.getUsername(), params.getPassword());
+			checkCredentials(params.getUsername(), params.getCredentials());
 			this.params = params;
 		}
 
@@ -284,8 +285,8 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 			}
 		}
 
-		private void checkCredentials(String username, String password) throws Exception {
-			if (password.startsWith("wrong")) {
+		private void checkCredentials(String username, CFCredentials credentials) throws Exception {
+			if (credentials.getPassword().startsWith("wrong")) {
 				throw errorInvalidCredentials();
 			}
 		}

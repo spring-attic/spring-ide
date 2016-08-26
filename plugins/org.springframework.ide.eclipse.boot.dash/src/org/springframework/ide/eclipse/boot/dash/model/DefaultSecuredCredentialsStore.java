@@ -34,11 +34,13 @@ public class DefaultSecuredCredentialsStore implements SecuredCredentialsStore {
 		}
 	}
 
-	public String getPassword(String runTargetId) throws StorageException {
+	@Override
+	public String getCredentials(String runTargetId) throws StorageException {
 		return readProperty(KEY_PASSWORD, runTargetId);
 	}
 
-	public void setPassword(String password, String runTargetId) throws StorageException {
+	@Override
+	public void setCredentials(String password, String runTargetId) throws StorageException {
 		setProperty(KEY_PASSWORD, password, runTargetId);
 	}
 

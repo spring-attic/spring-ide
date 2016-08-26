@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.dialogs;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
+import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel.StoreCredentialsMode;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 
 /**
@@ -22,13 +25,67 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
  */
 public class PasswordDialogModel {
 
+	public static enum StoreCredentialsMode {
+
+		STORE_PASSWORD {
+			@Override
+			public CFCredentials createCredentials(String storedString) {
+				return CFCredentials.fromPassword(storedString);
+			}
+
+			@Override
+			public String credentialsToString(CFCredentials credentials) {
+				String password = credentials.getPassword();
+				Assert.isLegal(password!=null, "Password is not set");
+				return password;
+			}
+		},
+
+		STORE_TOKEN {
+			@Override
+			public CFCredentials createCredentials(String storedString) {
+				return CFCredentials.fromRefreshToken(storedString);
+			}
+
+			@Override
+			public String credentialsToString(CFCredentials credentials) {
+				String token = credentials.getPassword();
+				Assert.isLegal(token!=null, "RefreshToken is not set");
+				return token;
+			}
+		},
+
+		STORE_NOTHING {
+			@Override
+			public CFCredentials createCredentials(String storedString) {
+				return null;
+			}
+
+			@Override
+			public String credentialsToString(CFCredentials credentials) {
+				return null;
+			}
+		};
+
+		/**
+		 * Create credentials from a previously stored string.
+		 */
+		public abstract CFCredentials createCredentials(String storedString);
+
+		/**
+		 * Convert credentials to a String that can be stored and later retrieved to
+		 * recreate the credentials.
+		 */
+		public abstract String credentialsToString(CFCredentials credentials);
+	}
+
 	final private String fUser;
 	final private String fTargetId;
 	final private LiveVariable<String> fPasswordVar;
-	final private LiveVariable<Boolean> fStoreVar;
+	final private LiveVariable<StoreCredentialsMode> fStoreVar;
 	private int fButtonPressed = -1;
 
-	public PasswordDialogModel(String user, String targetId, String password, boolean secureStore) {
+	public PasswordDialogModel(String user, String targetId, String password, StoreCredentialsMode secureStore) {
 		super();
 		fUser = user;
 		fTargetId = targetId;
@@ -36,7 +93,7 @@ public class PasswordDialogModel {
 		fStoreVar = new LiveVariable<>(secureStore);
 	}
 
-	public PasswordDialogModel(String user, String targetId, boolean secureStore) {
+	public PasswordDialogModel(String user, String targetId, StoreCredentialsMode secureStore) {
 		this(user, targetId, null, secureStore);
 	}
 
@@ -52,7 +109,7 @@ public class PasswordDialogModel {
 		return fPasswordVar;
 	}
 
-	public LiveVariable<Boolean> getStoreVar() {
+	public LiveVariable<StoreCredentialsMode> getStoreVar() {
 		return fStoreVar;
 	}
 

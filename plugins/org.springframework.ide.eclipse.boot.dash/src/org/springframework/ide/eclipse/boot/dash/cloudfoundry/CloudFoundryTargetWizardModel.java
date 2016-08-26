@@ -16,8 +16,10 @@ import java.net.URL;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.operation.IRunnableContext;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
+import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel.StoreCredentialsMode;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.WizardModelUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
@@ -49,7 +51,7 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 	private LiveVariable<Boolean> skipSslValidation = new LiveVariable<>(false);
 	private LiveVariable<String> userName = new LiveVariable<>();
 	private LiveVariable<String> password = new LiveVariable<>();
-	private LiveVariable<Boolean> storePassword = new LiveVariable<>(false);
+	private LiveVariable<StoreCredentialsMode> storeCredentials = new LiveVariable<>(StoreCredentialsMode.STORE_NOTHING);
 	private LiveVariable<OrgsAndSpaces> allSpaces = new LiveVariable<>();
 
 	private Validator credentialsValidator = new CredentialsValidator();
@@ -195,32 +197,27 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 		if (get(TargetProperties.RUN_TARGET_ID) == null) {
 			this.password.setValue(password);
 		} else {
-			super.setPassword(password);
+			super.setCredentials(CFCredentials.fromPassword(password));
 		}
 	}
 
-	@Override
 	public String getPassword() throws CannotAccessPropertyException {
+		return password.getValue();
+	}
+
+	public void setStoreCredentials(StoreCredentialsMode store) {
 		if (get(TargetProperties.RUN_TARGET_ID) == null) {
-			return password.getValue();
+			storeCredentials.setValue(store);
 		} else {
-			return super.getPassword();
+			super.setStoreCredentials(store);
 		}
 	}
 
-	public void setStorePassword(boolean store) {
+	public StoreCredentialsMode getStoreCredentials() {
 		if (get(TargetProperties.RUN_TARGET_ID) == null) {
-			storePassword.setValue(store);
+			return storeCredentials.getValue();
 		} else {
-			super.setStorePassword(store);
-		}
-	}
-
-	public boolean isStorePassword() {
-		if (get(TargetProperties.RUN_TARGET_ID) == null) {
-			return storePassword.getValue();
-		} else {
-			return super.isStorePassword();
+			return super.getStoreCredentials();
 		}
 	}
 
@@ -255,10 +252,10 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 	public CloudFoundryRunTarget finish() throws Exception {
 		String id = CloudFoundryTargetProperties.getId(this);
 		put(TargetProperties.RUN_TARGET_ID, id);
-		super.setStorePassword(storePassword.getValue());
+		super.setStoreCredentials(storeCredentials.getValue());
 
 		try {
-			super.setPassword(password.getValue());
+			super.setCredentials(CFCredentials.fromPassword(password.getValue()));
 		} catch (Exception e) {
 			final StorageException storageException = getStorageException(e);
 			// Allow run target to be created on storage exceptions as the run target can still be created and connected

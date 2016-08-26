@@ -68,9 +68,11 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElemen
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.HealthChecks;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
+import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel.StoreCredentialsMode;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -162,7 +164,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		CloudFoundryBootDashModel target =  harness.createCfTarget(targetParams);
 
 		assertNotNull(target);
-		assertNotNull(target.getRunTarget().getTargetProperties().getPassword());
+		assertNotNull(target.getRunTarget().getTargetProperties().getCredentials().getPassword());
 		assertEquals(1, harness.getCfRunTargetModels().size());
 	}
 
@@ -384,7 +386,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		for (String spaceName : spaceNames) {
 			CFClientParams params = new CFClientParams(
 					"http://api.run.cloud.mock.com",
-					"some-user",  "his-password",
+					"some-user",  CFCredentials.fromPassword("his-password"),
 					false,
 					orgName,
 					spaceName,
@@ -433,7 +435,13 @@ public class CloudFoundryBootDashModelMockingTest {
 		String apiUrl = "http://api.some-cloud.com";
 		String username = "freddy"; String password = "whocares";
 
-		CloudFoundryBootDashModel cfModel = harness.createCfTarget(new CFClientParams(apiUrl, username, password, false, "my-org", "foo", false));
+		CloudFoundryBootDashModel cfModel = harness.createCfTarget(new CFClientParams(
+				apiUrl,
+				username, CFCredentials.fromPassword(password),
+				false,
+				"my-org",
+				"foo",
+		false));
 
 		assertEquals("http://console.some-cloud.com", cfModel.getRunTarget().getAppsManagerHost());
 		assertEquals("http://console.some-cloud.com", cfModel.getRunTarget().getAppsManagerHostDefault());
@@ -448,7 +456,9 @@ public class CloudFoundryBootDashModelMockingTest {
 		String apiUrl = "http://api.some-cloud.com";
 		String username = "freddy"; String password = "whocares";
 
-		CloudFoundryBootDashModel cfModel = harness.createCfTarget(new CFClientParams(apiUrl, username, password, false, "my-org", "foo", false));
+		CloudFoundryBootDashModel cfModel = harness.createCfTarget(new CFClientParams(apiUrl, username,
+				CFCredentials.fromPassword(password), false, "my-org", "foo", false
+		));
 
 		cfModel.getRunTarget().setAppsManagerHost("http://totallyDifferentHost.com");
 
@@ -465,8 +475,10 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		String apiUrl = "http://api.some-cloud.com";
 		String username = "freddy"; String password = "whocares";
-		AbstractBootDashModel fooSpace = harness.createCfTarget(new CFClientParams(apiUrl, username, password, false, "my-org", "foo", false));
-		AbstractBootDashModel barSpace = harness.createCfTarget(new CFClientParams(apiUrl, username, password, false, "your-org", "bar", false));
+		AbstractBootDashModel fooSpace = harness.createCfTarget(new CFClientParams(apiUrl, username,
+				CFCredentials.fromPassword(password), false, "my-org", "foo", false));
+		AbstractBootDashModel barSpace = harness.createCfTarget(new CFClientParams(apiUrl, username,
+				CFCredentials.fromPassword(password), false, "your-org", "bar", false));
 
 		//check the default rendering is like it used to be before introducing templates.
 		assertEquals("my-org : foo - [http://api.some-cloud.com]", fooSpace.getDisplayName());
@@ -493,8 +505,10 @@ public class CloudFoundryBootDashModelMockingTest {
 		String apiUrl = "http://api.some-cloud.com";
 		String username = "freddy"; String password = "whocares";
 		LocalBootDashModel local = harness.getLocalModel();
-		AbstractBootDashModel fooSpace = harness.createCfTarget(new CFClientParams(apiUrl, username, password, false, "my-org", "foo", false));
-		AbstractBootDashModel barSpace = harness.createCfTarget(new CFClientParams(apiUrl, username, password, false, "your-org", "bar", false));
+		AbstractBootDashModel fooSpace = harness.createCfTarget(new CFClientParams(apiUrl, username,
+				CFCredentials.fromPassword(password), false, "my-org", "foo", false));
+		AbstractBootDashModel barSpace = harness.createCfTarget(new CFClientParams(apiUrl, username,
+				CFCredentials.fromPassword(password), false, "your-org", "bar", false));
 		CustmomizeTargetLabelAction action = actions.getCustomizeTargetLabelAction();
 
 		//////////// not applicable for local targets:
@@ -550,8 +564,10 @@ public class CloudFoundryBootDashModelMockingTest {
 		String apiUrl = "http://api.some-cloud.com";
 		String username = "freddy"; String password = "whocares";
 
-		AbstractBootDashModel fooSpace = harness.createCfTarget(new CFClientParams(apiUrl, username, password, false, "my-org", "foo", false));
-		AbstractBootDashModel barSpace = harness.createCfTarget(new CFClientParams(apiUrl, username, password, false, "your-org", "bar", false));
+		AbstractBootDashModel fooSpace = harness.createCfTarget(new CFClientParams(apiUrl, username,
+				CFCredentials.fromPassword(password), false, "my-org", "foo", false));
+		AbstractBootDashModel barSpace = harness.createCfTarget(new CFClientParams(apiUrl, username,
+				CFCredentials.fromPassword(password), false, "your-org", "bar", false));
 
 		ModelStateListener modelStateListener = mock(ModelStateListener.class);
 		fooSpace.addModelStateListener(modelStateListener);
@@ -1372,7 +1388,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertTrue(updatePassword.isEnabled());
 
 		harness.answerPasswordPrompt(ui, (d) -> {
-			d.getPasswordVar().setValue(targetParams.getPassword());
+			d.getPasswordVar().setValue(targetParams.getCredentials().getPassword());
 			d.buttonPressed(IDialogConstants.OK_ID);
 		});
 
@@ -1418,8 +1434,8 @@ public class CloudFoundryBootDashModelMockingTest {
 		reset(ui);
 
 		harness.answerPasswordPrompt(ui, (d) -> {
-			d.getPasswordVar().setValue(targetParams.getPassword());
-			d.getStoreVar().setValue(false);
+			d.getPasswordVar().setValue(targetParams.getCredentials().getPassword());
+			d.getStoreVar().setValue(StoreCredentialsMode.STORE_NOTHING);
 			d.buttonPressed(IDialogConstants.OK_ID);
 		});
 
@@ -1466,8 +1482,8 @@ public class CloudFoundryBootDashModelMockingTest {
 		reset(ui);
 
 		harness.answerPasswordPrompt(ui, (d) -> {
-			d.getPasswordVar().setValue(targetParams.getPassword());
-			d.getStoreVar().setValue(true);
+			d.getPasswordVar().setValue(targetParams.getCredentials().getPassword());
+			d.getStoreVar().setValue(StoreCredentialsMode.STORE_PASSWORD);
 			d.buttonPressed(IDialogConstants.OK_ID);
 		});
 

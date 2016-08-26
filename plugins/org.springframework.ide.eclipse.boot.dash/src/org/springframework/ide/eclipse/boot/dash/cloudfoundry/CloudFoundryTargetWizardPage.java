@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
+import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel.StoreCredentialsMode;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
 import org.springframework.ide.eclipse.boot.util.Log;
@@ -136,12 +137,13 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 		rememberPassword.setText("Remember Password");
 		rememberPassword.setSelection(false);
 		rememberPassword.addSelectionListener(new SelectionAdapter() {
-
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				wizardModel.setStorePassword(rememberPassword.getSelection());
+				wizardModel.setStoreCredentials(rememberPassword.getSelection()
+						? StoreCredentialsMode.STORE_PASSWORD
+						: StoreCredentialsMode.STORE_NOTHING
+				);
 			}
-
 		});
 
 		Label urlLabel = new Label(topComposite, SWT.NONE);
