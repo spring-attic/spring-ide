@@ -10,7 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
+import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties.ORG_GUID;
+import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties.ORG_PROP;
+import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties.SPACE_GUID;
+import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties.SPACE_PROP;
+
 import org.eclipse.equinox.security.storage.StorageException;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel.StoreCredentialsMode;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
@@ -83,4 +89,35 @@ public class CloudFoundryTargetProperties extends TargetProperties {
 	public boolean isStoreCredentials() {
 		return getStoreCredentials()!=StoreCredentialsMode.STORE_NOTHING;
 	}
+
+	public void setSpace(CFSpace space) {
+		if (space != null) {
+			put(ORG_PROP, space.getOrganization().getName());
+			put(ORG_GUID, space.getOrganization().getGuid().toString());
+			put(SPACE_PROP, space.getName());
+			put(SPACE_GUID, space.getGuid().toString());
+		} else {
+			put(ORG_PROP, null);
+			put(ORG_GUID, null);
+			put(SPACE_PROP, null);
+			put(SPACE_GUID, null);
+		}
+	}
+
+	public void setUrl(String value) {
+		put(URL_PROP, value);
+	}
+
+	public void setSelfSigned(boolean value) {
+		put(SELF_SIGNED_PROP, Boolean.toString(value));
+	}
+
+	public void setSkipSslValidation(boolean value) {
+		put(SKIP_SSL_VALIDATION_PROP, Boolean.toString(value));
+	}
+
+	public void setUserName(String value) {
+		put(USERNAME_PROP, value);
+	}
+
 }

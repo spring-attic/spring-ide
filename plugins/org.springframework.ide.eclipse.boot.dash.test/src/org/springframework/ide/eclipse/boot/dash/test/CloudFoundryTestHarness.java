@@ -118,6 +118,7 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 
 	public CloudFoundryBootDashModel createCfTarget(CFClientParams params) throws Exception {
 		CloudFoundryTargetWizardModel wizard = new CloudFoundryTargetWizardModel(cfTargetType, clientFactory, NO_TARGETS, context);
+
 		wizard.setUrl(params.getApiUrl());
 		wizard.setUsername(params.getUsername());
 		wizard.setStoreCredentials(StoreCredentialsMode.STORE_PASSWORD);

@@ -21,8 +21,8 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel.StoreCredentialsMode;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
-import org.springframework.ide.eclipse.boot.dash.model.WizardModelUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
+import org.springframework.ide.eclipse.boot.dash.model.WizardModelUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
@@ -43,7 +43,10 @@ import com.google.common.collect.ImmutableSet;
  *
  *
  */
-public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties {
+public class CloudFoundryTargetWizardModel {
+
+	private RunTargetType runTargetType;
+	private BootDashModelContext context;
 
 	private LiveVariable<String> url = new LiveVariable<>();
 	private LiveVariable<CFSpace> space = new LiveVariable<>();
@@ -70,7 +73,8 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 
 	public CloudFoundryTargetWizardModel(RunTargetType runTargetType, CloudFoundryClientFactory clientFactory,
 			ImmutableSet<RunTarget> existingTargets, BootDashModelContext context, WizardModelUserInteractions interactions) {
-		super(runTargetType, context);
+		this.runTargetType = runTargetType;
+		this.context = context;
 		Assert.isNotNull(clientFactory, "clientFactory should not be null");
 		this.interactions = interactions;
 		this.existingTargets = existingTargets == null ? ImmutableSet.<RunTarget>of() : existingTargets;
@@ -98,7 +102,7 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 		allPropertiesValidator.addChild(spacesValidator);
 		allPropertiesValidator.addChild(orgsSpacesValidator);
 
-		setUrl(getDefaultTargetUrl());
+		url.setValue(getDefaultTargetUrl());
 	}
 
 	/**
@@ -141,84 +145,49 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 		space.removeListener(cloudSpaceChangeListener);
 	}
 
-	/*
-	 *
-	 * NOTE: for the setters, make sure the values are placed in the underlying
-	 * backed map first before setting them in the live variables, as live
-	 * variables trigger validation events.
-	 *
-	 * This hybrid model with both live expressions and a non-event driven map
-	 * may not be ideal, but to avoid regressions in implementation it is kept
-	 * as it is for now, with the observation that the map needs to be updated
-	 * first before updating the live variable.
-	 *
-	 */
-	public void setUrl(String url) {
-		put(URL_PROP, url);
 
+	public void setUrl(String url) {
 		this.url.setValue(url);
 	}
 
-	public void setSpace(CFSpace space) {
-
-		if (space != null) {
-			put(ORG_PROP, space.getOrganization().getName());
-			put(ORG_GUID, space.getOrganization().getGuid().toString());
-			put(SPACE_PROP, space.getName());
-			put(SPACE_GUID, space.getGuid().toString());
-		} else {
-			put(ORG_PROP, null);
-			put(ORG_GUID, null);
-			put(SPACE_PROP, null);
-			put(SPACE_GUID, null);
-		}
-		this.space.setValue(space);
-	}
-
 	public void setSelfsigned(boolean selfsigned) {
-		put(SELF_SIGNED_PROP, Boolean.toString(selfsigned));
-
 		this.selfsigned.setValue(selfsigned);
 	}
 
 	public void skipSslValidation(boolean skipSsl) {
-		put(SKIP_SSL_VALIDATION_PROP, Boolean.toString(skipSsl));
-
 		this.skipSslValidation.setValue(skipSsl);
 	}
 
 	public void setUsername(String userName) {
-		put(USERNAME_PROP, userName);
-
 		this.userName.setValue(userName);
 	}
 
 	public void setPassword(String password) throws CannotAccessPropertyException {
-		if (get(TargetProperties.RUN_TARGET_ID) == null) {
-			this.password.setValue(password);
-		} else {
-			super.setCredentials(CFCredentials.fromPassword(password));
-		}
+		this.password.setValue(password);
+	}
+
+	public void setSpace(CFSpace space) {
+		this.space.setValue(space);
 	}
 
 	public String getPassword() throws CannotAccessPropertyException {
 		return password.getValue();
 	}
 
+	public String getUrl() {
+		return url.getValue();
+	}
+
+	public String getUsername() {
+		return userName.getValue();
+	}
+
 	public void setStoreCredentials(StoreCredentialsMode store) {
-		if (get(TargetProperties.RUN_TARGET_ID) == null) {
-			storeCredentials.setValue(store);
-		} else {
-			super.setStoreCredentials(store);
-		}
+		storeCredentials.setValue(store);
 	}
 
 	public StoreCredentialsMode getStoreCredentials() {
-		if (get(TargetProperties.RUN_TARGET_ID) == null) {
-			return storeCredentials.getValue();
-		} else {
-			return super.getStoreCredentials();
-		}
+		return storeCredentials.getValue();
 	}
 
 	protected String getDefaultTargetUrl() {
@@ -226,10 +195,61 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 	}
 
 	public OrgsAndSpaces resolveSpaces(IRunnableContext context) throws Exception {
-		OrgsAndSpaces spaces = clientFactory.getCloudSpaces(this, context);
+		boolean toFetchSpaces = true;
+		OrgsAndSpaces spaces = clientFactory.getCloudSpaces(createTargetProperties(toFetchSpaces), context);
 		allSpaces.setValue(spaces);
 		return allSpaces.getValue();
+	}
 
+	/**
+	 * Create target properties based on current input values in the wizard.
+	 * <p>
+	 * Note that there are two slightly different ways to produce these properties.
+	 * <p>
+	 * a) to create a intermediate client just to fetch orgs and spaces.
+	 * <p>
+	 * b) the final properties used to create the client after space is selected and the user
+	 * clicks 'finish' button.
+	 */
+	private CloudFoundryTargetProperties createTargetProperties(boolean toFetchSpaces) throws CannotAccessPropertyException {
+		CloudFoundryTargetProperties targetProps = new CloudFoundryTargetProperties(runTargetType, context);
+		if (!toFetchSpaces) {
+			//Take care: when fetching spaces the space may not be known yet, so neither is the id
+			String id = CloudFoundryTargetProperties.getId(
+					this.getUsername(),
+					this.getUrl(),
+					this.getOrganizationName(),
+					this.getSpaceName()
+			);
+			targetProps.put(TargetProperties.RUN_TARGET_ID, id);
+		}
+
+		targetProps.setUrl(url.getValue());
+		targetProps.setSelfSigned(selfsigned.getValue());
+		targetProps.setSkipSslValidation(skipSslValidation.getValue());
+
+		targetProps.setUserName(userName.getValue());
+		if (toFetchSpaces) {
+			targetProps.setStoreCredentials(StoreCredentialsMode.STORE_NOTHING);
+			targetProps.setCredentials(CFCredentials.fromPassword(password.getValue()));
+		} else {
+			//use credentials of a style that is consistent with the 'store mode'.
+			StoreCredentialsMode mode = storeCredentials.getValue();
+			targetProps.setStoreCredentials(storeCredentials.getValue());
+			switch (mode) {
+			case STORE_TOKEN:
+				throw new IllegalStateException("Authentication via refresh token not yet supported");
+			case STORE_NOTHING:
+			case STORE_PASSWORD:
+				targetProps.setCredentials(CFCredentials.fromPassword(password.getValue()));
+				break;
+			default:
+				throw new IllegalStateException("BUG: Missing switch case?");
+			}
+		}
+		targetProps.setCredentials(CFCredentials.fromPassword(password.getValue()));
+		targetProps.setSpace(space.getValue());
+		return targetProps;
 	}
 
 	public OrgsAndSpaces getSpaces() {
@@ -250,27 +270,42 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 	}
 
 	public CloudFoundryRunTarget finish() throws Exception {
-		String id = CloudFoundryTargetProperties.getId(this);
-		put(TargetProperties.RUN_TARGET_ID, id);
-		super.setStoreCredentials(storeCredentials.getValue());
-
+		CloudFoundryTargetProperties targetProps = null;
 		try {
-			super.setCredentials(CFCredentials.fromPassword(password.getValue()));
+			targetProps = createTargetProperties(/*toFetchSpaces*/false);
 		} catch (Exception e) {
 			final StorageException storageException = getStorageException(e);
 			// Allow run target to be created on storage exceptions as the run target can still be created and connected
 			if (storageException != null) {
+				Log.log(storageException);
 				if (interactions != null) {
-					String message = "Failed to store password in secure storage. Please check your secure storage preferences. Error: "
+					String message = "Failed to store credentials in secure storage. Please check your secure storage preferences. Error: "
 							+ storageException.getMessage();
 					interactions.informationPopup("Secure Storage Error", message);
 				}
-				Log.log(storageException);
+				storeCredentials.setValue(StoreCredentialsMode.STORE_NOTHING);
+				targetProps = createTargetProperties(/*toFetchSpaces*/false);
 			} else {
 				throw e;
 			}
 		}
-		return (CloudFoundryRunTarget) getRunTargetType().createRunTarget(this);
+		return (CloudFoundryRunTarget) runTargetType.createRunTarget(targetProps);
+	}
+
+	public String getSpaceName() {
+		CFSpace space = this.space.getValue();
+		if (space!=null) {
+			return space.getName();
+		}
+		return null;
+	}
+
+	public String getOrganizationName() {
+		CFSpace space = this.space.getValue();
+		if (space!=null) {
+			return space.getOrganization().getName();
+		}
+		return null;
 	}
 
 	protected StorageException getStorageException(Exception e) {
@@ -288,15 +323,15 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 		protected ValidationResult compute() {
 			String infoMessage = null;
 
-			if (isEmpty(getUsername())) {
+			if (isEmpty(userName.getValue())) {
 				infoMessage = "Enter a username";
 			} else if (isEmpty(password.getValue())) {
 				infoMessage = "Enter a password";
-			} else if (isEmpty(getUrl())) {
+			} else if (isEmpty(url.getValue())) {
 				infoMessage = "Enter a target URL";
 			} else {
 				try {
-					new URL(getUrl());
+					new URL(url.getValue());
 				} catch (MalformedURLException e) {
 					return ValidationResult.error(e.getMessage());
 				}
@@ -304,7 +339,6 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 			if (infoMessage != null) {
 				return ValidationResult.info(infoMessage);
 			}
-
 			return ValidationResult.OK;
 		}
 
