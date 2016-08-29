@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,8 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.core.cli.BootCliCommand;
 import org.springframework.ide.eclipse.boot.core.cli.BootCliUtils;
+import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
+import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager.BootInstallListener;
 import org.springframework.ide.eclipse.boot.core.cli.install.IBootInstall;
 import org.springframework.ide.eclipse.boot.dash.devtools.DevtoolsPortRefresher;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchConfRunStateTracker;
@@ -71,6 +73,8 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 	private LiveExpression<Pattern> projectExclusion;
 	private ValueListener<Pattern> projectExclusionListener;
 
+	private BootInstallListener bootInstallListener;
+
 	public class WorkspaceListener implements ProjectChangeListener, ClasspathListener {
 
 		@Override
@@ -106,6 +110,17 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 			});
 			updateElementsFromWorkspace();
 
+			bootInstallListener = new BootInstallListener() {
+				@Override
+				public void defaultInstallChanged() {
+					refresh(null);
+				}
+			};
+			try {
+				BootInstallManager.getInstance().addBootInstallListener(bootInstallListener);
+			} catch (Exception e) {
+				Log.log(e);
+			}
 			new Job("Loading local cloud services") {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
@@ -143,6 +158,13 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 		if (projectExclusionListener!=null) {
 			projectExclusion.removeListener(projectExclusionListener);
 			projectExclusionListener=null;
+		}
+		if (bootInstallListener != null) {
+			try {
+				BootInstallManager.getInstance().removeBootInstallListener(bootInstallListener);
+			} catch (Exception e) {
+				Log.log(e);
+			}
 		}
 		launchConfTracker.dispose();
 		launchConfRunStateTracker.dispose();

@@ -14,10 +14,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
@@ -57,10 +57,18 @@ public class ToggleFiltersModel {
 		}
 	};
 
+	private static final Filter<BootDashElement> HIDE_LOCAL_SERVICES = new Filter<BootDashElement>() {
+		@Override
+		public boolean accept(BootDashElement t) {
+			return !(t instanceof LocalCloudServiceDashElement);
+		}
+	};
+
 	private static final String STORE_ID = "toggle-filters";
 	private static final FilterChoice[] FILTERS = {
 			new FilterChoice("hide.non-workspace", "Hide non-workspace elements", HIDE_NON_WORKSPACE_ELEMENTS),
-			new FilterChoice("hide.solitary-launch-config", "Hide solitary launch configs", HIDE_SOLITARY_CONFS, true)
+			new FilterChoice("hide.solitary-launch-config", "Hide solitary launch configs", HIDE_SOLITARY_CONFS, true),
+			new FilterChoice("hide.local-cloud-services", "Hide local cloud services", HIDE_LOCAL_SERVICES)
 	};
 
 	private final PropertyStoreApi persistentProperties;
@@ -162,7 +170,7 @@ public class ToggleFiltersModel {
 			}
 		} catch (Exception e) {
 			//trouble saving filters... log and move on. This is not critical
-			BootDashActivator.log(e);
+			Log.log(e);
 		}
 	}
 
