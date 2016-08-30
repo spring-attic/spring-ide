@@ -12,13 +12,18 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel.StoreCredentialsMode;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
@@ -57,6 +62,8 @@ public class CloudFoundryTargetWizardModel {
 	private LiveVariable<StoreCredentialsMode> storeCredentials = new LiveVariable<>(StoreCredentialsMode.STORE_NOTHING);
 	private LiveVariable<OrgsAndSpaces> allSpaces = new LiveVariable<>();
 
+	private String refreshToken = null;
+
 	private Validator credentialsValidator = new CredentialsValidator();
 	private Validator spacesValidator = new CloudSpaceValidator();
 	private Validator orgsSpacesValidator = new OrgsSpacesValidator();
@@ -65,6 +72,7 @@ public class CloudFoundryTargetWizardModel {
 	private CloudFoundryClientFactory clientFactory;
 	private ImmutableSet<RunTarget> existingTargets;
 	private WizardModelUserInteractions interactions;
+
 
 	public CloudFoundryTargetWizardModel(RunTargetType runTargetType, CloudFoundryClientFactory clientFactory,
 			ImmutableSet<RunTarget> existingTargets, BootDashModelContext context) {
@@ -196,9 +204,35 @@ public class CloudFoundryTargetWizardModel {
 
 	public OrgsAndSpaces resolveSpaces(IRunnableContext context) throws Exception {
 		boolean toFetchSpaces = true;
-		OrgsAndSpaces spaces = clientFactory.getCloudSpaces(createTargetProperties(toFetchSpaces), context);
+		OrgsAndSpaces spaces = getCloudSpaces(createTargetProperties(toFetchSpaces), context);
 		allSpaces.setValue(spaces);
 		return allSpaces.getValue();
+	}
+
+	private OrgsAndSpaces getCloudSpaces(final CloudFoundryTargetProperties targetProperties, IRunnableContext context)
+			throws Exception {
+
+		OrgsAndSpaces spaces = null;
+
+		Operation<List<CFSpace>> op = new Operation<List<CFSpace>>(
+				"Connecting to the Cloud Foundry target. Please wait while the list of spaces is resolved...") {
+			protected List<CFSpace> runOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
+				ClientRequests client = clientFactory.getClient(targetProperties);
+				List<CFSpace> spaces = client.getSpaces();
+				String t = client.getRefreshToken();
+				if (t!=null) {
+					refreshToken = t;
+				}
+				return spaces;
+			}
+		};
+
+		List<CFSpace> actualSpaces = op.run(context, true);
+		if (actualSpaces != null && !actualSpaces.isEmpty()) {
+			spaces = new OrgsAndSpaces(actualSpaces);
+		}
+
+		return spaces;
 	}
 
 	/**
@@ -238,7 +272,9 @@ public class CloudFoundryTargetWizardModel {
 			targetProps.setStoreCredentials(storeCredentials.getValue());
 			switch (mode) {
 			case STORE_TOKEN:
-				throw new IllegalStateException("Authentication via refresh token not yet supported");
+				Assert.isTrue(refreshToken!=null);
+				targetProps.setCredentials(CFCredentials.fromRefreshToken(refreshToken));
+				break;
 			case STORE_NOTHING:
 			case STORE_PASSWORD:
 				targetProps.setCredentials(CFCredentials.fromPassword(password.getValue()));
@@ -247,7 +283,6 @@ public class CloudFoundryTargetWizardModel {
 				throw new IllegalStateException("BUG: Missing switch case?");
 			}
 		}
-		targetProps.setCredentials(CFCredentials.fromPassword(password.getValue()));
 		targetProps.setSpace(space.getValue());
 		return targetProps;
 	}
@@ -389,4 +424,9 @@ public class CloudFoundryTargetWizardModel {
 	public LiveExpression<ValidationResult> getValidator() {
 		return allPropertiesValidator;
 	}
+
+	public String getRefreshToken() {
+		return refreshToken;
+	}
+
 }

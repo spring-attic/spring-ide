@@ -127,7 +127,7 @@ public class TargetProperties {
 
 	public CFCredentials getCredentials() throws CannotAccessPropertyException {
 		StoreCredentialsMode storeMode = getStoreCredentials();
-		if (credentials == null) {
+		if (credentials == null && storeMode!=StoreCredentialsMode.STORE_NOTHING) {
 			try {
 				String str = context.getSecuredCredentialsStore().getCredentials(secureStoreScopeKey(type.getName(), getRunTargetId()));
 				credentials = storeMode.createCredentials(str);

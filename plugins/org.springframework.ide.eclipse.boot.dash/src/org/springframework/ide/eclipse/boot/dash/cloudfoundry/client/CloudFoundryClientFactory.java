@@ -44,25 +44,4 @@ public abstract class CloudFoundryClientFactory {
 		return getClient(new CFClientParams(targetProperties));
 	}
 
-	public final OrgsAndSpaces getCloudSpaces(final CloudFoundryTargetProperties targetProperties, IRunnableContext context)
-			throws Exception {
-
-		//TODO: this doesn't belong in a 'factory'. Where should/can it go?
-
-		OrgsAndSpaces spaces = null;
-
-		Operation<List<CFSpace>> op = new Operation<List<CFSpace>>(
-				"Connecting to the Cloud Foundry target. Please wait while the list of spaces is resolved...") {
-			protected List<CFSpace> runOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
-				return CloudFoundryClientFactory.this.getClient(targetProperties).getSpaces();
-			}
-		};
-
-		List<CFSpace> actualSpaces = op.run(context, true);
-		if (actualSpaces != null && !actualSpaces.isEmpty()) {
-			spaces = new OrgsAndSpaces(actualSpaces);
-		}
-
-		return spaces;
-	}
 }

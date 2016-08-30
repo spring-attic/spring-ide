@@ -80,6 +80,10 @@ public class CFCredentials {
 
 	@Override
 	public String toString() {
-		return "CFCredentials [password=" + password + ", refreshToken=" + refreshToken + "]";
+		return "CFCredentials [password=" + hidePassword(password) + ", refreshToken=" + refreshToken + "]";
+	}
+
+	private String hidePassword(String password) {
+		return password==null ? null : "*****";
 	}
 }

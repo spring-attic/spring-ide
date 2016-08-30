@@ -75,9 +75,7 @@ public class UpdatePasswordAction extends AbstractCloudDashModelAction {
 									CFCredentials savedCreds = runTarget.getTargetProperties().getCredentials();
 									new ConnectOperation(targetModel, false, ui).run(monitor);
 									// Disconnect will wipe out password if it's not stored, so reset it below.
-									if (runTarget.getTargetProperties().getStoreCredentials()!=StoreCredentialsMode.STORE_NOTHING) {
-										runTarget.getTargetProperties().setCredentials(savedCreds);
-									}
+									runTarget.getTargetProperties().setCredentials(savedCreds);
 								}
 								new ConnectOperation(targetModel, true, ui).run(monitor);
 							} catch (Exception e) {

@@ -16,6 +16,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.doAnswer;
@@ -26,6 +27,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.springframework.ide.eclipse.boot.dash.test.BootDashModelTest.waitForJobsToComplete;
 import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.APP_DELETE_TIMEOUT;
 import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.APP_DEPLOY_TIMEOUT;
@@ -82,7 +84,9 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ModelStateL
 import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
+import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCFApplication;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCFSpace;
@@ -161,11 +165,132 @@ public class CloudFoundryBootDashModelMockingTest {
 	public void testCreateCfTarget() throws Exception {
 		CFClientParams targetParams = CfTestTargetParams.fromEnv();
 		clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
-		CloudFoundryBootDashModel target =  harness.createCfTarget(targetParams);
+		CloudFoundryBootDashModel target =  harness.createCfTarget(targetParams, StoreCredentialsMode.STORE_PASSWORD);
 
 		assertNotNull(target);
 		assertNotNull(target.getRunTarget().getTargetProperties().getCredentials().getPassword());
 		assertEquals(1, harness.getCfRunTargetModels().size());
+	}
+
+	@Test public void testCreateCfTargetAndStorePassword() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		{
+			clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+			CloudFoundryBootDashModel target =  harness.createCfTarget(targetParams, StoreCredentialsMode.STORE_PASSWORD);
+
+			assertNotNull(target);
+			assertNotNull(target.getRunTarget().getTargetProperties().getCredentials().getPassword());
+			assertEquals(1, harness.getCfRunTargetModels().size());
+		}
+
+		harness.reload();
+
+		{
+			CloudFoundryBootDashModel target = harness.getCfTargetModel();
+			String expectedPass = targetParams.getCredentials().getPassword();
+
+			SecuredCredentialsStore store = harness.getCredentialsStore();
+			String key = secureStoreLookupKey(target);
+			String storedCred = store.getCredentials(key);
+			assertEquals(expectedPass, storedCred);
+
+			assertNotNull(target);
+			String password = target.getRunTarget().getTargetProperties().getCredentials().getPassword();
+			assertEquals(expectedPass, password);
+			assertEquals(StoreCredentialsMode.STORE_PASSWORD, target.getRunTarget().getTargetProperties().getStoreCredentials());
+
+			waitForJobsToComplete();
+			assertTrue(target.isConnected()); //should auto connect.
+			verifyZeroInteractions(ui); //should not prompt for password (but used stored pass).
+		}
+	}
+
+	private String secureStoreLookupKey(CloudFoundryBootDashModel target) {
+		return target.getRunTarget().getType().getName()+":"+target.getRunTarget().getId();
+	}
+
+	@Test public void testCreateCfTargetAndForgetPassword() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+
+		{
+			CloudFoundryBootDashModel target =  harness.createCfTarget(targetParams, StoreCredentialsMode.STORE_NOTHING);
+
+			assertNotNull(target);
+			assertNotNull(target.getRunTarget().getTargetProperties().getCredentials().getPassword());
+			assertEquals(1, harness.getCfRunTargetModels().size());
+		}
+
+		harness.reload();
+
+		{
+			CloudFoundryBootDashModel target = harness.getCfTargetModel();
+
+			waitForJobsToComplete();
+
+			SecuredCredentialsStore store = harness.getCredentialsStore();
+			String key = secureStoreLookupKey(target);
+			String storedCred = store.getCredentials(key);
+			assertNull(storedCred);
+			assertEquals(StoreCredentialsMode.STORE_NOTHING, target.getRunTarget().getTargetProperties().getStoreCredentials());
+			assertNotNull(target);
+			assertNull(target.getRunTarget().getTargetProperties().getCredentials());
+			assertFalse(target.isConnected()); // no auto connect if no creds are stored.
+
+			verifyZeroInteractions(ui);
+
+			//When we connect... the user should get prompted for password
+			harness.answerPasswordPrompt(ui, (d) -> {
+				d.getPasswordVar().setValue(targetParams.getCredentials().getPassword());
+				d.buttonPressed(IDialogConstants.OK_ID);
+			});
+
+			harness.sectionSelection.setValue(target);
+			IAction connectAction = actions.getToggleTargetConnectionAction();
+			connectAction.run();
+
+			ACondition.waitFor("connected to target", 5_000, () -> {
+				assertTrue(target.isConnected());
+			});
+
+			verify(ui).openPasswordDialog(any());
+			verifyNoMoreInteractions(ui);
+		}
+	}
+
+	@Test public void testCreateCfTargetAndStoreToken() throws Exception {
+
+		{
+			CFClientParams targetParams = CfTestTargetParams.fromEnv();
+			MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+			space.defApp("foo");
+			clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+
+			CloudFoundryBootDashModel target =  harness.createCfTarget(targetParams, StoreCredentialsMode.STORE_TOKEN);
+			assertNotNull(target);
+			assertTrue(target.isConnected());
+			assertEquals(MockCloudFoundryClientFactory.FAKE_REFRESH_TOKEN, target.getRunTarget().getTargetProperties().getCredentials().getRefreshToken());
+			assertEquals(1, harness.getCfRunTargetModels().size());
+		}
+
+		harness.reload();
+
+		{
+			CloudFoundryBootDashModel target = harness.getCfTargetModel();
+
+			SecuredCredentialsStore store = harness.getCredentialsStore();
+			String key = secureStoreLookupKey(target);
+			String storedCred = store.getCredentials(key);
+			assertEquals(MockCloudFoundryClientFactory.FAKE_REFRESH_TOKEN, storedCred);
+
+			assertNotNull(target);
+			assertEquals(MockCloudFoundryClientFactory.FAKE_REFRESH_TOKEN, target.getRunTarget().getTargetProperties().getCredentials().getRefreshToken());
+			assertEquals(StoreCredentialsMode.STORE_TOKEN, target.getRunTarget().getTargetProperties().getStoreCredentials());
+
+			waitForJobsToComplete();
+			assertTrue(target.isConnected()); //should auto connect.
+			verifyZeroInteractions(ui); //should not prompt for password (but used stored token).
+		}
 	}
 
 	@Test

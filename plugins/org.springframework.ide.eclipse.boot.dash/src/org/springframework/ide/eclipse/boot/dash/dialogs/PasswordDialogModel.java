@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.boot.dash.dialogs;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
-import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel.StoreCredentialsMode;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 
 /**
@@ -49,7 +48,7 @@ public class PasswordDialogModel {
 
 			@Override
 			public String credentialsToString(CFCredentials credentials) {
-				String token = credentials.getPassword();
+				String token = credentials.getRefreshToken();
 				Assert.isLegal(token!=null, "RefreshToken is not set");
 				return token;
 			}

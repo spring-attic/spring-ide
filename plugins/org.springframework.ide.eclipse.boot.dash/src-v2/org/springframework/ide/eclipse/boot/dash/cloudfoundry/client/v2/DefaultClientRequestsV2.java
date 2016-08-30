@@ -67,6 +67,8 @@ import org.cloudfoundry.operations.services.ServiceInstance;
 import org.cloudfoundry.operations.services.UnbindServiceInstanceRequest;
 import org.cloudfoundry.operations.spaces.GetSpaceRequest;
 import org.cloudfoundry.operations.spaces.SpaceDetail;
+import org.cloudfoundry.reactor.TokenProvider;
+import org.cloudfoundry.reactor.tokenprovider.AbstractUaaTokenProvider;
 import org.cloudfoundry.util.PaginationUtils;
 import org.eclipse.core.runtime.Platform;
 import org.osgi.framework.Version;
@@ -163,12 +165,14 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	private Mono<String> orgId;
 	private Mono<GetInfoResponse> info;
 	private Mono<String> spaceId;
+	private AbstractUaaTokenProvider _tokenProvider;
 
 	public DefaultClientRequestsV2(CloudFoundryClientCache clients, CFClientParams params) throws Exception {
 		this.params = params;
 		this.v1 = new DefaultClientRequestsV1(params);
 		CFClientProvider provider = clients.getOrCreate(params.getUsername(), params.getCredentials(), params.getHost(), params.skipSslValidation());
 		this._client = provider.client;
+		this._tokenProvider = (AbstractUaaTokenProvider) provider.tokenProvider;
 		debug(">>> creating cf operations");
 		this._operations = DefaultCloudFoundryOperations.builder()
 				.cloudFoundryClient(_client)
@@ -1344,6 +1348,11 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 				.build()
 			)
 		);
+	}
+
+	@Override
+	public String getRefreshToken() {
+		return _tokenProvider.getRefreshToken();
 	}
 
 }

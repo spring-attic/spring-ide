@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test;
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
@@ -44,6 +44,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
+import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
@@ -116,16 +117,17 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 		return (CloudFoundryBootDashModel) getRunTargetModel(cfTargetType);
 	}
 
-	public CloudFoundryBootDashModel createCfTarget(CFClientParams params) throws Exception {
+	public CloudFoundryBootDashModel createCfTarget(CFClientParams params, StoreCredentialsMode storePassword) throws Exception {
 		CloudFoundryTargetWizardModel wizard = new CloudFoundryTargetWizardModel(cfTargetType, clientFactory, NO_TARGETS, context);
 
 		wizard.setUrl(params.getApiUrl());
 		wizard.setUsername(params.getUsername());
-		wizard.setStoreCredentials(StoreCredentialsMode.STORE_PASSWORD);
+		wizard.setStoreCredentials(storePassword);
 		wizard.setPassword(params.getCredentials().getPassword());
 		wizard.setSelfsigned(params.isSelfsigned());
 		wizard.skipSslValidation(params.skipSslValidation());
 		wizard.resolveSpaces(new MockRunnableContext());
+		assertNotNull(wizard.getRefreshToken());
 		wizard.setSpace(getSpace(wizard, params.getOrgName(), params.getSpaceName()));
 		assertOk(wizard.getValidator());
 		final CloudFoundryRunTarget newTarget = wizard.finish();
@@ -140,6 +142,10 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 			}
 		};
 		return targetModel;
+	}
+
+	public CloudFoundryBootDashModel createCfTarget(CFClientParams params) throws Exception {
+		return createCfTarget(params, StoreCredentialsMode.STORE_PASSWORD);
 	}
 
 	public CloudFoundryBootDashModel getCfModelFor(CloudFoundryRunTarget cfTarget) {
@@ -340,4 +346,9 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 			}
 		});
 	}
+
+	public SecuredCredentialsStore getCredentialsStore() {
+		return context.getSecuredCredentialsStore();
+	}
+
 }

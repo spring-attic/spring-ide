@@ -47,6 +47,7 @@ import reactor.core.publisher.Mono;
 
 public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
+	public static final String FAKE_REFRESH_TOKEN = "fakeRefreshToken";
 	private Version supportedApiVersion = new Version(CloudFoundryClient.SUPPORTED_API_VERSION);
 	private Version apiVersion = supportedApiVersion;
 
@@ -129,8 +130,10 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
 	private class MockClient implements ClientRequests {
 
+
 		private CFClientParams params;
 		private boolean connected = true;
+		private String refreshToken = null;
 
 		public MockClient(CFClientParams params) throws Exception {
 			checkCredentials(params.getUsername(), params.getCredentials());
@@ -195,6 +198,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 			checkConnected();
 			@SuppressWarnings("rawtypes")
 			List hack = ImmutableList.copyOf(spacesByName.values());
+			refreshToken = FAKE_REFRESH_TOKEN;
 			return hack;
 		}
 
@@ -286,7 +290,17 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		}
 
 		private void checkCredentials(String username, CFCredentials credentials) throws Exception {
-			if (credentials.getPassword().startsWith("wrong")) {
+			String password = credentials.getPassword();
+			String token = credentials.getRefreshToken();
+			if (password!=null) {
+				if (credentials.getPassword().startsWith("wrong")) {
+					throw errorInvalidCredentials();
+				}
+			} else if (token!=null) {
+				if (!token.equals(FAKE_REFRESH_TOKEN)) {
+					throw errorInvalidCredentials();
+				}
+			} else {
 				throw errorInvalidCredentials();
 			}
 		}
@@ -348,6 +362,11 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 					return Mono.error(e);
 				}
 			});
+		}
+
+		@Override
+		public String getRefreshToken() {
+			return refreshToken;
 		}
 
 	}
