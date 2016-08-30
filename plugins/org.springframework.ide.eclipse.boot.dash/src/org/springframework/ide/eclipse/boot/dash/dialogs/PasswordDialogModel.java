@@ -49,7 +49,6 @@ public class PasswordDialogModel {
 			@Override
 			public String credentialsToString(CFCredentials credentials) {
 				String token = credentials.getRefreshToken();
-				Assert.isLegal(token!=null, "RefreshToken is not set");
 				return token;
 			}
 		},

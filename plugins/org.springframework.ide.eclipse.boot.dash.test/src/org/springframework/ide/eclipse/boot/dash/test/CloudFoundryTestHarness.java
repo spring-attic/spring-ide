@@ -291,6 +291,10 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 		});
 	}
 
+	public String secureStoreLookupKey(CloudFoundryBootDashModel target) {
+		return target.getRunTarget().getType().getName()+":"+target.getRunTarget().getId();
+	}
+
 	public void answerPasswordPrompt(UserInteractions ui, PasswordAnswerer answerer) {
 		doAnswer(new Answer<Boolean>() {
 			@Override
