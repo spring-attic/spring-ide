@@ -238,7 +238,7 @@ public class CloudFoundryBootDashModelMockingTest {
 			//When we connect... the user should get prompted for password
 			harness.answerPasswordPrompt(ui, (d) -> {
 				d.getPasswordVar().setValue(targetParams.getCredentials().getPassword());
-				d.buttonPressed(IDialogConstants.OK_ID);
+				d.performOk();
 			});
 
 			harness.sectionSelection.setValue(target);
@@ -1510,7 +1510,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		harness.answerPasswordPrompt(ui, (d) -> {
 			d.getPasswordVar().setValue(targetParams.getCredentials().getPassword());
-			d.buttonPressed(IDialogConstants.OK_ID);
+			d.performOk();
 		});
 
 		updatePassword.run();
@@ -1526,7 +1526,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		harness.answerPasswordPrompt(ui, (d) -> {
 			d.getPasswordVar().setValue("wrong password");
-			d.buttonPressed(IDialogConstants.OK_ID);
+			d.performOk();
 		});
 
 		updatePassword.run();
@@ -1557,7 +1557,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		harness.answerPasswordPrompt(ui, (d) -> {
 			d.getPasswordVar().setValue(targetParams.getCredentials().getPassword());
 			d.getStoreVar().setValue(StoreCredentialsMode.STORE_NOTHING);
-			d.buttonPressed(IDialogConstants.OK_ID);
+			d.performOk();
 		});
 
 		updatePassword.run();
@@ -1605,7 +1605,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		harness.answerPasswordPrompt(ui, (d) -> {
 			d.getPasswordVar().setValue(targetParams.getCredentials().getPassword());
 			d.getStoreVar().setValue(StoreCredentialsMode.STORE_PASSWORD);
-			d.buttonPressed(IDialogConstants.OK_ID);
+			d.performOk();
 		});
 
 		updatePassword.run();
@@ -1648,7 +1648,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		harness.answerPasswordPrompt(ui, (d) -> {
 			d.getPasswordVar().setValue(targetParams.getCredentials().getPassword());
 			d.getStoreVar().setValue(StoreCredentialsMode.STORE_TOKEN);
-			d.buttonPressed(IDialogConstants.OK_ID);
+			d.performOk();
 		});
 
 		updatePassword.run();

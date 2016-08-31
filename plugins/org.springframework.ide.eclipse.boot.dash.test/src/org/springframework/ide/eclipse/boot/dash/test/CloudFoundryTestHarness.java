@@ -67,7 +67,7 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 
 	@FunctionalInterface
 	public interface PasswordAnswerer {
-		void apply(PasswordDialogModel model);
+		void apply(PasswordDialogModel model) throws Exception;
 	}
 
 	/**

@@ -13,7 +13,14 @@ package org.springframework.ide.eclipse.boot.dash.dialogs;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
+import org.springframework.ide.eclipse.editor.support.util.StringUtil;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
+import org.springsource.ide.eclipse.commons.livexp.ui.Ilabelable;
+import org.springsource.ide.eclipse.commons.livexp.ui.OkButtonHandler;
+
+import org.springsource.ide.eclipse.commons.livexp.core.Validator;
 
 /**
  * Password dialog model. Provides ability to specify password and whether it
@@ -22,9 +29,9 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
  * @author Alex Boyko
  *
  */
-public class PasswordDialogModel {
+public class PasswordDialogModel implements OkButtonHandler {
 
-	public static enum StoreCredentialsMode {
+	public static enum StoreCredentialsMode implements Ilabelable {
 
 		STORE_PASSWORD {
 			@Override
@@ -37,6 +44,11 @@ public class PasswordDialogModel {
 				String password = credentials.getPassword();
 				Assert.isLegal(password!=null, "Password is not set");
 				return password;
+			}
+
+			@Override
+			public String getLabel() {
+				return "Store Password";
 			}
 		},
 
@@ -51,6 +63,10 @@ public class PasswordDialogModel {
 				String token = credentials.getRefreshToken();
 				return token;
 			}
+			@Override
+			public String getLabel() {
+				return "Store OAuth Token";
+			}
 		},
 
 		STORE_NOTHING {
@@ -62,6 +78,11 @@ public class PasswordDialogModel {
 			@Override
 			public String credentialsToString(CFCredentials credentials) {
 				return null;
+			}
+
+			@Override
+			public String getLabel() {
+				return "Do NOT Store";
 			}
 		};
 
@@ -81,7 +102,8 @@ public class PasswordDialogModel {
 	final private String fTargetId;
 	final private LiveVariable<String> fPasswordVar;
 	final private LiveVariable<StoreCredentialsMode> fStoreVar;
-	private int fButtonPressed = -1;
+	private boolean okButtonPressed = false;
+	private Validator passwordValidator;
 
 	public PasswordDialogModel(String user, String targetId, String password, StoreCredentialsMode secureStore) {
 		super();
@@ -111,16 +133,32 @@ public class PasswordDialogModel {
 		return fStoreVar;
 	}
 
-	public void buttonPressed(int button) {
-		fButtonPressed = button;
-	}
-
-	public boolean isCancelled() {
-		return fButtonPressed == IDialogConstants.CANCEL_ID;
-	}
-
 	public boolean isOk() {
-		return fButtonPressed == IDialogConstants.OK_ID;
+		return okButtonPressed;
+	}
+
+	@Override
+	public void performOk() throws Exception {
+		okButtonPressed = true;
+	}
+
+	public LiveExpression<ValidationResult> getPasswordValidator() {
+		if (passwordValidator==null) {
+			passwordValidator = new Validator() {
+				{
+					dependsOn(fPasswordVar);
+				}
+				@Override
+				protected ValidationResult compute() {
+					String pw = fPasswordVar.getValue();
+					if (!StringUtil.hasText(pw)) {
+						return ValidationResult.error("Password can not be empty");
+					}
+					return ValidationResult.info("Please press 'OK' to set the password.");
+				}
+			};
+		}
+		return passwordValidator;
 	}
 
 }
