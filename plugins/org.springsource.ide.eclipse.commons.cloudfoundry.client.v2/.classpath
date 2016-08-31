@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-client-2.0.0.RELEASE.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-client-reactor-2.0.0.RELEASE.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-operations-2.0.0.RELEASE.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-util-2.0.0.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-client-2.1.0.BUILD-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-client-reactor-2.1.0.BUILD-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-operations-2.1.0.BUILD-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-util-2.1.0.BUILD-SNAPSHOT.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/commons-compress-1.12.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/evo-inflector-1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/jackson-annotations-2.8.0.jar"/>
