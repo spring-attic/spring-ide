@@ -31,9 +31,7 @@ import org.cloudfoundry.client.lib.HttpProxyConfiguration;
 import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.CloudInfo;
-import org.cloudfoundry.client.lib.domain.CloudService;
 import org.cloudfoundry.client.lib.domain.Staging;
-import org.eclipse.core.runtime.Platform;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudErrors;
@@ -43,19 +41,16 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
+import org.springsource.ide.eclipse.commons.cloudfoundry.client.RefreshTokenUtil;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.BuildpackSupport;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.CloudInfoV2;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupportV1;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
 
 @Deprecated
 public class DefaultClientRequestsV1 {
@@ -105,11 +100,15 @@ public class DefaultClientRequestsV1 {
 		if (password!=null) {
 			credentials = new CloudCredentials(params.getUsername(), password);
 		} else if (refreshToken!=null) {
-			throw new IllegalStateException("Support for refresh token auth not yey implemented!");
+			credentials = refreshTokenCredentials(refreshToken);
 		} else {
 			throw new IllegalArgumentException("Either a password or refreshToken must be provided");
 		}
 		return credentials;
+	}
+
+	private static CloudCredentials refreshTokenCredentials(String refreshToken) {
+		return RefreshTokenUtil.credentialsFromRefreshToken(refreshToken);
 	}
 
 	private static CloudFoundryOperations getOperations(
@@ -117,7 +116,7 @@ public class DefaultClientRequestsV1 {
 			URL apiUrl, String orgName, String spaceName,
 			boolean isSelfsigned
 	) throws Exception {
-		checkPassword(credentials.getPassword(), credentials.getEmail());
+		checkCredentials(credentials);
 
 		Properties properties = System.getProperties();
 		// By default disable connection pool (i.e. flag is set to true) unless
@@ -133,9 +132,12 @@ public class DefaultClientRequestsV1 {
 
 	}
 
-	private static void checkPassword(String password, String id) throws MissingPasswordException {
-		if (password == null) {
-			throw new MissingPasswordException("No password stored or set for: " + id
+	private static void checkCredentials(CloudCredentials credentials) throws MissingPasswordException {
+		String id = credentials.getEmail();
+		String password  = credentials.getPassword();
+		Object token = credentials.getToken();
+		if (password == null && token==null) {
+			throw new MissingPasswordException("No password or token stored or set for: " + id
 					+ ". Please ensure that the password is set in the run target and it is up-to-date.");
 		}
 	}

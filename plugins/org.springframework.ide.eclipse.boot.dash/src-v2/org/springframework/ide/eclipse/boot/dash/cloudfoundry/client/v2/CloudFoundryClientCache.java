@@ -24,6 +24,7 @@ import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.cloudfoundry.reactor.doppler.ReactorDopplerClient;
 import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
+import org.cloudfoundry.reactor.tokenprovider.RefreshTokenGrantTokenProvider;
 import org.cloudfoundry.reactor.uaa.ReactorUaaClient;
 import org.eclipse.core.net.proxy.IProxyData;
 import org.eclipse.core.net.proxy.IProxyService;
@@ -141,7 +142,9 @@ public class CloudFoundryClientCache {
 						.password(password)
 						.build();
 			} else if (refreshToken!=null) {
-				throw new IllegalStateException("Support for authorizing via refresh token not yet implemented!");
+				return RefreshTokenGrantTokenProvider.builder()
+						.token(refreshToken)
+						.build();
 			} else {
 				throw new IllegalArgumentException("Either a password or refreshToken must be provided");
 			}
