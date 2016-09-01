@@ -32,6 +32,7 @@ import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPathSegment.
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YType;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypedProperty;
+import org.springframework.ide.eclipse.editor.support.yaml.schema.YValueHint;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SChildBearingNode;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SKeyNode;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SNode;
@@ -151,16 +152,16 @@ public class YTypeAssistContext extends AbstractYamlAssistContext {
 	}
 
 	private List<ICompletionProposal> getValueCompletions(YamlDocument doc, int offset, String query) {
-		String[] values = typeUtil.getHintValues(type);
+		YValueHint[] values = typeUtil.getHintValues(type);
 		if (values!=null) {
 			ArrayList<ICompletionProposal> completions = new ArrayList<ICompletionProposal>();
-			for (String value : values) {
-				double score = FuzzyMatcher.matchScore(query, value);
+			for (YValueHint value : values) {
+				double score = FuzzyMatcher.matchScore(query, value.getValue());
 				if (score!=0 && !value.equals(query)) {
 					DocumentEdits edits = new DocumentEdits(doc.getDocument());
 					edits.delete(offset-query.length(), offset);
-					edits.insert(offset, value);
-					completions.add(completionFactory().valueProposal(value, query, type, score, edits, null));
+					edits.insert(offset, value.getValue());
+					completions.add(completionFactory().valueProposal(value.getValue(), query, value.getLabel(), type, score, edits, null));
 				}
 			}
 			return completions;

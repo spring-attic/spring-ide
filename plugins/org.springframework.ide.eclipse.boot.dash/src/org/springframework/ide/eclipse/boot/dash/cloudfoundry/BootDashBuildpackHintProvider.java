@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -30,18 +32,12 @@ public class BootDashBuildpackHintProvider implements Provider<Collection<YValue
 
 	private BootDashViewModel model;
 
-	public static final YValueHint[] DEFAULT_BUILDPACK_VALUES = new YValueHint[] {
-			createHint("java_buildpack"),
-			createHint("ruby_buildpack"),
-			createHint("staticfile_buildpack"),
-			createHint("nodejs_buildpack"),
-			createHint("python_buildpack"),
-			createHint("php_buildpack"),
-			createHint("liberty_buildpack"),
-			createHint("binary_buildpack"),
-			createHint("go_buildpack")
-	};
+	private static final String REMOVE_PATTERN = "api.run";
 
+	public static final YValueHint[] DEFAULT_BUILDPACK_VALUES = new YValueHint[] { createHint("java_buildpack"),
+			createHint("ruby_buildpack"), createHint("staticfile_buildpack"), createHint("nodejs_buildpack"),
+			createHint("python_buildpack"), createHint("php_buildpack"), createHint("liberty_buildpack"),
+			createHint("binary_buildpack"), createHint("go_buildpack") };
 
 	public BootDashBuildpackHintProvider(BootDashViewModel model) {
 		this.model = model;
@@ -60,7 +56,7 @@ public class BootDashBuildpackHintProvider implements Provider<Collection<YValue
 						Collection<String> targetBuildpacks = cfTarget.getBuildpackValues();
 						if (targetBuildpacks != null) {
 							for (String existingBp : targetBuildpacks) {
-								YValueHint ymlBuildpack = createHint(existingBp, cfTarget.getUrl());
+								YValueHint ymlBuildpack = createHint(existingBp, getLabel(existingBp, cfTarget));
 								buildPacks.add(ymlBuildpack);
 							}
 						}
@@ -78,10 +74,37 @@ public class BootDashBuildpackHintProvider implements Provider<Collection<YValue
 	}
 
 	public static YValueHint createHint(String value, String label) {
-		return new BasicYValueHint(value, label);
+		return  label != null ? new BasicYValueHint(value, label) : new BasicYValueHint(value);
 	}
 
 	public static YValueHint createHint(String value) {
 		return createHint(value, null);
+	}
+
+	protected String getLabel(String buildpack, CloudFoundryRunTarget target) {
+		if (target.isPWS()) {
+			return buildpack;
+		}
+
+		return buildpack + " (" + getUrlSegmentForLabel(target.getUrl()) + ')';
+	}
+
+	protected String getUrlSegmentForLabel(String url) {
+		if (url != null) {
+			try {
+				URI uri = new URI(url);
+				String authority = uri.getAuthority();
+
+				int removePatternOffset = REMOVE_PATTERN.length() + 1;
+
+				if (authority != null && authority.startsWith(REMOVE_PATTERN)
+						&& removePatternOffset < authority.length()) {
+					return authority.substring(removePatternOffset, authority.length());
+				}
+			} catch (URISyntaxException e) {
+				// Ignore. return original URL.
+			}
+		}
+		return url;
 	}
 }
