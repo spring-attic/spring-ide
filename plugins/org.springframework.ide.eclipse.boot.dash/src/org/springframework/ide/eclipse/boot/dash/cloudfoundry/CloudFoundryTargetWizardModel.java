@@ -17,6 +17,7 @@ import java.util.List;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
@@ -38,15 +39,13 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import com.google.common.collect.ImmutableSet;
 
 /**
  * Cloud Foundry Target properties that uses {@link LiveExpression} and
  * {@link Validator}.
- *
- *
- *
  */
 public class CloudFoundryTargetWizardModel {
 
@@ -60,13 +59,15 @@ public class CloudFoundryTargetWizardModel {
 	private LiveVariable<String> userName = new LiveVariable<>();
 	private LiveVariable<String> password = new LiveVariable<>();
 	private LiveVariable<StoreCredentialsMode> storeCredentials = new LiveVariable<>(StoreCredentialsMode.STORE_NOTHING);
-	private LiveVariable<OrgsAndSpaces> allSpaces = new LiveVariable<>();
+
+	private LiveVariable<ValidationResult> spaceResolutionStatus = new LiveVariable<>(ValidationResult.OK); // has an error if resolution failed.
+	private LiveVariable<OrgsAndSpaces> resolvedSpaces = new LiveVariable<>();
 
 	private String refreshToken = null;
 
 	private Validator credentialsValidator = new CredentialsValidator();
-	private Validator spacesValidator = new CloudSpaceValidator();
-	private Validator orgsSpacesValidator = new OrgsSpacesValidator();
+	private Validator spaceValidator = new CloudSpaceValidator();
+	private Validator resolvedSpacesValidator = new ResolvedSpacesValidator();
 	private CompositeValidator allPropertiesValidator = new CompositeValidator();
 
 	private CloudFoundryClientFactory clientFactory;
@@ -101,35 +102,17 @@ public class CloudFoundryTargetWizardModel {
 		// validated, and different listeners may need to be registered for
 		// credential validation
 		// vs space validation
-		spacesValidator.dependsOn(space);
+		spaceValidator.dependsOn(space);
 
-		orgsSpacesValidator.dependsOn(allSpaces);
+		resolvedSpacesValidator.dependsOn(spaceResolutionStatus);
+		resolvedSpacesValidator.dependsOn(resolvedSpaces);
 
-		// Aggregate of the credentials and space validator.
+		// Aggregate of the credentials and space validators.
 		allPropertiesValidator.addChild(credentialsValidator);
-		allPropertiesValidator.addChild(spacesValidator);
-		allPropertiesValidator.addChild(orgsSpacesValidator);
+		allPropertiesValidator.addChild(resolvedSpacesValidator);
+		allPropertiesValidator.addChild(spaceValidator);
 
 		url.setValue(getDefaultTargetUrl());
-	}
-
-	/**
-	 * @param credentialsValidationListener
-	 *            listener that is notified when only credential properties are
-	 *            validated (but not org/space)
-	 *
-	 */
-	public void addCredentialsListener(ValueListener<ValidationResult> credentialsValidationListener) {
-		credentialsValidator.addListener(credentialsValidationListener);
-	}
-
-	/**
-	 * @param cloudSpaceChangeListener
-	 *            listener that is notified when Cloud space is changed
-	 *
-	 */
-	public void addSpaceSelectionListener(ValueListener<CFSpace> cloudSpaceChangeListener) {
-		space.addListener(cloudSpaceChangeListener);
 	}
 
 	/**
@@ -142,17 +125,7 @@ public class CloudFoundryTargetWizardModel {
 
 	public void removeAllPropertiesListeners(ValueListener<ValidationResult> allPropertiesValidationListener) {
 		allPropertiesValidator.removeListener(allPropertiesValidationListener);
-
 	}
-
-	public void removeCredentialsListeners(ValueListener<ValidationResult> credentialsValidationListener) {
-		credentialsValidator.removeListener(credentialsValidationListener);
-	}
-
-	public void removeSpaceSelectionListeners(ValueListener<CFSpace> cloudSpaceChangeListener) {
-		space.removeListener(cloudSpaceChangeListener);
-	}
-
 
 	public void setUrl(String url) {
 		this.url.setValue(url);
@@ -202,11 +175,19 @@ public class CloudFoundryTargetWizardModel {
 		return "https://api.run.pivotal.io";
 	}
 
-	public OrgsAndSpaces resolveSpaces(IRunnableContext context) throws Exception {
-		boolean toFetchSpaces = true;
-		OrgsAndSpaces spaces = getCloudSpaces(createTargetProperties(toFetchSpaces), context);
-		allSpaces.setValue(spaces);
-		return allSpaces.getValue();
+	public OrgsAndSpaces resolveSpaces(IRunnableContext context) {
+		try {
+			boolean toFetchSpaces = true;
+			OrgsAndSpaces spaces = getCloudSpaces(createTargetProperties(toFetchSpaces), context);
+			resolvedSpaces.setValue(spaces);
+			spaceResolutionStatus.setValue(ValidationResult.OK);
+			return resolvedSpaces.getValue();
+		} catch (Exception e) {
+			Log.log(e);
+			resolvedSpaces.setValue(null);
+			spaceResolutionStatus.setValue(ValidationResult.error(ExceptionUtil.getMessage(e)));
+			return null;
+		}
 	}
 
 	private OrgsAndSpaces getCloudSpaces(final CloudFoundryTargetProperties targetProperties, IRunnableContext context)
@@ -288,7 +269,7 @@ public class CloudFoundryTargetWizardModel {
 	}
 
 	public OrgsAndSpaces getSpaces() {
-		return allSpaces.getValue();
+		return resolvedSpaces.getValue();
 	}
 
 	protected RunTarget getExistingRunTarget(CFSpace space) {
@@ -401,19 +382,20 @@ public class CloudFoundryTargetWizardModel {
 		}
 	}
 
-	class OrgsSpacesValidator extends Validator {
+	class ResolvedSpacesValidator extends Validator {
 		@Override
 		protected ValidationResult compute() {
-
-			if (allSpaces.getValue() == null || allSpaces.getValue().getAllSpaces() == null) {
-				return ValidationResult.info("Enter credentials and select a space to validate the credentials.");
+			ValidationResult resolveStatus = spaceResolutionStatus.getValue();
+			if (!resolveStatus.isOk()) {
+				return resolveStatus;
 			}
-
-			if (allSpaces.getValue().getAllSpaces().isEmpty()) {
+			if (resolvedSpaces.getValue() == null || resolvedSpaces.getValue().getAllSpaces() == null) {
+				return ValidationResult.info("Select a space to validate the credentials.");
+			}
+			if (resolvedSpaces.getValue().getAllSpaces().isEmpty()) {
 				return ValidationResult.error(
 						"No spaces available to select. Please check that the credentials and target URL are correct, and spaces are defined in the target.");
 			}
-
 			return ValidationResult.OK;
 		}
 	}
@@ -427,6 +409,46 @@ public class CloudFoundryTargetWizardModel {
 
 	public String getRefreshToken() {
 		return refreshToken;
+	}
+
+	public LiveVariable<String> getUsernameVar() {
+		return userName;
+	}
+
+	public LiveVariable<String> getPasswordVar() {
+		return password;
+	}
+
+	public LiveVariable<StoreCredentialsMode> getStoreVar() {
+		return storeCredentials;
+	}
+
+	public LiveVariable<Boolean> getSkipSslVar() {
+		return skipSslValidation;
+	}
+
+	public LiveVariable<String> getUrlVar() {
+		return url;
+	}
+
+	public LiveVariable<CFSpace> getSpaceVar() {
+		return space;
+	}
+
+	public LiveExpression<Boolean> getEnableSpacesUI() {
+		return credentialsValidator.apply((r) -> r.isOk());
+	}
+
+	public LiveExpression<ValidationResult> getSpaceValidator() {
+		return spaceValidator;
+	}
+
+	public LiveExpression<ValidationResult> getResolvedSpacesValidator() {
+		return resolvedSpacesValidator;
+	}
+
+	public LiveExpression<ValidationResult> getCredentialsValidator() {
+		return credentialsValidator;
 	}
 
 }

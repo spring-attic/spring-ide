@@ -36,10 +36,13 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel.StoreCredentialsMode;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.SelectionModel;
+import org.springsource.ide.eclipse.commons.livexp.ui.CheckboxSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.ChooseOneSectionCombo;
 import org.springsource.ide.eclipse.commons.livexp.ui.CommentSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.DialogWithSections;
+import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.StringFieldSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 
@@ -70,9 +73,13 @@ public class UpdatePasswordDialog extends DialogWithSections {
 				"The password must match your existing target credentials in " + model.getTargetId() + "."));
 
 		sections.add(new StringFieldSection(this, "Password", model.getPasswordVar(), model.getPasswordValidator()));
-		sections.add(new ChooseOneSectionCombo<>(this, "Remember?", new SelectionModel<>(model.getStoreVar()), storeCredentialChoices));
+		sections.add(storeCredentialsSection(this, model.getStoreVar()));
 
 		return sections;
+	}
+
+	public static ChooseOneSectionCombo<StoreCredentialsMode> storeCredentialsSection(IPageWithSections owner, LiveVariable<StoreCredentialsMode> storeCreds) {
+		return new ChooseOneSectionCombo<>(owner, "Remember:", new SelectionModel<>(storeCreds), storeCredentialChoices);
 	}
 
 }
