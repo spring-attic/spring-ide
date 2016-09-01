@@ -24,6 +24,8 @@ public class DefaultSecuredCredentialsStore implements SecuredCredentialsStore {
 
 	private static final String KEY_PASSWORD = "password";
 
+	private boolean isUnlocked = false;
+
 	public DefaultSecuredCredentialsStore() {
 	}
 
@@ -55,6 +57,8 @@ public class DefaultSecuredCredentialsStore implements SecuredCredentialsStore {
 		String val = null;
 		if (preferences != null) {
 			val = preferences.get(property, null);
+			//We've succesfully used it so... it must be unlocked now.
+			isUnlocked = true;
 		}
 		return val;
 	}
@@ -67,7 +71,14 @@ public class DefaultSecuredCredentialsStore implements SecuredCredentialsStore {
 			} else {
 				preferences.put(property, value, true);
 			}
+			//We've succesfully used it so... it must be unlocked now.
+			isUnlocked = true;
 		}
+	}
+
+	@Override
+	public boolean isUnlocked() {
+		return isUnlocked;
 	}
 
 }

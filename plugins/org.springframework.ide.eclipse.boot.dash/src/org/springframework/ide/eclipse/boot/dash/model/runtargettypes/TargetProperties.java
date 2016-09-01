@@ -126,12 +126,11 @@ public class TargetProperties {
 	}
 
 	public CFCredentials getCredentials() throws CannotAccessPropertyException {
-		StoreCredentialsMode storeMode = getStoreCredentials();
-		if (credentials == null && storeMode!=StoreCredentialsMode.STORE_NOTHING) {
+		if (credentials == null) {
+			StoreCredentialsMode storeMode = getStoreCredentials();
 			try {
-				String str = context.getSecuredCredentialsStore().getCredentials(secureStoreScopeKey(type.getName(), getRunTargetId()));
-				credentials = storeMode.createCredentials(str);
-			} catch (StorageException e) {
+				credentials = storeMode.loadCredentials(context, type, getRunTargetId());
+			} catch (Exception e) {
 				throw new CannotAccessPropertyException("Cannot read password.", e);
 			}
 		}
@@ -141,16 +140,7 @@ public class TargetProperties {
 	public void setCredentials(CFCredentials credentials) throws CannotAccessPropertyException {
 		this.credentials = credentials;
 		StoreCredentialsMode storeMode = getStoreCredentials();
-		if (storeMode!=StoreCredentialsMode.STORE_NOTHING) {
-			try {
-				String storedString = storeMode.credentialsToString(credentials);
-				context.getSecuredCredentialsStore().setCredentials(storedString, secureStoreScopeKey(type.getName(), getRunTargetId()));
-			} catch (StorageException e) {
-				throw new CannotAccessPropertyException("Cannot store password.", e);
-			}
-		} else {
-			// Shall we clear out the password that might be stored if we don't remember the password?
-		}
+		storeMode.saveCredentials(context, type, getRunTargetId(), credentials);
 	}
 
 	public String getUrl() {
@@ -163,10 +153,6 @@ public class TargetProperties {
 		} else {
 			map.put(key, value);
 		}
-	}
-
-	protected String secureStoreScopeKey(String targetTypeName, String targetId) {
-		return targetTypeName+":"+targetId;
 	}
 
 }

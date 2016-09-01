@@ -16,5 +16,6 @@ public interface SecuredCredentialsStore {
 
 	String getCredentials(String string) throws StorageException;
 	void setCredentials(String password, String runTargetId) throws StorageException;
+	boolean isUnlocked();
 
 }
