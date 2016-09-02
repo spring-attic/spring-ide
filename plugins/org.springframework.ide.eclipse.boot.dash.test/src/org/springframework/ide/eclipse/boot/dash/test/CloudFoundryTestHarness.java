@@ -40,6 +40,7 @@ import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDia
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel.StoreCredentialsMode;
+import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
@@ -291,7 +292,11 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 		});
 	}
 
-	public String secureStoreLookupKey(CloudFoundryBootDashModel target) {
+	public String privateStoreKey(CloudFoundryBootDashModel target) {
+		return secureStoreKey(target)+":token";
+	}
+
+	public String secureStoreKey(CloudFoundryBootDashModel target) {
 		return target.getRunTarget().getType().getName()+":"+target.getRunTarget().getId();
 	}
 
@@ -353,6 +358,10 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 
 	public SecuredCredentialsStore getCredentialsStore() {
 		return context.getSecuredCredentialsStore();
+	}
+
+	public IPropertyStore getPrivateStore() {
+		return context.getPrivatePropertyStore();
 	}
 
 }

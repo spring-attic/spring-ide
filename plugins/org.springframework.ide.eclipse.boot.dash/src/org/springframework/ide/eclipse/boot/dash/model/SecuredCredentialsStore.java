@@ -15,7 +15,7 @@ import org.eclipse.equinox.security.storage.StorageException;
 public interface SecuredCredentialsStore {
 
 	String getCredentials(String string) throws StorageException;
-	void setCredentials(String password, String runTargetId) throws StorageException;
+	void setCredentials(String runTargetId, String password) throws StorageException;
 	boolean isUnlocked();
 
 }

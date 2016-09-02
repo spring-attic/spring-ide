@@ -10,9 +10,12 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.metadata;
 
+import java.io.IOException;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -22,6 +25,7 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultSecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springframework.ide.eclipse.boot.util.Log;
 
 /**
  * Provides static helper methods to create IPropertyStore instances,
@@ -134,6 +138,10 @@ public class PropertyStoreFactory {
 				return null;
 			}
 		};
+	}
+
+	public static IPropertyStore createPrivateStore(IPath append) {
+		return new PropertyFileStore(append.toFile());
 	}
 
 }

@@ -79,14 +79,6 @@ public class UpdatePasswordAction extends AbstractCloudDashModelAction {
 									runTarget.getTargetProperties().setCredentials(savedCreds);
 								}
 								new ConnectOperation(targetModel, true, ui).run(monitor);
-								if (runTarget.getTargetProperties().getStoreCredentials()==StoreCredentialsMode.STORE_TOKEN) {
-									//TODO: This special case doesn't seem like it should be necessary. Instead, any interaction with
-									// client should publish refresh token as it changes and credentials should be updated in target
-									// properties automatically any time there is a change.
-									String refreshToken = targetModel.getRunTarget().getClient().getRefreshToken();
-									Assert.isNotNull(refreshToken);
-									runTarget.getTargetProperties().setCredentials(CFCredentials.fromRefreshToken(refreshToken));
-								}
 							} catch (Exception e) {
 								targetModel.setBaseRefreshState(RefreshState.error(e));
 								ui.errorPopup("Failed Setting Password", "Credentials for " + targetId

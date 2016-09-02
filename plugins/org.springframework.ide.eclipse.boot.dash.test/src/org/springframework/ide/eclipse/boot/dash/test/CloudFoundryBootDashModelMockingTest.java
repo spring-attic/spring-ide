@@ -75,6 +75,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.HealthCheck
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel.StoreCredentialsMode;
+import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -181,18 +182,15 @@ public class CloudFoundryBootDashModelMockingTest {
 			assertNotNull(target);
 			assertNotNull(target.getRunTarget().getTargetProperties().getCredentials().getPassword());
 			assertEquals(1, harness.getCfRunTargetModels().size());
+
+			SecuredCredentialsStore store = harness.getCredentialsStore();
+			assertTrue(store.isUnlocked());
 		}
 
 		harness.reload();
-
 		{
 			CloudFoundryBootDashModel target = harness.getCfTargetModel();
 			String expectedPass = targetParams.getCredentials().getPassword();
-
-			SecuredCredentialsStore store = harness.getCredentialsStore();
-			String key = harness.secureStoreLookupKey(target);
-			String storedCred = store.getCredentials(key);
-			assertEquals(expectedPass, storedCred);
 
 			assertNotNull(target);
 			String password = target.getRunTarget().getTargetProperties().getCredentials().getPassword();
@@ -202,6 +200,21 @@ public class CloudFoundryBootDashModelMockingTest {
 			waitForJobsToComplete();
 			assertTrue(target.isConnected()); //should auto connect.
 			verifyZeroInteractions(ui); //should not prompt for password (but used stored pass).
+
+			{
+				SecuredCredentialsStore store = harness.getCredentialsStore();
+				assertTrue(store.isUnlocked());
+				String key = harness.secureStoreKey(target);
+				String storedCred = store.getCredentials(key);
+				assertEquals(expectedPass, storedCred);
+			}
+
+			{
+				IPropertyStore store = harness.getPrivateStore();
+				String key = harness.privateStoreKey(target);
+				String storedCred = store.get(key);
+				assertNull(storedCred);
+			}
 		}
 	}
 
@@ -215,6 +228,9 @@ public class CloudFoundryBootDashModelMockingTest {
 			assertNotNull(target);
 			assertNotNull(target.getRunTarget().getTargetProperties().getCredentials().getPassword());
 			assertEquals(1, harness.getCfRunTargetModels().size());
+
+			SecuredCredentialsStore store = harness.getCredentialsStore();
+			assertFalse(store.isUnlocked()); // should not have gotten unlocked.
 		}
 
 		harness.reload();
@@ -224,14 +240,21 @@ public class CloudFoundryBootDashModelMockingTest {
 
 			waitForJobsToComplete();
 
-			SecuredCredentialsStore store = harness.getCredentialsStore();
-			String key = harness.secureStoreLookupKey(target);
-			String storedCred = store.getCredentials(key);
-			assertNull(storedCred);
 			assertEquals(StoreCredentialsMode.STORE_NOTHING, target.getRunTarget().getTargetProperties().getStoreCredentials());
 			assertNotNull(target);
 			assertNull(target.getRunTarget().getTargetProperties().getCredentials());
 			assertFalse(target.isConnected()); // no auto connect if no creds are stored.
+			{	//check secure store is clean
+				SecuredCredentialsStore store = harness.getCredentialsStore();
+				assertFalse(store.isUnlocked()); // should not have gotten unlocked.
+				String storedCred = store.getCredentials(harness.secureStoreKey(target));
+				assertNull(storedCred);
+			}
+			{	//check private store is clean
+				IPropertyStore store = harness.getPrivateStore();
+				String storedCred = store.get(harness.privateStoreKey(target));
+				assertNull(storedCred);
+			}
 
 			verifyZeroInteractions(ui);
 
@@ -274,10 +297,19 @@ public class CloudFoundryBootDashModelMockingTest {
 		{
 			CloudFoundryBootDashModel target = harness.getCfTargetModel();
 
-			SecuredCredentialsStore store = harness.getCredentialsStore();
-			String key = harness.secureStoreLookupKey(target);
-			String storedCred = store.getCredentials(key);
-			assertEquals(MockCloudFoundryClientFactory.FAKE_REFRESH_TOKEN, storedCred);
+			{	//secure store shouldn't have been accessed (i.e. avoid opening it and popping password)
+				SecuredCredentialsStore store = harness.getCredentialsStore();
+				assertFalse(store.isUnlocked());
+				String key = harness.secureStoreKey(target);
+				String storedCred = store.getCredentials(key);
+				assertNull(storedCred);
+			}
+			{
+				IPropertyStore store = harness.getPrivateStore();
+				String key = harness.privateStoreKey(target);
+				String storedCred = store.get(key);
+				assertEquals(MockCloudFoundryClientFactory.FAKE_REFRESH_TOKEN, storedCred);
+			}
 
 			assertNotNull(target);
 			assertEquals(MockCloudFoundryClientFactory.FAKE_REFRESH_TOKEN, target.getRunTarget().getTargetProperties().getCredentials().getRefreshToken());
@@ -1568,6 +1600,11 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertNotNull(model.getApplication(appName));
 		assertEquals(RefreshState.READY, model.getRefreshState());
 
+		{
+			assertNull(harness.getCredentialsStore().getCredentials(harness.secureStoreKey(model)));
+			assertNull(harness.getPrivateStore().get(harness.privateStoreKey(model)));
+		}
+
 		actions.getToggleTargetConnectionAction().run();
 
 		waitForJobsToComplete();
@@ -1670,7 +1707,8 @@ public class CloudFoundryBootDashModelMockingTest {
 		CFCredentials creds = model.getRunTarget().getTargetProperties().getCredentials();
 		assertEquals(MockCloudFoundryClientFactory.FAKE_REFRESH_TOKEN, creds.getRefreshToken());
 		assertNull(creds.getPassword());
-		assertEquals(MockCloudFoundryClientFactory.FAKE_REFRESH_TOKEN, harness.getCredentialsStore().getCredentials(harness.secureStoreLookupKey(model)));
+		assertEquals(MockCloudFoundryClientFactory.FAKE_REFRESH_TOKEN, harness.getPrivateStore().get(harness.privateStoreKey(model)));
+		assertNull(harness.getCredentialsStore().getCredentials(harness.secureStoreKey(model)));
 		assertEquals(RefreshState.READY, model.getRefreshState());
 		assertNotNull(model.getApplication(appName));
 

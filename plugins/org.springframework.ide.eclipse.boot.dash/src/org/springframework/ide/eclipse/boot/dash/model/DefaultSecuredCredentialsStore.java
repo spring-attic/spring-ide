@@ -42,7 +42,7 @@ public class DefaultSecuredCredentialsStore implements SecuredCredentialsStore {
 	}
 
 	@Override
-	public void setCredentials(String password, String runTargetId) throws StorageException {
+	public void setCredentials(String runTargetId, String password) throws StorageException {
 		setProperty(KEY_PASSWORD, password, runTargetId);
 	}
 

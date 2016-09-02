@@ -12,11 +12,13 @@ public class MockSecuredCredentialStore implements SecuredCredentialsStore {
 
 	@Override
 	public synchronized String getCredentials(String runTargetId) {
+		isUnlocked = true;
 		return store.get(runTargetId);
 	}
 
 	@Override
-	public synchronized void setCredentials(String password, String runTargetId) {
+	public synchronized void setCredentials(String runTargetId, String password) {
+		isUnlocked = true;
 		store.put(runTargetId, password);
 	}
 

@@ -17,6 +17,7 @@ import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel.StoreCredentialsMode;
+import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
@@ -66,7 +67,7 @@ public class PasswordDialogModel implements OkButtonHandler {
 			protected void basicSaveCredentials(BootDashModelContext context, RunTargetType type, String runTargetId, CFCredentials credentials) throws CannotAccessPropertyException {
 				try {
 					String storedString = credentials.getPassword();
-					context.getSecuredCredentialsStore().setCredentials(storedString, secureStoreScopeKey(type.getName(), runTargetId));
+					context.getSecuredCredentialsStore().setCredentials(secureStoreScopeKey(type.getName(), runTargetId), storedString);
 				} catch (StorageException e) {
 					throw new CannotAccessPropertyException("Failed to save credentials", e);
 				}
@@ -78,11 +79,15 @@ public class PasswordDialogModel implements OkButtonHandler {
 					SecuredCredentialsStore store = context.getSecuredCredentialsStore();
 					//Be careful and avoid annoying password popup just to erase data in a locked secure store.
 					if (store.isUnlocked()) {
-						store.setCredentials(null, secureStoreScopeKey(type.getName(), runTargetId));
+						store.setCredentials(secureStoreScopeKey(type.getName(), runTargetId), null);
 					}
 				} catch (StorageException e) {
 					Log.log(e);
 				}
+			}
+
+			private String secureStoreScopeKey(String targetTypeName, String targetId) {
+				return targetTypeName+":"+targetId;
 			}
 		},
 
@@ -92,25 +97,25 @@ public class PasswordDialogModel implements OkButtonHandler {
 				return "Store OAuth Token";
 			}
 
+			private String privateStoreKey(String targetType, String targetId) {
+				return targetType+":"+targetId + ":token";
+			}
+
 			@Override
-			public CFCredentials loadCredentials(BootDashModelContext context, RunTargetType type, String runTargetId) throws CannotAccessPropertyException {
-				try {
-					String token = context.getSecuredCredentialsStore().getCredentials(secureStoreScopeKey(type.getName(), runTargetId));
-					if (token!=null) {
-						return CFCredentials.fromRefreshToken(token);
-					}
-					return null;
-				} catch (StorageException e) {
-					throw new CannotAccessPropertyException("Failed to load credentials", e);
+			public CFCredentials loadCredentials(BootDashModelContext context, RunTargetType type, String runTargetId) {
+				String token = context.getPrivatePropertyStore().get(privateStoreKey(type.getName(), runTargetId));
+				if (token!=null) {
+					return CFCredentials.fromRefreshToken(token);
 				}
+				return null;
 			}
 
 			@Override
 			public void basicSaveCredentials(BootDashModelContext context, RunTargetType type, String runTargetId, CFCredentials credentials) throws CannotAccessPropertyException {
 				try {
 					String storedString = credentials.getRefreshToken();
-					context.getSecuredCredentialsStore().setCredentials(storedString, secureStoreScopeKey(type.getName(), runTargetId));
-				} catch (StorageException e) {
+					context.getPrivatePropertyStore().put(privateStoreKey(type.getName(), runTargetId), storedString);
+				} catch (Exception e) {
 					throw new CannotAccessPropertyException("Failed to save credentials", e);
 				}
 			}
@@ -118,12 +123,9 @@ public class PasswordDialogModel implements OkButtonHandler {
 			@Override
 			protected void eraseCredentials(BootDashModelContext context, RunTargetType type, String runTargetId) {
 				try {
-					SecuredCredentialsStore store = context.getSecuredCredentialsStore();
-					//Be careful and avoid annoying password popup just to erase data in a locked secure store.
-					if (store.isUnlocked()) {
-						store.setCredentials(null, secureStoreScopeKey(type.getName(), runTargetId));
-					}
-				} catch (StorageException e) {
+					IPropertyStore store = context.getPrivatePropertyStore();
+					store.put(privateStoreKey(type.getName(), runTargetId), null);
+				} catch (Exception e) {
 					Log.log(e);
 				}
 			}
@@ -158,15 +160,11 @@ public class PasswordDialogModel implements OkButtonHandler {
 		public final void saveCredentials(BootDashModelContext context, RunTargetType type, String runTargetId, CFCredentials credentials) throws CannotAccessPropertyException {
 			for (StoreCredentialsMode mode : EnumSet.allOf(StoreCredentialsMode.class)) {
 				if (mode==this) {
-					basicSaveCredentials(context, type, runTargetId, credentials);
+					mode.basicSaveCredentials(context, type, runTargetId, credentials);
 				} else {
-					eraseCredentials(context, type, runTargetId);
+					mode.eraseCredentials(context, type, runTargetId);
 				}
 			}
-		}
-
-		protected String secureStoreScopeKey(String targetTypeName, String targetId) {
-			return targetTypeName+":"+targetId;
 		}
 	}
 
