@@ -50,7 +50,7 @@ public class InitializrPreferencePage extends FieldEditorPreferencePage implemen
 
 			@Override
 			protected boolean checkState() {
-				// Check if tsring is URL
+				// Checks if string has a correct URL format 
 				Text text = getTextControl();
 				if (text == null) {
 					return false;
