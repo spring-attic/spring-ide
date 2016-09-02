@@ -32,8 +32,7 @@ public class OpenFilterPreferencesAction extends AbstractBootDashAction {
 
 	@Override
 	public void run() {
-		PreferencesUtil.createPreferenceDialogOn(null, BootPreferences.BOOT_PREFERENCE_PAGE_ID,
-				new String[] { BootPreferences.BOOT_PREFERENCE_PAGE_ID }, null).open();
+		PreferencesUtil.createPreferenceDialogOn(null, BootPreferences.BOOT_PREFERENCE_PAGE_ID, null, null).open();
 	}
 
 }

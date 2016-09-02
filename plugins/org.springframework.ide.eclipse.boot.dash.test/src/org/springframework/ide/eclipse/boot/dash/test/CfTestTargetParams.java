@@ -17,6 +17,7 @@ import java.nio.file.Path;
 
 import org.eclipse.core.runtime.Assert;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
 import org.springframework.ide.eclipse.core.StringUtils;
 
 /**
@@ -29,7 +30,7 @@ public class CfTestTargetParams {
 			return new CFClientParams(
 					fromEnv("CF_TEST_API_URL"),
 					fromEnv("CF_TEST_USER"),
-					fromEnv("CF_TEST_PASSWORD"),
+					CFCredentials.fromPassword(fromEnv("CF_TEST_PASSWORD")),
 					false, //self signed
 					fromEnv("CF_TEST_ORG"),
 					fromEnvOrFile("CF_TEST_SPACE"),

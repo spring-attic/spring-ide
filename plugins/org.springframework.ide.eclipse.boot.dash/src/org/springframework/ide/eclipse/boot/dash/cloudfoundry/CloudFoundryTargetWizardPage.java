@@ -10,31 +10,35 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.jface.dialogs.Dialog;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
-import org.springframework.ide.eclipse.boot.util.Log;
+import org.springframework.ide.eclipse.boot.dash.views.UpdatePasswordDialog;
+import org.springframework.ide.eclipse.editor.support.util.CollectionUtil;
+import org.springsource.ide.eclipse.commons.livexp.core.CompositeValidator;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
-import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
-import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.ui.CheckboxSection;
+import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
+import org.springsource.ide.eclipse.commons.livexp.ui.StringFieldSection;
+import org.springsource.ide.eclipse.commons.livexp.ui.UIConstants;
+import org.springsource.ide.eclipse.commons.livexp.ui.ValidatorSection;
+import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
+import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageWithSections;
 
 /**
  * Creates a Cloud Foundry target by prompting user for credentials and Cloud
@@ -42,234 +46,105 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
  *
  *
  */
-public class CloudFoundryTargetWizardPage extends WizardPage implements ValueListener<ValidationResult> {
+public class CloudFoundryTargetWizardPage extends WizardPageWithSections {
 
-	private Text emailText;
+	private CloudFoundryTargetWizardModel model;
 
-	private Text passwordText;
+	private class SelectSpaceSection extends WizardPageSection {
 
-	private Text urlText;
+		private CompositeValidator spaceSectionValidator = new CompositeValidator();
+		{
+			//Do these two really need to be exposed from the model as separate entities?
+			//   I don't think they are really used separately?
+			// Keeping it like this for now as it sort of make sense. The ui here has two pieces
+			//  one is a box showing a selected space. And the other a button to resolve spaces.
+			spaceSectionValidator.addChild(model.getResolvedSpacesValidator());
+			spaceSectionValidator.addChild(model.getSpaceValidator());
+		}
 
-	private Text spaceValueText;
+		public SelectSpaceSection(IPageWithSections owner) {
+			super(owner);
+		}
 
-//	private Button trustSelfSigned;
+		@Override
+		public void createContents(Composite page) {
+	        Composite buttonComposite = new Composite(page, SWT.NONE);
+			GridDataFactory.fillDefaults().grab(true, false).applyTo(buttonComposite);
+	        GridLayout layout = GridLayoutFactory.fillDefaults().numColumns(3).margins(0,2).create();
+	        buttonComposite.setLayout(layout);
 
-	private Button skipSslValidation;
+	        Label label = new Label(buttonComposite, SWT.NONE);
+	        label.setText("Space:");
+	        GridDataFactory.fillDefaults()
+	        	.hint(UIConstants.fieldLabelWidthHint(label), SWT.DEFAULT)
+	        	.align(SWT.BEGINNING, SWT.CENTER)
+	        	.applyTo(label);
 
-	private Button orgsSpacesButton;
+			Text spaceValueText = new Text(buttonComposite, SWT.BORDER);
+			spaceValueText.setEnabled(false);
+			spaceValueText.setBackground(buttonComposite.getBackground());
+			GridDataFactory.fillDefaults().grab(true, false).applyTo(spaceValueText);
+			model.getSpaceVar().addListener((exp, value) -> {
+				if (spaceValueText != null && !spaceValueText.isDisposed()) {
+					spaceValueText.setText(value != null ? value.getName() : "");
+				}
+			});
 
-	private boolean canFinish = false;
+			Button selectSpaceButton = new Button(buttonComposite, SWT.PUSH);
+			selectSpaceButton.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false));
+			selectSpaceButton.setText("Select Space...");
+			selectSpaceButton.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent event) {
 
-	private CloudFoundryTargetWizardModel wizardModel;
+					// Fetch an updated list of orgs and spaces in a cancellable
+					// operation (i.e. the operation
+					// can be cancelled in the wizard's progress bar)
+					model.resolveSpaces(getWizard().getContainer());
+					OrgsAndSpaces spaces = model.getSpaces();
+					if (spaces != null && CollectionUtil.hasElements(spaces.getAllSpaces())) {
+						OrgsAndSpacesWizard spacesWizard = new OrgsAndSpacesWizard(model);
+						WizardDialog dialog = new WizardDialog(getShell(), spacesWizard);
+						dialog.open();
+					}
+				}
+			});
 
-	private EnableSpaceControlListener credentialsValidationListener = null;
+			//Enable the "Select Space" button once credentials are complete.
+			model.getCredentialsValidator().addListener((exp, value) -> {
+				if (selectSpaceButton != null && !selectSpaceButton.isDisposed()) {
+					selectSpaceButton.setEnabled(value.isOk());
+				}
+			});
+		}
 
-	private SetSpaceValListener setSpaceValListener = null;
+		@Override
+		public LiveExpression<ValidationResult> getValidator() {
+			return spaceSectionValidator;
+		}
+
+	}
+
 
 	private RunTarget runTarget = null;
 
 	public CloudFoundryTargetWizardPage(CloudFoundryTargetWizardModel model) {
-		super("Add a Cloud Foundry Target");
-		this.wizardModel = model;
-		setTitle("Add a Cloud Foundry Target");
+		super("page1", "Add a Cloud Foundry Target", BootDashActivator.getImageDescriptor("icons/wizban_cloudfoundry.png"));
+		this.model = model;
 		setDescription("Enter credentials and a Cloud Foundry target URL.");
-
-		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/wizban_cloudfoundry.png"));
-
-	}
-
-	public void createControl(Composite parent) {
-		Composite area = new Composite(parent, SWT.NONE);
-		GridDataFactory.fillDefaults().grab(true, true).hint(400, SWT.DEFAULT).applyTo(area);
-		GridLayoutFactory.fillDefaults().margins(10, 10).numColumns(1).applyTo(area);
-
-		createCredentialsUI(area);
-
-		Dialog.applyDialogFont(area);
-		setControl(area);
-	}
-
-	private void createCredentialsUI(Composite parent) {
-
-		Composite topComposite = new Composite(parent, SWT.NONE);
-		topComposite.setLayout(GridLayoutFactory.fillDefaults().numColumns(2).equalWidth(false).spacing(5, 10).create());
-		topComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
-		Label emailLabel = new Label(topComposite, SWT.NONE);
-		emailLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		emailLabel.setText("Email: ");
-
-		emailText = new Text(topComposite, SWT.BORDER);
-		emailText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		emailText.setEditable(true);
-		emailText.setFocus();
-
-		emailText.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				wizardModel.setUsername(emailText.getText());
-			}
-		});
-
-		Label passwordLabel = new Label(topComposite, SWT.NONE);
-		passwordLabel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-		passwordLabel.setText("Password: ");
-
-		Composite passwordComposite = new Composite(topComposite, SWT.NONE);
-		GridLayoutFactory.fillDefaults().spacing(5, 2).applyTo(passwordComposite);
-		GridDataFactory.fillDefaults().grab(true, false).applyTo(passwordComposite);
-
-		passwordText = new Text(passwordComposite, SWT.PASSWORD | SWT.BORDER);
-		GridDataFactory.fillDefaults().grab(true, false).applyTo(passwordText);
-		passwordText.setEditable(true);
-
-		passwordText.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				try {
-					wizardModel.setPassword(passwordText.getText());
-				} catch (CannotAccessPropertyException e1) {
-					// Ignore. This will execute without exception
-				}
-			}
-		});
-
-		final Button rememberPassword = new Button(passwordComposite, SWT.CHECK);
-		rememberPassword.setText("Remember Password");
-		rememberPassword.setSelection(false);
-		rememberPassword.addSelectionListener(new SelectionAdapter() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				wizardModel.setStorePassword(rememberPassword.getSelection());
-			}
-
-		});
-
-		Label urlLabel = new Label(topComposite, SWT.NONE);
-		urlLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		urlLabel.setText("URL: ");
-
-		urlText = new Text(topComposite, SWT.BORDER);
-		urlText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		urlText.setEditable(true);
-
-		urlText.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				wizardModel.setUrl(urlText.getText());
-			}
-		});
-
-		Label spacesLabel = new Label(topComposite, SWT.NONE);
-		spacesLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		spacesLabel.setText("Space: ");
-
-		Composite buttonComposite = new Composite(topComposite, SWT.NONE);
-		GridDataFactory.fillDefaults().grab(true, false).applyTo(buttonComposite);
-		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(buttonComposite);
-
-		spaceValueText = new Text(buttonComposite, SWT.BORDER);
-		spaceValueText.setEnabled(false);
-		spaceValueText.setBackground(buttonComposite.getBackground());
-		spaceValueText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-
-		orgsSpacesButton = new Button(buttonComposite, SWT.PUSH);
-		orgsSpacesButton.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false));
-
-		orgsSpacesButton.setText("Select Space...");
-		orgsSpacesButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent event) {
-
-				// Fetch an updated list of orgs and spaces in a cancellable
-				// operation (i.e. the operation
-				// can be cancelled in the wizard's progress bar)
-				OrgsAndSpaces spaces = null;
-				try {
-					spaces = wizardModel.resolveSpaces(getWizard().getContainer());
-				} catch (Exception e) {
-					Log.log(e);
-					setErrorMessage(ExceptionUtil.getMessage(e));
-					refreshWizardUI();
-					return;
-				}
-				if (spaces != null) {
-					OrgsAndSpacesWizard spacesWizard = new OrgsAndSpacesWizard(wizardModel);
-					WizardDialog dialog = new WizardDialog(getShell(), spacesWizard);
-					dialog.open();
-				}
-			}
-		});
-
-//		trustSelfSigned = new Button(topComposite, SWT.CHECK);
-//		trustSelfSigned.setText("Self-signed");
-//		GridDataFactory.fillDefaults().grab(false, false).applyTo(trustSelfSigned);
-//		trustSelfSigned.setSelection(false);
-//
-//		trustSelfSigned.addSelectionListener(new SelectionAdapter() {
-//
-//			@Override
-//			public void widgetSelected(SelectionEvent e) {
-//				wizardModel.setSelfsigned(trustSelfSigned.getSelection());
-//			}
-//
-//		});
-
-
-		skipSslValidation = new Button(topComposite, SWT.CHECK);
-		skipSslValidation.setText("Skip SSL Validation");
-		GridDataFactory.fillDefaults().grab(false, false).applyTo(skipSslValidation);
-		skipSslValidation.setSelection(false);
-
-		skipSslValidation.addSelectionListener(new SelectionAdapter() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				wizardModel.skipSslValidation(skipSslValidation.getSelection());
-			}
-
-		});
-
-		wizardModel.addAllPropertiesListener(this);
-		wizardModel.addCredentialsListener(credentialsValidationListener = new EnableSpaceControlListener());
-		wizardModel.addSpaceSelectionListener(setSpaceValListener = new SetSpaceValListener());
-
-		setValuesFromTargetProperties();
-		refreshWizardUI();
-
-	}
-
-	private void setValuesFromTargetProperties() {
-
-		String userName = wizardModel.getUsername();
-		if (emailText != null && !emailText.isDisposed() && userName != null) {
-			emailText.setText(userName);
-		}
-		String password = null;
-		try {
-			password = wizardModel.getPassword();
-		} catch (CannotAccessPropertyException e) {
-			// Ignore
-		}
-		if (passwordText != null && !passwordText.isDisposed() && password != null) {
-			passwordText.setText(password);
-		}
-		String url = wizardModel.getUrl();
-		if (urlText != null && !urlText.isDisposed() && url != null) {
-			urlText.setText(url);
-		}
-
-	}
-
-	private void refreshWizardUI() {
-		if (getWizard() != null && getWizard().getContainer() != null) {
-			setPageComplete(canFinish);
-
-			getWizard().getContainer().updateButtons();
-		}
 	}
 
 	@Override
-	public boolean isPageComplete() {
-		return canFinish;
+	protected List<WizardPageSection> createSections() {
+		List<WizardPageSection> sections = new ArrayList<>();
+		sections.add(new StringFieldSection(this, "Email:", model.getUsernameVar()));
+		sections.add(new StringFieldSection(this, "Password:", model.getPasswordVar()));
+		sections.add(UpdatePasswordDialog.storeCredentialsSection(this, model.getStoreVar()));
+		sections.add(new StringFieldSection(this, "Url:", model.getUrlVar()));
+		sections.add(new ValidatorSection(model.getCredentialsValidator(), this));
+		sections.add(new SelectSpaceSection(this));
+		sections.add(new CheckboxSection(this, model.getSkipSslVar(), "Skip SSL Validation"));
+		return sections;
 	}
 
 	/**
@@ -280,7 +155,7 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 		// Cache to avoid creating run target multiple times in the same wizard session
 		if (runTarget == null) {
 			try {
-				runTarget = wizardModel.finish();
+				runTarget = model.finish();
 			} catch (Exception e) {
 				setErrorMessage(e.getMessage());
 			}
@@ -288,87 +163,4 @@ public class CloudFoundryTargetWizardPage extends WizardPage implements ValueLis
 		return runTarget;
 	}
 
-	/*
-	 *
-	 * Properties change and validation handlers
-	 *
-	 */
-
-	/*
-	 * General validation handler that notifies the wizard if there is an error
-	 * in ANY properties validation, whether credentials, URL or org/space.
-	 * (non-Javadoc)
-	 *
-	 * @see
-	 * org.springsource.ide.eclipse.commons.livexp.core.ValueListener#gotValue(
-	 * org.springsource.ide.eclipse.commons.livexp.core.LiveExpression,
-	 * java.lang.Object)
-	 */
-	@Override
-	public void gotValue(LiveExpression<ValidationResult> exp, ValidationResult value) {
-		setErrorMessage(null);
-
-		if (value.isOk()) {
-			canFinish = true;
-			String message = "Press 'Finish' to create the target";
-			setMessage(message);
-		} else {
-			canFinish = false;
-
-			if (value.status == IStatus.ERROR) {
-				setErrorMessage(value.msg);
-			} else {
-				setMessage(value.msg, value.status);
-			}
-		}
-		refreshWizardUI();
-	}
-
-	@Override
-	public void dispose() {
-		wizardModel.removeAllPropertiesListeners(this);
-		wizardModel.removeCredentialsListeners(credentialsValidationListener);
-		wizardModel.removeSpaceSelectionListeners(setSpaceValListener);
-		super.dispose();
-	}
-
-	class SetSpaceValListener implements ValueListener<CFSpace> {
-
-		@Override
-		public void gotValue(LiveExpression<CFSpace> exp, CFSpace value) {
-			if (spaceValueText != null && !spaceValueText.isDisposed()) {
-				spaceValueText.setText(value != null ? value.getName() : "");
-			}
-		}
-	}
-
-	/**
-	 *
-	 * This is a separate listener from the general validation handler that only
-	 * enables the org/space UI, and it is only notified when credential
-	 * properties are validated, but not org/spaces validation.
-	 * <p/>
-	 * The reason is that if all credentials and URL are entered, only then
-	 * should the org/space UI be enabled. But at the same time, the org/space
-	 * UI should not be disabled if there is an error with org/space validation
-	 * (which may happen if this is part of the general validation handler), as
-	 * it would prevent the user from interacting with the org/space UI.
-	 * <p/>
-	 * For example, if all credentials and URL are entered, the org/space should
-	 * be enabled, whether there are errors with org/space validation or not,
-	 * but if a credential or URL is missing, there is no point in enabling the
-	 * org/space UI since org/spaces cannot be fetched unless all the missing
-	 * credential and URL information is entered by the user.
-	 *
-	 */
-	class EnableSpaceControlListener implements ValueListener<ValidationResult> {
-
-		@Override
-		public void gotValue(LiveExpression<ValidationResult> exp, ValidationResult value) {
-
-			if (orgsSpacesButton != null && !orgsSpacesButton.isDisposed()) {
-				orgsSpacesButton.setEnabled(value.isOk());
-			}
-		}
-	}
 }

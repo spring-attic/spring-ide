@@ -80,7 +80,7 @@ public class YTypeFactory {
 		}
 
 		@Override
-		public String[] getHintValues(YType type) {
+		public YValueHint[] getHintValues(YType type) {
 			return ((AbstractType)type).getHintValues();
 		}
 
@@ -119,7 +119,7 @@ public class YTypeFactory {
 
 		private ValueParser parser;
 		private List<YTypedProperty> propertyList = new ArrayList<>();
-		private final List<String> hints = new ArrayList<>();
+		private final List<YValueHint> hints = new ArrayList<>();
 		private Map<String, YTypedProperty> cachedPropertyMap;
 		private Provider<Collection<YValueHint>> hintProvider;
 
@@ -143,25 +143,25 @@ public class YTypeFactory {
 			this.hintProvider = hintProvider;
 		}
 
-		public String[] getHintValues() {
+		public YValueHint[] getHintValues() {
 			Collection<YValueHint> providerHints = hintProvider != null ? hintProvider.get() : null;
 
 			if (providerHints == null || providerHints.isEmpty()) {
-				return hints.toArray(new String[hints.size()]);
+				return hints.toArray(new YValueHint[hints.size()]);
 			} else {
 				// Only merge if there are provider hints to merge
-				Set<String> mergedHints = new LinkedHashSet<>();
+				Set<YValueHint> mergedHints = new LinkedHashSet<>();
 
 				// Add type hints first
-				for (String val : hints) {
+				for (YValueHint val : hints) {
 					mergedHints.add(val);
 				}
 
 				// merge the provider hints
 				for (YValueHint val : providerHints) {
-					mergedHints.add(val.getValue());
+					mergedHints.add(val);
 				}
-				return mergedHints.toArray(new String[mergedHints.size()]);
+				return mergedHints.toArray(new YValueHint[mergedHints.size()]);
 			}
 		}
 
@@ -204,7 +204,14 @@ public class YTypeFactory {
 			addProperty(new YTypedPropertyImpl(name, type));
 		}
 		public void addHints(String... strings) {
-			hints.addAll(Arrays.asList(strings));
+			if (strings != null) {
+				for (String value : strings) {
+					BasicYValueHint hint = new BasicYValueHint(value);
+					if (!hints.contains(hint)) {
+						hints.add(hint);
+					}
+				}
+			}
 		}
 		public void parseWith(ValueParser parser) {
 			this.parser = parser;

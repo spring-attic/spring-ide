@@ -25,6 +25,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicati
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFOrganization;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
@@ -46,6 +47,7 @@ import reactor.core.publisher.Mono;
 
 public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
+	public static final String FAKE_REFRESH_TOKEN = "fakeRefreshToken";
 	private Version supportedApiVersion = new Version(CloudFoundryClient.SUPPORTED_API_VERSION);
 	private Version apiVersion = supportedApiVersion;
 
@@ -130,9 +132,9 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
 		private CFClientParams params;
 		private boolean connected = true;
+		private String refreshToken = null;
 
-		public MockClient(CFClientParams params) throws Exception {
-			checkCredentials(params.getUsername(), params.getPassword());
+		public MockClient(CFClientParams params) {
 			this.params = params;
 		}
 
@@ -146,6 +148,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
 		@Override
 		public Flux<CFApplicationDetail> getApplicationDetails(List<CFApplication> appsToLookUp) throws Exception {
+			checkConnection();
 			MockCFSpace space = getSpace();
 			return Flux.fromIterable(appsToLookUp)
 			.flatMap((app) -> {
@@ -154,13 +157,15 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		}
 
 		@Override
-		public Cancellation streamLogs(String appName, IApplicationLogConsole logConsole) {
+		public Cancellation streamLogs(String appName, IApplicationLogConsole logConsole) throws Exception {
+			checkConnection();
 			//TODO: This 'log streamer' is a total dummy for now. It doesn't stream any data and canceling it does nothing.
            return Flux.empty().subscribe();
 		}
 
 		@Override
 		public void stopApplication(String appName) throws Exception {
+			checkConnection();
 			MockCFApplication app = getSpace().getApplication(appName);
 			if (app==null) {
 				throw errorAppNotFound(appName);
@@ -170,6 +175,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
 		@Override
 		public void restartApplication(String appName, CancelationToken cancelationToken) throws Exception {
+			checkConnection();
 			MockCFApplication app = getSpace().getApplication(appName);
 			if (app==null) {
 				throw errorAppNotFound(appName);
@@ -191,7 +197,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		@SuppressWarnings("unchecked")
 		@Override
 		public List<CFSpace> getSpaces() throws Exception {
-			checkConnected();
+			checkConnection();
 			@SuppressWarnings("rawtypes")
 			List hack = ImmutableList.copyOf(spacesByName.values());
 			return hack;
@@ -199,12 +205,11 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
 		@Override
 		public List<CFServiceInstance> getServices() throws Exception {
-			checkConnected();
+			checkConnection();
 			return getSpace().getServices();
 		}
 
 		private MockCFSpace getSpace() throws IOException {
-			checkConnected();
 			if (params.getOrgName()==null) {
 				throw errorNoOrgSelected();
 			}
@@ -220,25 +225,25 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
 		@Override
 		public List<CFCloudDomain> getDomains() throws Exception {
-			checkConnected();
+			checkConnection();
 			return ImmutableList.<CFCloudDomain>copyOf(domainsByName.values());
 		}
 
 		@Override
 		public List<CFBuildpack> getBuildpacks() throws Exception {
-			checkConnected();
+			checkConnection();
 			return ImmutableList.<CFBuildpack>copyOf(buildpacksByName.values());
 		}
 
 		@Override
 		public List<CFApplication> getApplicationsWithBasicInfo() throws Exception {
-			checkConnected();
+			checkConnection();
 			return getSpace().getApplicationsWithBasicInfo();
 		}
 
 		@Override
 		public CFApplicationDetail getApplication(String appName) throws Exception {
-			checkConnected();
+			checkConnection();
 			MockCFApplication app = getSpace().getApplication(appName);
 			if (app!=null) {
 				return app.getDetailedInfo();
@@ -258,14 +263,15 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
 		@Override
 		public void deleteApplication(String name) throws Exception {
+			checkConnection();
 			if (!getSpace().removeApp(name)) {
 				throw errorAppNotFound(name);
 			}
 		}
 
 		@Override
-		public String getHealthCheck(UUID appGuid) throws IOException {
-			checkConnected();
+		public String getHealthCheck(UUID appGuid) throws Exception {
+			checkConnection();
 			MockCFApplication app = getApplication(appGuid);
 			if (app == null) {
 				throw errorAppNotFound("GUID: "+appGuid.toString());
@@ -278,36 +284,60 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 			return getSpace().getApplication(appGuid);
 		}
 
-		private void checkConnected() throws IOException {
+		/**
+		 * Each mock operation that does something requires access to CF should call this
+		 * to ensure that it implicitly check whether the connection is valid.
+		 * <p>
+		 * Operations on 'invalid' connection are expected to throw Exceptions.
+		 * Calling this method makes the operations behave as expected. For example,
+		 * fail when logged out, or when connection was created with invalid credentials.
+		 */
+		private void checkConnection() throws Exception {
 			if (!connected) {
 				throw errorClientNotConnected();
 			}
+			checkCredentials(params.getUsername(), params.getCredentials());
 		}
 
-		private void checkCredentials(String username, String password) throws Exception {
-			if (password.startsWith("wrong")) {
+		private void checkCredentials(String username, CFCredentials credentials) throws Exception {
+			String password = credentials.getPassword();
+			String token = credentials.getRefreshToken();
+			if (password!=null) {
+				if (credentials.getPassword().startsWith("wrong")) {
+					throw errorInvalidCredentials();
+				}
+			} else if (token!=null) {
+				if (!token.equals(FAKE_REFRESH_TOKEN)) {
+					throw errorInvalidCredentials();
+				}
+			} else {
 				throw errorInvalidCredentials();
 			}
+			//Validation of credentials is expected to update refresh token.
+			refreshToken = FAKE_REFRESH_TOKEN;
 		}
 
 		@Override
-		public void setHealthCheck(UUID guid, String hcType) {
+		public void setHealthCheck(UUID guid, String hcType) throws Exception {
+			checkConnection();
 			notImplementedStub();
 		}
 
 		@Override
 		public List<CFStack> getStacks() throws Exception {
-			checkConnected();
+			checkConnection();
 			return ImmutableList.<CFStack>copyOf(stacksByName.values());
 		}
 
 		@Override
-		public boolean applicationExists(String appName) throws IOException {
+		public boolean applicationExists(String appName) throws Exception {
+			checkConnection();
 			return getSpace().getApplication(appName) !=null;
 		}
 
 		@Override
 		public void push(CFPushArguments args, CancelationToken cancelationToken) throws Exception {
+			checkConnection();
 			System.out.println("Pushing: "+args);
 			//TODO: should check services exist and raise an error because non-existant services cannot be bound.
 			MockCFSpace space = getSpace();
@@ -330,6 +360,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
 		@Override
 		public Map<String, String> getApplicationEnvironment(String appName) throws Exception {
+			checkConnection();
 			MockCFApplication app = getSpace().getApplication(appName);
 			if (app==null) {
 				throw errorAppNotFound(appName);
@@ -341,12 +372,18 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		public Mono<Void> deleteServiceAsync(String serviceName) {
 			return Mono.defer(() -> {
 				try {
+					checkConnection();
 					getSpace().deleteService(serviceName);
 					return Mono.empty();
 				} catch (Exception e) {
 					return Mono.error(e);
 				}
 			});
+		}
+
+		@Override
+		public String getRefreshToken() {
+			return refreshToken;
 		}
 
 	}

@@ -50,4 +50,9 @@ public class RunTargetWizard extends Wizard {
 	public RunTarget getRunTarget() {
 		return page != null ? page.createRunTarget() : null;
 	}
+
+	@Override
+	public boolean needsProgressMonitor() {
+		return true;
+	}
 }

@@ -286,7 +286,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_CHANGE);
 		try {
 			if (getRunTarget().getTargetProperties().get(CloudFoundryTargetProperties.DISCONNECTED) == null
-					&& (getRunTarget().getTargetProperties().isStorePassword() || getRunTarget().getTargetProperties().getPassword() != null)) {
+					&& (getRunTarget().getTargetProperties().isStoreCredentials() || getRunTarget().getTargetProperties().getCredentials() != null)) {
 				// If CF target was connected previously and either password is stored or not stored but non-null then connect automatically
 				getOperationsExecution().runAsynch(new ConnectOperation(this, true));
 			}

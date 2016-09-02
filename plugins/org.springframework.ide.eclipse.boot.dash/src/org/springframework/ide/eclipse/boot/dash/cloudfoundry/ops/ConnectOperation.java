@@ -17,7 +17,9 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.MissingPasswordException;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel;
+import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel.StoreCredentialsMode;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
@@ -62,22 +64,22 @@ public class ConnectOperation extends CloudOperation {
 					} else {
 						PasswordDialogModel passwordDialogModel = new PasswordDialogModel(
 								model.getRunTarget().getTargetProperties().getUsername(), model.getRunTarget().getId(),
-								model.getRunTarget().getTargetProperties().isStorePassword());
+								model.getRunTarget().getTargetProperties().getStoreCredentials());
 						ui.openPasswordDialog(passwordDialogModel);
 						if (passwordDialogModel.isOk()) {
-							model.getRunTarget().getTargetProperties().setStorePassword(passwordDialogModel.getStoreVar().getValue());
+							model.getRunTarget().getTargetProperties().setStoreCredentials(passwordDialogModel.getStoreVar().getValue());
 							String password = passwordDialogModel.getPasswordVar().getValue();
 							// The password cannot be null or empty string - enforced by the dialog
 							// Do the check just in case for tests bypassing the UI
 							if (password != null && !password.isEmpty()) {
 								try {
-									model.getRunTarget().getTargetProperties().setPassword(password);
+									model.getRunTarget().getTargetProperties().setCredentials(CFCredentials.fromPassword(password));
 								} catch (CannotAccessPropertyException e1) {
 									ui.warningPopup("Failed Storing Password",
 											"Failed to store password in Secure Storage for " + passwordDialogModel.getTargetId()
 													+ ". Secure Storage is most likely locked. Current password will be kept until disconnect.");
 									// Set "remember password" to false. Password hasn't been stored.
-									model.getRunTarget().getTargetProperties().setStorePassword(false);
+									model.getRunTarget().getTargetProperties().setStoreCredentials(StoreCredentialsMode.STORE_NOTHING);
 								}
 								// At this point the password must be set otherwise an exception from the call above would be thrown
 								doCloudOp(monitor);
@@ -97,9 +99,9 @@ public class ConnectOperation extends CloudOperation {
 				model.setBaseRefreshState(RefreshState.loading("Disconnecting..."));
 				model.getRunTarget().disconnect();
 				model.getRunTarget().getTargetProperties().put(CloudFoundryTargetProperties.DISCONNECTED, "true"); //$NON-NLS-1$
-				if (!model.getRunTarget().getTargetProperties().isStorePassword()) {
-					// Forget password on disconnect if it's not stored
-					model.getRunTarget().getTargetProperties().setPassword(null);
+				if (!model.getRunTarget().getTargetProperties().isStoreCredentials()) {
+					// Forget credentials on disconnect if it's not stored
+					model.getRunTarget().getTargetProperties().setCredentials(null);
 				}
 				model.getViewModel().updateTargetPropertiesInStore();
 				model.setBaseRefreshState(RefreshState.READY);

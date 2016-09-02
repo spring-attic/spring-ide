@@ -169,7 +169,6 @@ public class ActuatorClient {
 		try {
 			String json = rest.getForObject(target+"/mappings", String.class);
 			if (json!=null) {
-				System.out.println("Got some json:\n"+json);
 				return parse(json);
 			}
 		} catch (Exception e) {

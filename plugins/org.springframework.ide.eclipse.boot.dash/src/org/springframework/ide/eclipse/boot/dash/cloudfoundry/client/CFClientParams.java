@@ -26,7 +26,7 @@ public class CFClientParams {
 
 	private final String apiUrl;
 	private final String username;
-	private final String password;
+	private final CFCredentials credentials;
 	private final boolean isSelfSigned;
 	private final boolean skipSslValidation;
 
@@ -34,7 +34,8 @@ public class CFClientParams {
 	private String spaceName; //optional
 
 	public CFClientParams(String apiUrl,
-			String username, String password,
+			String username,
+			CFCredentials credentials,
 			boolean isSelfSigned,
 			String orgName,
 			String spaceName,
@@ -42,10 +43,10 @@ public class CFClientParams {
 	) {
 		Assert.isNotNull(apiUrl, "apiUrl is required");
 		Assert.isNotNull(username, "username is required");
-		Assert.isNotNull(password, "password is required");
+		Assert.isNotNull(credentials, "credentials required");
 		this.apiUrl = apiUrl;
 		this.username = username;
-		this.password = password;
+		this.credentials = credentials;
 		this.isSelfSigned = isSelfSigned;
 		this.skipSslValidation = skipSslValidation;
 		this.orgName = orgName;
@@ -56,7 +57,7 @@ public class CFClientParams {
 		this(
 			targetProperties.getUrl(),
 			targetProperties.getUsername(),
-			targetProperties.getPassword(),
+			targetProperties.getCredentials(),
 			targetProperties.isSelfsigned(),
 			targetProperties.getOrganizationName(),
 			targetProperties.getSpaceName(),
@@ -64,8 +65,8 @@ public class CFClientParams {
 		);
 	}
 
-	public String getPassword() {
-		return password;
+	public CFCredentials getCredentials() {
+		return credentials;
 	}
 
 	public String getUsername() {
@@ -121,7 +122,7 @@ public class CFClientParams {
 		result = prime * result + ((apiUrl == null) ? 0 : apiUrl.hashCode());
 		result = prime * result + (isSelfSigned ? 1231 : 1237);
 		result = prime * result + ((orgName == null) ? 0 : orgName.hashCode());
-		result = prime * result + ((password == null) ? 0 : password.hashCode());
+		result = prime * result + ((credentials == null) ? 0 : credentials.hashCode());
 		result = prime * result + ((spaceName == null) ? 0 : spaceName.hashCode());
 		result = prime * result + ((username == null) ? 0 : username.hashCode());
 		return result;
@@ -148,10 +149,10 @@ public class CFClientParams {
 				return false;
 		} else if (!orgName.equals(other.orgName))
 			return false;
-		if (password == null) {
-			if (other.password != null)
+		if (credentials == null) {
+			if (other.credentials != null)
 				return false;
-		} else if (!password.equals(other.password))
+		} else if (!credentials.equals(other.credentials))
 			return false;
 		if (spaceName == null) {
 			if (other.spaceName != null)

@@ -12,15 +12,23 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.operation.IRunnableContext;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
+import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel.StoreCredentialsMode;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
-import org.springframework.ide.eclipse.boot.dash.model.WizardModelUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
+import org.springframework.ide.eclipse.boot.dash.model.WizardModelUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
@@ -31,17 +39,18 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import com.google.common.collect.ImmutableSet;
 
 /**
  * Cloud Foundry Target properties that uses {@link LiveExpression} and
  * {@link Validator}.
- *
- *
- *
  */
-public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties {
+public class CloudFoundryTargetWizardModel {
+
+	private RunTargetType runTargetType;
+	private BootDashModelContext context;
 
 	private LiveVariable<String> url = new LiveVariable<>();
 	private LiveVariable<CFSpace> space = new LiveVariable<>();
@@ -49,17 +58,22 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 	private LiveVariable<Boolean> skipSslValidation = new LiveVariable<>(false);
 	private LiveVariable<String> userName = new LiveVariable<>();
 	private LiveVariable<String> password = new LiveVariable<>();
-	private LiveVariable<Boolean> storePassword = new LiveVariable<>(false);
-	private LiveVariable<OrgsAndSpaces> allSpaces = new LiveVariable<>();
+	private LiveVariable<StoreCredentialsMode> storeCredentials = new LiveVariable<>(StoreCredentialsMode.STORE_NOTHING);
+
+	private LiveVariable<ValidationResult> spaceResolutionStatus = new LiveVariable<>(ValidationResult.OK); // has an error if resolution failed.
+	private LiveVariable<OrgsAndSpaces> resolvedSpaces = new LiveVariable<>();
+
+	private String refreshToken = null;
 
 	private Validator credentialsValidator = new CredentialsValidator();
-	private Validator spacesValidator = new CloudSpaceValidator();
-	private Validator orgsSpacesValidator = new OrgsSpacesValidator();
+	private Validator spaceValidator = new CloudSpaceValidator();
+	private Validator resolvedSpacesValidator = new ResolvedSpacesValidator();
 	private CompositeValidator allPropertiesValidator = new CompositeValidator();
 
 	private CloudFoundryClientFactory clientFactory;
 	private ImmutableSet<RunTarget> existingTargets;
 	private WizardModelUserInteractions interactions;
+
 
 	public CloudFoundryTargetWizardModel(RunTargetType runTargetType, CloudFoundryClientFactory clientFactory,
 			ImmutableSet<RunTarget> existingTargets, BootDashModelContext context) {
@@ -68,7 +82,8 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 
 	public CloudFoundryTargetWizardModel(RunTargetType runTargetType, CloudFoundryClientFactory clientFactory,
 			ImmutableSet<RunTarget> existingTargets, BootDashModelContext context, WizardModelUserInteractions interactions) {
-		super(runTargetType, context);
+		this.runTargetType = runTargetType;
+		this.context = context;
 		Assert.isNotNull(clientFactory, "clientFactory should not be null");
 		this.interactions = interactions;
 		this.existingTargets = existingTargets == null ? ImmutableSet.<RunTarget>of() : existingTargets;
@@ -87,35 +102,17 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 		// validated, and different listeners may need to be registered for
 		// credential validation
 		// vs space validation
-		spacesValidator.dependsOn(space);
+		spaceValidator.dependsOn(space);
 
-		orgsSpacesValidator.dependsOn(allSpaces);
+		resolvedSpacesValidator.dependsOn(spaceResolutionStatus);
+		resolvedSpacesValidator.dependsOn(resolvedSpaces);
 
-		// Aggregate of the credentials and space validator.
+		// Aggregate of the credentials and space validators.
 		allPropertiesValidator.addChild(credentialsValidator);
-		allPropertiesValidator.addChild(spacesValidator);
-		allPropertiesValidator.addChild(orgsSpacesValidator);
+		allPropertiesValidator.addChild(resolvedSpacesValidator);
+		allPropertiesValidator.addChild(spaceValidator);
 
-		setUrl(getDefaultTargetUrl());
-	}
-
-	/**
-	 * @param credentialsValidationListener
-	 *            listener that is notified when only credential properties are
-	 *            validated (but not org/space)
-	 *
-	 */
-	public void addCredentialsListener(ValueListener<ValidationResult> credentialsValidationListener) {
-		credentialsValidator.addListener(credentialsValidationListener);
-	}
-
-	/**
-	 * @param cloudSpaceChangeListener
-	 *            listener that is notified when Cloud space is changed
-	 *
-	 */
-	public void addSpaceSelectionListener(ValueListener<CFSpace> cloudSpaceChangeListener) {
-		space.addListener(cloudSpaceChangeListener);
+		url.setValue(getDefaultTargetUrl());
 	}
 
 	/**
@@ -128,115 +125,151 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 
 	public void removeAllPropertiesListeners(ValueListener<ValidationResult> allPropertiesValidationListener) {
 		allPropertiesValidator.removeListener(allPropertiesValidationListener);
-
 	}
 
-	public void removeCredentialsListeners(ValueListener<ValidationResult> credentialsValidationListener) {
-		credentialsValidator.removeListener(credentialsValidationListener);
-	}
-
-	public void removeSpaceSelectionListeners(ValueListener<CFSpace> cloudSpaceChangeListener) {
-		space.removeListener(cloudSpaceChangeListener);
-	}
-
-	/*
-	 *
-	 * NOTE: for the setters, make sure the values are placed in the underlying
-	 * backed map first before setting them in the live variables, as live
-	 * variables trigger validation events.
-	 *
-	 * This hybrid model with both live expressions and a non-event driven map
-	 * may not be ideal, but to avoid regressions in implementation it is kept
-	 * as it is for now, with the observation that the map needs to be updated
-	 * first before updating the live variable.
-	 *
-	 */
 	public void setUrl(String url) {
-		put(URL_PROP, url);
-
 		this.url.setValue(url);
 	}
 
-	public void setSpace(CFSpace space) {
-
-		if (space != null) {
-			put(ORG_PROP, space.getOrganization().getName());
-			put(ORG_GUID, space.getOrganization().getGuid().toString());
-			put(SPACE_PROP, space.getName());
-			put(SPACE_GUID, space.getGuid().toString());
-		} else {
-			put(ORG_PROP, null);
-			put(ORG_GUID, null);
-			put(SPACE_PROP, null);
-			put(SPACE_GUID, null);
-		}
-		this.space.setValue(space);
-	}
-
 	public void setSelfsigned(boolean selfsigned) {
-		put(SELF_SIGNED_PROP, Boolean.toString(selfsigned));
-
 		this.selfsigned.setValue(selfsigned);
 	}
 
 	public void skipSslValidation(boolean skipSsl) {
-		put(SKIP_SSL_VALIDATION_PROP, Boolean.toString(skipSsl));
-
 		this.skipSslValidation.setValue(skipSsl);
 	}
 
 	public void setUsername(String userName) {
-		put(USERNAME_PROP, userName);
-
 		this.userName.setValue(userName);
 	}
 
 	public void setPassword(String password) throws CannotAccessPropertyException {
-		if (get(TargetProperties.RUN_TARGET_ID) == null) {
-			this.password.setValue(password);
-		} else {
-			super.setPassword(password);
-		}
+		this.password.setValue(password);
 	}
 
-	@Override
+	public void setSpace(CFSpace space) {
+		this.space.setValue(space);
+	}
+
 	public String getPassword() throws CannotAccessPropertyException {
-		if (get(TargetProperties.RUN_TARGET_ID) == null) {
-			return password.getValue();
-		} else {
-			return super.getPassword();
-		}
+		return password.getValue();
 	}
 
-	public void setStorePassword(boolean store) {
-		if (get(TargetProperties.RUN_TARGET_ID) == null) {
-			storePassword.setValue(store);
-		} else {
-			super.setStorePassword(store);
-		}
+	public String getUrl() {
+		return url.getValue();
 	}
 
-	public boolean isStorePassword() {
-		if (get(TargetProperties.RUN_TARGET_ID) == null) {
-			return storePassword.getValue();
-		} else {
-			return super.isStorePassword();
-		}
+	public String getUsername() {
+		return userName.getValue();
+	}
+
+	public void setStoreCredentials(StoreCredentialsMode store) {
+		storeCredentials.setValue(store);
+	}
+
+	public StoreCredentialsMode getStoreCredentials() {
+		return storeCredentials.getValue();
 	}
 
 	protected String getDefaultTargetUrl() {
 		return "https://api.run.pivotal.io";
 	}
 
-	public OrgsAndSpaces resolveSpaces(IRunnableContext context) throws Exception {
-		OrgsAndSpaces spaces = clientFactory.getCloudSpaces(this, context);
-		allSpaces.setValue(spaces);
-		return allSpaces.getValue();
+	public OrgsAndSpaces resolveSpaces(IRunnableContext context) {
+		try {
+			boolean toFetchSpaces = true;
+			OrgsAndSpaces spaces = getCloudSpaces(createTargetProperties(toFetchSpaces), context);
+			resolvedSpaces.setValue(spaces);
+			spaceResolutionStatus.setValue(ValidationResult.OK);
+			return resolvedSpaces.getValue();
+		} catch (Exception e) {
+			Log.log(e);
+			resolvedSpaces.setValue(null);
+			spaceResolutionStatus.setValue(ValidationResult.error(ExceptionUtil.getMessage(e)));
+			return null;
+		}
+	}
 
+	private OrgsAndSpaces getCloudSpaces(final CloudFoundryTargetProperties targetProperties, IRunnableContext context)
+			throws Exception {
+
+		OrgsAndSpaces spaces = null;
+
+		Operation<List<CFSpace>> op = new Operation<List<CFSpace>>(
+				"Connecting to the Cloud Foundry target. Please wait while the list of spaces is resolved...") {
+			protected List<CFSpace> runOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
+				ClientRequests client = clientFactory.getClient(targetProperties);
+				List<CFSpace> spaces = client.getSpaces();
+				String t = client.getRefreshToken();
+				if (t!=null) {
+					refreshToken = t;
+				}
+				return spaces;
+			}
+		};
+
+		List<CFSpace> actualSpaces = op.run(context, true);
+		if (actualSpaces != null && !actualSpaces.isEmpty()) {
+			spaces = new OrgsAndSpaces(actualSpaces);
+		}
+
+		return spaces;
+	}
+
+	/**
+	 * Create target properties based on current input values in the wizard.
+	 * <p>
+	 * Note that there are two slightly different ways to produce these properties.
+	 * <p>
+	 * a) to create a intermediate client just to fetch orgs and spaces.
+	 * <p>
+	 * b) the final properties used to create the client after space is selected and the user
+	 * clicks 'finish' button.
+	 */
+	private CloudFoundryTargetProperties createTargetProperties(boolean toFetchSpaces) throws CannotAccessPropertyException {
+		CloudFoundryTargetProperties targetProps = new CloudFoundryTargetProperties(runTargetType, context);
+		if (!toFetchSpaces) {
+			//Take care: when fetching spaces the space may not be known yet, so neither is the id
+			String id = CloudFoundryTargetProperties.getId(
+					this.getUsername(),
+					this.getUrl(),
+					this.getOrganizationName(),
+					this.getSpaceName()
+			);
+			targetProps.put(TargetProperties.RUN_TARGET_ID, id);
+		}
+
+		targetProps.setUrl(url.getValue());
+		targetProps.setSelfSigned(selfsigned.getValue());
+		targetProps.setSkipSslValidation(skipSslValidation.getValue());
+
+		targetProps.setUserName(userName.getValue());
+		if (toFetchSpaces) {
+			targetProps.setStoreCredentials(StoreCredentialsMode.STORE_NOTHING);
+			targetProps.setCredentials(CFCredentials.fromPassword(password.getValue()));
+		} else {
+			//use credentials of a style that is consistent with the 'store mode'.
+			StoreCredentialsMode mode = storeCredentials.getValue();
+			targetProps.setStoreCredentials(storeCredentials.getValue());
+			switch (mode) {
+			case STORE_TOKEN:
+				Assert.isTrue(refreshToken!=null);
+				targetProps.setCredentials(CFCredentials.fromRefreshToken(refreshToken));
+				break;
+			case STORE_NOTHING:
+			case STORE_PASSWORD:
+				targetProps.setCredentials(CFCredentials.fromPassword(password.getValue()));
+				break;
+			default:
+				throw new IllegalStateException("BUG: Missing switch case?");
+			}
+		}
+		targetProps.setSpace(space.getValue());
+		return targetProps;
 	}
 
 	public OrgsAndSpaces getSpaces() {
-		return allSpaces.getValue();
+		return resolvedSpaces.getValue();
 	}
 
 	protected RunTarget getExistingRunTarget(CFSpace space) {
@@ -253,27 +286,42 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 	}
 
 	public CloudFoundryRunTarget finish() throws Exception {
-		String id = CloudFoundryTargetProperties.getId(this);
-		put(TargetProperties.RUN_TARGET_ID, id);
-		super.setStorePassword(storePassword.getValue());
-
+		CloudFoundryTargetProperties targetProps = null;
 		try {
-			super.setPassword(password.getValue());
+			targetProps = createTargetProperties(/*toFetchSpaces*/false);
 		} catch (Exception e) {
 			final StorageException storageException = getStorageException(e);
 			// Allow run target to be created on storage exceptions as the run target can still be created and connected
 			if (storageException != null) {
+				Log.log(storageException);
 				if (interactions != null) {
-					String message = "Failed to store password in secure storage. Please check your secure storage preferences. Error: "
+					String message = "Failed to store credentials in secure storage. Please check your secure storage preferences. Error: "
 							+ storageException.getMessage();
 					interactions.informationPopup("Secure Storage Error", message);
 				}
-				Log.log(storageException);
+				storeCredentials.setValue(StoreCredentialsMode.STORE_NOTHING);
+				targetProps = createTargetProperties(/*toFetchSpaces*/false);
 			} else {
 				throw e;
 			}
 		}
-		return (CloudFoundryRunTarget) getRunTargetType().createRunTarget(this);
+		return (CloudFoundryRunTarget) runTargetType.createRunTarget(targetProps);
+	}
+
+	public String getSpaceName() {
+		CFSpace space = this.space.getValue();
+		if (space!=null) {
+			return space.getName();
+		}
+		return null;
+	}
+
+	public String getOrganizationName() {
+		CFSpace space = this.space.getValue();
+		if (space!=null) {
+			return space.getOrganization().getName();
+		}
+		return null;
 	}
 
 	protected StorageException getStorageException(Exception e) {
@@ -291,15 +339,15 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 		protected ValidationResult compute() {
 			String infoMessage = null;
 
-			if (isEmpty(getUsername())) {
+			if (isEmpty(userName.getValue())) {
 				infoMessage = "Enter a username";
 			} else if (isEmpty(password.getValue())) {
 				infoMessage = "Enter a password";
-			} else if (isEmpty(getUrl())) {
+			} else if (isEmpty(url.getValue())) {
 				infoMessage = "Enter a target URL";
 			} else {
 				try {
-					new URL(getUrl());
+					new URL(url.getValue());
 				} catch (MalformedURLException e) {
 					return ValidationResult.error(e.getMessage());
 				}
@@ -307,7 +355,6 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 			if (infoMessage != null) {
 				return ValidationResult.info(infoMessage);
 			}
-
 			return ValidationResult.OK;
 		}
 
@@ -335,19 +382,20 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 		}
 	}
 
-	class OrgsSpacesValidator extends Validator {
+	class ResolvedSpacesValidator extends Validator {
 		@Override
 		protected ValidationResult compute() {
-
-			if (allSpaces.getValue() == null || allSpaces.getValue().getAllSpaces() == null) {
-				return ValidationResult.info("Enter credentials and select a space to validate the credentials.");
+			ValidationResult resolveStatus = spaceResolutionStatus.getValue();
+			if (!resolveStatus.isOk()) {
+				return resolveStatus;
 			}
-
-			if (allSpaces.getValue().getAllSpaces().isEmpty()) {
+			if (resolvedSpaces.getValue() == null || resolvedSpaces.getValue().getAllSpaces() == null) {
+				return ValidationResult.info("Select a space to validate the credentials.");
+			}
+			if (resolvedSpaces.getValue().getAllSpaces().isEmpty()) {
 				return ValidationResult.error(
 						"No spaces available to select. Please check that the credentials and target URL are correct, and spaces are defined in the target.");
 			}
-
 			return ValidationResult.OK;
 		}
 	}
@@ -358,4 +406,49 @@ public class CloudFoundryTargetWizardModel extends CloudFoundryTargetProperties 
 	public LiveExpression<ValidationResult> getValidator() {
 		return allPropertiesValidator;
 	}
+
+	public String getRefreshToken() {
+		return refreshToken;
+	}
+
+	public LiveVariable<String> getUsernameVar() {
+		return userName;
+	}
+
+	public LiveVariable<String> getPasswordVar() {
+		return password;
+	}
+
+	public LiveVariable<StoreCredentialsMode> getStoreVar() {
+		return storeCredentials;
+	}
+
+	public LiveVariable<Boolean> getSkipSslVar() {
+		return skipSslValidation;
+	}
+
+	public LiveVariable<String> getUrlVar() {
+		return url;
+	}
+
+	public LiveVariable<CFSpace> getSpaceVar() {
+		return space;
+	}
+
+	public LiveExpression<Boolean> getEnableSpacesUI() {
+		return credentialsValidator.apply((r) -> r.isOk());
+	}
+
+	public LiveExpression<ValidationResult> getSpaceValidator() {
+		return spaceValidator;
+	}
+
+	public LiveExpression<ValidationResult> getResolvedSpacesValidator() {
+		return resolvedSpacesValidator;
+	}
+
+	public LiveExpression<ValidationResult> getCredentialsValidator() {
+		return credentialsValidator;
+	}
+
 }

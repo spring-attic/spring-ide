@@ -28,126 +28,58 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
-import org.eclipse.jface.layout.GridDataFactory;
-import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel;
+import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel.StoreCredentialsMode;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.core.SelectionModel;
+import org.springsource.ide.eclipse.commons.livexp.ui.CheckboxSection;
+import org.springsource.ide.eclipse.commons.livexp.ui.ChooseOneSectionCombo;
+import org.springsource.ide.eclipse.commons.livexp.ui.CommentSection;
+import org.springsource.ide.eclipse.commons.livexp.ui.DialogWithSections;
+import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
+import org.springsource.ide.eclipse.commons.livexp.ui.StringFieldSection;
+import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 
 /**
  * Dialog for setting the password and "store password" flag.
  *
  * @author Terry Denney
  * @author Alex Boyko
+ * @author Kris De Volder
  */
-public class UpdatePasswordDialog extends TitleAreaDialog {
+public class UpdatePasswordDialog extends DialogWithSections {
 
-	private static final String PLEASE_PRESS_OK_TO_SET_THE_PASSWORD = "Please press 'OK' to set the password.";
-	private static final String PLEASE_ENTER_A_PASSWORD = "Please enter a password.";
+	private static final StoreCredentialsMode[] storeCredentialChoices = EnumSet.allOf(StoreCredentialsMode.class)
+			.toArray(new StoreCredentialsMode[0]);
+
 	private PasswordDialogModel model;
 
 	public UpdatePasswordDialog(Shell parentShell, PasswordDialogModel model) {
-		super(parentShell);
+		super("Enter Password", model, parentShell);
 		this.model = model;
 	}
 
 	@Override
-	protected Control createDialogArea(Composite parent) {
+	protected List<WizardPageSection> createSections() throws CoreException {
+		List<WizardPageSection> sections = new ArrayList<>();
 
-		setTitle("Enter Password");
-		if (model.getPasswordVar().getValue() == null || model.getPasswordVar().getValue().isEmpty()) {
-			setMessage(PLEASE_ENTER_A_PASSWORD, IStatus.INFO);
-		} else {
-			setMessage(PLEASE_PRESS_OK_TO_SET_THE_PASSWORD, IStatus.INFO);
-		}
+		sections.add(new CommentSection(this,
+				"The password must match your existing target credentials in " + model.getTargetId() + "."));
 
-		Composite composite = new Composite(parent, SWT.NONE);
-		GridDataFactory.fillDefaults().grab(true, true).applyTo(composite);
-		GridLayoutFactory.fillDefaults().numColumns(2).margins(10, 10).spacing(10, 10).applyTo(composite);
+		sections.add(new StringFieldSection(this, "Password", model.getPasswordVar(), model.getPasswordValidator()));
+		sections.add(storeCredentialsSection(this, model.getStoreVar()));
 
-		Label description = new Label(composite, SWT.NONE | SWT.WRAP);
-
-		// Set a minimum width such that the wrapped text does not enlarge the
-		// dialogue with extra space
-		GridDataFactory.fillDefaults().span(2, 1).hint(300, SWT.DEFAULT).applyTo(description);
-		description.setText("The password must match your existing target credentials in " + model.getTargetId() + ".");
-
-		Label updatePasswordLabel = new Label(composite, SWT.NONE);
-		updatePasswordLabel.setText("Password:");
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.TOP).grab(false, false).applyTo(updatePasswordLabel);
-
-		Composite passwordComposite = new Composite(composite, SWT.NONE);
-		GridLayoutFactory.fillDefaults().spacing(10, 10).applyTo(passwordComposite);
-		GridDataFactory.fillDefaults().grab(true, false).applyTo(passwordComposite);
-
-		final Text newPasswordText = new Text(passwordComposite, SWT.PASSWORD | SWT.BORDER);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(newPasswordText);
-		String password = model.getPasswordVar().getValue();
-		newPasswordText.setText(password == null ? "" : password);
-
-		newPasswordText.addModifyListener(new ModifyListener() {
-
-			public void modifyText(ModifyEvent e) {
-				String password = newPasswordText.getText();
-				model.getPasswordVar().setValue(password);
-
-				if (password == null || password.isEmpty()) {
-					setMessage(PLEASE_ENTER_A_PASSWORD, IStatus.INFO);
-					getButton(OK).setEnabled(false);
-				} else {
-					setMessage(PLEASE_PRESS_OK_TO_SET_THE_PASSWORD, IStatus.INFO);
-					getButton(OK).setEnabled(true);
-				}
-			}
-		});
-
-		final Button rememberPassword = new Button(passwordComposite, SWT.CHECK);
-		rememberPassword.setText("Remember Password");
-		rememberPassword.setSelection(model.getStoreVar().getValue());
-		GridDataFactory.fillDefaults().applyTo(rememberPassword);
-		rememberPassword.addSelectionListener(new SelectionAdapter() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				model.getStoreVar().setValue(rememberPassword.getSelection());
-			}
-
-		});
-
-		parent.pack(true);
-
-		return composite;
+		return sections;
 	}
 
-	@Override
-	protected Control createContents(Composite parent) {
-		Control contents =  super.createContents(parent);
-		// Override to disable OK button if password is empty at the start
-		String password = model.getPasswordVar().getValue();
-		getButton(OK).setEnabled(password != null && password.length() > 0);
-		return contents;
-	}
-
-	@Override
-	protected boolean isResizable() {
-		return true;
-	}
-
-	@Override
-	protected void buttonPressed(int buttonId) {
-		model.buttonPressed(buttonId);
-		super.buttonPressed(buttonId);
+	public static ChooseOneSectionCombo<StoreCredentialsMode> storeCredentialsSection(IPageWithSections owner, LiveVariable<StoreCredentialsMode> storeCreds) {
+		return new ChooseOneSectionCombo<>(owner, "Remember:", new SelectionModel<>(storeCreds), storeCredentialChoices);
 	}
 
 }
