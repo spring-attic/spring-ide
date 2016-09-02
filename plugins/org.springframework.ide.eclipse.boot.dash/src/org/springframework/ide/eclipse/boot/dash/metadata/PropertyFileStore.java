@@ -27,6 +27,8 @@ import java.nio.file.attribute.UserPrincipal;
 import java.nio.file.attribute.UserPrincipalLookupService;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Properties;
 
@@ -36,6 +38,9 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.core.util.OsUtils;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 
 /**
  * Implementation of IPropertyStore backed by a .properties file.
@@ -160,6 +165,31 @@ public class PropertyFileStore implements IPropertyStore {
 		} else {
 			return props.put(key, value);
 		}
+	}
+
+	public boolean isEmpty() {
+		return props.isEmpty();
+	}
+
+	/**
+	 * Blocks the current thread until all dirty data has been written to disk. This meant for testing purposes.
+	 * E.g. a test that wants to check contents of the backing file after performing ops on the store.
+	 */
+	public void sync() throws InterruptedException {
+		flushProperties.join();
+	}
+
+	/**
+	 * Convert the contents currently in the store into a Map. Mainly meant for testing purposes to easily compare
+	 * the map contents to expected contents. Not thread safe. Test code is expected to call this at a time
+	 * when the work on the map is 'done'.
+	 */
+	public Map<String,String> asMap() {
+		Builder<String, String> builder = ImmutableMap.builder();
+		for (Entry<Object, Object> e : props.entrySet()) {
+			builder.put((String)e.getKey(), (String)e.getValue());
+		}
+		return builder.build();
 	}
 
 }
