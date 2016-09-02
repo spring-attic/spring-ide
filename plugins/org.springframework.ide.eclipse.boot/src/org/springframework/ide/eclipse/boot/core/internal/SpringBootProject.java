@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,20 +15,18 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
-import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.IMavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.MavenId;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarters;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
+import org.springframework.ide.eclipse.boot.util.Log;
 
 public abstract class SpringBootProject implements ISpringBootProject {
 
 	static final List<SpringBootStarter> NO_STARTERS = Collections.emptyList();
 	private final InitializrService initializr;
-
-	private SpringBootStarters cachedInfos;
 
 	public SpringBootProject(InitializrService initializr) {
 		this.initializr = initializr;
@@ -54,14 +52,10 @@ public abstract class SpringBootProject implements ISpringBootProject {
 		try {
 			String bootVersion = getBootVersion();
 			if (bootVersion!=null) {
-				SpringBootStarters infos = cachedInfos;
-				if (infos!=null && bootVersion.equals(infos.getBootVersion())) {
-					return infos;
-				}
-				return cachedInfos = initializr.getStarters(bootVersion);
+				return initializr.getStarters(bootVersion);
 			}
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 		}
 		return null;
 	}
@@ -96,4 +90,5 @@ public abstract class SpringBootProject implements ISpringBootProject {
 		}
 		return null;
 	}
+	
 }

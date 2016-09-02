@@ -20,8 +20,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
-import org.springframework.ide.eclipse.boot.wizard.json.InitializrServiceSpec.Dependency;
 
 /**
  * Component that keeps track of 'popular' dependencies used in the NewSpringBootWizard.

@@ -32,8 +32,6 @@ public class BootPreferencePage extends FieldEditorPreferencePage implements IWo
 
 	@Override
 	public void init(IWorkbench workbench) {
-		IPreferenceStore store = BootActivator.getDefault().getPreferenceStore();
-		store.setDefault(PREF_IGNORE_SILENT_EXIT, DEFAULT_PREF_IGNORE_SILENT_EXIT);
 		setPreferenceStore(BootActivator.getDefault().getPreferenceStore());
 	}
 
@@ -59,6 +57,10 @@ public class BootPreferencePage extends FieldEditorPreferencePage implements IWo
 
 	private void setTooltip(Composite parent, BooleanFieldEditor2 fe, String tooltip) {
 		fe.getChangeControl(parent).setToolTipText(tooltip);
+	}
+	
+	public static void initDefaults(IPreferenceStore store) {
+		store.setDefault(PREF_IGNORE_SILENT_EXIT, DEFAULT_PREF_IGNORE_SILENT_EXIT);
 	}
 
 }

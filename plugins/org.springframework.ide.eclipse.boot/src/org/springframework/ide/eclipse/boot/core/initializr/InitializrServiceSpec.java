@@ -8,7 +8,7 @@
  * Contributors:
  *     GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.wizard.json;
+package org.springframework.ide.eclipse.boot.core.initializr;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,7 +25,7 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.osgi.framework.Version;
 import org.osgi.framework.VersionRange;
-import org.springframework.ide.eclipse.boot.wizard.BootWizardActivator;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.util.StringUtils;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
 
@@ -154,7 +154,7 @@ public class InitializrServiceSpec {
 					}
 				}
 			} catch (Exception e) {
-				BootWizardActivator.log(e);
+				Log.log(e);
 			}
 			return true;
 		}

@@ -8,7 +8,7 @@
  * Contributors:
  *  Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.core.dialogs;
+package org.springframework.ide.eclipse.boot.wizard;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,24 +24,20 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.ide.eclipse.boot.core.IMavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.MavenId;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarters;
-import org.springframework.ide.eclipse.boot.wizard.BootWizardActivator;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.DependencyGroup;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
-import org.springframework.ide.eclipse.boot.wizard.HierarchicalMultiSelectionFieldModel;
-import org.springframework.ide.eclipse.boot.wizard.MultiSelectionFieldModel;
-import org.springframework.ide.eclipse.boot.wizard.NewSpringBootWizardModel;
-import org.springframework.ide.eclipse.boot.wizard.PopularityTracker;
-import org.springframework.ide.eclipse.boot.wizard.json.InitializrServiceSpec.Dependency;
-import org.springframework.ide.eclipse.boot.wizard.json.InitializrServiceSpec.DependencyGroup;
-import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.ui.OkButtonHandler;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 /**
  * @author Kris De Volder
@@ -80,8 +76,10 @@ public class EditStartersModel implements OkButtonHandler {
 
 	public String getNotSupportedMessage() {
 		if (starters==null) {
-			return "Could not obtain starter dependencies information. This information is obtained by accessing the 'start.spring.io' webservice. "
-					+ "Are you connected to the internet?";
+			String url = BootPreferences.getInitializrUrl();
+			boolean isDefault = BootPreferences.getDefaultInitializrUrl().equals(url);
+			return "Could not obtain starter dependencies information. This information is obtained by accessing the '"+ url + "' webservice. "
+					+ (isDefault ? "Are you connected to the internet?" : "Initializr URL can be specified via Preferences (Spring -> Boot -> Initializr)");
 		}
 		return null;
 	}
@@ -126,7 +124,7 @@ public class EditStartersModel implements OkButtonHandler {
 					}
 					return Status.OK_STATUS;
 				} catch (Exception e) {
-					BootActivator.log(e);
+					Log.log(e);
 					return ExceptionUtil.status(e);
 				}
 			}

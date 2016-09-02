@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2014 Pivotal Software, Inc.
+ * Copyright (c) 2013, 2016 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,7 +16,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
 import org.springframework.ide.eclipse.boot.core.internal.MavenSpringBootProject;
 import org.springsource.ide.eclipse.commons.core.preferences.StsProperties;
-import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 public class SpringBootCore {
 
@@ -61,7 +60,7 @@ public class SpringBootCore {
 	 */
 	public static SpringBootCore getDefault() {
 		if (instance==null) {
-			instance = new SpringBootCore(InitializrService.DEFAULT);
+			instance = new SpringBootCore(InitializrService.CACHING);
 		}
 		return instance;
 	}
