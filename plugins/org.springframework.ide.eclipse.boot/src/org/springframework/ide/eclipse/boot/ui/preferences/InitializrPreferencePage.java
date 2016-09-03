@@ -16,14 +16,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
-import org.springsource.ide.eclipse.commons.core.preferences.StsProperties;
 
 /**
  * Preferences page for Spring IO Initializr IDE support
@@ -72,10 +70,6 @@ public class InitializrPreferencePage extends FieldEditorPreferencePage implemen
 		initializrUrl.getTextControl(parent).setToolTipText(TOOLTIP_INITIALIZR_URL);
 		addField(initializrUrl);
 
-	}
-
-	static void initDefaults(IPreferenceStore store) {
-		store.setDefault(PREF_INITIALIZR_URL, StsProperties.getInstance().get("spring.initializr.json.url"));
 	}
 	
 }

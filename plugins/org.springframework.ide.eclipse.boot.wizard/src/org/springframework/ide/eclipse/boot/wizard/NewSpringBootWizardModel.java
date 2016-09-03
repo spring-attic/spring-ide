@@ -109,7 +109,6 @@ public class NewSpringBootWizardModel {
 	public NewSpringBootWizardModel(IPreferenceStore prefs) throws Exception {
 		this(
 				BootActivator.getUrlConnectionFactory(),
-				StsProperties.getInstance(new NullProgressMonitor()),
 				prefs
 		);
 	}
@@ -117,12 +116,11 @@ public class NewSpringBootWizardModel {
 	public NewSpringBootWizardModel() throws Exception {
 		this(
 				BootActivator.getUrlConnectionFactory(),
-				StsProperties.getInstance(new NullProgressMonitor()),
 				BootWizardActivator.getDefault().getPreferenceStore()
 		);
 	}
 
-	public NewSpringBootWizardModel(URLConnectionFactory urlConnectionFactory, StsProperties stsProps, IPreferenceStore prefs) throws Exception {
+	public NewSpringBootWizardModel(URLConnectionFactory urlConnectionFactory, IPreferenceStore prefs) throws Exception {
 		this(urlConnectionFactory, BootPreferences.getInitializrUrl(), prefs);
 	}
 

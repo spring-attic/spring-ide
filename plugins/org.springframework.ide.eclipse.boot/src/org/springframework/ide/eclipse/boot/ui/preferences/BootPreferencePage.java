@@ -10,13 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.ui.preferences;
 
-import static org.springframework.ide.eclipse.boot.core.BootPreferences.DEFAULT_PREF_IGNORE_SILENT_EXIT;
 import static org.springframework.ide.eclipse.boot.core.BootPreferences.PREF_BOOT_PROJECT_EXCLUDE;
 import static org.springframework.ide.eclipse.boot.core.BootPreferences.PREF_IGNORE_SILENT_EXIT;
 
 import org.eclipse.debug.internal.ui.preferences.BooleanFieldEditor2;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
@@ -59,8 +57,4 @@ public class BootPreferencePage extends FieldEditorPreferencePage implements IWo
 		fe.getChangeControl(parent).setToolTipText(tooltip);
 	}
 	
-	public static void initDefaults(IPreferenceStore store) {
-		store.setDefault(PREF_IGNORE_SILENT_EXIT, DEFAULT_PREF_IGNORE_SILENT_EXIT);
-	}
-
 }
