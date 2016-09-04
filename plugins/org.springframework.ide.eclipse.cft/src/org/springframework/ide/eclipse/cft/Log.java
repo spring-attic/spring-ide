@@ -41,6 +41,23 @@ public class Log {
 		}
 	}
 
+	public static void logWarning(String message) {
+
+		try {
+			SpringCFTActivator.getDefault().getLog().log(createWarningStatus(message));
+		} catch (NullPointerException npe) {
+			// Can happen if errors are trying to be logged during Eclipse's
+			// shutdown
+		}
+	}
+
+	public static IStatus createWarningStatus(String message) {
+		if (message == null) {
+			message = "";
+		}
+		return new Status(IStatus.WARNING, SpringCFTActivator.PLUGIN_ID, message);
+	}
+
 	/**
 	 * Returns a new <code>IStatus</code> for this plug-in
 	 */
