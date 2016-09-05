@@ -501,7 +501,7 @@
 				<repository>
 					<id>cft</id>
 					<layout>p2</layout>
-					<url>http://download.eclipse.org/cft/1.0.1.M1/</url>
+					<url>http://download.eclipse.org/cft/1.0.1.RC1/</url>
 				</repository>
 				<repository>
 					<id>eclipse-integration-commons</id>
@@ -546,6 +546,11 @@
 		  			<id>groovy</id>
 		  			<layout>p2</layout>
 		  			<url>http://dist.springsource.org/snapshot/GRECLIPSE/e4.6/</url>
+				</repository>
+				<repository>
+					<id>cft</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/cft/1.0.1.RC1/</url>
 				</repository>
 				<repository>
 					<id>eclipse-integration-commons</id>
