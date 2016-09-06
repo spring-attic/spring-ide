@@ -72,7 +72,7 @@ public class UpdatePasswordDialog extends DialogWithSections {
 		sections.add(new CommentSection(this,
 				"The password must match your existing target credentials in " + model.getTargetId() + "."));
 
-		sections.add(new StringFieldSection(this, "Password", model.getPasswordVar(), model.getPasswordValidator()));
+		sections.add(new StringFieldSection(this, "Password", model.getPasswordVar(), model.getPasswordValidator()).setPassword(true));
 		sections.add(storeCredentialsSection(this, model.getStoreVar()));
 
 		return sections;
