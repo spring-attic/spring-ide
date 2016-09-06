@@ -10,15 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard;
 
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLConnection;
-
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
-import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
 
 public class BootWizardActivator extends AbstractUIPlugin {
 
@@ -62,17 +57,4 @@ public class BootWizardActivator extends AbstractUIPlugin {
 		getDefault().getLog().log(createInfoStatus(msg));
 	}
 
-	public static URLConnectionFactory getUrlConnectionFactory() {
-		final String userAgent = "STS/"+BootWizardActivator.getDefault().getBundle().getVersion();
-		//TODO: post 3.7.2 the URLConnectionFactory in master will have support for adding userAgent string
-		//  so we do not have to implement it here by subclassing.
-		return new URLConnectionFactory() {
-			@Override
-			public URLConnection createConnection(URL url) throws IOException {
-				URLConnection conn = super.createConnection(url);
-				conn.addRequestProperty("User-Agent", userAgent);
-				return conn;
-			}
-		};
-	}
 }

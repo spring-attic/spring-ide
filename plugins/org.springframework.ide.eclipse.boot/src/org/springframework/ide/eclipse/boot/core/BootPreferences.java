@@ -15,8 +15,9 @@ import java.util.regex.Pattern;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
-import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.springframework.ide.eclipse.boot.util.Log;
+import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 /**
@@ -28,6 +29,10 @@ public class BootPreferences implements IPreferenceChangeListener {
 	public static final Pattern DEFAULT_BOOT_PROJECT_EXCLUDE = Pattern.compile("^$");
 	public static final String PREF_IGNORE_SILENT_EXIT = "org.springframework.ide.eclipse.boot.ignore.silent.exit";
 	public static final boolean DEFAULT_PREF_IGNORE_SILENT_EXIT = true;
+	public static final String PREF_INITIALIZR_URL = "org.springframework.ide.eclipse.boot.wizard.initializr.url";
+	
+	// Boot Preference Page ID
+	public static final String BOOT_PREFERENCE_PAGE_ID = "org.springframework.ide.eclipse.boot.ui.preferences.BootPreferencePage";
 
 	private static BootPreferences INSTANCE = null;
 	private IEclipsePreferences prefs;
@@ -67,7 +72,7 @@ public class BootPreferences implements IPreferenceChangeListener {
 		try {
 			return prefs.getBoolean(PREF_IGNORE_SILENT_EXIT, DEFAULT_PREF_IGNORE_SILENT_EXIT);
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 			return DEFAULT_PREF_IGNORE_SILENT_EXIT;
 		}
 	}
@@ -85,7 +90,7 @@ public class BootPreferences implements IPreferenceChangeListener {
 				}
 			}
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 		}
 		//Ensure there's always some default pattern returned, no matter what!
 		return Pattern.compile("^$");
@@ -93,6 +98,14 @@ public class BootPreferences implements IPreferenceChangeListener {
 
 	public LiveExpression<Pattern> getProjectExclusionExp() {
 		return projectExclude;
+	}
+	
+	public static String getInitializrUrl() {
+		return BootActivator.getDefault().getPreferenceStore().getString(PREF_INITIALIZR_URL);
+	}
+	
+	public static String getDefaultInitializrUrl() {
+		return BootActivator.getDefault().getPreferenceStore().getDefaultString(PREF_INITIALIZR_URL);
 	}
 
 }

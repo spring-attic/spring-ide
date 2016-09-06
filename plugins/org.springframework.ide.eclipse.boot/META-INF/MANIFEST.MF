@@ -32,15 +32,15 @@ Require-Bundle: org.eclipse.core.resources,
  com.fasterxml.jackson.core.jackson-databind,
  com.fasterxml.jackson.core.jackson-annotations,
  org.eclipse.ui.forms,
- org.springframework.ide.eclipse.boot.wizard,
  org.springframework.ide.eclipse.core,
  org.springframework.ide.eclipse.editor.support,
- org.eclipse.ltk.core.refactoring
+ org.eclipse.ltk.core.refactoring,
+ org.json,
+ org.springframework.core
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.boot.core,
  org.springframework.ide.eclipse.boot.core.cli,
- org.springframework.ide.eclipse.boot.core.dialogs,
  org.springframework.ide.eclipse.boot.core.initializr,
  org.springframework.ide.eclipse.boot.ui,
  org.springframework.ide.eclipse.boot.util

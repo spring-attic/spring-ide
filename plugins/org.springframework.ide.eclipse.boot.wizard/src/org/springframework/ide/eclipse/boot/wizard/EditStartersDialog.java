@@ -8,7 +8,7 @@
  * Contributors:
  *   Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.ui;
+package org.springframework.ide.eclipse.boot.wizard;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,13 +18,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
-import org.springframework.ide.eclipse.boot.core.dialogs.EditStartersModel;
-import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
-import org.springframework.ide.eclipse.boot.wizard.DependencyFilterBox;
-import org.springframework.ide.eclipse.boot.wizard.MultiSelectionFieldModel;
-import org.springframework.ide.eclipse.boot.wizard.SearchBoxSection;
-import org.springframework.ide.eclipse.boot.wizard.json.InitializrServiceSpec.Dependency;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.DialogWithSections;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 GoPivotal, Inc.
+ * Copyright (c) 2014, 2016 GoPivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard;
 
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Type;
 import org.springframework.ide.eclipse.boot.wizard.importing.ImportStrategy;
-import org.springframework.ide.eclipse.boot.wizard.json.InitializrServiceSpec.Type;
 
 /**
  * Extension of {@link RadioInfo} adds extra attribute(s) only

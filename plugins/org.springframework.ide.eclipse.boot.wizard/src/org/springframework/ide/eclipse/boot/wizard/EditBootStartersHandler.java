@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 GoPivotal, Inc.
+ * Copyright (c) 2013, 2016 GoPivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,7 @@
  * Contributors:
  *     GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.handlers;
+package org.springframework.ide.eclipse.boot.wizard;
 
 import java.util.List;
 
@@ -19,11 +19,10 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.springframework.ide.eclipse.boot.core.BootActivator;
-import org.springframework.ide.eclipse.boot.ui.EditStartersDialog;
-import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.frameworks.ui.internal.utils.ProjectFilter;
 import org.springsource.ide.eclipse.commons.frameworks.ui.internal.utils.SelectionUtils;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 public class EditBootStartersHandler extends AbstractHandler {
 
@@ -42,7 +41,7 @@ public class EditBootStartersHandler extends AbstractHandler {
 				}
 			}
 		} catch (Throwable e) {
-			BootActivator.log(e);
+			Log.log(e);
 			MessageDialog.openError(HandlerUtil.getActiveShell(event), "Error", ExceptionUtil.getMessage(e));
 		}
 		return null;

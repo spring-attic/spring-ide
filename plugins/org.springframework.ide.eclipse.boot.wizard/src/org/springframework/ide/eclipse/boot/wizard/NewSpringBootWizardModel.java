@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013-2015 Pivotal, Inc.
+ * Copyright (c) 2013, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,22 +27,24 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
+import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.core.BootPreferences;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.DependencyGroup;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Option;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Type;
 import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
 import org.springframework.ide.eclipse.boot.wizard.content.BuildType;
 import org.springframework.ide.eclipse.boot.wizard.content.CodeSet;
 import org.springframework.ide.eclipse.boot.wizard.importing.ImportStrategy;
 import org.springframework.ide.eclipse.boot.wizard.importing.ImportUtils;
-import org.springframework.ide.eclipse.boot.wizard.json.InitializrServiceSpec;
-import org.springframework.ide.eclipse.boot.wizard.json.InitializrServiceSpec.Dependency;
-import org.springframework.ide.eclipse.boot.wizard.json.InitializrServiceSpec.DependencyGroup;
-import org.springframework.ide.eclipse.boot.wizard.json.InitializrServiceSpec.Option;
-import org.springframework.ide.eclipse.boot.wizard.json.InitializrServiceSpec.Type;
 import org.springframework.util.StringUtils;
 import org.springsource.ide.eclipse.commons.core.preferences.StsProperties;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager;
@@ -106,22 +108,20 @@ public class NewSpringBootWizardModel {
 
 	public NewSpringBootWizardModel(IPreferenceStore prefs) throws Exception {
 		this(
-				BootWizardActivator.getUrlConnectionFactory(),
-				StsProperties.getInstance(new NullProgressMonitor()),
+				BootActivator.getUrlConnectionFactory(),
 				prefs
 		);
 	}
 
 	public NewSpringBootWizardModel() throws Exception {
 		this(
-				BootWizardActivator.getUrlConnectionFactory(),
-				StsProperties.getInstance(new NullProgressMonitor()),
+				BootActivator.getUrlConnectionFactory(),
 				BootWizardActivator.getDefault().getPreferenceStore()
 		);
 	}
 
-	public NewSpringBootWizardModel(URLConnectionFactory urlConnectionFactory, StsProperties stsProps, IPreferenceStore prefs) throws Exception {
-		this(urlConnectionFactory, stsProps.get("spring.initializr.json.url"), prefs);
+	public NewSpringBootWizardModel(URLConnectionFactory urlConnectionFactory, IPreferenceStore prefs) throws Exception {
+		this(urlConnectionFactory, BootPreferences.getInitializrUrl(), prefs);
 	}
 
 	public NewSpringBootWizardModel(URLConnectionFactory urlConnectionFactory, String jsonUrl, IPreferenceStore prefs) throws Exception {
@@ -251,10 +251,10 @@ public class NewSpringBootWizardModel {
 					projectNameValue,
 					cs
 			));
-			oper.run(new SubProgressMonitor(mon, 3));
+			oper.run(SubMonitor.convert(mon, 3));
 
 			IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectNameValue);
-			addToWorkingSets(project, new SubProgressMonitor(mon, 1));
+			addToWorkingSets(project, SubMonitor.convert(mon, 1));
 
 		} catch (IOException e) {
 			throw new InvocationTargetException(e);
