@@ -98,19 +98,20 @@ public class PropertyFileStore implements IPropertyStore {
 		UserPrincipalLookupService upls = file.getFileSystem().getUserPrincipalLookupService();
 		UserPrincipal user = upls.lookupPrincipalByName(System.getProperty("user.name"));
 		AclEntry.Builder builder = AclEntry.newBuilder();
-		builder.setPermissions( EnumSet.of(
-				AclEntryPermission.READ_DATA,
-				AclEntryPermission.WRITE_DATA,
-				AclEntryPermission.APPEND_DATA,
-				//AclEntryPermission.EXECUTE,
-				AclEntryPermission.READ_ACL,
-				AclEntryPermission.WRITE_ACL,
-				AclEntryPermission.READ_ATTRIBUTES,
-				AclEntryPermission.WRITE_ATTRIBUTES,
-				AclEntryPermission.READ_NAMED_ATTRS,
-				AclEntryPermission.WRITE_NAMED_ATTRS,
-				AclEntryPermission.DELETE
-		));
+		builder.setPermissions( EnumSet.allOf(AclEntryPermission.class));
+// This was here before but it seems not enough to actually allow reading the file:
+//		builder.setPermissions( EnumSet.of(
+//				AclEntryPermission.READ_DATA,
+//				AclEntryPermission.WRITE_DATA,
+//				AclEntryPermission.APPEND_DATA,
+//				AclEntryPermission.READ_ACL,
+//				AclEntryPermission.WRITE_ACL,
+//				AclEntryPermission.READ_ATTRIBUTES,
+//				AclEntryPermission.WRITE_ATTRIBUTES,
+//				AclEntryPermission.READ_NAMED_ATTRS,
+//				AclEntryPermission.WRITE_NAMED_ATTRS,
+//				AclEntryPermission.DELETE
+//		));
 		builder.setPrincipal(user);
 		builder.setType(AclEntryType.ALLOW);
 		aclAttr.setAcl(Collections.singletonList(builder.build()));
