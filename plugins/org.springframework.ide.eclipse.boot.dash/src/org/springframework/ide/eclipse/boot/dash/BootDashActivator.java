@@ -17,6 +17,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.BootDashBuildpackHintProvider;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.BuildpackHintGenerator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultCloudFoundryClientFactoryV2;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
@@ -136,7 +137,7 @@ public class BootDashActivator extends AbstractUIPlugin {
 					new CloudFoundryRunTargetType(context, DefaultCloudFoundryClientFactoryV2.INSTANCE)
 					// RunTargetTypes.LATTICE
 			);
-			ManifestEditorActivator.getDefault().setBuildpackProvider(new BootDashBuildpackHintProvider(model));
+			ManifestEditorActivator.getDefault().setBuildpackProvider(new BootDashBuildpackHintProvider(model, new BuildpackHintGenerator()));
 //			DebugSelectionListener debugSelectionListener = new DebugSelectionListener(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService());
 //			model.addDisposableChild(debugSelectionListener);
 		}
