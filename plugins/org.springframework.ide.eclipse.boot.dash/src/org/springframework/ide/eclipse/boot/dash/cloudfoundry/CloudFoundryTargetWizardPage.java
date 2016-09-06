@@ -138,7 +138,7 @@ public class CloudFoundryTargetWizardPage extends WizardPageWithSections {
 	protected List<WizardPageSection> createSections() {
 		List<WizardPageSection> sections = new ArrayList<>();
 		sections.add(new StringFieldSection(this, "Email:", model.getUsernameVar()));
-		sections.add(new StringFieldSection(this, "Password:", model.getPasswordVar(), true));
+		sections.add(new StringFieldSection(this, "Password:", model.getPasswordVar()).setPassword(true));
 		sections.add(UpdatePasswordDialog.storeCredentialsSection(this, model.getStoreVar()));
 		sections.add(new StringFieldSection(this, "Url:", model.getUrlVar()));
 		sections.add(new ValidatorSection(model.getCredentialsValidator(), this));
