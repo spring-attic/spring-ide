@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.boot.wizard;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -25,8 +24,8 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
-import org.springframework.ide.eclipse.boot.wizard.json.InitializrServiceSpec.Dependency;
 import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;

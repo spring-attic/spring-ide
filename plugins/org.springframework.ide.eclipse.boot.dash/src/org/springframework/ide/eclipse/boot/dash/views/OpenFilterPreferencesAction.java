@@ -12,7 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.views;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.ui.dialogs.PreferencesUtil;
-import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 /**
@@ -32,8 +32,7 @@ public class OpenFilterPreferencesAction extends AbstractBootDashAction {
 
 	@Override
 	public void run() {
-		PreferencesUtil.createPreferenceDialogOn(null, BootActivator.BOOT_PREFERENCE_PAGE_ID,
-				new String[] { BootActivator.BOOT_PREFERENCE_PAGE_ID }, null).open();
+		PreferencesUtil.createPreferenceDialogOn(null, BootPreferences.BOOT_PREFERENCE_PAGE_ID, null, null).open();
 	}
 
 }

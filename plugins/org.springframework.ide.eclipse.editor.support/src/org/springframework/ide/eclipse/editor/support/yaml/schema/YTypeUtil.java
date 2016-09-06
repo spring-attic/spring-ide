@@ -29,7 +29,7 @@ public interface YTypeUtil {
 	boolean isSequencable(YType type);
 	boolean isBean(YType type);
 	YType getDomainType(YType type);
-	String[] getHintValues(YType yType);
+	YValueHint[] getHintValues(YType yType);
 	String niceTypeName(YType type);
 	YType getKeyType(YType type);
 	ValueParser getValueParser(YType type);

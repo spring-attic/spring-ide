@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.cft.applications;
 
 import org.eclipse.cft.server.core.CFApplicationArchive;
-import org.eclipse.cft.server.core.internal.CloudFoundryServer;
 import org.eclipse.cft.server.core.internal.application.ModuleResourceApplicationDelegate;
 import org.eclipse.cft.server.core.internal.client.CloudFoundryApplicationModule;
 import org.eclipse.core.runtime.CoreException;
@@ -19,14 +18,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.model.IModuleResource;
+import org.springframework.ide.eclipse.cft.ProjectUtils;
 
 public class SpringBootApplicationDelegate extends ModuleResourceApplicationDelegate {
-
-	// Add the archivers in the order that they should be invoked
-	private IntegrationApplicationArchiver[] orderedArchivers = new IntegrationApplicationArchiver[] {
-			new BootDashboardArchiver(),
-
-			new LegacyCFTJavaArchiver() };
 
 	@Override
 	public boolean requiresURL() {
@@ -36,32 +30,12 @@ public class SpringBootApplicationDelegate extends ModuleResourceApplicationDele
 
 	@Override
 	public boolean shouldSetDefaultUrl(CloudFoundryApplicationModule appModule) {
-		for (IntegrationApplicationArchiver archiver : orderedArchivers) {
-			if (archiver.supports(appModule)) {
-				return archiver.shouldSetDefaultUrl(appModule);
-			}
-		}
-		return false;
+		return ProjectUtils.isSpringBootProject(appModule);
 	}
 
 	@Override
 	public CFApplicationArchive getApplicationArchive(IModule module, IServer server, IModuleResource[] moduleResources,
 			IProgressMonitor monitor) throws CoreException {
-		CloudFoundryApplicationModule appModule = getCloudFoundryApplicationModule(module, server);
-		CloudFoundryServer cloudServer = getCloudServer(server);
-
-		for (IntegrationApplicationArchiver archiver : orderedArchivers) {
-			if (archiver.supports(appModule)) {
-				// If archive is not generated, find the next archiver that
-				// supports this module
-				CFApplicationArchive archive = archiver.getApplicationArchive(appModule, cloudServer, moduleResources,
-						monitor);
-				if (archive != null) {
-					return archive;
-				}
-			}
-		}
-
-		return null;
+		return new BootDashboardArchiver().getApplicationArchive(module, server, moduleResources, monitor);
 	}
 }
