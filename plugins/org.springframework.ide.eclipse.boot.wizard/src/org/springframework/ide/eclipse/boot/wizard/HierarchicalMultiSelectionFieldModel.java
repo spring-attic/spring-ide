@@ -109,5 +109,9 @@ public class HierarchicalMultiSelectionFieldModel<T> {
 		}
 		return allUsedBoxes;
 	}
-
+	
+	public void clearSelection() {
+		categories.values().forEach(MultiSelectionFieldModel::clearSelection);
+	}
+	
 }

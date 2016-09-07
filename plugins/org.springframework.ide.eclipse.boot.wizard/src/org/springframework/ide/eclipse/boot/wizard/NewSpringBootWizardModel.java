@@ -15,17 +15,18 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -46,7 +47,6 @@ import org.springframework.ide.eclipse.boot.wizard.content.CodeSet;
 import org.springframework.ide.eclipse.boot.wizard.importing.ImportStrategy;
 import org.springframework.ide.eclipse.boot.wizard.importing.ImportUtils;
 import org.springframework.util.StringUtils;
-import org.springsource.ide.eclipse.commons.core.preferences.StsProperties;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadableItem;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
@@ -105,6 +105,7 @@ public class NewSpringBootWizardModel {
 	private final String JSON_URL;
 	private PopularityTracker popularities;
 	private PreferredSelections preferredSelections;
+	private DefaultDependencies defaultDependencies;
 
 	public NewSpringBootWizardModel(IPreferenceStore prefs) throws Exception {
 		this(
@@ -127,6 +128,7 @@ public class NewSpringBootWizardModel {
 	public NewSpringBootWizardModel(URLConnectionFactory urlConnectionFactory, String jsonUrl, IPreferenceStore prefs) throws Exception {
 		this.popularities = new PopularityTracker(prefs);
 		this.preferredSelections = new PreferredSelections(prefs);
+		this.defaultDependencies = new DefaultDependencies(prefs);
 		this.urlConnectionFactory = urlConnectionFactory;
 		this.JSON_URL = jsonUrl;
 
@@ -159,6 +161,7 @@ public class NewSpringBootWizardModel {
 		addBuildTypeValidator();
 
 		preferredSelections.restore(this);
+		defaultDependencies.restore(dependencies);
 	}
 
 	/**
@@ -221,6 +224,40 @@ public class NewSpringBootWizardModel {
 	public List<CheckBoxModel<Dependency>> getMostPopular(int howMany) {
 		return popularities.getMostPopular(dependencies, howMany);
 	}
+	
+	/**
+	 * Retrieves currently set default dependencies
+	 * @return list of default dependencies check-box models
+	 */
+	public List<CheckBoxModel<Dependency>> getDefaultDependencies() {
+		return defaultDependencies.getDependencies(dependencies);
+	}
+	
+	/**
+	 * Retrieves frequently used dependencies based on currently set default dependencies and the most popular dependencies
+	 * 
+	 * @param numberOfMostPopular max number of most popular dependencies
+	 * @return list of frequently used dependencies
+	 */
+	public List<CheckBoxModel<Dependency>> getFrequentlyUsedDependencies(int numberOfMostPopular) {
+		List<CheckBoxModel<Dependency>> defaultDependencies = getDefaultDependencies();
+		Set<String> defaultDependecyIds = getDefaultDependenciesIds();
+		getMostPopular(numberOfMostPopular).stream().filter(checkboxModel -> {
+			return !defaultDependecyIds.contains(checkboxModel.getValue().getId());
+		}).forEach(defaultDependencies::add);
+		// Sort alphbetically
+		defaultDependencies.sort(new Comparator<CheckBoxModel<Dependency>>() {
+			@Override
+			public int compare(CheckBoxModel<Dependency> d1, CheckBoxModel<Dependency> d2) {
+				return d1.getLabel().compareTo(d2.getLabel());
+			}
+		});
+		return defaultDependencies;
+	}
+	
+	public Set<String> getDefaultDependenciesIds() {
+		return defaultDependencies.getDependciesIdSet();
+	}
 
 	/**
 	 * Shouldn't be public really. This is just to make it easier to call from unit test.
@@ -228,7 +265,10 @@ public class NewSpringBootWizardModel {
 	public void updateUsageCounts() {
 		popularities.incrementUsageCount(dependencies.getCurrentSelection());
 	}
-
+	
+	public boolean saveDefaultDependencies() {
+		return defaultDependencies.save(dependencies);
+	}
 
 	public void performFinish(IProgressMonitor mon) throws InvocationTargetException, InterruptedException {
 		mon.beginTask("Importing "+baseUrl.getValue(), 4);

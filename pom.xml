@@ -80,8 +80,8 @@
 		<test.skip>${maven.test.skip}</test.skip>
 		<maven.test.error.ignore>false</maven.test.error.ignore>
 		<maven.test.failure.ignore>false</maven.test.failure.ignore>
-		<maven.compiler.source>1.7</maven.compiler.source>
-		<maven.compiler.target>1.7</maven.compiler.target>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
 		<encoding>UTF-8</encoding>
 		<test.osvmargs></test.osvmargs>
 		<test.vmargs>${test.osvmargs} -Dreactor.io.epoll=false -Dspring.initializr.json.url=http://start-development.cfapps.io -Dorg.slf4j.simpleLogger.log.cloudfoundry-client=debug</test.vmargs>

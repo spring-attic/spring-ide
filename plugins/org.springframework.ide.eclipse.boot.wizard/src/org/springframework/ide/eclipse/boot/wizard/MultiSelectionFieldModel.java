@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 GoPivotal, Inc.
+ * Copyright (c) 2013, 2016 GoPivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -196,6 +196,12 @@ public class MultiSelectionFieldModel<T> {
 			cb.setTooltip(getTooltip(choice));
 		}
 		return Collections.unmodifiableList(checkboxes);
+	}
+	
+	public void clearSelection() {
+		selections.values().forEach(liveVar -> {
+			liveVar.setValue(false);
+		});
 	}
 
 }

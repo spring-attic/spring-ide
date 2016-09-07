@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.wizard;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -48,6 +49,7 @@ public class EditStartersModel implements OkButtonHandler {
 
 	private final ISpringBootProject project;
 	private final PopularityTracker popularities;
+	private final DefaultDependencies defaultDependencies;
 
 	/**
 	 * Will be used to remember the set of initially selected dependencies (i.e. those that are already
@@ -89,6 +91,7 @@ public class EditStartersModel implements OkButtonHandler {
 	 */
 	public EditStartersModel(IProject selectedProject, SpringBootCore springBootCore, IPreferenceStore store) throws Exception {
 		this.popularities = new PopularityTracker(store);
+		this.defaultDependencies = new DefaultDependencies(store);
 		this.project = springBootCore.project(selectedProject);
 		discoverOptions(dependencies);
 	}
@@ -212,6 +215,37 @@ public class EditStartersModel implements OkButtonHandler {
 		}
 		return Collections.unmodifiableList(result);
 	}
+	
+	/**
+	 * Retrieves currently set default dependencies
+	 * @return list of default dependencies check-box models
+	 */
+	public List<CheckBoxModel<Dependency>> getDefaultDependencies() {
+		return defaultDependencies.getDependencies(dependencies);
+	}
+	
+	/**
+	 * Retrieves frequently used dependencies based on currently set default dependencies and the most popular dependencies
+	 * 
+	 * @param numberOfMostPopular max number of most popular dependencies
+	 * @return list of frequently used dependencies
+	 */
+	public List<CheckBoxModel<Dependency>> getFrequentlyUsedDependencies(int numberOfMostPopular) {
+		List<CheckBoxModel<Dependency>> dependencies = getDefaultDependencies();
+		Set<String> defaultDependecyIds = defaultDependencies.getDependciesIdSet();
+		getMostPopular(numberOfMostPopular).stream().filter(checkboxModel -> {
+			return !defaultDependecyIds.contains(checkboxModel.getValue().getId());
+		}).forEach(dependencies::add);
+		// Sort alphabetically
+		dependencies.sort(new Comparator<CheckBoxModel<Dependency>>() {
+			@Override
+			public int compare(CheckBoxModel<Dependency> d1, CheckBoxModel<Dependency> d2) {
+				return d1.getLabel().compareTo(d2.getLabel());
+			}
+		});
+		return dependencies;
+	}
+
 
 	/**
 	 * Convenience method for easier scripting of the wizard model (used in testing). Not used
