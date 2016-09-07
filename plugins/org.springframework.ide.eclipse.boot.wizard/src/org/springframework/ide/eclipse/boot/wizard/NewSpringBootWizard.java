@@ -11,16 +11,25 @@
 package org.springframework.ide.eclipse.boot.wizard;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
@@ -145,6 +154,10 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 	public class DependencyPage extends WizardPageWithSections {
 
 		private static final int NUM_DEP_COLUMNS = 4;
+		
+		private ExpandableSection frequentlyUsedSection;
+
+		private CheckBoxesSection<Dependency> frequentlyUsedCheckboxes;
 
 		protected DependencyPage() {
 			super("page2", "New Spring Starter Project", null);
@@ -154,12 +167,36 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 			boolean visChanged = checkboxes.applyFilter(filter);
 
 			boolean hasVisible = checkboxes.hasVisible();
-			expandable.setVisible(hasVisible);
-			if (hasVisible && visChanged) {
-				//Reveal if visibility changed
-				expandable.getExpansionState().setValue(true);
-				this.reflow();
+			if (checkboxes.isCreated()) {
+				expandable.setVisible(hasVisible);
+				if (hasVisible && visChanged) {
+					//Reveal if visibility changed
+					expandable.getExpansionState().setValue(true);
+					this.reflow();
+				}
 			}
+		}
+		
+		private void refreshFrequentlyUsedDependencies() {
+			List<CheckBoxModel<Dependency>> dependenciesCheckboxes = calculateFrequentlyUsedDependencies();
+			frequentlyUsedCheckboxes.setModel(dependenciesCheckboxes);
+			frequentlyUsedSection.setVisible(!dependenciesCheckboxes.isEmpty());
+			reflow();
+		}
+		
+		private List<CheckBoxModel<Dependency>> calculateFrequentlyUsedDependencies() {
+			List<CheckBoxModel<Dependency>> defaultDependencies = model.getDefaultDependencies();
+			Set<String> defaultDependecyIds = model.getDefaultDependenciesIds();
+			model.getMostPopular(3*NUM_DEP_COLUMNS).stream().filter(checkboxModel -> {
+				return !defaultDependecyIds.contains(checkboxModel.getValue().getId());
+			}).forEach(defaultDependencies::add);
+			defaultDependencies.sort(new Comparator<CheckBoxModel<Dependency>>() {
+				@Override
+				public int compare(CheckBoxModel<Dependency> d1, CheckBoxModel<Dependency> d2) {
+					return d1.getLabel().compareTo(d2.getLabel());
+				}
+			});
+			return defaultDependencies;
 		}
 
 		@Override
@@ -175,19 +212,53 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 					new CommentSection(this, model.dependencies.getLabel())
 			);
 
-			List<CheckBoxModel<Dependency>> mostpopular = model.getMostPopular(3*NUM_DEP_COLUMNS);
-			if (!mostpopular.isEmpty()) {
-				sections.add(new ExpandableSection(this, "Frequently Used",
-						new CheckBoxesSection<Dependency>(this, mostpopular)
-							.columns(NUM_DEP_COLUMNS)
-				));
-			}
+			List<CheckBoxModel<Dependency>> frequesntDependencies = calculateFrequentlyUsedDependencies();
+			frequentlyUsedCheckboxes = new CheckBoxesSection<Dependency>(this, frequesntDependencies)
+					.columns(NUM_DEP_COLUMNS);
+			frequentlyUsedSection = new ExpandableSection(this, "Frequently Used",
+					frequentlyUsedCheckboxes);
+			sections.add(frequentlyUsedSection);
+			frequentlyUsedSection.setVisible(!frequesntDependencies.isEmpty());
 
 			sections.add(new SearchBoxSection(this, model.getDependencyFilterBoxText()) {
+				
 				@Override
 				protected String getSearchHint() {
 					return "Type to search dependencies";
 				}
+				
+				@Override
+				public void createContents(Composite page) {
+					Composite toolbar = new Composite(page, SWT.NONE);
+					toolbar.setLayout(new GridLayout(3, false));
+					GridDataFactory.fillDefaults().grab(true, false).applyTo(toolbar);
+					
+					// Search box
+					super.createContents(toolbar);
+					
+					Button makeDefault = new Button(toolbar, SWT.PUSH);
+					makeDefault.setText("Make Default");
+					makeDefault.setToolTipText("Make currently selected dependencies selected by default");
+					makeDefault.addSelectionListener(new SelectionAdapter() {
+						@Override
+						public void widgetSelected(SelectionEvent e) {
+							if (model.saveDefaultDependencies()) {
+								refreshFrequentlyUsedDependencies();
+							}
+						}
+					});
+					
+					Button clearSelection = new Button(toolbar, SWT.PUSH);
+					clearSelection.setText("Clear Selection");
+					clearSelection.setToolTipText("Clear dependencies selection");
+					clearSelection.addSelectionListener(new SelectionAdapter() {
+						@Override
+						public void widgetSelected(SelectionEvent e) {
+							model.dependencies.clearSelection();
+						}
+					});
+				}
+
 			});
 
 			for (String cat : model.dependencies.getCategories()) {

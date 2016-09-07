@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 GoPivotal, Inc.
+ * Copyright (c) 2013, 2016 GoPivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -80,7 +80,7 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 		}
 	}
 
-	private final List<CheckBoxModel<T>> model;
+	private List<CheckBoxModel<T>> model;
 	private Composite composite;
 	private WizardPageSection[] subsections;
 	private int numCols;
@@ -107,6 +107,8 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 		private Button cb;
 		private CheckBoxModel<T> model;
 		private LiveVariable<Boolean> isVisible = new LiveVariable<Boolean>(true);
+		private ValueListener<Boolean> selectionListener;
+		private ValueListener<Boolean> enablementListener;
 
 		public CheckBox(IPageWithSections owner, CheckBoxModel<T> model) {
 			super(owner);
@@ -127,7 +129,7 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 				if (tooltip!=null) {
 					cb.setToolTipText(tooltip);
 				}
-				model.getSelection().addListener(new ValueListener<Boolean>() {
+				model.getSelection().addListener(selectionListener = new ValueListener<Boolean>() {
 					public void gotValue(LiveExpression<Boolean> exp, Boolean value) {
 						if (value!=null) {
 							cb.setSelection(value);
@@ -152,7 +154,7 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 				});
 				LiveExpression<Boolean> enablement = model.getEnablement();
 				if (enablement!=null) {
-					enablement.addListener(new ValueListener<Boolean>() {
+					enablement.addListener(enablementListener = new ValueListener<Boolean>() {
 						public void gotValue(LiveExpression<Boolean> exp, Boolean value) {
 							if (value!=null) {
 								cb.setEnabled(value);
@@ -177,6 +179,12 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 			if (cb!=null && !cb.isDisposed()) {
 				cb.dispose();
 				cb = null;
+			}
+			if (selectionListener != null) {
+				model.getSelection().removeListener(selectionListener);
+			}
+			if (enablementListener != null) {
+				model.getEnablement().removeListener(enablementListener);
 			}
 		}
 
@@ -217,15 +225,18 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 		layout.marginHeight = 0;
 		composite.setLayout(layout);
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(composite);
-
+		createSubsections();
+	}
+	
+	private void createSubsections() {
 		subsections = new WizardPageSection[Math.max(1, model.size())];
 
-//				GridData gd = (GridData) group.getLayoutData();
-//				boolean visible = checkboxes.length>0;
-//				gd.exclude = !visible;
+//		 GridData gd = (GridData) group.getLayoutData();
+//		 boolean visible = checkboxes.length>0;
+//		 gd.exclude = !visible;
 
 		if (model.isEmpty()) {
-			//don't leave section empty it looks ugly
+			// don't leave section empty it looks ugly
 			subsections[0] = new CommentSection(owner, "No choices available");
 			subsections[0].createContents(composite);
 		}
@@ -277,6 +288,28 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 			}
 		}
 		return false;
+	}
+	
+	public boolean isCreated() {
+		return composite != null;
+	}
+
+	@Override
+	public void dispose() {
+		
+		if (subsections != null) {
+			for (WizardPageSection subsection : subsections) {
+				subsection.dispose();
+			}
+		}
+		super.dispose();
+	}
+	
+	public void setModel(List<CheckBoxModel<T>> model) {
+		dispose();
+		this.model = model;
+		createSubsections();
+		composite.layout();
 	}
 
 }
