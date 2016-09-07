@@ -166,8 +166,8 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 		private void applyFilter(Filter<CheckBoxModel<Dependency>> filter, ExpandableSection expandable, CheckBoxesSection<Dependency> checkboxes) {
 			boolean visChanged = checkboxes.applyFilter(filter);
 
-			boolean hasVisible = checkboxes.hasVisible();
 			if (checkboxes.isCreated()) {
+				boolean hasVisible = checkboxes.hasVisible();
 				expandable.setVisible(hasVisible);
 				if (hasVisible && visChanged) {
 					//Reveal if visibility changed
