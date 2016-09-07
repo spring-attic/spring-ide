@@ -15,6 +15,8 @@ import java.io.File;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.JavaRuntime;
+import org.springsource.ide.eclipse.commons.frameworks.test.util.ExternalCommand;
+import org.springsource.ide.eclipse.commons.frameworks.test.util.ExternalProcess;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 /**
