@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 GoPivotal, Inc.
+ * Copyright (c) 2016 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -96,12 +96,10 @@ public class DefaultDependencies {
 				Optional<Dependency> matchedDependency = Arrays.asList(model.getContents(category).getChoices()).stream().filter(dependency -> {
 					return id.equals(dependency.getId());
 				}).findFirst();
-				if (matchedDependency.isPresent()) {
-					model.setSelection(category, matchedDependency.get(), true);
-					return true;
-				} else {
-					return false;
-				}
+				matchedDependency.ifPresent(d -> {
+					model.setSelection(category, d, true);
+				});
+				return matchedDependency.isPresent();
 			}).findFirst();
 		}); 
 	}
