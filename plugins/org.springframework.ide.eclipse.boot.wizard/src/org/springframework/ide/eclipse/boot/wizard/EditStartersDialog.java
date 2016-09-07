@@ -46,12 +46,14 @@ public class EditStartersDialog extends DialogWithSections {
 	private void applyFilter(Filter<CheckBoxModel<Dependency>> filter, ExpandableSection expandable, CheckBoxesSection<Dependency> checkboxes) {
 		boolean visChanged = checkboxes.applyFilter(filter);
 
-		boolean hasVisible = checkboxes.hasVisible();
-		expandable.setVisible(hasVisible);
-		if (hasVisible && visChanged) {
-			//Reveal if visibility changed
-			expandable.getExpansionState().setValue(true);
-			this.reflow();
+		if (checkboxes.isCreated()) {
+			boolean hasVisible = checkboxes.hasVisible();
+			expandable.setVisible(hasVisible);
+			if (hasVisible && visChanged) {
+				//Reveal if visibility changed
+				expandable.getExpansionState().setValue(true);
+				this.reflow();
+			}
 		}
 	}
 
@@ -61,7 +63,7 @@ public class EditStartersDialog extends DialogWithSections {
 		ArrayList<WizardPageSection> sections = new ArrayList<>();
 //		sections.add(new CommentSection(this, "Project: "+model.getProjectName()));
 
-		List<CheckBoxModel<Dependency>> mostpopular = model.getMostPopular(4*NUM_DEP_COLUMNS);
+		List<CheckBoxModel<Dependency>> mostpopular = model.getFrequentlyUsedDependencies(4*NUM_DEP_COLUMNS);
 		if (!mostpopular.isEmpty()) {
 			sections.add(new ExpandableSection(this, "Frequently Used",
 					new CheckBoxesSection<Dependency>(this, mostpopular)

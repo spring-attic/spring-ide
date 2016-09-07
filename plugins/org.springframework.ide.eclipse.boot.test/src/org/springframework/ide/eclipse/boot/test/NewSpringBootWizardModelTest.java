@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.junit.Assert;
@@ -328,6 +329,39 @@ public class NewSpringBootWizardModelTest extends TestCase {
 		popularBox.getSelection().setValue(false);
 		assertFalse(normalBox.getSelection().getValue());
 		assertFalse(popularBox.getSelection().getValue());
+	}
+	
+	public void testDefaultDependencies() throws Exception {
+		IPreferenceStore store = new MockPrefsStore();
+		NewSpringBootWizardModel model = parseFrom(INITIALIZR_JSON, store);
+		assertTrue(model.getDefaultDependencies().isEmpty());
+		select(model.dependencies, getDependencyById(model, "web"));
+		select(model.dependencies, getDependencyById(model, "actuator"));
+		select(model.dependencies, getDependencyById(model, "thymeleaf"));
+		assertTrue(model.saveDefaultDependencies());
+		
+		// Initialize new model and check if default dependencies are selected
+		model = parseFrom(INITIALIZR_JSON, store);
+		assertEquals(3, model.getDefaultDependencies().size());
+		
+		Set<String> selectedIds = model.dependencies.getCurrentSelection().stream().map(Dependency::getId).collect(Collectors.toSet());
+		Set<String> defaultIds = model.getDefaultDependencies().stream().map(checkboxModel -> {
+			return checkboxModel.getValue().getId();
+		}).collect(Collectors.toSet());
+		assertEquals(defaultIds, selectedIds);
+	}
+	
+	public void testUnselectAll() throws Exception {
+		IPreferenceStore store = new MockPrefsStore();
+		NewSpringBootWizardModel model = parseFrom(INITIALIZR_JSON, store);
+		assertTrue(model.getDefaultDependencies().isEmpty());
+		select(model.dependencies, getDependencyById(model, "web"));
+		select(model.dependencies, getDependencyById(model, "actuator"));
+		select(model.dependencies, getDependencyById(model, "thymeleaf"));
+		assertEquals(3, model.dependencies.getCurrentSelection().size());
+		
+		model.dependencies.clearSelection();
+		assertTrue(model.dependencies.getCurrentSelection().isEmpty());
 	}
 
 	public void testDependencySearchBox() throws Exception {
