@@ -11,9 +11,7 @@
 package org.springframework.ide.eclipse.boot.wizard;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -154,6 +152,7 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 	public class DependencyPage extends WizardPageWithSections {
 
 		private static final int NUM_DEP_COLUMNS = 4;
+		private static final int MAX_MOST_POPULAR = 3*NUM_DEP_COLUMNS;
 		
 		private ExpandableSection frequentlyUsedSection;
 
@@ -178,27 +177,12 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 		}
 		
 		private void refreshFrequentlyUsedDependencies() {
-			List<CheckBoxModel<Dependency>> dependenciesCheckboxes = calculateFrequentlyUsedDependencies();
+			List<CheckBoxModel<Dependency>> dependenciesCheckboxes = model.getFrequentlyUsedDependencies(MAX_MOST_POPULAR);
 			frequentlyUsedCheckboxes.setModel(dependenciesCheckboxes);
 			frequentlyUsedSection.setVisible(!dependenciesCheckboxes.isEmpty());
 			reflow();
 		}
 		
-		private List<CheckBoxModel<Dependency>> calculateFrequentlyUsedDependencies() {
-			List<CheckBoxModel<Dependency>> defaultDependencies = model.getDefaultDependencies();
-			Set<String> defaultDependecyIds = model.getDefaultDependenciesIds();
-			model.getMostPopular(3*NUM_DEP_COLUMNS).stream().filter(checkboxModel -> {
-				return !defaultDependecyIds.contains(checkboxModel.getValue().getId());
-			}).forEach(defaultDependencies::add);
-			defaultDependencies.sort(new Comparator<CheckBoxModel<Dependency>>() {
-				@Override
-				public int compare(CheckBoxModel<Dependency> d1, CheckBoxModel<Dependency> d2) {
-					return d1.getLabel().compareTo(d2.getLabel());
-				}
-			});
-			return defaultDependencies;
-		}
-
 		@Override
 		protected List<WizardPageSection> createSections() {
 			List<WizardPageSection> sections = new ArrayList<WizardPageSection>();
@@ -212,7 +196,7 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 					new CommentSection(this, model.dependencies.getLabel())
 			);
 
-			List<CheckBoxModel<Dependency>> frequesntDependencies = calculateFrequentlyUsedDependencies();
+			List<CheckBoxModel<Dependency>> frequesntDependencies = model.getFrequentlyUsedDependencies(MAX_MOST_POPULAR);
 			frequentlyUsedCheckboxes = new CheckBoxesSection<Dependency>(this, frequesntDependencies)
 					.columns(NUM_DEP_COLUMNS);
 			frequentlyUsedSection = new ExpandableSection(this, "Frequently Used",

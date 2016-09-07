@@ -15,6 +15,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -224,8 +225,34 @@ public class NewSpringBootWizardModel {
 		return popularities.getMostPopular(dependencies, howMany);
 	}
 	
+	/**
+	 * Retrieves currently set default dependencies
+	 * @return list of default dependencies check-box models
+	 */
 	public List<CheckBoxModel<Dependency>> getDefaultDependencies() {
 		return defaultDependencies.getDependencies(dependencies);
+	}
+	
+	/**
+	 * Retrieves frequently used dependencies based on currently set default dependencies and the most popular dependencies
+	 * 
+	 * @param numberOfMostPopular max number of most popular dependencies
+	 * @return list of frequently used dependencies
+	 */
+	public List<CheckBoxModel<Dependency>> getFrequentlyUsedDependencies(int numberOfMostPopular) {
+		List<CheckBoxModel<Dependency>> defaultDependencies = getDefaultDependencies();
+		Set<String> defaultDependecyIds = getDefaultDependenciesIds();
+		getMostPopular(numberOfMostPopular).stream().filter(checkboxModel -> {
+			return !defaultDependecyIds.contains(checkboxModel.getValue().getId());
+		}).forEach(defaultDependencies::add);
+		// Sort alphbetically
+		defaultDependencies.sort(new Comparator<CheckBoxModel<Dependency>>() {
+			@Override
+			public int compare(CheckBoxModel<Dependency> d1, CheckBoxModel<Dependency> d2) {
+				return d1.getLabel().compareTo(d2.getLabel());
+			}
+		});
+		return defaultDependencies;
 	}
 	
 	public Set<String> getDefaultDependenciesIds() {

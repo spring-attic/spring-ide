@@ -63,7 +63,7 @@ public class EditStartersDialog extends DialogWithSections {
 		ArrayList<WizardPageSection> sections = new ArrayList<>();
 //		sections.add(new CommentSection(this, "Project: "+model.getProjectName()));
 
-		List<CheckBoxModel<Dependency>> mostpopular = model.getMostPopular(4*NUM_DEP_COLUMNS);
+		List<CheckBoxModel<Dependency>> mostpopular = model.getFrequentlyUsedDependencies(4*NUM_DEP_COLUMNS);
 		if (!mostpopular.isEmpty()) {
 			sections.add(new ExpandableSection(this, "Frequently Used",
 					new CheckBoxesSection<Dependency>(this, mostpopular)
