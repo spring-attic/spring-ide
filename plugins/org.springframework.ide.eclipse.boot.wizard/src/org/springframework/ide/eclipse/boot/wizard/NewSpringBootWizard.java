@@ -36,6 +36,7 @@ import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxMod
 import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
+import org.springsource.ide.eclipse.commons.livexp.ui.ButtonSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.ChooseOneSectionCombo;
 import org.springsource.ide.eclipse.commons.livexp.ui.CommentSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.DescriptionSection;
@@ -204,47 +205,32 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 			sections.add(frequentlyUsedSection);
 			frequentlyUsedSection.setVisible(!frequesntDependencies.isEmpty());
 
-			sections.add(new SearchBoxSection(this, model.getDependencyFilterBoxText()) {
-				
-				@Override
-				protected String getSearchHint() {
-					return "Type to search dependencies";
-				}
-				
-				@Override
-				public void createContents(Composite page) {
-					Composite toolbar = new Composite(page, SWT.NONE);
-					toolbar.setLayout(new GridLayout(3, false));
-					GridDataFactory.fillDefaults().grab(true, false).applyTo(toolbar);
-					
-					// Search box
-					super.createContents(toolbar);
-					
-					Button makeDefault = new Button(toolbar, SWT.PUSH);
-					makeDefault.setText("Make Default");
-					makeDefault.setToolTipText("Make currently selected dependencies selected by default");
-					makeDefault.addSelectionListener(new SelectionAdapter() {
+			sections.add(
+				new GroupSection(this, null, 
+					new SearchBoxSection(this, model.getDependencyFilterBoxText()) {
 						@Override
-						public void widgetSelected(SelectionEvent e) {
-							if (model.saveDefaultDependencies()) {
-								refreshFrequentlyUsedDependencies();
-							}
+						protected String getSearchHint() {
+							return "Type to search dependencies";
 						}
-					});
+					},
+	
+					new ButtonSection(this, "Make Default", () -> {
+						if (model.saveDefaultDependencies()) {
+							refreshFrequentlyUsedDependencies();
+						}
+					})
+					.tooltip("Make currently selected dependencies selected by default"),
 					
-					Button clearSelection = new Button(toolbar, SWT.PUSH);
-					clearSelection.setText("Clear Selection");
-					clearSelection.setToolTipText("Clear dependencies selection");
-					clearSelection.addSelectionListener(new SelectionAdapter() {
-						@Override
-						public void widgetSelected(SelectionEvent e) {
-							model.dependencies.clearSelection();
+					new ButtonSection(this, "Clear Selection", () -> {
+						if (model.saveDefaultDependencies()) {
+							refreshFrequentlyUsedDependencies();
 						}
-					});
-				}
-
-			});
-
+					})
+					.tooltip("Clear dependencies selection")
+				)
+				.columns(3, false)
+			);
+				
 			for (String cat : model.dependencies.getCategories()) {
 				MultiSelectionFieldModel<Dependency> dependencyGroup = model.dependencies.getContents(cat);
 				final ExpandableSection expandable;
