@@ -211,6 +211,10 @@
 		<module>plugins/org.springframework.ide.eclipse.cft</module>
 		<module>features/org.springframework.ide.eclipse.cft.feature</module>
 
+		<!-- AERI integration -->
+		<module>plugins/org.springframework.ide.eclipse.aeri</module>
+		<module>features/org.springframework.ide.eclipse.aeri.feature</module>
+
 		<!-- sources -->
 		<module>features/org.springframework.ide.eclipse.feature.source</module>
 		<module>features/org.springframework.ide.eclipse.aop.feature.source</module>
@@ -228,6 +232,7 @@
         <module>features/org.springframework.ide.eclipse.boot.feature.source</module>
         <module>features/org.springframework.ide.eclipse.boot.dash.feature.source</module>
         <module>features/org.springframework.ide.eclipse.cft.feature.source</module>
+        <module>features/org.springframework.ide.eclipse.aeri.feature.source</module>
         
 		<!-- site -->
 		<module>releng/org.springframework.ide.eclipse.site</module>

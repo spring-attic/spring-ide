@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.epp.logging.aeri.ide.servers">
+      <server
+            class="org.eclipse.epp.internal.logging.aeri.ide.server.mars.ServerConnection"
+            description="The Spring IDE Team wishes to automatically log errors that are related to Spring IDE (demo)"
+            icon16="icons/spring16.png"
+            icon32="icons/spring32.png"
+            id="com.genuitec.eclipse.aeri.server1"
+            name="Spring IDE">
+         <link
+               href="https://aer.ctrlflow.com/spring-ide/community/discovery"
+               rel="discovery"
+               title="Discovery">
+         </link>
+         <link
+               href="http://pivotal.io"
+               rel="provider"
+               title="Pivotal Software, Inc.">
+         </link>
+      </server>
+   </extension>
+
+</plugin>

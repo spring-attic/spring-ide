@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Automated Error Reporting
+Bundle-SymbolicName: org.springframework.ide.eclipse.aeri;singleton:=true
+Bundle-Version: 3.8.2.qualifier
+Bundle-Vendor: Pivotal Software, Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: org.eclipse.epp.logging.aeri.ide

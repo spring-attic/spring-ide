@@ -105,6 +105,12 @@
 			<category name="Extensions / Spring IDE" />
 		</feature>	
 
+		<feature
+			url="features/org.springframework.ide.eclipse.aeri.feature_3.8.2.qualifier.jar"
+			id="org.springframework.ide.eclipse.aeri.feature" version="3.8.2.qualifier">
+			<category name="Extensions / Spring IDE" />
+		</feature>	
+
 		<!-- Resources features -->
 		<feature
 			url="features/org.springframework.ide.eclipse.feature.source_3.8.2.qualifier.jar"
@@ -199,6 +205,12 @@
 		<feature
 			url="features/org.springframework.ide.eclipse.cft.feature.source_3.8.2.qualifier.jar"
 			id="org.springframework.ide.eclipse.cft.feature.source" version="3.8.2.qualifier">
+			<category name="Resources / Spring IDE" />
+		</feature>		
+
+		<feature
+			url="features/org.springframework.ide.eclipse.aeri.feature.source_3.8.2.qualifier.jar"
+			id="org.springframework.ide.eclipse.aeri.feature.source" version="3.8.2.qualifier">
 			<category name="Resources / Spring IDE" />
 		</feature>		
 
