@@ -222,9 +222,7 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 					.tooltip("Make currently selected dependencies selected by default"),
 					
 					new ButtonSection(this, "Clear Selection", () -> {
-						if (model.saveDefaultDependencies()) {
-							refreshFrequentlyUsedDependencies();
-						}
+						model.dependencies.clearSelection();
 					})
 					.tooltip("Clear dependencies selection")
 				)
