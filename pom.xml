@@ -232,6 +232,7 @@
         <module>features/org.springframework.ide.eclipse.boot.feature.source</module>
         <module>features/org.springframework.ide.eclipse.boot.dash.feature.source</module>
         <module>features/org.springframework.ide.eclipse.cft.feature.source</module>
+        <module>features/org.springframework.ide.eclipse.aeri.feature.source</module>
         
 		<!-- site -->
 		<module>releng/org.springframework.ide.eclipse.site</module>
