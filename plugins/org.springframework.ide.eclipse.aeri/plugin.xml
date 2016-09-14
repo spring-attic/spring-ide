@@ -5,7 +5,7 @@
          point="org.eclipse.epp.logging.aeri.ide.servers">
       <server
             class="org.eclipse.epp.internal.logging.aeri.ide.server.mars.ServerConnection"
-            description="The Spring IDE Team wishes to automatically log errors that are related to Spring IDE (demo)"
+            description="%spring.ide.aeri.description"
             icon16="icons/spring16.png"
             icon32="icons/spring32.png"
             id="com.genuitec.eclipse.aeri.server1"
