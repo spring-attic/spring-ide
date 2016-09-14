@@ -9,7 +9,7 @@
             icon16="icons/spring16.png"
             icon32="icons/spring32.png"
             id="com.genuitec.eclipse.aeri.server1"
-            name="Spring IDE">
+            name="%spring.ide.aeri.name">
          <link
                href="https://aer.ctrlflow.com/spring-ide/community/discovery"
                rel="discovery"
