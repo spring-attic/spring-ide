@@ -73,10 +73,11 @@ public class RooProjectConfigurator extends AbstractSpringProjectConfigurator {
 					doConfigure(facade.getMavenProject(), facade.getProject(), request, monitor);
 				}
 			}
-			else {
+			// ROO-3781: Commented to prevent that Spring ROO shell was opened automatically
+			/*else {
 				// open the Roo Shell for the project
 				new OpenShellJob(project).schedule();
-			}
+			}*/
 		}
 	}
 
