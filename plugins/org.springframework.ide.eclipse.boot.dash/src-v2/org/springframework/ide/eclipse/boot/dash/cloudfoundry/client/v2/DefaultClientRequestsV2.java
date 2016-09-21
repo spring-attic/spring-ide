@@ -540,7 +540,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	@Override
 	public List<CFSpace> getSpaces() throws Exception {
-		return ReactorUtils.get(
+		Object it = ReactorUtils.get(
 			log("operations.organizations().list()",
 				_operations.organizations()
 				.list()
@@ -557,6 +557,8 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 			})
 			.collectList()
 		);
+		//workaround eclipse jdt bug: https://bugs.eclipse.org/bugs/show_bug.cgi?id=501949
+		return (List<CFSpace>) it;
 	}
 
 	@Override
