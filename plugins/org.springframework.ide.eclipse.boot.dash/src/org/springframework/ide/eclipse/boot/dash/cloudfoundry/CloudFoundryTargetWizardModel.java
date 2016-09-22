@@ -10,17 +10,24 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
+import java.lang.reflect.Field;
+import java.net.Authenticator;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
+import org.cloudfoundry.client.lib.CloudFoundryException;
+import org.eclipse.core.internal.net.ProxyManager;
+import org.eclipse.core.net.proxy.IProxyService;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.operation.IRunnableContext;
+import org.springframework.http.HttpStatus;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFExceptions;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
@@ -183,7 +190,11 @@ public class CloudFoundryTargetWizardModel {
 			spaceResolutionStatus.setValue(ValidationResult.OK);
 			return resolvedSpaces.getValue();
 		} catch (Exception e) {
-			Log.log(e);
+			if (CFExceptions.isAuthFailure(e)) {
+				//don't log, its expected if user just typed bad password.
+			} else {
+				Log.log(e);
+			}
 			resolvedSpaces.setValue(null);
 			spaceResolutionStatus.setValue(ValidationResult.error(ExceptionUtil.getMessage(e)));
 			return null;
