@@ -19,6 +19,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDa
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.MissingPasswordException;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFExceptions;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel.StoreCredentialsMode;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
@@ -101,8 +102,14 @@ public class ConnectOperation extends CloudOperation {
 					if (ui == null) {
 						throw e;
 					} else {
-						Log.log(e);
-						ui.errorPopup("Cannot Connect to Cloud Foundry", "Failed to connect to " + model.getRunTarget().getId() + ". Ensure login credentials are correct.");
+						String msg = "Failed to connect to " + model.getRunTarget().getId() + ". ";
+						if (CFExceptions.isAuthFailure(e)) {
+							msg = msg+ " Ensure login credentials are correct.";
+						} else {
+							msg = msg+ " See error log for detailed message.";
+							Log.log(e);
+						}
+						ui.errorPopup("Cannot Connect to Cloud Foundry", msg);
 					}
 				}
 			} else if (!connect && model.getRunTarget().isConnected()) {
