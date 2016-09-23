@@ -329,9 +329,6 @@ public class ManifestYamlEditorTest {
 		editor.assertProblems(/*none*/);
 	}
 
-	//TODO: checking for certain value types. E.g 'integer' and 'Memory'
-	// But we haven't implemented that yet.
-
 	//////////////////////////////////////////////////////////////////////////////
 
 	private void assertCompletions(String textBefore, String... textAfter) throws Exception {
