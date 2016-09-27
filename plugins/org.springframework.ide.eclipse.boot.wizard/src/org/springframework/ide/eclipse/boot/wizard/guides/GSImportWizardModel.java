@@ -52,11 +52,40 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
  * @author Kris De Volder
  */
 public class GSImportWizardModel {
+	
+	// Indicates the state when downloading ALL contents
+	private final LiveVariable<AllContentDownloadState> allContentDownloadState = new LiveVariable<>(
+			AllContentDownloadState.NOT_STARTED);	
+	
+	/**
+	 * The chosen guide to import stuff from.
+	 */
+	private final LiveVariable<GSContent> guide = new LiveVariable<GSContent>();
 
+
+	private final LiveExpression<ValidationResult> guideValidator = new Validator() {
+		{
+			dependsOn(guide);
+			dependsOn(allContentDownloadState);
+		}
+
+		@Override
+		protected ValidationResult compute() {
+			AllContentDownloadState downloaded = allContentDownloadState.getValue();
+			if (downloaded == AllContentDownloadState.IS_DOWNLOADING) {
+				return ValidationResult.info("Downloading contents. Please wait...");
+			} else if (guide.getValue() == null) {
+				return ValidationResult.error("No GS content selected");
+			} else {
+				return ValidationResult.OK;
+			}
+		}
+	};
+	
 	static final ValidationResult isDownloadingMessage(GSContent g) {
 		return ValidationResult.info(g.getDisplayName()+" is downloading...");
 	}
-
+	
 	public class CodeSetValidator extends LiveExpression<ValidationResult> {
 
 		private final LiveVariable<GSContent> codesetProvider;
@@ -123,11 +152,10 @@ public class GSImportWizardModel {
 	 * content provided another way.
 	 */
 	private ContentManager contentManager = GettingStartedContent.getInstance();
-
-	/**
-	 * The chosen guide to import stuff from.
-	 */
-	private final LiveVariable<GSContent> guide = new LiveVariable<GSContent>();
+	// Wire the "All content downloaded" variable to the content manager
+	{
+		contentManager.setAllContentDownloadState(allContentDownloadState);
+	}
 
 	/**
 	 * Chosen element in the content picker whether it is an actual GSContent item
@@ -174,11 +202,10 @@ public class GSImportWizardModel {
 	};
 
 	/**
-	 * The import strategt chosen by user
+	 * The import strategy chosen by user
 	 */
 	private final LiveVariable<ImportStrategy> importStrategy = new LiveVariable<ImportStrategy>(BuildType.DEFAULT.getDefaultStrategy());
-
-	private final LiveExpression<ValidationResult> guideValidator = Validator.notNull(guide, "No GS content selected");
+	
 	private final LiveExpression<ValidationResult> codesetValidator = new CodeSetValidator(guide, codesets, validCodesetNames);
 	private final LiveExpression<ValidationResult> importStrategyValidator = new Validator() {
 		@Override
@@ -328,6 +355,7 @@ public class GSImportWizardModel {
 		description.dependsOn(rawSelection);
 
 		homePage.dependsOn(guide);
+	
 
 		validCodesetNames.dependsOn(guide);
 		validCodesetNames.dependsOn(isDownloaded);
@@ -335,7 +363,7 @@ public class GSImportWizardModel {
 		codesetValidator.dependsOn(isDownloaded);
 		//Note: some other dependsOn are registered inside CodeSetValidator class itself.
 		// isDownloaded is an exception because is still null when CodeSetValidator class gets
-		// instantiated.
+		// instantiated.	
 	}
 
 	/**
@@ -451,6 +479,8 @@ public class GSImportWizardModel {
 	public LiveExpression<Boolean> isDownloaded() {
 		return isDownloaded;
 	}
+	
+
 
 	public LiveVariable<Boolean> getEnableOpenHomePage() {
 		return enableOpenHomePage;
@@ -478,6 +508,13 @@ public class GSImportWizardModel {
 
 	public void setContentManager(ContentManager contentManager) {
 		this.contentManager = contentManager;
+	}
+	
+	
+	public static enum AllContentDownloadState {
+		IS_DOWNLOADING,
+		DOWNLOAD_COMPLETED,
+		NOT_STARTED
 	}
 
 }

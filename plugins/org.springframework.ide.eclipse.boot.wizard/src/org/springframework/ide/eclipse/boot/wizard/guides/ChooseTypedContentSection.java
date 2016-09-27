@@ -1,16 +1,18 @@
 /*******************************************************************************
- *  Copyright (c) 2013, 2016 GoPivotal, Inc.
+ *  Copyright (c) 2013, 2016 Pivotal Software, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      GoPivotal, Inc. - initial API and implementation
+ *      Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard.guides;
 
 import java.util.HashMap;
+
+import javax.inject.Provider;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -35,6 +37,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.internal.misc.StringMatcher;
@@ -45,6 +48,8 @@ import org.springframework.ide.eclipse.boot.wizard.content.ContentType;
 import org.springframework.ide.eclipse.boot.wizard.content.Describable;
 import org.springframework.ide.eclipse.boot.wizard.content.DisplayNameable;
 import org.springframework.ide.eclipse.boot.wizard.content.GSContent;
+import org.springframework.ide.eclipse.boot.wizard.guides.GSImportWizardModel.AllContentDownloadState;
+import org.springframework.util.StringUtils;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.SelectionModel;
@@ -162,7 +167,11 @@ public class ChooseTypedContentSection extends WizardPageSection {
 		}
 
 		public void setSearchTerm(String text) {
-			matcher = new StringMatcher(text, true, false);
+			if (StringUtils.hasText(text)) {
+				matcher = new StringMatcher(text, true, false);
+			} else {
+				matcher = null;
+			}
 			cache.clear();
 		}
 
@@ -185,9 +194,9 @@ public class ChooseTypedContentSection extends WizardPageSection {
 				//Only search in the content (leaves). The contenttypes are selected if
 				// any of their children (content) is selected.
 				return matchChildren(viewer, e);
-			} else if (match(label)) {
+			} else if (match(()->label)) {
 				return true;
-			} else if (e instanceof Describable && match(((Describable) e).getDescription())) {
+			} else if (e instanceof Describable && match(()->((Describable) e).getDescription())) {
 				return true;
 			}
 			return false;
@@ -205,17 +214,19 @@ public class ChooseTypedContentSection extends WizardPageSection {
 			return false;
 		}
 
-		private boolean match(String text) {
-			if (matcher==null) {
+		private boolean match(Provider<String> provider) {
+			if (matcher == null) {
 				return true; // Search term not set... anything is acceptable.
-			} else if (text==null) {
-				return false;
 			} else {
-				Position x = matcher.find(text, 0, text.length());
-				return x!=null;
+				String text = provider.get();
+				if (text == null) {
+					return false;
+				} else {
+					Position x = matcher.find(text, 0, text.length());
+					return x != null;
+				}
 			}
 		}
-
 	}
 
 
@@ -247,6 +258,12 @@ public class ChooseTypedContentSection extends WizardPageSection {
 
 	@Override
 	public void createContents(Composite page) {
+		
+		// PT 130652465 - Avoid prefetching content (i.e. network I/O) in the UI thread. 
+		// Solution: downloading content in the background to avoid blocking the UI in case
+		// it takes a long time.
+	    prefetchAllContentInBackground();
+		
 		Composite field = new Composite(page, SWT.NONE);
 		int cols = sectionLabel==null ? 1 : 2;
 		GridLayout layout = GridLayoutFactory.fillDefaults().numColumns(cols).create();
@@ -340,6 +357,23 @@ public class ChooseTypedContentSection extends WizardPageSection {
 				updateFilter();
 			}
 		});
+	}
+
+
+	private void prefetchAllContentInBackground() {
+		LiveVariable<AllContentDownloadState> allContentDownloadState = content.getAllContentDownloadState();
+		allContentDownloadState.addListener((liveVar, downloadState) -> {
+			if (downloadState == AllContentDownloadState.DOWNLOAD_COMPLETED) {
+				Display.getDefault().asyncExec(() -> {
+					if (treeviewer != null && !treeviewer.getTree().isDisposed()) {
+						treeviewer.refresh();
+						treeviewer.expandAll();
+					}
+				});
+			}
+		});
+		
+		content.downloadAllContentInBackground(owner.getRunnableContext(), "Downloading all contents. Please wait...");
 	}
 
 	private void whenVisible(final Control control, final Runnable runnable) {
