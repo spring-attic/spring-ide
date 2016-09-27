@@ -64,13 +64,11 @@ import org.springsource.ide.eclipse.commons.livexp.ui.ProjectLocationSection;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 
 /**
- * A ZipUrlImportWizard is a simple wizard in which one can paste a url
- * pointing to a zip file. The zip file is supposed to contain a maven (or gradle)
- * project in the root of the zip.
+ * This is the model for the 'New Spring Starter Project' wizard.
  */
 public class NewSpringBootWizardModel {
 
-	private static final Map<String,BuildType> KNOWN_TYPES = new HashMap<String, BuildType>();
+	private static final Map<String,BuildType> KNOWN_TYPES = new HashMap<>();
 	static {
 		KNOWN_TYPES.put("gradle-project", BuildType.GRADLE); // New version of initialzr app
 		KNOWN_TYPES.put("maven-project", BuildType.MAVEN); // New versions of initialzr app
@@ -83,7 +81,7 @@ public class NewSpringBootWizardModel {
 	 * Lists known query parameters that map onto a String input field. The default values for these
 	 * parameters will be pulled from the json spec document.
 	 */
-	private static final Map<String,String> KNOWN_STRING_INPUTS = new LinkedHashMap<String, String>();
+	private static final Map<String,String> KNOWN_STRING_INPUTS = new LinkedHashMap<>();
 	static {
 		KNOWN_STRING_INPUTS.put("name", "Name");
 		KNOWN_STRING_INPUTS.put("groupId", "Group");
@@ -93,7 +91,7 @@ public class NewSpringBootWizardModel {
 		KNOWN_STRING_INPUTS.put("packageName", "Package");
 	};
 
-	private static final Map<String, String> KNOWN_SINGLE_SELECTS = new LinkedHashMap<String, String>();
+	private static final Map<String, String> KNOWN_SINGLE_SELECTS = new LinkedHashMap<>();
 	static {
 		KNOWN_SINGLE_SELECTS.put("packaging", "Packaging:");
 		KNOWN_SINGLE_SELECTS.put("javaVersion", "Java Version:");
@@ -132,7 +130,7 @@ public class NewSpringBootWizardModel {
 		this.urlConnectionFactory = urlConnectionFactory;
 		this.JSON_URL = jsonUrl;
 
-		baseUrl = new LiveVariable<String>("<computed>");
+		baseUrl = new LiveVariable<>("<computed>");
 		baseUrlValidator = new UrlValidator("Base Url", baseUrl);
 
 		discoverOptions(stringInputs, dependencies);
@@ -140,7 +138,7 @@ public class NewSpringBootWizardModel {
 
 		projectName = stringInputs.getField("name");
 		projectName.validator(new NewProjectNameValidator(projectName.getVariable()));
-		location = new LiveVariable<String>(ProjectLocationSection.getDefaultProjectLocation(projectName.getValue()));
+		location = new LiveVariable<>(ProjectLocationSection.getDefaultProjectLocation(projectName.getValue()));
 		locationValidator = new NewProjectLocationValidator("Location", location, projectName.getVariable());
 		Assert.isNotNull(projectName, "The service at "+JSON_URL+" doesn't specify a 'name' text input");
 
@@ -191,11 +189,11 @@ public class NewSpringBootWizardModel {
 	}
 
 	@SuppressWarnings("unchecked")
-	public final FieldArrayModel<String> stringInputs = new FieldArrayModel<String>(
+	public final FieldArrayModel<String> stringInputs = new FieldArrayModel<>(
 			//The fields need to be discovered by parsing json from rest endpoint.
 	);
 
-	public final HierarchicalMultiSelectionFieldModel<Dependency> dependencies = new HierarchicalMultiSelectionFieldModel<Dependency>(Dependency.class, "dependencies")
+	public final HierarchicalMultiSelectionFieldModel<Dependency> dependencies = new HierarchicalMultiSelectionFieldModel<>(Dependency.class, "dependencies")
 			.label("Dependencies:");
 
 	private final FieldModel<String> projectName; //an alias for stringFields.getField("name");
@@ -207,7 +205,7 @@ public class NewSpringBootWizardModel {
 	public final LiveVariable<String> baseUrl;
 	public final LiveExpression<ValidationResult> baseUrlValidator;
 
-	public final LiveVariable<String> downloadUrl = new LiveVariable<String>();
+	public final LiveVariable<String> downloadUrl = new LiveVariable<>();
 	private IWorkingSet[] workingSets = new IWorkingSet[0];
 	private RadioGroups radioGroups = new RadioGroups();
 	private RadioGroup bootVersion;
@@ -224,7 +222,7 @@ public class NewSpringBootWizardModel {
 	public List<CheckBoxModel<Dependency>> getMostPopular(int howMany) {
 		return popularities.getMostPopular(dependencies, howMany);
 	}
-	
+
 	/**
 	 * Retrieves currently set default dependencies
 	 * @return list of default dependencies check-box models
@@ -232,10 +230,10 @@ public class NewSpringBootWizardModel {
 	public List<CheckBoxModel<Dependency>> getDefaultDependencies() {
 		return defaultDependencies.getDependencies(dependencies);
 	}
-	
+
 	/**
 	 * Retrieves frequently used dependencies based on currently set default dependencies and the most popular dependencies
-	 * 
+	 *
 	 * @param numberOfMostPopular max number of most popular dependencies
 	 * @return list of frequently used dependencies
 	 */
@@ -254,7 +252,7 @@ public class NewSpringBootWizardModel {
 		});
 		return defaultDependencies;
 	}
-	
+
 	public Set<String> getDefaultDependenciesIds() {
 		return defaultDependencies.getDependciesIdSet();
 	}
@@ -265,7 +263,7 @@ public class NewSpringBootWizardModel {
 	public void updateUsageCounts() {
 		popularities.incrementUsageCount(dependencies.getCurrentSelection());
 	}
-	
+
 	public boolean saveDefaultDependencies() {
 		return defaultDependencies.save(dependencies);
 	}
