@@ -24,7 +24,6 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.springframework.ide.eclipse.boot.wizard.BootWizardActivator;
 import org.springframework.ide.eclipse.boot.wizard.github.auth.AuthenticatedDownloader;
-import org.springframework.ide.eclipse.boot.wizard.guides.GSImportWizardModel.DownloadState;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -38,21 +37,22 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
  * But the infrastructure for managing/downloading the content is shared.
  *
  * @author Kris De Volder
+ * @author Nieraj Singh
  */
 public class ContentManager {
 
 	private final Map<Class<?>, TypedContentManager<?>> byClass = new HashMap<Class<?>, TypedContentManager<?>>();
 	private final List<ContentType<?>> types = new ArrayList<ContentType<?>>();
 		
-	// Assign a default content state even though it may be set externally by the model that encloses the content manager. It must never be null
-	protected LiveVariable<DownloadState> allContentDownloadTracker = new LiveVariable<>(DownloadState.NOT_STARTED);;
-	protected LiveVariable<DownloadState> contentProviderPropertiesDownloadTracker = new LiveVariable<>(DownloadState.NOT_STARTED);
+	protected LiveVariable<DownloadState> prefetchContentTracker = new LiveVariable<>(DownloadState.NOT_STARTED);
+	protected LiveVariable<DownloadState> prefetchContentProviderPropertiesTracker = new LiveVariable<>(
+			DownloadState.NOT_STARTED);	
 
 	public <T extends GSContent> void register(Class<T> klass, String description, ContentProvider<T> provider) {
 		try {
 			Assert.isLegal(!byClass.containsKey(klass), "A content provider for " + klass + " is already registered");
 
-			allContentDownloadTracker.setValue(DownloadState.NOT_STARTED);
+			prefetchContentTracker.setValue(DownloadState.NOT_STARTED);
 			
 			ContentType<T> ctype = new ContentType<T>(klass, description);
 			types.add(ctype);
@@ -72,10 +72,7 @@ public class ContentManager {
 						.clearCache();
 	}
 	
-	public void setAllContentDownloadTracker(LiveVariable<DownloadState> allContentDownloadTracker) {
-		Assert.isNotNull(allContentDownloadTracker, "Content download tracker cannot be null.");
-		this.allContentDownloadTracker = allContentDownloadTracker;
-	}
+
 
 	/**
 	 * Fetch the content of a given type. May return null but only if no content
@@ -84,13 +81,6 @@ public class ContentManager {
 	@SuppressWarnings("unchecked")
 	public <T> T[] get(Class<T> type) {
 		
-		// To guard against different callers 
-		// attempting to start a download in parallel while all downloads is currently under way, always give priority to downloading all contents. 
-		// In other words, if all contents are currently being downloaded, do not allow 
-		// separate download of contents for a specific type.
-		if (allContentDownloadTracker.getValue()==DownloadState.IS_DOWNLOADING) {
-			return null;
-		}
 		TypedContentManager<T> man = (TypedContentManager<T>) byClass.get(type);
 		if (man != null) {
 			return man.getAll();
@@ -105,6 +95,18 @@ public class ContentManager {
 	public Object[] get(ContentType<?> ct) {
 		if (ct != null) {
 			return get(ct.getKlass());
+		}
+		return null;
+	}
+	
+	/**
+	 * Will return content for the given content type, IF and only if, there is no prefetching currently under way. Otherwise it returns null.
+	 * @param ct
+	 * @return content if no downloading is currently taking place. Null otherwise
+	 */
+	public Object[] getWithPrefetchCheck(ContentType<?> ct) {
+		if (prefetchContentTracker.getValue() != DownloadState.IS_DOWNLOADING) {
+			return get(ct);
 		}
 		return null;
 	}
@@ -128,11 +130,11 @@ public class ContentManager {
 	}
 
 	/**
-	 * Download all the content. May require network access therefore do not run in the UI thread.
+	 * Prefetch all the content. May require network access therefore do not run in the UI thread.
 	 */
-	public void downloadAllContent(IProgressMonitor monitor) {
+	public void prefetchAllContent(IProgressMonitor monitor) {
 		
-		allContentDownloadTracker.setValue(DownloadState.IS_DOWNLOADING);
+		prefetchContentTracker.setValue(DownloadState.IS_DOWNLOADING);
 		try {
 			ContentType<?>[] allTypes = getTypes();
 
@@ -144,21 +146,25 @@ public class ContentManager {
 					get(type);
 				}
 			}
-			// Inform any listeners that completion is finished
-			allContentDownloadTracker.setValue(DownloadState.DOWNLOAD_COMPLETED);
+			// Inform any listeners that completion has just finished (e.g. to let listeners refresh the content in their views)
+			prefetchContentTracker.setValue(DownloadState.DOWNLOADING_COMPLETED);
 		} finally {
-			// Reset the download state
-			allContentDownloadTracker.setValue(DownloadState.NOT_STARTED);
+			// Mark the session as downloaded
+			prefetchContentTracker.setValue(DownloadState.DOWNLOADED);
 		}
 	}
 	
-	public LiveVariable<DownloadState> getAllContentDownloadTracker() {
-		return allContentDownloadTracker;
+	public LiveVariable<DownloadState> getPrefetchContentTracker() {
+		return prefetchContentTracker;
+	}
+	
+	public LiveVariable<DownloadState> getPrefetchContentProviderPropertiesTracker() {
+		return prefetchContentProviderPropertiesTracker;
 	}
 
 	/**
 	 * Will run {@link #prefetch(IProgressMonitor)} in the background.
-	 * @param runnableContext
+	 * @param runnableContext. Must not be null.
 	 */
 	public void prefetchInBackground(IRunnableContext runnableContext) {
 		try {
@@ -173,17 +179,57 @@ public class ContentManager {
 	}
 	
 	/**
-	 * Will prefetch (download) all content. This may be a long-running process and is not expected to be run in the UI thread.
+	 * Will prefetch (download) all content. This may be a long-running process
+	 * and is not expected to be run in the UI thread.
+	 * 
 	 * @param monitor
+	 *            must not be null
 	 */
 	protected void prefetch(IProgressMonitor monitor) {
 		String downloadLabel = "Downloading all content. Please wait...";
-		downloadAllContent(SubMonitor.convert(monitor, downloadLabel, 50));
+		prefetchAllContent(SubMonitor.convert(monitor, downloadLabel, 50));
 	}
+	
+	/**
+	 * Disposes all prefetching tracking listeners. However, tracking states are preserved.
+	 */
+	public void disposePrefetchTrackingListeners() {
+		// The purpose of disposing trackers is to clear any listeners that are registered to avoid possible memory leaks
+		// on accumulating listeners over time, but the tracker states should be preserved.
+		DownloadState propertiesDownloadState = prefetchContentProviderPropertiesTracker.getValue();
+		DownloadState contentDownloadState = prefetchContentTracker.getValue();
+		
+		// Dispose all listeners to avoid memory leaks for listeners that keep getting accumulating over time.
+		prefetchContentProviderPropertiesTracker.dispose();
+		prefetchContentTracker.dispose();
 
-	public void setProviderPropertiesDownloadTracker(LiveVariable<DownloadState> contentProviderPropertiesDownloadTracker) {
-		Assert.isNotNull(allContentDownloadTracker, "Content provider properties download tracker cannot be null.");
-
-		this.contentProviderPropertiesDownloadTracker = contentProviderPropertiesDownloadTracker;
+		// Make sure new trackers are set
+		prefetchContentProviderPropertiesTracker = new LiveVariable<>(propertiesDownloadState);
+		prefetchContentTracker = new LiveVariable<>(contentDownloadState);
+	}
+	
+	public static enum DownloadState {
+		/**
+		 * Downloading currently under way
+		 */
+		IS_DOWNLOADING,
+		
+		/**
+		 * Active downloading session has just completed. For example, this state may be used to trigger refresh of content in views.
+		 */
+		DOWNLOADING_COMPLETED,
+		
+		/**
+		 * A "Post-downloading" state, different than
+		 * {@link #DOWNLOADING_COMPLETED}, that indicates that all content has
+		 * already been downloaded before, and potentially no further action is
+		 * required on any participants that are listening for this state.
+		 */
+		DOWNLOADED,
+		
+		/**
+		 * No downloading has been initiated yet
+		 */
+		NOT_STARTED
 	}
 }

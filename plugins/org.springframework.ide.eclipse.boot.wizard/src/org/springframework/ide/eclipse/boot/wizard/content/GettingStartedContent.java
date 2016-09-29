@@ -22,7 +22,6 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubMonitor;
 import org.springframework.ide.eclipse.boot.wizard.github.GithubClient;
 import org.springframework.ide.eclipse.boot.wizard.github.Repo;
-import org.springframework.ide.eclipse.boot.wizard.guides.GSImportWizardModel.DownloadState;
 import org.springsource.ide.eclipse.commons.core.preferences.StsProperties;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager;
 
@@ -34,6 +33,13 @@ import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.Down
  * manage them already existed before this framework was implemented.
  */
 public class GettingStartedContent extends ContentManager {
+	
+	 // IMPORTANT NOTE: Because this is a singleton class, 
+	// CARE needs to be taken with any listeners registered, especially in live expressions.
+	// The ContentManager super class has two tracker LiveVariables to track
+	// registration of content providers and downloading of content.
+	// These two are publicly exposed and may result in listeners being registered by owners.
+	// To avoid memory leaks, be sure that any live expressions that accumulate listeners are properly disposed
 
 	private static GettingStartedContent INSTANCE = null;
 
@@ -53,9 +59,9 @@ public class GettingStartedContent extends ContentManager {
 	@Override
 	protected void prefetch(IProgressMonitor monitor) {
 		// Register the content providers as part of prefetching, as registering
-		// the providers may also require prefetching properties from github
+		// the providers may also require network access much like downloading content.
 		String registeringProvidersLabel = "Registering content providers";
-		registerAll(SubMonitor.convert(monitor, registeringProvidersLabel, 50));
+		registerAllContentProviders(SubMonitor.convert(monitor, registeringProvidersLabel, 50));
 		super.prefetch(monitor);
 	}
 	
@@ -88,18 +94,21 @@ public class GettingStartedContent extends ContentManager {
 		return cachedRepos;
 	}
 	
-	protected void registerAll(IProgressMonitor monitor) {
-		
-		contentProviderPropertiesDownloadTracker.setValue(DownloadState.IS_DOWNLOADING);
-		
-		try {
-			registerAllWithStsProperties(StsProperties.getInstance(monitor));
-			
-			contentProviderPropertiesDownloadTracker.setValue(DownloadState.DOWNLOAD_COMPLETED);
-		} finally {
-			
-			// Reset the download state
-			contentProviderPropertiesDownloadTracker.setValue(DownloadState.NOT_STARTED);
+	/**
+	 * Registering content providers may require network access if content provider properties
+	 * need to be fetched external. Avoid running in UI thread.
+	 * @param monitor must not be null.
+	 */
+	protected void registerAllContentProviders(IProgressMonitor monitor) {
+		// Avoid registering and downloading content properties if already registered
+		if (prefetchContentProviderPropertiesTracker.getValue()!=DownloadState.DOWNLOADED) {
+			try {
+				prefetchContentProviderPropertiesTracker.setValue(DownloadState.IS_DOWNLOADING);
+				registerAllWithStsProperties(StsProperties.getInstance(monitor));
+				prefetchContentProviderPropertiesTracker.setValue(DownloadState.DOWNLOADING_COMPLETED);
+			} finally {
+				prefetchContentProviderPropertiesTracker.setValue(DownloadState.DOWNLOADED);
+			}
 		}
 	}
 
@@ -233,5 +242,4 @@ public class GettingStartedContent extends ContentManager {
 //		}
 //		return null;
 //	}
-
 }

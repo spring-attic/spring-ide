@@ -44,16 +44,17 @@ import org.eclipse.ui.internal.misc.StringMatcher;
 import org.eclipse.ui.internal.misc.StringMatcher.Position;
 import org.springframework.ide.eclipse.boot.wizard.BootWizardActivator;
 import org.springframework.ide.eclipse.boot.wizard.content.ContentManager;
+import org.springframework.ide.eclipse.boot.wizard.content.ContentManager.DownloadState;
 import org.springframework.ide.eclipse.boot.wizard.content.ContentType;
 import org.springframework.ide.eclipse.boot.wizard.content.Describable;
 import org.springframework.ide.eclipse.boot.wizard.content.DisplayNameable;
 import org.springframework.ide.eclipse.boot.wizard.content.GSContent;
-import org.springframework.ide.eclipse.boot.wizard.guides.GSImportWizardModel.DownloadState;
 import org.springframework.util.StringUtils;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.SelectionModel;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
+import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
@@ -70,6 +71,22 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
  */
 @SuppressWarnings("restriction")
 public class ChooseTypedContentSection extends WizardPageSection {
+	
+	private final PrefetchContentListener prefetchContentListener = new PrefetchContentListener();
+
+	public class PrefetchContentListener implements ValueListener<DownloadState> {
+		@Override
+		public void gotValue(LiveExpression<DownloadState> exp, DownloadState downloadState) {
+			if (downloadState == DownloadState.DOWNLOADING_COMPLETED) {
+				Display.getDefault().asyncExec(() -> {
+					if (treeviewer != null && !treeviewer.getTree().isDisposed()) {
+						treeviewer.refresh();
+						treeviewer.expandAll();
+					}
+				});
+			}
+		}
+	}
 
 	private static class ContentProvider implements ITreeContentProvider {
 
@@ -108,7 +125,7 @@ public class ChooseTypedContentSection extends WizardPageSection {
 		public Object[] getChildren(Object e) {
 			try {
 				if (e instanceof ContentType<?>) {
-					return content.get((ContentType<?>)e);
+					return content.getWithPrefetchCheck((ContentType<?>)e);
 				}
 				return null;
 			} catch (Throwable error) {
@@ -259,10 +276,10 @@ public class ChooseTypedContentSection extends WizardPageSection {
 	@Override
 	public void createContents(Composite page) {
 		
-		// PT 130652465 - Avoid prefetching content (i.e. network I/O) in the UI thread. 
-		// Solution: downloading content in the background to avoid blocking the UI in case
+		// PT 130652465 - Avoid downloading content (i.e. network I/O) in the UI thread. 
+		// Solution: downloading/prefetch content in the background to avoid blocking the UI in case
 		// it takes a long time.
-	    registerAndDownloadContentInBackground();
+	    prefetchProvidersAndContent();
 		
 		Composite field = new Composite(page, SWT.NONE);
 		int cols = sectionLabel==null ? 1 : 2;
@@ -360,18 +377,9 @@ public class ChooseTypedContentSection extends WizardPageSection {
 	}
 
 
-	private void registerAndDownloadContentInBackground() {
-		LiveVariable<DownloadState> allContentDownloadTracker = content.getAllContentDownloadTracker();
-		allContentDownloadTracker.addListener((liveVar, downloadState) -> {
-			if (downloadState == DownloadState.DOWNLOAD_COMPLETED) {
-				Display.getDefault().asyncExec(() -> {
-					if (treeviewer != null && !treeviewer.getTree().isDisposed()) {
-						treeviewer.refresh();
-						treeviewer.expandAll();
-					}
-				});
-			}
-		});
+	private void prefetchProvidersAndContent() {
+		LiveVariable<DownloadState> prefetchContentTracker = content.getPrefetchContentTracker();
+		prefetchContentTracker.addListener(this.prefetchContentListener);
 		content.prefetchInBackground(owner.getRunnableContext());
 	}
 
@@ -405,6 +413,18 @@ public class ChooseTypedContentSection extends WizardPageSection {
 		treeviewer.refresh();
 		treeviewer.expandAll();
 	}
+	
+	@Override
+	public void dispose() {
+		if (content != null ) {
+			if (prefetchContentListener != null) {
+				// This may not be necessary, but to be safe explicitly remove the listener
+				content.getPrefetchContentTracker().removeListener(prefetchContentListener);
+			}
+			content.disposePrefetchTrackingListeners();
+		}
+	}
+
 
 //	private String[] getLabels() {
 //		String[] labels = new String[options.length];

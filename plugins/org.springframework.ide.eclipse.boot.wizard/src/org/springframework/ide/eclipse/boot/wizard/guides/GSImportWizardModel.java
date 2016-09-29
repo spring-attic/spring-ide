@@ -21,13 +21,14 @@ import java.util.Set;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.springframework.ide.eclipse.boot.wizard.BootWizardActivator;
 import org.springframework.ide.eclipse.boot.wizard.content.BuildType;
 import org.springframework.ide.eclipse.boot.wizard.content.CodeSet;
 import org.springframework.ide.eclipse.boot.wizard.content.ContentManager;
+import org.springframework.ide.eclipse.boot.wizard.content.ContentManager.DownloadState;
 import org.springframework.ide.eclipse.boot.wizard.content.Describable;
 import org.springframework.ide.eclipse.boot.wizard.content.GSContent;
 import org.springframework.ide.eclipse.boot.wizard.content.GettingStartedContent;
@@ -50,15 +51,24 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
  * UI.
  *
  * @author Kris De Volder
+ * @author Nieraj Singh
  */
 public class GSImportWizardModel {
 	
-	// Tracks the download state of content
-	private final LiveVariable<DownloadState> allContentDownloadTracker = new LiveVariable<>(
-			DownloadState.NOT_STARTED);	
+	/**
+	 * ContentManager instance that provides all the content that this wizard can import.
+	 * By default this is content discovered automatically with the default content manager
+	 * instance. However it is possible to set the Content manager to browser / import
+	 * content provided another way.
+	 */
+	private ContentManager contentManager = GettingStartedContent.getInstance();
+
 	
-	// Tracks the download state for content providers properties
-	private final LiveVariable<DownloadState> contentProviderPropertiesDownloadTracker = new LiveVariable<>(DownloadState.NOT_STARTED);
+	// Tracks the download state of content from content manager
+	private final LiveVariable<DownloadState> prefetchContentTracker = contentManager.getPrefetchContentTracker();
+	
+	// Tracks the download state for content providers properties from content manager
+	private final LiveVariable<DownloadState> prefetchContentProviderPropsTracker = contentManager.getPrefetchContentProviderPropertiesTracker();
 	
 	/**
 	 * The chosen guide to import stuff from.
@@ -69,17 +79,17 @@ public class GSImportWizardModel {
 	private final LiveExpression<ValidationResult> guideValidator = new Validator() {
 		{
 			dependsOn(guide);
-			dependsOn(contentProviderPropertiesDownloadTracker);
-			dependsOn(allContentDownloadTracker);
+			dependsOn(prefetchContentProviderPropsTracker);
+			dependsOn(prefetchContentTracker);
 		}
 
 		@Override
 		protected ValidationResult compute() {
-			DownloadState state = contentProviderPropertiesDownloadTracker.getValue();
+			DownloadState state = prefetchContentProviderPropsTracker.getValue();
 			if (state == DownloadState.IS_DOWNLOADING) {
 				return ValidationResult.info("Registering content providers. Please wait...");
 			} else {
-				state = allContentDownloadTracker.getValue();
+				state = prefetchContentTracker.getValue();
 				if (state == DownloadState.IS_DOWNLOADING) {
 					return ValidationResult.info("Downloading all content. Please wait...");
 				}
@@ -154,19 +164,6 @@ public class GSImportWizardModel {
 			}
 			return ValidationResult.OK;
 		}
-	}
-
-	/**
-	 * ContentManager instance that provides all the content that this wizard can import.
-	 * By default this is content discovered automatically with the default content manager
-	 * instance. However it is possible to set the Content manager to browser / import
-	 * content provided another way.
-	 */
-	private ContentManager contentManager = GettingStartedContent.getInstance();
-	// Wire the download trackers to the content manager
-	{
-		contentManager.setAllContentDownloadTracker(allContentDownloadTracker);
-		contentManager.setProviderPropertiesDownloadTracker(contentProviderPropertiesDownloadTracker);
 	}
 
 	/**
@@ -442,7 +439,7 @@ public class GSImportWizardModel {
 							g,
 							cs
 					));
-					oper.run(new SubProgressMonitor(mon, 1));
+					oper.run(SubMonitor.convert(mon, 1));
 				}
 			}
 			if (enableOpenHomePage.getValue()) {
@@ -521,12 +518,4 @@ public class GSImportWizardModel {
 	public void setContentManager(ContentManager contentManager) {
 		this.contentManager = contentManager;
 	}
-	
-	
-	public static enum DownloadState {
-		IS_DOWNLOADING,
-		DOWNLOAD_COMPLETED,
-		NOT_STARTED
-	}
-
 }
