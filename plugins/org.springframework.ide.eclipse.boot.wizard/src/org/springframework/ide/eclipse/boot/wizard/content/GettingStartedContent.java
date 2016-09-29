@@ -1,12 +1,12 @@
 /*******************************************************************************
- *  Copyright (c) 2013 GoPivotal, Inc.
+ *  Copyright (c) 2013, 2016 Pivotal Software, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      GoPivotal, Inc. - initial API and implementation
+ *      Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard.content;
 
@@ -17,10 +17,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SubMonitor;
 import org.springframework.ide.eclipse.boot.wizard.github.GithubClient;
 import org.springframework.ide.eclipse.boot.wizard.github.Repo;
+import org.springframework.ide.eclipse.boot.wizard.guides.GSImportWizardModel.DownloadState;
 import org.springsource.ide.eclipse.commons.core.preferences.StsProperties;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager;
 
@@ -37,19 +39,26 @@ public class GettingStartedContent extends ContentManager {
 
 	private final static boolean ADD_REAL =  true;
 	private final static boolean ADD_MOCKS = false; // (""+Platform.getLocation()).contains("kdvolder")
-
+	
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder")
 				|| (""+Platform.getLocation()).contains("bamboo");
 
 	public static GettingStartedContent getInstance() {
-		//TODO: propagate progress monitor. Make sure this isn't called in UIThread. It may
-		// hang downloading properties if user has no or poor internet access.
-		if (INSTANCE == null) {
-			INSTANCE = new GettingStartedContent(StsProperties.getInstance(new NullProgressMonitor()));
+	   if (INSTANCE == null) {
+			INSTANCE = new GettingStartedContent();
 		}
 		return INSTANCE;
 	}
-
+	
+	@Override
+	protected void prefetch(IProgressMonitor monitor) {
+		// Register the content providers as part of prefetching, as registering
+		// the providers may also require prefetching properties from github
+		String registeringProvidersLabel = "Registering content providers";
+		registerAll(SubMonitor.convert(monitor, registeringProvidersLabel, 50));
+		super.prefetch(monitor);
+	}
+	
 	private final GithubClient github = new GithubClient();
 
 
@@ -78,12 +87,31 @@ public class GettingStartedContent extends ContentManager {
 		}
 		return cachedRepos;
 	}
+	
+	protected void registerAll(IProgressMonitor monitor) {
+		
+		contentProviderPropertiesDownloadTracker.setValue(DownloadState.IS_DOWNLOADING);
+		
+		try {
+			registerAllWithStsProperties(StsProperties.getInstance(monitor));
+			
+			contentProviderPropertiesDownloadTracker.setValue(DownloadState.DOWNLOAD_COMPLETED);
+		} finally {
+			
+			// Reset the download state
+			contentProviderPropertiesDownloadTracker.setValue(DownloadState.NOT_STARTED);
+		}
+	}
 
-	private GettingStartedContent(final StsProperties stsProps) {
+	/**
+	 * Will register all content providers using STS properties.
+	 * 
+	 */
+	public void registerAllWithStsProperties(final StsProperties stsProps) {
 		//Guides: are discoverable because they are all repos in org on github
 		register(GettingStartedGuide.class, GettingStartedGuide.GUIDE_DESCRIPTION_TEXT,
 			new ContentProvider<GettingStartedGuide>() {
-//				@Override
+//					@Override
 				public GettingStartedGuide[] fetch(DownloadManager downloader) {
 					LinkedHashMap<String, GettingStartedGuide> guides = new LinkedHashMap<String, GettingStartedGuide>();
 					if (ADD_MOCKS) {
@@ -98,7 +126,7 @@ public class GettingStartedContent extends ContentManager {
 				private LinkedHashMap<String, GettingStartedGuide> addGuidesFrom(Repo[] repos, LinkedHashMap<String, GettingStartedGuide> guides, DownloadManager downloader) {
 					for (Repo repo : repos) {
 						String name = repo.getName();
-	//					System.out.println("repo : "+name + " "+repo.getUrl());
+//					System.out.println("repo : "+name + " "+repo.getUrl());
 						if (name.startsWith("gs-") && !guides.containsKey(name)) {
 							guides.put(name, new GettingStartedGuide(stsProps, repo, downloader));
 						}
@@ -109,25 +137,25 @@ public class GettingStartedContent extends ContentManager {
 		);
 
 // Commented out: there are no more tutorial guides.
-//		register(TutorialGuide.class, TutorialGuide.GUIDE_DESCRIPTION_TEXT,
-//			new ContentProvider<TutorialGuide>() {
-//				public TutorialGuide[] fetch(DownloadManager downloader) {
-//					LinkedHashMap<String, TutorialGuide> guides = new LinkedHashMap<String, TutorialGuide>();
-//					addGuidesFrom(getGuidesRepos(), guides, downloader);
-//					return guides.values().toArray(new TutorialGuide[guides.size()]);
-//				}
-//
-//				private LinkedHashMap<String, TutorialGuide> addGuidesFrom(Repo[] repos, LinkedHashMap<String, TutorialGuide> guides, DownloadManager downloader) {
-//					for (Repo repo : repos) {
-//						String name = repo.getName();
-//						if (name.startsWith("tut-") && !guides.containsKey(name)) {
-//							guides.put(name, new TutorialGuide(stsProps, repo, downloader));
-//						}
+//			register(TutorialGuide.class, TutorialGuide.GUIDE_DESCRIPTION_TEXT,
+//				new ContentProvider<TutorialGuide>() {
+//					public TutorialGuide[] fetch(DownloadManager downloader) {
+//						LinkedHashMap<String, TutorialGuide> guides = new LinkedHashMap<String, TutorialGuide>();
+//						addGuidesFrom(getGuidesRepos(), guides, downloader);
+//						return guides.values().toArray(new TutorialGuide[guides.size()]);
 //					}
-//					return guides;
+//
+//					private LinkedHashMap<String, TutorialGuide> addGuidesFrom(Repo[] repos, LinkedHashMap<String, TutorialGuide> guides, DownloadManager downloader) {
+//						for (Repo repo : repos) {
+//							String name = repo.getName();
+//							if (name.startsWith("tut-") && !guides.containsKey(name)) {
+//								guides.put(name, new TutorialGuide(stsProps, repo, downloader));
+//							}
+//						}
+//						return guides;
+//					}
 //				}
-//			}
-//		);
+//			);
 
 
 		//References apps: are discoverable because we maintain a list of json metadata
@@ -135,7 +163,7 @@ public class GettingStartedContent extends ContentManager {
 		register(ReferenceApp.class, ReferenceApp.REFERENCE_APP_DESCRIPTION,
 			new ContentProvider<ReferenceApp>() {
 
-//			@Override
+//				@Override
 			public ReferenceApp[] fetch(DownloadManager downloader) {
 				ReferenceAppMetaData[] infos = github.get(stsProps.get("spring.reference.app.discovery.url"), ReferenceAppMetaData[].class);
 				ReferenceApp[] apps = new ReferenceApp[infos.length];

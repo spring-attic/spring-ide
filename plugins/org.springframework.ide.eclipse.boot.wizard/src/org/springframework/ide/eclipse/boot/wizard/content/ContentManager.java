@@ -19,10 +19,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.springframework.ide.eclipse.boot.wizard.BootWizardActivator;
 import org.springframework.ide.eclipse.boot.wizard.github.auth.AuthenticatedDownloader;
-import org.springframework.ide.eclipse.boot.wizard.guides.GSImportWizardModel.AllContentDownloadState;
+import org.springframework.ide.eclipse.boot.wizard.guides.GSImportWizardModel.DownloadState;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -41,17 +43,16 @@ public class ContentManager {
 
 	private final Map<Class<?>, TypedContentManager<?>> byClass = new HashMap<Class<?>, TypedContentManager<?>>();
 	private final List<ContentType<?>> types = new ArrayList<ContentType<?>>();
-	
-	private static final LiveVariable<AllContentDownloadState> DEFAULT_DOWNLOADSTATE = new LiveVariable<>(AllContentDownloadState.NOT_STARTED);
-	
+		
 	// Assign a default content state even though it may be set externally by the model that encloses the content manager. It must never be null
-	private LiveVariable<AllContentDownloadState> allContentDownloadState = DEFAULT_DOWNLOADSTATE;
+	protected LiveVariable<DownloadState> allContentDownloadTracker = new LiveVariable<>(DownloadState.NOT_STARTED);;
+	protected LiveVariable<DownloadState> contentProviderPropertiesDownloadTracker = new LiveVariable<>(DownloadState.NOT_STARTED);
 
 	public <T extends GSContent> void register(Class<T> klass, String description, ContentProvider<T> provider) {
 		try {
 			Assert.isLegal(!byClass.containsKey(klass), "A content provider for " + klass + " is already registered");
 
-			allContentDownloadState.setValue(AllContentDownloadState.NOT_STARTED);
+			allContentDownloadTracker.setValue(DownloadState.NOT_STARTED);
 			
 			ContentType<T> ctype = new ContentType<T>(klass, description);
 			types.add(ctype);
@@ -71,9 +72,9 @@ public class ContentManager {
 						.clearCache();
 	}
 	
-	public void setAllContentDownloadState(LiveVariable<AllContentDownloadState> allContentDownloadState) {
-		Assert.isNotNull(allContentDownloadState, "All Content Download State tracking cannot be null.");
-		this.allContentDownloadState = allContentDownloadState;
+	public void setAllContentDownloadTracker(LiveVariable<DownloadState> allContentDownloadTracker) {
+		Assert.isNotNull(allContentDownloadTracker, "Content download tracker cannot be null.");
+		this.allContentDownloadTracker = allContentDownloadTracker;
 	}
 
 	/**
@@ -82,11 +83,12 @@ public class ContentManager {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T[] get(Class<T> type) {
+		
 		// To guard against different callers 
 		// attempting to start a download in parallel while all downloads is currently under way, always give priority to downloading all contents. 
 		// In other words, if all contents are currently being downloaded, do not allow 
 		// separate download of contents for a specific type.
-		if (allContentDownloadState.getValue()==AllContentDownloadState.IS_DOWNLOADING) {
+		if (allContentDownloadTracker.getValue()==DownloadState.IS_DOWNLOADING) {
 			return null;
 		}
 		TypedContentManager<T> man = (TypedContentManager<T>) byClass.get(type);
@@ -126,54 +128,62 @@ public class ContentManager {
 	}
 
 	/**
-	 * Download all the content in the background. Must pass a runnable context.
-	 * <p/>
-	 * Also see {@link #getAllContentDownloadState()} to get a live variable to register a listener and be notified
-	 * when completion ends
-	 * 
-
-	 * @param runnableContext
-	 *            runnable context to run in job in background. Must not be
-	 *            null.
-	 * @param backgroundJobLabel
+	 * Download all the content. May require network access therefore do not run in the UI thread.
 	 */
-	public void downloadAllContentInBackground(IRunnableContext runnableContext,
-			String backgroundJobLabel) {
+	public void downloadAllContent(IProgressMonitor monitor) {
 		
-		Assert.isLegal(runnableContext != null,
-				"Runnable context when prefetching content in the background must not be null.");
-		
-		allContentDownloadState.setValue(AllContentDownloadState.IS_DOWNLOADING);
-
+		allContentDownloadTracker.setValue(DownloadState.IS_DOWNLOADING);
 		try {
-			JobUtil.runBackgroundJobWithUIProgress((monitor) -> {
-				try {
-					prefetchAllContent();
-				} finally {
-					// Inform any listeners that completion is finished
-					allContentDownloadState.setValue(AllContentDownloadState.DOWNLOAD_COMPLETED);
-					// Reset the download state
-					allContentDownloadState.setValue(AllContentDownloadState.NOT_STARTED);
+			ContentType<?>[] allTypes = getTypes();
+
+			if (allTypes != null) {
+				for (ContentType<?> type : allTypes) {
+					if (monitor.isCanceled()) {
+						break;
+					}
+					get(type);
 				}
-			}, runnableContext, backgroundJobLabel);
-		} catch (Throwable e) {
-			// On any error, be sure to reset download state
-			allContentDownloadState.setValue(AllContentDownloadState.NOT_STARTED);
+			}
+			// Inform any listeners that completion is finished
+			allContentDownloadTracker.setValue(DownloadState.DOWNLOAD_COMPLETED);
+		} finally {
+			// Reset the download state
+			allContentDownloadTracker.setValue(DownloadState.NOT_STARTED);
 		}
 	}
 	
-	public LiveVariable<AllContentDownloadState> getAllContentDownloadState() {
-		return allContentDownloadState;
+	public LiveVariable<DownloadState> getAllContentDownloadTracker() {
+		return allContentDownloadTracker;
 	}
 
-	protected void prefetchAllContent() {
-
-		ContentType<?>[] allTypes = getTypes();
-
-		if (allTypes != null) {
-			for (ContentType<?> type : allTypes) {
-				get(type);
-			}
+	/**
+	 * Will run {@link #prefetch(IProgressMonitor)} in the background.
+	 * @param runnableContext
+	 */
+	public void prefetchInBackground(IRunnableContext runnableContext) {
+		try {
+			JobUtil.runBackgroundJobWithUIProgress((monitor) -> {
+	
+				prefetch(monitor);
+	
+			}, runnableContext, "Prefetching content...");
+		} catch (Exception e) {
+			BootWizardActivator.log(e);
 		}
+	}
+	
+	/**
+	 * Will prefetch (download) all content. This may be a long-running process and is not expected to be run in the UI thread.
+	 * @param monitor
+	 */
+	protected void prefetch(IProgressMonitor monitor) {
+		String downloadLabel = "Downloading all content. Please wait...";
+		downloadAllContent(SubMonitor.convert(monitor, downloadLabel, 50));
+	}
+
+	public void setProviderPropertiesDownloadTracker(LiveVariable<DownloadState> contentProviderPropertiesDownloadTracker) {
+		Assert.isNotNull(allContentDownloadTracker, "Content provider properties download tracker cannot be null.");
+
+		this.contentProviderPropertiesDownloadTracker = contentProviderPropertiesDownloadTracker;
 	}
 }

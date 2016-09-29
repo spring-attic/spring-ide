@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2016 GoPivotal, Inc.
+ * Copyright (c) 2013, 2016 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- * GoPivotal, Inc. - initial API and implementation
+ * Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard.guides;
 
@@ -53,9 +53,12 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
  */
 public class GSImportWizardModel {
 	
-	// Indicates the state when downloading ALL contents
-	private final LiveVariable<AllContentDownloadState> allContentDownloadState = new LiveVariable<>(
-			AllContentDownloadState.NOT_STARTED);	
+	// Tracks the download state of content
+	private final LiveVariable<DownloadState> allContentDownloadTracker = new LiveVariable<>(
+			DownloadState.NOT_STARTED);	
+	
+	// Tracks the download state for content providers properties
+	private final LiveVariable<DownloadState> contentProviderPropertiesDownloadTracker = new LiveVariable<>(DownloadState.NOT_STARTED);
 	
 	/**
 	 * The chosen guide to import stuff from.
@@ -66,15 +69,23 @@ public class GSImportWizardModel {
 	private final LiveExpression<ValidationResult> guideValidator = new Validator() {
 		{
 			dependsOn(guide);
-			dependsOn(allContentDownloadState);
+			dependsOn(contentProviderPropertiesDownloadTracker);
+			dependsOn(allContentDownloadTracker);
 		}
 
 		@Override
 		protected ValidationResult compute() {
-			AllContentDownloadState downloaded = allContentDownloadState.getValue();
-			if (downloaded == AllContentDownloadState.IS_DOWNLOADING) {
-				return ValidationResult.info("Downloading contents. Please wait...");
-			} else if (guide.getValue() == null) {
+			DownloadState state = contentProviderPropertiesDownloadTracker.getValue();
+			if (state == DownloadState.IS_DOWNLOADING) {
+				return ValidationResult.info("Registering content providers. Please wait...");
+			} else {
+				state = allContentDownloadTracker.getValue();
+				if (state == DownloadState.IS_DOWNLOADING) {
+					return ValidationResult.info("Downloading all content. Please wait...");
+				}
+			}
+
+			if (guide.getValue() == null) {
 				return ValidationResult.error("No GS content selected");
 			} else {
 				return ValidationResult.OK;
@@ -152,9 +163,10 @@ public class GSImportWizardModel {
 	 * content provided another way.
 	 */
 	private ContentManager contentManager = GettingStartedContent.getInstance();
-	// Wire the "All content downloaded" variable to the content manager
+	// Wire the download trackers to the content manager
 	{
-		contentManager.setAllContentDownloadState(allContentDownloadState);
+		contentManager.setAllContentDownloadTracker(allContentDownloadTracker);
+		contentManager.setProviderPropertiesDownloadTracker(contentProviderPropertiesDownloadTracker);
 	}
 
 	/**
@@ -511,7 +523,7 @@ public class GSImportWizardModel {
 	}
 	
 	
-	public static enum AllContentDownloadState {
+	public static enum DownloadState {
 		IS_DOWNLOADING,
 		DOWNLOAD_COMPLETED,
 		NOT_STARTED

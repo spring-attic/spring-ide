@@ -48,7 +48,7 @@ import org.springframework.ide.eclipse.boot.wizard.content.ContentType;
 import org.springframework.ide.eclipse.boot.wizard.content.Describable;
 import org.springframework.ide.eclipse.boot.wizard.content.DisplayNameable;
 import org.springframework.ide.eclipse.boot.wizard.content.GSContent;
-import org.springframework.ide.eclipse.boot.wizard.guides.GSImportWizardModel.AllContentDownloadState;
+import org.springframework.ide.eclipse.boot.wizard.guides.GSImportWizardModel.DownloadState;
 import org.springframework.util.StringUtils;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -262,7 +262,7 @@ public class ChooseTypedContentSection extends WizardPageSection {
 		// PT 130652465 - Avoid prefetching content (i.e. network I/O) in the UI thread. 
 		// Solution: downloading content in the background to avoid blocking the UI in case
 		// it takes a long time.
-	    prefetchAllContentInBackground();
+	    registerAndDownloadContentInBackground();
 		
 		Composite field = new Composite(page, SWT.NONE);
 		int cols = sectionLabel==null ? 1 : 2;
@@ -360,10 +360,10 @@ public class ChooseTypedContentSection extends WizardPageSection {
 	}
 
 
-	private void prefetchAllContentInBackground() {
-		LiveVariable<AllContentDownloadState> allContentDownloadState = content.getAllContentDownloadState();
-		allContentDownloadState.addListener((liveVar, downloadState) -> {
-			if (downloadState == AllContentDownloadState.DOWNLOAD_COMPLETED) {
+	private void registerAndDownloadContentInBackground() {
+		LiveVariable<DownloadState> allContentDownloadTracker = content.getAllContentDownloadTracker();
+		allContentDownloadTracker.addListener((liveVar, downloadState) -> {
+			if (downloadState == DownloadState.DOWNLOAD_COMPLETED) {
 				Display.getDefault().asyncExec(() -> {
 					if (treeviewer != null && !treeviewer.getTree().isDisposed()) {
 						treeviewer.refresh();
@@ -372,8 +372,7 @@ public class ChooseTypedContentSection extends WizardPageSection {
 				});
 			}
 		});
-		
-		content.downloadAllContentInBackground(owner.getRunnableContext(), "Downloading all contents. Please wait...");
+		content.prefetchInBackground(owner.getRunnableContext());
 	}
 
 	private void whenVisible(final Control control, final Runnable runnable) {
