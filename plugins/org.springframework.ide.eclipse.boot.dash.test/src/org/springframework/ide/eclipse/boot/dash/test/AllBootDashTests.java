@@ -13,7 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
-import org.springframework.ide.eclipse.boot.dash.metadata.PropertyFileStore;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.AppNameReconciler;
 import org.springframework.ide.eclipse.boot.dash.test.requestmappings.ActuatorClientTest;
 import org.springframework.ide.eclipse.boot.dash.test.yaml.DeploymentProperties2Yaml;
 import org.springframework.ide.eclipse.boot.dash.test.yaml.ManifestCompareMergeTests;
@@ -30,6 +30,7 @@ import org.springframework.ide.eclipse.boot.dash.test.yaml.Yaml2DeploymentProper
 	//Added by Alex:
 	DeploymentProperties2Yaml.class,
 	Yaml2DeploymentProperties.class,
+	AppNameReconciler.class,
 
 	//Really short (less than 2 seconds per suite):
 	JLRMethodParserTest.class,

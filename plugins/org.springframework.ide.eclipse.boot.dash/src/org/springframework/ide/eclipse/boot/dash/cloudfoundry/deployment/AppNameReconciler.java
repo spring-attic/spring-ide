@@ -28,6 +28,8 @@ import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlFileAST;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.ScalarNode;
 import org.yaml.snakeyaml.nodes.SequenceNode;
+import org.yaml.snakeyaml.parser.ParserException;
+import org.yaml.snakeyaml.scanner.ScannerException;
 
 /**
  * Reconciler responsible for creating annotation at application names positions
@@ -157,6 +159,8 @@ public class AppNameReconciler {
 					monitor.worked(10);
 				}
 			}
+		} catch (ParserException | ScannerException e) {
+			// Ignore these exceptions as they'd appear as syntax errors in the editor
 		} catch (Throwable t) {
 			Log.log(t);
 		} finally {
