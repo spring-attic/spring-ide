@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.osgi.framework.Version;
 import org.osgi.framework.VersionRange;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.internal.core.CorePlugin;
 
 /**
@@ -65,19 +66,21 @@ public class BootPropertyTester extends PropertyTester {
 
 	public static boolean hasDevtools(IProject p) {
 		try {
-			if (p!=null) {
+			if (p!=null && p.isAccessible()) {
 				IJavaProject jp = JavaCore.create(p);
-				IClasspathEntry[] classpath = jp.getResolvedClasspath(true);
-				if (classpath!=null) {
-					for (IClasspathEntry e : classpath) {
-						if (BootPropertyTester.isDevtoolsJar(e)) {
-							return true;
+				if (jp.exists()) {
+					IClasspathEntry[] classpath = jp.getResolvedClasspath(true);
+					if (classpath!=null) {
+						for (IClasspathEntry e : classpath) {
+							if (BootPropertyTester.isDevtoolsJar(e)) {
+								return true;
+							}
 						}
 					}
 				}
 			}
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 		}
 		return false;
 	}
