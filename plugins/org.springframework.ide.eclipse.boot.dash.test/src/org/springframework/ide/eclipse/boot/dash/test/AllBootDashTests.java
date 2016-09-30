@@ -30,7 +30,7 @@ import org.springframework.ide.eclipse.boot.dash.test.yaml.Yaml2DeploymentProper
 	//Added by Alex:
 	DeploymentProperties2Yaml.class,
 	Yaml2DeploymentProperties.class,
-	AppNameReconciler.class,
+//	AppNameReconciler.class,
 
 	//Really short (less than 2 seconds per suite):
 	JLRMethodParserTest.class,
