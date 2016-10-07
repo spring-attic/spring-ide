@@ -28,11 +28,16 @@ public class SchemaBasedYamlAssistContextProvider implements YamlAssistContextPr
 	}
 
 	@Override
-	public YamlAssistContext getGlobalAssistContext(YamlDocument doc) {
+	public YamlAssistContext getGlobalAssistContext(final YamlDocument doc) {
 		return new TopLevelAssistContext() {
 			@Override
 			protected YamlAssistContext getDocumentContext(int documentSelector) {
 				return new YTypeAssistContext(this, documentSelector, schema.getTopLevelType(), schema.getTypeUtil());
+			}
+
+			@Override
+			public YamlDocument getDocument() {
+				return doc;
 			}
 		};
 	}

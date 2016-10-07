@@ -41,7 +41,7 @@ public class ApplicationYamlCompletionEngine {
 			public YamlAssistContext getGlobalAssistContext(YamlDocument ydoc) {
 				IDocument doc = ydoc.getDocument();
 				FuzzyMap<PropertyInfo> index = indexProvider.getIndex(doc);
-				return ApplicationYamlAssistContext.global(index, completionFactory, typeUtilProvider.getTypeUtil(doc), conf);
+				return ApplicationYamlAssistContext.global(ydoc, index, completionFactory, typeUtilProvider.getTypeUtil(doc), conf);
 			}
 		};
 		return new YamlCompletionEngine(structureProvider, contextProvider);

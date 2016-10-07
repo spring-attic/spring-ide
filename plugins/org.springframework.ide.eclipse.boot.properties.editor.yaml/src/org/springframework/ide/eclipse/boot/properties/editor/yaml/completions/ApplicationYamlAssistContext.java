@@ -47,6 +47,7 @@ import org.springframework.ide.eclipse.editor.support.util.CollectionUtil;
 import org.springframework.ide.eclipse.editor.support.util.DocumentRegion;
 import org.springframework.ide.eclipse.editor.support.util.FuzzyMatcher;
 import org.springframework.ide.eclipse.editor.support.util.StringUtil;
+import org.springframework.ide.eclipse.editor.support.util.YamlIndentUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 import org.springframework.ide.eclipse.editor.support.yaml.completions.AbstractYamlAssistContext;
 import org.springframework.ide.eclipse.editor.support.yaml.completions.TopLevelAssistContext;
@@ -82,8 +83,8 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 
 	public final TypeUtil typeUtil;
 
-	public ApplicationYamlAssistContext(int documentSelector, YamlPath contextPath, TypeUtil typeUtil, RelaxedNameConfig conf) {
-		super(documentSelector, contextPath);
+	public ApplicationYamlAssistContext(YamlDocument doc, int documentSelector, YamlPath contextPath, TypeUtil typeUtil, RelaxedNameConfig conf) {
+		super(doc, documentSelector, contextPath);
 		this.typeUtil = typeUtil;
 		this.conf = conf;
 	}
@@ -97,7 +98,7 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 		//so the strings created here do not need to contain indentation spaces.
 		if (TypeUtil.isMap(type)) {
 			//ready to enter nested map key on next line
-			return "\n";
+			return "\n"+YamlIndentUtil.INDENT_STR;
 		} if (TypeUtil.isSequencable(type)) {
 			//ready to enter sequence element on next line
 			return "\n- ";
@@ -106,7 +107,7 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 			return " ";
 		} else {
 			//Assume its some kind of pojo bean
-			return "\n";
+			return "\n"+YamlIndentUtil.INDENT_STR;
 		}
 	}
 
@@ -115,16 +116,16 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 	 */
 	protected abstract Type getType();
 
-	public static ApplicationYamlAssistContext subdocument(int documentSelector, FuzzyMap<PropertyInfo> index, PropertyCompletionFactory completionFactory, TypeUtil typeUtil, RelaxedNameConfig conf) {
-		return new IndexContext(documentSelector, YamlPath.EMPTY, IndexNavigator.with(index), completionFactory, typeUtil, conf);
+	public static ApplicationYamlAssistContext subdocument(YamlDocument doc, int documentSelector, FuzzyMap<PropertyInfo> index, PropertyCompletionFactory completionFactory, TypeUtil typeUtil, RelaxedNameConfig conf) {
+		return new IndexContext(doc, documentSelector, YamlPath.EMPTY, IndexNavigator.with(index), completionFactory, typeUtil, conf);
 	}
 
-	public static YamlAssistContext forPath(YamlPath contextPath,  FuzzyMap<PropertyInfo> index, PropertyCompletionFactory completionFactory, TypeUtil typeUtil, RelaxedNameConfig conf) {
+	public static YamlAssistContext forPath(YamlDocument doc, YamlPath contextPath,  FuzzyMap<PropertyInfo> index, PropertyCompletionFactory completionFactory, TypeUtil typeUtil, RelaxedNameConfig conf) {
 		try {
 			YamlPathSegment documentSelector = contextPath.getSegment(0);
 			if (documentSelector!=null) {
 				contextPath = contextPath.dropFirst(1);
-				YamlAssistContext context = ApplicationYamlAssistContext.subdocument(documentSelector.toIndex(), index, completionFactory, typeUtil, conf);
+				YamlAssistContext context = ApplicationYamlAssistContext.subdocument(doc, documentSelector.toIndex(), index, completionFactory, typeUtil, conf);
 				for (YamlPathSegment s : contextPath.getSegments()) {
 					if (context==null) return null;
 					context = context.traverse(s);
@@ -149,7 +150,7 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 
 		public TypeContext(ApplicationYamlAssistContext parent, YamlPath contextPath, Type type,
 				PropertyCompletionFactory completionFactory, TypeUtil typeUtil, RelaxedNameConfig conf, HintProvider hints) {
-			super(parent.documentSelector, contextPath, typeUtil, conf);
+			super(parent.getDocument(), parent.documentSelector, contextPath, typeUtil, conf);
 			this.parent = parent;
 			this.completionFactory = completionFactory;
 			this.type = type;
@@ -185,7 +186,7 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 			int queryOffset = offset - query.length();
 			List<TypedProperty> properties = getProperties(query, enumCaseMode, beanMode);
 			if (CollectionUtil.hasElements(properties)) {
-				ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>(properties.size());
+				ArrayList<ICompletionProposal> proposals = new ArrayList<>(properties.size());
 				SNode contextNode = getContextNode(doc);
 				Set<String> definedProps = getDefinedProperties(contextNode);
 				for (TypedProperty p : properties) {
@@ -244,7 +245,7 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 				if (contextNode instanceof SChildBearingNode) {
 					List<SNode> children = ((SChildBearingNode)contextNode).getChildren();
 					if (CollectionUtil.hasElements(children)) {
-						Set<String> keys = new HashSet<String>(children.size());
+						Set<String> keys = new HashSet<>(children.size());
 						for (SNode c : children) {
 							if (c instanceof SKeyNode) {
 								keys.add(((SKeyNode) c).getKey());
@@ -262,7 +263,7 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 		private List<ICompletionProposal> getValueCompletions(YamlDocument doc, int offset, String query, EnumCaseMode enumCaseMode) {
 			Collection<StsValueHint> hints = getHintValues(query, doc, offset, enumCaseMode);
 			if (hints!=null) {
-				ArrayList<ICompletionProposal> completions = new ArrayList<ICompletionProposal>();
+				ArrayList<ICompletionProposal> completions = new ArrayList<>();
 				for (StsValueHint hint : hints) {
 					String value = hint.getValue();
 					double score = FuzzyMatcher.matchScore(query, value);
@@ -383,9 +384,9 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 		private IndexNavigator indexNav;
 		PropertyCompletionFactory completionFactory;
 
-		public IndexContext(int documentSelector, YamlPath contextPath, IndexNavigator indexNav,
+		public IndexContext(YamlDocument doc, int documentSelector, YamlPath contextPath, IndexNavigator indexNav,
 				PropertyCompletionFactory completionFactory, TypeUtil typeUtil, RelaxedNameConfig conf) {
-			super(documentSelector, contextPath, typeUtil, conf);
+			super(doc, documentSelector, contextPath, typeUtil, conf);
 			this.indexNav = indexNav;
 			this.completionFactory = completionFactory;
 		}
@@ -395,7 +396,7 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 			String query = getPrefix(doc, node, offset);
 			Collection<Match<PropertyInfo>> matchingProps = indexNav.findMatching(query);
 			if (!matchingProps.isEmpty()) {
-				ArrayList<ICompletionProposal> completions = new ArrayList<ICompletionProposal>();
+				ArrayList<ICompletionProposal> completions = new ArrayList<>();
 				for (Match<PropertyInfo> match : matchingProps) {
 					ProposalApplier edits = createEdits(doc, offset, query, match);
 					ScoreableProposal completion = completionFactory.property(
@@ -464,9 +465,9 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 					}
 				}
 				if (subIndex.getExtensionCandidate()!=null) {
-					return new IndexContext(documentSelector, contextPath.append(s), subIndex, completionFactory, typeUtil, conf);
+					return new IndexContext(getDocument(), documentSelector, contextPath.append(s), subIndex, completionFactory, typeUtil, conf);
 				} else if (subIndex.getExactMatch()!=null) {
-					IndexContext asIndexContext = new IndexContext(documentSelector, contextPath.append(s), subIndex, completionFactory, typeUtil, conf);
+					IndexContext asIndexContext = new IndexContext(getDocument(), documentSelector, contextPath.append(s), subIndex, completionFactory, typeUtil, conf);
 					PropertyInfo prop = subIndex.getExactMatch();
 					return new TypeContext(asIndexContext, contextPath.append(s), TypeParser.parse(prop.getType()), completionFactory, typeUtil, conf, prop.getHints(typeUtil, true));
 				}
@@ -505,11 +506,16 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 		return null;
 	}
 
-	public static YamlAssistContext global(final FuzzyMap<PropertyInfo> index, final PropertyCompletionFactory completionFactory, final TypeUtil typeUtil, final RelaxedNameConfig conf) {
+	public static YamlAssistContext global(YamlDocument doc, final FuzzyMap<PropertyInfo> index, final PropertyCompletionFactory completionFactory, final TypeUtil typeUtil, final RelaxedNameConfig conf) {
 		return new TopLevelAssistContext() {
 			@Override
 			protected YamlAssistContext getDocumentContext(int documentSelector) {
-				return subdocument(documentSelector, index, completionFactory, typeUtil, conf);
+				return subdocument(doc, documentSelector, index, completionFactory, typeUtil, conf);
+			}
+
+			@Override
+			public YamlDocument getDocument() {
+				return doc;
 			}
 		};
 	}

@@ -35,6 +35,6 @@ public interface YTypeUtil {
 	ValueParser getValueParser(YType type);
 
 	//TODO: only one of these two should be enough?
-	List<YTypedProperty> getProperties(YType type);
-	Map<String, YTypedProperty> getPropertiesMap(YType yType);
+	List<YTypedProperty> getProperties(YType type, DynamicSchemaContext dynamicCtxt);
+	Map<String, YTypedProperty> getPropertiesMap(YType yType, DynamicSchemaContext dynamicCtxt);
 }

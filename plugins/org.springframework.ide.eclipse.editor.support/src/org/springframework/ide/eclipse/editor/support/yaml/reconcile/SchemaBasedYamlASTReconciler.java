@@ -19,6 +19,8 @@ import org.springframework.ide.eclipse.editor.support.reconcile.IProblemCollecto
 import org.springframework.ide.eclipse.editor.support.util.ValueParser;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlFileAST;
+import org.springframework.ide.eclipse.editor.support.yaml.schema.ASTDynamicSchemaContext;
+import org.springframework.ide.eclipse.editor.support.yaml.schema.DynamicSchemaContext;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YType;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypedProperty;
@@ -70,7 +72,8 @@ public class SchemaBasedYamlASTReconciler implements YamlASTReconciler {
 						reconcile(entry.getValueNode(), typeUtil.getDomainType(type));
 					}
 				} else if (typeUtil.isBean(type)) {
-					Map<String, YTypedProperty> beanProperties = typeUtil.getPropertiesMap(type);
+					DynamicSchemaContext schemaContext = new ASTDynamicSchemaContext(map);
+					Map<String, YTypedProperty> beanProperties = typeUtil.getPropertiesMap(type, schemaContext);
 					for (NodeTuple entry : map.getValue()) {
 						Node keyNode = entry.getKeyNode();
 						String key = NodeUtil.asScalar(keyNode);

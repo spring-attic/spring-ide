@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.editor.support.yaml.completions;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,16 +24,18 @@ import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.hover.YPropertyHoverInfo;
 import org.springframework.ide.eclipse.editor.support.util.CollectionUtil;
 import org.springframework.ide.eclipse.editor.support.util.FuzzyMatcher;
+import org.springframework.ide.eclipse.editor.support.util.YamlIndentUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPath;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPathSegment;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPathSegment.YamlPathSegmentType;
+import org.springframework.ide.eclipse.editor.support.yaml.schema.DynamicSchemaContext;
+import org.springframework.ide.eclipse.editor.support.yaml.schema.SNodeDynamicSchemaContext;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YType;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypedProperty;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YValueHint;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SChildBearingNode;
-import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SKeyNode;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SNode;
 
 public class YTypeAssistContext extends AbstractYamlAssistContext {
@@ -44,14 +45,14 @@ public class YTypeAssistContext extends AbstractYamlAssistContext {
 	final private YamlAssistContext parent;
 
 	public YTypeAssistContext(YTypeAssistContext parent, YamlPath contextPath, YType YType, YTypeUtil typeUtil) {
-		super(parent.documentSelector, contextPath);
+		super(parent.getDocument(), parent.documentSelector, contextPath);
 		this.parent = parent;
 		this.type = YType;
 		this.typeUtil = typeUtil;
 	}
 
 	public YTypeAssistContext(TopLevelAssistContext parent, int documentSelector, YType type, YTypeUtil typeUtil) {
-		super(documentSelector, YamlPath.EMPTY);
+		super(parent.getDocument(), documentSelector, YamlPath.EMPTY);
 		this.type = type;
 		this.typeUtil = typeUtil;
 		this.parent = parent;
@@ -67,13 +68,24 @@ public class YTypeAssistContext extends AbstractYamlAssistContext {
 		return getKeyCompletions(doc, offset, query);
 	}
 
+	private DynamicSchemaContext getSchemaContext() {
+		try {
+			SNode contextNode = getContextNode(getDocument());
+			return new SNodeDynamicSchemaContext(contextNode);
+		} catch (Exception e) {
+			EditorSupportActivator.log(e);
+			return DynamicSchemaContext.NULL;
+		}
+	}
+
 	public List<ICompletionProposal> getKeyCompletions(YamlDocument doc, int offset, String query) throws Exception {
 		int queryOffset = offset - query.length();
-		List<YTypedProperty> properties = typeUtil.getProperties(type);
+		SNode contextNode = getContextNode(doc);
+		DynamicSchemaContext dynamicCtxt = new SNodeDynamicSchemaContext(contextNode);
+		List<YTypedProperty> properties = typeUtil.getProperties(type, dynamicCtxt);
 		if (CollectionUtil.hasElements(properties)) {
-			ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>(properties.size());
-			SNode contextNode = getContextNode(doc);
-			Set<String> definedProps = getDefinedProperties(contextNode);
+			ArrayList<ICompletionProposal> proposals = new ArrayList<>(properties.size());
+			Set<String> definedProps = dynamicCtxt.getDefinedProperties();
 			for (YTypedProperty p : properties) {
 				String name = p.getName();
 				double score = FuzzyMatcher.matchScore(query, name);
@@ -116,9 +128,12 @@ public class YTypeAssistContext extends AbstractYamlAssistContext {
 	protected String appendTextFor(YType type) {
 		//Note that proper indentation after each \n" is added automatically
 		//so the strings created here do not need to contain indentation spaces.
-		if (typeUtil.isMap(type)) {
+		if (type==null) {
+			//Assume its some kind of pojo bean
+			return "\n"+YamlIndentUtil.INDENT_STR;
+		} else if (typeUtil.isMap(type)) {
 			//ready to enter nested map key on next line
-			return "\n";
+			return "\n"+YamlIndentUtil.INDENT_STR;
 		} if (typeUtil.isSequencable(type)) {
 			//ready to enter sequence element on next line
 			return "\n- ";
@@ -131,30 +146,10 @@ public class YTypeAssistContext extends AbstractYamlAssistContext {
 		}
 	}
 
-	private Set<String> getDefinedProperties(SNode contextNode) {
-		try {
-			if (contextNode instanceof SChildBearingNode) {
-				List<SNode> children = ((SChildBearingNode)contextNode).getChildren();
-				if (CollectionUtil.hasElements(children)) {
-					Set<String> keys = new HashSet<String>(children.size());
-					for (SNode c : children) {
-						if (c instanceof SKeyNode) {
-							keys.add(((SKeyNode) c).getKey());
-						}
-					}
-					return keys;
-				}
-			}
-		} catch (Exception e) {
-			EditorSupportActivator.log(e);
-		}
-		return Collections.emptySet();
-	}
-
 	private List<ICompletionProposal> getValueCompletions(YamlDocument doc, int offset, String query) {
 		YValueHint[] values = typeUtil.getHintValues(type);
 		if (values!=null) {
-			ArrayList<ICompletionProposal> completions = new ArrayList<ICompletionProposal>();
+			ArrayList<ICompletionProposal> completions = new ArrayList<>();
 			for (YValueHint value : values) {
 				double score = FuzzyMatcher.matchScore(query, value.getValue());
 				if (score!=0 && !value.equals(query)) {
@@ -170,13 +165,15 @@ public class YTypeAssistContext extends AbstractYamlAssistContext {
 	}
 
 	@Override
-	public YamlAssistContext traverse(YamlPathSegment s) {
+	public YamlAssistContext traverse(YamlPathSegment s) throws Exception {
 		if (s.getType()==YamlPathSegmentType.VAL_AT_KEY) {
 			if (typeUtil.isSequencable(type) || typeUtil.isMap(type)) {
 				return contextWith(s, typeUtil.getDomainType(type));
 			}
 			String key = s.toPropString();
-			Map<String, YTypedProperty> subproperties = typeUtil.getPropertiesMap(type);
+			SNode contextNode = getContextNode(getDocument());
+			DynamicSchemaContext dynamicCtxt = new SNodeDynamicSchemaContext(contextNode);
+			Map<String, YTypedProperty> subproperties = typeUtil.getPropertiesMap(type, dynamicCtxt);
 			if (subproperties!=null) {
 				return contextWith(s, getType(subproperties.get(key)));
 			}
@@ -238,6 +235,6 @@ public class YTypeAssistContext extends AbstractYamlAssistContext {
 	}
 
 	private YTypedProperty getProperty(String name) {
-		return typeUtil.getPropertiesMap(getType()).get(name);
+		return typeUtil.getPropertiesMap(getType(), getSchemaContext()).get(name);
 	}
 }

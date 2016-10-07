@@ -18,12 +18,14 @@ import org.springframework.ide.eclipse.editor.support.util.DocumentRegion;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlNavigable;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPathSegment;
+import org.springframework.ide.eclipse.editor.support.yaml.schema.DynamicSchemaContext;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SNode;
 
 /**
  * @author Kris De Volder
  */
 public interface YamlAssistContext extends YamlNavigable<YamlAssistContext> {
+	YamlDocument getDocument();
 	Collection<ICompletionProposal> getCompletions(YamlDocument doc, SNode node, int offset) throws Exception;
 
 	//TODO: conceptually... the right thing would be to only implement the second of these

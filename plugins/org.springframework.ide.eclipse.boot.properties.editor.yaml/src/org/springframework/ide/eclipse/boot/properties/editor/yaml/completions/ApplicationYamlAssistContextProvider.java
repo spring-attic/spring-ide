@@ -46,6 +46,6 @@ public class ApplicationYamlAssistContextProvider implements YamlAssistContextPr
 	public YamlAssistContext getGlobalAssistContext(YamlDocument ydoc) {
 		IDocument doc = ydoc.getDocument();
 		FuzzyMap<PropertyInfo> index = indexProvider.getIndex(doc);
-		return ApplicationYamlAssistContext.global(index, completionFactory, typeUtilProvider.getTypeUtil(doc), relaxedNameConfig);
+		return ApplicationYamlAssistContext.global(ydoc, index, completionFactory, typeUtilProvider.getTypeUtil(doc), relaxedNameConfig);
 	}
 }
