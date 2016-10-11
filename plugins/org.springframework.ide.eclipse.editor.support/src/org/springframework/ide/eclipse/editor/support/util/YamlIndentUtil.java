@@ -14,6 +14,8 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension4;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 
+import com.google.common.base.Strings;
+
 /**
  * Helper methods to mainpulate indentation levels.
  *
@@ -26,6 +28,8 @@ public class YamlIndentUtil {
 	 * TODO: replace this constant by (existing!) yedit preference value
 	 */
 	public static final int INDENT_BY = 2;
+
+	public static final String INDENT_STR = Strings.repeat(" ", INDENT_BY);
 
 	/**
 	 * Some functions introduce line separators and this may depend on the context (i.e. default line separator

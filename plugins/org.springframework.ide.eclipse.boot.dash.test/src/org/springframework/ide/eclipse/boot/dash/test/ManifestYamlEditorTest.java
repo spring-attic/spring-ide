@@ -21,7 +21,7 @@ public class ManifestYamlEditorTest {
 		editor = new MockManifestEditor("<*>");
 		editor.assertCompletions(
 				"applications:\n"+
-				"  - <*>",
+				"- <*>",
 				// ---------------
 				"buildpack: <*>",
 				// ---------------
@@ -32,7 +32,7 @@ public class ManifestYamlEditorTest {
 				"domain: <*>",
 				// ---------------
 				"domains:\n"+
-				"  - <*>",
+				"- <*>",
 				// ---------------
 				"env:\n"+
 				"  <*>",
@@ -59,7 +59,7 @@ public class ManifestYamlEditorTest {
 				"random-route: <*>",
 				// ---------------
 				"services:\n"+
-				"  - <*>",
+				"- <*>",
 				// ---------------
 				"stack: <*>",
 				// ---------------
@@ -77,67 +77,67 @@ public class ManifestYamlEditorTest {
 		MockManifestEditor editor;
 		editor = new MockManifestEditor(
 				"applications:\n" +
-				"  - <*>"
+				"- <*>"
 		);
 		editor.assertCompletions(
 				// ---------------
 				"applications:\n" +
-				"  - buildpack: <*>",
+				"- buildpack: <*>",
 				// ---------------
 				"applications:\n" +
-				"  - command: <*>",
+				"- command: <*>",
 				// ---------------
 				"applications:\n" +
-				"  - disk_quota: <*>",
+				"- disk_quota: <*>",
 				// ---------------
 				"applications:\n" +
-				"  - domain: <*>",
+				"- domain: <*>",
 				// ---------------
 				"applications:\n" +
-				"  - domains:\n"+
-				"      - <*>",
+				"- domains:\n"+
+				"  - <*>",
 				// ---------------
 				"applications:\n" +
-				"  - env:\n"+
-				"      <*>",
+				"- env:\n"+
+				"    <*>",
 				// ---------------
 				"applications:\n" +
-				"  - host: <*>",
+				"- host: <*>",
 				// ---------------
 				"applications:\n" +
-				"  - hosts:\n"+
-				"      - <*>",
+				"- hosts:\n"+
+				"  - <*>",
 				// ---------------
 				"applications:\n" +
-				"  - instances: <*>",
+				"- instances: <*>",
 				// ---------------
 				"applications:\n" +
-				"  - memory: <*>",
+				"- memory: <*>",
 				// ---------------
 				"applications:\n" +
-				"  - name: <*>",
+				"- name: <*>",
 				// ---------------
 				"applications:\n" +
-				"  - no-hostname: <*>",
+				"- no-hostname: <*>",
 				// ---------------
 				"applications:\n" +
-				"  - no-route: <*>",
+				"- no-route: <*>",
 				// ---------------
 				"applications:\n" +
-				"  - path: <*>",
+				"- path: <*>",
 				// ---------------
 				"applications:\n" +
-				"  - random-route: <*>",
+				"- random-route: <*>",
 				// ---------------
 				"applications:\n" +
-				"  - services:\n"+
-				"      - <*>",
+				"- services:\n"+
+				"  - <*>",
 				// ---------------
 				"applications:\n" +
-				"  - stack: <*>",
+				"- stack: <*>",
 				// ---------------
 				"applications:\n" +
-				"  - timeout: <*>"
+				"- timeout: <*>"
 		);
 	}
 

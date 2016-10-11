@@ -25,6 +25,7 @@ import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.hover.YPropertyHoverInfo;
 import org.springframework.ide.eclipse.editor.support.util.CollectionUtil;
 import org.springframework.ide.eclipse.editor.support.util.FuzzyMatcher;
+import org.springframework.ide.eclipse.editor.support.util.YamlIndentUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPath;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPathSegment;
@@ -116,9 +117,12 @@ public class YTypeAssistContext extends AbstractYamlAssistContext {
 	protected String appendTextFor(YType type) {
 		//Note that proper indentation after each \n" is added automatically
 		//so the strings created here do not need to contain indentation spaces.
-		if (typeUtil.isMap(type)) {
+		if (type==null) {
+			//Assume its some kind of pojo bean
+			return "\n"+YamlIndentUtil.INDENT_STR;
+		} else if (typeUtil.isMap(type)) {
 			//ready to enter nested map key on next line
-			return "\n";
+			return "\n"+YamlIndentUtil.INDENT_STR;
 		} if (typeUtil.isSequencable(type)) {
 			//ready to enter sequence element on next line
 			return "\n- ";

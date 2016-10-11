@@ -70,13 +70,12 @@ public class ReplaceDeprecatedYamlQuickfix implements ICompletionProposal {
 			}
 			YamlDocument doc = new YamlDocument(context.getDocument(), YamlStructureProvider.DEFAULT);
 			SNode problemNode = doc.getStructure().find(problem.getOffset());
-			System.out.println(problemNode);
 			if (problemNode.getNodeType()==SNodeType.KEY) {
 				SKeyNode problemKey = (SKeyNode) problemNode;
 				if (problemKey.isInKey(problem.getOffset())) {
 					YamlPathEdits edits = new YamlPathEdits(doc);
-					print(doc, edits);
-					String valueText = problemKey.getValue();
+//					print(doc, edits);
+					String valueText = problemKey.getValueWithRelativeIndent();
 					edits.deleteNode(problemKey);
 					int maxParentDeletions = oldPath.size() - prefix.size() - 1; // don't delete bits of the common prefix!
 					SChildBearingNode parent = problemNode.getParent();
@@ -85,10 +84,10 @@ public class ReplaceDeprecatedYamlQuickfix implements ICompletionProposal {
 						parent = parent.getParent();
 						maxParentDeletions--;
 					}
-					print(doc, edits);
+//					print(doc, edits);
 					SDocNode docRoot = problemNode.getDocNode(); //edits should stay within the same 'document' for yaml file that has multiple documents inside of it.
 					edits.createPath(docRoot, YamlPath.fromProperty(newName), valueText);
-					print(doc, edits);
+//					print(doc, edits);
 					return edits;
 				}
 			}
@@ -100,13 +99,13 @@ public class ReplaceDeprecatedYamlQuickfix implements ICompletionProposal {
 			return ProposalApplier.NULL;
 		}
 
-		private void print(YamlDocument doc, YamlPathEdits edits) throws Exception {
-			Document workingCopy = new Document(doc.getDocument().get());
-			edits.apply(workingCopy);
-			System.out.println("==============");
-			System.out.println(workingCopy.get());
-			System.out.println("==============");
-		}
+//		private void print(YamlDocument doc, YamlPathEdits edits) throws Exception {
+//			Document workingCopy = new Document(doc.getDocument().get());
+//			edits.apply(workingCopy);
+//			System.out.println("==============");
+//			System.out.println(workingCopy.get());
+//			System.out.println("==============");
+//		}
 	};
 
 	public ReplaceDeprecatedYamlQuickfix(QuickfixContext context, SpringPropertyProblem problem) {

@@ -269,7 +269,7 @@ public class YamlStructureParser {
 		protected abstract void dump(Writer out, int indent) throws Exception;
 
 		public YamlPath getPath() throws Exception {
-			ArrayList<YamlPathSegment> segments = new ArrayList<YamlPathSegment>();
+			ArrayList<YamlPathSegment> segments = new ArrayList<>();
 			buildPath(this, segments);
 			return new YamlPath(segments);
 		}
@@ -384,7 +384,7 @@ public class YamlStructureParser {
 		}
 		public void addChild(SNode c) {
 			if (children==null) {
-				children = new ArrayList<SNode>();
+				children = new ArrayList<>();
 			}
 			children.add(c);
 		}
@@ -477,7 +477,7 @@ public class YamlStructureParser {
 
 		private Map<String, SKeyNode> keyMap() throws Exception {
 			if (keyMap==null) {
-				HashMap<String, SKeyNode> index = new HashMap<String, SKeyNode>();
+				HashMap<String, SKeyNode> index = new HashMap<>();
 				for (SNode node: getChildren()) {
 					if (node.getNodeType()==SNodeType.KEY) {
 						SKeyNode keyNode = (SKeyNode)node;
@@ -692,13 +692,15 @@ public class YamlStructureParser {
 		 * Gets the raw text of the 'stuff' assigned to the key in this node.
 		 * This includes all the text starting from the ':' upto the very end of this node,
 		 * including the text for this node's children (if any).
+		 * <p>
+		 * For child nodes we also retain the indentations relative to the parent. In other words
+		 * child nodes are stripped of indentation upto the indentation level of the parent.
 		 */
-		public String getValue() {
+		public String getValueWithRelativeIndent() {
 			int start = getColonOffset()+1;
 			int end = getTreeEnd();
 			String indentedText = StringUtil.trimEnd(doc.textBetween(start, end));
-			List<SNode> children = getChildren();
-			int indent = determineIndentation(children);
+			int indent = getIndent();
 			if (indent>0) {
 				return stripIndentation(indent, indentedText);
 			}
@@ -724,7 +726,11 @@ public class YamlStructureParser {
 				out.append(indentedText.substring(newline, newline_end));
 				pos = newline_end;
 			}
-			out.append(stripIndentationFromLine(indent, indentedText.substring(pos)));
+			String line = indentedText.substring(pos);
+			if (!first) {
+				line = stripIndentationFromLine(indent, line);
+			}
+			out.append(line);
 			return out.toString();
 		}
 
@@ -734,24 +740,6 @@ public class YamlStructureParser {
 				start++;
 			}
 			return line.substring(start);
-		}
-
-		/**
-		 * Determine the indentation of a block of children.
-		 */
-		private int determineIndentation(List<SNode> children) {
-			//The tricky bit is that the block may start with comment nodes which provide no hints about the indentation
-			//indicated by indentation level = -1
-			//So... we must take indentation from the first node that actually has one
-			if (children!=null) {
-				for (SNode c : children) {
-					int indent = c.getIndent();
-					if (indent>=0) {
-						return indent;
-					}
-				}
-			}
-			return -1; //Couldn't determine it.
 		}
 	}
 

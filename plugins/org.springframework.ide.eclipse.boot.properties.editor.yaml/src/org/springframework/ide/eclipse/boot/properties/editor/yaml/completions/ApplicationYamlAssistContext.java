@@ -47,6 +47,7 @@ import org.springframework.ide.eclipse.editor.support.util.CollectionUtil;
 import org.springframework.ide.eclipse.editor.support.util.DocumentRegion;
 import org.springframework.ide.eclipse.editor.support.util.FuzzyMatcher;
 import org.springframework.ide.eclipse.editor.support.util.StringUtil;
+import org.springframework.ide.eclipse.editor.support.util.YamlIndentUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 import org.springframework.ide.eclipse.editor.support.yaml.completions.AbstractYamlAssistContext;
 import org.springframework.ide.eclipse.editor.support.yaml.completions.TopLevelAssistContext;
@@ -97,7 +98,7 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 		//so the strings created here do not need to contain indentation spaces.
 		if (TypeUtil.isMap(type)) {
 			//ready to enter nested map key on next line
-			return "\n";
+			return "\n"+YamlIndentUtil.INDENT_STR;
 		} if (TypeUtil.isSequencable(type)) {
 			//ready to enter sequence element on next line
 			return "\n- ";
@@ -106,7 +107,7 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 			return " ";
 		} else {
 			//Assume its some kind of pojo bean
-			return "\n";
+			return "\n"+YamlIndentUtil.INDENT_STR;
 		}
 	}
 
