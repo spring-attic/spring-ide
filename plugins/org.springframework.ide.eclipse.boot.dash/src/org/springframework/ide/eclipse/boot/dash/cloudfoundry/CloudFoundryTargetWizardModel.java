@@ -190,8 +190,9 @@ public class CloudFoundryTargetWizardModel {
 			spaceResolutionStatus.setValue(ValidationResult.OK);
 			return resolvedSpaces.getValue();
 		} catch (Exception e) {
-			if (CFExceptions.isAuthFailure(e)) {
-				//don't log, its expected if user just typed bad password.
+			if (CFExceptions.isAuthFailure(e) || CFExceptions.isSSLCertificateFailure(e)) {
+				//don't log, its expected if user just typed bad password,
+				//or didn't check ssl box when they should have.
 			} else {
 				Log.log(e);
 			}
