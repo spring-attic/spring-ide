@@ -18,12 +18,12 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.ui.PlatformUI;
 import org.junit.Test;
 import org.springframework.ide.eclipse.boot.wizard.content.ContentManager;
 import org.springframework.ide.eclipse.boot.wizard.content.ContentManager.DownloadState;
 import org.springframework.ide.eclipse.boot.wizard.content.ContentType;
 import org.springframework.ide.eclipse.boot.wizard.guides.GSImportWizardModel;
+import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
@@ -203,7 +203,7 @@ public class GSGWizardModelTest {
 	}
 
 	public static IRunnableContext getRunnableContext() {
-		return PlatformUI.getWorkbench().getProgressService();
+		return JobUtil.DEFAULT_BACKGROUND_RUNNABLE_CONTEXT;
 	}
 
 	protected List<?> getContent(ContentType<?>[] types, ContentManager contentManager) {
