@@ -72,7 +72,7 @@ public class YTypeAssistContext extends AbstractYamlAssistContext {
 		int queryOffset = offset - query.length();
 		List<YTypedProperty> properties = typeUtil.getProperties(type);
 		if (CollectionUtil.hasElements(properties)) {
-			ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>(properties.size());
+			ArrayList<ICompletionProposal> proposals = new ArrayList<>(properties.size());
 			SNode contextNode = getContextNode(doc);
 			Set<String> definedProps = getDefinedProperties(contextNode);
 			for (YTypedProperty p : properties) {
@@ -116,7 +116,8 @@ public class YTypeAssistContext extends AbstractYamlAssistContext {
 	 */
 	protected String appendTextFor(YType type) {
 		//Note that proper indentation after each \n" is added automatically
-		//so the strings created here do not need to contain indentation spaces.
+		//to align with the parent. The strings created here only need to contain
+		//indentation spaces to indent *more* than the parent node.
 		if (type==null) {
 			//Assume its some kind of pojo bean
 			return "\n"+YamlIndentUtil.INDENT_STR;
@@ -131,7 +132,7 @@ public class YTypeAssistContext extends AbstractYamlAssistContext {
 			return " ";
 		} else {
 			//Assume its some kind of pojo bean
-			return "\n";
+			return "\n"+YamlIndentUtil.INDENT_STR;
 		}
 	}
 
@@ -140,7 +141,7 @@ public class YTypeAssistContext extends AbstractYamlAssistContext {
 			if (contextNode instanceof SChildBearingNode) {
 				List<SNode> children = ((SChildBearingNode)contextNode).getChildren();
 				if (CollectionUtil.hasElements(children)) {
-					Set<String> keys = new HashSet<String>(children.size());
+					Set<String> keys = new HashSet<>(children.size());
 					for (SNode c : children) {
 						if (c instanceof SKeyNode) {
 							keys.add(((SKeyNode) c).getKey());
@@ -158,7 +159,7 @@ public class YTypeAssistContext extends AbstractYamlAssistContext {
 	private List<ICompletionProposal> getValueCompletions(YamlDocument doc, int offset, String query) {
 		YValueHint[] values = typeUtil.getHintValues(type);
 		if (values!=null) {
-			ArrayList<ICompletionProposal> completions = new ArrayList<ICompletionProposal>();
+			ArrayList<ICompletionProposal> completions = new ArrayList<>();
 			for (YValueHint value : values) {
 				double score = FuzzyMatcher.matchScore(query, value.getValue());
 				if (score!=0 && !value.equals(query)) {
