@@ -11,8 +11,6 @@
 package org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
@@ -26,7 +24,6 @@ import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.editor.support.completions.DocumentEdits;
 import org.springframework.ide.eclipse.editor.support.completions.ProposalApplier;
 import org.springframework.ide.eclipse.editor.support.reconcile.QuickfixContext;
-import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 import org.springframework.ide.eclipse.editor.support.yaml.completions.YamlPathEdits;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPath;
