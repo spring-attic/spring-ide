@@ -57,7 +57,6 @@
 	</distributionManagement>
 
 	<properties>
-	    <misc.p2.repo.version>3.8.2.201609202236</misc.p2.repo.version>
 		<p2.qualifier>SNAPSHOT</p2.qualifier>
 		<p2.sign>false</p2.sign>
 		<p2.repository.name>Spring IDE</p2.repository.name>
@@ -619,11 +618,6 @@
 			<layout>p2</layout>
 			<url>http://dist.springsource.com/release/TOOLS/third-party/yedit</url>
 		</repository>
- 		<repository>
- 			<id>p2-thirdparty-bundles</id>
- 			<layout>p2</layout>
- 			<url>http://dist.springsource.com/release/TOOLS/third-party/misc-p2-repo/${misc.p2.repo.version}</url>
- 		</repository>
 <!-- 		<repository> -->
 <!-- 			<id>yedit</id> -->
 <!-- 			<layout>p2</layout> -->
