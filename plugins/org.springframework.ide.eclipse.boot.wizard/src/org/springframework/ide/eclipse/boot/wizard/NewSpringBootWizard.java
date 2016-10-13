@@ -18,16 +18,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
@@ -98,13 +91,13 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 	private WizardPageSection createRadioGroupsSection(WizardPageWithSections owner) {
 		boolean notEmpty = false;
 		RadioGroup bootVersion = model.getBootVersion(); //This is placed specifically somewhere else so must skip it here
-		ArrayList<WizardPageSection> radioSections = new ArrayList<WizardPageSection>();
+		ArrayList<WizardPageSection> radioSections = new ArrayList<>();
 		for (RadioGroup radioGroup : model.getRadioGroups().getGroups()) {
 			if (radioGroup!=bootVersion) {
 				if (radioGroup.getRadios().length>1) {
 					//Don't add a UI elements for something that offers no real choice
 					radioSections.add(
-						new ChooseOneSectionCombo<RadioInfo>(owner, radioGroup.getLabel(), radioGroup.getSelection(), radioGroup.getRadios())
+						new ChooseOneSectionCombo<>(owner, radioGroup.getLabel(), radioGroup.getSelection(), radioGroup.getRadios())
 						//new ChooseOneSectionCombo<RadioInfo>(owner, radioGroup.getLabel(), radioGroup.getSelection(), radioGroup.getRadios())
 					);
 					notEmpty = true;
@@ -125,7 +118,7 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 
 		@Override
 		protected List<WizardPageSection> createSections() {
-			List<WizardPageSection> sections = new ArrayList<WizardPageSection>();
+			List<WizardPageSection> sections = new ArrayList<>();
 
 			FieldModel<String> projectName = model.getProjectName();
 			sections.add(new StringFieldSection(this, projectName));
@@ -154,7 +147,7 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 
 		private static final int NUM_DEP_COLUMNS = 4;
 		private static final int MAX_MOST_POPULAR = 3*NUM_DEP_COLUMNS;
-		
+
 		private ExpandableSection frequentlyUsedSection;
 
 		private CheckBoxesSection<Dependency> frequentlyUsedCheckboxes;
@@ -176,29 +169,32 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 				}
 			}
 		}
-		
+
 		private void refreshFrequentlyUsedDependencies() {
 			List<CheckBoxModel<Dependency>> dependenciesCheckboxes = model.getFrequentlyUsedDependencies(MAX_MOST_POPULAR);
 			frequentlyUsedCheckboxes.setModel(dependenciesCheckboxes);
 			frequentlyUsedSection.setVisible(!dependenciesCheckboxes.isEmpty());
 			reflow();
 		}
-		
+
 		@Override
 		protected List<WizardPageSection> createSections() {
-			List<WizardPageSection> sections = new ArrayList<WizardPageSection>();
+			List<WizardPageSection> sections = new ArrayList<>();
 
 			RadioGroup bootVersion = model.getBootVersion();
 			sections.add(
-					new ChooseOneSectionCombo<RadioInfo>(this, bootVersion.getLabel(),
-							bootVersion.getSelection(), bootVersion.getRadios()));
+				new ChooseOneSectionCombo<>(this, bootVersion.getLabel(),
+							bootVersion.getSelection(), bootVersion.getRadios()
+				)
+				.useFieldLabelWidthHint(false)
+			);
 
 			sections.add(
 					new CommentSection(this, model.dependencies.getLabel())
 			);
 
 			List<CheckBoxModel<Dependency>> frequesntDependencies = model.getFrequentlyUsedDependencies(MAX_MOST_POPULAR);
-			frequentlyUsedCheckboxes = new CheckBoxesSection<Dependency>(this, frequesntDependencies)
+			frequentlyUsedCheckboxes = new CheckBoxesSection<>(this, frequesntDependencies)
 					.columns(NUM_DEP_COLUMNS);
 			frequentlyUsedSection = new ExpandableSection(this, "Frequently Used",
 					frequentlyUsedCheckboxes);
@@ -206,21 +202,21 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 			frequentlyUsedSection.setVisible(!frequesntDependencies.isEmpty());
 
 			sections.add(
-				new GroupSection(this, null, 
+				new GroupSection(this, null,
 					new SearchBoxSection(this, model.getDependencyFilterBoxText()) {
 						@Override
 						protected String getSearchHint() {
 							return "Type to search dependencies";
 						}
 					},
-	
+
 					new ButtonSection(this, "Make Default", () -> {
 						if (model.saveDefaultDependencies()) {
 							refreshFrequentlyUsedDependencies();
 						}
 					})
 					.tooltip("Make currently selected dependencies selected by default"),
-					
+
 					new ButtonSection(this, "Clear Selection", () -> {
 						model.dependencies.clearSelection();
 					})
@@ -228,14 +224,14 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 				)
 				.columns(3, false)
 			);
-				
+
 			for (String cat : model.dependencies.getCategories()) {
 				MultiSelectionFieldModel<Dependency> dependencyGroup = model.dependencies.getContents(cat);
 				final ExpandableSection expandable;
 				final CheckBoxesSection<Dependency> checkboxes;
 				sections.add(
 					expandable = new ExpandableSection(this, dependencyGroup.getLabel(),
-							checkboxes = new CheckBoxesSection<Dependency>(this, dependencyGroup.getCheckBoxModels())
+							checkboxes = new CheckBoxesSection<>(this, dependencyGroup.getCheckBoxModels())
 								.columns(NUM_DEP_COLUMNS)
 					)
 				);
@@ -264,7 +260,7 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 
 		@Override
 		protected List<WizardPageSection> createSections() {
-			List<WizardPageSection> sections = new ArrayList<WizardPageSection>();
+			List<WizardPageSection> sections = new ArrayList<>();
 
 			sections.add(new GroupSection(this, "Site Info",
 					new StringFieldSection(this, "Base Url", model.baseUrl, model.baseUrlValidator),

@@ -96,7 +96,7 @@ public class NewSpringBootWizardModel {
 		KNOWN_SINGLE_SELECTS.put("packaging", "Packaging:");
 		KNOWN_SINGLE_SELECTS.put("javaVersion", "Java Version:");
 		KNOWN_SINGLE_SELECTS.put("language", "Language:");
-		KNOWN_SINGLE_SELECTS.put("bootVersion", "Boot Version:");
+		KNOWN_SINGLE_SELECTS.put("bootVersion", "Spring Boot Version:");
 	}
 
 	private final URLConnectionFactory urlConnectionFactory;
