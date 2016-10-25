@@ -119,14 +119,6 @@ public class ApplicationYamlEditorTestHarness extends YamlOrPropertyEditorTestHa
 		assertEquals(0, getCompletions(editor).length);
 	}
 
-	public void assertCompletion(String before, String after) throws Exception {
-		YamlEditor editor = newEditor(before);
-		ICompletionProposal completion = getFirstCompletion(editor);
-		editor.apply(completion);
-		String actual = editor.getText();
-		assertEquals(trimEnd(after), trimEnd(actual));
-	}
-
 	public class YamlEditor extends MockYamlEditor {
 		public YamlEditor(String string) {
 			super(string, structureProvider, parser, ApplicationYamlEditorTestHarness.this.hoverProvider);
