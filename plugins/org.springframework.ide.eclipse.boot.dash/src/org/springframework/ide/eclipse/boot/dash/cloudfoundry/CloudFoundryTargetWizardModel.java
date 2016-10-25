@@ -10,23 +10,18 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
-import java.lang.reflect.Field;
-import java.net.Authenticator;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
-import org.cloudfoundry.client.lib.CloudFoundryException;
-import org.eclipse.core.internal.net.ProxyManager;
-import org.eclipse.core.net.proxy.IProxyService;
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.operation.IRunnableContext;
-import org.springframework.http.HttpStatus;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials.CFCredentialType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFExceptions;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
@@ -40,12 +35,14 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAcce
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
 import org.springframework.ide.eclipse.boot.util.Log;
+import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.CompositeValidator;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
+import org.springsource.ide.eclipse.commons.livexp.ui.Ilabelable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import com.google.common.collect.ImmutableSet;
@@ -56,6 +53,24 @@ import com.google.common.collect.ImmutableSet;
  */
 public class CloudFoundryTargetWizardModel {
 
+	public enum LoginMethod implements Ilabelable {
+		PASSWORD,
+		TEMPORARY_CODE;
+
+		@Override
+		public String getLabel() {
+			String[] pieces = name().split("_");
+			StringBuilder label = new StringBuilder();
+			for (int i = 0; i < pieces.length; i++) {
+				if (i>0) {
+					label.append(" ");
+				}
+				label.append(StringUtils.capitalize(pieces[i].toLowerCase()));
+			}
+			return label.toString();
+		}
+	}
+
 	private RunTargetType runTargetType;
 	private BootDashModelContext context;
 
@@ -63,6 +78,7 @@ public class CloudFoundryTargetWizardModel {
 	private LiveVariable<CFSpace> space = new LiveVariable<>();
 	private LiveVariable<Boolean> selfsigned = new LiveVariable<>(false);
 	private LiveVariable<Boolean> skipSslValidation = new LiveVariable<>(false);
+	private LiveVariable<LoginMethod> method = new LiveVariable<>(LoginMethod.PASSWORD);
 	private LiveVariable<String> userName = new LiveVariable<>();
 	private LiveVariable<String> password = new LiveVariable<>();
 	private LiveVariable<StoreCredentialsMode> storeCredentials = new LiveVariable<>(StoreCredentialsMode.STORE_NOTHING);
@@ -102,6 +118,7 @@ public class CloudFoundryTargetWizardModel {
 		credentialsValidator.dependsOn(selfsigned);
 		credentialsValidator.dependsOn(userName);
 		credentialsValidator.dependsOn(password);
+		credentialsValidator.dependsOn(method);
 
 		// Spaces validator is notified when there are changes to the space
 		// variable. This is a separate validator as space validation and spave
@@ -349,23 +366,23 @@ public class CloudFoundryTargetWizardModel {
 	class CredentialsValidator extends Validator {
 		@Override
 		protected ValidationResult compute() {
-			String infoMessage = null;
-
 			if (isEmpty(userName.getValue())) {
-				infoMessage = "Enter a username";
-			} else if (isEmpty(password.getValue())) {
-				infoMessage = "Enter a password";
+				return ValidationResult.info("Enter a username");
 			} else if (isEmpty(url.getValue())) {
-				infoMessage = "Enter a target URL";
-			} else {
 				try {
 					new URL(url.getValue());
+					return ValidationResult.info("Enter a target URL");
 				} catch (MalformedURLException e) {
 					return ValidationResult.error(e.getMessage());
 				}
-			}
-			if (infoMessage != null) {
-				return ValidationResult.info(infoMessage);
+			} else if (method.getValue()==LoginMethod.PASSWORD) {
+				if (isEmpty(password.getValue())) {
+					return ValidationResult.info("Enter a password");
+				}
+			} else if (method.getValue()==LoginMethod.TEMPORARY_CODE) {
+				if (isEmpty(password.getValue())) {
+					return ValidationResult.info("Enter a Temporary Access Code");
+				}
 			}
 			return ValidationResult.OK;
 		}
@@ -423,6 +440,10 @@ public class CloudFoundryTargetWizardModel {
 		return refreshToken;
 	}
 
+	public LiveVariable<LoginMethod> getMethodVar() {
+		return method;
+	}
+
 	public LiveVariable<String> getUsernameVar() {
 		return userName;
 	}
@@ -461,6 +482,10 @@ public class CloudFoundryTargetWizardModel {
 
 	public LiveExpression<ValidationResult> getCredentialsValidator() {
 		return credentialsValidator;
+	}
+
+	public void setMethod(LoginMethod v) {
+		method.setValue(v);
 	}
 
 }

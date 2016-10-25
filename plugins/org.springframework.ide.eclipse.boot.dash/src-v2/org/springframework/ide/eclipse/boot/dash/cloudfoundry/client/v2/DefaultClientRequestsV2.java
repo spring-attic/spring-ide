@@ -78,6 +78,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicati
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
@@ -161,7 +162,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	private CloudFoundryOperations _operations;
 
 	@Deprecated
-	private DefaultClientRequestsV1 v1;
+	private DefaultClientRequestsV1 _v1;
 
 	private Mono<String> orgId;
 	private Mono<GetInfoResponse> info;
@@ -170,7 +171,6 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	public DefaultClientRequestsV2(CloudFoundryClientCache clients, CFClientParams params) throws Exception {
 		this.params = params;
-		this.v1 = new DefaultClientRequestsV1(params);
 		CFClientProvider provider = clients.getOrCreate(params.getUsername(), params.getCredentials(), params.getHost(), params.skipSslValidation());
 		this._client = provider.client;
 		this._tokenProvider = (AbstractUaaTokenProvider) provider.tokenProvider;
@@ -462,9 +462,9 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	public void logout() {
 		_operations = null;
 		_client = null;
-		if (v1!=null) {
-			v1.logout();
-			v1 = null;
+		if (_v1!=null) {
+			_v1.logout();
+			_v1 = null;
 		}
 	}
 
@@ -698,7 +698,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		.then(mono_debug("Uploading[1]..."))
 		.then(Mono.fromCallable(() -> {
 			debug("Uploading[2]...");
-			v1.uploadApplication(appName, params.getApplicationData());
+			v1().uploadApplication(appName, params.getApplicationData());
 			debug("Uploading[2] DONE");
 			return "who cares";
 		}))
@@ -707,6 +707,22 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 			? stopApp(appName)
 			: restartApp(appName)
 		);
+	}
+
+	private DefaultClientRequestsV1 v1() throws Exception {
+		if (_v1==null) {
+			CFClientParams v1params = new CFClientParams(
+					params.getApiUrl(),
+					params.getUsername(),
+					CFCredentials.fromRefreshToken(getRefreshToken()),
+					params.isSelfsigned(),
+					params.getOrgName(),
+					params.getSpaceName(),
+					params.skipSslValidation()
+			);
+			_v1 = new DefaultClientRequestsV1(v1params);
+		}
+		return _v1;
 	}
 
 	private Mono<Void> mono_debug(String string) {
@@ -724,7 +740,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 			).then()
 		)
 		.then(Mono.fromCallable(() -> {
-			v1.uploadApplication(appName, params.getApplicationData());
+			v1().uploadApplication(appName, params.getApplicationData());
 			return "who cares";
 		}))
 		.then(params.isNoStart()

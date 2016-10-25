@@ -23,11 +23,13 @@ import org.cloudfoundry.reactor.ProxyConfiguration;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.cloudfoundry.reactor.doppler.ReactorDopplerClient;
+import org.cloudfoundry.reactor.tokenprovider.OneTimePasscodeTokenProvider;
 import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
 import org.cloudfoundry.reactor.tokenprovider.RefreshTokenGrantTokenProvider;
 import org.cloudfoundry.reactor.uaa.ReactorUaaClient;
 import org.eclipse.core.net.proxy.IProxyData;
 import org.eclipse.core.net.proxy.IProxyService;
+import org.eclipse.core.runtime.Assert;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.util.Log;
@@ -134,19 +136,22 @@ public class CloudFoundryClientCache {
 
 		private TokenProvider createTokenProvider(Params params) {
 			CFCredentials creds = params.credentials;
-			String password = creds.getPassword();
-			String refreshToken = creds.getRefreshToken();
-			if (password!=null) {
+			switch (creds.getType()) {
+			case PASSWORD:
 				return PasswordGrantTokenProvider.builder()
 						.username(params.username)
-						.password(password)
+						.password(creds.getSecret())
 						.build();
-			} else if (refreshToken!=null) {
+			case REFRESH_TOKEN:
 				return RefreshTokenGrantTokenProvider.builder()
-						.token(refreshToken)
+						.token(creds.getSecret())
 						.build();
-			} else {
-				throw new IllegalArgumentException("Either a password or refreshToken must be provided");
+			case TEMPORARY_CODE:
+				return OneTimePasscodeTokenProvider.builder()
+						.passcode(creds.getSecret())
+						.build();
+			default:
+				throw new IllegalStateException("BUG! Missing switch case?");
 			}
 		}
 

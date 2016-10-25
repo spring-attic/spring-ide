@@ -11,48 +11,80 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client;
 
 import org.eclipse.core.runtime.Assert;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetWizardModel.LoginMethod;
 
 public class CFCredentials {
 
-	//At least one of password / refreshToken must be set.
-	//Either password or refreshToken can be used to authenticate CF connection.
+	public enum CFCredentialType {
+		PASSWORD,
+		TEMPORARY_CODE,
+		REFRESH_TOKEN;
 
-	private final String password;
-	private final String refreshToken;
+		public LoginMethod toLoginMethod() {
+			switch (this) {
+			case PASSWORD:
+				return LoginMethod.PASSWORD;
+			case TEMPORARY_CODE:
+				return LoginMethod.TEMPORARY_CODE;
+			default:
+				return null;
+			}
+		}
+	}
 
+	private final CFCredentialType type;
+	private final String secret;
+
+	/**
+	 * Deprecated, use fromLogin instead
+	 */
+	@Deprecated
 	public static CFCredentials fromPassword(String password) {
-		return new CFCredentials(password, null);
+		return fromLogin(LoginMethod.PASSWORD, password);
+	}
+
+
+	public static CFCredentials fromLogin(LoginMethod method, String secret) {
+		CFCredentialType type;
+		switch (method) {
+		case PASSWORD:
+			type = CFCredentialType.PASSWORD;
+			break;
+		case TEMPORARY_CODE:
+			type = CFCredentialType.TEMPORARY_CODE;
+			break;
+		default:
+			throw new IllegalStateException("Bug! Missing switch case?");
+		}
+		return new CFCredentials(type, secret);
 	}
 
 	public static CFCredentials fromRefreshToken(String refreshToken) {
-		return new CFCredentials(null, refreshToken);
+		Assert.isNotNull(refreshToken);
+		return new CFCredentials(CFCredentialType.REFRESH_TOKEN, refreshToken);
 	}
 
-	public String getPassword() {
-		return password;
-	}
-
-	public String getRefreshToken() {
-		return refreshToken;
+	public String getSecret() {
+		return secret;
 	}
 
 	/////////////////////////////////////////////////////////////////////////
 
+
 	/**
 	 * Private constuctor, use static `fromXXX` factory methods instead.
 	 */
-	private CFCredentials(String password, String refreshToken) {
-		Assert.isLegal(password!=null || refreshToken!=null);
-		this.password = password;
-		this.refreshToken = refreshToken;
+	private CFCredentials(CFCredentialType type, String secret) {
+		this.type = type;
+		this.secret = secret;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((password == null) ? 0 : password.hashCode());
-		result = prime * result + ((refreshToken == null) ? 0 : refreshToken.hashCode());
+		result = prime * result + ((secret == null) ? 0 : secret.hashCode());
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
 		return result;
 	}
 
@@ -65,25 +97,33 @@ public class CFCredentials {
 		if (getClass() != obj.getClass())
 			return false;
 		CFCredentials other = (CFCredentials) obj;
-		if (password == null) {
-			if (other.password != null)
+		if (secret == null) {
+			if (other.secret != null)
 				return false;
-		} else if (!password.equals(other.password))
+		} else if (!secret.equals(other.secret))
 			return false;
-		if (refreshToken == null) {
-			if (other.refreshToken != null)
-				return false;
-		} else if (!refreshToken.equals(other.refreshToken))
+		if (type != other.type)
 			return false;
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return "CFCredentials [password=" + hidePassword(password) + ", refreshToken=" + refreshToken + "]";
+		return "CFCredentials [type=" + type + ", secret=" + hidePassword(type, secret) + "]";
 	}
 
-	private String hidePassword(String password) {
-		return password==null ? null : "*****";
+	private String hidePassword(CFCredentialType type, String password) {
+		if (password==null) {
+			return null;
+		}
+		return type==CFCredentialType.PASSWORD
+				? "****"
+				: password;
 	}
+
+
+	public CFCredentialType getType() {
+		return type;
+	}
+
 }

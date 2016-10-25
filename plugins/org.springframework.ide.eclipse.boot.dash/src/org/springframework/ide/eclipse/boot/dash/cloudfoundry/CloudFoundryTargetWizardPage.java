@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 
 import org.eclipse.jface.layout.GridDataFactory;
@@ -26,6 +27,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetWizardModel.LoginMethod;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.views.UpdatePasswordDialog;
 import org.springframework.ide.eclipse.editor.support.util.CollectionUtil;
@@ -33,6 +35,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.CompositeValidator;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.ui.CheckboxSection;
+import org.springsource.ide.eclipse.commons.livexp.ui.ChooseOneSectionCombo;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.StringFieldSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.UIConstants;
@@ -137,6 +140,8 @@ public class CloudFoundryTargetWizardPage extends WizardPageWithSections {
 	@Override
 	protected List<WizardPageSection> createSections() {
 		List<WizardPageSection> sections = new ArrayList<>();
+		sections.add(new ChooseOneSectionCombo<>(this, "Method:", model.getMethodVar(), EnumSet.allOf(LoginMethod.class)));
+		//TODO: hide password or passcode field depending on the method.
 		sections.add(new StringFieldSection(this, "Email:", model.getUsernameVar()));
 		sections.add(new StringFieldSection(this, "Password:", model.getPasswordVar()).setPassword(true));
 		sections.add(UpdatePasswordDialog.storeCredentialsSection(this, model.getStoreVar()));

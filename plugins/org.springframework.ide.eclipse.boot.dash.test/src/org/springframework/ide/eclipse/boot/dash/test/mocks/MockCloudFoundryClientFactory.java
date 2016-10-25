@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials.CFCredentialType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFOrganization;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
@@ -300,14 +301,14 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		}
 
 		private void checkCredentials(String username, CFCredentials credentials) throws Exception {
-			String password = credentials.getPassword();
-			String token = credentials.getRefreshToken();
-			if (password!=null) {
-				if (credentials.getPassword().startsWith("wrong")) {
+			CFCredentialType type = credentials.getType();
+			String secret = credentials.getSecret();
+			if (type==CFCredentialType.PASSWORD) {
+				if (credentials.getSecret().startsWith("wrong")) {
 					throw errorInvalidCredentials();
 				}
-			} else if (token!=null) {
-				if (!token.equals(FAKE_REFRESH_TOKEN)) {
+			} else if (type==CFCredentialType.REFRESH_TOKEN) {
+				if (!secret.equals(FAKE_REFRESH_TOKEN)) {
 					throw errorInvalidCredentials();
 				}
 			} else {

@@ -32,6 +32,7 @@ import org.cloudfoundry.client.lib.StreamingLogToken;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.CloudInfo;
 import org.cloudfoundry.client.lib.domain.Staging;
+import org.eclipse.core.runtime.Assert;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudErrors;
@@ -41,6 +42,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials.CFCredentialType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
@@ -94,17 +96,8 @@ public class DefaultClientRequestsV1 {
 
 	private static CloudCredentials getCloudCredentials(CFClientParams params) {
 		CFCredentials creds = params.getCredentials();
-		String password = creds.getPassword();
-		String refreshToken = creds.getRefreshToken();
-		CloudCredentials credentials = null;
-		if (password!=null) {
-			credentials = new CloudCredentials(params.getUsername(), password);
-		} else if (refreshToken!=null) {
-			credentials = refreshTokenCredentials(refreshToken);
-		} else {
-			throw new IllegalArgumentException("Either a password or refreshToken must be provided");
-		}
-		return credentials;
+		Assert.isLegal(creds.getType()==CFCredentialType.REFRESH_TOKEN, "V1 client should only be created with refresh token auth");
+		return refreshTokenCredentials(creds.getSecret());
 	}
 
 	private static CloudCredentials refreshTokenCredentials(String refreshToken) {

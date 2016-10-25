@@ -61,6 +61,8 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElemen
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudServiceInstanceDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials.CFCredentialType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel.StoreCredentialsMode;
@@ -131,8 +133,10 @@ public class CloudFoundryBootDashModelIntegrationTest {
 	@Test
 	public void testCreateCfTarget() throws Exception {
 		CloudFoundryBootDashModel target =  harness.createCfTarget(CfTestTargetParams.fromEnv());
+		CFCredentials credentials = target.getRunTarget().getTargetProperties().getCredentials();
 		assertNotNull(target);
-		assertNotNull(target.getRunTarget().getTargetProperties().getCredentials().getPassword());
+		assertEquals(CFCredentialType.PASSWORD, credentials.getType());
+		assertNotNull(credentials.getSecret());
 		assertEquals(1, harness.getCfRunTargetModels().size());
 	}
 
@@ -142,7 +146,9 @@ public class CloudFoundryBootDashModelIntegrationTest {
 		CloudFoundryBootDashModel target =  harness.createCfTarget(targetParams, StoreCredentialsMode.STORE_TOKEN);
 		assertNotNull(target);
 		assertTrue(target.isConnected());
-		assertNotNull(target.getRunTarget().getTargetProperties().getCredentials().getRefreshToken());
+		CFCredentials credentials = target.getRunTarget().getTargetProperties().getCredentials();
+		assertEquals(CFCredentialType.REFRESH_TOKEN, credentials.getType());
+		assertNotNull(credentials.getSecret());
 		assertEquals(1, harness.getCfRunTargetModels().size());
 	}
 

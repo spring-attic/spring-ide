@@ -38,6 +38,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials.CFCredentialType;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel.StoreCredentialsMode;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
@@ -628,7 +629,7 @@ public class BootDashViewModelTest {
 
 		harness.model.updateTargetPropertiesInStore();
 
-		assertEquals("secret", target.getTargetProperties().getCredentials().getPassword());
+		assertEquals("secret", target.getTargetProperties().getCredentials().getSecret());
 
 		harness.reload();
 
@@ -659,7 +660,8 @@ public class BootDashViewModelTest {
 		// That seems undesirable.
 		String key = "mock-type:target-id";
 		assertEquals(StoreCredentialsMode.STORE_PASSWORD, target.getTargetProperties().getStoreCredentials());
-		assertEquals("secret", target.getTargetProperties().getCredentials().getPassword());
+		assertEquals(CFCredentialType.PASSWORD, target.getTargetProperties().getCredentials().getType());
+		assertEquals("secret", target.getTargetProperties().getCredentials().getSecret());
 		assertEquals("secret", secureStore.getCredentials(key));
 
 		/////////////////////////////////////////
@@ -672,7 +674,7 @@ public class BootDashViewModelTest {
 		assertTrue(restoredTarget != target); //Not a strict requirement, but it is more or less
 												// expected the restored target is a brand new object
 		assertEquals(StoreCredentialsMode.STORE_PASSWORD, restoredTarget.getTargetProperties().getStoreCredentials());
-		assertEquals("secret", restoredTarget.getTargetProperties().getCredentials().getPassword());
+		assertEquals("secret", restoredTarget.getTargetProperties().getCredentials().getSecret());
 	}
 
 	@Test
@@ -695,7 +697,7 @@ public class BootDashViewModelTest {
 		// That seems undesirable.
 		String key = "mock-type:target-id";
 		assertEquals(StoreCredentialsMode.STORE_NOTHING, target.getTargetProperties().getStoreCredentials());
-		assertEquals("secret", target.getTargetProperties().getCredentials().getPassword());
+		assertEquals("secret", target.getTargetProperties().getCredentials().getSecret());
 		assertNull(secureStore.getCredentials(key));
 
 		/////////////////////////////////////////

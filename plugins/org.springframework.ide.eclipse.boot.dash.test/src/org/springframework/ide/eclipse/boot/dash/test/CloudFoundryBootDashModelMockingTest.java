@@ -71,6 +71,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDa
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials.CFCredentialType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.HealthChecks;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
@@ -169,7 +170,9 @@ public class CloudFoundryBootDashModelMockingTest {
 		CloudFoundryBootDashModel target =  harness.createCfTarget(targetParams, StoreCredentialsMode.STORE_PASSWORD);
 
 		assertNotNull(target);
-		assertNotNull(target.getRunTarget().getTargetProperties().getCredentials().getPassword());
+		CFCredentials credentials = target.getRunTarget().getTargetProperties().getCredentials();
+		assertEquals(CFCredentialType.PASSWORD, credentials.getType());
+		assertNotNull(credentials.getSecret());
 		assertEquals(1, harness.getCfRunTargetModels().size());
 	}
 
@@ -180,7 +183,9 @@ public class CloudFoundryBootDashModelMockingTest {
 			CloudFoundryBootDashModel target =  harness.createCfTarget(targetParams, StoreCredentialsMode.STORE_PASSWORD);
 
 			assertNotNull(target);
-			assertNotNull(target.getRunTarget().getTargetProperties().getCredentials().getPassword());
+			CFCredentials credentials = target.getRunTarget().getTargetProperties().getCredentials();
+			assertEquals(CFCredentialType.PASSWORD, credentials.getType());
+			assertNotNull(credentials.getSecret());
 			assertEquals(1, harness.getCfRunTargetModels().size());
 
 			SecuredCredentialsStore store = harness.getCredentialsStore();
@@ -190,10 +195,12 @@ public class CloudFoundryBootDashModelMockingTest {
 		harness.reload();
 		{
 			CloudFoundryBootDashModel target = harness.getCfTargetModel();
-			String expectedPass = targetParams.getCredentials().getPassword();
+			String expectedPass = targetParams.getCredentials().getSecret();
 
 			assertNotNull(target);
-			String password = target.getRunTarget().getTargetProperties().getCredentials().getPassword();
+			CFCredentials credentials = target.getRunTarget().getTargetProperties().getCredentials();
+			String password = credentials.getSecret();
+			assertEquals(CFCredentialType.PASSWORD, credentials.getType());
 			assertEquals(expectedPass, password);
 			assertEquals(StoreCredentialsMode.STORE_PASSWORD, target.getRunTarget().getTargetProperties().getStoreCredentials());
 
@@ -226,7 +233,9 @@ public class CloudFoundryBootDashModelMockingTest {
 			CloudFoundryBootDashModel target =  harness.createCfTarget(targetParams, StoreCredentialsMode.STORE_NOTHING);
 
 			assertNotNull(target);
-			assertNotNull(target.getRunTarget().getTargetProperties().getCredentials().getPassword());
+			CFCredentials credentials = target.getRunTarget().getTargetProperties().getCredentials();
+			assertEquals(CFCredentialType.PASSWORD, credentials.getType());
+			assertNotNull(credentials.getSecret());
 			assertEquals(1, harness.getCfRunTargetModels().size());
 
 			SecuredCredentialsStore store = harness.getCredentialsStore();
@@ -260,7 +269,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 			//When we connect... the user should get prompted for password
 			harness.answerPasswordPrompt(ui, (d) -> {
-				d.getPasswordVar().setValue(targetParams.getCredentials().getPassword());
+				d.getPasswordVar().setValue(targetParams.getCredentials().getSecret());
 				d.performOk();
 			});
 
@@ -288,7 +297,9 @@ public class CloudFoundryBootDashModelMockingTest {
 			CloudFoundryBootDashModel target =  harness.createCfTarget(targetParams, StoreCredentialsMode.STORE_TOKEN);
 			assertNotNull(target);
 			assertTrue(target.isConnected());
-			assertEquals(MockCloudFoundryClientFactory.FAKE_REFRESH_TOKEN, target.getRunTarget().getTargetProperties().getCredentials().getRefreshToken());
+			CFCredentials credentials = target.getRunTarget().getTargetProperties().getCredentials();
+			assertEquals(CFCredentialType.REFRESH_TOKEN, credentials.getType());
+			assertEquals(MockCloudFoundryClientFactory.FAKE_REFRESH_TOKEN, credentials.getSecret());
 			assertEquals(1, harness.getCfRunTargetModels().size());
 		}
 
@@ -312,7 +323,9 @@ public class CloudFoundryBootDashModelMockingTest {
 			}
 
 			assertNotNull(target);
-			assertEquals(MockCloudFoundryClientFactory.FAKE_REFRESH_TOKEN, target.getRunTarget().getTargetProperties().getCredentials().getRefreshToken());
+			CFCredentials credentials = target.getRunTarget().getTargetProperties().getCredentials();
+			assertEquals(MockCloudFoundryClientFactory.FAKE_REFRESH_TOKEN, credentials.getSecret());
+			assertEquals(CFCredentialType.REFRESH_TOKEN, credentials.getType());
 			assertEquals(StoreCredentialsMode.STORE_TOKEN, target.getRunTarget().getTargetProperties().getStoreCredentials());
 
 			waitForJobsToComplete();
@@ -1541,7 +1554,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertTrue(updatePassword.isEnabled());
 
 		harness.answerPasswordPrompt(ui, (d) -> {
-			d.getPasswordVar().setValue(targetParams.getCredentials().getPassword());
+			d.getPasswordVar().setValue(targetParams.getCredentials().getSecret());
 			d.performOk();
 		});
 
@@ -1587,7 +1600,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		reset(ui);
 
 		harness.answerPasswordPrompt(ui, (d) -> {
-			d.getPasswordVar().setValue(targetParams.getCredentials().getPassword());
+			d.getPasswordVar().setValue(targetParams.getCredentials().getSecret());
 			d.getStoreVar().setValue(StoreCredentialsMode.STORE_NOTHING);
 			d.performOk();
 		});
@@ -1640,7 +1653,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		reset(ui);
 
 		harness.answerPasswordPrompt(ui, (d) -> {
-			d.getPasswordVar().setValue(targetParams.getCredentials().getPassword());
+			d.getPasswordVar().setValue(targetParams.getCredentials().getSecret());
 			d.getStoreVar().setValue(StoreCredentialsMode.STORE_PASSWORD);
 			d.performOk();
 		});
@@ -1683,7 +1696,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		reset(ui);
 
 		harness.answerPasswordPrompt(ui, (d) -> {
-			d.getPasswordVar().setValue(targetParams.getCredentials().getPassword());
+			d.getPasswordVar().setValue(targetParams.getCredentials().getSecret());
 			d.getStoreVar().setValue(StoreCredentialsMode.STORE_TOKEN);
 			d.performOk();
 		});
@@ -1705,8 +1718,8 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		assertTrue(model.isConnected());
 		CFCredentials creds = model.getRunTarget().getTargetProperties().getCredentials();
-		assertEquals(MockCloudFoundryClientFactory.FAKE_REFRESH_TOKEN, creds.getRefreshToken());
-		assertNull(creds.getPassword());
+		assertEquals(MockCloudFoundryClientFactory.FAKE_REFRESH_TOKEN, creds.getSecret());
+		assertEquals(CFCredentialType.REFRESH_TOKEN, creds.getType());
 		assertEquals(MockCloudFoundryClientFactory.FAKE_REFRESH_TOKEN, harness.getPrivateStore().get(harness.privateStoreKey(model)));
 		assertNull(harness.getCredentialsStore().getCredentials(harness.secureStoreKey(model)));
 		assertEquals(RefreshState.READY, model.getRefreshState());

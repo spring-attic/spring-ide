@@ -61,7 +61,7 @@ public class PasswordDialogModel implements OkButtonHandler {
 			@Override
 			protected void basicSaveCredentials(BootDashModelContext context, RunTargetType type, String runTargetId, CFCredentials credentials) throws CannotAccessPropertyException {
 				try {
-					String storedString = credentials.getPassword();
+					String storedString = credentials.getSecret();
 					context.getSecuredCredentialsStore().setCredentials(secureStoreScopeKey(type.getName(), runTargetId), storedString);
 				} catch (StorageException e) {
 					throw new CannotAccessPropertyException("Failed to save credentials", e);
@@ -108,7 +108,7 @@ public class PasswordDialogModel implements OkButtonHandler {
 			@Override
 			public void basicSaveCredentials(BootDashModelContext context, RunTargetType type, String runTargetId, CFCredentials credentials) throws CannotAccessPropertyException {
 				try {
-					String storedString = credentials.getRefreshToken();
+					String storedString = credentials.getSecret();
 					context.getPrivatePropertyStore().put(privateStoreKey(type.getName(), runTargetId), storedString);
 				} catch (Exception e) {
 					throw new CannotAccessPropertyException("Failed to save credentials", e);
