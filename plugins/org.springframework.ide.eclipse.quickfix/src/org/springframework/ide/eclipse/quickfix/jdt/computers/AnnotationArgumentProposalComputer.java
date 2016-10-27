@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.quickfix.jdt.computers;
 
+import java.rmi.activation.Activator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -151,7 +152,9 @@ public class AnnotationArgumentProposalComputer extends JavaCompletionProposalCo
 
 				}
 				catch (JavaModelException e) {
-					StatusHandler.log(e.getStatus());
+					//Something went wrong obtaining java model infos. This could be for any number of reasons (including bad
+					// code in user's workspace. Don't log this! (or 'aer' will report it back to us as a 'bug')
+					//Activator.StatusHandler.log(new Status);
 				}
 			}
 		}
