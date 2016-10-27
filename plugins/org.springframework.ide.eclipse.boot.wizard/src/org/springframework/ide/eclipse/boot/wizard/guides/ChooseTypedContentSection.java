@@ -71,7 +71,7 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
  */
 @SuppressWarnings("restriction")
 public class ChooseTypedContentSection extends WizardPageSection {
-	
+
 	private final PrefetchContentListener prefetchContentListener = new PrefetchContentListener();
 
 	public class PrefetchContentListener implements ValueListener<DownloadState> {
@@ -90,6 +90,7 @@ public class ChooseTypedContentSection extends WizardPageSection {
 
 	private static class ContentProvider implements ITreeContentProvider {
 
+		private static final Object[] NO_ELEMENTS = {};
 		private final ContentManager content;
 
 		public ContentProvider(ContentManager content) {
@@ -118,7 +119,7 @@ public class ChooseTypedContentSection extends WizardPageSection {
 					}
 				}
 			}
-			return null;
+			return NO_ELEMENTS;
 		}
 
 		//@Override
@@ -175,7 +176,7 @@ public class ChooseTypedContentSection extends WizardPageSection {
 	private class ChoicesFilter extends ViewerFilter {
 
 		private StringMatcher matcher = null;
-		private final HashMap<Object, Boolean> cache = new HashMap<Object, Boolean>();
+		private final HashMap<Object, Boolean> cache = new HashMap<>();
 
 		public ChoicesFilter() {
 			if (searchBox!=null) {
@@ -275,12 +276,12 @@ public class ChooseTypedContentSection extends WizardPageSection {
 
 	@Override
 	public void createContents(Composite page) {
-		
-		// PT 130652465 - Avoid downloading content (i.e. network I/O) in the UI thread. 
+
+		// PT 130652465 - Avoid downloading content (i.e. network I/O) in the UI thread.
 		// Solution: downloading/prefetch content in the background to avoid blocking the UI in case
 		// it takes a long time.
 	    prefetchProvidersAndContent();
-		
+
 		Composite field = new Composite(page, SWT.NONE);
 		int cols = sectionLabel==null ? 1 : 2;
 		GridLayout layout = GridLayoutFactory.fillDefaults().numColumns(cols).create();
@@ -413,7 +414,7 @@ public class ChooseTypedContentSection extends WizardPageSection {
 		treeviewer.refresh();
 		treeviewer.expandAll();
 	}
-	
+
 	@Override
 	public void dispose() {
 		if (content != null ) {
