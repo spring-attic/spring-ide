@@ -789,7 +789,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 		MockEditor editor = newEditor(textBefore);
 		ICompletionProposal completion = getFirstCompletion(editor);
 		editor.apply(completion);
-		assertEquals(expectTextAfter, editor.getText());
+		assertEquals(StringUtil.trimEnd(expectTextAfter), StringUtil.trimEnd(editor.getText()));
 	}
 
 

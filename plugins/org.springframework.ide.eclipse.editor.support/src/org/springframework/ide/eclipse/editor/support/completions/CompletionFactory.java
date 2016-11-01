@@ -83,8 +83,8 @@ public class CompletionFactory {
 
 	public static final CompletionFactory DEFAULT = new CompletionFactory();
 
-	public ScoreableProposal simpleProposal(String name, String pattern, int sortingOrder, ProposalApplier applier, HoverInfo Well ) {
-		return simpleProposal(name, pattern, -(1.0+sortingOrder), applier, Well );
+	public ScoreableProposal simpleProposal(String name, String pattern, int sortingOrder, ProposalApplier applier, HoverInfo info) {
+		return simpleProposal(name, pattern, -(1.0+sortingOrder), applier, info);
 	}
 
 	public ScoreableProposal simpleProposal(String name, String pattern, double score, ProposalApplier applier, HoverInfo info) {

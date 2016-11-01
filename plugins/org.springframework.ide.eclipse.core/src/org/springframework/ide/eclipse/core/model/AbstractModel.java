@@ -40,9 +40,11 @@ public abstract class AbstractModel extends AbstractModelElement implements IMod
 	}
 
 	public final void notifyListeners(IModelElement element, Type type) {
-		ModelChangeEvent event = new ModelChangeEvent(element, type);
-		for (Object listener : listeners.getListeners()) {
-			((IModelChangeListener) listener).elementChanged(event);
+		if (element!=null) { //no element? => Nobody to notify.
+			ModelChangeEvent event = new ModelChangeEvent(element, type);
+			for (Object listener : listeners.getListeners()) {
+				((IModelChangeListener) listener).elementChanged(event);
+			}
 		}
 	}
 }

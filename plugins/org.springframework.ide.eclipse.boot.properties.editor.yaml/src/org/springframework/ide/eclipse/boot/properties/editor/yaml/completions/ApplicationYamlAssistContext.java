@@ -95,7 +95,7 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 	 */
 	protected String appendTextFor(Type type) {
 		//Note that proper indentation after each \n" is added automatically
-		//so the strings created here do not need to contain indentation spaces.
+		//so the strings created here do not need to contain indentation spaces
 		if (TypeUtil.isMap(type)) {
 			//ready to enter nested map key on next line
 			return "\n"+YamlIndentUtil.INDENT_STR;
