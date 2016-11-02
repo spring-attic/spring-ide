@@ -39,7 +39,6 @@ import org.springframework.ide.eclipse.config.tests.util.StsConfigBot;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 import org.springsource.ide.eclipse.commons.tests.util.swtbot.StsUiTestCase;
 
-
 /**
  * @author Steffen Pingel
  * @author Terry Denney
@@ -70,8 +69,8 @@ public abstract class AbstractQuickfixUiTestCase extends StsUiTestCase {
 		BeansModel model = (BeansModel) BeansCorePlugin.getModel();
 		// model.start();
 		// model.stop();
-		IProject project = StsTestUtil
-				.createPredefinedProject("Test", "org.springframework.ide.eclipse.quickfix.tests");
+		IProject project = StsTestUtil.createPredefinedProject("Test",
+				"org.springframework.ide.eclipse.quickfix.tests");
 		model.start();
 		final IFile file = project.getFile(path);
 		assertTrue(file.exists());
@@ -124,7 +123,7 @@ public abstract class AbstractQuickfixUiTestCase extends StsUiTestCase {
 	}
 
 	@Override
-	protected void setUp() throws Exception {
+	public void setUp() throws Exception {
 		SWTBotPreferences.KEYBOARD_LAYOUT = "EN_US";
 		bot = new StsConfigBot();
 		try {
