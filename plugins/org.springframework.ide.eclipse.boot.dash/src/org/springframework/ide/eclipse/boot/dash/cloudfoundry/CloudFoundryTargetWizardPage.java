@@ -142,9 +142,11 @@ public class CloudFoundryTargetWizardPage extends WizardPageWithSections {
 		List<WizardPageSection> sections = new ArrayList<>();
 		sections.add(new ChooseOneSectionCombo<>(this, "Method:", model.getMethodVar(), EnumSet.allOf(LoginMethod.class)));
 		//TODO: hide password or passcode field depending on the method.
-		sections.add(new StringFieldSection(this, "Email:", model.getUsernameVar()));
+		sections.add(new StringFieldSection(this, "Email:", model.getUserNameVar())
+				.setEnabler(model.getEnableUserName()));
+
 		sections.add(new StringFieldSection(this, "Password:", model.getPasswordVar()).setPassword(true));
-		sections.add(UpdatePasswordDialog.storeCredentialsSection(this, model.getStoreVar()));
+		sections.add(UpdatePasswordDialog.storeCredentialsSection(this, model.getStoreVar(), model.getStoreCredentialsValidator()));
 		sections.add(new StringFieldSection(this, "Url:", model.getUrlVar()));
 		sections.add(new ValidatorSection(model.getCredentialsValidator(), this));
 		sections.add(new SelectSpaceSection(this));

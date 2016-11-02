@@ -35,6 +35,7 @@ import reactor.util.function.Tuples;
  */
 public class ReactorUtils {
 
+	private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(45); // reflects default timeout of Mono.block in reactor 2.x.
 	public static boolean DUMP_STACK_ON_TIMEOUT = false;
 
 	/**
@@ -60,7 +61,7 @@ public class ReactorUtils {
 	 */
 	public static <T> T get(Mono<T> mono) throws Exception {
 		try {
-			return mono.block();
+			return mono.block(DEFAULT_TIMEOUT);
 		} catch (Exception e) {
 			dumpStacks();
 			throw new IOException(e);
@@ -86,7 +87,7 @@ public class ReactorUtils {
 	}
 
 
-	public static List<CFCloudDomain> get(Duration t, Mono<List<CFCloudDomain>> m) throws IOException {
+	public static <T> List<T> get(Duration t, Mono<List<T>> m) throws IOException {
 		try {
 			return m.block(t);
 		} catch (Exception e) {

@@ -16,6 +16,7 @@ import org.cloudfoundry.client.lib.HttpProxyConfiguration;
 import org.eclipse.core.runtime.Assert;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials.CFCredentialType;
 
 /**
  * All the parameters needed to create a CF client.
@@ -42,8 +43,10 @@ public class CFClientParams {
 			boolean skipSslValidation
 	) {
 		Assert.isNotNull(apiUrl, "apiUrl is required");
-		Assert.isNotNull(username, "username is required");
 		Assert.isNotNull(credentials, "credentials required");
+		if (credentials.getType()==CFCredentialType.PASSWORD) {
+			Assert.isNotNull(username, "username is required");
+		}
 		this.apiUrl = apiUrl;
 		this.username = username;
 		this.credentials = credentials;

@@ -234,7 +234,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 			assertNotNull(target);
 			CFCredentials credentials = target.getRunTarget().getTargetProperties().getCredentials();
-			assertEquals(CFCredentialType.PASSWORD, credentials.getType());
+			assertEquals(CFCredentialType.REFRESH_TOKEN, credentials.getType());
 			assertNotNull(credentials.getSecret());
 			assertEquals(1, harness.getCfRunTargetModels().size());
 

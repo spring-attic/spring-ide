@@ -33,11 +33,16 @@ import java.util.EnumSet;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.widgets.Shell;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetWizardModel.LoginMethod;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel.StoreCredentialsMode;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.SelectionModel;
+import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
+import org.springsource.ide.eclipse.commons.livexp.ui.ButtonSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.CheckboxSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.ChooseOneSectionCombo;
 import org.springsource.ide.eclipse.commons.livexp.ui.CommentSection;
@@ -61,8 +66,9 @@ public class UpdatePasswordDialog extends DialogWithSections {
 	private PasswordDialogModel model;
 
 	public UpdatePasswordDialog(Shell parentShell, PasswordDialogModel model) {
-		super("Enter Password", model, parentShell);
+		super("Update Credentials", model, parentShell);
 		this.model = model;
+		disableOkButtonAt(Status.INFO);
 	}
 
 	@Override
@@ -70,16 +76,21 @@ public class UpdatePasswordDialog extends DialogWithSections {
 		List<WizardPageSection> sections = new ArrayList<>();
 
 		sections.add(new CommentSection(this,
-				"The password must match your existing target credentials in " + model.getTargetId() + "."));
+				"The password/code must match your existing target credentials in " + model.getTargetId() + "."));
 
-		sections.add(new StringFieldSection(this, "Password", model.getPasswordVar(), model.getPasswordValidator()).setPassword(true));
-		sections.add(storeCredentialsSection(this, model.getStoreVar()));
+		sections.add(new ChooseOneSectionCombo<>(this, "Method:", model.getMethodVar(), EnumSet.allOf(LoginMethod.class)));
+		sections.add(new StringFieldSection(this, "Password:", model.getPasswordVar(), model.getPasswordValidator()).setPassword(true));
+		sections.add(storeCredentialsSection(this, model.getStoreVar(), model.getStoreValidator()));
+		sections.add(new ButtonSection(this, "Validate", model::requestCredentialValidation));
 
 		return sections;
 	}
 
-	public static ChooseOneSectionCombo<StoreCredentialsMode> storeCredentialsSection(IPageWithSections owner, LiveVariable<StoreCredentialsMode> storeCreds) {
-		return new ChooseOneSectionCombo<>(owner, "Remember:", new SelectionModel<>(storeCreds), storeCredentialChoices);
+	public static ChooseOneSectionCombo<StoreCredentialsMode> storeCredentialsSection(IPageWithSections owner,
+			LiveVariable<StoreCredentialsMode> storeCreds,
+			LiveExpression<ValidationResult> validator
+	) {
+		return new ChooseOneSectionCombo<>(owner, "Remember:", new SelectionModel<>(storeCreds, validator), storeCredentialChoices);
 	}
 
 }

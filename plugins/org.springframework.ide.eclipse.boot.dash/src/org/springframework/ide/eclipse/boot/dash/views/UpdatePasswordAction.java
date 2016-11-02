@@ -10,13 +10,14 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ConnectOperation;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel;
@@ -27,7 +28,7 @@ import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 public class UpdatePasswordAction extends AbstractCloudDashModelAction {
@@ -42,26 +43,26 @@ public class UpdatePasswordAction extends AbstractCloudDashModelAction {
 
 	@Override
 	public void run() {
-		final CloudFoundryBootDashModel targetModel = (CloudFoundryBootDashModel) sectionSelection.getValue();
-		final RunTargetWithProperties runTarget = getCredentialsHolder(targetModel);
-		if (runTarget!=null) {
-			final String userName = runTarget.getTargetProperties().get(TargetProperties.USERNAME_PROP);
-			final String targetId = runTarget.getId();
-			final StoreCredentialsMode storePassword = runTarget.getTargetProperties().getStoreCredentials();
-			Job job = new Job("Updating password") {
+		try {
+			final CloudFoundryBootDashModel targetModel = (CloudFoundryBootDashModel) sectionSelection.getValue();
+			final CloudFoundryRunTarget runTarget = targetModel.getRunTarget();
+			if (runTarget!=null) {
+				final CFClientParams clientParams = new CFClientParams(runTarget.getTargetProperties());
+				final String targetId = runTarget.getId();
+				final StoreCredentialsMode storePassword = runTarget.getTargetProperties().getStoreCredentials();
+				Job job = new Job("Updating password") {
 
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					PasswordDialogModel passwordDialogModel = new PasswordDialogModel(userName, targetId, storePassword);
-					ui.openPasswordDialog(passwordDialogModel);
-					if (passwordDialogModel.isOk()) {
-						runTarget.getTargetProperties().setStoreCredentials(passwordDialogModel.getStoreVar().getValue());
-						String password = passwordDialogModel.getPasswordVar().getValue();
-						// The password cannot be null or empty string - enforced by the dialog
-						// Do the check just in case for tests bypassing the UI
-						if (password != null && !password.isEmpty()) {
+					@Override
+					protected IStatus run(IProgressMonitor monitor) {
+						PasswordDialogModel passwordDialogModel = new PasswordDialogModel(runTarget.getClientFactory(), clientParams, storePassword);
+						ui.openPasswordDialog(passwordDialogModel);
+						if (passwordDialogModel.isOk()) {
+							runTarget.getTargetProperties().setStoreCredentials(
+									passwordDialogModel.getEffectiveStoreMode());
+							CFCredentials credentials = passwordDialogModel.getCredentials();
+							// The credentials cannot be null or empty string - enforced by the dialog
 							try {
-								runTarget.getTargetProperties().setCredentials(CFCredentials.fromPassword(password));
+								runTarget.getTargetProperties().setCredentials(credentials);
 							} catch (CannotAccessPropertyException e) {
 								ui.warningPopup("Failed Storing Password",
 										"Failed to store password in Secure Storage for " + targetId
@@ -81,18 +82,20 @@ public class UpdatePasswordAction extends AbstractCloudDashModelAction {
 								new ConnectOperation(targetModel, true, ui).run(monitor);
 							} catch (Exception e) {
 								targetModel.setBaseRefreshState(RefreshState.error(e));
-								ui.errorPopup("Failed Setting Password", "Credentials for " + targetId
+								ui.errorPopup("Failed Setting Credentials", "Credentials for " + targetId
 										+ " are not valid. Ensure credentials are correct.");
 							}
 
 							// launch refresh if disconnected it would just clear out children
 							targetModel.refresh(ui);
 						}
+						return Status.OK_STATUS;
 					}
-					return Status.OK_STATUS;
-				}
-			};
-			job.schedule();
+				};
+				job.schedule();
+			}
+		} catch (Exception e) {
+			Log.log(e);
 		}
 	}
 

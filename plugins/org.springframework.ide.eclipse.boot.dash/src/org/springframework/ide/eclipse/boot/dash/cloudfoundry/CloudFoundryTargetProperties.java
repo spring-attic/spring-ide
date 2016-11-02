@@ -16,6 +16,7 @@ import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundr
 import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties.SPACE_PROP;
 
 import org.eclipse.equinox.security.storage.StorageException;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel.StoreCredentialsMode;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
@@ -80,6 +81,10 @@ public class CloudFoundryTargetProperties extends TargetProperties {
 	public static String getName(CloudFoundryTargetProperties cloudProps) {
 		return cloudProps.getOrganizationName() + " : " + cloudProps.getSpaceName() + " - [" + cloudProps.getUrl()
 				+ "]";
+	}
+
+	public static String getId(CFClientParams params) {
+		return getId(params.getUsername(), params.getApiUrl(), params.getOrgName(), params.getSpaceName());
 	}
 
 	public static String getId(String userName, String url, String orgName, String spaceName) {

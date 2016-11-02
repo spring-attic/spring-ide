@@ -67,8 +67,8 @@ import org.cloudfoundry.operations.services.ServiceInstance;
 import org.cloudfoundry.operations.services.UnbindServiceInstanceRequest;
 import org.cloudfoundry.operations.spaces.GetSpaceRequest;
 import org.cloudfoundry.operations.spaces.SpaceDetail;
-import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.reactor.tokenprovider.AbstractUaaTokenProvider;
+import org.cloudfoundry.uaa.UaaClient;
 import org.cloudfoundry.util.PaginationUtils;
 import org.eclipse.core.runtime.Platform;
 import org.osgi.framework.Version;
@@ -92,7 +92,6 @@ import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.util.StringUtils;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import com.google.common.collect.ImmutableList;
@@ -113,10 +112,13 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	private static final Duration APP_START_TIMEOUT = Duration.ofMillis(ApplicationRunningStateTracker.APP_START_TIMEOUT);
 	private static final Duration GET_SERVICES_TIMEOUT = Duration.ofSeconds(60);
+	private static final Duration GET_SPACES_TIMEOUT = Duration.ofSeconds(20);
+	private static final Duration GET_USERNAME_TIMEOUT = Duration.ofSeconds(5);
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder") || (""+Platform.getLocation()).contains("bamboo");
 //	private static final boolean DEBUG_REACTOR = false;//(""+Platform.getLocation()).contains("kdvolder")
 									//|| (""+Platform.getLocation()).contains("bamboo");
+
 
 	private static void debug(String string) {
 		if (DEBUG) {
@@ -159,6 +161,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	private CFClientParams params;
 	private CloudFoundryClient _client ;
+	private UaaClient _uaa;
 	private CloudFoundryOperations _operations;
 
 	@Deprecated
@@ -173,6 +176,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		this.params = params;
 		CFClientProvider provider = clients.getOrCreate(params.getUsername(), params.getCredentials(), params.getHost(), params.skipSslValidation());
 		this._client = provider.client;
+		this._uaa = provider.uaaClient;
 		this._tokenProvider = (AbstractUaaTokenProvider) provider.tokenProvider;
 		debug(">>> creating cf operations");
 		this._operations = DefaultCloudFoundryOperations.builder()
@@ -540,8 +544,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	@Override
 	public List<CFSpace> getSpaces() throws Exception {
-		Object it = ReactorUtils.get(
-			log("operations.organizations().list()",
+		Object it = ReactorUtils.get(GET_SPACES_TIMEOUT, log("operations.organizations().list()",
 				_operations.organizations()
 				.list()
 			)
@@ -1372,6 +1375,13 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	@Override
 	public String getRefreshToken() {
 		return _tokenProvider.getRefreshToken();
+	}
+
+	@Override
+	public String getUserName() {
+		return log("uaa.getUsername",
+				_uaa.getUsername()
+		).block(GET_USERNAME_TIMEOUT);
 	}
 
 }

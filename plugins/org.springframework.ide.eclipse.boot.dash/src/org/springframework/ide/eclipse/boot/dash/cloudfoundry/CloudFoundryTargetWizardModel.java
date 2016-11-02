@@ -27,6 +27,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
+import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel.StoreCredentialsMode;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
@@ -91,6 +92,7 @@ public class CloudFoundryTargetWizardModel {
 	private Validator credentialsValidator = new CredentialsValidator();
 	private Validator spaceValidator = new CloudSpaceValidator();
 	private Validator resolvedSpacesValidator = new ResolvedSpacesValidator();
+	private Validator storeCredentialsValidator = PasswordDialogModel.makeStoreCredentialsValidator(method, storeCredentials);
 	private CompositeValidator allPropertiesValidator = new CompositeValidator();
 
 	private CloudFoundryClientFactory clientFactory;
@@ -233,6 +235,10 @@ public class CloudFoundryTargetWizardModel {
 				if (t!=null) {
 					refreshToken = t;
 				}
+				String effectiveUser = client.getUserName();
+				if (effectiveUser!=null) {
+					userName.setValue(effectiveUser);
+				}
 				return spaces;
 			}
 		};
@@ -275,17 +281,20 @@ public class CloudFoundryTargetWizardModel {
 		targetProps.setUserName(userName.getValue());
 		if (toFetchSpaces) {
 			targetProps.setStoreCredentials(StoreCredentialsMode.STORE_NOTHING);
-			targetProps.setCredentials(CFCredentials.fromPassword(password.getValue()));
+			targetProps.setCredentials(CFCredentials.fromLogin(method.getValue(), password.getValue()));
 		} else {
 			//use credentials of a style that is consistent with the 'store mode'.
+			if (method.getValue()==LoginMethod.TEMPORARY_CODE && storeCredentials.getValue()==StoreCredentialsMode.STORE_PASSWORD) {
+				//The one token shouldn't be stored since its meaningless. Silently downgrade storemode to store
+			}
 			StoreCredentialsMode mode = storeCredentials.getValue();
 			targetProps.setStoreCredentials(storeCredentials.getValue());
 			switch (mode) {
+			case STORE_NOTHING:
 			case STORE_TOKEN:
 				Assert.isTrue(refreshToken!=null);
 				targetProps.setCredentials(CFCredentials.fromRefreshToken(refreshToken));
 				break;
-			case STORE_NOTHING:
 			case STORE_PASSWORD:
 				targetProps.setCredentials(CFCredentials.fromPassword(password.getValue()));
 				break;
@@ -366,7 +375,7 @@ public class CloudFoundryTargetWizardModel {
 	class CredentialsValidator extends Validator {
 		@Override
 		protected ValidationResult compute() {
-			if (isEmpty(userName.getValue())) {
+			if (isEmpty(userName.getValue()) && method.getValue()==LoginMethod.PASSWORD) {
 				return ValidationResult.info("Enter a username");
 			} else if (isEmpty(url.getValue())) {
 				try {
@@ -444,7 +453,7 @@ public class CloudFoundryTargetWizardModel {
 		return method;
 	}
 
-	public LiveVariable<String> getUsernameVar() {
+	public LiveVariable<String> getUserNameVar() {
 		return userName;
 	}
 
@@ -472,6 +481,10 @@ public class CloudFoundryTargetWizardModel {
 		return credentialsValidator.apply((r) -> r.isOk());
 	}
 
+	public LiveExpression<Boolean> getEnableUserName() {
+		return method.apply((method) -> method==LoginMethod.PASSWORD);
+	}
+
 	public LiveExpression<ValidationResult> getSpaceValidator() {
 		return spaceValidator;
 	}
@@ -486,6 +499,10 @@ public class CloudFoundryTargetWizardModel {
 
 	public void setMethod(LoginMethod v) {
 		method.setValue(v);
+	}
+
+	public Validator getStoreCredentialsValidator() {
+		return storeCredentialsValidator;
 	}
 
 }

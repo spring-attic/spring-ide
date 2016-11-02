@@ -387,6 +387,11 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 			return refreshToken;
 		}
 
+		@Override
+		public String getUserName() {
+			return params.getUsername();
+		}
+
 	}
 
 	public void defBuildpacks(String... names) {

@@ -12,8 +12,20 @@ package org.springframework.ide.eclipse.boot.dash.dialogs;
 
 import java.util.EnumSet;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.equinox.security.storage.StorageException;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetWizardModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetWizardModel.LoginMethod;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1.DefaultClientRequestsV1;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
@@ -27,6 +39,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
 import org.springsource.ide.eclipse.commons.livexp.ui.Ilabelable;
 import org.springsource.ide.eclipse.commons.livexp.ui.OkButtonHandler;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 /**
  * Password dialog model. Provides ability to specify password and whether it
@@ -163,31 +176,91 @@ public class PasswordDialogModel implements OkButtonHandler {
 		}
 	}
 
-	final private String fUser;
-	final private String fTargetId;
+	private static final ValidationResult REQUEST_VALIDATION_MESSAGE = ValidationResult.info(
+			"Click the 'Validate' button to verify the credentials.");
+
+	private static final ValidationResult VALIDATION_IN_PROGRESS_MESSAGE = ValidationResult.info(
+			"Please wait. Concacting CF to verify the credentials..."
+	);
+
+	private CFClientParams currentParams;
+	private CloudFoundryClientFactory clientFactory;
+
+	private String refreshToken = null; //This is set when credentials are succesfully validated.
+	private LiveVariable<Boolean> needValidation = new LiveVariable<>(true);
+
+	private LiveVariable<ValidationResult> credentialsValidationResult;
+	final private LiveVariable<LoginMethod> fMethod;
 	final private LiveVariable<String> fPasswordVar;
 	final private LiveVariable<StoreCredentialsMode> fStoreVar;
 	private boolean okButtonPressed = false;
 	private Validator passwordValidator;
+	private LiveExpression<ValidationResult> storeValidator;
 
-	public PasswordDialogModel(String user, String targetId, String password, StoreCredentialsMode secureStore) {
-		super();
-		fUser = user;
-		fTargetId = targetId;
-		fPasswordVar = new LiveVariable<>(password);
-		fStoreVar = new LiveVariable<>(secureStore);
+	/**
+	 * This job handles the 'expensive' part of credential validation. We don't want
+	 * to run this on every keystroke while user types password. So the validation
+	 * is triggered by a button click.
+	 */
+	private Job validateCredentialsJob = new Job("Validate CF Credentials") {
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			try {
+				credentialsValidationResult.setValue(validate());
+			} catch (Exception e) {
+				credentialsValidationResult.setValue(ValidationResult.error(ExceptionUtil.getMessage(e)));
+			}
+			return Status.OK_STATUS;
+		}
+
+		private ValidationResult validate() throws Exception {
+			String secret = fPasswordVar.getValue();
+			if (!StringUtil.hasText(secret)) {
+				//Don't bother verifying empty passwords.
+				return REQUEST_VALIDATION_MESSAGE;
+			}
+			CFCredentials creds = CFCredentials.fromLogin(fMethod.getValue(), secret);
+			CFClientParams params = new CFClientParams(
+					currentParams.getApiUrl(),
+					currentParams.getUsername(),
+					creds,
+					currentParams.isSelfsigned(),
+					null, null,
+					currentParams.skipSslValidation()
+			);
+			ClientRequests client = clientFactory.getClient(params);
+			String actualUserName = client.getUserName();
+			if (!currentParams.getUsername().equals(actualUserName)) {
+				return ValidationResult.error("The credentials belong to a different user!");
+			}
+			refreshToken = client.getRefreshToken();
+			return ValidationResult.OK;
+		}
+	};
+
+	private <T> void credentialsChangedHandler(LiveExpression<T> exp, T value) {
+		needValidation.setValue(true);
 	}
 
-	public PasswordDialogModel(String user, String targetId, StoreCredentialsMode secureStore) {
-		this(user, targetId, null, secureStore);
+	public PasswordDialogModel(CloudFoundryClientFactory cfFactory, CFClientParams currentParams, StoreCredentialsMode storeMode) {
+		super();
+		this.clientFactory = cfFactory;
+		this.currentParams = currentParams;
+		fPasswordVar = new LiveVariable<>("");
+		fStoreVar = new LiveVariable<>(storeMode);
+		fMethod = new LiveVariable<>(LoginMethod.PASSWORD);
+		storeValidator = makeStoreCredentialsValidator(getMethodVar(), fStoreVar);
+		credentialsValidationResult = new LiveVariable<>(REQUEST_VALIDATION_MESSAGE);
+		fMethod.addListener(this::credentialsChangedHandler);
+		fPasswordVar.addListener(this::credentialsChangedHandler);
 	}
 
 	public String getUser() {
-		return fUser;
+		return currentParams.getUsername();
 	}
 
 	public String getTargetId() {
-		return fTargetId;
+		return CloudFoundryTargetProperties.getId(currentParams);
 	}
 
 	public LiveVariable<String> getPasswordVar() {
@@ -212,6 +285,8 @@ public class PasswordDialogModel implements OkButtonHandler {
 			passwordValidator = new Validator() {
 				{
 					dependsOn(fPasswordVar);
+					dependsOn(needValidation);
+					dependsOn(credentialsValidationResult);
 				}
 				@Override
 				protected ValidationResult compute() {
@@ -219,11 +294,83 @@ public class PasswordDialogModel implements OkButtonHandler {
 					if (!StringUtil.hasText(pw)) {
 						return ValidationResult.error("Password can not be empty");
 					}
-					return ValidationResult.info("Please press 'OK' to set the password.");
+					if (needValidation.getValue()) {
+						return REQUEST_VALIDATION_MESSAGE;
+					}
+					return credentialsValidationResult.getValue();
 				}
 			};
 		}
 		return passwordValidator;
+	}
+
+	public LiveExpression<ValidationResult> getStoreValidator() {
+		return storeValidator;
+	}
+
+	/**
+	 * Determines the 'effective' StoreCredentialsMode. This may be different
+	 * from what the user explicitly chose. If the user choice is 'invalid'
+	 * we ignore it (with a warning) and replace it with STORE_NOTHING.
+	 */
+	public StoreCredentialsMode getEffectiveStoreMode() {
+		if (storeValidator.getValue().isOk()) {
+			return fStoreVar.getValue();
+		}
+		return StoreCredentialsMode.STORE_NOTHING;
+	}
+
+	public static Validator makeStoreCredentialsValidator(LiveExpression<CloudFoundryTargetWizardModel.LoginMethod> method, LiveExpression<StoreCredentialsMode> storeCredentials ) {
+		return new Validator() {
+			{
+				dependsOn(method);
+				dependsOn(storeCredentials);
+			}
+
+			@Override
+			protected ValidationResult compute() {
+				if (
+					method.getValue()==CloudFoundryTargetWizardModel.LoginMethod.TEMPORARY_CODE &&
+					storeCredentials.getValue()==StoreCredentialsMode.STORE_PASSWORD
+				) {
+					return ValidationResult.warning("'Store Password' is useless for a 'Tempory Code'. This option will be ignored!");
+				}
+				return ValidationResult.OK;
+			}
+		};
+	}
+
+	/**
+	 * Represents the 'Validate' button in the dialog. This method is called when user
+	 * clicks that button. It triggers validation of credentials asynchronously.
+	 */
+	public void requestCredentialValidation() {
+		needValidation.setValue(false);
+		refreshToken = null;
+		credentialsValidationResult.setValue(VALIDATION_IN_PROGRESS_MESSAGE);
+		validateCredentialsJob.schedule();
+	}
+
+	public LiveVariable<LoginMethod> getMethodVar() {
+		return fMethod;
+	}
+
+	public CFCredentials getCredentials() {
+		String refreshToken = this.refreshToken;
+		if (refreshToken==null) {
+			throw new IllegalStateException("Credentials must be validated before retrieving them from the model");
+		}
+		//Produce credential object consistent with store credentials mode
+		StoreCredentialsMode storeMode = getEffectiveStoreMode();
+		switch (storeMode) {
+		case STORE_NOTHING:
+		case STORE_TOKEN:
+			return CFCredentials.fromRefreshToken(refreshToken);
+		case STORE_PASSWORD:
+			return CFCredentials.fromPassword(fPasswordVar.getValue());
+		default:
+			throw new IllegalStateException("Bug! Missing case?");
+		}
 	}
 
 }
