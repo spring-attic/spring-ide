@@ -60,7 +60,7 @@ public class CfTestTargetParams {
 		return val;
 	}
 
-	private static String fromEnv(String name) {
+	public static String fromEnv(String name) {
 		String value = getEnvMaybe(name);
 		Assert.isLegal(StringUtils.hasText(value), "The environment varable '"+name+"' must be set");
 		return value;

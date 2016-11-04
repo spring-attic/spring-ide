@@ -12,12 +12,15 @@ package org.springframework.ide.eclipse.boot.dash.test.mocks;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.cloudfoundry.client.CloudFoundryClient;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
@@ -36,7 +39,9 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundr
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshClientSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.IApplicationLogConsole;
+import org.springframework.ide.eclipse.boot.dash.test.CfTestTargetParams;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
+import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 
 import com.google.common.collect.ImmutableList;
@@ -49,6 +54,7 @@ import reactor.core.publisher.Mono;
 public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
 	public static final String FAKE_REFRESH_TOKEN = "fakeRefreshToken";
+	public static final String FAKE_PASSWORD = CfTestTargetParams.fromEnv("CF_TEST_PASSWORD");
 	private Version supportedApiVersion = new Version(CloudFoundryClient.SUPPORTED_API_VERSION);
 	private Version apiVersion = supportedApiVersion;
 
@@ -57,6 +63,8 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 	private Map<String, MockCFDomain> domainsByName = new LinkedHashMap<>();
 	private Map<String, MockCFBuildpack> buildpacksByName = new LinkedHashMap<>();
 	private Map<String, MockCFStack> stacksByName = new LinkedHashMap<>();
+
+	private Set<String> ssoTokens = new HashSet<>();
 
 	/**
 	 * Becomes non-null if notImplementedStub is called, used to check that the tests
@@ -69,6 +77,22 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		defDomain("cfmockapps.io"); //Lost of functionality may assume there's at least one domain so make sure we have one.
 		defBuildpacks("java-buildpack", "ruby-buildpack", "funky-buildpack", "another-buildpack");
 		defStacks("cflinuxfs2", "windows2012R2");
+	}
+
+	synchronized public String getSsoToken() {
+		String token = RandomStringUtils.randomAlphabetic(8);
+		ssoTokens.add(token);
+		return token;
+	}
+
+	/**
+	 * Verfies the validity of a sso token. Sso token can only be used once
+	 * so this check implicitly invalidates the token.
+	 *
+	 * @return Whether the token was valid prior to the call to this method.
+	 */
+	private synchronized boolean checkSsoToken(String token) {
+		return ssoTokens.remove(token);
 	}
 
 	public void defStacks(String... names) {
@@ -133,6 +157,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
 		private CFClientParams params;
 		private boolean connected = true;
+		private Boolean validCredentials = null;
 		private String refreshToken = null;
 
 		public MockClient(CFClientParams params) {
@@ -297,25 +322,35 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 			if (!connected) {
 				throw errorClientNotConnected();
 			}
-			checkCredentials(params.getUsername(), params.getCredentials());
+			if (validCredentials==null) {
+				validCredentials = isValidCredentials(params.getUsername(), params.getCredentials());
+			}
+			if (!validCredentials) {
+				throw errorInvalidCredentials();
+			}
 		}
 
-		private void checkCredentials(String username, CFCredentials credentials) throws Exception {
+		private boolean isValidCredentials(String username, CFCredentials credentials) throws Exception {
 			CFCredentialType type = credentials.getType();
 			String secret = credentials.getSecret();
 			if (type==CFCredentialType.PASSWORD) {
-				if (credentials.getSecret().startsWith("wrong")) {
-					throw errorInvalidCredentials();
+				if (!credentials.getSecret().equals(FAKE_PASSWORD)) {
+					return false;
 				}
 			} else if (type==CFCredentialType.REFRESH_TOKEN) {
 				if (!secret.equals(FAKE_REFRESH_TOKEN)) {
-					throw errorInvalidCredentials();
+					return false;
+				}
+			} else if (type==CFCredentialType.TEMPORARY_CODE) {
+				if (!checkSsoToken(secret)) {
+					return false;
 				}
 			} else {
-				throw errorInvalidCredentials();
+				return false;
 			}
 			//Validation of credentials is expected to update refresh token.
 			refreshToken = FAKE_REFRESH_TOKEN;
+			return true;
 		}
 
 		@Override

@@ -560,7 +560,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		for (String spaceName : spaceNames) {
 			CFClientParams params = new CFClientParams(
 					"http://api.run.cloud.mock.com",
-					"some-user",  CFCredentials.fromPassword("his-password"),
+					"some-user",  CFCredentials.fromPassword(MockCloudFoundryClientFactory.FAKE_PASSWORD),
 					false,
 					orgName,
 					spaceName,
@@ -607,7 +607,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		MockCFSpace space = clientFactory.defSpace("my-org", "foo");
 
 		String apiUrl = "http://api.some-cloud.com";
-		String username = "freddy"; String password = "whocares";
+		String username = "freddy"; String password = MockCloudFoundryClientFactory.FAKE_PASSWORD;
 
 		CloudFoundryBootDashModel cfModel = harness.createCfTarget(new CFClientParams(
 				apiUrl,
@@ -628,7 +628,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		MockCFSpace space = clientFactory.defSpace("my-org", "foo");
 
 		String apiUrl = "http://api.some-cloud.com";
-		String username = "freddy"; String password = "whocares";
+		String username = "freddy"; String password = MockCloudFoundryClientFactory.FAKE_PASSWORD;
 
 		CloudFoundryBootDashModel cfModel = harness.createCfTarget(new CFClientParams(apiUrl, username,
 				CFCredentials.fromPassword(password), false, "my-org", "foo", false
@@ -648,7 +648,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		clientFactory.defSpace("your-org", "bar");
 
 		String apiUrl = "http://api.some-cloud.com";
-		String username = "freddy"; String password = "whocares";
+		String username = "freddy"; String password = MockCloudFoundryClientFactory.FAKE_PASSWORD;
 		AbstractBootDashModel fooSpace = harness.createCfTarget(new CFClientParams(apiUrl, username,
 				CFCredentials.fromPassword(password), false, "my-org", "foo", false));
 		AbstractBootDashModel barSpace = harness.createCfTarget(new CFClientParams(apiUrl, username,
@@ -677,7 +677,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		clientFactory.defSpace("your-org", "bar");
 
 		String apiUrl = "http://api.some-cloud.com";
-		String username = "freddy"; String password = "whocares";
+		String username = "freddy"; String password = MockCloudFoundryClientFactory.FAKE_PASSWORD;
 		LocalBootDashModel local = harness.getLocalModel();
 		AbstractBootDashModel fooSpace = harness.createCfTarget(new CFClientParams(apiUrl, username,
 				CFCredentials.fromPassword(password), false, "my-org", "foo", false));
@@ -736,7 +736,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		clientFactory.defSpace("your-org", "bar");
 
 		String apiUrl = "http://api.some-cloud.com";
-		String username = "freddy"; String password = "whocares";
+		String username = "freddy"; String password = MockCloudFoundryClientFactory.FAKE_PASSWORD;
 
 		AbstractBootDashModel fooSpace = harness.createCfTarget(new CFClientParams(apiUrl, username,
 				CFCredentials.fromPassword(password), false, "my-org", "foo", false));
