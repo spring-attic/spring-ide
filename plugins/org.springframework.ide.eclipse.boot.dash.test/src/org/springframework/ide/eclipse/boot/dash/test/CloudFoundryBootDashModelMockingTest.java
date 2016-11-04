@@ -266,7 +266,9 @@ public class CloudFoundryBootDashModelMockingTest {
 		CFClientParams targetParams = CfTestTargetParams.fromEnvWithCredentials(CFCredentials.fromSsoToken(clientFactory.getSsoToken()));
 		{
 			clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
-			CloudFoundryBootDashModel target =  harness.createCfTarget(targetParams, StoreCredentialsMode.STORE_PASSWORD);
+			CloudFoundryBootDashModel target =  harness.createCfTarget(targetParams, StoreCredentialsMode.STORE_PASSWORD, (wizard) -> {
+				assertContains("'Store Password' is useless for a 'Temporary Code'", wizard.getValidator().getValue().msg);
+			});
 			//STORE_PASSWORD is meaningless for sso login and should be ignored (so behaves as STORE_NOTHING instead)
 
 			assertNotNull(target);

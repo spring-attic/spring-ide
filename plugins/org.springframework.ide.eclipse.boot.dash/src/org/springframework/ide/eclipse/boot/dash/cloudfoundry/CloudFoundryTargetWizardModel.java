@@ -135,6 +135,7 @@ public class CloudFoundryTargetWizardModel {
 
 		// Aggregate of the credentials and space validators.
 		allPropertiesValidator.addChild(credentialsValidator);
+		allPropertiesValidator.addChild(storeCredentialsValidator);
 		allPropertiesValidator.addChild(resolvedSpacesValidator);
 		allPropertiesValidator.addChild(spaceValidator);
 

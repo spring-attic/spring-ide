@@ -162,7 +162,7 @@ public class PasswordDialogModel implements OkButtonHandler {
 					method.getValue()==CloudFoundryTargetWizardModel.LoginMethod.TEMPORARY_CODE &&
 					storeCredentials.getValue()==StoreCredentialsMode.STORE_PASSWORD
 				) {
-					return ValidationResult.warning("'Store Password' is useless for a 'Tempory Code'. This option will be ignored!");
+					return ValidationResult.warning("'Store Password' is useless for a 'Temporary Code'. This option will be ignored!");
 				}
 				return ValidationResult.OK;
 			}

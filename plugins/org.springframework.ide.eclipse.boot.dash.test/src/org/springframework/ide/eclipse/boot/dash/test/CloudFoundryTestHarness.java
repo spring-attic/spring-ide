@@ -18,6 +18,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -51,6 +52,7 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetT
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockRunnableContext;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
+import org.springsource.ide.eclipse.commons.frameworks.test.util.Asserter1;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -118,7 +120,18 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 		return (CloudFoundryBootDashModel) getRunTargetModel(cfTargetType);
 	}
 
-	public CloudFoundryBootDashModel createCfTarget(CFClientParams params, StoreCredentialsMode storePassword) throws Exception {
+	public CloudFoundryBootDashModel createCfTarget(
+			CFClientParams params,
+			StoreCredentialsMode storePassword
+	) throws Exception {
+		return createCfTarget(params, storePassword, (wizard) -> assertOk(wizard.getValidator()));
+	}
+
+	public CloudFoundryBootDashModel createCfTarget(
+			CFClientParams params,
+			StoreCredentialsMode storePassword,
+			Asserter1<CloudFoundryTargetWizardModel> wizardAsserter
+	) throws Exception {
 		CloudFoundryTargetWizardModel wizard = new CloudFoundryTargetWizardModel(cfTargetType, clientFactory, NO_TARGETS, context);
 
 		wizard.setUrl(params.getApiUrl());
@@ -131,7 +144,7 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 		wizard.resolveSpaces(new MockRunnableContext());
 		assertNotNull(wizard.getRefreshToken());
 		wizard.setSpace(getSpace(wizard, params.getOrgName(), params.getSpaceName()));
-		assertOk(wizard.getValidator());
+		wizardAsserter.execute(wizard);
 		final CloudFoundryRunTarget newTarget = wizard.finish();
 		if (newTarget!=null) {
 			model.getRunTargets().add(newTarget);
