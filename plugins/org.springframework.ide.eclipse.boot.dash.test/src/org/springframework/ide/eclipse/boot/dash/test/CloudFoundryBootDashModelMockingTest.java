@@ -72,6 +72,7 @@ import org.mockito.stubbing.Answer;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetWizardModel.LoginMethod;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials.CFCredentialType;
@@ -111,6 +112,7 @@ import org.springframework.util.StringUtils;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
@@ -1715,6 +1717,180 @@ public class CloudFoundryBootDashModelMockingTest {
 
 	}
 
+
+	@Test public void updateTargetSsoAndStoreNothing() throws Exception {
+		String appName = "someApp";
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		space.defApp(appName);
+		CloudFoundryBootDashModel model = harness.createCfTarget(targetParams, StoreCredentialsMode.STORE_TOKEN);
+		waitForApps(model, appName);
+
+		harness.sectionSelection.setValue(model);
+		IAction updatePassword = actions.getUpdatePasswordAction();
+		assertTrue(updatePassword.isEnabled());
+
+		// Clear out any mocks on the ui object
+		reset(ui);
+
+		String newToken=clientFactory.getSsoToken();
+		harness.answerPasswordPrompt(ui, (d) -> {
+			d.getMethodVar().setValue(LoginMethod.TEMPORARY_CODE);
+			d.getPasswordVar().setValue(newToken);
+			d.getStoreVar().setValue(StoreCredentialsMode.STORE_NOTHING);
+			d.validateCredentials().block();
+			d.performOk();
+		});
+
+		updatePassword.run();
+
+		waitForJobsToComplete();
+
+		assertTrue(model.isConnected());
+		assertNotNull(model.getApplication(appName));
+		assertEquals(RefreshState.READY, model.getRefreshState());
+
+		{
+			assertNull(harness.getCredentialsStore().getCredentials(harness.secureStoreKey(model)));
+			assertNull(harness.getPrivateStore().get(harness.privateStoreKey(model)));
+		}
+
+		actions.getToggleTargetConnectionAction().run();
+
+		waitForJobsToComplete();
+		assertFalse(model.isConnected());
+
+		// Clear out any mocks on the ui object to get the right count below
+		reset(ui);
+
+		actions.getToggleTargetConnectionAction().run();
+		waitForJobsToComplete();
+
+		assertFalse(model.isConnected());
+		assertEquals(RefreshState.READY, model.getRefreshState());
+		assertNull(model.getApplication(appName));
+
+		verify(ui).openPasswordDialog(any());
+		verifyNoMoreInteractions(ui);
+	}
+
+	@Test public void updateTargetSsoAndStorePassword() throws Exception {
+		String appName = "someApp";
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		space.defApp(appName);
+		CloudFoundryBootDashModel model = harness.createCfTarget(targetParams, StoreCredentialsMode.STORE_TOKEN);
+		waitForApps(model, appName);
+
+		harness.sectionSelection.setValue(model);
+		IAction updatePassword = actions.getUpdatePasswordAction();
+		assertTrue(updatePassword.isEnabled());
+
+		// Clear out any mocks on the ui object
+		reset(ui);
+
+		LiveVariable<ValidationResult> capturedStoreValidator = new LiveVariable<>(null);
+
+		String newToken=clientFactory.getSsoToken();
+		harness.answerPasswordPrompt(ui, (d) -> {
+			d.getMethodVar().setValue(LoginMethod.TEMPORARY_CODE);
+			d.getPasswordVar().setValue(newToken);
+			d.getStoreVar().setValue(StoreCredentialsMode.STORE_PASSWORD);
+			capturedStoreValidator.setValue(d.getStoreValidator().getValue());
+			d.validateCredentials().block();
+			d.performOk();
+		});
+
+		updatePassword.run();
+
+		waitForJobsToComplete();
+
+		assertContains("'Store Password' is useless for a 'Temporary Code'", capturedStoreValidator.getValue().msg);
+
+		assertTrue(model.isConnected());
+		assertNotNull(model.getApplication(appName));
+		assertEquals(RefreshState.READY, model.getRefreshState());
+		//store password is ignored and treated as 'STORE_NOTHING'
+		assertEquals(StoreCredentialsMode.STORE_NOTHING, model.getRunTarget().getTargetProperties().getStoreCredentials());
+		{
+			assertNull(harness.getCredentialsStore().getCredentials(harness.secureStoreKey(model)));
+			assertNull(harness.getPrivateStore().get(harness.privateStoreKey(model)));
+		}
+
+		actions.getToggleTargetConnectionAction().run();
+
+		waitForJobsToComplete();
+		assertFalse(model.isConnected());
+
+		// Clear out any mocks on the ui object to get the right count below
+		reset(ui);
+
+		actions.getToggleTargetConnectionAction().run();
+		waitForJobsToComplete();
+
+		assertFalse(model.isConnected());
+		assertEquals(RefreshState.READY, model.getRefreshState());
+		assertNull(model.getApplication(appName));
+
+		verify(ui).openPasswordDialog(any());
+		verifyNoMoreInteractions(ui);
+	}
+
+	@Test public void updateTargetSsoAndStoreToken() throws Exception {
+		String appName = "someApp";
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		space.defApp(appName);
+		CloudFoundryBootDashModel model = harness.createCfTarget(targetParams, StoreCredentialsMode.STORE_PASSWORD);
+		waitForApps(model, appName);
+
+		harness.sectionSelection.setValue(model);
+		IAction updatePassword = actions.getUpdatePasswordAction();
+		assertTrue(updatePassword.isEnabled());
+
+		// Clear out any mocks on the ui object
+		reset(ui);
+
+		String newToken=clientFactory.getSsoToken();
+		harness.answerPasswordPrompt(ui, (d) -> {
+			d.getMethodVar().setValue(LoginMethod.TEMPORARY_CODE);
+			d.getPasswordVar().setValue(newToken);
+			d.getStoreVar().setValue(StoreCredentialsMode.STORE_TOKEN);
+			d.validateCredentials().block();
+			d.performOk();
+		});
+
+		updatePassword.run();
+
+		waitForJobsToComplete();
+
+		assertTrue(model.isConnected());
+		assertNotNull(model.getApplication(appName));
+		assertEquals(RefreshState.READY, model.getRefreshState());
+
+		assertEquals(StoreCredentialsMode.STORE_TOKEN, model.getRunTarget().getTargetProperties().getStoreCredentials());
+		{
+			assertNull(harness.getCredentialsStore().getCredentials(harness.secureStoreKey(model)));
+			assertEquals(MockCloudFoundryClientFactory.FAKE_REFRESH_TOKEN, harness.getPrivateStore().get(harness.privateStoreKey(model)));
+		}
+
+		actions.getToggleTargetConnectionAction().run();
+
+		waitForJobsToComplete();
+		assertFalse(model.isConnected());
+
+		// Clear out any mocks on the ui object to get the right count below
+		reset(ui);
+
+		actions.getToggleTargetConnectionAction().run();
+		waitForJobsToComplete();
+
+		assertTrue(model.isConnected());
+		assertEquals(RefreshState.READY, model.getRefreshState());
+		assertNotNull(model.getApplication(appName));
+
+		verifyZeroInteractions(ui); //should have used stored token so no pw dialog!
+	}
 
 	@Test public void updateTargetPasswordAndStoreNothing() throws Exception {
 		CFClientParams targetParams = CfTestTargetParams.fromEnv();
