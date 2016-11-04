@@ -337,6 +337,15 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 						serviceImplModuleProject.setDescription(serviceApiImplDescription, new NullProgressMonitor());
 						modules.add(serviceImplModuleProject);
 						
+						// Import integration module project
+						IProject integrationModuleProject = workspace.getRoot().getProject("integration".concat(":").concat(project.getName()));
+						IProjectDescription integrationModuleDescription = workspace.newProjectDescription("integration".concat(":").concat(project.getName()));
+						integrationModuleDescription.setLocation(new Path(projectLocation + "/integration"));
+						integrationModuleProject.create(integrationModuleDescription, new NullProgressMonitor());
+						integrationModuleProject.open(0, new NullProgressMonitor());
+						integrationModuleProject.setDescription(integrationModuleDescription, new NullProgressMonitor());
+						modules.add(integrationModuleProject);
+						
 						// Import application module project
 						IProject applicationModuleProject = workspace.getRoot().getProject("application".concat(":").concat(project.getName()));
 						IProjectDescription applicationModuleDescription = workspace.newProjectDescription("application".concat(":").concat(project.getName()));
