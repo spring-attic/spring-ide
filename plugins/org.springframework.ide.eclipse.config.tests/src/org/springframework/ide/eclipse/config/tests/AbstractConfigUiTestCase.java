@@ -78,7 +78,7 @@ public abstract class AbstractConfigUiTestCase extends StsUiTestCase {
 	}
 
 	@Override
-	protected void setUp() throws Exception {
+	public void setUp() throws Exception {
 		SWTBotPreferences.KEYBOARD_LAYOUT = "EN_US";
 		bot = new StsConfigBot();
 		try {
