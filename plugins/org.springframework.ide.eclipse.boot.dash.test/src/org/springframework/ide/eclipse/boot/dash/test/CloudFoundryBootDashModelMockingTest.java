@@ -45,6 +45,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
@@ -54,6 +56,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugPlugin;
@@ -73,9 +76,11 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientPar
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials.CFCredentialType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.HealthChecks;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CloudFoundryClientCache.Params;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ReactorUtils;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
-import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel.StoreCredentialsMode;
+import org.springframework.ide.eclipse.boot.dash.dialogs.StoreCredentialsMode;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
@@ -107,6 +112,7 @@ import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
+import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
@@ -269,7 +275,9 @@ public class CloudFoundryBootDashModelMockingTest {
 
 			//When we connect... the user should get prompted for password
 			harness.answerPasswordPrompt(ui, (d) -> {
+				d.getMethodVar().setValue(targetParams.getCredentials().getType().toLoginMethod());
 				d.getPasswordVar().setValue(targetParams.getCredentials().getSecret());
+				d.validateCredentials().block();
 				d.performOk();
 			});
 
@@ -1555,6 +1563,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		harness.answerPasswordPrompt(ui, (d) -> {
 			d.getPasswordVar().setValue(targetParams.getCredentials().getSecret());
+			d.validateCredentials().block();
 			d.performOk();
 		});
 
@@ -1569,18 +1578,20 @@ public class CloudFoundryBootDashModelMockingTest {
 		// Clear out any mocks on the ui object set above
 		reset(ui);
 
+		CompletableFuture<ValidationResult> passwordValidation = new CompletableFuture<>();
+
 		harness.answerPasswordPrompt(ui, (d) -> {
 			d.getPasswordVar().setValue("wrong password");
-			d.performOk();
+			ReactorUtils.completeWith(passwordValidation, d.validateCredentials());
+			//d.performOk(); //shouldn't perform ok because we are expecting passwordValidation to fail
 		});
 
 		updatePassword.run();
 
-		waitForJobsToComplete();
+		ValidationResult validationResult = passwordValidation.get();
+		assertEquals(IStatus.ERROR, validationResult.status);
+		assertContains("Invalid credentials", validationResult.msg);
 
-		assertNull(model.getApplication(appName));
-		assertFalse(model.isConnected());
-		assertTrue(model.getRefreshState().isError());
 	}
 
 
@@ -1602,6 +1613,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		harness.answerPasswordPrompt(ui, (d) -> {
 			d.getPasswordVar().setValue(targetParams.getCredentials().getSecret());
 			d.getStoreVar().setValue(StoreCredentialsMode.STORE_NOTHING);
+			d.validateCredentials().block();
 			d.performOk();
 		});
 
@@ -1655,6 +1667,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		harness.answerPasswordPrompt(ui, (d) -> {
 			d.getPasswordVar().setValue(targetParams.getCredentials().getSecret());
 			d.getStoreVar().setValue(StoreCredentialsMode.STORE_PASSWORD);
+			d.validateCredentials().block();
 			d.performOk();
 		});
 
@@ -1698,6 +1711,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		harness.answerPasswordPrompt(ui, (d) -> {
 			d.getPasswordVar().setValue(targetParams.getCredentials().getSecret());
 			d.getStoreVar().setValue(StoreCredentialsMode.STORE_TOKEN);
+			d.validateCredentials().block();
 			d.performOk();
 		});
 

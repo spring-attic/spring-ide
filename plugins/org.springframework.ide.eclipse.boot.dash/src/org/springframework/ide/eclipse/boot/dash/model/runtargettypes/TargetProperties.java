@@ -15,7 +15,7 @@ import java.util.Map;
 
 import org.eclipse.equinox.security.storage.StorageException;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
-import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel.StoreCredentialsMode;
+import org.springframework.ide.eclipse.boot.dash.dialogs.StoreCredentialsMode;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 

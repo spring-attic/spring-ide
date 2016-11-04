@@ -172,7 +172,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	private Mono<String> spaceId;
 	private AbstractUaaTokenProvider _tokenProvider;
 
-	public DefaultClientRequestsV2(CloudFoundryClientCache clients, CFClientParams params) throws Exception {
+	public DefaultClientRequestsV2(CloudFoundryClientCache clients, CFClientParams params) {
 		this.params = params;
 		CFClientProvider provider = clients.getOrCreate(params.getUsername(), params.getCredentials(), params.getHost(), params.skipSslValidation());
 		this._client = provider.client;
@@ -1378,10 +1378,10 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	@Override
-	public String getUserName() {
+	public Mono<String> getUserName() {
 		return log("uaa.getUsername",
 				_uaa.getUsername()
-		).block(GET_USERNAME_TIMEOUT);
+		).timeout(GET_USERNAME_TIMEOUT);
 	}
 
 }

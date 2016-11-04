@@ -15,7 +15,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTarget
 
 public abstract class CloudFoundryClientFactory {
 
-	public abstract ClientRequests getClient(CFClientParams params) throws Exception;
+	public abstract ClientRequests getClient(CFClientParams params);
 
 	/**
 	 * Get the client for an existing {@link CloudFoundryRunTarget}. Note that

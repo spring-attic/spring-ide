@@ -28,7 +28,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientReque
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel;
-import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel.StoreCredentialsMode;
+import org.springframework.ide.eclipse.boot.dash.dialogs.StoreCredentialsMode;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.WizardModelUserInteractions;
@@ -235,7 +235,7 @@ public class CloudFoundryTargetWizardModel {
 				if (t!=null) {
 					refreshToken = t;
 				}
-				String effectiveUser = client.getUserName();
+				String effectiveUser = client.getUserName().block();
 				if (effectiveUser!=null) {
 					userName.setValue(effectiveUser);
 				}

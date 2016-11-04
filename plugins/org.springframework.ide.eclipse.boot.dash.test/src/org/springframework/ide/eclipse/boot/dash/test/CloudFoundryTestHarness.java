@@ -39,7 +39,7 @@ import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDia
 import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel.ManifestType;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel;
-import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel.StoreCredentialsMode;
+import org.springframework.ide.eclipse.boot.dash.dialogs.StoreCredentialsMode;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;

@@ -17,6 +17,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
@@ -27,6 +29,7 @@ import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.Cancelat
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
@@ -269,4 +272,20 @@ public class ReactorUtils {
 		return sb;
 	}
 
+
+	/**
+	 * Connect a mono to a CompletableFuture so that the result of the mono
+	 * can be retrieved from the {@link CompletableFuture} by calling it's 'get'
+	 * method.
+	 */
+	public static <T> void completeWith(CompletableFuture<T> future, Mono<T> mono) {
+		mono.doOnNext((T v) -> {
+			future.complete(v);
+		})
+		.doOnError((Throwable e) -> {
+			future.completeExceptionally(e);
+		})
+		.subscribeOn(Schedulers.elastic())
+		.subscribe();
+	}
 }

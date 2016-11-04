@@ -37,7 +37,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetWizardModel.LoginMethod;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel;
-import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel.StoreCredentialsMode;
+import org.springframework.ide.eclipse.boot.dash.dialogs.StoreCredentialsMode;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.SelectionModel;
@@ -50,6 +50,8 @@ import org.springsource.ide.eclipse.commons.livexp.ui.DialogWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.StringFieldSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
+
+import reactor.core.scheduler.Schedulers;
 
 /**
  * Dialog for setting the password and "store password" flag.
@@ -81,7 +83,9 @@ public class UpdatePasswordDialog extends DialogWithSections {
 		sections.add(new ChooseOneSectionCombo<>(this, "Method:", model.getMethodVar(), EnumSet.allOf(LoginMethod.class)));
 		sections.add(new StringFieldSection(this, "Password:", model.getPasswordVar(), model.getPasswordValidator()).setPassword(true));
 		sections.add(storeCredentialsSection(this, model.getStoreVar(), model.getStoreValidator()));
-		sections.add(new ButtonSection(this, "Validate", model::requestCredentialValidation));
+		sections.add(new ButtonSection(this, "Validate", () -> {
+			model.validateCredentials().subscribeOn(Schedulers.elastic()).subscribe();
+		}));
 
 		return sections;
 	}

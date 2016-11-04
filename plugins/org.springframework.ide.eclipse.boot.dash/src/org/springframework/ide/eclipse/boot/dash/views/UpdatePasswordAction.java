@@ -21,7 +21,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientPar
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ConnectOperation;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel;
-import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel.StoreCredentialsMode;
+import org.springframework.ide.eclipse.boot.dash.dialogs.StoreCredentialsMode;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
@@ -47,14 +47,13 @@ public class UpdatePasswordAction extends AbstractCloudDashModelAction {
 			final CloudFoundryBootDashModel targetModel = (CloudFoundryBootDashModel) sectionSelection.getValue();
 			final CloudFoundryRunTarget runTarget = targetModel.getRunTarget();
 			if (runTarget!=null) {
-				final CFClientParams clientParams = new CFClientParams(runTarget.getTargetProperties());
 				final String targetId = runTarget.getId();
 				final StoreCredentialsMode storePassword = runTarget.getTargetProperties().getStoreCredentials();
 				Job job = new Job("Updating password") {
 
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
-						PasswordDialogModel passwordDialogModel = new PasswordDialogModel(runTarget.getClientFactory(), clientParams, storePassword);
+						PasswordDialogModel passwordDialogModel = new PasswordDialogModel(runTarget.getClientFactory(), runTarget.getTargetProperties(), storePassword);
 						ui.openPasswordDialog(passwordDialogModel);
 						if (passwordDialogModel.isOk()) {
 							runTarget.getTargetProperties().setStoreCredentials(

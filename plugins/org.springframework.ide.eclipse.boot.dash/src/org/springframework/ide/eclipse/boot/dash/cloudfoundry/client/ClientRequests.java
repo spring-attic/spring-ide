@@ -78,5 +78,5 @@ public interface ClientRequests {
 	 * @return Refresh token if it is already known, null otherwise.
 	 */
 	String getRefreshToken();
-	String getUserName();
+	Mono<String> getUserName();
 }

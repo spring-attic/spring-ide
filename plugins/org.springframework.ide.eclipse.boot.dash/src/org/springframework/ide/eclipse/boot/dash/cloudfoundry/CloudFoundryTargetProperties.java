@@ -18,7 +18,7 @@ import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundr
 import org.eclipse.equinox.security.storage.StorageException;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
-import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel.StoreCredentialsMode;
+import org.springframework.ide.eclipse.boot.dash.dialogs.StoreCredentialsMode;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;

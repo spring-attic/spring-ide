@@ -23,7 +23,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientPar
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFExceptions;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel;
-import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel.StoreCredentialsMode;
+import org.springframework.ide.eclipse.boot.dash.dialogs.StoreCredentialsMode;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
@@ -78,7 +78,7 @@ public class ConnectOperation extends CloudOperation {
 						CloudFoundryRunTarget runtarget = model.getRunTarget();
 						PasswordDialogModel passwordDialogModel = new PasswordDialogModel(
 								runtarget.getClientFactory(),
-								new CFClientParams(runtarget.getTargetProperties()),
+								runtarget.getTargetProperties(),
 								runtarget.getTargetProperties().getStoreCredentials()
 						);
 						ui.openPasswordDialog(passwordDialogModel);

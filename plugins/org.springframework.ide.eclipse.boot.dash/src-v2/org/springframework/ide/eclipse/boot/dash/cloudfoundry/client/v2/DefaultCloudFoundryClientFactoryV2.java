@@ -26,7 +26,7 @@ public class DefaultCloudFoundryClientFactoryV2 extends CloudFoundryClientFactor
 	private CloudFoundryClientCache clientFactory = new CloudFoundryClientCache();
 
 	@Override
-	public ClientRequests getClient(CFClientParams params) throws Exception {
+	public ClientRequests getClient(CFClientParams params) {
 		return new DefaultClientRequestsV2(clientFactory, params);
 	}
 }

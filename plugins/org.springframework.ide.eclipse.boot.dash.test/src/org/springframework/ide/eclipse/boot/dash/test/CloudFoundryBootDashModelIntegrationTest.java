@@ -65,7 +65,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentia
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials.CFCredentialType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
-import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel.StoreCredentialsMode;
+import org.springframework.ide.eclipse.boot.dash.dialogs.StoreCredentialsMode;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;

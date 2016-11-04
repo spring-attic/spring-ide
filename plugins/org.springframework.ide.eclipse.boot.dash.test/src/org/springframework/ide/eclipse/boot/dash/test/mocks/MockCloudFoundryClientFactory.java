@@ -84,7 +84,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 	}
 
 	@Override
-	public ClientRequests getClient(CFClientParams params) throws Exception {
+	public ClientRequests getClient(CFClientParams params) {
 		return new MockClient(params);
 	}
 
@@ -388,8 +388,15 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		}
 
 		@Override
-		public String getUserName() {
-			return params.getUsername();
+		public Mono<String> getUserName() {
+			return Mono.defer(() -> {
+				try {
+					checkConnection();
+					return Mono.just(params.getUsername());
+				} catch (Exception e) {
+					return Mono.error(e);
+				}
+			});
 		}
 
 	}
