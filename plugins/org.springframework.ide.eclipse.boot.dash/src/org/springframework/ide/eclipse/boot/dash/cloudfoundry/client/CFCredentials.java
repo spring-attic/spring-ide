@@ -126,4 +126,7 @@ public class CFCredentials {
 		return type;
 	}
 
+	public static CFCredentials fromSsoToken(String ssoToken) {
+		return CFCredentials.fromLogin(LoginMethod.TEMPORARY_CODE, ssoToken);
+	}
 }

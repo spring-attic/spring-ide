@@ -27,7 +27,7 @@ public class CFClientParams {
 
 	private final String apiUrl;
 	private final String username;
-	private final CFCredentials credentials;
+	private CFCredentials credentials;
 	private final boolean isSelfSigned;
 	private final boolean skipSslValidation;
 
@@ -169,4 +169,5 @@ public class CFClientParams {
 			return false;
 		return true;
 	}
+
 }

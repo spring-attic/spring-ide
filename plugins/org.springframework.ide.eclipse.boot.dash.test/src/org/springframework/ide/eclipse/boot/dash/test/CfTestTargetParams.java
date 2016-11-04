@@ -73,4 +73,20 @@ public class CfTestTargetParams {
 		}
 		return Boolean.parseBoolean(value);
 	}
+
+	public static CFClientParams fromEnvWithCredentials(CFCredentials credentials) {
+		try {
+			return new CFClientParams(
+					fromEnv("CF_TEST_API_URL"),
+					fromEnv("CF_TEST_USER"),
+					credentials,
+					false, //self signed
+					fromEnv("CF_TEST_ORG"),
+					fromEnvOrFile("CF_TEST_SPACE"),
+					fromEnvBoolean("CF_TEST_SKIP_SSL")
+			);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
 }

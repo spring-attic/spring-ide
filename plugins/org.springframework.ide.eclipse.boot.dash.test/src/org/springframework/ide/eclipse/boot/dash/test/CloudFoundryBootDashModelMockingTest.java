@@ -182,6 +182,125 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertEquals(1, harness.getCfRunTargetModels().size());
 	}
 
+	@Test
+	public void testCreateCfTargetSsoAndStoreRefreshToken() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnvWithCredentials(CFCredentials.fromSsoToken(clientFactory.getSsoToken()));
+		{
+			clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+			CloudFoundryBootDashModel target =  harness.createCfTarget(targetParams, StoreCredentialsMode.STORE_TOKEN);
+
+			assertNotNull(target);
+			CFCredentials credentials = target.getRunTarget().getTargetProperties().getCredentials();
+			assertEquals(CFCredentialType.REFRESH_TOKEN, credentials.getType());
+			assertEquals(MockCloudFoundryClientFactory.FAKE_REFRESH_TOKEN, credentials.getSecret());
+			assertEquals(1, harness.getCfRunTargetModels().size());
+		}
+		harness.reload();
+
+		CloudFoundryBootDashModel target = harness.getCfTargetModel();
+		assertNotNull(target);
+
+		CFCredentials credentials = target.getRunTarget().getTargetProperties().getCredentials();
+		assertEquals(CFCredentialType.REFRESH_TOKEN, credentials.getType());
+		assertEquals(MockCloudFoundryClientFactory.FAKE_REFRESH_TOKEN, credentials.getSecret());
+		assertEquals(StoreCredentialsMode.STORE_TOKEN, target.getRunTarget().getTargetProperties().getStoreCredentials());
+
+		waitForJobsToComplete();
+		assertTrue(target.isConnected()); //should auto connect.
+		verifyZeroInteractions(ui); //should not prompt for password (but used stored pass).
+
+		{
+			SecuredCredentialsStore store = harness.getCredentialsStore();
+			assertFalse(store.isUnlocked()); //not unlocked because token is stored in simple private file
+		}
+
+		{
+			IPropertyStore store = harness.getPrivateStore();
+			String key = harness.privateStoreKey(target);
+			String storedCred = store.get(key);
+			assertEquals(MockCloudFoundryClientFactory.FAKE_REFRESH_TOKEN, storedCred);
+		}
+	}
+
+	@Test
+	public void testCreateCfTargetSsoAndStoreNothing() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnvWithCredentials(CFCredentials.fromSsoToken(clientFactory.getSsoToken()));
+		{
+			clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+			CloudFoundryBootDashModel target =  harness.createCfTarget(targetParams, StoreCredentialsMode.STORE_NOTHING);
+
+			assertNotNull(target);
+			CFCredentials credentials = target.getRunTarget().getTargetProperties().getCredentials();
+			assertEquals(CFCredentialType.REFRESH_TOKEN, credentials.getType());
+			assertEquals(MockCloudFoundryClientFactory.FAKE_REFRESH_TOKEN, credentials.getSecret());
+			assertEquals(1, harness.getCfRunTargetModels().size());
+		}
+		harness.reload();
+
+		CloudFoundryBootDashModel target = harness.getCfTargetModel();
+		assertNotNull(target);
+
+		CFCredentials credentials = target.getRunTarget().getTargetProperties().getCredentials();
+		assertNull(credentials);
+
+		waitForJobsToComplete();
+		assertFalse(target.isConnected()); //should not auto connect.
+		verifyZeroInteractions(ui);
+
+		{
+			SecuredCredentialsStore store = harness.getCredentialsStore();
+			assertFalse(store.isUnlocked()); //not unlocked because token is stored in simple private file
+			assertNull(store.getCredentials(harness.secureStoreKey(target)));
+		}
+
+		{
+			IPropertyStore store = harness.getPrivateStore();
+			String key = harness.privateStoreKey(target);
+			String storedCred = store.get(key);
+			assertNull(storedCred);
+		}
+	}
+
+	@Test
+	public void testCreateCfTargetSsoAndStorePassword() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnvWithCredentials(CFCredentials.fromSsoToken(clientFactory.getSsoToken()));
+		{
+			clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+			CloudFoundryBootDashModel target =  harness.createCfTarget(targetParams, StoreCredentialsMode.STORE_PASSWORD);
+			//STORE_PASSWORD is meaningless for sso login and should be ignored (so behaves as STORE_NOTHING instead)
+
+			assertNotNull(target);
+			CFCredentials credentials = target.getRunTarget().getTargetProperties().getCredentials();
+			assertEquals(CFCredentialType.REFRESH_TOKEN, credentials.getType());
+			assertEquals(MockCloudFoundryClientFactory.FAKE_REFRESH_TOKEN, credentials.getSecret());
+			assertEquals(1, harness.getCfRunTargetModels().size());
+		}
+		harness.reload();
+
+		CloudFoundryBootDashModel target = harness.getCfTargetModel();
+		assertNotNull(target);
+
+		CFCredentials credentials = target.getRunTarget().getTargetProperties().getCredentials();
+		assertNull(credentials);
+
+		waitForJobsToComplete();
+		assertFalse(target.isConnected()); //should not auto connect.
+		verifyZeroInteractions(ui);
+
+		{
+			SecuredCredentialsStore store = harness.getCredentialsStore();
+			assertFalse(store.isUnlocked()); //not unlocked because token is stored in simple private file
+			assertNull(store.getCredentials(harness.secureStoreKey(target)));
+		}
+
+		{
+			IPropertyStore store = harness.getPrivateStore();
+			String key = harness.privateStoreKey(target);
+			String storedCred = store.get(key);
+			assertNull(storedCred);
+		}
+	}
+
 	@Test public void testCreateCfTargetAndStorePassword() throws Exception {
 		CFClientParams targetParams = CfTestTargetParams.fromEnv();
 		{

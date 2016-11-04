@@ -286,6 +286,7 @@ public class CloudFoundryTargetWizardModel {
 			//use credentials of a style that is consistent with the 'store mode'.
 			if (method.getValue()==LoginMethod.TEMPORARY_CODE && storeCredentials.getValue()==StoreCredentialsMode.STORE_PASSWORD) {
 				//The one token shouldn't be stored since its meaningless. Silently downgrade storemode to store
+				storeCredentials.setValue(StoreCredentialsMode.STORE_NOTHING);
 			}
 			StoreCredentialsMode mode = storeCredentials.getValue();
 			targetProps.setStoreCredentials(storeCredentials.getValue());
