@@ -292,8 +292,8 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 
 					if(type == ProjectType.MULTIMODULE_BASIC){
 						// Import application module project
-						IProject applicationModuleProject = workspace.getRoot().getProject("application".concat(":").concat(project.getName()));
-						IProjectDescription applicationModuleDescription = workspace.newProjectDescription("application".concat(":").concat(project.getName()));
+						IProject applicationModuleProject = workspace.getRoot().getProject(project.getName().concat(".").concat("application"));
+						IProjectDescription applicationModuleDescription = workspace.newProjectDescription(project.getName().concat(".").concat("application"));
 						applicationModuleDescription.setLocation(new Path(projectLocation + "/application"));
 						applicationModuleProject.create(applicationModuleDescription, new NullProgressMonitor());
 						applicationModuleProject.open(0, new NullProgressMonitor());
@@ -301,8 +301,8 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 						modules.add(applicationModuleProject);
 					}else if(type == ProjectType.MULTIMODULE_STANDARD){
 						// Import model module project
-						IProject modelModuleProject = workspace.getRoot().getProject("model".concat(":").concat(project.getName()));
-						IProjectDescription modelModuleDescription = workspace.newProjectDescription("model".concat(":").concat(project.getName()));
+						IProject modelModuleProject = workspace.getRoot().getProject(project.getName().concat(".").concat("model"));
+						IProjectDescription modelModuleDescription = workspace.newProjectDescription(project.getName().concat(".").concat("model"));
 						modelModuleDescription.setLocation(new Path(projectLocation + "/model"));
 						modelModuleProject.create(modelModuleDescription, new NullProgressMonitor());
 						modelModuleProject.open(0, new NullProgressMonitor());
@@ -310,9 +310,8 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 						modules.add(modelModuleProject);
 						
 						// Import repository module project
-						IProject repositoryModuleProject = workspace.getRoot().getProject("repository".concat(":").concat(project.getName()));
-						repositoryModuleProject.exists();
-						IProjectDescription repositoryModuleDescription = workspace.newProjectDescription("repository".concat(":").concat(project.getName()));
+						IProject repositoryModuleProject = workspace.getRoot().getProject(project.getName().concat(".").concat("repository"));
+						IProjectDescription repositoryModuleDescription = workspace.newProjectDescription(project.getName().concat(".").concat("repository"));
 						repositoryModuleDescription.setLocation(new Path(projectLocation + "/repository"));
 						repositoryModuleProject.create(repositoryModuleDescription, new NullProgressMonitor());
 						repositoryModuleProject.open(0, new NullProgressMonitor());
@@ -320,8 +319,8 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 						modules.add(repositoryModuleProject);
 						
 						// Import service-api module project
-						IProject serviceApiModuleProject = workspace.getRoot().getProject("service-api".concat(":").concat(project.getName()));
-						IProjectDescription serviceApiModuleDescription = workspace.newProjectDescription("service-api".concat(":").concat(project.getName()));
+						IProject serviceApiModuleProject = workspace.getRoot().getProject(project.getName().concat(".").concat("service-api"));
+						IProjectDescription serviceApiModuleDescription = workspace.newProjectDescription(project.getName().concat(".").concat("service-api"));
 						serviceApiModuleDescription.setLocation(new Path(projectLocation + "/service-api"));
 						serviceApiModuleProject.create(serviceApiModuleDescription, new NullProgressMonitor());
 						serviceApiModuleProject.open(0, new NullProgressMonitor());
@@ -329,8 +328,8 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 						modules.add(serviceApiModuleProject);
 						
 						// Import service-impl module project
-						IProject serviceImplModuleProject = workspace.getRoot().getProject("service-impl".concat(":").concat(project.getName()));
-						IProjectDescription serviceApiImplDescription = workspace.newProjectDescription("service-impl".concat(":").concat(project.getName()));
+						IProject serviceImplModuleProject = workspace.getRoot().getProject(project.getName().concat(".").concat("service-impl"));
+						IProjectDescription serviceApiImplDescription = workspace.newProjectDescription(project.getName().concat(".").concat("service-impl"));
 						serviceApiImplDescription.setLocation(new Path(projectLocation + "/service-impl"));
 						serviceImplModuleProject.create(serviceApiImplDescription, new NullProgressMonitor());
 						serviceImplModuleProject.open(0, new NullProgressMonitor());
@@ -338,8 +337,8 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 						modules.add(serviceImplModuleProject);
 						
 						// Import integration module project
-						IProject integrationModuleProject = workspace.getRoot().getProject("integration".concat(":").concat(project.getName()));
-						IProjectDescription integrationModuleDescription = workspace.newProjectDescription("integration".concat(":").concat(project.getName()));
+						IProject integrationModuleProject = workspace.getRoot().getProject(project.getName().concat(".").concat("integration"));
+						IProjectDescription integrationModuleDescription = workspace.newProjectDescription(project.getName().concat(".").concat("integration"));
 						integrationModuleDescription.setLocation(new Path(projectLocation + "/integration"));
 						integrationModuleProject.create(integrationModuleDescription, new NullProgressMonitor());
 						integrationModuleProject.open(0, new NullProgressMonitor());
@@ -347,8 +346,8 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 						modules.add(integrationModuleProject);
 						
 						// Import application module project
-						IProject applicationModuleProject = workspace.getRoot().getProject("application".concat(":").concat(project.getName()));
-						IProjectDescription applicationModuleDescription = workspace.newProjectDescription("application".concat(":").concat(project.getName()));
+						IProject applicationModuleProject = workspace.getRoot().getProject(project.getName().concat(".").concat("application"));
+						IProjectDescription applicationModuleDescription = workspace.newProjectDescription(project.getName().concat(".").concat("application"));
 						applicationModuleDescription.setLocation(new Path(projectLocation + "/application"));
 						applicationModuleProject.create(applicationModuleDescription, new NullProgressMonitor());
 						applicationModuleProject.open(0, new NullProgressMonitor());
