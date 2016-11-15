@@ -16,7 +16,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.doAnswer;
@@ -31,6 +30,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.springframework.ide.eclipse.boot.dash.test.BootDashModelTest.waitForJobsToComplete;
 import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.APP_DELETE_TIMEOUT;
 import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.APP_DEPLOY_TIMEOUT;
+import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withPackaging;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertContains;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.createFile;
@@ -45,7 +45,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -61,7 +60,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -69,6 +67,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
@@ -77,7 +76,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientPar
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials.CFCredentialType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.HealthChecks;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CloudFoundryClientCache.Params;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ReactorUtils;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
@@ -94,7 +92,6 @@ import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCFApplication;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCFSpace;
@@ -145,7 +142,7 @@ public class CloudFoundryBootDashModelMockingTest {
 	@Rule
 	public TestBracketter testBracketter = new TestBracketter();
 
-
+	private SpringBootCore springBootCore = SpringBootCore.getDefault();
 
 	@Before
 	public void setup() throws Exception {
@@ -1185,6 +1182,39 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertNull(app.getDeploymentManifestFile());
 		assertEquals(1024, (int) app.getMemory());
 		assertEquals(appName, app.getName());
+	}
+
+	@Test public void warDeploy() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
+
+		IProject project = projects.createBootProject("to-deploy-war",
+				withStarters("actuator", "web"),
+				withPackaging("war")
+		);
+		assertEquals("war", springBootCore.project(project).getPackaging());
+
+		String appName = project.getName();
+		harness.answerDeploymentPrompt(ui, (dialog) -> {
+			dialog.okPressed();
+		});
+
+		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		waitForApps(model, appName);
+
+		CloudAppDashElement app = model.getApplication(appName);
+		waitForState(app, RunState.RUNNING, 10000);
+
+		assertEquals((Integer)1, space.getPushCount(appName).getValue());
+		assertNull(app.getDeploymentManifestFile());
+		assertEquals(1024, (int) app.getMemory());
+		assertEquals(appName, app.getName());
+
+		File projectLocation = project.getLocation().toFile();
+		File warFile = new File(projectLocation, "target/"+project.getName()+"-0.0.1-SNAPSHOT.war");
+		assertTrue("war file not found: "+warFile, warFile.exists());
+		assertDeployedBytes(warFile, space.getApplication(appName));
 	}
 
 	@Test public void stopCancelsDeploy() throws Exception {

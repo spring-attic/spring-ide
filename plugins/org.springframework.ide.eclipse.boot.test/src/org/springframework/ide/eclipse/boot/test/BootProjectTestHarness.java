@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.test;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.springsource.ide.eclipse.commons.livexp.ui.ProjectLocationSection.getDefaultProjectLocation;
 
@@ -53,7 +54,7 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
  * @author Kris De Volder
  */
 public class BootProjectTestHarness {
-	
+
 	private static final boolean DEBUG = true;
 
 	private static void debug(String string) {
@@ -71,6 +72,7 @@ public class BootProjectTestHarness {
 		this.workspace = workspace;
 	}
 
+	@FunctionalInterface
 	public interface WizardConfigurer {
 
 		void apply(NewSpringBootWizardModel wizard);
@@ -87,6 +89,20 @@ public class BootProjectTestHarness {
 			public void apply(NewSpringBootWizardModel wizard) {
 				wizard.setImportStrategy(is);
 			}
+		};
+	}
+
+	public static WizardConfigurer withPackaging(final String packagingTypeName) {
+		return (wizard) -> {
+			RadioGroup packagingRadio = wizard.getRadioGroups().getGroup("packaging");
+			assertNotNull("Couldn't find 'packaging' radiogroup in the wizard model", packagingRadio);
+			for (RadioInfo r : packagingRadio.getRadios()) {
+				if (r.getValue().equals(packagingTypeName)) {
+					packagingRadio.getSelection().selection.setValue(r);
+					return;
+				}
+			}
+			fail("Couldn't find packaging type '"+packagingTypeName+"' in the wizard model");
 		};
 	}
 
@@ -219,7 +235,7 @@ public class BootProjectTestHarness {
 			job.schedule();
 
 			waitForImportJob(getProject(projectName), job);
-			
+
 		});
 		return getProject(projectName);
 	}
@@ -241,7 +257,7 @@ public class BootProjectTestHarness {
 	public IProject getProject(String projectName) {
 		return workspace.getRoot().getProject(projectName);
 	}
-	
+
 	public static void updateMavenProjectDependencies(IProject project) throws InterruptedException {
 		debug("updateMavenProjectDependencies("+project.getName()+") ...");
 		boolean refreshFromLocal = true;

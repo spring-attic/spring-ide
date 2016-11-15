@@ -41,7 +41,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushAr
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.IApplicationLogConsole;
 import org.springframework.ide.eclipse.boot.dash.test.CfTestTargetParams;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
-import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 
 import com.google.common.collect.ImmutableList;
