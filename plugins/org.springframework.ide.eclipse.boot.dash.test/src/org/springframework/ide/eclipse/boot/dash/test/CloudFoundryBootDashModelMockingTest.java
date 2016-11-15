@@ -881,11 +881,11 @@ public class CloudFoundryBootDashModelMockingTest {
 		dialog.template.setValue("CHANGED %s -> %o");
 		dialog.performOk();
 
-		verify(modelStateListener).stateChanged(same(fooSpace));
-		verify(modelStateListener, never()).stateChanged(same(barSpace));
-
 		assertEquals("CHANGED foo -> my-org", fooSpace.getDisplayName());
 		assertEquals("your-org : bar - [http://api.some-cloud.com]", barSpace.getDisplayName());
+
+		verify(modelStateListener).stateChanged(same(fooSpace));
+		verify(modelStateListener, never()).stateChanged(same(barSpace));
 
 		//Opening the dialog now should have 'apply to all' disabled to avoid accidentally overwriting
 		// existing individually customized labels...
@@ -1281,8 +1281,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		CloudAppDashElement app = model.getApplication(appName);
 		app.setProject(null);
 		assertNull(app.getProject());
-
-		assertEquals(RunState.INACTIVE, app.getRunState());
+		waitForState(app, RunState.INACTIVE, 3000);
 
 		harness.answerDeploymentPrompt(ui, appName, appName);
 		Mockito.doReturn(true).when(ui).confirmOperation(same("Replace Existing Application"), any());
