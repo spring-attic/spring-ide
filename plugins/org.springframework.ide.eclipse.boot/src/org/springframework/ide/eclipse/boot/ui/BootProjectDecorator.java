@@ -54,7 +54,7 @@ public class BootProjectDecorator implements ILightweightLabelDecorator {
 		if (project != null) {
 
 			// workaround m2e initialization issue to avoid broken m2e
-			if (workaroundMavenBundleInitializationIssue(project)) {
+			if (BootPropertyTester.workaroundMavenBundleInitializationIssue(project)) {
 				return;
 			}
 			
@@ -76,29 +76,4 @@ public class BootProjectDecorator implements ILightweightLabelDecorator {
 		return null;
 	}
 	
-	/**
-	 * this is a workaround for an initialization issue around m2e
-	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=479245
-	 * 
-	 * this workaround tries to avoid very early m2e.jdt activation
-	 * and therefore tries to reduce the likelihood of running into
-	 * the issue.
-	 */
-	private boolean workaroundMavenBundleInitializationIssue(IProject project) {
-		try {
-			if (project.hasNature("org.eclipse.m2e.core.maven2Nature")) {
-				Bundle bundle = Platform.getBundle("org.eclipse.m2e.jdt");
-				if (bundle != null) {
-					if (bundle.getState() != Bundle.ACTIVE) {
-						return true;
-					}
-				}
-			}
-		} catch (CoreException e) {
-		}
-		
-		return false;
-	}
-
-
 }

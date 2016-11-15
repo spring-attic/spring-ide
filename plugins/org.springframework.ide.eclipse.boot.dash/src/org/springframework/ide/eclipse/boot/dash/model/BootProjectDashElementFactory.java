@@ -46,6 +46,10 @@ public class BootProjectDashElementFactory implements Disposable {
 	}
 
 	public BootProjectDashElement createOrGet(IProject p) {
+		if (BootPropertyTester.workaroundMavenBundleInitializationIssue(p)) {
+			return null;
+		}
+
 		if (BootPropertyTester.isBootProject(p)) {
 			BootProjectDashElement el;
 			synchronized (this) {
