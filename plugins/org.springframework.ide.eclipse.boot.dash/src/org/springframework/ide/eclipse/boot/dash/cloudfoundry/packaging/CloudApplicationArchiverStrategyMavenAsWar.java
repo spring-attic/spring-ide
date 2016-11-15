@@ -25,13 +25,13 @@ import org.springframework.ide.eclipse.boot.util.Log;
  *
  * @author Kris De Volder
  */
-public class CloudApplicationArchiverStrategyAsWar implements CloudApplicationArchiverStrategy {
+public class CloudApplicationArchiverStrategyMavenAsWar implements CloudApplicationArchiverStrategy {
 
 	private SpringBootCore springBootCore = SpringBootCore.getDefault();
 	private IProject project;
 //	private UserInteractions ui;
 
-	public CloudApplicationArchiverStrategyAsWar(IProject project, UserInteractions ui) {
+	public CloudApplicationArchiverStrategyMavenAsWar(IProject project, UserInteractions ui) {
 		this.project = project;
 //		this.ui = ui;
 	}

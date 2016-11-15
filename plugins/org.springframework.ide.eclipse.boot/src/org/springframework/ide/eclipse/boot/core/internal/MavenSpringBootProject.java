@@ -568,7 +568,7 @@ public class MavenSpringBootProject extends SpringBootProject {
 		if (warFile==null) {
 			throw ExceptionUtil.coreException("Couldn't determine where to find the war file after 'mvn package'");
 		} else if (!warFile.isFile()) {
-			throw ExceptionUtil.coreException("Couldn't find the war file at '"+warFile+"' after running 'mvn package'");
+			throw ExceptionUtil.coreException("Couldn't find file to deploy at '"+warFile+"' after running 'mvn package'");
 		}
 		return warFile;
 	}

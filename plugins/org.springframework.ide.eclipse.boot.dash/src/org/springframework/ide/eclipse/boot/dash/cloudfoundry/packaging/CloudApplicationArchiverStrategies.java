@@ -40,7 +40,7 @@ public class CloudApplicationArchiverStrategies {
 	}
 
 	public static CloudApplicationArchiverStrategy packageMvnAsWar(IProject project, UserInteractions ui) {
-		return new CloudApplicationArchiverStrategyAsWar(project, ui);
+		return new CloudApplicationArchiverStrategyMavenAsWar(project, ui);
 	}
 
 }
