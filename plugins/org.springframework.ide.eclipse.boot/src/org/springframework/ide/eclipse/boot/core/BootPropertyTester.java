@@ -91,10 +91,11 @@ public class BootPropertyTester extends PropertyTester {
 		}
 		try {
 			if (project.hasNature(JavaCore.NATURE_ID)) {
-				IJavaProject jp = JavaCore.create(project);
-				IClasspathEntry[] classpath = jp.getResolvedClasspath(true);
-				//Look for a 'spring-boot' jar or project entry
 				if (!isExcludedProject(project)) {
+					IJavaProject jp = JavaCore.create(project);
+					IClasspathEntry[] classpath = jp.getResolvedClasspath(true);
+					//Look for a 'spring-boot' jar or project entry
+
 					for (IClasspathEntry e : classpath) {
 						if (isBootJar(e) || isBootProject(e)) {
 							return true;
