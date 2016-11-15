@@ -39,4 +39,8 @@ public class CloudApplicationArchiverStrategies {
 		return new CloudApplicationArchiverStrategyAsJar(project, ui);
 	}
 
+	public static CloudApplicationArchiverStrategy packageMvnAsWar(IProject project, UserInteractions ui) {
+		return new CloudApplicationArchiverStrategyAsWar(project, ui);
+	}
+
 }
