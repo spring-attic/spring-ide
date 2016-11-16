@@ -1,12 +1,13 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012 - 2016 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      GoPivotal, Inc. - initial API and implementation
+ *      DISID Corporation, S.L - Spring Roo maintainer
  *******************************************************************************/
 package org.springframework.ide.eclipse.roo.ui.internal;
 
@@ -32,6 +33,7 @@ import org.springframework.util.StringUtils;
  * @author Christian Dupuis
  * @author Steffen Pingel
  * @author Leo Dos Santos
+ * @author Juan Carlos García
  * @since 2.1.0
  */
 public class StyledTextAppender {
@@ -153,7 +155,11 @@ public class StyledTextAppender {
 					// structure
 					Matcher matcher = getHyperlinkPattern().matcher(StringUtils.replace(trimmedMessage, NL, "").replace('\\',
 							'/'));
-					if (matcher.matches()) {
+          // If matches and some file has been created, updated or deleted,
+          // decorate the new file with Hyperlink style.
+					if (matcher.matches() && (trimmedMessage.startsWith("Created") 
+                        || trimmedMessage.startsWith("Updated")
+                        || trimmedMessage.startsWith("Deleted"))) {
 						String prefix = matcher.group(1);
 						String file = matcher.group(2);
 						String appendix = matcher.group(5);
