@@ -26,6 +26,7 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.project.IMavenProjectImportResult;
@@ -34,6 +35,7 @@ import org.eclipse.m2e.core.project.ProjectImportConfiguration;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCorePreferences;
@@ -46,14 +48,14 @@ import org.springframework.ide.eclipse.maven.internal.core.MavenClasspathUpdateJ
  */
 public class MavenCorePlugin extends AbstractUIPlugin {
 
-	private static final String M2ECLIPSE_CLASS = "org.eclipse.m2e.core.MavenPlugin";
-	public static final boolean IS_M2ECLIPSE_PRESENT = isPresent(M2ECLIPSE_CLASS);
+	private static final String M2ECLIPSE_BUNDLE = "org.eclipse.m2e.core";
+	public static final boolean IS_M2ECLIPSE_PRESENT = isPresent(M2ECLIPSE_BUNDLE);
 
-	private static boolean isPresent(String className) {
+	private static boolean isPresent(String bundleName) {
 		try {
-			Class.forName(className);
-			return true;
-		} catch (ClassNotFoundException e) {
+			Bundle bundle = Platform.getBundle(bundleName);
+			return bundle != null && bundle.getState() != Bundle.INSTALLED && bundle.getState() != Bundle.UNINSTALLED;
+		} catch (Exception e) {
 			return false;
 		}
 	}
