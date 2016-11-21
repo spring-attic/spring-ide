@@ -2190,7 +2190,7 @@ public class CloudFoundryBootDashModelMockingTest {
 	}
 
 	protected void waitForApps(final CloudFoundryBootDashModel target, final String... names) throws Exception {
-		new ACondition("wait for apps to appear", 10000) {
+		new ACondition("wait for apps to appear", 30000) {
 			@Override
 			public boolean test() throws Exception {
 				ImmutableSet<String> appNames = getNames(target.getApplications().getValues());
