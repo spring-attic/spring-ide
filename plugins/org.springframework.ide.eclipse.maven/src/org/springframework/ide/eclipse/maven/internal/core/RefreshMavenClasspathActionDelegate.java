@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 - 2013 GoPivotal, Inc.
+ *  Copyright (c) 2012, 2016 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -70,7 +70,7 @@ public class RefreshMavenClasspathActionDelegate implements IObjectActionDelegat
 						enabled = false;
 						break;
 					}
-					else if (SpringCoreUtils.hasNature(project, MavenCorePlugin.M2ECLIPSE_NATURE) || SpringCoreUtils.hasNature(project, MavenCorePlugin.M2ECLIPSE_LEGACY_NATURE)) {
+					else if (SpringCoreUtils.hasNature(project, MavenCorePlugin.M2ECLIPSE_NATURE)) {
 						enabled = false;
 						break;
 					}
