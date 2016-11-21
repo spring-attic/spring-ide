@@ -30,8 +30,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Eclipse-LazyStart: true
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
-Export-Package: org.springframework.ide.eclipse.maven,
- org.springframework.ide.eclipse.maven.internal.legacyconversion
+Export-Package: org.springframework.ide.eclipse.maven
 Import-Package: org.eclipse.core.runtime,
  org.eclipse.core.runtime.jobs,
  org.eclipse.core.runtime.preferences,

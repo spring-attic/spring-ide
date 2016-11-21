@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2016 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -47,10 +47,7 @@ import org.springframework.ide.eclipse.maven.internal.core.MavenClasspathUpdateJ
 public class MavenCorePlugin extends AbstractUIPlugin {
 
 	private static final String M2ECLIPSE_CLASS = "org.eclipse.m2e.core.MavenPlugin";
-	private static final String M2ECLIPSE_LEGACY_CLASS = "org.maven.ide.eclipse.MavenPlugin";
-
 	public static final boolean IS_M2ECLIPSE_PRESENT = isPresent(M2ECLIPSE_CLASS);
-	public static final boolean IS_LEGACY_M2ECLIPSE_PRESENT = isPresent(M2ECLIPSE_LEGACY_CLASS);
 
 	private static boolean isPresent(String className) {
 		try {
@@ -69,8 +66,6 @@ public class MavenCorePlugin extends AbstractUIPlugin {
 
 	public static final String M2ECLIPSE_NATURE = "org.eclipse.m2e.core.maven2Nature";
 
-	public static final String M2ECLIPSE_LEGACY_NATURE = "org.maven.ide.eclipse.maven2Nature";
-
 	private static MavenCorePlugin plugin;
 
 	private IResourceChangeListener resourceChangeListener;
@@ -78,7 +73,7 @@ public class MavenCorePlugin extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-		if (IS_M2ECLIPSE_PRESENT || IS_LEGACY_M2ECLIPSE_PRESENT) {
+		if (IS_M2ECLIPSE_PRESENT) {
 			resourceChangeListener = new PomResourceChangeListener();
 			ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener);
 		}
@@ -87,7 +82,7 @@ public class MavenCorePlugin extends AbstractUIPlugin {
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
 		super.stop(context);
-		if (resourceChangeListener != null && (IS_M2ECLIPSE_PRESENT || IS_LEGACY_M2ECLIPSE_PRESENT)) {
+		if (resourceChangeListener != null && (IS_M2ECLIPSE_PRESENT)) {
 			ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
 		}
 	}
