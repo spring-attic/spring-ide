@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 - 2013 VMware, Inc.
+ *  Copyright (c) 2012, 2016 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -333,7 +333,7 @@ public class ExampleProjectsImporterJob extends WorkspaceJob implements IOverwri
 	}
 
 	private static boolean hasMaven() {
-		return (MavenCorePlugin.IS_M2ECLIPSE_PRESENT || MavenCorePlugin.IS_LEGACY_M2ECLIPSE_PRESENT);
+		return (MavenCorePlugin.IS_M2ECLIPSE_PRESENT);
 	}
 
 	private void deleteRecursive(File file) {
