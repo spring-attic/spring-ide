@@ -24,6 +24,7 @@ public interface DeploymentProperties {
 
 	int DEFAULT_MEMORY = 1024;
 	int DEFAULT_INSTANCES = 1;
+	String DEFAULT_HEALTH_CHECK_TYPE = "port";
 
 	String getAppName();
 
@@ -32,6 +33,8 @@ public interface DeploymentProperties {
 	int getDiskQuota();
 
 	Integer getTimeout();
+
+	String getHealthCheckType();
 
 	String getBuildpack();
 

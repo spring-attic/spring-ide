@@ -108,6 +108,11 @@ public class CFApplicationSummaryData implements CFApplication {
 	}
 
 	@Override
+	public String getHealthCheckType() {
+		return extras.getHealthCheckType().block();
+	}
+
+	@Override
 	public String getCommand() {
 		return extras.getCommand().block();
 	}

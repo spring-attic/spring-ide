@@ -98,6 +98,8 @@ public class ApplicationManifestHandler {
 
 	public static final String TIMEOUT_PROP = "timeout";
 
+	public static final String HEALTH_CHECK_TYPE_PROP = "health-check-type";
+
 	public static final String COMMAND_PROP = "command";
 
 	public static final String STACK_PROP = "stack";
@@ -306,6 +308,8 @@ public class ApplicationManifestHandler {
 
 		readTimeout(appMap, allResults, properties);
 
+		readHealthCheckType(appMap, allResults, properties);
+
 		readCommand(appMap, allResults, properties);
 
 		readStack(appMap, allResults, properties);
@@ -425,6 +429,10 @@ public class ApplicationManifestHandler {
 		}
 		if (properties.getTimeout() != null) {
 			application.put(ApplicationManifestHandler.TIMEOUT_PROP, properties.getTimeout());
+		}
+		String healthCheck = properties.getHealthCheckType();
+		if (healthCheck != null) {
+			application.put(ApplicationManifestHandler.HEALTH_CHECK_TYPE_PROP, healthCheck);
 		}
 		if (properties.getCommand() != null) {
 			application.put(ApplicationManifestHandler.COMMAND_PROP, properties.getCommand());
@@ -591,6 +599,17 @@ public class ApplicationManifestHandler {
 		}
 		if (timeout != null) {
 			properties.setTimeout(timeout);
+		}
+	}
+
+	private void readHealthCheckType(Map<?, ?> application, Map<Object, Object> allResults,
+			CloudApplicationDeploymentProperties properties) {
+		String hc = getValue(application, HEALTH_CHECK_TYPE_PROP, String.class);
+		if (hc == null) {
+			hc = getValue(allResults, HEALTH_CHECK_TYPE_PROP, String.class);
+		}
+		if (hc != null) {
+			properties.setHealthCheckType(hc);
 		}
 	}
 

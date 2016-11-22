@@ -77,6 +77,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentia
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials.CFCredentialType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.HealthChecks;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ReactorUtils;
+import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel.ManifestType;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.StoreCredentialsMode;
@@ -93,6 +94,7 @@ import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.DeploymentAnswerer;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCFApplication;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCFSpace;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCloudFoundryClientFactory;
@@ -553,7 +555,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertEquals(HealthChecks.HC_PORT, appElement.getHealthCheck());
 
 
-		foo.setHealthCheck(HealthChecks.HC_NONE);
+		foo.setHealthCheckType(HealthChecks.HC_NONE);
 
 		target.refresh(ui);
 
@@ -1746,6 +1748,30 @@ public class CloudFoundryBootDashModelMockingTest {
 
 	}
 
+	@Test public void pushWithHealthCheckParam() throws Exception {
+		String appName = "someApp";
+		final IProject project = projects.createBootProject(appName, withStarters("actuator", "web"));
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+
+		CloudFoundryBootDashModel model = harness.createCfTarget(targetParams);
+
+		harness.answerDeploymentPrompt(ui, (dialog) -> {
+			dialog.setManifestType(ManifestType.MANUAL);
+			dialog.setManualManifest(
+					"applications:\n" +
+					"- name: "+appName+"\n" +
+					"  health-check-type: none\n"
+			);
+			dialog.okPressed();
+		});
+		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		waitForApps(model, appName);
+		waitForState(model.getApplication(appName), RunState.RUNNING, 4000);
+		waitForJobsToComplete();
+
+		assertEquals("none",space.getApplication(appName).getHealthCheckType());
+	}
 
 	@Test public void updateTargetSsoAndStoreNothing() throws Exception {
 		String appName = "someApp";

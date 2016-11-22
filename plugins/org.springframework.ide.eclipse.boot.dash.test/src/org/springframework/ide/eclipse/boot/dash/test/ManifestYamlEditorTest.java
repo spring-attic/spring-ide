@@ -36,6 +36,8 @@ public class ManifestYamlEditorTest {
 				// ---------------
 				"env:\n"+
 				"  <*>",
+				// ----------------
+				"health-check-type: <*>",
 				// ---------------
 //				"host: <*>",
 				// ---------------
@@ -102,6 +104,9 @@ public class ManifestYamlEditorTest {
 				"    <*>",
 				// ---------------
 				"applications:\n" +
+				"- health-check-type: <*>",
+				// ---------------
+				"applications:\n" +
 				"- host: <*>",
 				// ---------------
 				"applications:\n" +
@@ -165,6 +170,10 @@ public class ManifestYamlEditorTest {
 				"random-route: false<*>",
 				"random-route: true<*>"
 		);
+		assertCompletions("health-check-type: <*>",
+				"health-check-type: none<*>",
+				"health-check-type: port<*>"
+		);
 	}
 
 	@Test
@@ -174,7 +183,8 @@ public class ManifestYamlEditorTest {
 				"applications:\n" +
 				"  - buildpack: zbuildpack\n" +
 				"    domain: zdomain\n" +
-				"    name: foo"
+				"    name: foo\n" +
+				"    health-check-type: none"
 		);
 		editor.assertIsHoverRegion("memory");
 		editor.assertIsHoverRegion("applications");
@@ -185,6 +195,7 @@ public class ManifestYamlEditorTest {
 		editor.assertHoverContains("memory", "Use the <code>memory</code> attribute to specify the memory limit");
 		editor.assertHoverContains("1G", "Use the <code>memory</code> attribute to specify the memory limit");
 		editor.assertHoverContains("buildpack", "use the <code>buildpack</code> attribute to specify its URL or name");
+		editor.assertHoverContains("health-check-type", "Use the <code>health-check-type</code> attribute to");
 	}
 
 	@Test

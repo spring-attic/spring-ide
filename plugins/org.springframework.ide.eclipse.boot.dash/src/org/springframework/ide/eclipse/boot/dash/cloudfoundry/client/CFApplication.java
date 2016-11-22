@@ -31,4 +31,5 @@ public interface CFApplication extends CFEntity {
 	String getStack();
 
 	Map<String,String> getEnvAsMap();
+	String getHealthCheckType();
 }

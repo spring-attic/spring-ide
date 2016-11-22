@@ -266,6 +266,10 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 				entity.then((e) -> Mono.justOrEmpty(e.getCommand()))
 		);
 
+		Mono<String> healthCheckType = prefetch("healthCheckType",
+				entity.then((e) -> Mono.justOrEmpty(e.getHealthCheckType()))
+		);
+
 		return new ApplicationExtras() {
 			@Override
 			public Mono<List<String>> getServices() {
@@ -294,6 +298,11 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 			@Override
 			public Mono<String> getCommand() {
 				return command;
+			}
+
+			@Override
+			public Mono<String> getHealthCheckType() {
+				return healthCheckType;
 			}
 		};
 	}
@@ -762,6 +771,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 					.name(params.getAppName())
 					.memory(params.getMemory())
 					.diskQuota(params.getDiskQuota())
+					.healthCheckType(params.getHealthCheckType())
 					.healthCheckTimeout(params.getTimeout())
 					.buildpack(params.getBuildpack())
 					.command(params.getCommand())
@@ -799,6 +809,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 				.name(params.getAppName())
 				.memory(params.getMemory())
 				.diskQuota(params.getDiskQuota())
+				.healthCheckType(params.getHealthCheckType())
 				.healthCheckTimeout(params.getTimeout())
 				.buildpack(params.getBuildpack())
 				.command(params.getCommand())
@@ -812,8 +823,6 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		})
 		.then(Mono.just(appId));
 	}
-
-
 
 //	public void pushV2(CFPushArguments params, CancelationToken cancelationToken) throws Exception {
 //		debug("Pushing app starting: "+params.getAppName());

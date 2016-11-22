@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1;
 
-import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1.CFWrapping.wrap;
-import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1.CFWrapping.wrapApps;
 import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1.CFWrapping.wrapBuildpacks;
 import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1.CFWrapping.wrapDomains;
 
@@ -29,15 +27,12 @@ import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.HttpProxyConfiguration;
 import org.cloudfoundry.client.lib.StreamingLogToken;
-import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.CloudInfo;
 import org.cloudfoundry.client.lib.domain.Staging;
 import org.eclipse.core.runtime.Assert;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudErrors;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.MissingPasswordException;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
@@ -224,35 +219,34 @@ public class DefaultClientRequestsV1 {
 //		}.call();
 //	}
 
-	public CFApplication getApplication(final UUID appUUID) throws Exception {
-
-		return new ApplicationRequest<CFApplication>(this.client, appUUID.toString()) {
-			@Override
-			protected CFApplication doRun(CloudFoundryOperations client) throws Exception {
-				try {
-					return wrap(client.getApplication(appUUID));
-				} catch (Exception e) {
-					if (CloudErrors.is503Error(e)) {
-						// Alternate way to fetch applications that does not
-						// fetch instances and
-						// may not throw 503 due to fetching stats on app
-						// instances if app is not running
-						List<CloudApplication> apps = client.getApplicationsWithBasicInfo();
-						if (apps != null) {
-							for (CloudApplication app : apps) {
-								if (app.getMeta().getGuid().equals(appUUID)) {
-									return wrap(app);
-								}
-							}
-						}
-						return null;
-					} else {
-						throw e;
-					}
-				}
-			}
-		}.call();
-	}
+//	public CFApplication getApplication(final UUID appUUID) throws Exception {
+//		return new ApplicationRequest<CFApplication>(this.client, appUUID.toString()) {
+//			@Override
+//			protected CFApplication doRun(CloudFoundryOperations client) throws Exception {
+//				try {
+//					return wrap(client.getApplication(appUUID));
+//				} catch (Exception e) {
+//					if (CloudErrors.is503Error(e)) {
+//						// Alternate way to fetch applications that does not
+//						// fetch instances and
+//						// may not throw 503 due to fetching stats on app
+//						// instances if app is not running
+//						List<CloudApplication> apps = client.getApplicationsWithBasicInfo();
+//						if (apps != null) {
+//							for (CloudApplication app : apps) {
+//								if (app.getMeta().getGuid().equals(appUUID)) {
+//									return wrap(app);
+//								}
+//							}
+//						}
+//						return null;
+//					} else {
+//						throw e;
+//					}
+//				}
+//			}
+//		}.call();
+//	}
 
 //	public CFApplicationStats getApplicationStats(final String appName) throws Exception {
 //		return CFWrapping.wrap(new ApplicationInstanceRequest(this.client, appName).call());
@@ -266,14 +260,14 @@ public class DefaultClientRequestsV1 {
 //		return RetryUtil.retry(2000, timeout, task);
 //	}
 
-	public List<CFApplication> getApplicationsWithBasicInfo() throws Exception {
-		return new ClientRequest<List<CFApplication>>(this.client, "Getting all Cloud applications") {
-			@Override
-			protected List<CFApplication> doRun(CloudFoundryOperations client) throws Exception {
-				return wrapApps(client.getApplicationsWithBasicInfo());
-			}
-		}.call();
-	}
+//	public List<CFApplication> getApplicationsWithBasicInfo() throws Exception {
+//		return new ClientRequest<List<CFApplication>>(this.client, "Getting all Cloud applications") {
+//			@Override
+//			protected List<CFApplication> doRun(CloudFoundryOperations client) throws Exception {
+//				return wrapApps(client.getApplicationsWithBasicInfo());
+//			}
+//		}.call();
+//	}
 
 	public void uploadApplication(final String appName, final ZipFile archive) throws Exception {
 		new BasicRequest(this.client, appName, "Uploading application archive") {

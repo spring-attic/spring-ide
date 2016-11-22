@@ -113,23 +113,23 @@ public class CFWrapping {
 		return null;
 	}
 
-	public static List<CFApplication> wrapApps(List<CloudApplication> apps) {
-		if (apps!=null) {
-			Builder<CFApplication> builder = ImmutableList.builder();
-			for (CloudApplication a : apps) {
-				builder.add(wrap(a));
-			}
-			return builder.build();
-		}
-		return null;
-	}
+//	public static List<CFApplication> wrapApps(List<CloudApplication> apps) {
+//		if (apps!=null) {
+//			Builder<CFApplication> builder = ImmutableList.builder();
+//			for (CloudApplication a : apps) {
+//				builder.add(wrap(a));
+//			}
+//			return builder.build();
+//		}
+//		return null;
+//	}
 
-	public static CFApplication wrap(final CloudApplication a) {
-		if (a!=null) {
-			return new CFApplicationWrapper(a);
-		}
-		return null;
-	}
+//	public static CFApplication wrap(final CloudApplication a) {
+//		if (a!=null) {
+//			return new CFApplicationWrapper(a);
+//		}
+//		return null;
+//	}
 
 //	public static CFApplicationDetail wrapDetails(CloudApplication a) {
 //		if (a!=null) {
@@ -138,133 +138,138 @@ public class CFWrapping {
 //		return null;
 //	}
 
-	private static class CFApplicationWrapper implements CFApplication {
-		private final CloudApplication a;
+//	private static class CFApplicationWrapper implements CFApplication {
+//		private final CloudApplication a;
+//
+//		public CFApplicationWrapper(CloudApplication a) {
+//			this.a = a;
+//		}
+//
+//		@Override
+//		public String getName() {
+//			return a.getName();
+//		}
+//
+//		private CloudApplication unwrap() {
+//			return a;
+//		}
+//		@Override
+//		public boolean equals(Object obj) {
+//			if (obj instanceof CFApplicationWrapper) {
+//				return ((CFApplicationWrapper)obj).unwrap().equals(unwrap());
+//			}
+//			return false;
+//		}
+//
+//		@Override
+//		public int hashCode() {
+//			return a.hashCode();
+//		}
+//
+//		@Override
+//		public int getInstances() {
+//			return a.getInstances();
+//		}
+//
+//		@Override
+//		public int getRunningInstances() {
+//			return a.getRunningInstances();
+//		}
+//
+//		@Override
+//		public Map<String, String> getEnvAsMap() {
+//			return a.getEnvAsMap();
+//		}
+//
+//		@Override
+//		public int getMemory() {
+//			return a.getMemory();
+//		}
+//
+//		@Override
+//		public UUID getGuid() {
+//			return a.getMeta().getGuid();
+//		}
+//
+//		@Override
+//		public List<String> getServices() {
+//			return a.getServices();
+//		}
+//
+//		@Override
+//		public String getBuildpackUrl() {
+//			Staging s = a.getStaging();
+//			if (s!=null) {
+//				return s.getBuildpackUrl();
+//			}
+//			return null;
+//		}
+//
+//		@Override
+//		public List<String> getUris() {
+//			return a.getUris();
+//		}
+//
+//		@Override
+//		public Integer getTimeout() {
+//			Staging s = a.getStaging();
+//			if (s!=null) {
+//				return s.getHealthCheckTimeout();
+//			}
+//			return null;
+//		}
+//
+//		@Override
+//		public String getCommand() {
+//			Staging s = a.getStaging();
+//			if (s!=null) {
+//				return s.getCommand();
+//			}
+//			return null;
+//		}
+//
+//		@Override
+//		public String getStack() {
+//			Staging s = a.getStaging();
+//			if (s!=null) {
+//				return s.getStack();
+//			}
+//			return null;
+//		}
+//
+//		@Override
+//		public CFAppState getState() {
+//			return CFAppState.valueOf(a.getState().toString());
+//		}
+//
+//		@Override
+//		public int getDiskQuota() {
+//			return a.getDiskQuota();
+//		}
+//
+//		@Override
+//		public String getHealthCheckType() {
+//			return a.get;
+//		}
+//	}
 
-		public CFApplicationWrapper(CloudApplication a) {
-			this.a = a;
-		}
+//	public static CloudApplication unwrap(final CFApplication a) {
+//		if (a!=null) {
+//			return ((CFApplicationWrapper)a).unwrap();
+//		}
+//		return null;
+//	}
 
-		@Override
-		public String getName() {
-			return a.getName();
-		}
-
-		private CloudApplication unwrap() {
-			return a;
-		}
-		@Override
-		public boolean equals(Object obj) {
-			if (obj instanceof CFApplicationWrapper) {
-				return ((CFApplicationWrapper)obj).unwrap().equals(unwrap());
-			}
-			return false;
-		}
-
-		@Override
-		public int hashCode() {
-			return a.hashCode();
-		}
-
-		@Override
-		public int getInstances() {
-			return a.getInstances();
-		}
-
-		@Override
-		public int getRunningInstances() {
-			return a.getRunningInstances();
-		}
-
-		@Override
-		public Map<String, String> getEnvAsMap() {
-			return a.getEnvAsMap();
-		}
-
-		@Override
-		public int getMemory() {
-			return a.getMemory();
-		}
-
-		@Override
-		public UUID getGuid() {
-			return a.getMeta().getGuid();
-		}
-
-		@Override
-		public List<String> getServices() {
-			return a.getServices();
-		}
-
-		@Override
-		public String getBuildpackUrl() {
-			Staging s = a.getStaging();
-			if (s!=null) {
-				return s.getBuildpackUrl();
-			}
-			return null;
-		}
-
-		@Override
-		public List<String> getUris() {
-			return a.getUris();
-		}
-
-		@Override
-		public Integer getTimeout() {
-			Staging s = a.getStaging();
-			if (s!=null) {
-				return s.getHealthCheckTimeout();
-			}
-			return null;
-		}
-
-		@Override
-		public String getCommand() {
-			Staging s = a.getStaging();
-			if (s!=null) {
-				return s.getCommand();
-			}
-			return null;
-		}
-
-		@Override
-		public String getStack() {
-			Staging s = a.getStaging();
-			if (s!=null) {
-				return s.getStack();
-			}
-			return null;
-		}
-
-		@Override
-		public CFAppState getState() {
-			return CFAppState.valueOf(a.getState().toString());
-		}
-
-		@Override
-		public int getDiskQuota() {
-			return a.getDiskQuota();
-		}
-	}
-
-	public static CloudApplication unwrap(final CFApplication a) {
-		if (a!=null) {
-			return ((CFApplicationWrapper)a).unwrap();
-		}
-		return null;
-	}
-
-	public static List<CloudApplication> unwrapApps(final List<CFApplication> apps) {
-		if (apps!=null) {
-			Builder<CloudApplication> builder = ImmutableList.builder();
-			for (CFApplication a : apps) {
-				builder.add(unwrap(a));
-			}
-			return builder.build();
-		}
-		return null;
-	}
+//	public static List<CloudApplication> unwrapApps(final List<CFApplication> apps) {
+//		if (apps!=null) {
+//			Builder<CloudApplication> builder = ImmutableList.builder();
+//			for (CFApplication a : apps) {
+//				builder.add(unwrap(a));
+//			}
+//			return builder.build();
+//		}
+//		return null;
+//	}
 
 //	private static class CFApplicationDetailWrapper extends CFApplicationWrapper implements CFApplicationDetail {
 //		public CFApplicationDetailWrapper(CloudApplication a) {

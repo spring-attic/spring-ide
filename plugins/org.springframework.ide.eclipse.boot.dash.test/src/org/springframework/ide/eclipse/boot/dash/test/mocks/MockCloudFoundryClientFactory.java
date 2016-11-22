@@ -301,7 +301,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 			if (app == null) {
 				throw errorAppNotFound("GUID: "+appGuid.toString());
 			} else {
-				return app.getHealthCheck();
+				return app.getHealthCheckType();
 			}
 		}
 
@@ -386,6 +386,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 			app.setServicesMaybe(args.getServices());
 			app.setStackMaybe(args.getStack());
 			app.setTimeoutMaybe(args.getTimeout());
+			app.setHealthCheckTypeMaybe(args.getHealthCheckType());
 			app.setBits(IOUtil.toBytes(new FileInputStream(args.getApplicationData().getName())));
 			space.put(app);
 			space.getPushCount(app.getName()).increment();
