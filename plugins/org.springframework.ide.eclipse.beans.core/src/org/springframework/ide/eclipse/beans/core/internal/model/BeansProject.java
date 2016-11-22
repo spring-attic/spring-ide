@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2015 Spring IDE Developers
+ * Copyright (c) 2004, 2016 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,15 +28,18 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.MultiRule;
 import org.eclipse.jdt.core.IType;
+import org.osgi.framework.Bundle;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescriptionReader;
@@ -1076,16 +1079,22 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 			Job job = new Job("populate auto detected configs") {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
+					
 					try {
-						populateAutoDetectedConfigsAndConfigSetsInternally();
-	
+						boolean reschedule = populateAutoDetectedConfigsAndConfigSetsInternally();
+						if (reschedule) {
+							schedule(3000);
+						}
+
 						w.lock();
 						restoreConfigSetState(removedConfigsFromSets);
 					} finally {
 						updateAllConfigsCache();
 						w.unlock();
 					}
+					
 					((AbstractModel) (BeansCorePlugin.getModel())).notifyListeners(BeansProject.this, ModelChangeEvent.Type.CHANGED);
+					
 					return Status.OK_STATUS;
 				}
 	
@@ -1102,7 +1111,10 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 		}
 	}
 
-	protected void populateAutoDetectedConfigsAndConfigSetsInternally() {
+	protected boolean populateAutoDetectedConfigsAndConfigSetsInternally() {
+		
+		final Boolean[] reschedule = new Boolean[1];
+		reschedule[0] = Boolean.FALSE;
 
 		final Map<BeansConfigLocatorDefinition, Map<String, IBeansConfig>> newAutoConfigs = new HashMap<BeansConfigLocatorDefinition, Map<String, IBeansConfig>>();
 		final Map<BeansConfigLocatorDefinition, String> newConfigSetNames = new HashMap<BeansConfigLocatorDefinition, String>();
@@ -1117,10 +1129,11 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 				// creation
 				SafeRunner.run(new ISafeRunnable() {
 
+					@Override
 					public void handleException(Throwable exception) {
-						// nothing to handle here
 					}
-
+					
+					@Override
 					public void run() throws Exception {
 						IBeansConfigLocator configLocator = locator.getBeansConfigLocator();
 						Set<IFile> files = configLocator.locateBeansConfigs(getProject(), null);
@@ -1139,14 +1152,20 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 								newConfigSetNames.put(locator, configSet);
 							}
 						}
-
+						
 						if (configLocator instanceof IJavaConfigLocator) {
-							Set<IType> types = ((IJavaConfigLocator) configLocator).locateJavaConfigs(getProject(), null);
-							for (IType type : types) {
-								IBeansConfig config = new BeansJavaConfig(BeansProject.this, type, type.getFullyQualifiedName(), Type.AUTO_DETECTED);
-								String configName = BeansConfigFactory.JAVA_CONFIG_TYPE + type.getFullyQualifiedName();
-								if (!hasConfig(configName)) {
-									detectedConfigs.put(configName, config);
+							
+							if (workaroundM2EActivationTimeout(getProject())) {
+								reschedule[0] = Boolean.TRUE;
+							}
+							else {
+								Set<IType> types = ((IJavaConfigLocator) configLocator).locateJavaConfigs(getProject(), null);
+								for (IType type : types) {
+									IBeansConfig config = new BeansJavaConfig(BeansProject.this, type, type.getFullyQualifiedName(), Type.AUTO_DETECTED);
+									String configName = BeansConfigFactory.JAVA_CONFIG_TYPE + type.getFullyQualifiedName();
+									if (!hasConfig(configName)) {
+										detectedConfigs.put(configName, config);
+									}
 								}
 							}
 						}
@@ -1156,6 +1175,25 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 		}
 
 		setAutoDetectedConfigs(newAutoConfigs, newConfigSetNames);
+
+		return reschedule[0].booleanValue();
+	}
+
+	protected boolean workaroundM2EActivationTimeout(IProject project2) {
+		try {
+			if (project.hasNature("org.eclipse.m2e.core.maven2Nature")) {
+				Bundle bundle = Platform.getBundle("org.eclipse.m2e.jdt");
+				if (bundle != null) {
+					if (bundle.getState() != Bundle.ACTIVE) {
+						return true;
+					}
+				}
+			}
+		}
+		catch (CoreException e) {
+		}
+
+		return false;
 	}
 
 	protected void setAutoDetectedConfigs(Map<BeansConfigLocatorDefinition, Map<String, IBeansConfig>> newAutoConfigs,
