@@ -17,41 +17,18 @@ import java.util.concurrent.Callable;
 
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.ILaunch;
-import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.IProcessFactory;
-import org.eclipse.debug.core.IStreamListener;
 import org.eclipse.debug.core.model.IProcess;
-import org.eclipse.debug.core.model.IStreamMonitor;
 import org.eclipse.debug.core.model.IStreamsProxy;
 import org.eclipse.debug.core.model.RuntimeProcess;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.util.SpringApplicationLifeCycleClientManager;
 import org.springframework.ide.eclipse.boot.launch.util.SpringApplicationLifecycleClient;
+import org.springframework.ide.eclipse.boot.util.DumpOutput;
 import org.springframework.ide.eclipse.boot.util.RetryUtil;
 
 public class BootProcessFactory implements IProcessFactory {
-
-	private static class DumpOutput implements IStreamListener {
-
-		private final String label;
-		private boolean first = true;
-
-		public DumpOutput(String streamName) {
-			this.label = streamName;
-		}
-
-		@Override
-		public void streamAppended(String text, IStreamMonitor monitor) {
-			//TODO: this might look messy on windows
-			if (first) {
-				System.out.print("\n"+label);
-				first = false;
-			}
-			System.out.print(text.replaceAll("\n", "\n"+label));
-		}
-
-	}
 
 	/**
 	 * This flag enables dumping the process output onto System.out. This meant to help in

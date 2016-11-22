@@ -35,24 +35,19 @@ import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.performOnDOMDocu
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
-import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.project.MavenProject;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -95,9 +90,9 @@ import org.springframework.ide.eclipse.boot.core.Repo;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
+import org.springframework.ide.eclipse.boot.util.DumpOutput;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.editor.support.util.StringUtil;
-import org.springframework.util.StringUtils;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
 import org.w3c.dom.Document;
@@ -108,6 +103,12 @@ import org.w3c.dom.Element;
  */
 @SuppressWarnings("restriction")
 public class MavenSpringBootProject extends SpringBootProject {
+
+	/**
+	 * Debug flag, may be flipped on temporarily by test code to spy on the output of maven
+	 * execution.
+	 */
+	public static boolean DUMP_MAVEN_OUTPUT = false;
 
 	private static final String MVN_LAUNCH_MODE = "run";
 
@@ -550,6 +551,11 @@ public class MavenSpringBootProject extends SpringBootProject {
 		try {
 			ILaunchConfiguration launchConf = createLaunchConfiguration(project, "package");
 			ILaunch launch = launchConf.launch(MVN_LAUNCH_MODE, SubMonitor.convert(monitor, 10), true, true);
+			if (DUMP_MAVEN_OUTPUT) {
+				launch.getProcesses()[0].getStreamsProxy().getOutputStreamMonitor().addListener(new DumpOutput("%mvn-out"));
+				launch.getProcesses()[0].getStreamsProxy().getErrorStreamMonitor().addListener(new DumpOutput("%mvn-err"));
+			}
+
 			LaunchUtils.whenTerminated(launch).get();
 			int exitValue = launch.getProcesses()[0].getExitValue();
 			if (exitValue!=0) {
