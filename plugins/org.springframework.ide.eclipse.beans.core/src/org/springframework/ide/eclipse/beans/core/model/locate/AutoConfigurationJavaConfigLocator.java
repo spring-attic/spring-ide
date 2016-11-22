@@ -29,8 +29,10 @@ import org.springsource.ide.eclipse.commons.core.JdtUtils;
  */
 public class AutoConfigurationJavaConfigLocator extends AbstractJavaConfigLocator {
 
+	@Override
 	public Set<IType> locateJavaConfigs(IProject project,
 			IProgressMonitor monitor) {
+		
 		Set<IType> types = new HashSet<IType>();
 		IJavaProject javaProj = JdtUtils.getJavaProject(project);
 		if (javaProj != null) {

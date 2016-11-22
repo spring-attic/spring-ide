@@ -11,11 +11,9 @@
 package org.springframework.ide.eclipse.beans.core.model.locate;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -35,9 +33,9 @@ import org.springframework.beans.factory.xml.NamespaceHandlerResolver;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.namespaces.DelegatingNamespaceHandlerResolver;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
 import org.springframework.util.StringUtils;
+import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
 
 /**
  * Basic {@link IBeansConfigLocator} that is capable for scanning an
@@ -97,6 +95,7 @@ public class ProjectScanningBeansConfigLocator extends
 	 * As this locator is not intended to be used at runtime, we don't need to
 	 * listen to any resource changes.
 	 */
+	@Override
 	public boolean requiresRefresh(IFile file) {
 		return false;
 	}

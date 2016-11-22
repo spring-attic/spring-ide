@@ -33,6 +33,7 @@ public abstract class AbstractJavaProjectPathMatchingBeansConfigLocator extends
 	/**
 	 * Returns <code>true</code> only if the given project is a {@link IJavaProject}.
 	 */
+	@Override
 	public boolean supports(IProject project) {
 		return JdtUtils.isJavaProject(project);
 	}
