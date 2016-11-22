@@ -67,6 +67,7 @@ public class BeansConfigLocatorFactory {
 		// Sort definitions based on there defined order
 		Collections.sort(configLocatorDefinitions, new Comparator<BeansConfigLocatorDefinition>() {
 
+			@Override
 			public int compare(BeansConfigLocatorDefinition o1, BeansConfigLocatorDefinition o2) {
 				return o1.getOrder().compareTo(o2.getOrder());
 			}

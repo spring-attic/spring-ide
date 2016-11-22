@@ -197,7 +197,7 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 		modelJob.setRule(MultiRule.combine(ResourcesPlugin.getWorkspace().getRoot(), BeansCoreUtils.BEANS_MODEL_INIT_RULE));
 		// modelJob.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
 		// modelJob.setSystem(true);
-		modelJob.setPriority(Job.INTERACTIVE);
+		modelJob.setPriority(Job.DECORATE);
 		modelJob.schedule();
 	}
 

@@ -121,6 +121,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 
+import org.springframework.ide.eclipse.boot.core.internal.MavenSpringBootProject;
+
 /**
  * @author Kris De Volder
  */
@@ -1186,36 +1188,41 @@ public class CloudFoundryBootDashModelMockingTest {
 	}
 
 	@Test public void warDeploy() throws Exception {
-		CFClientParams targetParams = CfTestTargetParams.fromEnv();
-		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
-		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
+		MavenSpringBootProject.DUMP_MAVEN_OUTPUT = true;
+		try {
+			CFClientParams targetParams = CfTestTargetParams.fromEnv();
+			MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+			CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
 
-		IProject project = projects.createBootProject("to-deploy-war",
-				withStarters("actuator", "web"),
-				withPackaging("war")
-		);
-		assertEquals("war", springBootCore.project(project).getPackaging());
+			IProject project = projects.createBootProject("to-deploy-war",
+					withStarters("actuator", "web"),
+					withPackaging("war")
+			);
+			assertEquals("war", springBootCore.project(project).getPackaging());
 
-		String appName = project.getName();
-		harness.answerDeploymentPrompt(ui, (dialog) -> {
-			dialog.okPressed();
-		});
+			String appName = project.getName();
+			harness.answerDeploymentPrompt(ui, (dialog) -> {
+				dialog.okPressed();
+			});
 
-		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
-		waitForApps(model, appName);
+			model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+			waitForApps(model, appName);
 
-		CloudAppDashElement app = model.getApplication(appName);
-		waitForState(app, RunState.RUNNING, 10000);
+			CloudAppDashElement app = model.getApplication(appName);
+			waitForState(app, RunState.RUNNING, 10000);
 
-		assertEquals((Integer)1, space.getPushCount(appName).getValue());
-		assertNull(app.getDeploymentManifestFile());
-		assertEquals(1024, (int) app.getMemory());
-		assertEquals(appName, app.getName());
+			assertEquals((Integer)1, space.getPushCount(appName).getValue());
+			assertNull(app.getDeploymentManifestFile());
+			assertEquals(1024, (int) app.getMemory());
+			assertEquals(appName, app.getName());
 
-		File projectLocation = project.getLocation().toFile();
-		File warFile = new File(projectLocation, "target/"+project.getName()+"-0.0.1-SNAPSHOT.war");
-		assertTrue("war file not found: "+warFile, warFile.exists());
-		assertDeployedBytes(warFile, space.getApplication(appName));
+			File projectLocation = project.getLocation().toFile();
+			File warFile = new File(projectLocation, "target/"+project.getName()+"-0.0.1-SNAPSHOT.war");
+			assertTrue("war file not found: "+warFile, warFile.exists());
+			assertDeployedBytes(warFile, space.getApplication(appName));
+		} finally {
+			MavenSpringBootProject.DUMP_MAVEN_OUTPUT = false;
+		}
 	}
 
 	@Test public void stopCancelsDeploy() throws Exception {
