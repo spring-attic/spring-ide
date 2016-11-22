@@ -35,6 +35,7 @@ public abstract class AbstractBeansConfigLocator implements IBeansConfigLocator 
 	 * Checks if the given <code>file</code> is accessible and its file extension is in the list
 	 * of allowed file extensions.
 	 */
+	@Override
 	public final boolean isBeansConfig(IFile file) {
 		if (file.isAccessible() && getAllowedFileExtensions().contains(file.getFileExtension())) {
 			Set<IPath> rootPaths = getRootDirectories(file.getProject());
@@ -60,6 +61,7 @@ public abstract class AbstractBeansConfigLocator implements IBeansConfigLocator 
 	 * Returns <code>null</code> to express that this locater does not want to organize located
 	 * files in a config set.
 	 */
+	@Override
 	public String getBeansConfigSetName(Set<IFile> files) {
 		return null;
 	}
@@ -67,6 +69,7 @@ public abstract class AbstractBeansConfigLocator implements IBeansConfigLocator 
 	/**
 	 * No configuration required as this locator does not create a {@link IBeansConfigSet}.
 	 */
+	@Override
 	public void configureBeansConfigSet(IBeansConfigSet configSet) {
 		// no op here
 	}
