@@ -94,7 +94,6 @@ import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
-import org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.DeploymentAnswerer;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCFApplication;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCFSpace;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCloudFoundryClientFactory;
@@ -1748,7 +1747,19 @@ public class CloudFoundryBootDashModelMockingTest {
 
 	}
 
-	@Test public void pushWithHealthCheckParam() throws Exception {
+	@Test public void pushWithHealthCheckNone() throws Exception {
+		doPushWithHealthCheckType("none", "none");
+	}
+
+	@Test public void pushWithHealthCheckDefault() throws Exception {
+		doPushWithHealthCheckType(null, "port");
+	}
+
+	@Test public void pushWithHealthCheckPort() throws Exception {
+		doPushWithHealthCheckType("port", "port");
+	}
+
+	private void doPushWithHealthCheckType(String specified, String expected) throws Exception {
 		String appName = "someApp";
 		final IProject project = projects.createBootProject(appName, withStarters("actuator", "web"));
 		CFClientParams targetParams = CfTestTargetParams.fromEnv();
@@ -1761,7 +1772,7 @@ public class CloudFoundryBootDashModelMockingTest {
 			dialog.setManualManifest(
 					"applications:\n" +
 					"- name: "+appName+"\n" +
-					"  health-check-type: none\n"
+					(specified==null?"":"  health-check-type: "+specified+"\n")
 			);
 			dialog.okPressed();
 		});
@@ -1770,7 +1781,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		waitForState(model.getApplication(appName), RunState.RUNNING, 4000);
 		waitForJobsToComplete();
 
-		assertEquals("none",space.getApplication(appName).getHealthCheckType());
+		assertEquals(expected,space.getApplication(appName).getHealthCheckType());
 	}
 
 	@Test public void updateTargetSsoAndStoreNothing() throws Exception {
@@ -2160,17 +2171,6 @@ public class CloudFoundryBootDashModelMockingTest {
 			return targetDirPath.toFile();
 		}
 		return new File(System.getProperty("user.home"));
-	}
-
-	private void assertEqualStreams(InputStream expectedBytes, InputStream actualBytes) throws IOException {
-		int offset = 0;
-		int expected; int actual;
-		while ((expected=expectedBytes.read())>=0) {
-			actual = actualBytes.read();
-			assertEquals("Different bytes at offset: "+offset, expected, actual);
-			offset++;
-		}
-		assertEquals(-1, actualBytes.read());
 	}
 
 	private File getTestZip(String fileName) {
