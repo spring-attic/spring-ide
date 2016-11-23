@@ -1789,6 +1789,9 @@ public class CloudFoundryBootDashModelMockingTest {
 		waitForJobsToComplete();
 
 		assertEquals(expected,space.getApplication(appName).getHealthCheckType());
+		ACondition.waitFor("hcType in model", 3000, () -> {
+			assertEquals(expected, model.getApplication(appName).getHealthCheck());
+		});
 	}
 
 	@Test public void updateTargetSsoAndStoreNothing() throws Exception {
