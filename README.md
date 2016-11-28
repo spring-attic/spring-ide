@@ -82,8 +82,8 @@
 ## Contributing
 
 ### Code of Conduct
-This project adheres to the Contributor Covenant link:CODE_OF_CONDUCT.adoc[code of
-conduct]. By participating, you  are expected to uphold this code. Please report
+This project adheres to the Contributor Covenant [code of
+conduct](CODE_OF_CONDUCT.adoc). By participating, you  are expected to uphold this code. Please report
 unacceptable behavior to spring-code-of-conduct@pivotal.io.
 
 ### Get Involved
