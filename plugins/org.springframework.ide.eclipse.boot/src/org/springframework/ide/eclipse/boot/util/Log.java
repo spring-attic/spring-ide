@@ -37,4 +37,17 @@ public class Log {
 		BootActivator.getDefault().getLog().log(ExceptionUtil.status(IStatus.WARNING, msg));
 	}
 
+	public static void warn(Throwable e) {
+		if (ExceptionUtil.isCancelation(e)) {
+			//Don't log canceled operations, those aren't real errors.
+			return;
+		}
+		try {
+			BootActivator.getDefault().getLog().log(ExceptionUtil.status(IStatus.WARNING, e));
+		} catch (NullPointerException npe) {
+			//Can happen if errors are trying to be logged during Eclipse's shutdown
+			e.printStackTrace();
+		}
+	}
+
 }
