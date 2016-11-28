@@ -85,6 +85,9 @@ import org.springframework.util.ObjectUtils;
  */
 public class BeansProject extends AbstractResourceModelElement implements IBeansProject, ILazyInitializedModelElement {
 
+	private static final int AUTO_CONFIG_RESCHEDULE_SLEEP_TIME_MILLIS = 3000;
+	private static final int AUTO_CONFIG_RESCHEDULE_MAX_COUNT = 10;
+
 	private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
 
 	private final Lock r = rwl.readLock();
@@ -129,6 +132,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public int getElementType() {
 		return IBeansModelElementTypes.PROJECT_TYPE;
 	}
@@ -146,6 +150,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public IResource getElementResource() {
 		return project;
 	}
@@ -153,6 +158,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public boolean isElementArchived() {
 		return false;
 	}
@@ -186,6 +192,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public IProject getProject() {
 		return project;
 	}
@@ -230,6 +237,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 		return false;
 	}
 
+	@Override
 	public Set<String> getConfigSuffixes() {
 		if (!this.modelPopulated) {
 			populateModel();
@@ -245,11 +253,13 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * @deprecated use {@link #getConfigSuffixes()} instead.
 	 */
+	@Override
 	@Deprecated
 	public Set<String> getConfigExtensions() {
 		return getConfigSuffixes();
 	}
 
+	@Override
 	public boolean hasConfigSuffix(String suffix) {
 		try {
 			r.lock();
@@ -262,6 +272,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * @deprecated use {@link #hasConfigSuffix(String)} instead.
 	 */
+	@Override
 	@Deprecated
 	public boolean hasConfigExtension(String extension) {
 		return hasConfigSuffix(extension);
@@ -450,10 +461,12 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 		return false;
 	}
 
+	@Override
 	public boolean hasConfig(IFile file) {
 		return hasConfig(getConfigName(file));
 	}
 
+	@Override
 	public boolean hasConfig(String configName) {
 		if (!this.modelPopulated) {
 			populateModel();
@@ -466,6 +479,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 		}
 	}
 
+	@Override
 	public boolean hasConfig(IFile configFile, String configName, boolean includeImported) {
 		if (hasConfig(configName)) {
 			return true;
@@ -492,6 +506,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 		return false;
 	}
 
+	@Override
 	public IBeansConfig getConfig(IFile configFile, boolean includeImported) {
 		Set<IBeansConfig> beansConfigs = getConfigs(configFile, includeImported);
 		Iterator<IBeansConfig> iterator = beansConfigs.iterator();
@@ -501,6 +516,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 		return null;
 	}
 
+	@Override
 	public Set<IBeansConfig> getConfigs(IFile file, boolean includeImported) {
 		Set<IBeansConfig> beansConfigs = new LinkedHashSet<IBeansConfig>();
 
@@ -573,6 +589,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public IBeansConfig getConfig(IFile file) {
 		IBeansConfig config = getConfig(getConfigName(file));
 		if (config == null) {
@@ -597,6 +614,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public IBeansConfig getConfig(String configName) {
 		if (configName != null && configName.length() > 0 && configName.charAt(0) == '/') {
 			return BeansCorePlugin.getModel().getConfig(configName);
@@ -682,6 +700,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Set<IBeansConfig> getConfigs() {
 		if (!this.modelPopulated) {
 			populateModel();
@@ -756,6 +775,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public boolean hasConfigSet(String configSetName) {
 		if (!this.modelPopulated) {
 			populateModel();
@@ -771,6 +791,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public IBeansConfigSet getConfigSet(String configSetName) {
 		if (!this.modelPopulated) {
 			populateModel();
@@ -790,6 +811,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Set<IBeansConfigSet> getConfigSets() {
 		if (!this.modelPopulated) {
 			populateModel();
@@ -807,6 +829,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public boolean isBeanClass(String className) {
 		for (IBeansConfig config : getConfigs()) {
 			if (config.isBeanClass(className)) {
@@ -819,6 +842,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Set<String> getBeanClasses() {
 		Set<String> beanClasses = new LinkedHashSet<String>();
 		for (IBeansConfig config : getConfigs()) {
@@ -830,6 +854,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Set<IBean> getBeans(String className) {
 		Set<IBean> beans = new LinkedHashSet<IBean>();
 		for (IBeansConfig config : getConfigs()) {
@@ -918,6 +943,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public boolean isImportsEnabled() {
 		return isImportsEnabled;
 	}
@@ -937,6 +963,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public boolean isUpdatable() {
 		IFile file = project.getProject().getFile(new Path(IBeansProject.DESCRIPTION_FILE));
 		return !file.isReadOnly();
@@ -974,6 +1001,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public boolean isExternal() {
 		return false;
 	}
@@ -1077,13 +1105,20 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	protected void populateAutoDetectedConfigsAndConfigSets(final Map<IBeansConfigSet, Set<String>> removedConfigsFromSets) {
 		if (BeansCorePlugin.getDefault().isAutoDetectionEnabled()) {
 			Job job = new Job("populate auto detected configs") {
+				
+				private int rescheduleCount = 0;
+				
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					
 					try {
 						boolean reschedule = populateAutoDetectedConfigsAndConfigSetsInternally();
 						if (reschedule) {
-							schedule(3000);
+							rescheduleCount++;
+
+							if (rescheduleCount < AUTO_CONFIG_RESCHEDULE_MAX_COUNT) {
+								schedule(AUTO_CONFIG_RESCHEDULE_SLEEP_TIME_MILLIS);
+							}
 						}
 
 						w.lock();
@@ -1299,6 +1334,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public void onPostProcessorDetected(IBeansConfig config, IBeansConfigPostProcessor postProcessor) {
 			for (IBeansProject project : BeansCorePlugin.getModel().getProjects()) {
 				for (IBeansConfigSet configSet : project.getConfigSets()) {
@@ -1316,6 +1352,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public void onPostProcessorRemoved(IBeansConfig config, IBeansConfigPostProcessor postProcessor) {
 			for (IBeansProject project : BeansCorePlugin.getModel().getProjects()) {
 				for (IBeansConfigSet configSet : project.getConfigSets()) {
@@ -1333,18 +1370,21 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public void onReadEnd(IBeansConfig config) {
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public void onReadStart(IBeansConfig config) {
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public void onReset(IBeansConfig config) {
 			for (IBeansProject project : BeansCorePlugin.getModel().getProjects()) {
 				for (IBeansConfigSet configSet : project.getConfigSets()) {
@@ -1358,6 +1398,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 		}
 	}
 
+	@Override
 	public boolean isInitialized() {
 		if (!this.modelPopulated) {
 			return false;
@@ -1380,6 +1421,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 		}
 	}
 
+	@Override
 	public boolean isAutoConfigStatePersisted() {
 		return this.isAutoConfigStatePersisted;
 	}
