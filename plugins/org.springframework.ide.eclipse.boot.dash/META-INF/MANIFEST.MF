@@ -45,10 +45,8 @@ Require-Bundle: org.eclipse.ui,
  com.fasterxml.jackson.core.jackson-core,
  io.projectreactor.reactor-core;bundle-version="3.0.3",
  org.reactivestreams.reactive-streams;bundle-version="1.0.0",
- org.springframework.ide.eclipse.core,
  org.slf4j.api;bundle-version="1.7.2",
  org.eclipse.core.net,
- org.springframework.web,
  org.apache.httpcomponents.httpclient,
  org.apache.httpcomponents.httpcore,
  org.springsource.ide.eclipse.commons.core
@@ -69,6 +67,4 @@ Export-Package: org.springframework.ide.eclipse.boot.dash,
  org.springframework.ide.eclipse.boot.dash.util,
  org.springframework.ide.eclipse.boot.dash.views,
  org.springframework.ide.eclipse.boot.dash.views.sections
-Import-Package: org.springframework.core,
- org.springframework.web.client,
- org.yaml.snakeyaml
+Import-Package: org.yaml.snakeyaml

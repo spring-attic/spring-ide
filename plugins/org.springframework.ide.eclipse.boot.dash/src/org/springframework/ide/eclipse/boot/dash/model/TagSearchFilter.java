@@ -18,7 +18,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
-import org.springframework.ide.eclipse.core.PatternUtils;
+import org.springsource.ide.eclipse.commons.core.PatternUtils;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 
 import com.google.common.collect.ImmutableSet;
