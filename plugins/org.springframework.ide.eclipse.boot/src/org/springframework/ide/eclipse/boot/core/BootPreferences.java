@@ -12,12 +12,12 @@ package org.springframework.ide.eclipse.boot.core;
 
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.springframework.ide.eclipse.boot.util.Log;
-import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 /**
@@ -85,7 +85,7 @@ public class BootPreferences implements IPreferenceChangeListener {
 		try {
 			if (prefs!=null) {
 				String patternString = prefs.get(PREF_BOOT_PROJECT_EXCLUDE, null);
-				if (StringUtil.hasText(patternString)) {
+				if (StringUtils.isNotBlank(patternString)) {
 					return Pattern.compile(patternString);
 				}
 			}

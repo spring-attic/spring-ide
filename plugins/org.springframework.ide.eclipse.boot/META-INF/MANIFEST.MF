@@ -33,11 +33,10 @@ Require-Bundle: org.eclipse.core.resources,
  com.fasterxml.jackson.core.jackson-annotations,
  org.eclipse.ui.forms,
  org.springframework.ide.eclipse.core,
- org.springframework.ide.eclipse.editor.support,
  org.eclipse.ltk.core.refactoring,
  org.json,
- org.springframework.core,
- org.eclipse.m2e.launching
+ org.eclipse.m2e.launching,
+ org.apache.commons.lang3
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.boot.core,
@@ -46,7 +45,8 @@ Export-Package: org.springframework.ide.eclipse.boot.core,
  org.springframework.ide.eclipse.boot.core.internal,
  org.springframework.ide.eclipse.boot.ui,
  org.springframework.ide.eclipse.boot.util
-Import-Package: org.eclipse.core.runtime,
+Import-Package: org.apache.commons.lang;version="2.6.0",
+ org.eclipse.core.runtime,
  org.eclipse.core.runtime.jobs,
  org.eclipse.core.runtime.preferences,
  org.osgi.framework,

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal Software, Inc.
+ * Copyright (c) 2015, 2016 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.ui;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -29,7 +30,6 @@ import org.springframework.ide.eclipse.boot.core.MavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
 import org.springframework.ide.eclipse.core.SpringCore;
-import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 public class EnableDisableBootDevtools implements IObjectActionDelegate {
@@ -135,7 +135,7 @@ public class EnableDisableBootDevtools implements IObjectActionDelegate {
 	private SpringBootStarter getAvaibleDevtools(ISpringBootProject project) {
 		try {
 			String versionString = project.getBootVersion();
-			if (StringUtil.hasText(versionString) && DEVTOOLS_SUPPORTED.includes(new Version(versionString))) {
+			if (StringUtils.isNotBlank(versionString) && DEVTOOLS_SUPPORTED.includes(new Version(versionString))) {
 				return DEVTOOLS_STARTER;
 			}
 		} catch (Exception e) {

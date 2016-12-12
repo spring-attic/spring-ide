@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.project.MavenProject;
@@ -92,7 +93,6 @@ import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
 import org.springframework.ide.eclipse.boot.util.DumpOutput;
 import org.springframework.ide.eclipse.boot.util.Log;
-import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
 import org.w3c.dom.Document;
@@ -526,7 +526,7 @@ public class MavenSpringBootProject extends SpringBootProject {
 	}
 
 	private void createElementWithTextMaybe(Element parent, String name, String text) {
-		if (StringUtil.hasText(text)) {
+		if (StringUtils.isNotBlank(text)) {
 			createElementWithText(parent, name, text);
 		}
 	}

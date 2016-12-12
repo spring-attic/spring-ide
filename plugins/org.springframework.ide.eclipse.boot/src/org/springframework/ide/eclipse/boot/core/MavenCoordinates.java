@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 GoPivotal, Inc.
+ * Copyright (c) 2013, 2016 GoPivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.core;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrDependencySpec.DependencyInfo;
-import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.ui.Ilabelable;
 
 public class MavenCoordinates implements IMavenCoordinates, Ilabelable {
@@ -117,10 +117,10 @@ public class MavenCoordinates implements IMavenCoordinates, Ilabelable {
 		xml.append("<dependency>\n");
 		xml.append("   <artifactId>"+artifact+"</artifactId>\n");
 		xml.append("   <groupId>"+artifact+"</groupId>\n");
-		if (StringUtil.hasText(version)) {
+		if (StringUtils.isNotBlank(version)) {
 			xml.append("   <version>"+version+"</version>\n");
 		}
-		if (StringUtil.hasText(classifier)) {
+		if (StringUtils.isNotBlank(classifier)) {
 			xml.append("   <classifier>"+classifier+"</classifier>\n");
 		}
 		xml.append("</dependency>");

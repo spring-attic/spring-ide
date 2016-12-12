@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,7 +27,6 @@ import org.json.JSONTokener;
 import org.osgi.framework.Version;
 import org.osgi.framework.VersionRange;
 import org.springframework.ide.eclipse.boot.util.Log;
-import org.springframework.util.StringUtils;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
 
 /**
@@ -144,7 +144,7 @@ public class InitializrServiceSpec {
 
 		public boolean isSupportedFor(String bootVersion) {
 			try {
-				if (StringUtils.hasText(versionRange)) {
+				if (StringUtils.isNotBlank(versionRange)) {
 					final VersionRange range = new VersionRange(versionRange);
 					String versionStr = bootVersion;
 					if (versionStr!=null) {
