@@ -18,11 +18,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
-import org.springframework.util.StringUtils;
 
 /**
  * Component responsible for storing/loading dependencies selected by default.
@@ -60,7 +60,7 @@ public class DefaultDependencies {
 	private String get(String name, String dflt) {
 		String key = key(name);
 		String v = store.getString(key);
-		if (StringUtils.hasText(v)) {
+		if (StringUtils.isNotBlank(v)) {
 			return v;
 		}
 		return dflt;

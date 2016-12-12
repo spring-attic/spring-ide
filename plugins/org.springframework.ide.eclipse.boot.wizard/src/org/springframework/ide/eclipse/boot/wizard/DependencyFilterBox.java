@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
-import org.springframework.util.StringUtils;
 import org.springsource.ide.eclipse.commons.livexp.core.FilterBoxModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
@@ -22,7 +22,7 @@ public class DependencyFilterBox extends FilterBoxModel<CheckBoxModel<Dependency
 
 	@Override
 	protected Filter<CheckBoxModel<Dependency>> createFilterForInput(String _text) {
-		if (StringUtils.hasText(_text)) {
+		if (StringUtils.isNotBlank(_text)) {
 			final String text = _text.toLowerCase();
 			return new Filter<CheckBoxModel<Dependency>>() {
 				public boolean accept(CheckBoxModel<Dependency> cb) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Pivotal Software, Inc.
+ * Copyright (c) 2012, 2016 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.springframework.util.StringUtils;
 import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
 
 /**
@@ -88,7 +88,7 @@ public class PreferredSelections {
 	private String get(String name, String dflt) {
 		String key = key(name);
 		String v = store.getString(key);
-		if (StringUtils.hasText(v)) {
+		if (StringUtils.isNotBlank(v)) {
 			return v;
 		}
 		return dflt;

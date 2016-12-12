@@ -14,6 +14,7 @@ import java.util.HashMap;
 
 import javax.inject.Provider;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -49,7 +50,6 @@ import org.springframework.ide.eclipse.boot.wizard.content.ContentType;
 import org.springframework.ide.eclipse.boot.wizard.content.Describable;
 import org.springframework.ide.eclipse.boot.wizard.content.DisplayNameable;
 import org.springframework.ide.eclipse.boot.wizard.content.GSContent;
-import org.springframework.util.StringUtils;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.SelectionModel;
@@ -185,7 +185,7 @@ public class ChooseTypedContentSection extends WizardPageSection {
 		}
 
 		public void setSearchTerm(String text) {
-			if (StringUtils.hasText(text)) {
+			if (StringUtils.isNotBlank(text)) {
 				matcher = new StringMatcher(text, true, false);
 			} else {
 				matcher = null;
