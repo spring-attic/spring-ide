@@ -531,7 +531,9 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 						if (host!=null) {
 							return Mono.just(new SshHost(host, port, fingerPrint));
 						}
-						return Mono.empty();
+						// Workaround for bug in Eclipse Neon.1 JDT cannot properly infer type SshHost.
+						// Works in Mars. Returning Mono.empty() results in compilation error in Neon.1
+						return Mono.<SshHost>empty();
 					})
 				);
 			}
