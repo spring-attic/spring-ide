@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Set;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -76,7 +77,6 @@ import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashAction;
 import org.springframework.ide.eclipse.boot.dash.views.AddRunTargetAction;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.RunStateAction;
-import org.springframework.ide.eclipse.boot.properties.editor.util.ArrayUtils;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
@@ -613,7 +613,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 					ModifiableModel target = (ModifiableModel) droppedOn;
 					if (transfer.isSupportedType(event.currentDataType)) {
 						Object[] elements = getDraggedElements();
-						if (ArrayUtils.hasElements(elements) && target.canBeAdded(Arrays.asList(elements))) {
+						if (ArrayUtils.isNotEmpty(elements) && target.canBeAdded(Arrays.asList(elements))) {
 							return true;
 						}
 					}

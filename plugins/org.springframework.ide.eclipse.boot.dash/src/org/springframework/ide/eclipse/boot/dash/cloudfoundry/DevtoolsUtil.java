@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -117,7 +117,7 @@ public class DevtoolsUtil {
 
 	private static List<ILaunch> findLaunches(IProject project, String host) {
 		String remoteUrl = remoteUrl(host);
-		List<ILaunch> launches = new ArrayList<ILaunch>();
+		List<ILaunch> launches = new ArrayList<>();
 		for (ILaunch l : getLaunchManager().getLaunches()) {
 			try {
 				ILaunchConfiguration c = l.getLaunchConfiguration();
