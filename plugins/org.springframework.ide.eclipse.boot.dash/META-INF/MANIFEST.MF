@@ -49,7 +49,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.net,
  org.apache.httpcomponents.httpclient,
  org.apache.httpcomponents.httpcore,
- org.springsource.ide.eclipse.commons.core
+ org.springsource.ide.eclipse.commons.core,
+ org.springframework.web
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
@@ -67,4 +68,5 @@ Export-Package: org.springframework.ide.eclipse.boot.dash,
  org.springframework.ide.eclipse.boot.dash.util,
  org.springframework.ide.eclipse.boot.dash.views,
  org.springframework.ide.eclipse.boot.dash.views.sections
-Import-Package: org.yaml.snakeyaml
+Import-Package: org.springframework.web.client,
+ org.yaml.snakeyaml
