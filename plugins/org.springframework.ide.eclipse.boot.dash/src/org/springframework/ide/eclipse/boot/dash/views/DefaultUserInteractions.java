@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentPropertiesDialog;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.ManifestDiffDialog;
@@ -40,6 +41,7 @@ import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel.Result;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel;
+import org.springframework.ide.eclipse.boot.dash.dialogs.ReplaceExistingApplicationDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.SelectRemoteEurekaDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialogModel;
@@ -332,6 +334,20 @@ public class DefaultUserInteractions implements UserInteractions {
 				MessageDialog.openWarning(getShell(), title, message);
 			}
 		});
+	}
+
+	@Override
+	public boolean confirmApplicationReplacement(String title, String message, CFApplicationDetail details) {
+		final boolean[] result = new boolean[] { false };
+		getShell().getDisplay().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				ReplaceExistingApplicationDialog dialog = new ReplaceExistingApplicationDialog(getShell(), title, message,
+						details.getServices());
+				result[0] = dialog.open() == IDialogConstants.OK_ID;
+			}
+		});
+		return result[0];
 	}
 
 }
