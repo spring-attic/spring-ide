@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.util;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
@@ -47,6 +48,14 @@ public class Log {
 		} catch (NullPointerException npe) {
 			//Can happen if errors are trying to be logged during Eclipse's shutdown
 			e.printStackTrace();
+		}
+	}
+
+	public static void error(String string) {
+		try {
+			throw ExceptionUtil.coreException(string);
+		} catch (CoreException e) {
+			Log.log(e);
 		}
 	}
 

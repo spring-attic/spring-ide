@@ -79,9 +79,7 @@ public class PropertiesTableSection extends WizardPageSection implements ILaunch
 			super(tableViewer);
 			this.col = col;
 			if (col==PROPERTY_NAME_COLUMN) {
-				IContentProposalProvider proposalProvider =
-					//	new SimpleContentProposalProvider(new String[] {"red", "green", "blue"});
-					 new PropertyNameContentProposalProvider(project);
+				IContentProposalProvider proposalProvider = ProposalExtensionPoint.create(project);
 				this.editor = new TextCellEditorWithContentProposal(tableViewer.getTable(),
 						proposalProvider, CTRL_SPACE,
 						ProposalProcessor.AUTO_ACTIVATION_CHARS
@@ -148,9 +146,9 @@ public class PropertiesTableSection extends WizardPageSection implements ILaunch
 	}
 
 	private final LiveExpression<IProject> project;
-	private LiveVariable<Boolean> dirtyState = new LiveVariable<Boolean>(false);
+	private LiveVariable<Boolean> dirtyState = new LiveVariable<>(false);
 	private CheckboxTableViewer tableViewer;
-	private List<PropVal> props = new ArrayList<PropVal>();
+	private List<PropVal> props = new ArrayList<>();
 	private CheckStateSynchronizer checkStateProvider = new CheckStateSynchronizer();
 
 	/**

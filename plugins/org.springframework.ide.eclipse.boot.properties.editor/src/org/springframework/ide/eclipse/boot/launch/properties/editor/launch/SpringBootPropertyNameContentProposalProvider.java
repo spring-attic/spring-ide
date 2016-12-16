@@ -8,7 +8,7 @@
  * Contributors:
  *     GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.launch.properties;
+package org.springframework.ide.eclipse.boot.launch.properties.editor.launch;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
@@ -20,17 +20,26 @@ import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCo
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
+import org.springframework.ide.eclipse.boot.launch.properties.ContentProposalProviderFactory;
+
 /**
  * @author Kris De Volder
  */
-public class PropertyNameContentProposalProvider implements IContentProposalProvider {
+public class SpringBootPropertyNameContentProposalProvider implements IContentProposalProvider {
+
+	public static class Factory implements ContentProposalProviderFactory {
+		@Override
+		public IContentProposalProvider create(LiveExpression<IProject> project) {
+			return new SpringBootPropertyNameContentProposalProvider(project);
+		}
+	}
 
 	private static final IContentProposal[] NO_PROPOSALS = new IContentProposal[0];
 
 	private SpringPropertiesCompletionEngine _engine;
 	final private LiveExpression<IProject> project;
 
-	public PropertyNameContentProposalProvider(LiveExpression<IProject> project) {
+	public SpringBootPropertyNameContentProposalProvider(LiveExpression<IProject> project) {
 		this.project = project;
 		project.addListener(new ValueListener<IProject>() {
 			public void gotValue(LiveExpression<IProject> exp, IProject value) {
