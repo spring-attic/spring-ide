@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2015 Spring IDE Developers
+ * Copyright (c) 2013, 2016 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -224,6 +224,7 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 						beanNameGenerator = new UniqueBeanNameGenerator(BeansJavaConfig.this);
 						registry = new ScannedGenericBeanDefinitionSuppressingBeanDefinitionRegistry();
 
+						w.lock();
 						try {
 							registerAnnotationProcessors(eventListener);
 							registerBean(eventListener, cl);
@@ -234,6 +235,7 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 							}
 						}
 						finally {
+							w.unlock();
 							// Reset the context classloader
 							Thread.currentThread().setContextClassLoader(threadClassLoader);
 							LogFactory.release(cl); //Otherwise permgen leak?
