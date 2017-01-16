@@ -28,7 +28,7 @@ public interface ClientRequests {
 	/**
 	 * The actual Rest API version that cloud controller claims to be.
 	 */
-	Version getApiVersion();
+	Version getApiVersion() throws Exception;
 
 	/**
 	 * The minimum version that the CF V2 java client claims to support.

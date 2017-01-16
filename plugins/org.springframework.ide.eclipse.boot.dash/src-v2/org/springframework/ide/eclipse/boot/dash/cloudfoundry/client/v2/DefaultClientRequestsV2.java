@@ -640,10 +640,10 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	@Override
-	public Version getApiVersion() {
-		return info
-		.map((i) -> new Version(i.getApiVersion()))
-		.block();
+	public Version getApiVersion() throws Exception {
+		return ReactorUtils.get(info
+				.map((i) -> new Version(i.getApiVersion()))
+		);
 	}
 
 	@Override
