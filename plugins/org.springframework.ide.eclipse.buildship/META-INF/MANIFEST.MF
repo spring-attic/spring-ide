@@ -4,7 +4,7 @@ Bundle-Name: %pluginName
 Bundle-SymbolicName: org.springframework.ide.eclipse.buildship;singleton:=true
 Bundle-Version: 3.8.4.qualifier
 Bundle-Vendor: %providerName
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Eclipse-LazyStart: true
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
@@ -15,5 +15,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.springframework.ide.eclipse.boot.wizard,
  org.eclipse.jface,
  org.apache.commons.io,
- org.eclipse.buildship.core;bundle-version="[0.0.0,2.0.0)";resolution:=optional,
- com.gradleware.tooling.model;resolution:=optional
+ org.eclipse.buildship.core;bundle-version="[2.0.0,3.0.0)";resolution:=optional,
+ com.gradleware.tooling.model;resolution:=optional,
+ org.springsource.ide.eclipse.commons.livexp,
+ org.eclipse.ui.workbench
