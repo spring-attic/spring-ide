@@ -105,15 +105,13 @@ public class BuildshipImportStrategy extends ImportStrategy {
 					);
 					done.get();
 				} catch (Exception e) {
-					if (!ExceptionUtil.isCancelation(e)) {
-						if (e instanceof InterruptedException) {
-							throw (InterruptedException)e;
-						}
-						if (e instanceof InvocationTargetException) {
-							throw (InvocationTargetException)e;
-						}
-						throw new InvocationTargetException(e);
+					if (e instanceof InterruptedException) {
+						throw (InterruptedException)e;
 					}
+					if (e instanceof InvocationTargetException) {
+						throw (InvocationTargetException)e;
+					}
+					throw new InvocationTargetException(e);
 				}
 				finally {
 					mon.done();
