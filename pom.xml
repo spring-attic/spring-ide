@@ -454,7 +454,7 @@
 				<repository>
 		  			<id>buildship</id>
 		  			<layout>p2</layout>
-		  			<url>http://download.eclipse.org/buildship/updates/e44/releases/2.0/</url>
+		  			<url>http://download.eclipse.org/buildship/updates/e44/releases/2.x/</url>
 				</repository>
 				<repository>
 					<id>eclipse-integration-commons</id>
@@ -503,7 +503,7 @@
 				<repository>
 		  			<id>buildship</id>
 		  			<layout>p2</layout>
-		  			<url>http://download.eclipse.org/buildship/updates/e45/releases/2.0/</url>
+		  			<url>http://download.eclipse.org/buildship/updates/e45/releases/2.x/</url>
 				</repository>
 				<repository>
 					<id>cft</id>
@@ -557,7 +557,7 @@
 				<repository>
 		  			<id>buildship</id>
 		  			<layout>p2</layout>
-		  			<url>http://download.eclipse.org/buildship/updates/e46/releases/2.0/</url>
+		  			<url>http://download.eclipse.org/buildship/updates/e46/releases/2.x/</url>
 				</repository>
 				<repository>
 					<id>cft</id>
