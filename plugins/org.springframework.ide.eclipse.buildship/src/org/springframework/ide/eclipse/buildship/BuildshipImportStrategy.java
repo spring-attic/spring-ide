@@ -74,39 +74,10 @@ public class BuildshipImportStrategy extends ImportStrategy {
 		@Override
 		public ImportStrategy create(BuildType buildType, String name, String notInstalledMessage) throws Exception {
 			Assert.isLegal(buildType==BuildType.GRADLE);
-			Class.forName("org.eclipse.buildship.core.projectimport.ProjectImportConfiguration");
+			Class.forName("org.eclipse.buildship.core.util.configuration.FixedRequestAttributesBuilder");
 			return new BuildshipImportStrategy(buildType, name, notInstalledMessage);
 		}
 
-	}
-
-	private IProject getProject(File projectLoc) {
-		for (IProject p : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
-			if (p.isAccessible()) {
-				IPath l = getLocation(p);
-				if (l!=null) {
-					File f = l.toFile();
-					if (projectLoc.equals(f)) {
-						return p;
-					}
-				}
-			}
-		}
-		return null;
-	}
-
-	private IPath getLocation(IProject p) {
-		//In eclipse... nothing is ever simple. No, you can not just ask a project for its location...
-		URI uri = p.getRawLocationURI();
-		if (uri==null) {
-			//This means project description doesn't specify location, which means project is in the
-			// default location
-			IPath wsloc = ResourcesPlugin.getWorkspace().getRoot().getLocation();
-			return wsloc.append(p.getName());
-		} else if (uri.getScheme().equals("file")) {
-			return new Path(uri.getPath());
-		}
-		return null;
 	}
 
 	@Override
