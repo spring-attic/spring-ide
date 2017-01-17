@@ -1,3 +1,4 @@
+package org.springframework.ide.eclipse.buildship20;
 ///*******************************************************************************
 // * Copyright (c) 2014, 2015 Pivotal Software, Inc.
 // * All rights reserved. This program and the accompanying materials

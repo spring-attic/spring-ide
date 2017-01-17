@@ -10,7 +10,7 @@
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 	<groupId>org.springframework.ide.eclipse</groupId>
-	<artifactId>org.springframework.ide.eclipse.buildship</artifactId>
+	<artifactId>org.springframework.ide.eclipse.buildship20</artifactId>
 	
 	<packaging>eclipse-plugin</packaging>
 

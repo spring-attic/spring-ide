@@ -8,25 +8,20 @@
  *  Contributors:
  *      Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.buildship;
+package org.springframework.ide.eclipse.buildship20;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URI;
 import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.buildship.core.CorePlugin;
 import org.eclipse.buildship.core.util.configuration.FixedRequestAttributesBuilder;
 import org.eclipse.buildship.core.workspace.NewProjectHandler;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.springframework.ide.eclipse.boot.wizard.content.BuildType;
 import org.springframework.ide.eclipse.boot.wizard.importing.ImportConfiguration;
@@ -35,7 +30,6 @@ import org.springframework.ide.eclipse.boot.wizard.importing.ImportStrategyFacto
 import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
 import org.springsource.ide.eclipse.commons.core.util.NatureUtils;
 import org.springsource.ide.eclipse.commons.frameworks.core.FrameworkCoreActivator;
-import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import com.gradleware.tooling.toolingmodel.OmniEclipseProject;
 import com.gradleware.tooling.toolingmodel.repository.FixedRequestAttributes;
@@ -47,7 +41,7 @@ import com.gradleware.tooling.toolingmodel.repository.FixedRequestAttributes;
  * @author Kris De Volder
  */
 @SuppressWarnings("restriction")
-public class BuildshipImportStrategy extends ImportStrategy {
+public class Buildship20ImportStrategy extends ImportStrategy {
 
 	protected static final NewProjectHandler IMPORT_AND_ADD_SPRING_NATURE = new NewProjectHandler() {
 
@@ -66,7 +60,7 @@ public class BuildshipImportStrategy extends ImportStrategy {
 		}
 	};
 
-	public BuildshipImportStrategy(BuildType buildType, String name, String notInstalledMessage) {
+	public Buildship20ImportStrategy(BuildType buildType, String name, String notInstalledMessage) {
 		super(buildType, name, notInstalledMessage);
 	}
 
@@ -75,7 +69,7 @@ public class BuildshipImportStrategy extends ImportStrategy {
 		public ImportStrategy create(BuildType buildType, String name, String notInstalledMessage) throws Exception {
 			Assert.isLegal(buildType==BuildType.GRADLE);
 			Class.forName("org.eclipse.buildship.core.util.configuration.FixedRequestAttributesBuilder");
-			return new BuildshipImportStrategy(buildType, name, notInstalledMessage);
+			return new Buildship20ImportStrategy(buildType, name, notInstalledMessage);
 		}
 
 	}

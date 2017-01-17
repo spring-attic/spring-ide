@@ -17,7 +17,7 @@
           point="org.springframework.ide.eclipse.wizard.import.strategy">
        <import-strategy
              buildType="GRADLE"
-             class="org.springframework.ide.eclipse.buildship.BuildshipImportStrategy$Factory"
+             class="org.springframework.ide.eclipse.buildship20.Buildship20ImportStrategy$Factory"
              notInstalledMessage="Buildship Gradle Tooling is not installed. You can install it from Eclipse Marketplace."
              name="Buildship">
        </import-strategy>
