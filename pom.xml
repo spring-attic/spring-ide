@@ -87,6 +87,11 @@
 
 	<modules>
 
+		<!-- gradle -->
+		<module>plugins/org.springframework.ide.eclipse.gradle</module>
+		<module>plugins/org.springframework.ide.eclipse.buildship</module>
+		<module>plugins/org.springframework.ide.eclipse.buildship20</module>
+
 		<!-- boot -->
 		<module>plugins/org.springframework.ide.eclipse.boot</module>
 		<module>plugins/org.springframework.ide.eclipse.boot.test</module>
@@ -195,11 +200,6 @@
 		<module>plugins/org.springframework.ide.eclipse.roo.ui</module>
 		<module>features/org.springframework.ide.eclipse.roo.feature</module>
 		
-		<!-- gradle -->
-		<module>plugins/org.springframework.ide.eclipse.gradle</module>
-		<!-- <module>plugins/org.springframework.ide.eclipse.buildship</module> -->
-		<module>plugins/org.springframework.ide.eclipse.buildship20</module>
-
 		<!-- maven -->
 		<module>plugins/org.springframework.ide.eclipse.maven</module>
 		<module>features/org.springframework.ide.eclipse.maven.feature</module>
@@ -453,11 +453,6 @@
 		  			<url>http://dist.springsource.org/snapshot/GRECLIPSE/e4.4/</url>
 				</repository>
 				<repository>
-		  			<id>buildship</id>
-		  			<layout>p2</layout>
-		  			<url>http://download.eclipse.org/buildship/updates/e44/releases/2.x/</url>
-				</repository>
-				<repository>
 					<id>eclipse-integration-commons</id>
 					<layout>p2</layout>
 					<url>http://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}/e4.4/</url>
@@ -500,11 +495,6 @@
 		  			<id>groovy</id>
 		  			<layout>p2</layout>
 		  			<url>http://dist.springsource.org/snapshot/GRECLIPSE/e4.5/</url>
-				</repository>
-				<repository>
-		  			<id>buildship</id>
-		  			<layout>p2</layout>
-		  			<url>http://download.eclipse.org/buildship/updates/e45/releases/2.x/</url>
 				</repository>
 				<repository>
 					<id>cft</id>
@@ -554,11 +544,6 @@
 		  			<id>groovy</id>
 		  			<layout>p2</layout>
 		  			<url>http://dist.springsource.org/snapshot/GRECLIPSE/e4.6/</url>
-				</repository>
-				<repository>
-		  			<id>buildship</id>
-		  			<layout>p2</layout>
-		  			<url>http://download.eclipse.org/buildship/updates/e46/releases/2.x/</url>
 				</repository>
 				<repository>
 					<id>cft</id>

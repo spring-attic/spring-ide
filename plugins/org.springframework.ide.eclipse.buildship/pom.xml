@@ -10,7 +10,7 @@
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 	<groupId>org.springframework.ide.eclipse</groupId>
-	<artifactId>org.springframework.ide.eclipse.buildship20</artifactId>
+	<artifactId>org.springframework.ide.eclipse.buildship</artifactId>
 	
 	<packaging>eclipse-plugin</packaging>
 
@@ -21,7 +21,7 @@
 				<repository>
 					<id>buildship2</id>
 					<layout>p2</layout>
-					<url>http://download.eclipse.org/buildship/updates/e45/releases/2.x/</url>
+					<url>http://download.eclipse.org/buildship/updates/e45/releases/1.0/</url>
 				</repository>
 			</repositories>
 		</profile>
@@ -31,7 +31,7 @@
 				<repository>
 					<id>buildship2</id>
 					<layout>p2</layout>
-					<url>http://download.eclipse.org/buildship/updates/e46/releases/2.x/</url>
+					<url>http://download.eclipse.org/buildship/updates/e46/releases/1.0/</url>
 				</repository>
 			</repositories>
 		</profile>
@@ -53,7 +53,7 @@
 							<requirement>
 								<type>eclipse-plugin</type>
 								<id>org.eclipse.buildship.core</id>
-								<versionRange>[2.0.0,3.0.0)</versionRange>
+								<versionRange>[1.0.0,2.0.0)</versionRange>
 							</requirement>
 						</extraRequirements>
 					</dependency-resolution>
@@ -61,7 +61,7 @@
 <!-- 						<filter> -->
 <!-- 							<type>p2-installable-unit</type> -->
 <!-- 							<id>org.eclipse.buildship.core</id> -->
-<!-- 							<versionRange>[2.0.0,3.0.0)</versionRange> -->
+<!-- 							<versionRange>[1.0.0,2.0.0)</versionRange> -->
 <!-- 						</filter> -->
 <!-- 					</filters> -->
 				</configuration>
