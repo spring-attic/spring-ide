@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-client-2.1.0.BUILD-SNAPSHOT.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-client-reactor-2.1.0.BUILD-SNAPSHOT.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-operations-2.1.0.BUILD-SNAPSHOT.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-util-2.1.0.BUILD-SNAPSHOT.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-client-2.3.0.BUILD-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-client-reactor-2.3.0.BUILD-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-operations-2.3.0.BUILD-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-util-2.3.0.BUILD-SNAPSHOT.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/commons-compress-1.12.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/evo-inflector-1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/jackson-annotations-2.8.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/jackson-core-2.8.3.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/jackson-databind-2.8.3.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/jackson-datatype-jdk8-2.8.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/jackson-core-2.8.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/jackson-databind-2.8.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/jackson-datatype-jdk8-2.8.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/java-semver-0.9.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/jcl-over-slf4j-1.7.21.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/jjwt-0.7.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/netty-all-4.1.5.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/netty-all-4.1.6.Final.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/okio-1.8.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/reactor-ipc-0.5.1.RELEASE.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/reactor-netty-0.5.1.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/reactor-ipc-0.6.0.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/reactor-netty-0.6.0.RELEASE.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/slf4j-api-1.7.16.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/slf4j-simple-1.7.16.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/spring-core-4.2.8.RELEASE.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/spring-web-4.2.8.RELEASE.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/wire-runtime-2.2.0.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
-	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
