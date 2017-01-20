@@ -109,7 +109,7 @@ public class NewSpringBootWizardModelTest extends TestCase {
 
 		RadioGroup group = model.getRadioGroups().getGroup("type");
 		assertNotNull(group);
-		assertGroupValues(group, "MAVEN", "GRADLE-STS", "GRADLE-Buildship");
+		assertGroupValues(group, "MAVEN", "GRADLE-STS", "GRADLE-Buildship 1.x", "GRADLE-Buildship 2.x");
 		assertEquals("MAVEN", group.getDefaultValue().getValue());
 
 		group.getSelection().selection.setValue(group.getRadio("MAVEN"));
@@ -136,7 +136,7 @@ public class NewSpringBootWizardModelTest extends TestCase {
 
 		RadioGroup group = model.getRadioGroups().getGroup("type");
 		assertNotNull(group);
-		assertGroupValues(group, "MAVEN", "GRADLE-STS", "GRADLE-Buildship");
+		assertGroupValues(group, "MAVEN", "GRADLE-STS", "GRADLE-Buildship 1.x", "GRADLE-Buildship 2.x");
 		assertEquals("MAVEN", group.getDefaultValue().getValue());
 		assertEquals(mavenZipUrl, model.baseUrl.getValue());
 
@@ -175,7 +175,7 @@ public class NewSpringBootWizardModelTest extends TestCase {
 
 	private <T> Collection<T> getAllChoices(
 			HierarchicalMultiSelectionFieldModel<T> dependencies) {
-		ArrayList<T> choices = new ArrayList<T>();
+		ArrayList<T> choices = new ArrayList<>();
 		for (String catName : dependencies.getCategories()) {
 			MultiSelectionFieldModel<T> cat = dependencies.getContents(catName);
 			choices.addAll(Arrays.asList(cat.getChoices()));
@@ -330,7 +330,7 @@ public class NewSpringBootWizardModelTest extends TestCase {
 		assertFalse(normalBox.getSelection().getValue());
 		assertFalse(popularBox.getSelection().getValue());
 	}
-	
+
 	public void testDefaultDependencies() throws Exception {
 		IPreferenceStore store = new MockPrefsStore();
 		NewSpringBootWizardModel model = parseFrom(INITIALIZR_JSON, store);
@@ -339,18 +339,18 @@ public class NewSpringBootWizardModelTest extends TestCase {
 		select(model.dependencies, getDependencyById(model, "actuator"));
 		select(model.dependencies, getDependencyById(model, "thymeleaf"));
 		assertTrue(model.saveDefaultDependencies());
-		
+
 		// Initialize new model and check if default dependencies are selected
 		model = parseFrom(INITIALIZR_JSON, store);
 		assertEquals(3, model.getDefaultDependencies().size());
-		
+
 		Set<String> selectedIds = model.dependencies.getCurrentSelection().stream().map(Dependency::getId).collect(Collectors.toSet());
 		Set<String> defaultIds = model.getDefaultDependencies().stream().map(checkboxModel -> {
 			return checkboxModel.getValue().getId();
 		}).collect(Collectors.toSet());
 		assertEquals(defaultIds, selectedIds);
 	}
-	
+
 	public void testUnselectAll() throws Exception {
 		IPreferenceStore store = new MockPrefsStore();
 		NewSpringBootWizardModel model = parseFrom(INITIALIZR_JSON, store);
@@ -359,7 +359,7 @@ public class NewSpringBootWizardModelTest extends TestCase {
 		select(model.dependencies, getDependencyById(model, "actuator"));
 		select(model.dependencies, getDependencyById(model, "thymeleaf"));
 		assertEquals(3, model.dependencies.getCurrentSelection().size());
-		
+
 		model.dependencies.clearSelection();
 		assertTrue(model.dependencies.getCurrentSelection().isEmpty());
 	}
@@ -422,14 +422,14 @@ public class NewSpringBootWizardModelTest extends TestCase {
 		searchBox.setValue(pattern);
 		Filter<CheckBoxModel<Dependency>> filter = model.getDependencyFilter().getValue();
 
-		LiveVariable<Boolean> selection = new LiveVariable<Boolean>(false);
-		LiveVariable<Boolean> enablement = new LiveVariable<Boolean>(true);
+		LiveVariable<Boolean> selection = new LiveVariable<>(false);
+		LiveVariable<Boolean> enablement = new LiveVariable<>(true);
 
 		Dependency dep = new Dependency();
 		dep.setId(id);
 		dep.setName(null);
 		dep.setDescription(desc);
-		CheckBoxModel<Dependency> cb = new CheckBoxModel<Dependency>(label, dep, selection, enablement);
+		CheckBoxModel<Dependency> cb = new CheckBoxModel<>(label, dep, selection, enablement);
 
 		assertEquals(expect, filter.accept(cb));
 
@@ -481,7 +481,7 @@ public class NewSpringBootWizardModelTest extends TestCase {
 	}
 
 	private Set<Dependency> getSelecteds(HierarchicalMultiSelectionFieldModel<Dependency> dependencies) {
-		HashSet<Dependency> selecteds = new HashSet<InitializrServiceSpec.Dependency>();
+		HashSet<Dependency> selecteds = new HashSet<>();
 		for (String catName : dependencies.getCategories()) {
 			MultiSelectionFieldModel<Dependency> cat = dependencies.getContents(catName);
 			selecteds.addAll(cat.getCurrentSelection());
@@ -616,13 +616,17 @@ public class NewSpringBootWizardModelTest extends TestCase {
 		urlParam = getUrlParam(model.downloadUrl.getValue(), "type");
 		assertEquals("gradle-project", urlParam);
 
-		selection.setValue(type.getRadio("GRADLE-Buildship"));
+		selection.setValue(type.getRadio("GRADLE-Buildship 1.x"));
 		urlParam = getUrlParam(model.downloadUrl.getValue(), "type");
 		assertEquals("gradle-project", urlParam);
-	}
+
+		selection.setValue(type.getRadio("GRADLE-Buildship 2.x"));
+		urlParam = getUrlParam(model.downloadUrl.getValue(), "type");
+		assertEquals("gradle-project", urlParam);
+}
 
 	public static Map<String, List<String>> getQueryParams(String url) throws Exception {
-        Map<String, List<String>> params = new HashMap<String, List<String>>();
+        Map<String, List<String>> params = new HashMap<>();
         String[] urlParts = url.split("\\?");
         if (urlParts.length > 1) {
             String query = urlParts[1];
@@ -636,7 +640,7 @@ public class NewSpringBootWizardModelTest extends TestCase {
 
                 List<String> values = params.get(key);
                 if (values == null) {
-                    values = new ArrayList<String>();
+                    values = new ArrayList<>();
                     params.put(key, values);
                 }
                 values.add(value);
@@ -667,7 +671,7 @@ public class NewSpringBootWizardModelTest extends TestCase {
 	}
 
 	private void assertGroupValues(RadioGroup group, String... expecteds) {
-		Set<String> expectedSet = new HashSet<String>(Arrays.asList(expecteds));
+		Set<String> expectedSet = new HashSet<>(Arrays.asList(expecteds));
 		RadioInfo[] radios = group.getRadios();
 		for (int i = 0; i < radios.length; i++) {
 			String actual = radios[i].getValue();
