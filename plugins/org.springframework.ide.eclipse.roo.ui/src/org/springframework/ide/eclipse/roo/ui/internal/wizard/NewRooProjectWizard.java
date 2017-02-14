@@ -350,12 +350,6 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 					// ROO-3726: If some modules have been imported, configure them.
 					for(IProject module : modules){
 						SpringCoreUtils.addProjectNature(module, SpringCore.NATURE_ID, new NullProgressMonitor());
-						SpringCoreUtils.addProjectNature(module, RooCoreActivator.NATURE_ID, new NullProgressMonitor());
-						
-						SpringCorePreferences.getProjectPreferences(module, RooCoreActivator.PLUGIN_ID).putBoolean(
-								RooCoreActivator.PROJECT_PROPERTY_ID, useDefault);
-						SpringCorePreferences.getProjectPreferences(module, RooCoreActivator.PLUGIN_ID).putString(
-								RooCoreActivator.ROO_INSTALL_PROPERTY, rooInstall);
 						
 						configureProjectUi(module);
 						

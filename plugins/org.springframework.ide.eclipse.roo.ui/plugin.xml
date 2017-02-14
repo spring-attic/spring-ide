@@ -364,5 +364,28 @@
        </description>
     </colorDefinition>
  </extension>
+ 
+ <extension point="org.eclipse.ui.decorators">
+	<decorator
+	    id="org.springframework.ide.eclipse.roo.ui.internal.listener.RooProjectDecorator"
+	    label="Spring Roo Project Decorator"
+	    lightweight="true"
+	    state="true"
+	    class= "org.springframework.ide.eclipse.roo.ui.internal.listener.RooProjectDecorator">
+	    <description>
+	      Decorates projects to show when a project's classpath contains Spring Roo Elements. 
+	    </description>
+	    <enablement>
+	       <or>
+		       <objectClass
+		             name="org.eclipse.jdt.core.IJavaProject">
+		       </objectClass>
+		       <objectClass
+		             name="org.eclipse.core.resources.IProject">
+		       </objectClass>
+		   </or>
+	    </enablement>
+	  </decorator>
+ </extension>
    	
 </plugin>
