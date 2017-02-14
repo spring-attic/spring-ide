@@ -21,6 +21,9 @@ import org.springframework.ide.eclipse.roo.core.RooCoreActivator;
 /**
  * Decorates a Spring Roo Project with a '[roo]' text decoration if the
  * project has spring-roo nature
+ * 
+ * Copied from BootProjectDecorator.java class
+ * https://github.com/spring-projects/spring-ide/blob/master/plugins/org.springframework.ide.eclipse.boot/src/org/springframework/ide/eclipse/boot/ui/BootProjectDecorator.java
  *
  * @author Juan Carlos García
  */
