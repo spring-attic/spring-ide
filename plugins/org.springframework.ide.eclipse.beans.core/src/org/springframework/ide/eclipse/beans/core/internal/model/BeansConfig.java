@@ -44,6 +44,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.ui.IPersistableElement;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
@@ -758,7 +759,13 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 
 			@Override
 			public void handleException(Throwable exception) {
-				BeansCorePlugin.log(exception);
+				if (exception instanceof BeansException) {
+					BeansCorePlugin.log(new Status(IStatus.WARNING, BeansCorePlugin.PLUGIN_ID, 
+							"Error occured while running bean post processors", exception));
+				}
+				else {
+					BeansCorePlugin.log(exception);
+				}
 			}
 
 			@Override

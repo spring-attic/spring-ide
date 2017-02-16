@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2015 Spring IDE Developers
+ * Copyright (c) 2013, 2017 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.PackageFragment;
 import org.eclipse.jdt.internal.core.util.Util;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -320,10 +321,18 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 			final ReaderEventListener eventListener) {
 		SafeRunner.run(new ISafeRunnable() {
 
+			@Override
 			public void handleException(Throwable exception) {
-				BeansCorePlugin.log(exception);
+				if (exception instanceof BeansException) {
+					BeansCorePlugin.log(new Status(IStatus.WARNING, BeansCorePlugin.PLUGIN_ID, 
+							"Error occured while running bean post processors", exception));
+				}
+				else {
+					BeansCorePlugin.log(exception);
+				}
 			}
 
+			@Override
 			public void run() throws Exception {
 				postProcessor.postProcess(BeansConfigPostProcessorFactory.createPostProcessingContext(BeansJavaConfig.this,
 						beans.values(), eventListener, problemReporter, beanNameGenerator, registry, problems));
