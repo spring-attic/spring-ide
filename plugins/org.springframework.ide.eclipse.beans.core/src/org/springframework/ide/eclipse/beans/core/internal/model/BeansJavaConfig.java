@@ -23,6 +23,7 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.apache.commons.logging.LogFactory;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -39,7 +40,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.PackageFragment;
 import org.eclipse.jdt.internal.core.util.Util;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -83,7 +83,6 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.java.JavaModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * This class defines a Spring beans configuration based on a Spring JavaConfig class.
@@ -323,19 +322,19 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 
 			@Override
 			public void handleException(Throwable exception) {
-				if (exception instanceof BeansException) {
-					BeansCorePlugin.log(new Status(IStatus.WARNING, BeansCorePlugin.PLUGIN_ID, 
-							"Error occured while running bean post processors", exception));
-				}
-				else {
-					BeansCorePlugin.log(exception);
-				}
+				BeansCorePlugin.log(new Status(IStatus.WARNING, BeansCorePlugin.PLUGIN_ID, 
+						"Error occured while running bean post processors", exception));
 			}
 
 			@Override
 			public void run() throws Exception {
-				postProcessor.postProcess(BeansConfigPostProcessorFactory.createPostProcessingContext(BeansJavaConfig.this,
-						beans.values(), eventListener, problemReporter, beanNameGenerator, registry, problems));
+				try {
+					postProcessor.postProcess(BeansConfigPostProcessorFactory.createPostProcessingContext(BeansJavaConfig.this,
+							beans.values(), eventListener, problemReporter, beanNameGenerator, registry, problems));
+				}
+				catch (Exception e) {
+					handleException(e);
+				}
 			}
 		});
 	}
