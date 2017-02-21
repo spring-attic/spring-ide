@@ -45,6 +45,8 @@ import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.Yaml;
 
+import com.google.common.collect.ImmutableList;
+
 /**
  * Reads and creates manifest.yml content from a specific location relative to
  * an {@link IProject}.
@@ -103,6 +105,10 @@ public class ApplicationManifestHandler {
 	public static final String COMMAND_PROP = "command";
 
 	public static final String STACK_PROP = "stack";
+
+	private static final String ROUTES_PROP = "routes";
+
+	private static final String ROUTE_PROP = "route";
 
 	private final IProject project;
 
@@ -649,22 +655,25 @@ public class ApplicationManifestHandler {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	protected void readApplicationURL(Map<?, ?> application, Map<Object, Object> allResults,
-			CloudApplicationDeploymentProperties properties) {
-
-		List<CFCloudDomain> domains = getCloudDomains(cloudData);
-
-		/*
-		 * Check for "no-route: true". If set then uris list should be empty
-		 */
+	private boolean noRoute(Map<?, ?> application, Map<Object, Object> allResults) {
 		Boolean noRoute = getValue(application, NO_ROUTE_PROP, Boolean.class);
 		if (noRoute == null) {
 			noRoute = getValue(allResults, NO_ROUTE_PROP, Boolean.class);
 		}
-		if (Boolean.TRUE.equals(noRoute)) {
-			return;
-		}
+		return Boolean.TRUE.equals(noRoute);
+	}
+	
+	/**
+	 *
+	 * @param application
+	 * @param allResults
+	 * @param properties
+	 * @return non-null list of URIs parsed from domains and hosts. May be empty
+	 */
+	@SuppressWarnings("unchecked")
+	private List<String> fromDomainsAndHosts(Map<?, ?> application, Map<Object, Object> allResults,
+			CloudApplicationDeploymentProperties properties) {
+		List<CFCloudDomain> domains = getCloudDomains(cloudData);
 
 		HashSet<String> hostsSet = new LinkedHashSet<>();
 		HashSet<String> domainsSet = new LinkedHashSet<>();
@@ -764,8 +773,56 @@ public class ApplicationManifestHandler {
 			}
 		}
 
-		properties.setUris(uris);
+		return uris;
+	}
 
+	@SuppressWarnings("unchecked")
+	protected void readApplicationURL(Map<?, ?> application, Map<Object, Object> allResults,
+			CloudApplicationDeploymentProperties properties) {
+		/*
+		 * Check for "no-route: true". If set then uris list should be empty
+		 */
+		if (!noRoute(application, allResults)) {
+			// Manifest documentation states:
+			// "The routes attribute cannot be used in conjunction with the
+			// following
+			// attributes: host, hosts, domain, domains, and no-hostname.
+			// An error will result."
+			// If only routes are available, then only parse routes. Do NOT
+			// also create a default URI from domain and app name if routes are available.
+			// This appears to be consistent with cf CLI behaviour as well.
+			// Otherwise fall back to parsing from domains and hosts
+			List<String> uris = fromRoutesProperty(application, allResults, properties);
+			if (uris.isEmpty()) {
+				uris = fromDomainsAndHosts(application, allResults, properties);
+			}
+
+			properties.setUris(uris);
+		}
+	}
+
+	private List<String> fromRoutesProperty(Map<?, ?> application, Map<Object, Object> allResults,
+			CloudApplicationDeploymentProperties properties) {
+		Set<String> uris = new LinkedHashSet<>();
+
+		// NOTE: based on how cf CLI interprets "routes", each route appears
+		// to be assumed to be "complete", meaning that no further construction
+		// of URIs based the route in combination with other properties like
+		// domains and hosts is required.
+		List<?> routes = getValue(application, ROUTES_PROP, List.class);
+		if (routes != null && !routes.isEmpty()) {
+			for (Object mapObj : routes) {
+				if (mapObj instanceof Map<?, ?>) {
+					Map<?, ?> routeMap = (Map<?, ?>) mapObj;
+
+					String routeVal = (String) routeMap.get(ROUTE_PROP);
+					if (routeVal != null) {
+						uris.add(routeVal);
+					}
+				}
+			}
+		}
+		return ImmutableList.copyOf(uris);
 	}
 
 	public static boolean isDomainValid(String domain, List<CFCloudDomain> domains) {
