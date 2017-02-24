@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2016 Pivotal Software, Inc.
+ * Copyright (c) 2015, 2017 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Map.Entry;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -346,21 +345,15 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 	}
 
 	public static ILaunchConfiguration duplicate(ILaunchConfiguration conf) throws CoreException {
-		ILaunchConfigurationWorkingCopy wc = createWorkingCopy(conf.getName());
-		for (Entry<String, Object> e : conf.getAttributes().entrySet()) {
-			String key = e.getKey();
-			Object value = e.getValue();
-			if (value instanceof String) {
-				wc.setAttribute(key, (String)value);
-			}
-		}
+		String newName = DebugPlugin.getDefault().getLaunchManager().generateLaunchConfigurationName(conf.getName());
+		ILaunchConfigurationWorkingCopy copy = conf.copy(newName);
 
 		int existingJmxPort = getJMXPortAsInt(conf);
 		if (existingJmxPort>0) {
 			//change port on duplicated config, but only if it was set to a specific port.
-			setJMXPort(wc, ""+JmxBeanSupport.randomPort());
+			setJMXPort(copy, ""+JmxBeanSupport.randomPort());
 		}
-		return wc.doSave();
+		return copy.doSave();
 	}
 
 
