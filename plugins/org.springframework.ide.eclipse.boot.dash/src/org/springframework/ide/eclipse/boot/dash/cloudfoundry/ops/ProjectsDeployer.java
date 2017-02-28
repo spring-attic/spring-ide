@@ -183,6 +183,6 @@ public class ProjectsDeployer extends CloudOperation {
 		writer.append(" - with the project: ");
 		writer.append(properties.getProject().getName());
 		writer.append('?');
-		return ui.confirmApplicationReplacement(title, writer.toString(), existingAppDetails);
+		return ui.confirmApplicationReplacement(title, writer.toString(), existingAppDetails.getServices());
 	}
 }
