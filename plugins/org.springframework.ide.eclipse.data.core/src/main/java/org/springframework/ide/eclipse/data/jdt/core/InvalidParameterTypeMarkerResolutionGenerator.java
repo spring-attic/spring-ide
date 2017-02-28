@@ -53,6 +53,7 @@ public class InvalidParameterTypeMarkerResolutionGenerator implements IMarkerRes
 			return new IMarkerResolution[0];
 		}
 		
+		@SuppressWarnings("unchecked")
 		List<SingleVariableDeclaration> parameters = methodDecl.parameters();
 		if (parameters.size() != 1) {
 			return new IMarkerResolution[0];

@@ -49,17 +49,10 @@ import org.springsource.ide.eclipse.commons.core.StatusHandler;
 public class FindByMethodCompletionProposal implements IJavaCompletionProposal, ICompletionProposalExtension2 {
 
 	private final String propertyName;
-
 	private final Class<?> propertyClass;
-
 	private final Class<?> domainClass;
-
 	private final int startOffset;
-
-	private final int endOffset;
-
 	private IRegion selectedRegion;
-
 	private final ICompilationUnit cu;
 
 	public FindByMethodCompletionProposal(String propertyName, Class<?> propertyClass, Class<?> domainClass,
@@ -68,7 +61,6 @@ public class FindByMethodCompletionProposal implements IJavaCompletionProposal, 
 		this.propertyClass = propertyClass;
 		this.domainClass = domainClass;
 		this.startOffset = startOffset;
-		this.endOffset = endOffset;
 
 		this.selectedRegion = new Region(startOffset, endOffset);
 		cu = javaContext.getCompilationUnit();
@@ -204,7 +196,7 @@ public class FindByMethodCompletionProposal implements IJavaCompletionProposal, 
 
 			methodStr.append(");");
 
-			document.replace(startOffset + importOffset, endOffset - startOffset, methodStr.toString());
+			document.replace(startOffset + importOffset, offset - startOffset, methodStr.toString());
 
 			for (LinkedPositionGroup currGroup : groups) {
 				model.addGroup(currGroup);

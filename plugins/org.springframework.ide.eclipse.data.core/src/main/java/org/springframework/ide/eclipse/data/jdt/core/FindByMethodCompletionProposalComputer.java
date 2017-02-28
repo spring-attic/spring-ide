@@ -2,6 +2,7 @@ package org.springframework.ide.eclipse.data.jdt.core;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -41,7 +42,7 @@ public class FindByMethodCompletionProposalComputer extends JavaCompletionPropos
 			IProgressMonitor monitor) {
 
 		if (!(context instanceof JavaContentAssistInvocationContext)) {
-			return super.computeCompletionProposals(context, monitor);
+			return Collections.emptyList();
 		}
 
 		JavaContentAssistInvocationContext javaContext = (JavaContentAssistInvocationContext) context;
@@ -50,12 +51,12 @@ public class FindByMethodCompletionProposalComputer extends JavaCompletionPropos
 		if (coreContext != null) {
 			int tokenLocation = coreContext.getTokenLocation();
 			if ((tokenLocation & CompletionContext.TL_MEMBER_START) == 0) {
-				return super.computeCompletionProposals(context, monitor);
+				return Collections.emptyList();
 			}
 		}
 
 		if (!SpringCoreUtils.isSpringProject(javaContext.getProject().getProject())) {
-			return super.computeCompletionProposals(context, monitor);
+			return Collections.emptyList();
 		}
 
 		ITextViewer viewer = context.getViewer();
@@ -71,16 +72,19 @@ public class FindByMethodCompletionProposalComputer extends JavaCompletionPropos
 			}
 
 			if (start < 0) {
-				return super.computeCompletionProposals(context, monitor);
+				return Collections.emptyList();
 			}
 
 			String prefix = document.get(start, end - start);
-			if (!"findby".startsWith(prefix.toLowerCase())) {
-				return super.computeCompletionProposals(context, monitor);
+			
+			if (prefix != null && prefix.length() > 0
+					&& !"findby".startsWith(prefix.toLowerCase())
+					&& !prefix.toLowerCase().startsWith("findby")) {
+				return Collections.emptyList();
 			}
-
+			
 			if (!(viewer instanceof ISourceViewer)) {
-				return super.computeCompletionProposals(context, monitor);
+				return Collections.emptyList();
 			}
 
 			IType expectedType = javaContext.getExpectedType();
@@ -89,10 +93,10 @@ public class FindByMethodCompletionProposalComputer extends JavaCompletionPropos
 				expectedType = javaContext.getCompilationUnit().findPrimaryType();
 			}
 			if (expectedType == null) {
-				return super.computeCompletionProposals(javaContext, monitor);
+				return Collections.emptyList();
 			}
 			if (!isSpringDataRepository(expectedType, javaContext.getProject())) {
-				return super.computeCompletionProposals(javaContext, monitor);
+				return Collections.emptyList();
 			}
 
 			List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
@@ -117,10 +121,15 @@ public class FindByMethodCompletionProposalComputer extends JavaCompletionPropos
 						if ("Class".equals(propertyName)) {
 							continue;
 						}
-						if (!containsMethodName(FindByMethodCompletionProposal.getMethodName(propertyName),
-								expectedType)) {
-							proposals.add(new FindByMethodCompletionProposal(propertyName, returnType, domainClass,
-									start, end, javaContext));
+						String proposalMethodName = FindByMethodCompletionProposal.getMethodName(propertyName);
+						if (!containsMethodName(proposalMethodName, expectedType)) {
+
+							if (prefix != null && prefix.length() > 0
+									&& proposalMethodName.toLowerCase().startsWith(prefix.toLowerCase())) {
+
+								proposals.add(new FindByMethodCompletionProposal(propertyName, returnType, domainClass,
+										start, end, javaContext));
+							}
 						}
 					}
 				}
@@ -134,7 +143,7 @@ public class FindByMethodCompletionProposalComputer extends JavaCompletionPropos
 		catch (JavaModelException e) {
 			StatusHandler.log(new Status(Status.ERROR, DataCorePlugin.PLUGIN_ID, e.getMessage(), e));
 		}
-		return super.computeCompletionProposals(context, monitor);
+		return Collections.emptyList();
 	}
 
 	private boolean containsMethodName(String methodName, IType expectedType) {
