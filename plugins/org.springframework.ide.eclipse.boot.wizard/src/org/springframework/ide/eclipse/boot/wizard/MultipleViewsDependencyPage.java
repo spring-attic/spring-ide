@@ -24,8 +24,10 @@ import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageWithSections;
 
 public abstract class MultipleViewsDependencyPage extends WizardPageWithSections {
-	private static final int NUM_COLUMNS_FREQUENTLY_USED = 4;
+	private static final int NUM_COLUMNS_FREQUENTLY_USED = 3;
 	private static final int MAX_MOST_POPULAR = 3*NUM_COLUMNS_FREQUENTLY_USED;
+	private static final int DEPENDENCY_SECTION_WIDTH = 200;
+	private static final int DEPENDENCY_SECTION_HEIGHT = 200;
 
 	private CheckBoxesSection<Dependency> frequentlyUsedCheckboxes;
 
@@ -41,7 +43,9 @@ public abstract class MultipleViewsDependencyPage extends WizardPageWithSections
 
 	private void refreshFrequentlyUsedDependencies() {
 		List<CheckBoxModel<Dependency>> dependenciesCheckboxes = model.getFrequentlyUsedDependencies(MAX_MOST_POPULAR);
-		frequentlyUsedCheckboxes.setModel(dependenciesCheckboxes);
+		if (frequentlyUsedCheckboxes.isCreated()) {
+			frequentlyUsedCheckboxes.setModel(dependenciesCheckboxes);
+		}
 		reflow();
 	}
 
@@ -90,19 +94,23 @@ public abstract class MultipleViewsDependencyPage extends WizardPageWithSections
 		
 		// Shared selection model between the different "dependency" sections
 		SelectionModel<String> categorySelection = new SelectionModel<>();
-
+		
+		int categoriesHeight = 20*model.dependencies.getCategories().size();
+		SectionConfiguration catConfing = new SectionConfiguration(DEPENDENCY_SECTION_WIDTH, categoriesHeight, 1);
+		SectionConfiguration depConfing = new SectionConfiguration(DEPENDENCY_SECTION_WIDTH, DEPENDENCY_SECTION_HEIGHT, 1);
+		SectionConfiguration selectedConfing = new SectionConfiguration(DEPENDENCY_SECTION_WIDTH, DEPENDENCY_SECTION_HEIGHT, 1);
 		sections.add(
 				new GroupSection(this, null,
 						new GroupSection(this, "Categories", new ChooseCategorySection(this, 
 								model,
-								categorySelection)),
+								categorySelection, catConfing)),
 
 						new GroupSection(this, "Dependencies", new ChooseDependencySection(this,
 								model, 
-								categorySelection)),
+								categorySelection, depConfing)),
 						
 						new GroupSection(this, "Selected", new SelectedDependenciesSection(this,
-								model))
+								model, selectedConfing))
 					)
 					.columns(3, true)
 				);

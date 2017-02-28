@@ -12,9 +12,6 @@ package org.springframework.ide.eclipse.boot.wizard;
 
 import java.util.List;
 
-import org.eclipse.jface.layout.GridDataFactory;
-import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
@@ -22,23 +19,24 @@ import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxMod
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.SelectionModel;
 import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
+import org.springsource.ide.eclipse.commons.livexp.ui.CommentSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
-import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 
-public class ChooseDependencySection extends WizardPageSection {
+public class ChooseDependencySection extends WizardPageSectionWithConfiguration {
 	private static final int NUM_DEP_COLUMNS = 1;
 
 	private final NewSpringBootWizardModel model;
 	private DepencyCheckBoxesSection<Dependency> selectedDependencySection = null;
+	private CommentSection commentSection;
 	private UIValueListener<Filter<CheckBoxModel<Dependency>>> sectionFilterListener = null;
 	private SelectionModel<String> categorySelection;
 	private Composite dependencyArea;
 
 	public ChooseDependencySection(IPageWithSections owner, NewSpringBootWizardModel model,
-			SelectionModel<String> categorySelection) {
-		super(owner);
+			SelectionModel<String> categorySelection, SectionConfiguration configuration) {
+		super(owner, configuration);
 		this.model = model;
 		this.categorySelection = categorySelection;
 	}
@@ -46,14 +44,11 @@ public class ChooseDependencySection extends WizardPageSection {
 	@Override
 	public void createContents(Composite page) {
 
-		// This dependency area stays active throughout the life of the dependency section. The contents of the area may change and are
-		// managed by the check boxes section created in this area when category selection changes
-		dependencyArea = new Composite(page, SWT.NONE);
-
-		int cols = 1;
-		GridLayout layout = GridLayoutFactory.fillDefaults().numColumns(cols).create();
-		GridDataFactory.fillDefaults().grab(true, true).align(SWT.BEGINNING, SWT.BEGINNING).applyTo(dependencyArea);
-		dependencyArea.setLayout(layout);
+		// This dependency area stays active throughout the life of the
+		// dependency section. The contents of the area may change and are
+		// managed by the check boxes section created in this area when category
+		// selection changes
+		dependencyArea = area(page);
 
 		categorySelection.selection.addListener(new UIValueListener<String>() {
 
@@ -94,27 +89,38 @@ public class ChooseDependencySection extends WizardPageSection {
 				break;
 			}
 		}
+		if (dependencyArea != null && !dependencyArea.isDisposed()) {
 
-		if (dependencyGroup != null && dependencyArea != null && !dependencyArea.isDisposed()) {
+			if (dependencyGroup != null) {
+				if (commentSection != null) {
+					commentSection.dispose();
+				}
+				// Only ONE check box section is required and kept active
+				// throughout
+				// the life of the dependency section.
+				// The CONTENT of the box section may change, but the section is
+				// NOT
+				// recreated every time the dependency content changes
+				if (selectedDependencySection == null) {
+					selectedDependencySection = new DepencyCheckBoxesSection<>(owner,
+							dependencyGroup.getCheckBoxModels());
+					selectedDependencySection.createContents(dependencyArea);
 
-			// Only ONE check box section is required and kept active throughout
-			// the life of the dependency section.
-			// The CONTENT of the box section may change, but the section is NOT
-			// recreated every time the dependency content changes
-			if (selectedDependencySection == null) {
-				selectedDependencySection = new DepencyCheckBoxesSection<>(owner, dependencyGroup.getCheckBoxModels());
-				selectedDependencySection.createContents(dependencyArea);
+				} else {
+					selectedDependencySection.setModel(dependencyGroup.getCheckBoxModels());
+				}
 
+				addSelectionFilterListener();
 			} else {
-				selectedDependencySection.setModel(dependencyGroup.getCheckBoxModels());
+				if (commentSection == null) {
+					commentSection = new CommentSection(getWizardOwner(), "Please select a category to see available dependency options.");
+					commentSection.createContents(dependencyArea);
+				}
 			}
-
-			addSelectionFilterListener();
 
 			layout();
 		}
 	}
-
 
 	private void addSelectionFilterListener() {
 		// NOTE: adding a listener triggers a value change, and it is the way to
@@ -142,7 +148,7 @@ public class ChooseDependencySection extends WizardPageSection {
 		if (dependencyArea != null && !dependencyArea.isDisposed()) {
 			dependencyArea.layout(true);
 			dependencyArea.getParent().layout(true);
-		} 		
+		}
 		getWizardOwner().reflow();
 	}
 
@@ -157,9 +163,7 @@ public class ChooseDependencySection extends WizardPageSection {
 		super.dispose();
 	}
 
-
 	class DepencyCheckBoxesSection<T> extends CheckBoxesSection<T> {
-
 
 		public DepencyCheckBoxesSection(IPageWithSections owner, List<CheckBoxModel<T>> model) {
 			super(owner, model);
