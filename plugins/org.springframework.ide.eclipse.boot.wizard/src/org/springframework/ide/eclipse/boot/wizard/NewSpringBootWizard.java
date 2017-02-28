@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2016 GoPivotal, Inc.
+ * Copyright (c) 2013, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.INewWizard;
@@ -79,8 +80,19 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 	public void addPages() {
 		super.addPages();
 		addPage(projectPage = new ProjectDetailsPage());
-		addPage(new DependencyPage());
+		addPage(createDependencyPage());
 		addPage(new PageThree());
+	}
+
+	private IWizardPage createDependencyPage() {
+
+		return new MultipleViewsDependencyPage() {
+
+			@Override
+			protected NewSpringBootWizardModel getModel() {
+				return model;
+			}
+		};
 	}
 
 	@Override

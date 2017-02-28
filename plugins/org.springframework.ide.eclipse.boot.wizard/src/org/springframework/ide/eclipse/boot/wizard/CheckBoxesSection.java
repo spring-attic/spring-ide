@@ -131,7 +131,10 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 				}
 				model.getSelection().addListener(selectionListener = new ValueListener<Boolean>() {
 					public void gotValue(LiveExpression<Boolean> exp, Boolean value) {
-						if (value!=null) {
+						// note: checkbox button may be null in cases where the
+						// model keeps changing in the container section and the selection
+						// listener is notified after the button was disposed
+						if (value!=null && cb != null && !cb.isDisposed()) {
 							cb.setSelection(value);
 						}
 					}
