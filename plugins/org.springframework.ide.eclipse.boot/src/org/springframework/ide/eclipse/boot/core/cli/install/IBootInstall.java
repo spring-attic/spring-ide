@@ -24,6 +24,7 @@ public interface IBootInstall {
 	String getUrl(); //Url identifying this installation. Two installs are considered the same if their urls are the same.
 	File getHome() throws Exception;
 	File[] getBootLibJars() throws Exception;
+	File[] getExtensionsJars() throws Exception;
 	String getName();
 	IStatus validate();
 	String getVersion();

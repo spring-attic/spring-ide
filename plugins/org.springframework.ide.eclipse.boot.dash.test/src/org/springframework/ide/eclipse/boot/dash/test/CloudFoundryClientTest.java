@@ -66,6 +66,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDoma
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.HealthChecks;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshClientSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshHost;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
@@ -424,6 +425,41 @@ public class CloudFoundryClientTest {
 		ReactorUtils.get(client.setRoutes(appName, routes));
 		CFApplicationDetail app = client.getApplication(appName);
 		assertEquals(routes, ImmutableSet.copyOf(app.getUris()));
+	}
+
+	@Test
+	public void testPushWithHealthcheckNone() throws Exception {
+		//This test is to make sure that hc info is properly passed on by push operation
+		// to the 'real' cf client.
+		//Since the push works different on firt push and repush we have to check both!
+
+		String appName = appHarness.randomAppName();
+
+		// First push
+		try (CFPushArguments params = new CFPushArguments()) {
+			params.setAppName(appName);
+			params.setRoutes(appName+"."+CFAPPS_IO());
+			params.setApplicationData(getTestZip("testapp"));
+			params.setBuildpack("staticfile_buildpack");
+			params.setHealthCheckType(HealthChecks.HC_NONE);
+			push(params);
+			CFApplicationDetail app = client.getApplication(appName);
+			assertNotNull("Expected application to exist after push: " + appName, app);
+			assertEquals(HealthChecks.HC_NONE, app.getHealthCheckType());
+		}
+
+		// re-push
+		try (CFPushArguments params = new CFPushArguments()) {
+			params.setAppName(appName);
+			params.setRoutes(appName+"."+CFAPPS_IO());
+			params.setApplicationData(getTestZip("testapp"));
+			params.setBuildpack("staticfile_buildpack");
+			params.setHealthCheckType(HealthChecks.HC_PORT);
+			push(params);
+			CFApplicationDetail app = client.getApplication(appName);
+			assertNotNull("Expected application to exist after push: " + appName, app);
+			assertEquals(HealthChecks.HC_PORT, app.getHealthCheckType());
+		}
 	}
 
 	@Test

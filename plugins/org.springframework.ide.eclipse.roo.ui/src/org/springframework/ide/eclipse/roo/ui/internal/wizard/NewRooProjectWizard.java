@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 - 2016 GoPivotal, Inc.
+ *  Copyright (c) 2012 - 2017 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -31,7 +31,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.ui.wizards.NewElementWizard;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.PlatformUI;
@@ -91,15 +90,7 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 
 	public NewRooProjectWizard() {
 		super();
-		
-		// Check if exists some Spring Roo installation before continue
-		while(RooCoreActivator.getDefault().getInstallManager().getDefaultRooInstall() == null) {
-			MessageDialog.openInformation(getShell(), "Spring Roo Alert",
-					"You are trying to generate an Spring Roo project, but you don't have any Spring Roo distribution installed."
-							+ "Include some Spring Roo distribution before continue.");
-			RooUiUtil.openPreferences(getShell());
-		}
-		
+
 		setWindowTitle("New Roo Project");
 		setDefaultPageImageDescriptor(RooUiActivator.getImageDescriptor("icons/full/wizban/roo_wizban.png"));
 		setNeedsProgressMonitor(true);
@@ -292,8 +283,8 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 
 					if(type == ProjectType.MULTIMODULE_BASIC){
 						// Import application module project
-						IProject applicationModuleProject = workspace.getRoot().getProject("application".concat(":").concat(project.getName()));
-						IProjectDescription applicationModuleDescription = workspace.newProjectDescription("application".concat(":").concat(project.getName()));
+						IProject applicationModuleProject = workspace.getRoot().getProject(project.getName().concat(".").concat("application"));
+						IProjectDescription applicationModuleDescription = workspace.newProjectDescription(project.getName().concat(".").concat("application"));
 						applicationModuleDescription.setLocation(new Path(projectLocation + "/application"));
 						applicationModuleProject.create(applicationModuleDescription, new NullProgressMonitor());
 						applicationModuleProject.open(0, new NullProgressMonitor());
@@ -301,8 +292,8 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 						modules.add(applicationModuleProject);
 					}else if(type == ProjectType.MULTIMODULE_STANDARD){
 						// Import model module project
-						IProject modelModuleProject = workspace.getRoot().getProject("model".concat(":").concat(project.getName()));
-						IProjectDescription modelModuleDescription = workspace.newProjectDescription("model".concat(":").concat(project.getName()));
+						IProject modelModuleProject = workspace.getRoot().getProject(project.getName().concat(".").concat("model"));
+						IProjectDescription modelModuleDescription = workspace.newProjectDescription(project.getName().concat(".").concat("model"));
 						modelModuleDescription.setLocation(new Path(projectLocation + "/model"));
 						modelModuleProject.create(modelModuleDescription, new NullProgressMonitor());
 						modelModuleProject.open(0, new NullProgressMonitor());
@@ -310,9 +301,8 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 						modules.add(modelModuleProject);
 						
 						// Import repository module project
-						IProject repositoryModuleProject = workspace.getRoot().getProject("repository".concat(":").concat(project.getName()));
-						repositoryModuleProject.exists();
-						IProjectDescription repositoryModuleDescription = workspace.newProjectDescription("repository".concat(":").concat(project.getName()));
+						IProject repositoryModuleProject = workspace.getRoot().getProject(project.getName().concat(".").concat("repository"));
+						IProjectDescription repositoryModuleDescription = workspace.newProjectDescription(project.getName().concat(".").concat("repository"));
 						repositoryModuleDescription.setLocation(new Path(projectLocation + "/repository"));
 						repositoryModuleProject.create(repositoryModuleDescription, new NullProgressMonitor());
 						repositoryModuleProject.open(0, new NullProgressMonitor());
@@ -320,8 +310,8 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 						modules.add(repositoryModuleProject);
 						
 						// Import service-api module project
-						IProject serviceApiModuleProject = workspace.getRoot().getProject("service-api".concat(":").concat(project.getName()));
-						IProjectDescription serviceApiModuleDescription = workspace.newProjectDescription("service-api".concat(":").concat(project.getName()));
+						IProject serviceApiModuleProject = workspace.getRoot().getProject(project.getName().concat(".").concat("service-api"));
+						IProjectDescription serviceApiModuleDescription = workspace.newProjectDescription(project.getName().concat(".").concat("service-api"));
 						serviceApiModuleDescription.setLocation(new Path(projectLocation + "/service-api"));
 						serviceApiModuleProject.create(serviceApiModuleDescription, new NullProgressMonitor());
 						serviceApiModuleProject.open(0, new NullProgressMonitor());
@@ -329,17 +319,26 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 						modules.add(serviceApiModuleProject);
 						
 						// Import service-impl module project
-						IProject serviceImplModuleProject = workspace.getRoot().getProject("service-impl".concat(":").concat(project.getName()));
-						IProjectDescription serviceApiImplDescription = workspace.newProjectDescription("service-impl".concat(":").concat(project.getName()));
+						IProject serviceImplModuleProject = workspace.getRoot().getProject(project.getName().concat(".").concat("service-impl"));
+						IProjectDescription serviceApiImplDescription = workspace.newProjectDescription(project.getName().concat(".").concat("service-impl"));
 						serviceApiImplDescription.setLocation(new Path(projectLocation + "/service-impl"));
 						serviceImplModuleProject.create(serviceApiImplDescription, new NullProgressMonitor());
 						serviceImplModuleProject.open(0, new NullProgressMonitor());
 						serviceImplModuleProject.setDescription(serviceApiImplDescription, new NullProgressMonitor());
 						modules.add(serviceImplModuleProject);
 						
+						// Import integration module project
+						IProject integrationModuleProject = workspace.getRoot().getProject(project.getName().concat(".").concat("integration"));
+						IProjectDescription integrationModuleDescription = workspace.newProjectDescription(project.getName().concat(".").concat("integration"));
+						integrationModuleDescription.setLocation(new Path(projectLocation + "/integration"));
+						integrationModuleProject.create(integrationModuleDescription, new NullProgressMonitor());
+						integrationModuleProject.open(0, new NullProgressMonitor());
+						integrationModuleProject.setDescription(integrationModuleDescription, new NullProgressMonitor());
+						modules.add(integrationModuleProject);
+						
 						// Import application module project
-						IProject applicationModuleProject = workspace.getRoot().getProject("application".concat(":").concat(project.getName()));
-						IProjectDescription applicationModuleDescription = workspace.newProjectDescription("application".concat(":").concat(project.getName()));
+						IProject applicationModuleProject = workspace.getRoot().getProject(project.getName().concat(".").concat("application"));
+						IProjectDescription applicationModuleDescription = workspace.newProjectDescription(project.getName().concat(".").concat("application"));
 						applicationModuleDescription.setLocation(new Path(projectLocation + "/application"));
 						applicationModuleProject.create(applicationModuleDescription, new NullProgressMonitor());
 						applicationModuleProject.open(0, new NullProgressMonitor());
@@ -351,12 +350,6 @@ public class NewRooProjectWizard extends NewElementWizard implements INewWizard 
 					// ROO-3726: If some modules have been imported, configure them.
 					for(IProject module : modules){
 						SpringCoreUtils.addProjectNature(module, SpringCore.NATURE_ID, new NullProgressMonitor());
-						SpringCoreUtils.addProjectNature(module, RooCoreActivator.NATURE_ID, new NullProgressMonitor());
-						
-						SpringCorePreferences.getProjectPreferences(module, RooCoreActivator.PLUGIN_ID).putBoolean(
-								RooCoreActivator.PROJECT_PROPERTY_ID, useDefault);
-						SpringCorePreferences.getProjectPreferences(module, RooCoreActivator.PLUGIN_ID).putString(
-								RooCoreActivator.ROO_INSTALL_PROPERTY, rooInstall);
 						
 						configureProjectUi(module);
 						

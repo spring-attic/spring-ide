@@ -28,7 +28,7 @@ public interface ClientRequests {
 	/**
 	 * The actual Rest API version that cloud controller claims to be.
 	 */
-	Version getApiVersion();
+	Version getApiVersion() throws Exception;
 
 	/**
 	 * The minimum version that the CF V2 java client claims to support.
@@ -68,7 +68,15 @@ public interface ClientRequests {
 	//Added since v2:
 	void push(CFPushArguments args, CancelationToken cancelationToken) throws Exception;
 	Map<String, String> getApplicationEnvironment(String appName) throws Exception;
-
 	Mono<Void> deleteServiceAsync(String serviceName);
 
+	/**
+	 * Gets current value of the client's refresh token. Note that the token is only set once it is known.
+	 * Initially, if a client is created via password auth, then the refreshToken won't be known until
+	 * some operation has been executed.
+	 *
+	 * @return Refresh token if it is already known, null otherwise.
+	 */
+	String getRefreshToken();
+	Mono<String> getUserName();
 }

@@ -67,6 +67,8 @@ import org.cloudfoundry.operations.services.ServiceInstance;
 import org.cloudfoundry.operations.services.UnbindServiceInstanceRequest;
 import org.cloudfoundry.operations.spaces.GetSpaceRequest;
 import org.cloudfoundry.operations.spaces.SpaceDetail;
+import org.cloudfoundry.reactor.tokenprovider.AbstractUaaTokenProvider;
+import org.cloudfoundry.uaa.UaaClient;
 import org.cloudfoundry.util.PaginationUtils;
 import org.eclipse.core.runtime.Platform;
 import org.osgi.framework.Version;
@@ -76,6 +78,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicati
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
@@ -109,10 +112,13 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	private static final Duration APP_START_TIMEOUT = Duration.ofMillis(ApplicationRunningStateTracker.APP_START_TIMEOUT);
 	private static final Duration GET_SERVICES_TIMEOUT = Duration.ofSeconds(60);
+	private static final Duration GET_SPACES_TIMEOUT = Duration.ofSeconds(20);
+	private static final Duration GET_USERNAME_TIMEOUT = Duration.ofSeconds(5);
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder") || (""+Platform.getLocation()).contains("bamboo");
 //	private static final boolean DEBUG_REACTOR = false;//(""+Platform.getLocation()).contains("kdvolder")
 									//|| (""+Platform.getLocation()).contains("bamboo");
+
 
 	private static void debug(String string) {
 		if (DEBUG) {
@@ -155,20 +161,23 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	private CFClientParams params;
 	private CloudFoundryClient _client ;
+	private UaaClient _uaa;
 	private CloudFoundryOperations _operations;
 
 	@Deprecated
-	private DefaultClientRequestsV1 v1;
+	private DefaultClientRequestsV1 _v1;
 
 	private Mono<String> orgId;
 	private Mono<GetInfoResponse> info;
 	private Mono<String> spaceId;
+	private AbstractUaaTokenProvider _tokenProvider;
 
-	public DefaultClientRequestsV2(CloudFoundryClientCache clients, CFClientParams params) throws Exception {
+	public DefaultClientRequestsV2(CloudFoundryClientCache clients, CFClientParams params) {
 		this.params = params;
-		this.v1 = new DefaultClientRequestsV1(params);
-		CFClientProvider provider = clients.getOrCreate(params.getUsername(), params.getPassword(), params.getHost(), params.skipSslValidation());
+		CFClientProvider provider = clients.getOrCreate(params.getUsername(), params.getCredentials(), params.getHost(), params.skipSslValidation());
 		this._client = provider.client;
+		this._uaa = provider.uaaClient;
+		this._tokenProvider = (AbstractUaaTokenProvider) provider.tokenProvider;
 		debug(">>> creating cf operations");
 		this._operations = DefaultCloudFoundryOperations.builder()
 				.cloudFoundryClient(_client)
@@ -257,6 +266,10 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 				entity.then((e) -> Mono.justOrEmpty(e.getCommand()))
 		);
 
+		Mono<String> healthCheckType = prefetch("healthCheckType",
+				entity.then((e) -> Mono.justOrEmpty(e.getHealthCheckType()))
+		);
+
 		return new ApplicationExtras() {
 			@Override
 			public Mono<List<String>> getServices() {
@@ -285,6 +298,11 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 			@Override
 			public Mono<String> getCommand() {
 				return command;
+			}
+
+			@Override
+			public Mono<String> getHealthCheckType() {
+				return healthCheckType;
 			}
 		};
 	}
@@ -457,9 +475,9 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	public void logout() {
 		_operations = null;
 		_client = null;
-		if (v1!=null) {
-			v1.logout();
-			v1 = null;
+		if (_v1!=null) {
+			_v1.logout();
+			_v1 = null;
 		}
 	}
 
@@ -513,7 +531,9 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 						if (host!=null) {
 							return Mono.just(new SshHost(host, port, fingerPrint));
 						}
-						return Mono.empty();
+						// Workaround for bug in Eclipse Neon.1 JDT cannot properly infer type SshHost.
+						// Works in Mars. Returning Mono.empty() results in compilation error in Neon.1
+						return Mono.<SshHost>empty();
 					})
 				);
 			}
@@ -535,8 +555,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	@Override
 	public List<CFSpace> getSpaces() throws Exception {
-		return ReactorUtils.get(
-			log("operations.organizations().list()",
+		Object it = ReactorUtils.get(GET_SPACES_TIMEOUT, log("operations.organizations().list()",
 				_operations.organizations()
 				.list()
 			)
@@ -552,6 +571,8 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 			})
 			.collectList()
 		);
+		//workaround eclipse jdt bug: https://bugs.eclipse.org/bugs/show_bug.cgi?id=501949
+		return (List<CFSpace>) it;
 	}
 
 	@Override
@@ -619,10 +640,10 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	@Override
-	public Version getApiVersion() {
-		return info
-		.map((i) -> new Version(i.getApiVersion()))
-		.block();
+	public Version getApiVersion() throws Exception {
+		return ReactorUtils.get(info
+				.map((i) -> new Version(i.getApiVersion()))
+		);
 	}
 
 	@Override
@@ -691,7 +712,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		.then(mono_debug("Uploading[1]..."))
 		.then(Mono.fromCallable(() -> {
 			debug("Uploading[2]...");
-			v1.uploadApplication(appName, params.getApplicationData());
+			v1().uploadApplication(appName, params.getApplicationData());
 			debug("Uploading[2] DONE");
 			return "who cares";
 		}))
@@ -700,6 +721,22 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 			? stopApp(appName)
 			: restartApp(appName)
 		);
+	}
+
+	private DefaultClientRequestsV1 v1() throws Exception {
+		if (_v1==null) {
+			CFClientParams v1params = new CFClientParams(
+					params.getApiUrl(),
+					params.getUsername(),
+					CFCredentials.fromRefreshToken(getRefreshToken()),
+					params.isSelfsigned(),
+					params.getOrgName(),
+					params.getSpaceName(),
+					params.skipSslValidation()
+			);
+			_v1 = new DefaultClientRequestsV1(v1params);
+		}
+		return _v1;
 	}
 
 	private Mono<Void> mono_debug(String string) {
@@ -717,7 +754,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 			).then()
 		)
 		.then(Mono.fromCallable(() -> {
-			v1.uploadApplication(appName, params.getApplicationData());
+			v1().uploadApplication(appName, params.getApplicationData());
 			return "who cares";
 		}))
 		.then(params.isNoStart()
@@ -736,6 +773,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 					.name(params.getAppName())
 					.memory(params.getMemory())
 					.diskQuota(params.getDiskQuota())
+					.healthCheckType(params.getHealthCheckType())
 					.healthCheckTimeout(params.getTimeout())
 					.buildpack(params.getBuildpack())
 					.command(params.getCommand())
@@ -773,6 +811,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 				.name(params.getAppName())
 				.memory(params.getMemory())
 				.diskQuota(params.getDiskQuota())
+				.healthCheckType(params.getHealthCheckType())
 				.healthCheckTimeout(params.getTimeout())
 				.buildpack(params.getBuildpack())
 				.command(params.getCommand())
@@ -786,8 +825,6 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		})
 		.then(Mono.just(appId));
 	}
-
-
 
 //	public void pushV2(CFPushArguments params, CancelationToken cancelationToken) throws Exception {
 //		debug("Pushing app starting: "+params.getAppName());
@@ -1344,6 +1381,18 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 				.build()
 			)
 		);
+	}
+
+	@Override
+	public String getRefreshToken() {
+		return _tokenProvider.getRefreshToken();
+	}
+
+	@Override
+	public Mono<String> getUserName() {
+		return log("uaa.getUsername",
+				_uaa.getUsername()
+		).timeout(GET_USERNAME_TIMEOUT);
 	}
 
 }

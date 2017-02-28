@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.equinox.security.storage.StorageException;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
+import org.springframework.ide.eclipse.boot.dash.dialogs.StoreCredentialsMode;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 
@@ -37,11 +39,12 @@ public class TargetProperties {
 	public static final String URL_PROP = "url";
 
 	private static final String STORE_PASSWORD = "storePassword";
+	private static final String STORE_CREDENTIALS = "storeCredentials";
 
 	protected Map<String, String> map;
 	private RunTargetType type;
 	private BootDashModelContext context;
-	private String password;
+	private CFCredentials credentials;
 
 	public TargetProperties(Map<String, String> map, RunTargetType type, BootDashModelContext context) {
 		this.map = map;
@@ -106,37 +109,38 @@ public class TargetProperties {
 		return map.get(USERNAME_PROP);
 	}
 
-	public boolean isStorePassword() {
-		String s = map.get(STORE_PASSWORD);
-		return s == null ? false : Boolean.valueOf(s);
+	public StoreCredentialsMode getStoreCredentials() {
+		String s = map.get(STORE_CREDENTIALS);
+		if (s!=null) {
+			return StoreCredentialsMode.valueOf(s);
+		} else {
+			//Try to preserve mode saved from old workspaces which only had store password support
+			// and not store auth token.
+			s = map.get(STORE_PASSWORD);
+			return s == null ? StoreCredentialsMode.STORE_NOTHING : StoreCredentialsMode.STORE_PASSWORD;
+		}
 	}
 
-	public void setStorePassword(boolean store) {
-		map.put(STORE_PASSWORD, String.valueOf(store));
+	public void setStoreCredentials(StoreCredentialsMode store) {
+		map.put(STORE_CREDENTIALS, String.valueOf(store));
 	}
 
-	public String getPassword() throws CannotAccessPropertyException {
-		if (password == null && isStorePassword()) {
+	public CFCredentials getCredentials() throws CannotAccessPropertyException {
+		if (credentials == null) {
+			StoreCredentialsMode storeMode = getStoreCredentials();
 			try {
-				password = context.getSecuredCredentialsStore().getPassword(secureStoreScopeKey(type.getName(), getRunTargetId()));
-			} catch (StorageException e) {
+				credentials = storeMode.loadCredentials(context, type, getRunTargetId());
+			} catch (Exception e) {
 				throw new CannotAccessPropertyException("Cannot read password.", e);
 			}
 		}
-		return password;
+		return credentials;
 	}
 
-	public void setPassword(String password) throws CannotAccessPropertyException {
-		this.password = password;
-		if (isStorePassword()) {
-			try {
-				context.getSecuredCredentialsStore().setPassword(password, secureStoreScopeKey(type.getName(), getRunTargetId()));
-			} catch (StorageException e) {
-				throw new CannotAccessPropertyException("Cannot store password.", e);
-			}
-		} else {
-			// Shall we clear out the password that might be stored if we don't remember the password?
-		}
+	public void setCredentials(CFCredentials credentials) throws CannotAccessPropertyException {
+		this.credentials = credentials;
+		StoreCredentialsMode storeMode = getStoreCredentials();
+		storeMode.saveCredentials(context, type, getRunTargetId(), credentials);
 	}
 
 	public String getUrl() {
@@ -149,10 +153,6 @@ public class TargetProperties {
 		} else {
 			map.put(key, value);
 		}
-	}
-
-	protected String secureStoreScopeKey(String targetTypeName, String targetId) {
-		return targetTypeName+":"+targetId;
 	}
 
 }

@@ -34,11 +34,13 @@ import org.springframework.boot.loader.tools.Library;
 import org.springframework.boot.loader.tools.LibraryCallback;
 import org.springframework.boot.loader.tools.LibraryScope;
 import org.springframework.boot.loader.tools.Repackager;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
+import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.util.FileUtil;
 import org.springframework.ide.eclipse.boot.util.JavaProjectUtil;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.frameworks.core.maintype.MainTypeFinder;
 
 public class CloudApplicationArchiverStrategyAsJar implements CloudApplicationArchiverStrategy {
@@ -58,8 +60,8 @@ public class CloudApplicationArchiverStrategyAsJar implements CloudApplicationAr
 	 * jars or output folders for other projects in the workspace.
 	 */
 	private static class SplitClasspath {
-		private List<File> projectContents = new ArrayList<File>(2); //one or two is typical
-		private List<File> dependencies = new ArrayList<File>();
+		private List<File> projectContents = new ArrayList<>(2); //one or two is typical
+		private List<File> dependencies = new ArrayList<>();
 		public SplitClasspath(IJavaProject jp, File[] entries) {
 			Set<File> outputFolders = toFileSet(JavaProjectUtil.getOutputFolders(jp));
 			for (File file : entries) {
@@ -89,7 +91,7 @@ public class CloudApplicationArchiverStrategyAsJar implements CloudApplicationAr
 		 * don't correspond to stuff on disk are silently ignored.
 		 */
 		private Set<File> toFileSet(Set<IContainer> containers) {
-			Set<File> files = new HashSet<File>();
+			Set<File> files = new HashSet<>();
 			for (IContainer folder : containers) {
 				IPath loc = folder.getLocation();
 				if (loc!=null) {
@@ -237,6 +239,7 @@ public class CloudApplicationArchiverStrategyAsJar implements CloudApplicationAr
 		}
 	}
 
+	private SpringBootCore springBootCore = SpringBootCore.getDefault();
 	private IProject project;
 	private UserInteractions ui;
 
@@ -249,16 +252,27 @@ public class CloudApplicationArchiverStrategyAsJar implements CloudApplicationAr
 	public ICloudApplicationArchiver getArchiver(IProgressMonitor mon) {
 		try {
 			final IJavaProject jp = getJavaProject();
-			if (jp!=null) {
+			if (jp!=null && checkPackagingType(jp)) {
 				final IType type = getMainType(jp, mon);
 				if (type!=null) {
 					return new Archiver(jp, type);
 				}
 			}
 		} catch (Exception e) {
-			BootDashActivator.log(e);
+			Log.log(e);
 		}
 		return null;
+	}
+
+	private boolean checkPackagingType(IJavaProject jp) throws CoreException {
+		ISpringBootProject bootProject = springBootCore.project(jp);
+		if (bootProject==null) {
+			//Gradle is poorly supported. We don't know how to determin packaging type. So just
+			// give such projects the benefit of the doubdt. They *might have the correct
+			// packaging type.
+			return true;
+		}
+		return ISpringBootProject.PACKAGING_JAR.equals(bootProject.getPackaging());
 	}
 
 	private IJavaProject getJavaProject() {
@@ -267,7 +281,7 @@ public class CloudApplicationArchiverStrategyAsJar implements CloudApplicationAr
 				return JavaCore.create(project);
 			}
 		} catch (Exception e) {
-			BootDashActivator.log(e);
+			Log.log(e);
 		}
 		return null;
 	}
@@ -288,7 +302,7 @@ public class CloudApplicationArchiverStrategyAsJar implements CloudApplicationAr
 				}
 			}
 		} catch (Exception e) {
-			BootDashActivator.log(e);
+			Log.log(e);
 		}
 		return null;
 	}

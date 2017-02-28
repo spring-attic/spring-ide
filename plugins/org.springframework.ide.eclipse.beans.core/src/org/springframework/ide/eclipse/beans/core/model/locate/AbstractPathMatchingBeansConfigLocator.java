@@ -57,6 +57,7 @@ public abstract class AbstractPathMatchingBeansConfigLocator extends AbstractBea
 	 * @see #filterMatchingFiles(Set)
 	 * @see #getAllowedFilePatterns()
 	 */
+	@Override
 	public final Set<IFile> locateBeansConfigs(IProject project, IProgressMonitor progressMonitor) {
 		if (progressMonitor == null) {
 			progressMonitor = new NullProgressMonitor();

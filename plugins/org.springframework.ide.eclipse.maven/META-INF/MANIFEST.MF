@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.springframework.ide.eclipse.maven;singleton:=true
-Bundle-Version: 3.8.2.qualifier
+Bundle-Version: 3.8.4.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.maven.MavenCorePlugin
 Bundle-Vendor: %providerName
 Require-Bundle: org.eclipse.ui,
@@ -30,8 +30,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Eclipse-LazyStart: true
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
-Export-Package: org.springframework.ide.eclipse.maven,
- org.springframework.ide.eclipse.maven.internal.legacyconversion
+Export-Package: org.springframework.ide.eclipse.maven
 Import-Package: org.eclipse.core.runtime,
  org.eclipse.core.runtime.jobs,
  org.eclipse.core.runtime.preferences,

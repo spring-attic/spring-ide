@@ -17,6 +17,7 @@ import java.nio.file.Path;
 
 import org.eclipse.core.runtime.Assert;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
 import org.springframework.ide.eclipse.core.StringUtils;
 
 /**
@@ -29,7 +30,7 @@ public class CfTestTargetParams {
 			return new CFClientParams(
 					fromEnv("CF_TEST_API_URL"),
 					fromEnv("CF_TEST_USER"),
-					fromEnv("CF_TEST_PASSWORD"),
+					CFCredentials.fromPassword(fromEnv("CF_TEST_PASSWORD")),
 					false, //self signed
 					fromEnv("CF_TEST_ORG"),
 					fromEnvOrFile("CF_TEST_SPACE"),
@@ -59,7 +60,7 @@ public class CfTestTargetParams {
 		return val;
 	}
 
-	private static String fromEnv(String name) {
+	public static String fromEnv(String name) {
 		String value = getEnvMaybe(name);
 		Assert.isLegal(StringUtils.hasText(value), "The environment varable '"+name+"' must be set");
 		return value;
@@ -71,5 +72,21 @@ public class CfTestTargetParams {
 			return false;
 		}
 		return Boolean.parseBoolean(value);
+	}
+
+	public static CFClientParams fromEnvWithCredentials(CFCredentials credentials) {
+		try {
+			return new CFClientParams(
+					fromEnv("CF_TEST_API_URL"),
+					fromEnv("CF_TEST_USER"),
+					credentials,
+					false, //self signed
+					fromEnv("CF_TEST_ORG"),
+					fromEnvOrFile("CF_TEST_SPACE"),
+					fromEnvBoolean("CF_TEST_SKIP_SSL")
+			);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }

@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2016 GoPivotal, Inc.
+ * Copyright (c) 2013, 2016 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- * GoPivotal, Inc. - initial API and implementation
+ * Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard.guides;
 
@@ -21,13 +21,14 @@ import java.util.Set;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.springframework.ide.eclipse.boot.wizard.BootWizardActivator;
 import org.springframework.ide.eclipse.boot.wizard.content.BuildType;
 import org.springframework.ide.eclipse.boot.wizard.content.CodeSet;
 import org.springframework.ide.eclipse.boot.wizard.content.ContentManager;
+import org.springframework.ide.eclipse.boot.wizard.content.ContentManager.DownloadState;
 import org.springframework.ide.eclipse.boot.wizard.content.Describable;
 import org.springframework.ide.eclipse.boot.wizard.content.GSContent;
 import org.springframework.ide.eclipse.boot.wizard.content.GettingStartedContent;
@@ -50,13 +51,62 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
  * UI.
  *
  * @author Kris De Volder
+ * @author Nieraj Singh
  */
 public class GSImportWizardModel {
+	
+	/**
+	 * ContentManager instance that provides all the content that this wizard can import.
+	 * By default this is content discovered automatically with the default content manager
+	 * instance. However it is possible to set the Content manager to browser / import
+	 * content provided another way.
+	 */
+	private ContentManager contentManager = GettingStartedContent.getInstance();
 
+	
+	// Tracks the download state of content from content manager
+	private final LiveVariable<DownloadState> prefetchContentTracker = contentManager.getPrefetchContentTracker();
+	
+	// Tracks the download state for content providers properties from content manager
+	private final LiveVariable<DownloadState> prefetchContentProviderPropsTracker = contentManager.getPrefetchContentProviderPropertiesTracker();
+	
+	/**
+	 * The chosen guide to import stuff from.
+	 */
+	private final LiveVariable<GSContent> guide = new LiveVariable<GSContent>();
+
+
+	private final LiveExpression<ValidationResult> guideValidator = new Validator() {
+		{
+			dependsOn(guide);
+			dependsOn(prefetchContentProviderPropsTracker);
+			dependsOn(prefetchContentTracker);
+		}
+
+		@Override
+		protected ValidationResult compute() {
+			DownloadState state = prefetchContentProviderPropsTracker.getValue();
+			if (state == DownloadState.IS_DOWNLOADING) {
+				return ValidationResult.info("Registering content providers. Please wait...");
+			} else {
+				state = prefetchContentTracker.getValue();
+				if (state == DownloadState.IS_DOWNLOADING) {
+					return ValidationResult.info("Downloading all content. Please wait...");
+				}
+			}
+
+			if (guide.getValue() == null) {
+				return ValidationResult.error("No GS content selected");
+			} else {
+				return ValidationResult.OK;
+			}
+		}
+	};
+	
 	static final ValidationResult isDownloadingMessage(GSContent g) {
 		return ValidationResult.info(g.getDisplayName()+" is downloading...");
 	}
-
+	
 	public class CodeSetValidator extends LiveExpression<ValidationResult> {
 
 		private final LiveVariable<GSContent> codesetProvider;
@@ -117,19 +167,6 @@ public class GSImportWizardModel {
 	}
 
 	/**
-	 * ContentManager instance that provides all the content that this wizard can import.
-	 * By default this is content discovered automatically with the default content manager
-	 * instance. However it is possible to set the Content manager to browser / import
-	 * content provided another way.
-	 */
-	private ContentManager contentManager = GettingStartedContent.getInstance();
-
-	/**
-	 * The chosen guide to import stuff from.
-	 */
-	private final LiveVariable<GSContent> guide = new LiveVariable<GSContent>();
-
-	/**
 	 * Chosen element in the content picker whether it is an actual GSContent item
 	 * or a ContentType. Used to update description instead of 'c
 	 */
@@ -174,11 +211,10 @@ public class GSImportWizardModel {
 	};
 
 	/**
-	 * The import strategt chosen by user
+	 * The import strategy chosen by user
 	 */
 	private final LiveVariable<ImportStrategy> importStrategy = new LiveVariable<ImportStrategy>(BuildType.DEFAULT.getDefaultStrategy());
-
-	private final LiveExpression<ValidationResult> guideValidator = Validator.notNull(guide, "No GS content selected");
+	
 	private final LiveExpression<ValidationResult> codesetValidator = new CodeSetValidator(guide, codesets, validCodesetNames);
 	private final LiveExpression<ValidationResult> importStrategyValidator = new Validator() {
 		@Override
@@ -328,6 +364,7 @@ public class GSImportWizardModel {
 		description.dependsOn(rawSelection);
 
 		homePage.dependsOn(guide);
+	
 
 		validCodesetNames.dependsOn(guide);
 		validCodesetNames.dependsOn(isDownloaded);
@@ -335,7 +372,7 @@ public class GSImportWizardModel {
 		codesetValidator.dependsOn(isDownloaded);
 		//Note: some other dependsOn are registered inside CodeSetValidator class itself.
 		// isDownloaded is an exception because is still null when CodeSetValidator class gets
-		// instantiated.
+		// instantiated.	
 	}
 
 	/**
@@ -402,7 +439,7 @@ public class GSImportWizardModel {
 							g,
 							cs
 					));
-					oper.run(new SubProgressMonitor(mon, 1));
+					oper.run(SubMonitor.convert(mon, 1));
 				}
 			}
 			if (enableOpenHomePage.getValue()) {
@@ -451,6 +488,8 @@ public class GSImportWizardModel {
 	public LiveExpression<Boolean> isDownloaded() {
 		return isDownloaded;
 	}
+	
+
 
 	public LiveVariable<Boolean> getEnableOpenHomePage() {
 		return enableOpenHomePage;
@@ -479,5 +518,4 @@ public class GSImportWizardModel {
 	public void setContentManager(ContentManager contentManager) {
 		this.contentManager = contentManager;
 	}
-
 }

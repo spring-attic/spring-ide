@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2016 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -26,6 +26,7 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.project.IMavenProjectImportResult;
@@ -34,6 +35,7 @@ import org.eclipse.m2e.core.project.ProjectImportConfiguration;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCorePreferences;
@@ -46,17 +48,14 @@ import org.springframework.ide.eclipse.maven.internal.core.MavenClasspathUpdateJ
  */
 public class MavenCorePlugin extends AbstractUIPlugin {
 
-	private static final String M2ECLIPSE_CLASS = "org.eclipse.m2e.core.MavenPlugin";
-	private static final String M2ECLIPSE_LEGACY_CLASS = "org.maven.ide.eclipse.MavenPlugin";
+	private static final String M2ECLIPSE_BUNDLE = "org.eclipse.m2e.core";
+	public static final boolean IS_M2ECLIPSE_PRESENT = isPresent(M2ECLIPSE_BUNDLE);
 
-	public static final boolean IS_M2ECLIPSE_PRESENT = isPresent(M2ECLIPSE_CLASS);
-	public static final boolean IS_LEGACY_M2ECLIPSE_PRESENT = isPresent(M2ECLIPSE_LEGACY_CLASS);
-
-	private static boolean isPresent(String className) {
+	private static boolean isPresent(String bundleName) {
 		try {
-			Class.forName(className);
-			return true;
-		} catch (ClassNotFoundException e) {
+			Bundle bundle = Platform.getBundle(bundleName);
+			return bundle != null && bundle.getState() != Bundle.INSTALLED && bundle.getState() != Bundle.UNINSTALLED;
+		} catch (Exception e) {
 			return false;
 		}
 	}
@@ -69,8 +68,6 @@ public class MavenCorePlugin extends AbstractUIPlugin {
 
 	public static final String M2ECLIPSE_NATURE = "org.eclipse.m2e.core.maven2Nature";
 
-	public static final String M2ECLIPSE_LEGACY_NATURE = "org.maven.ide.eclipse.maven2Nature";
-
 	private static MavenCorePlugin plugin;
 
 	private IResourceChangeListener resourceChangeListener;
@@ -78,7 +75,7 @@ public class MavenCorePlugin extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-		if (IS_M2ECLIPSE_PRESENT || IS_LEGACY_M2ECLIPSE_PRESENT) {
+		if (IS_M2ECLIPSE_PRESENT) {
 			resourceChangeListener = new PomResourceChangeListener();
 			ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener);
 		}
@@ -87,7 +84,7 @@ public class MavenCorePlugin extends AbstractUIPlugin {
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
 		super.stop(context);
-		if (resourceChangeListener != null && (IS_M2ECLIPSE_PRESENT || IS_LEGACY_M2ECLIPSE_PRESENT)) {
+		if (resourceChangeListener != null && (IS_M2ECLIPSE_PRESENT)) {
 			ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
 		}
 	}

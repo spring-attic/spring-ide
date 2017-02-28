@@ -1,17 +1,20 @@
 /*******************************************************************************
- *  Copyright (c) 2013, 2016 GoPivotal, Inc.
+ *  Copyright (c) 2013, 2016 Pivotal Software, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      GoPivotal, Inc. - initial API and implementation
+ *      Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard.guides;
 
 import java.util.HashMap;
 
+import javax.inject.Provider;
+
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -35,12 +38,14 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.internal.misc.StringMatcher;
 import org.eclipse.ui.internal.misc.StringMatcher.Position;
 import org.springframework.ide.eclipse.boot.wizard.BootWizardActivator;
 import org.springframework.ide.eclipse.boot.wizard.content.ContentManager;
+import org.springframework.ide.eclipse.boot.wizard.content.ContentManager.DownloadState;
 import org.springframework.ide.eclipse.boot.wizard.content.ContentType;
 import org.springframework.ide.eclipse.boot.wizard.content.Describable;
 import org.springframework.ide.eclipse.boot.wizard.content.DisplayNameable;
@@ -49,6 +54,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.SelectionModel;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
+import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
@@ -66,8 +72,25 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 @SuppressWarnings("restriction")
 public class ChooseTypedContentSection extends WizardPageSection {
 
+	private final PrefetchContentListener prefetchContentListener = new PrefetchContentListener();
+
+	public class PrefetchContentListener implements ValueListener<DownloadState> {
+		@Override
+		public void gotValue(LiveExpression<DownloadState> exp, DownloadState downloadState) {
+			if (downloadState == DownloadState.DOWNLOADING_COMPLETED) {
+				Display.getDefault().asyncExec(() -> {
+					if (treeviewer != null && !treeviewer.getTree().isDisposed()) {
+						treeviewer.refresh();
+						treeviewer.expandAll();
+					}
+				});
+			}
+		}
+	}
+
 	private static class ContentProvider implements ITreeContentProvider {
 
+		private static final Object[] NO_ELEMENTS = {};
 		private final ContentManager content;
 
 		public ContentProvider(ContentManager content) {
@@ -96,14 +119,14 @@ public class ChooseTypedContentSection extends WizardPageSection {
 					}
 				}
 			}
-			return null;
+			return NO_ELEMENTS;
 		}
 
 		//@Override
 		public Object[] getChildren(Object e) {
 			try {
 				if (e instanceof ContentType<?>) {
-					return content.get((ContentType<?>)e);
+					return content.getWithPrefetchCheck((ContentType<?>)e);
 				}
 				return null;
 			} catch (Throwable error) {
@@ -153,7 +176,7 @@ public class ChooseTypedContentSection extends WizardPageSection {
 	private class ChoicesFilter extends ViewerFilter {
 
 		private StringMatcher matcher = null;
-		private final HashMap<Object, Boolean> cache = new HashMap<Object, Boolean>();
+		private final HashMap<Object, Boolean> cache = new HashMap<>();
 
 		public ChoicesFilter() {
 			if (searchBox!=null) {
@@ -162,7 +185,11 @@ public class ChooseTypedContentSection extends WizardPageSection {
 		}
 
 		public void setSearchTerm(String text) {
-			matcher = new StringMatcher(text, true, false);
+			if (StringUtils.isNotBlank(text)) {
+				matcher = new StringMatcher(text, true, false);
+			} else {
+				matcher = null;
+			}
 			cache.clear();
 		}
 
@@ -185,9 +212,9 @@ public class ChooseTypedContentSection extends WizardPageSection {
 				//Only search in the content (leaves). The contenttypes are selected if
 				// any of their children (content) is selected.
 				return matchChildren(viewer, e);
-			} else if (match(label)) {
+			} else if (match(()->label)) {
 				return true;
-			} else if (e instanceof Describable && match(((Describable) e).getDescription())) {
+			} else if (e instanceof Describable && match(()->((Describable) e).getDescription())) {
 				return true;
 			}
 			return false;
@@ -205,17 +232,19 @@ public class ChooseTypedContentSection extends WizardPageSection {
 			return false;
 		}
 
-		private boolean match(String text) {
-			if (matcher==null) {
+		private boolean match(Provider<String> provider) {
+			if (matcher == null) {
 				return true; // Search term not set... anything is acceptable.
-			} else if (text==null) {
-				return false;
 			} else {
-				Position x = matcher.find(text, 0, text.length());
-				return x!=null;
+				String text = provider.get();
+				if (text == null) {
+					return false;
+				} else {
+					Position x = matcher.find(text, 0, text.length());
+					return x != null;
+				}
 			}
 		}
-
 	}
 
 
@@ -247,6 +276,12 @@ public class ChooseTypedContentSection extends WizardPageSection {
 
 	@Override
 	public void createContents(Composite page) {
+
+		// PT 130652465 - Avoid downloading content (i.e. network I/O) in the UI thread.
+		// Solution: downloading/prefetch content in the background to avoid blocking the UI in case
+		// it takes a long time.
+	    prefetchProvidersAndContent();
+
 		Composite field = new Composite(page, SWT.NONE);
 		int cols = sectionLabel==null ? 1 : 2;
 		GridLayout layout = GridLayoutFactory.fillDefaults().numColumns(cols).create();
@@ -342,6 +377,13 @@ public class ChooseTypedContentSection extends WizardPageSection {
 		});
 	}
 
+
+	private void prefetchProvidersAndContent() {
+		LiveVariable<DownloadState> prefetchContentTracker = content.getPrefetchContentTracker();
+		prefetchContentTracker.addListener(this.prefetchContentListener);
+		content.prefetchInBackground(owner.getRunnableContext());
+	}
+
 	private void whenVisible(final Control control, final Runnable runnable) {
 		PaintListener l = new PaintListener() {
 			public void paintControl(PaintEvent e) {
@@ -372,6 +414,18 @@ public class ChooseTypedContentSection extends WizardPageSection {
 		treeviewer.refresh();
 		treeviewer.expandAll();
 	}
+
+	@Override
+	public void dispose() {
+		if (content != null ) {
+			if (prefetchContentListener != null) {
+				// This may not be necessary, but to be safe explicitly remove the listener
+				content.getPrefetchContentTracker().removeListener(prefetchContentListener);
+			}
+			content.disposePrefetchTrackingListeners();
+		}
+	}
+
 
 //	private String[] getLabels() {
 //		String[] labels = new String[options.length];

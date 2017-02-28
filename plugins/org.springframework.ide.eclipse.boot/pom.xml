@@ -5,17 +5,12 @@
 	<parent>
 		<groupId>org.springframework.ide.eclipse</groupId>
 		<artifactId>org.springframework.ide.eclipse.parent</artifactId>
-		<version>3.8.2-SNAPSHOT</version>
+		<version>3.8.4-SNAPSHOT</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 	<groupId>org.springframework.ide.eclipse</groupId>
 	<artifactId>org.springframework.ide.eclipse.boot</artifactId>
 	<packaging>eclipse-plugin</packaging>
-	
-	<properties>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
-	</properties>
 	
 	<build>
 		<plugins>

@@ -189,6 +189,10 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 		for (ToggleFilterAction a : actions.getToggleFilterActions()) {
 			manager.add(a);
 		}
+
+		manager.add(new Separator());
+		manager.add(actions.getOpenFilterPreferencesAction());
+
 		// manager.add(refreshAction);
 		// manager.add(new Separator());
 		// manager.add(action2);

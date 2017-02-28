@@ -7,16 +7,24 @@ import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 
 public class MockSecuredCredentialStore implements SecuredCredentialsStore {
 
-	private Map<String,String> store = new HashMap<String, String>();
+	private Map<String,String> store = new HashMap<>();
+	private boolean isUnlocked = false;
 
 	@Override
-	public synchronized String getPassword(String runTargetId) {
+	public synchronized String getCredentials(String runTargetId) {
+		isUnlocked = true;
 		return store.get(runTargetId);
 	}
 
 	@Override
-	public synchronized void setPassword(String password, String runTargetId) {
+	public synchronized void setCredentials(String runTargetId, String password) {
+		isUnlocked = true;
 		store.put(runTargetId, password);
+	}
+
+	@Override
+	public boolean isUnlocked() {
+		return isUnlocked;
 	}
 
 }

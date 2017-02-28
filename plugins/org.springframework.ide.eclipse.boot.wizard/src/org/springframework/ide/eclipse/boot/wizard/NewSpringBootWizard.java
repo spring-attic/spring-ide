@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.boot.wizard;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -25,11 +24,12 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
-import org.springframework.ide.eclipse.boot.wizard.json.InitializrServiceSpec.Dependency;
 import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
+import org.springsource.ide.eclipse.commons.livexp.ui.ButtonSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.ChooseOneSectionCombo;
 import org.springsource.ide.eclipse.commons.livexp.ui.CommentSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.DescriptionSection;
@@ -91,13 +91,13 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 	private WizardPageSection createRadioGroupsSection(WizardPageWithSections owner) {
 		boolean notEmpty = false;
 		RadioGroup bootVersion = model.getBootVersion(); //This is placed specifically somewhere else so must skip it here
-		ArrayList<WizardPageSection> radioSections = new ArrayList<WizardPageSection>();
+		ArrayList<WizardPageSection> radioSections = new ArrayList<>();
 		for (RadioGroup radioGroup : model.getRadioGroups().getGroups()) {
 			if (radioGroup!=bootVersion) {
 				if (radioGroup.getRadios().length>1) {
 					//Don't add a UI elements for something that offers no real choice
 					radioSections.add(
-						new ChooseOneSectionCombo<RadioInfo>(owner, radioGroup.getLabel(), radioGroup.getSelection(), radioGroup.getRadios())
+						new ChooseOneSectionCombo<>(owner, radioGroup.getLabel(), radioGroup.getSelection(), radioGroup.getRadios())
 						//new ChooseOneSectionCombo<RadioInfo>(owner, radioGroup.getLabel(), radioGroup.getSelection(), radioGroup.getRadios())
 					);
 					notEmpty = true;
@@ -118,7 +118,7 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 
 		@Override
 		protected List<WizardPageSection> createSections() {
-			List<WizardPageSection> sections = new ArrayList<WizardPageSection>();
+			List<WizardPageSection> sections = new ArrayList<>();
 
 			FieldModel<String> projectName = model.getProjectName();
 			sections.add(new StringFieldSection(this, projectName));
@@ -146,6 +146,11 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 	public class DependencyPage extends WizardPageWithSections {
 
 		private static final int NUM_DEP_COLUMNS = 4;
+		private static final int MAX_MOST_POPULAR = 3*NUM_DEP_COLUMNS;
+
+		private ExpandableSection frequentlyUsedSection;
+
+		private CheckBoxesSection<Dependency> frequentlyUsedCheckboxes;
 
 		protected DependencyPage() {
 			super("page2", "New Spring Starter Project", null);
@@ -154,42 +159,71 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 		private void applyFilter(Filter<CheckBoxModel<Dependency>> filter, ExpandableSection expandable, CheckBoxesSection<Dependency> checkboxes) {
 			boolean visChanged = checkboxes.applyFilter(filter);
 
-			boolean hasVisible = checkboxes.hasVisible();
-			expandable.setVisible(hasVisible);
-			if (hasVisible && visChanged) {
-				//Reveal if visibility changed
-				expandable.getExpansionState().setValue(true);
-				this.reflow();
+			if (checkboxes.isCreated()) {
+				boolean hasVisible = checkboxes.hasVisible();
+				expandable.setVisible(hasVisible);
+				if (hasVisible && visChanged) {
+					//Reveal if visibility changed
+					expandable.getExpansionState().setValue(true);
+					this.reflow();
+				}
 			}
+		}
+
+		private void refreshFrequentlyUsedDependencies() {
+			List<CheckBoxModel<Dependency>> dependenciesCheckboxes = model.getFrequentlyUsedDependencies(MAX_MOST_POPULAR);
+			frequentlyUsedCheckboxes.setModel(dependenciesCheckboxes);
+			frequentlyUsedSection.setVisible(!dependenciesCheckboxes.isEmpty());
+			reflow();
 		}
 
 		@Override
 		protected List<WizardPageSection> createSections() {
-			List<WizardPageSection> sections = new ArrayList<WizardPageSection>();
+			List<WizardPageSection> sections = new ArrayList<>();
 
 			RadioGroup bootVersion = model.getBootVersion();
 			sections.add(
-					new ChooseOneSectionCombo<RadioInfo>(this, bootVersion.getLabel(),
-							bootVersion.getSelection(), bootVersion.getRadios()));
+				new ChooseOneSectionCombo<>(this, bootVersion.getLabel(),
+							bootVersion.getSelection(), bootVersion.getRadios()
+				)
+				.useFieldLabelWidthHint(false)
+			);
 
 			sections.add(
 					new CommentSection(this, model.dependencies.getLabel())
 			);
 
-			List<CheckBoxModel<Dependency>> mostpopular = model.getMostPopular(3*NUM_DEP_COLUMNS);
-			if (!mostpopular.isEmpty()) {
-				sections.add(new ExpandableSection(this, "Frequently Used",
-						new CheckBoxesSection<Dependency>(this, mostpopular)
-							.columns(NUM_DEP_COLUMNS)
-				));
-			}
+			List<CheckBoxModel<Dependency>> frequesntDependencies = model.getFrequentlyUsedDependencies(MAX_MOST_POPULAR);
+			frequentlyUsedCheckboxes = new CheckBoxesSection<>(this, frequesntDependencies)
+					.columns(NUM_DEP_COLUMNS);
+			frequentlyUsedSection = new ExpandableSection(this, "Frequently Used",
+					frequentlyUsedCheckboxes);
+			sections.add(frequentlyUsedSection);
+			frequentlyUsedSection.setVisible(!frequesntDependencies.isEmpty());
 
-			sections.add(new SearchBoxSection(this, model.getDependencyFilterBoxText()) {
-				@Override
-				protected String getSearchHint() {
-					return "Type to search dependencies";
-				}
-			});
+			sections.add(
+				new GroupSection(this, null,
+					new SearchBoxSection(this, model.getDependencyFilterBoxText()) {
+						@Override
+						protected String getSearchHint() {
+							return "Type to search dependencies";
+						}
+					},
+
+					new ButtonSection(this, "Make Default", () -> {
+						if (model.saveDefaultDependencies()) {
+							refreshFrequentlyUsedDependencies();
+						}
+					})
+					.tooltip("Make currently selected dependencies selected by default"),
+
+					new ButtonSection(this, "Clear Selection", () -> {
+						model.dependencies.clearSelection();
+					})
+					.tooltip("Clear dependencies selection")
+				)
+				.columns(3, false)
+			);
 
 			for (String cat : model.dependencies.getCategories()) {
 				MultiSelectionFieldModel<Dependency> dependencyGroup = model.dependencies.getContents(cat);
@@ -197,7 +231,7 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 				final CheckBoxesSection<Dependency> checkboxes;
 				sections.add(
 					expandable = new ExpandableSection(this, dependencyGroup.getLabel(),
-							checkboxes = new CheckBoxesSection<Dependency>(this, dependencyGroup.getCheckBoxModels())
+							checkboxes = new CheckBoxesSection<>(this, dependencyGroup.getCheckBoxModels())
 								.columns(NUM_DEP_COLUMNS)
 					)
 				);
@@ -226,7 +260,7 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 
 		@Override
 		protected List<WizardPageSection> createSections() {
-			List<WizardPageSection> sections = new ArrayList<WizardPageSection>();
+			List<WizardPageSection> sections = new ArrayList<>();
 
 			sections.add(new GroupSection(this, "Site Info",
 					new StringFieldSection(this, "Base Url", model.baseUrl, model.baseUrlValidator),

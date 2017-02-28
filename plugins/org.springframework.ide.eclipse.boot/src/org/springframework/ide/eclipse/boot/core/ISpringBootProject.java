@@ -10,11 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.core;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
 
@@ -25,6 +27,8 @@ import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
  */
 public interface ISpringBootProject {
 
+	final static String PACKAGING_JAR = "jar";
+	final static String PACKAGING_WAR = "war";
 
 	/**
 	 * @return corresponding Eclipse project.
@@ -105,5 +109,9 @@ public interface ISpringBootProject {
 	 * The name of the file in which the list of dependencies for this project are maintained. E.g "pom.xml" for maven projects.
 	 */
 	public String getDependencyFileName();
+
+	public String getPackaging() throws CoreException;
+
+	public File executePackagingScript(IProgressMonitor monitor) throws CoreException;
 
 }

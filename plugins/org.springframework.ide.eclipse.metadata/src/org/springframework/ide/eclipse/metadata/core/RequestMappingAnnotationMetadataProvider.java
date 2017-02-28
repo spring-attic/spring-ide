@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012, 2014 VMware, Inc.
+ *  Copyright (c) 2012, 2017 VMware, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -29,7 +29,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * {@link IAnnotationBeanMetadataProvider} for creating bean metadata from RequestMapping.
+ * {@link IAnnotationBeanMetadataProvider} for creating bean metadata from
+ * RequestMapping.
+ * 
  * @author Christian Dupuis
  * @author Leo Dos Santos
  * @since 1.0.0
@@ -39,29 +41,31 @@ public class RequestMappingAnnotationMetadataProvider implements IAnnotationBean
 	/** The RequesMapping annotation class */
 	private static final String REQUEST_MAPPING_CLASS = "org.springframework.web.bind.annotation.RequestMapping"; //$NON-NLS-1$
 
-	public Set<IBeanMetadata> provideBeanMetadata(IBean bean, IType type,
-			IAnnotationMetadata visitor) {
+	private static final String[] controllerClasses = new String[] {
+			Controller.class.getName(),
+			RestController.class.getName(),
+			REQUEST_MAPPING_CLASS,
+			"org.springframework.data.rest.webmvc.RepositoryRestController"
+		};
+
+	public Set<IBeanMetadata> provideBeanMetadata(IBean bean, IType type, IAnnotationMetadata visitor) {
 		Set<IBeanMetadata> beanMetaDataSet = new LinkedHashSet<IBeanMetadata>();
+		
 		try {
-			if (visitor.hasTypeLevelAnnotations(Controller.class.getName(), REQUEST_MAPPING_CLASS) ||
-					visitor.hasTypeLevelAnnotations(RestController.class.getName(), REQUEST_MAPPING_CLASS)) {
+			if (visitor.hasTypeLevelAnnotations(controllerClasses)) {
 				Set<IMethodMetadata> methodMetaData = new HashSet<IMethodMetadata>();
-				for (Map.Entry<IMethod, Annotation> entry : visitor.getMethodLevelAnnotations(
-						REQUEST_MAPPING_CLASS).entrySet()) {
-					methodMetaData.add(new RequestMappingMethodAnnotationMetadata(
-							REQUEST_MAPPING_CLASS, entry.getKey().getHandleIdentifier(), entry
-									.getValue().getMembers(), new JavaModelSourceLocation(entry
-									.getKey())));
+
+				for (Map.Entry<IMethod, Annotation> entry : visitor.getMethodLevelAnnotations(REQUEST_MAPPING_CLASS).entrySet()) {
+					methodMetaData.add(new RequestMappingMethodAnnotationMetadata(REQUEST_MAPPING_CLASS, entry.getKey().getHandleIdentifier(),
+							entry.getValue().getMembers(), new JavaModelSourceLocation(entry.getKey())));
 				}
-				beanMetaDataSet
-						.add(new RequestMappingAnnotationMetadata(bean, REQUEST_MAPPING_CLASS,
-								(visitor.hasTypeLevelAnnotations(REQUEST_MAPPING_CLASS) ? visitor
-										.getTypeLevelAnnotation(REQUEST_MAPPING_CLASS).getMembers()
-										: null), new JavaModelSourceLocation(type), methodMetaData,
-								type.getHandleIdentifier()));
+
+				beanMetaDataSet.add(new RequestMappingAnnotationMetadata(bean,
+						REQUEST_MAPPING_CLASS, (visitor.hasTypeLevelAnnotations(REQUEST_MAPPING_CLASS)
+								? visitor.getTypeLevelAnnotation(REQUEST_MAPPING_CLASS).getMembers() : null),
+						new JavaModelSourceLocation(type), methodMetaData, type.getHandleIdentifier()));
 			}
-		}
-		catch (JavaModelException e) {
+		} catch (JavaModelException e) {
 		}
 		return beanMetaDataSet;
 	}

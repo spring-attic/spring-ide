@@ -22,6 +22,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.APP_DELETE_TIMEOUT;
 import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.APP_DEPLOY_TIMEOUT;
@@ -60,13 +61,20 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElemen
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudServiceInstanceDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials.CFCredentialType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
+import org.springframework.ide.eclipse.boot.dash.dialogs.StoreCredentialsMode;
+import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel.ManifestType;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
+import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
+import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCFSpace;
+import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.test.AutobuildingEnablement;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.boot.test.util.TestBracketter;
@@ -126,10 +134,25 @@ public class CloudFoundryBootDashModelIntegrationTest {
 	@Test
 	public void testCreateCfTarget() throws Exception {
 		CloudFoundryBootDashModel target =  harness.createCfTarget(CfTestTargetParams.fromEnv());
+		CFCredentials credentials = target.getRunTarget().getTargetProperties().getCredentials();
 		assertNotNull(target);
-		assertNotNull(target.getRunTarget().getTargetProperties().getPassword());
+		assertEquals(CFCredentialType.PASSWORD, credentials.getType());
+		assertNotNull(credentials.getSecret());
 		assertEquals(1, harness.getCfRunTargetModels().size());
 	}
+
+	@Test public void testCreateCfTargetAndStoreToken() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+
+		CloudFoundryBootDashModel target =  harness.createCfTarget(targetParams, StoreCredentialsMode.STORE_TOKEN);
+		assertNotNull(target);
+		assertTrue(target.isConnected());
+		CFCredentials credentials = target.getRunTarget().getTargetProperties().getCredentials();
+		assertEquals(CFCredentialType.REFRESH_TOKEN, credentials.getType());
+		assertNotNull(credentials.getSecret());
+		assertEquals(1, harness.getCfRunTargetModels().size());
+	}
+
 
 	/**
 	 * Test that tests a bunch of things.

@@ -62,6 +62,7 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 	 * Path to a zipFile containing the contents of the stuff to deploy.
 	 */
 	private File archive;
+	private String healthCheckType;
 
 	public CloudApplicationDeploymentProperties() {
 		boundServices = new ArrayList<>();
@@ -109,6 +110,14 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 
 	public Integer getTimeout() {
 		return timeout;
+	}
+
+	public String getHealthCheckType() {
+		return healthCheckType;
+	}
+
+	public void setHealthCheckType(String healthCheckType) {
+		this.healthCheckType = healthCheckType;
 	}
 
 	public void setCommand(String command) {
@@ -228,6 +237,7 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 		properties.setServices(app == null ? Collections.<String>emptyList() : app.getServices());
 		properties.setDiskQuota(app == null ? DeploymentProperties.DEFAULT_MEMORY : app.getDiskQuota());
 		properties.setTimeout(app == null ? null : app.getTimeout());
+		properties.setHealthCheckType(app==null ? null : app.getHealthCheckType());
 		properties.setCommand(app == null ? null : app.getCommand());
 		properties.setStack(app == null ? null : app.getStack());
 
@@ -249,6 +259,7 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 		args.setMemory(getMemory());
 		args.setDiskQuota(getDiskQuota());
 		args.setTimeout(getTimeout());
+		args.setHealthCheckType(getHealthCheckType());
 		args.setBuildpack(getBuildpack());
 		args.setCommand(getCommand());
 		args.setStack(getStack());

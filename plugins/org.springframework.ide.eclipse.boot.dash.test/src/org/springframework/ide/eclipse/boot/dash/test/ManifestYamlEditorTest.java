@@ -21,7 +21,7 @@ public class ManifestYamlEditorTest {
 		editor = new MockManifestEditor("<*>");
 		editor.assertCompletions(
 				"applications:\n"+
-				"  - <*>",
+				"- <*>",
 				// ---------------
 				"buildpack: <*>",
 				// ---------------
@@ -32,10 +32,12 @@ public class ManifestYamlEditorTest {
 				"domain: <*>",
 				// ---------------
 				"domains:\n"+
-				"  - <*>",
+				"- <*>",
 				// ---------------
 				"env:\n"+
 				"  <*>",
+				// ----------------
+				"health-check-type: <*>",
 				// ---------------
 //				"host: <*>",
 				// ---------------
@@ -59,7 +61,7 @@ public class ManifestYamlEditorTest {
 				"random-route: <*>",
 				// ---------------
 				"services:\n"+
-				"  - <*>",
+				"- <*>",
 				// ---------------
 				"stack: <*>",
 				// ---------------
@@ -77,67 +79,70 @@ public class ManifestYamlEditorTest {
 		MockManifestEditor editor;
 		editor = new MockManifestEditor(
 				"applications:\n" +
-				"  - <*>"
+				"- <*>"
 		);
 		editor.assertCompletions(
 				// ---------------
 				"applications:\n" +
-				"  - buildpack: <*>",
+				"- buildpack: <*>",
 				// ---------------
 				"applications:\n" +
-				"  - command: <*>",
+				"- command: <*>",
 				// ---------------
 				"applications:\n" +
-				"  - disk_quota: <*>",
+				"- disk_quota: <*>",
 				// ---------------
 				"applications:\n" +
-				"  - domain: <*>",
+				"- domain: <*>",
 				// ---------------
 				"applications:\n" +
-				"  - domains:\n"+
-				"      - <*>",
+				"- domains:\n"+
+				"  - <*>",
 				// ---------------
 				"applications:\n" +
-				"  - env:\n"+
-				"      <*>",
+				"- env:\n"+
+				"    <*>",
 				// ---------------
 				"applications:\n" +
-				"  - host: <*>",
+				"- health-check-type: <*>",
 				// ---------------
 				"applications:\n" +
-				"  - hosts:\n"+
-				"      - <*>",
+				"- host: <*>",
 				// ---------------
 				"applications:\n" +
-				"  - instances: <*>",
+				"- hosts:\n"+
+				"  - <*>",
 				// ---------------
 				"applications:\n" +
-				"  - memory: <*>",
+				"- instances: <*>",
 				// ---------------
 				"applications:\n" +
-				"  - name: <*>",
+				"- memory: <*>",
 				// ---------------
 				"applications:\n" +
-				"  - no-hostname: <*>",
+				"- name: <*>",
 				// ---------------
 				"applications:\n" +
-				"  - no-route: <*>",
+				"- no-hostname: <*>",
 				// ---------------
 				"applications:\n" +
-				"  - path: <*>",
+				"- no-route: <*>",
 				// ---------------
 				"applications:\n" +
-				"  - random-route: <*>",
+				"- path: <*>",
 				// ---------------
 				"applications:\n" +
-				"  - services:\n"+
-				"      - <*>",
+				"- random-route: <*>",
 				// ---------------
 				"applications:\n" +
-				"  - stack: <*>",
+				"- services:\n"+
+				"  - <*>",
 				// ---------------
 				"applications:\n" +
-				"  - timeout: <*>"
+				"- stack: <*>",
+				// ---------------
+				"applications:\n" +
+				"- timeout: <*>"
 		);
 	}
 
@@ -165,6 +170,10 @@ public class ManifestYamlEditorTest {
 				"random-route: false<*>",
 				"random-route: true<*>"
 		);
+		assertCompletions("health-check-type: <*>",
+				"health-check-type: none<*>",
+				"health-check-type: port<*>"
+		);
 	}
 
 	@Test
@@ -174,7 +183,8 @@ public class ManifestYamlEditorTest {
 				"applications:\n" +
 				"  - buildpack: zbuildpack\n" +
 				"    domain: zdomain\n" +
-				"    name: foo"
+				"    name: foo\n" +
+				"    health-check-type: none"
 		);
 		editor.assertIsHoverRegion("memory");
 		editor.assertIsHoverRegion("applications");
@@ -185,6 +195,7 @@ public class ManifestYamlEditorTest {
 		editor.assertHoverContains("memory", "Use the <code>memory</code> attribute to specify the memory limit");
 		editor.assertHoverContains("1G", "Use the <code>memory</code> attribute to specify the memory limit");
 		editor.assertHoverContains("buildpack", "use the <code>buildpack</code> attribute to specify its URL or name");
+		editor.assertHoverContains("health-check-type", "Use the <code>health-check-type</code> attribute to");
 	}
 
 	@Test
@@ -328,9 +339,6 @@ public class ManifestYamlEditorTest {
 		);
 		editor.assertProblems(/*none*/);
 	}
-
-	//TODO: checking for certain value types. E.g 'integer' and 'Memory'
-	// But we haven't implemented that yet.
 
 	//////////////////////////////////////////////////////////////////////////////
 

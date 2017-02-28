@@ -12,13 +12,11 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging;
 
 import java.io.File;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
@@ -28,12 +26,12 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
  */
 public class CloudApplicationArchiverStrategyFromManifest implements CloudApplicationArchiverStrategy {
 
-	private IProject project;
+//	private IProject project;
 	private String applicationName;
 	private ApplicationManifestHandler parser;
 
 	public CloudApplicationArchiverStrategyFromManifest(IProject project, String applicationName, ApplicationManifestHandler parser) {
-		this.project = project;
+//		this.project = project;
 		this.applicationName = applicationName;
 		this.parser = parser;
 	}
@@ -89,10 +87,6 @@ public class CloudApplicationArchiverStrategyFromManifest implements CloudApplic
 		} else {
 			return packagedFile;
 		}
-	}
-
-	private IProject getProject() {
-		return project;
 	}
 
 }

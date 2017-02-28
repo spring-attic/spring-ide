@@ -36,6 +36,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.InstanceSta
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ApplicationExtras;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFApplicationDetailData;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFApplicationSummaryData;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
@@ -79,6 +80,7 @@ public class MockCFApplication {
 	private CFAppState state = CFAppState.STOPPED;
 	private int diskQuota = 1024;
 	private Integer timeout = null;
+	private String healthCheckType = DeploymentProperties.DEFAULT_HEALTH_CHECK_TYPE;
 	private String command = null;
 	private String stack = null;
 	private MockCloudFoundryClientFactory owner;
@@ -94,7 +96,6 @@ public class MockCFApplication {
 		this.cancelationTokens = new CancelationTokens();
 	}
 
-	private String healthCheck=HealthChecks.HC_PORT;
 	private ImmutableList<CFInstanceStats> stats = ImmutableList.of();
 
 	private CancelationTokens cancelationTokens;
@@ -155,13 +156,20 @@ public class MockCFApplication {
 		return owner.getStartDelay();
 	}
 
-	public String getHealthCheck() {
-		return healthCheck;
+	public String getHealthCheckType() {
+		return healthCheckType;
 	}
 
-	public void setHealthCheck(String healthCheck) {
-		this.healthCheck = healthCheck;
+	public void setHealthCheckType(String t) {
+		this.healthCheckType = t;
 	}
+
+	public void setHealthCheckTypeMaybe(String t) {
+		if (t!=null) {
+			setHealthCheckType(t);
+		}
+	}
+
 
 //	public int getInstances() {
 //		return instances;
@@ -196,6 +204,7 @@ public class MockCFApplication {
 	public void setTimeout(int timeout) {
 		this.timeout = timeout;
 	}
+
 
 	public void setDiskQuota(int diskQuota) {
 		this.diskQuota = diskQuota;
@@ -259,6 +268,11 @@ public class MockCFApplication {
 			public Mono<String> getCommand() {
 				return just(command);
 			}
+			@Override
+			public Mono<String> getHealthCheckType() {
+				return just(healthCheckType);
+			}
+
 		};
 	}
 
@@ -397,6 +411,7 @@ public class MockCFApplication {
 	public InputStream getBits() {
 		return new ByteArrayInputStream(bits);
 	}
+
 
 
 }

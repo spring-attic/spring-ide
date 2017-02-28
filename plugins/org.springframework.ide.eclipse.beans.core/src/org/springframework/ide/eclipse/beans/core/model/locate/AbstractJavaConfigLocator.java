@@ -24,26 +24,32 @@ import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
  */
 public abstract class AbstractJavaConfigLocator implements IJavaConfigLocator {
 
+	@Override
 	public Set<IFile> locateBeansConfigs(IProject project, IProgressMonitor progressMonitor) {
 		return Collections.emptySet();
 	}
 	
+	@Override
 	public boolean isBeansConfig(IFile file) {
 		return false;
 	}
 
+	@Override
 	public boolean supports(IProject project) {
 		return SpringCoreUtils.isSpringProject(project);
 	}
 
+	@Override
 	public boolean requiresRefresh(IFile file) {
 		return false;
 	}
 
+	@Override
 	public String getBeansConfigSetName(Set<IFile> files) {
 		return null;
 	}
 
+	@Override
 	public void configureBeansConfigSet(IBeansConfigSet configSet) {
 		// no-op
 	}

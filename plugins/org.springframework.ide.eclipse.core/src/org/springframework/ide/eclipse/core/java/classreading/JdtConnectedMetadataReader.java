@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 Spring IDE Developers
+ * Copyright (c) 2013, 2017 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,8 @@ package org.springframework.ide.eclipse.core.java.classreading;
 import java.io.IOException;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.asm.ClassReader;
@@ -33,7 +35,7 @@ public class JdtConnectedMetadataReader implements MetadataReader {
 	private final IType type;
 	private final JdtConnectedAnnotationMetadataReadingVisitor visitor;
 
-	public JdtConnectedMetadataReader(IType type, CachingClassReaderFactory classReaderFactory, ClassLoader classloader) {
+	public JdtConnectedMetadataReader(IType type, CachingClassReaderFactory classReaderFactory, ClassLoader classloader) throws IOException {
 		this.type = type;
 
 		this.visitor = new JdtConnectedAnnotationMetadataReadingVisitor(classloader, type);
@@ -41,10 +43,11 @@ public class JdtConnectedMetadataReader implements MetadataReader {
 		try {
 			ClassReader classReader = classReaderFactory.getClassReader(type.getFullyQualifiedName());
 			classReader.accept(this.visitor, 0);
-		} catch (IOException e) {
-			SpringCore.log(e);
 		}
-		
+		catch (IOException e) {
+			SpringCore.log(new Status(IStatus.WARNING, SpringCore.PLUGIN_ID, 0, e.getMessage(), e));
+			throw e;
+		}
 	}
 
 	public ClassMetadata getClassMetadata() {

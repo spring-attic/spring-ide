@@ -164,6 +164,10 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 		return null;
 	}
 
+	public CloudFoundryClientFactory getClientFactory() {
+		return clientFactory;
+	}
+
 	protected ClientRequests createClient() throws Exception {
 		return clientFactory.getClient(this);
 	}

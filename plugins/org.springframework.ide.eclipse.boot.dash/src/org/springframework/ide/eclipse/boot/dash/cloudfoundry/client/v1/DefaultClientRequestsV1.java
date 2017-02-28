@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1;
 
-import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1.CFWrapping.wrap;
-import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1.CFWrapping.wrapApps;
 import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1.CFWrapping.wrapBuildpacks;
 import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1.CFWrapping.wrapDomains;
 
@@ -29,32 +27,27 @@ import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CloudFoundryOperations;
 import org.cloudfoundry.client.lib.HttpProxyConfiguration;
 import org.cloudfoundry.client.lib.StreamingLogToken;
-import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.CloudInfo;
-import org.cloudfoundry.client.lib.domain.CloudService;
 import org.cloudfoundry.client.lib.domain.Staging;
-import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Assert;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudErrors;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.MissingPasswordException;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials.CFCredentialType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
+import org.springsource.ide.eclipse.commons.cloudfoundry.client.RefreshTokenUtil;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.BuildpackSupport;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.CloudInfoV2;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.HealthCheckSupport;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupport;
 import org.springsource.ide.eclipse.commons.cloudfoundry.client.diego.SshClientSupportV1;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
 
 @Deprecated
 public class DefaultClientRequestsV1 {
@@ -86,7 +79,7 @@ public class DefaultClientRequestsV1 {
 	}
 
 	private static CloudFoundryOperations createClient(CFClientParams params) throws Exception {
-		CloudCredentials credentials = new CloudCredentials(params.getUsername(), params.getPassword());
+		CloudCredentials credentials = getCloudCredentials(params);
 		return getOperations(
 				credentials,
 				new URL(params.getApiUrl()),
@@ -96,12 +89,22 @@ public class DefaultClientRequestsV1 {
 		);
 	}
 
+	private static CloudCredentials getCloudCredentials(CFClientParams params) {
+		CFCredentials creds = params.getCredentials();
+		Assert.isLegal(creds.getType()==CFCredentialType.REFRESH_TOKEN, "V1 client should only be created with refresh token auth");
+		return refreshTokenCredentials(creds.getSecret());
+	}
+
+	private static CloudCredentials refreshTokenCredentials(String refreshToken) {
+		return RefreshTokenUtil.credentialsFromRefreshToken(refreshToken);
+	}
+
 	private static CloudFoundryOperations getOperations(
 			CloudCredentials credentials,
 			URL apiUrl, String orgName, String spaceName,
 			boolean isSelfsigned
 	) throws Exception {
-		checkPassword(credentials.getPassword(), credentials.getEmail());
+		checkCredentials(credentials);
 
 		Properties properties = System.getProperties();
 		// By default disable connection pool (i.e. flag is set to true) unless
@@ -117,9 +120,12 @@ public class DefaultClientRequestsV1 {
 
 	}
 
-	private static void checkPassword(String password, String id) throws MissingPasswordException {
-		if (password == null) {
-			throw new MissingPasswordException("No password stored or set for: " + id
+	private static void checkCredentials(CloudCredentials credentials) throws MissingPasswordException {
+		String id = credentials.getEmail();
+		String password  = credentials.getPassword();
+		Object token = credentials.getToken();
+		if (password == null && token==null) {
+			throw new MissingPasswordException("No password or token stored or set for: " + id
 					+ ". Please ensure that the password is set in the run target and it is up-to-date.");
 		}
 	}
@@ -167,7 +173,7 @@ public class DefaultClientRequestsV1 {
 	private CloudInfoV2 getCloudInfoV2() throws Exception {
 		//cached cloudInfo as it doesn't really change and is more like a bunch of static info about how a target is configured.
 		if (this.cachedCloudInfo==null) {
-			CloudCredentials creds = new CloudCredentials(clientParams.getUsername(), clientParams.getPassword());
+			CloudCredentials creds = getCloudCredentials(clientParams);
 			HttpProxyConfiguration proxyConf = getProxyConf();
 			this.cachedCloudInfo = new CloudInfoV2(creds, client.getCloudControllerUrl(), proxyConf, clientParams.isSelfsigned());
 		}
@@ -213,35 +219,34 @@ public class DefaultClientRequestsV1 {
 //		}.call();
 //	}
 
-	public CFApplication getApplication(final UUID appUUID) throws Exception {
-
-		return new ApplicationRequest<CFApplication>(this.client, appUUID.toString()) {
-			@Override
-			protected CFApplication doRun(CloudFoundryOperations client) throws Exception {
-				try {
-					return wrap(client.getApplication(appUUID));
-				} catch (Exception e) {
-					if (CloudErrors.is503Error(e)) {
-						// Alternate way to fetch applications that does not
-						// fetch instances and
-						// may not throw 503 due to fetching stats on app
-						// instances if app is not running
-						List<CloudApplication> apps = client.getApplicationsWithBasicInfo();
-						if (apps != null) {
-							for (CloudApplication app : apps) {
-								if (app.getMeta().getGuid().equals(appUUID)) {
-									return wrap(app);
-								}
-							}
-						}
-						return null;
-					} else {
-						throw e;
-					}
-				}
-			}
-		}.call();
-	}
+//	public CFApplication getApplication(final UUID appUUID) throws Exception {
+//		return new ApplicationRequest<CFApplication>(this.client, appUUID.toString()) {
+//			@Override
+//			protected CFApplication doRun(CloudFoundryOperations client) throws Exception {
+//				try {
+//					return wrap(client.getApplication(appUUID));
+//				} catch (Exception e) {
+//					if (CloudErrors.is503Error(e)) {
+//						// Alternate way to fetch applications that does not
+//						// fetch instances and
+//						// may not throw 503 due to fetching stats on app
+//						// instances if app is not running
+//						List<CloudApplication> apps = client.getApplicationsWithBasicInfo();
+//						if (apps != null) {
+//							for (CloudApplication app : apps) {
+//								if (app.getMeta().getGuid().equals(appUUID)) {
+//									return wrap(app);
+//								}
+//							}
+//						}
+//						return null;
+//					} else {
+//						throw e;
+//					}
+//				}
+//			}
+//		}.call();
+//	}
 
 //	public CFApplicationStats getApplicationStats(final String appName) throws Exception {
 //		return CFWrapping.wrap(new ApplicationInstanceRequest(this.client, appName).call());
@@ -255,14 +260,14 @@ public class DefaultClientRequestsV1 {
 //		return RetryUtil.retry(2000, timeout, task);
 //	}
 
-	public List<CFApplication> getApplicationsWithBasicInfo() throws Exception {
-		return new ClientRequest<List<CFApplication>>(this.client, "Getting all Cloud applications") {
-			@Override
-			protected List<CFApplication> doRun(CloudFoundryOperations client) throws Exception {
-				return wrapApps(client.getApplicationsWithBasicInfo());
-			}
-		}.call();
-	}
+//	public List<CFApplication> getApplicationsWithBasicInfo() throws Exception {
+//		return new ClientRequest<List<CFApplication>>(this.client, "Getting all Cloud applications") {
+//			@Override
+//			protected List<CFApplication> doRun(CloudFoundryOperations client) throws Exception {
+//				return wrapApps(client.getApplicationsWithBasicInfo());
+//			}
+//		}.call();
+//	}
 
 	public void uploadApplication(final String appName, final ZipFile archive) throws Exception {
 		new BasicRequest(this.client, appName, "Uploading application archive") {
@@ -446,8 +451,7 @@ public class DefaultClientRequestsV1 {
 	}
 
 	private BuildpackSupport getBuildpackSupport() throws Exception {
-		CloudCredentials creds = new CloudCredentials(clientParams.getUsername(),
-				clientParams.getPassword());
+		CloudCredentials creds = getCloudCredentials(clientParams);
 		HttpProxyConfiguration proxyConf = getProxyConf();
 		return BuildpackSupport.create(client, creds, proxyConf,
 				clientParams.isSelfsigned());

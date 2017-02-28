@@ -27,15 +27,17 @@ public class SpringBootTypeDiscoveryFactory implements ExternalTypeDiscoveryFact
 
 	public SpringBootTypeDiscoveryFactory() {
 	}
-	
+
 	private Map<String, SpringBootTypeDiscovery> instances;
-	
+
 	@Override
 	public ExternalTypeDiscovery discoveryFor(IJavaProject jproject) {
 		if (isApplicable(jproject)) {
 			try {
 				ISpringBootProject project = SpringBootCore.create(jproject);
-				return discoveryFor(project.getBootVersion());
+				if (project!=null) {
+					return discoveryFor(project.getBootVersion());
+				}
 			} catch (Exception e) {
 				BootActivator.log(e);
 			}
@@ -46,7 +48,7 @@ public class SpringBootTypeDiscoveryFactory implements ExternalTypeDiscoveryFact
 
 	private synchronized ExternalTypeDiscovery discoveryFor(String bootVersion) {
 		if (instances==null) {
-			instances = new HashMap<String, SpringBootTypeDiscovery>();
+			instances = new HashMap<>();
 		}
 		SpringBootTypeDiscovery existing = instances.get(bootVersion);
 		if (existing==null) {
@@ -58,7 +60,7 @@ public class SpringBootTypeDiscoveryFactory implements ExternalTypeDiscoveryFact
 
 	private boolean isApplicable(IJavaProject javaProject) {
 		IProject project = javaProject.getProject();
-		return SpringCoreUtils.hasNature(project, SpringCoreUtils.NATURE_ID) && 
+		return SpringCoreUtils.hasNature(project, SpringCoreUtils.NATURE_ID) &&
 				BootPropertyTester.isBootProject(project);
 	}
 

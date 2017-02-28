@@ -164,19 +164,23 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 
 		@Override
 		protected RefreshState compute() {
-			ClientRequests client = getClient();
-			if (client!=null) {
-				Version server = client.getApiVersion();
-				Version supported = client.getSupportedApiVersion();
-				if (server.compareTo(supported)<0) {
-					return RefreshState.warning(
-							"Client supports API version "+server+
-							" and is connected to server with API version "+supported+". "+
-							"Things may not work as expected."
-					);
+			try {
+				ClientRequests client = getClient();
+				if (client!=null) {
+					Version server = client.getApiVersion();
+					Version supported = client.getSupportedApiVersion();
+					if (server.compareTo(supported)<0) {
+						return RefreshState.warning(
+								"Client supports API version "+server+
+								" and is connected to server with API version "+supported+". "+
+								"Things may not work as expected."
+						);
+					}
 				}
+				return RefreshState.READY;
+			} catch (Exception e) {
+				return RefreshState.error(e);
 			}
-			return RefreshState.READY;
 		}
 	};
 
@@ -286,7 +290,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_CHANGE);
 		try {
 			if (getRunTarget().getTargetProperties().get(CloudFoundryTargetProperties.DISCONNECTED) == null
-					&& (getRunTarget().getTargetProperties().isStorePassword() || getRunTarget().getTargetProperties().getPassword() != null)) {
+					&& (getRunTarget().getTargetProperties().isStoreCredentials() || getRunTarget().getTargetProperties().getCredentials() != null)) {
 				// If CF target was connected previously and either password is stored or not stored but non-null then connect automatically
 				getOperationsExecution().runAsynch(new ConnectOperation(this, true));
 			}
@@ -727,7 +731,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 				// TODO: refactor so that adding archive only gets called once for all properties resolving and creating cases.
 				// Reason to call multiple times in different conditions is to retain the old logic when
 				// switching to v2 usage and not introduce regressions with manifest diffing
-				addApplicationArchive(deploymentProperties, cloudData, ui, monitor);
+				addApplicationArchive(project, deploymentProperties, cloudData, ui, monitor);
 
 			} else {
 				// Still in manifest file deployment mode, but manifest file does not exist anymore therefore create properties
@@ -735,7 +739,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 			}
 		} else {
 			// Manual deployment mode
-			addApplicationArchive(deploymentProperties, cloudData, ui, monitor);
+			addApplicationArchive(project, deploymentProperties, cloudData, ui, monitor);
 		}
 
 		return deploymentProperties;
@@ -761,17 +765,23 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 
 			props = ui.promptApplicationDeploymentProperties(dialogModel);
 
-			addApplicationArchive(props, cloudData, ui, monitor);
+			addApplicationArchive(project, props, cloudData, ui, monitor);
 		}
 		return props;
 	}
 
-	public void addApplicationArchive(CloudApplicationDeploymentProperties properties, Map<String, Object> cloudData,
+	public void addApplicationArchive(IProject project, CloudApplicationDeploymentProperties properties, Map<String, Object> cloudData,
 			UserInteractions ui, IProgressMonitor monitor) throws Exception {
 		ICloudApplicationArchiver archiver = getArchiver(properties, cloudData, ui, monitor);
 		if (archiver != null) {
 			File archive = archiver.getApplicationArchive(monitor);
 			properties.setArchive(archive);
+		} else {
+			throw ExceptionUtil.coreException(
+					"No applicable archiver strategy found for project '"+project.getName()+"'! " +
+					"Check the project's packaging type; or add " +
+					"an explicit path attribute to your manifest.yml."
+			);
 		}
 	}
 
@@ -808,7 +818,8 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 
 		return new CloudApplicationArchiverStrategy[] {
 				CloudApplicationArchiverStrategies.fromManifest(project, appName, parser),
-				CloudApplicationArchiverStrategies.packageAsJar(project, ui)
+				CloudApplicationArchiverStrategies.packageAsJar(project, ui),
+				CloudApplicationArchiverStrategies.packageMvnAsWar(project, ui)
 		};
 	}
 

@@ -24,7 +24,7 @@ public class BootCliUtils {
 	public static boolean supportsSpringCloud(IBootInstall install) {
 		boolean cloudCliFound = false, cloudDeployerCliFound = false;
 		try {
-			for (File lib : install.getBootLibJars()) {
+			for (File lib : install.getExtensionsJars()) {
 				if (lib.getName().startsWith(CLOUD_CLI_LIB_PREFIX)) {
 					cloudCliFound = true;
 				}

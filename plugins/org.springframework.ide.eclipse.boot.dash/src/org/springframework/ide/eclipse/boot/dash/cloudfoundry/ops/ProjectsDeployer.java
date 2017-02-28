@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
+import java.io.StringWriter;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -19,9 +20,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.osgi.util.NLS;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
@@ -47,11 +48,6 @@ public class ProjectsDeployer extends CloudOperation {
 			System.out.println(string);
 		}
 	}
-
-
-	private final static String APP_FOUND_TITLE = "Replace Existing Application";
-
-	private final static String APP_FOUND_MESSAGE = "Replace the existing application - {0} - with project: {1}?";
 
 	private final Set<IProject> projectsToDeploy;
 	private final UserInteractions ui;
@@ -105,7 +101,9 @@ public class ProjectsDeployer extends CloudOperation {
 		try {
 			cde.whileStarting(ui, cancelationToken, monitor, () -> {
 				if (client.applicationExists(properties.getAppName())) {
-					if (!confirmOverwriteExisting(properties)) {
+					CFApplicationDetail existingAppDetails = client.getApplication(properties.getAppName());
+
+					if (!confirmOverwriteExisting(properties, existingAppDetails)) {
 						throw new OperationCanceledException();
 					}
 				}
@@ -177,8 +175,14 @@ public class ProjectsDeployer extends CloudOperation {
 		}
 	}
 
-	private boolean confirmOverwriteExisting(CloudApplicationDeploymentProperties properties) {
-		return ui.confirmOperation(APP_FOUND_TITLE, NLS.bind(APP_FOUND_MESSAGE, properties.getAppName(),
-				properties.getProject().getName()));
+	private boolean confirmOverwriteExisting(CloudApplicationDeploymentProperties properties, CFApplicationDetail existingAppDetails) {
+		String title = "Replace Existing Application";
+		StringWriter writer = new StringWriter();
+		writer.append("Replace existing application - ");
+		writer.append(properties.getAppName());
+		writer.append(" - with the project: ");
+		writer.append(properties.getProject().getName());
+		writer.append('?');
+		return ui.confirmApplicationReplacement(title, writer.toString(), existingAppDetails);
 	}
 }

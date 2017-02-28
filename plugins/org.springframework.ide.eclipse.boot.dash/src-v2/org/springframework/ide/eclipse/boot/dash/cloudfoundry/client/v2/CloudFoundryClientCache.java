@@ -20,13 +20,18 @@ import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.reactor.ConnectionContext;
 import org.cloudfoundry.reactor.DefaultConnectionContext;
 import org.cloudfoundry.reactor.ProxyConfiguration;
+import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.cloudfoundry.reactor.doppler.ReactorDopplerClient;
+import org.cloudfoundry.reactor.tokenprovider.OneTimePasscodeTokenProvider;
 import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
+import org.cloudfoundry.reactor.tokenprovider.RefreshTokenGrantTokenProvider;
 import org.cloudfoundry.reactor.uaa.ReactorUaaClient;
 import org.eclipse.core.net.proxy.IProxyData;
 import org.eclipse.core.net.proxy.IProxyService;
+import org.eclipse.core.runtime.Assert;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.util.StringUtils;
 
@@ -49,7 +54,7 @@ public class CloudFoundryClientCache {
 	public class CFClientProvider {
 
 		final ConnectionContext connection;
-		final PasswordGrantTokenProvider tokenProvider;
+		final TokenProvider tokenProvider;
 
 		//Note the three client objects below are 'stateless' wrappers and it would be
 		// fine to recreate as needed instead of store them
@@ -111,10 +116,7 @@ public class CloudFoundryClientCache {
 					.skipSslValidation(params.skipSsl)
 					.build();
 
-			tokenProvider = PasswordGrantTokenProvider.builder()
-					.username(params.username)
-					.password(params.password)
-					.build();
+			tokenProvider = createTokenProvider(params);
 
 			client = ReactorCloudFoundryClient.builder()
 					.connectionContext(connection)
@@ -130,6 +132,27 @@ public class CloudFoundryClientCache {
 					.connectionContext(connection)
 					.tokenProvider(tokenProvider)
 					.build();
+		}
+
+		private TokenProvider createTokenProvider(Params params) {
+			CFCredentials creds = params.credentials;
+			switch (creds.getType()) {
+			case PASSWORD:
+				return PasswordGrantTokenProvider.builder()
+						.username(params.username)
+						.password(creds.getSecret())
+						.build();
+			case REFRESH_TOKEN:
+				return RefreshTokenGrantTokenProvider.builder()
+						.token(creds.getSecret())
+						.build();
+			case TEMPORARY_CODE:
+				return OneTimePasscodeTokenProvider.builder()
+						.passcode(creds.getSecret())
+						.build();
+			default:
+				throw new IllegalStateException("BUG! Missing switch case?");
+			}
 		}
 
 		private Optional<Boolean> getBooleanSystemProp(String name) {
@@ -151,13 +174,13 @@ public class CloudFoundryClientCache {
 
 	public static class Params {
 		public final String username;
-		public final String password;
+		public final CFCredentials credentials;
 		public final String host;
 		public final boolean skipSsl;
-		public Params(String username, String password, String host, boolean skipSsl) {
+		public Params(String username, CFCredentials credentials, String host, boolean skipSsl) {
 			super();
 			this.username = username;
-			this.password = password;
+			this.credentials = credentials;
 			this.host = host;
 			this.skipSsl = skipSsl;
 		}
@@ -173,7 +196,7 @@ public class CloudFoundryClientCache {
 			final int prime = 31;
 			int result = 1;
 			result = prime * result + ((host == null) ? 0 : host.hashCode());
-			result = prime * result + ((password == null) ? 0 : password.hashCode());
+			result = prime * result + ((credentials == null) ? 0 : credentials.hashCode());
 			result = prime * result + (skipSsl ? 1231 : 1237);
 			result = prime * result + ((username == null) ? 0 : username.hashCode());
 			return result;
@@ -192,10 +215,10 @@ public class CloudFoundryClientCache {
 					return false;
 			} else if (!host.equals(other.host))
 				return false;
-			if (password == null) {
-				if (other.password != null)
+			if (credentials == null) {
+				if (other.credentials != null)
 					return false;
-			} else if (!password.equals(other.password))
+			} else if (!credentials.equals(other.credentials))
 				return false;
 			if (skipSsl != other.skipSsl)
 				return false;
@@ -212,8 +235,8 @@ public class CloudFoundryClientCache {
 
 	private int clientCount = 0;
 
-	public synchronized CFClientProvider getOrCreate(String username, String password, String host, boolean skipSsl) {
-		Params params = new Params(username, password, host, skipSsl);
+	public synchronized CFClientProvider getOrCreate(String username, CFCredentials credentials, String host, boolean skipSsl) {
+		Params params = new Params(username, credentials, host, skipSsl);
 		CFClientProvider client = cache.get(params);
 		if (client==null) {
 			clientCount++;

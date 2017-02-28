@@ -92,7 +92,6 @@ public interface RunTarget extends IdAble, Nameable {
 	 */
 	public abstract PropertyStoreApi getPersistentProperties();
 
-
 	/**
 	 * Return a nice name, suitable for displaying in a view to identify this target to the user.
 	 */

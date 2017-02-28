@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -19,7 +20,6 @@ import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
-import org.springframework.ide.eclipse.boot.properties.editor.util.ArrayUtils;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import com.google.common.collect.ImmutableSet;
@@ -31,7 +31,7 @@ import com.google.common.collect.ImmutableSet;
  */
 public class LaunchConfDashElement extends AbstractLaunchConfigurationsDashElement<ILaunchConfiguration> implements Deletable {
 
-	private static final BootDashColumn[] COLUMNS = ArrayUtils.remove(LocalRunTarget.DEFAULT_COLUMNS,
+	private static final BootDashColumn[] COLUMNS = ArrayUtils.removeElement(LocalRunTarget.DEFAULT_COLUMNS,
 			BootDashColumn.DEVTOOLS
 	);
 

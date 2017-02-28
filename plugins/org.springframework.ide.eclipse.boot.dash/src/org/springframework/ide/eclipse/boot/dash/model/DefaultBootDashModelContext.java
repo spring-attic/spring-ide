@@ -39,6 +39,8 @@ public class DefaultBootDashModelContext implements BootDashModelContext {
 
 	private IPropertyStore viewProperties = PropertyStoreFactory.backedBy(BootDashActivator.getDefault().getPreferenceStore());
 
+	private IPropertyStore privateProperties = PropertyStoreFactory.createPrivateStore(BootDashActivator.getDefault().getStateLocation().append("private.properties"));
+
 	@Override
 	public IWorkspace getWorkspace() {
 		return ResourcesPlugin.getWorkspace();
@@ -82,6 +84,11 @@ public class DefaultBootDashModelContext implements BootDashModelContext {
 	@Override
 	public IPropertyStore getViewProperties() {
 		return viewProperties;
+	}
+
+	@Override
+	public IPropertyStore getPrivatePropertyStore() {
+		return privateProperties;
 	}
 
 }

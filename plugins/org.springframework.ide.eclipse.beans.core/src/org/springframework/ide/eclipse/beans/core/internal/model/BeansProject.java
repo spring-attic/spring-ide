@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2015 Spring IDE Developers
+ * Copyright (c) 2004, 2016 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,15 +28,18 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.MultiRule;
 import org.eclipse.jdt.core.IType;
+import org.osgi.framework.Bundle;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.BeansCoreUtils;
 import org.springframework.ide.eclipse.beans.core.internal.project.BeansProjectDescriptionReader;
@@ -82,6 +85,9 @@ import org.springframework.util.ObjectUtils;
  */
 public class BeansProject extends AbstractResourceModelElement implements IBeansProject, ILazyInitializedModelElement {
 
+	private static final int AUTO_CONFIG_RESCHEDULE_SLEEP_TIME_MILLIS = 3000;
+	private static final int AUTO_CONFIG_RESCHEDULE_MAX_COUNT = 10;
+
 	private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
 
 	private final Lock r = rwl.readLock();
@@ -126,6 +132,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public int getElementType() {
 		return IBeansModelElementTypes.PROJECT_TYPE;
 	}
@@ -143,6 +150,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public IResource getElementResource() {
 		return project;
 	}
@@ -150,6 +158,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public boolean isElementArchived() {
 		return false;
 	}
@@ -183,6 +192,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public IProject getProject() {
 		return project;
 	}
@@ -227,6 +237,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 		return false;
 	}
 
+	@Override
 	public Set<String> getConfigSuffixes() {
 		if (!this.modelPopulated) {
 			populateModel();
@@ -242,11 +253,13 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * @deprecated use {@link #getConfigSuffixes()} instead.
 	 */
+	@Override
 	@Deprecated
 	public Set<String> getConfigExtensions() {
 		return getConfigSuffixes();
 	}
 
+	@Override
 	public boolean hasConfigSuffix(String suffix) {
 		try {
 			r.lock();
@@ -259,6 +272,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * @deprecated use {@link #hasConfigSuffix(String)} instead.
 	 */
+	@Override
 	@Deprecated
 	public boolean hasConfigExtension(String extension) {
 		return hasConfigSuffix(extension);
@@ -447,10 +461,12 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 		return false;
 	}
 
+	@Override
 	public boolean hasConfig(IFile file) {
 		return hasConfig(getConfigName(file));
 	}
 
+	@Override
 	public boolean hasConfig(String configName) {
 		if (!this.modelPopulated) {
 			populateModel();
@@ -463,6 +479,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 		}
 	}
 
+	@Override
 	public boolean hasConfig(IFile configFile, String configName, boolean includeImported) {
 		if (hasConfig(configName)) {
 			return true;
@@ -489,6 +506,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 		return false;
 	}
 
+	@Override
 	public IBeansConfig getConfig(IFile configFile, boolean includeImported) {
 		Set<IBeansConfig> beansConfigs = getConfigs(configFile, includeImported);
 		Iterator<IBeansConfig> iterator = beansConfigs.iterator();
@@ -498,6 +516,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 		return null;
 	}
 
+	@Override
 	public Set<IBeansConfig> getConfigs(IFile file, boolean includeImported) {
 		Set<IBeansConfig> beansConfigs = new LinkedHashSet<IBeansConfig>();
 
@@ -570,6 +589,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public IBeansConfig getConfig(IFile file) {
 		IBeansConfig config = getConfig(getConfigName(file));
 		if (config == null) {
@@ -594,6 +614,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public IBeansConfig getConfig(String configName) {
 		if (configName != null && configName.length() > 0 && configName.charAt(0) == '/') {
 			return BeansCorePlugin.getModel().getConfig(configName);
@@ -679,6 +700,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Set<IBeansConfig> getConfigs() {
 		if (!this.modelPopulated) {
 			populateModel();
@@ -753,6 +775,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public boolean hasConfigSet(String configSetName) {
 		if (!this.modelPopulated) {
 			populateModel();
@@ -768,6 +791,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public IBeansConfigSet getConfigSet(String configSetName) {
 		if (!this.modelPopulated) {
 			populateModel();
@@ -787,6 +811,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Set<IBeansConfigSet> getConfigSets() {
 		if (!this.modelPopulated) {
 			populateModel();
@@ -804,6 +829,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public boolean isBeanClass(String className) {
 		for (IBeansConfig config : getConfigs()) {
 			if (config.isBeanClass(className)) {
@@ -816,6 +842,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Set<String> getBeanClasses() {
 		Set<String> beanClasses = new LinkedHashSet<String>();
 		for (IBeansConfig config : getConfigs()) {
@@ -827,6 +854,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Set<IBean> getBeans(String className) {
 		Set<IBean> beans = new LinkedHashSet<IBean>();
 		for (IBeansConfig config : getConfigs()) {
@@ -915,6 +943,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public boolean isImportsEnabled() {
 		return isImportsEnabled;
 	}
@@ -934,6 +963,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public boolean isUpdatable() {
 		IFile file = project.getProject().getFile(new Path(IBeansProject.DESCRIPTION_FILE));
 		return !file.isReadOnly();
@@ -971,6 +1001,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public boolean isExternal() {
 		return false;
 	}
@@ -1074,18 +1105,31 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 	protected void populateAutoDetectedConfigsAndConfigSets(final Map<IBeansConfigSet, Set<String>> removedConfigsFromSets) {
 		if (BeansCorePlugin.getDefault().isAutoDetectionEnabled()) {
 			Job job = new Job("populate auto detected configs") {
+				
+				private int rescheduleCount = 0;
+				
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
+					
 					try {
-						populateAutoDetectedConfigsAndConfigSetsInternally();
-	
+						boolean reschedule = populateAutoDetectedConfigsAndConfigSetsInternally();
+						if (reschedule) {
+							rescheduleCount++;
+
+							if (rescheduleCount < AUTO_CONFIG_RESCHEDULE_MAX_COUNT) {
+								schedule(AUTO_CONFIG_RESCHEDULE_SLEEP_TIME_MILLIS);
+							}
+						}
+
 						w.lock();
 						restoreConfigSetState(removedConfigsFromSets);
 					} finally {
 						updateAllConfigsCache();
 						w.unlock();
 					}
+					
 					((AbstractModel) (BeansCorePlugin.getModel())).notifyListeners(BeansProject.this, ModelChangeEvent.Type.CHANGED);
+					
 					return Status.OK_STATUS;
 				}
 	
@@ -1102,7 +1146,10 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 		}
 	}
 
-	protected void populateAutoDetectedConfigsAndConfigSetsInternally() {
+	protected boolean populateAutoDetectedConfigsAndConfigSetsInternally() {
+		
+		final Boolean[] reschedule = new Boolean[1];
+		reschedule[0] = Boolean.FALSE;
 
 		final Map<BeansConfigLocatorDefinition, Map<String, IBeansConfig>> newAutoConfigs = new HashMap<BeansConfigLocatorDefinition, Map<String, IBeansConfig>>();
 		final Map<BeansConfigLocatorDefinition, String> newConfigSetNames = new HashMap<BeansConfigLocatorDefinition, String>();
@@ -1117,10 +1164,11 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 				// creation
 				SafeRunner.run(new ISafeRunnable() {
 
+					@Override
 					public void handleException(Throwable exception) {
-						// nothing to handle here
 					}
-
+					
+					@Override
 					public void run() throws Exception {
 						IBeansConfigLocator configLocator = locator.getBeansConfigLocator();
 						Set<IFile> files = configLocator.locateBeansConfigs(getProject(), null);
@@ -1139,14 +1187,20 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 								newConfigSetNames.put(locator, configSet);
 							}
 						}
-
+						
 						if (configLocator instanceof IJavaConfigLocator) {
-							Set<IType> types = ((IJavaConfigLocator) configLocator).locateJavaConfigs(getProject(), null);
-							for (IType type : types) {
-								IBeansConfig config = new BeansJavaConfig(BeansProject.this, type, type.getFullyQualifiedName(), Type.AUTO_DETECTED);
-								String configName = BeansConfigFactory.JAVA_CONFIG_TYPE + type.getFullyQualifiedName();
-								if (!hasConfig(configName)) {
-									detectedConfigs.put(configName, config);
+							
+							if (workaroundM2EActivationTimeout(getProject())) {
+								reschedule[0] = Boolean.TRUE;
+							}
+							else {
+								Set<IType> types = ((IJavaConfigLocator) configLocator).locateJavaConfigs(getProject(), null);
+								for (IType type : types) {
+									IBeansConfig config = new BeansJavaConfig(BeansProject.this, type, type.getFullyQualifiedName(), Type.AUTO_DETECTED);
+									String configName = BeansConfigFactory.JAVA_CONFIG_TYPE + type.getFullyQualifiedName();
+									if (!hasConfig(configName)) {
+										detectedConfigs.put(configName, config);
+									}
 								}
 							}
 						}
@@ -1156,6 +1210,25 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 		}
 
 		setAutoDetectedConfigs(newAutoConfigs, newConfigSetNames);
+
+		return reschedule[0].booleanValue();
+	}
+
+	protected boolean workaroundM2EActivationTimeout(IProject project2) {
+		try {
+			if (project.hasNature("org.eclipse.m2e.core.maven2Nature")) {
+				Bundle bundle = Platform.getBundle("org.eclipse.m2e.jdt");
+				if (bundle != null) {
+					if (bundle.getState() != Bundle.ACTIVE) {
+						return true;
+					}
+				}
+			}
+		}
+		catch (CoreException e) {
+		}
+
+		return false;
 	}
 
 	protected void setAutoDetectedConfigs(Map<BeansConfigLocatorDefinition, Map<String, IBeansConfig>> newAutoConfigs,
@@ -1261,6 +1334,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public void onPostProcessorDetected(IBeansConfig config, IBeansConfigPostProcessor postProcessor) {
 			for (IBeansProject project : BeansCorePlugin.getModel().getProjects()) {
 				for (IBeansConfigSet configSet : project.getConfigSets()) {
@@ -1278,6 +1352,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public void onPostProcessorRemoved(IBeansConfig config, IBeansConfigPostProcessor postProcessor) {
 			for (IBeansProject project : BeansCorePlugin.getModel().getProjects()) {
 				for (IBeansConfigSet configSet : project.getConfigSets()) {
@@ -1295,18 +1370,21 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public void onReadEnd(IBeansConfig config) {
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public void onReadStart(IBeansConfig config) {
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public void onReset(IBeansConfig config) {
 			for (IBeansProject project : BeansCorePlugin.getModel().getProjects()) {
 				for (IBeansConfigSet configSet : project.getConfigSets()) {
@@ -1320,6 +1398,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 		}
 	}
 
+	@Override
 	public boolean isInitialized() {
 		if (!this.modelPopulated) {
 			return false;
@@ -1342,6 +1421,7 @@ public class BeansProject extends AbstractResourceModelElement implements IBeans
 		}
 	}
 
+	@Override
 	public boolean isAutoConfigStatePersisted() {
 		return this.isAutoConfigStatePersisted;
 	}

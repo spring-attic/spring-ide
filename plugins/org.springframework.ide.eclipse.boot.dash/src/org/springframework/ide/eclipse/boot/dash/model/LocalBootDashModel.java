@@ -210,9 +210,12 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 				try {
 					cmd.execute("cloud", "--list");
 					List<BootDashElement> localServices = new LinkedList<>();
-					String[] outputLines = cmd.getOutput().split("\n");
-					for (String id : outputLines[outputLines.length - 1].split(" ")) {
-						localServices.add(new LocalCloudServiceDashElement(this, id));
+					if (!cmd.getOutput().startsWith("Exception in thread")) {
+						String[] outputLines = cmd.getOutput().split("\n");
+						String servicesLine = outputLines[outputLines.length - 1];
+						for (String id : servicesLine.split(" ")) {
+							localServices.add(new LocalCloudServiceDashElement(this, id));
+						}
 					}
 					elements.addAll(localServices);
 				} catch (RuntimeException e) {

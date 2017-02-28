@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.ide.eclipse</groupId>
+		<artifactId>org.springframework.ide.eclipse.parent</artifactId>
+		<version>3.8.4-SNAPSHOT</version>
+		<relativePath>../../pom.xml</relativePath>
+	</parent>
+	<groupId>org.springframework.ide.eclipse</groupId>
+	<artifactId>org.springframework.ide.eclipse.buildship20</artifactId>
+	
+	<packaging>eclipse-plugin</packaging>
+
+	<profiles>
+		<profile>
+			<id>e45</id>
+			<repositories>
+				<repository>
+					<id>buildship2</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/buildship/updates/e45/releases/2.x/</url>
+				</repository>
+			</repositories>
+		</profile>
+		<profile>
+			<id>e46</id>
+			<repositories>
+				<repository>
+					<id>buildship2</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/buildship/updates/e46/releases/2.x/</url>
+				</repository>
+			</repositories>
+		</profile>
+	</profiles>
+
+	<build>
+		<plugins>
+
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>target-platform-configuration</artifactId>
+				<version>${tycho-version}</version>
+				<configuration>
+					<resolver>p2</resolver>
+					<pomDependencies>ignore</pomDependencies>
+					<dependency-resolution>
+						<optionalDependencies>require</optionalDependencies>
+						<extraRequirements>
+							<requirement>
+								<type>eclipse-plugin</type>
+								<id>org.eclipse.buildship.core</id>
+								<versionRange>[2.0.0,3.0.0)</versionRange>
+							</requirement>
+						</extraRequirements>
+					</dependency-resolution>
+<!-- 					<filters> -->
+<!-- 						<filter> -->
+<!-- 							<type>p2-installable-unit</type> -->
+<!-- 							<id>org.eclipse.buildship.core</id> -->
+<!-- 							<versionRange>[2.0.0,3.0.0)</versionRange> -->
+<!-- 						</filter> -->
+<!-- 					</filters> -->
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-compiler-plugin</artifactId>
+				<version>${tycho-version}</version>
+			</plugin>
+
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-source-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<executions>
+					<execution>
+						<id>plugin-source</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>plugin-source</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-p2-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<executions>
+					<execution>
+						<id>second-generate-p2-metadata</id>
+						<goals>
+							<goal>p2-metadata</goal>
+						</goals>
+						<phase>verify</phase>
+					</execution>
+				</executions>
+			</plugin>
+	  
+		</plugins>
+	</build>
+</project>

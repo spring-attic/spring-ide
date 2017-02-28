@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Boot UI Support
 Bundle-SymbolicName: org.springframework.ide.eclipse.boot.wizard;singleton:=true
-Bundle-Version: 3.8.2.qualifier
+Bundle-Version: 3.8.4.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
@@ -13,17 +13,20 @@ Require-Bundle: org.eclipse.ui,
  com.google.guava,
  org.eclipse.jdt.ui,
  org.eclipse.jdt.core,
- org.apache.commons.logging,
  org.codehaus.jackson.core,
  org.codehaus.jackson.mapper,
  org.springsource.ide.eclipse.commons.frameworks.core,
  org.springsource.ide.eclipse.commons.core,
+ org.springframework.ide.eclipse.boot,
  org.apache.commons.codec,
  org.apache.commons.compress,
  org.apache.commons.io,
+ org.apache.commons.logging,
+ org.apache.commons.lang3,
  org.springsource.ide.eclipse.commons.ui,
  org.eclipse.m2e.core,
- org.eclipse.m2e.maven.runtime
+ org.eclipse.m2e.maven.runtime,
+ org.springsource.ide.eclipse.commons.frameworks.ui
 Import-Package: org.springframework.http;version="[4.0.0,4.4.0)",
  org.springframework.util;version="[4.0.0,4.4.0)",
  org.springframework.http.client;version="[4.0.0,4.4.0)",
@@ -39,5 +42,4 @@ Export-Package: org.springframework.ide.eclipse.boot.wizard,
  org.springframework.ide.eclipse.boot.wizard.guides,
  org.springframework.ide.eclipse.boot.wizard.guides.ext,
  org.springframework.ide.eclipse.boot.wizard.importing,
- org.springframework.ide.eclipse.boot.wizard.json,
  org.springframework.ide.eclipse.boot.wizard.util

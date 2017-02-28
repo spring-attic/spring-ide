@@ -25,6 +25,8 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifes
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentProperties;
 
+import com.google.common.collect.ImmutableList;
+
 /**
  * Tests for parsing YAML deployment manifest into
  * {@link CloudApplicationDeploymentProperties}
@@ -386,5 +388,24 @@ public class Yaml2DeploymentProperties {
 	public void test_memory_11() throws Exception {
 		CloudApplicationDeploymentProperties props = readDeploymentProperties("manifest-parse-data/memory-11.yml");
 		assertEquals("Uris sets not equal", 1500, props.getMemory());
+	}
+
+	@Test
+	public void test_routes() throws Exception {
+		CloudApplicationDeploymentProperties props = readDeploymentProperties("manifest-generate-data/routes.yml");
+
+		assertEquals("Routes and URIs not equal",
+				ImmutableList.of("privateapps.io", "tcp.domain.com:9999", "apphost.privateapps.io/somepath"),
+				ImmutableList.copyOf(props.getUris()));
+	}
+
+	@Test
+	public void test_routes_no_route() throws Exception {
+		// Manifest has a route but if "no-route" is also present, test that
+		// list of URI is empty in the props
+		CloudApplicationDeploymentProperties props = readDeploymentProperties(
+				"manifest-generate-data/routes-no-route.yml");
+
+		assertEquals("Routes and URIs not equal", ImmutableList.of(), ImmutableList.copyOf(props.getUris()));
 	}
 }

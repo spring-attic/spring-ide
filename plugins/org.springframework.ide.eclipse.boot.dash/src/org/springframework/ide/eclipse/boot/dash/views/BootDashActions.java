@@ -74,6 +74,8 @@ public class BootDashActions {
 	private ExposeAppAction exposeRunAppAction;
 	private ExposeAppAction exposeDebugAppAction;
 
+	private OpenFilterPreferencesAction openFilterPreferencesAction;
+
 	private DuplicateConfigAction duplicateConfigAction;
 
 	private DeleteElementsAction<CloudFoundryRunTargetType> deleteAppsAction;
@@ -86,7 +88,6 @@ public class BootDashActions {
 
 	private DisposingFactory<RunTarget, AbstractBootDashAction> debugOnTargetActions;
 	private DisposingFactory<RunTarget, AbstractBootDashAction> runOnTargetActions;
-
 
 	public BootDashActions(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		this(
@@ -208,6 +209,7 @@ public class BootDashActions {
 		debugOnTargetActions = createDeployOnTargetActions(RunState.DEBUGGING);
 		runOnTargetActions = createDeployOnTargetActions(RunState.RUNNING);
 
+		openFilterPreferencesAction = new OpenFilterPreferencesAction(ui);
 	}
 
 	private AddRunTargetAction[] createAddTargetActions() {
@@ -478,6 +480,11 @@ public class BootDashActions {
 	public ImmutableList<IAction> getRunOnTargetActions() {
 		return getDeployAndStartOnTargetActions(runOnTargetActions);
 	}
+
+	public OpenFilterPreferencesAction getOpenFilterPreferencesAction() {
+		return openFilterPreferencesAction;
+	}
+
 	private ImmutableList<IAction> getDeployAndStartOnTargetActions(
 			DisposingFactory<RunTarget, AbstractBootDashAction> actionFactory) {
 		ArrayList<RunTarget> targets = new ArrayList<>(model.getRunTargets().getValues());

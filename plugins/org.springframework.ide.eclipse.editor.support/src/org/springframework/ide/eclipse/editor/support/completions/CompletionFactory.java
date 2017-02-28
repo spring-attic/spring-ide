@@ -83,12 +83,16 @@ public class CompletionFactory {
 
 	public static final CompletionFactory DEFAULT = new CompletionFactory();
 
-	public ScoreableProposal simpleProposal(String name, String pattern, int sortingOrder, ProposalApplier applier, HoverInfo Well ) {
-		return simpleProposal(name, pattern, -(1.0+sortingOrder), applier, Well );
+	public ScoreableProposal simpleProposal(String name, String pattern, int sortingOrder, ProposalApplier applier, HoverInfo info) {
+		return simpleProposal(name, pattern, -(1.0+sortingOrder), applier, info);
 	}
 
 	public ScoreableProposal simpleProposal(String name, String pattern, double score, ProposalApplier applier, HoverInfo info) {
 		return new SimpleProposal(name, pattern, score, applier, info);
+	}
+
+	public ScoreableProposal simpleProposal(String name, String pattern, String label, double score, ProposalApplier applier, HoverInfo info) {
+		return new SimpleProposal(name, pattern, label, score, applier, info);
 	}
 
 	public static abstract class ScoreableProposal implements ICompletionProposal, ICompletionProposalExtension3, ICompletionProposalExtension4, ICompletionProposalExtension5, ICompletionProposalExtension6 {
@@ -179,17 +183,23 @@ public class CompletionFactory {
 	private static class SimpleProposal extends ScoreableProposal {
 
 		private String value;
+		private String label;
 		private ProposalApplier applier;
 		private double score;
 		private String pattern;
 		private HoverInfo hoverInfo;
 
 		public SimpleProposal(String value, String pattern, double score, ProposalApplier applier, HoverInfo info) {
+			this(value, pattern, value, score, applier, info);
+		}
+
+		public SimpleProposal(String value, String pattern, String label, double score, ProposalApplier applier, HoverInfo info) {
 			this.score = score;
 			this.value = value;
 			this.applier = applier;
 			this.pattern = pattern;
 			this.hoverInfo = info;
+			this.label = label;
 		}
 
 		@Override
@@ -218,7 +228,7 @@ public class CompletionFactory {
 
 		@Override
 		public String getDisplayString() {
-			return value;
+			return label.toString();
 		}
 
 		@Override
@@ -248,7 +258,7 @@ public class CompletionFactory {
 
 		@Override
 		protected String getBaseDisplayString() {
-			return value;
+			return label.toString();
 		}
 	}
 
@@ -310,6 +320,11 @@ public class CompletionFactory {
 	public ScoreableProposal valueProposal(String value, String pattern, YType yType, double score, ProposalApplier applier, HoverInfo info) {
 		return simpleProposal(value, pattern, score, applier, info);
 	}
+
+	public ScoreableProposal valueProposal(String value, String pattern, String label, YType yType, double score, ProposalApplier applier, HoverInfo info) {
+		return simpleProposal(value, pattern, label, score, applier, info);
+	}
+
 
 	public ScoreableProposal valueProposal(String value, String pattern, YType type, int order, ProposalApplier applier, HoverInfo info) {
 		return valueProposal(value, pattern, type, -(1.0+order), applier, info);

@@ -52,6 +52,8 @@ public abstract class BootInstall implements IBootInstall {
 	private static final String UNKNOWN_VERSION = "Unknown";
 
 	File[] bootLibJars; //Set once we determined the location of the spring-boot jar(s) for this install.
+	
+	File[] extensionJars; // Extensions
 
 	private String name;
 
@@ -70,6 +72,20 @@ public abstract class BootInstall implements IBootInstall {
 		}
 		
 		return bootLibJars;
+	}
+
+	@Override
+	public File[] getExtensionsJars() throws Exception {
+		if (extensionJars == null) {
+			File libFolder = new File(getHome(), "lib");
+			if (libFolder.exists()) {
+				File extFolder = new File(libFolder, "ext");
+				extensionJars = extFolder.exists() ? extFolder.listFiles(JAR_FILE_FILTER) : libFolder.listFiles();
+			} else {
+				extensionJars = NO_FILES;
+			}
+		}
+		return extensionJars;
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 GoPivotal, Inc.
+ * Copyright (c) 2013, 2016 GoPivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,11 +10,16 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.core;
 
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLConnection;
+
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.springframework.ide.eclipse.boot.util.Log;
+import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -23,7 +28,7 @@ public class BootActivator extends AbstractUIPlugin {
 
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.boot"; //$NON-NLS-1$
-
+	
 	// The shared instance
 	private static BootActivator plugin;
 
@@ -89,6 +94,18 @@ public class BootActivator extends AbstractUIPlugin {
 		Log.info(msg);
 	}
 
-
-
+	public static URLConnectionFactory getUrlConnectionFactory() {
+		final String userAgent = "STS/"+getDefault().getBundle().getVersion();
+		//TODO: post 3.7.2 the URLConnectionFactory in master will have support for adding userAgent string
+		//  so we do not have to implement it here by subclassing.
+		return new URLConnectionFactory() {
+			@Override
+			public URLConnection createConnection(URL url) throws IOException {
+				URLConnection conn = super.createConnection(url);
+				conn.addRequestProperty("User-Agent", userAgent);
+				return conn;
+			}
+		};
+	}
+	
 }

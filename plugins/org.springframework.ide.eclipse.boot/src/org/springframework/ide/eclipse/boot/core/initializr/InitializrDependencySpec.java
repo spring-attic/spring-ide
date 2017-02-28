@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,7 +16,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Map;
 
-import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -219,7 +219,7 @@ public class InitializrDependencySpec {
 			mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 			return mapper.writeValueAsString(this);
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 			return super.toString();
 		}
 	}

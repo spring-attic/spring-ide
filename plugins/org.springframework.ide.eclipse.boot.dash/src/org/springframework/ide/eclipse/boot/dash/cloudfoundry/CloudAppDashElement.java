@@ -48,6 +48,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushAr
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.RemoteDevClientStartOperation;
@@ -93,7 +94,6 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 
 	private CancelationTokens cancelationTokens;
 
-	private final LiveVariable<String> healthCheck = new LiveVariable<>(HealthChecks.HC_PORT);
 	private final CloudFoundryRunTarget cloudTarget;
 	private final CloudFoundryBootDashModel cloudModel;
 	private PropertyStoreApi persistentProperties;
@@ -129,6 +129,19 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		}
 	};
 
+	/**
+	 * Used as a temporary override of health-check info fetched from CF. This is cleared when element gets 'proper'
+	 * data fetched from CF. This exists so that we can implement 'setHealthCheck' which is called to update
+	 * model state after changing the health-check value individually. It makes sense in that case to only update
+	 * this one bit of the model state rather than refresh all the data from CF.
+	 */
+	private final LiveVariable<String> healthCheckOverride = new LiveVariable<>();
+	{
+		appData.addListener((e, v) -> {
+			healthCheckOverride.setValue(null);
+		});
+	}
+
 	protected void showConsole() {
 		try {
 			getCloudModel().getElementConsoleManager().showConsole(this);
@@ -146,7 +159,7 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		this.persistentProperties = PropertyStoreFactory.createApi(backingStore);
 		addElementNotifier(baseRunState);
 		addElementNotifier(appData);
-		addElementNotifier(healthCheck);
+		addElementNotifier(healthCheckOverride);
 		this.addDisposableChild(baseRunState);
 	}
 
@@ -418,7 +431,12 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 	}
 
 	public String getHealthCheck() {
-		return this.healthCheck.getValue();
+		String hc = healthCheckOverride.getValue();
+		if (hc!=null) {
+			return hc;
+		}
+		CFApplication data = getSummaryData();
+		return data!=null ? data.getHealthCheckType() : DeploymentProperties.DEFAULT_HEALTH_CHECK_TYPE;
 	}
 
 	/**
@@ -426,8 +444,9 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 	 * doesnt *not* change the real value of the health-check.
 	 */
 	public void setHealthCheck(String hc) {
-		this.healthCheck.setValue(hc);
+		this.healthCheckOverride.setValue(hc);
 	}
+
 
 	public UUID getAppGuid() {
 		CFApplication app = getSummaryData();
@@ -729,4 +748,5 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		operation.setSchedulingRule(null);
 		getCloudModel().runAsynch(operation, ui);
 	}
+
 }

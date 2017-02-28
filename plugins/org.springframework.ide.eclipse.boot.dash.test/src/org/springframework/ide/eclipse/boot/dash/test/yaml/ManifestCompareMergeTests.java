@@ -24,6 +24,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.text.edits.TextEdit;
 import org.junit.Assert;
@@ -70,25 +71,21 @@ public class ManifestCompareMergeTests {
 	}
 
 	private static void performMergeTest(File manifest, DeploymentProperties props, File expected) throws Exception {
-		FileInputStream manifestStream = null, expectedStream = null;
-		try {
-			String yamlContents = IOUtil.toString(manifestStream = new FileInputStream(manifest));
-			YamlGraphDeploymentProperties yamlGraphProps = new YamlGraphDeploymentProperties(yamlContents, props.getAppName(), createCloudDataMap());
-			TextEdit edit = yamlGraphProps.getDifferences(props);
-			if (expected == null) {
-				assertEquals(null, edit);
-			} else {
-				Document doc = new Document(yamlContents);
-				edit.apply(doc);
-				assertEquals(IOUtil.toString(expectedStream = new FileInputStream(expected)).trim(), doc.get().trim());
-			}
-		} finally {
-			if (manifestStream != null) {
-				manifestStream.close();
-			}
-			if (expectedStream != null) {
-				expectedStream.close();
-			}
+		String yamlContents = IOUtil.toString(new FileInputStream(manifest));
+		String expectText = expected == null ? null : IOUtil.toString(new FileInputStream(expected));
+		//Note: You don't need to close the FileInputStreams because IOUtil does that already.
+		performMergeTest(props, yamlContents, expectText);
+	}
+
+	private static void performMergeTest(DeploymentProperties props, String manifest, String expectText) throws Exception {
+		YamlGraphDeploymentProperties yamlGraphProps = new YamlGraphDeploymentProperties(manifest, props.getAppName(), createCloudDataMap());
+		TextEdit edit = yamlGraphProps.getDifferences(props);
+		if (expectText == null) {
+			assertEquals(null, edit);
+		} else {
+			Document doc = new Document(manifest);
+			edit.apply(doc);
+			assertEquals(expectText.trim(), doc.get().trim());
 		}
 	}
 
@@ -100,6 +97,78 @@ public class ManifestCompareMergeTests {
 		return new File(bundleFile, path);
 	}
 
+	@Test
+	public void test_health_check_port() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setHealthCheckType("port");
+
+		performMergeTest(props,
+			"applications:\n" +
+			"- name: app\n" +
+			"  no-route: true\n"
+			, // ==>
+			null
+		);
+
+		performMergeTest(props,
+			"applications:\n" +
+			"- name: app\n" +
+			"  no-route: true\n" +
+			"  health-check-type: port\n"
+			, // ==>
+			null
+		);
+
+		performMergeTest(props,
+			"applications:\n" +
+			"- name: app\n" +
+			"  no-route: true\n" +
+			"  health-check-type: none\n"
+			, // ==>
+			"applications:\n" +
+			"- name: app\n" +
+			"  no-route: true\n"
+		);
+	}
+
+	@Test
+	public void test_health_check_none() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setHealthCheckType("none");
+		performMergeTest(props,
+			"applications:\n" +
+			"- name: app\n" +
+			"  no-route: true\n"
+			, // ==>
+			"applications:\n" +
+			"- name: app\n" +
+			"  health-check-type: none\n" +
+			"  no-route: true\n"
+		);
+
+		performMergeTest(props,
+			"applications:\n" +
+			"- name: app\n" +
+			"  no-route: true\n" +
+			"  health-check-type: port\n"
+			, // ==>
+			"applications:\n" +
+			"- name: app\n" +
+			"  no-route: true\n" +
+			"  health-check-type: none\n"
+		);
+
+		performMergeTest(props,
+			"applications:\n" +
+			"- name: app\n" +
+			"  no-route: true\n" +
+			"  health-check-type: none\n"
+			, // ==>
+			null
+		);
+	}
 
 	@Test
 	public void test_memory_1() throws Exception {

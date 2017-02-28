@@ -291,7 +291,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"#some comment\n" +
 				"flyway:\n" +
 				"  schemas:\n" +
-				"    - <*>\n"
+				"  - <*>\n"
 		);
 	}
 
@@ -963,7 +963,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				,
 				"foo:\n"+
 				"  list:\n"+
-				"    - <*>"
+				"  - <*>"
 		);
 
 		//Try 'elsewhere' completion
@@ -976,7 +976,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"foo:\n" +
 				"  something:\n" +
 				"  list:\n" +
-				"    - <*>\n" +
+				"  - <*>\n" +
 				"more: stuff\n"
 		);
 	}
@@ -1123,7 +1123,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"      -\n" +
 				"    name: foo\n" +
 				"    tags:\n" +
-				"      - <*>",
+				"    - <*>",
 				//wavelen
 				"foo:\n" +
 				"  data:\n" +
@@ -1735,9 +1735,18 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		data("foo.slist", "java.util.List<java.lang.String>", null, "list of strings");
 		data("foo.ulist", "java.util.List<Unknown>", null, "list of strings");
 		data("foo.dlist", "java.util.List<java.lang.Double>", null, "list of doubles");
-		assertCompletions("foo:\n  u<*>", "foo:\n  ulist:\n    - <*>");
-		assertCompletions("foo:\n  d<*>", "foo:\n  dlist:\n    - <*>");
-		assertCompletions("foo:\n  sl<*>", "foo:\n  slist:\n    - <*>");
+		assertCompletions("foo:\n  u<*>",
+				"foo:\n" +
+				"  ulist:\n" +
+				"  - <*>");
+		assertCompletions("foo:\n  d<*>",
+				"foo:\n" +
+				"  dlist:\n" +
+				"  - <*>");
+		assertCompletions("foo:\n  sl<*>",
+				"foo:\n"+
+				"  slist:\n" +
+				"  - <*>");
 	}
 
 	public void testEnumsInLowerCaseReconciling() throws Exception {
@@ -1892,7 +1901,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"  color-data:\n" +
 				"    red: \n" +
 				"      children:\n" +
-				"        - <*>"
+				"      - <*>"
 		);
 
 		assertCompletions(
@@ -2192,7 +2201,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"          repos:\n" +
 				"            my-repo:\n" +
 				"              pattern:\n" +
-				"                - <*>\n"
+				"              - <*>\n"
 		);
 
 	}
@@ -2759,12 +2768,12 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 					"short:\n"+
 					"  stuff: goes here\n" +
 					"  path:\n" +
-					"    # some\n" +
-					"    - foo spread over\n"+
-					"        #confusing\n" +
-					"    - several lines\n" +
-					"      #comments\n" +
-					"    - of text\n"
+					"  # some\n" +
+					"  - foo spread over\n"+
+					"      #confusing\n" +
+					"  - several lines\n" +
+					"    #comments\n" +
+					"  - of text\n"
 			);
 		}
 	}
@@ -2910,7 +2919,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"  health:\n" +
 				"    status:\n" +
 				"      order:\n"+
-				"        - <*>"
+				"      - <*>"
 		);
 
 		assertCompletionsDisplayString(
@@ -2918,7 +2927,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"  health:\n" +
 				"    status:\n" +
 				"      order:\n" +
-				"        - <*>"
+				"      - <*>"
 				, //=>
 				"DOWN",
 				"OUT_OF_SERVICE",
@@ -3333,14 +3342,14 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 				"test-map:\n" +
 				"  some-string-key:\n" +
 				"    color-list:\n" +
-				"      - <*>"
+				"    - <*>"
 		);
 
 		assertCompletionsDisplayString(
 				"test-map:\n" +
 				"  some-string-key:\n" +
 				"    color-list:\n" +
-				"      - <*>"
+				"    - <*>"
 				, // =>
 				"red", "green", "blue"
 		);

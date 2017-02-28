@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Boot Tests
 Bundle-SymbolicName: org.springframework.ide.eclipse.boot.test
-Bundle-Version: 3.8.2.qualifier
+Bundle-Version: 3.8.4.qualifier
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.junit,
@@ -28,7 +28,7 @@ Require-Bundle: org.eclipse.ui,
  org.mockito,
  org.hamcrest,
  org.hamcrest.library,
- org.springframework.ide.eclipse.boot.wizard
+ org.springframework.ide.eclipse.boot.wizard;bundle-version="3.8.2"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: GoPivotal Inc.

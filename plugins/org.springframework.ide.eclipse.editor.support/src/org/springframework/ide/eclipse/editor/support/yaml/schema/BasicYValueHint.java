@@ -20,6 +20,11 @@ public class BasicYValueHint implements YValueHint {
 		this.label = label;
 	}
 
+	public BasicYValueHint(String value) {
+		this.value = value;
+		this.label = value;
+	}
+
 	/* (non-Javadoc)
 	 * @see org.springframework.ide.eclipse.cloudfoundry.manifest.editor.YValueHint#getValue()
 	 */

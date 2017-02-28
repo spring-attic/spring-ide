@@ -13,8 +13,10 @@ package org.springframework.ide.eclipse.boot.validation;
 import static org.springframework.ide.eclipse.boot.quickfix.GeneratorComposition.NO_RESOLUTIONS;
 import static org.springframework.ide.eclipse.boot.validation.BootMarkerUtils.getProject;
 
+import org.eclipse.core.internal.resources.ResourceException;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IAnnotation;
@@ -31,10 +33,12 @@ import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.MavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.quickfix.MarkerResolutionRegistry;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblemAttribute;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 /**
  * Validation rule that checks
@@ -223,7 +227,12 @@ public class MissingConfigurationProcessorRule extends BootValidationRule {
 				visitor.visit(cu.getCompilationUnit(), mon);
 			}
 		} catch (Exception e) {
-			BootActivator.log(e);
+			if (ExceptionUtil.getMessage(e).contains("File not found")) {
+				//Somewhat expected see [aer] https://www.pivotaltracker.com/story/show/133998741
+				Log.warn(e);
+			} else {
+				Log.log(e);
+			}
 		}
 	}
 

@@ -42,7 +42,7 @@ public class GeneralProjectStrategy extends ImportStrategy {
 		super(buildType, name, notInstalledMessage);
 	}
 
-	static class GeneralProjectImport implements IRunnableWithProgress {
+	public static class GeneralProjectImport implements IRunnableWithProgress {
 
 		private final String projectName;
 		private final File location;
@@ -76,7 +76,7 @@ public class GeneralProjectStrategy extends ImportStrategy {
 			}
 		}
 
-		static boolean isDefaultProjectLocation(String projectName, File projectDir) {
+		public static boolean isDefaultProjectLocation(String projectName, File projectDir) {
 			IPath workspaceLoc = Platform.getLocation();
 			if (workspaceLoc!=null) {
 				File defaultLoc = new File(workspaceLoc.toFile(), projectName);
@@ -88,8 +88,9 @@ public class GeneralProjectStrategy extends ImportStrategy {
 		/**
 		 * Create a general eclipse project (no builders natures etc) with a given name and project contents
 		 * from a given location. The contents of the project will be linked, not copied.
+		 * @return 
 		 */
-		public static void createGeneralProject(String projectName, File projectDir, IProgressMonitor mon) throws CoreException {
+		public static IProject createGeneralProject(String projectName, File projectDir, IProgressMonitor mon) throws CoreException {
 			mon.beginTask("Create project "+projectName, 3);
 			try {
 				//1
@@ -118,6 +119,7 @@ public class GeneralProjectStrategy extends ImportStrategy {
 
 				//3
 				project.open(new SubProgressMonitor(mon, 1));
+				return project;
 			} finally {
 				mon.done();
 			}

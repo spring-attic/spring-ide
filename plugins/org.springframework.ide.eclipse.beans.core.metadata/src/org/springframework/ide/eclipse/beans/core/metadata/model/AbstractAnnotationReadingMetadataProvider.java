@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2013 Spring IDE Developers
+ * Copyright (c) 2010, 2016 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IType;
 import org.springframework.asm.ClassReader;
 import org.springframework.asm.ClassVisitor;
@@ -141,7 +143,8 @@ public abstract class AbstractAnnotationReadingMetadataProvider extends BeanMeta
 			}
 		}
 		catch (IOException e) {
-			BeansCorePlugin.log("Error during AST class visiting", e);
+			IStatus status = new Status(IStatus.WARNING, BeansCorePlugin.PLUGIN_ID, 0, "Error during AST class visiting", e);
+			BeansCorePlugin.log(status);
 		}
 	}
 

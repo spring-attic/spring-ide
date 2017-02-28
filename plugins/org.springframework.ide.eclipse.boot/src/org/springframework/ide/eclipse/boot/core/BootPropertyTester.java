@@ -16,12 +16,16 @@ import java.util.regex.Pattern;
 import org.eclipse.core.expressions.PropertyTester;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 import org.osgi.framework.VersionRange;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.internal.core.CorePlugin;
 
 /**
@@ -65,19 +69,21 @@ public class BootPropertyTester extends PropertyTester {
 
 	public static boolean hasDevtools(IProject p) {
 		try {
-			if (p!=null) {
+			if (p!=null && p.isAccessible()) {
 				IJavaProject jp = JavaCore.create(p);
-				IClasspathEntry[] classpath = jp.getResolvedClasspath(true);
-				if (classpath!=null) {
-					for (IClasspathEntry e : classpath) {
-						if (BootPropertyTester.isDevtoolsJar(e)) {
-							return true;
+				if (jp.exists()) {
+					IClasspathEntry[] classpath = jp.getResolvedClasspath(true);
+					if (classpath!=null) {
+						for (IClasspathEntry e : classpath) {
+							if (BootPropertyTester.isDevtoolsJar(e)) {
+								return true;
+							}
 						}
 					}
 				}
 			}
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 		}
 		return false;
 	}
@@ -88,10 +94,11 @@ public class BootPropertyTester extends PropertyTester {
 		}
 		try {
 			if (project.hasNature(JavaCore.NATURE_ID)) {
-				IJavaProject jp = JavaCore.create(project);
-				IClasspathEntry[] classpath = jp.getResolvedClasspath(true);
-				//Look for a 'spring-boot' jar or project entry
 				if (!isExcludedProject(project)) {
+					IJavaProject jp = JavaCore.create(project);
+					IClasspathEntry[] classpath = jp.getResolvedClasspath(true);
+					//Look for a 'spring-boot' jar or project entry
+
 					for (IClasspathEntry e : classpath) {
 						if (isBootJar(e) || isBootProject(e)) {
 							return true;
@@ -187,5 +194,32 @@ public class BootPropertyTester extends PropertyTester {
 		}
 		return false;
 	}
+	
+	/**
+	 * this is a workaround for an initialization issue around m2e
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=479245
+	 * 
+	 * this workaround tries to avoid very early m2e.jdt activation
+	 * and therefore tries to reduce the likelihood of running into
+	 * the issue.
+	 */
+	public static boolean workaroundMavenBundleInitializationIssue(IProject project) {
+		try {
+			if (project.hasNature("org.eclipse.m2e.core.maven2Nature")) {
+				Bundle bundle = Platform.getBundle("org.eclipse.m2e.jdt");
+				if (bundle != null) {
+					if (bundle.getState() != Bundle.ACTIVE) {
+						return true;
+					}
+				}
+			}
+		} catch (CoreException e) {
+		}
+		
+		return false;
+	}
+
+
+
 
 }

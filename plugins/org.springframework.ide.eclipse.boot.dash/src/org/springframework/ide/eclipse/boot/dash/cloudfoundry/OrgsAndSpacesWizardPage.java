@@ -50,14 +50,14 @@ class OrgsAndSpacesWizardPage extends WizardPage implements ValueListener<Valida
 
 	private boolean canFinish = false;
 
-	OrgsAndSpacesWizardPage(CloudFoundryTargetWizardModel targetProperties) {
+	OrgsAndSpacesWizardPage(CloudFoundryTargetWizardModel targetWizardModel) {
 		super("Select an Org and Space");
 		setTitle("Select an Org and Space");
-		setDescription("Select a space in " + targetProperties.getUrl());
+		setDescription("Select a space in " + targetWizardModel.getUrl());
 		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/wizban_cloudfoundry.png"));
-		this.targetProperties = targetProperties;
-		this.spaces = targetProperties.getSpaces();
-		targetProperties.addAllPropertiesListener(this);
+		this.targetProperties = targetWizardModel;
+		this.spaces = targetWizardModel.getSpaces();
+		targetWizardModel.addAllPropertiesListener(this);
 	}
 
 	@Override

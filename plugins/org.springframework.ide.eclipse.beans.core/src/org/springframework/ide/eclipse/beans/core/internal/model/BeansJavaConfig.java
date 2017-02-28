@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2015 Spring IDE Developers
+ * Copyright (c) 2013, 2017 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,7 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.apache.commons.logging.LogFactory;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -82,7 +83,6 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.java.JavaModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * This class defines a Spring beans configuration based on a Spring JavaConfig class.
@@ -320,13 +320,21 @@ public class BeansJavaConfig extends AbstractBeansConfig implements IBeansConfig
 			final ReaderEventListener eventListener) {
 		SafeRunner.run(new ISafeRunnable() {
 
+			@Override
 			public void handleException(Throwable exception) {
-				BeansCorePlugin.log(exception);
+				BeansCorePlugin.log(new Status(IStatus.WARNING, BeansCorePlugin.PLUGIN_ID, 
+						"Error occured while running bean post processors", exception));
 			}
 
+			@Override
 			public void run() throws Exception {
-				postProcessor.postProcess(BeansConfigPostProcessorFactory.createPostProcessingContext(BeansJavaConfig.this,
-						beans.values(), eventListener, problemReporter, beanNameGenerator, registry, problems));
+				try {
+					postProcessor.postProcess(BeansConfigPostProcessorFactory.createPostProcessingContext(BeansJavaConfig.this,
+							beans.values(), eventListener, problemReporter, beanNameGenerator, registry, problems));
+				}
+				catch (Exception e) {
+					handleException(e);
+				}
 			}
 		});
 	}

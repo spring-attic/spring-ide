@@ -22,8 +22,8 @@ import org.springframework.ide.eclipse.boot.core.initializr.InitializrDependency
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrDependencySpec.BomInfo;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrDependencySpec.DependencyInfo;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrDependencySpec.RepoInfo;
-import org.springframework.ide.eclipse.boot.wizard.json.InitializrServiceSpec;
-import org.springframework.ide.eclipse.boot.wizard.json.InitializrServiceSpec.DependencyGroup;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.DependencyGroup;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
 
 /**

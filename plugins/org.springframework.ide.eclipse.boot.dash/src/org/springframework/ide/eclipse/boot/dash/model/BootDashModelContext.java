@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
@@ -48,6 +49,13 @@ public interface BootDashModelContext {
 
 	SecuredCredentialsStore getSecuredCredentialsStore();
 
+	/**
+	 * A store for properties which is suitable for sensitive data with basic protection.
+	 * I.e. backed by a unencrypted file which is made only accessible to the current user
+	 * and protected by the os. The file is not encrypted in any way.
+	 */
+	IPropertyStore getPrivatePropertyStore();
+
 	void log(Exception e);
 
 	/**
@@ -59,4 +67,5 @@ public interface BootDashModelContext {
 	 * will not work as expected.
 	 */
 	LiveExpression<Pattern> getBootProjectExclusion();
+
 }

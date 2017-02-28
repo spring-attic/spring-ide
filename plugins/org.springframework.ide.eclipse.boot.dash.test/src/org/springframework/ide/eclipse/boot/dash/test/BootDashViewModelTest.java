@@ -37,6 +37,9 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials.CFCredentialType;
+import org.springframework.ide.eclipse.boot.dash.dialogs.StoreCredentialsMode;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
@@ -619,20 +622,22 @@ public class BootDashViewModelTest {
 		harness = new BootDashViewModelHarness(context, targetType);
 		targetType.setRequiresCredentials(true);
 		TargetProperties properties = new TargetProperties(targetType, "target-id", harness.context);
-		properties.setPassword("secret");
+		properties.setCredentials(CFCredentials.fromPassword("secret"));
 
 		MockRunTarget target = (MockRunTarget) targetType.createRunTarget(properties);
 		harness.model.getRunTargets().add(target);
 
 		harness.model.updateTargetPropertiesInStore();
 
-		assertEquals("secret", target.getTargetProperties().getPassword());
+		assertEquals("secret", target.getTargetProperties().getCredentials().getSecret());
 
 		harness.reload();
 
 		MockRunTarget restoredTarget = (MockRunTarget) harness.getRunTarget(targetType);
 		assertTrue(restoredTarget != target); //Not a strict requirement, but it is more or less
 												// expected the restored target is a brand new object
+
+		//TODO: Strange test. Shouldn't there be something to check here?
 	}
 
 	@Test
@@ -641,8 +646,8 @@ public class BootDashViewModelTest {
 		harness = new BootDashViewModelHarness(context, targetType);
 		targetType.setRequiresCredentials(true);
 		TargetProperties properties = new TargetProperties(targetType, "target-id", harness.context);
-		properties.setStorePassword(true);
-		properties.setPassword("secret");
+		properties.setStoreCredentials(StoreCredentialsMode.STORE_PASSWORD);
+		properties.setCredentials(CFCredentials.fromPassword("secret"));
 
 		MockRunTarget target = (MockRunTarget) targetType.createRunTarget(properties);
 		harness.model.getRunTargets().add(target);
@@ -654,9 +659,10 @@ public class BootDashViewModelTest {
 		//This test needs to have knowledge what keys the passwords are store under.
 		// That seems undesirable.
 		String key = "mock-type:target-id";
-		assertTrue(target.getTargetProperties().isStorePassword());
-		assertEquals("secret", target.getTargetProperties().getPassword());
-		assertEquals("secret", secureStore.getPassword(key));
+		assertEquals(StoreCredentialsMode.STORE_PASSWORD, target.getTargetProperties().getStoreCredentials());
+		assertEquals(CFCredentialType.PASSWORD, target.getTargetProperties().getCredentials().getType());
+		assertEquals("secret", target.getTargetProperties().getCredentials().getSecret());
+		assertEquals("secret", secureStore.getCredentials(key));
 
 		/////////////////////////////////////////
 		// check that when runtargets are restored from the store the password prop is properly
@@ -667,8 +673,8 @@ public class BootDashViewModelTest {
 		MockRunTarget restoredTarget = (MockRunTarget) harness.getRunTarget(targetType);
 		assertTrue(restoredTarget != target); //Not a strict requirement, but it is more or less
 												// expected the restored target is a brand new object
-		assertTrue(restoredTarget.getTargetProperties().isStorePassword());
-		assertEquals("secret", restoredTarget.getTargetProperties().getPassword());
+		assertEquals(StoreCredentialsMode.STORE_PASSWORD, restoredTarget.getTargetProperties().getStoreCredentials());
+		assertEquals("secret", restoredTarget.getTargetProperties().getCredentials().getSecret());
 	}
 
 	@Test
@@ -677,8 +683,8 @@ public class BootDashViewModelTest {
 		harness = new BootDashViewModelHarness(context, targetType);
 		targetType.setRequiresCredentials(true);
 		TargetProperties properties = new TargetProperties(targetType, "target-id", harness.context);
-		properties.setStorePassword(false);
-		properties.setPassword("secret");
+		properties.setStoreCredentials(StoreCredentialsMode.STORE_NOTHING);
+		properties.setCredentials(CFCredentials.fromPassword("secret"));
 
 		MockRunTarget target = (MockRunTarget) targetType.createRunTarget(properties);
 		harness.model.getRunTargets().add(target);
@@ -690,9 +696,9 @@ public class BootDashViewModelTest {
 		//This test needs to have knowledge what keys the passwords are store under.
 		// That seems undesirable.
 		String key = "mock-type:target-id";
-		assertFalse(target.getTargetProperties().isStorePassword());
-		assertEquals("secret", target.getTargetProperties().getPassword());
-		assertNull(secureStore.getPassword(key));
+		assertEquals(StoreCredentialsMode.STORE_NOTHING, target.getTargetProperties().getStoreCredentials());
+		assertEquals("secret", target.getTargetProperties().getCredentials().getSecret());
+		assertNull(secureStore.getCredentials(key));
 
 		/////////////////////////////////////////
 		// check that when runtargets are restored from the store the password is not remebered
@@ -702,8 +708,8 @@ public class BootDashViewModelTest {
 		MockRunTarget restoredTarget = (MockRunTarget) harness.getRunTarget(targetType);
 		assertTrue(restoredTarget != target); //Not a strict requirement, but it is more or less
 												// expected the restored target is a brand new object
-		assertFalse(restoredTarget.getTargetProperties().isStorePassword());
-		assertNull(restoredTarget.getTargetProperties().getPassword());
+		assertEquals(StoreCredentialsMode.STORE_NOTHING, restoredTarget.getTargetProperties().getStoreCredentials());
+		assertNull(restoredTarget.getTargetProperties().getCredentials());
 	}
 
 }

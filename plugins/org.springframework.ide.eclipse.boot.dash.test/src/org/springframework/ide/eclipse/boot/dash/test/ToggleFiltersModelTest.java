@@ -23,12 +23,12 @@ import static org.mockito.Mockito.when;
 
 import org.eclipse.core.resources.IProject;
 import org.junit.Test;
+import org.springframework.ide.eclipse.boot.dash.metadata.InMemoryPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.LaunchConfDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.ToggleFiltersModel;
 import org.springframework.ide.eclipse.boot.dash.model.ToggleFiltersModel.FilterChoice;
-import org.springframework.ide.eclipse.boot.dash.test.mocks.MockPropertyStore;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 
 import com.google.common.collect.ImmutableSet;
@@ -39,7 +39,7 @@ public class ToggleFiltersModelTest {
 	private static final String HIDE_NON_WORKSPACE_ELEMENTS = "Hide non-workspace elements";
 	private static final String HIDE_SOLITARY_CONF = "Hide solitary launch configs";
 
-	private MockPropertyStore propertyStore = new MockPropertyStore();
+	private InMemoryPropertyStore propertyStore = new InMemoryPropertyStore();
 
 	@Test
 	public void testAvailableFilters() throws Exception {

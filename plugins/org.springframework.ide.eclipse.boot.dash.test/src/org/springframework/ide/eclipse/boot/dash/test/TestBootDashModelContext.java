@@ -23,10 +23,10 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.metadata.InMemoryPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
-import org.springframework.ide.eclipse.boot.dash.test.mocks.MockPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockSecuredCredentialStore;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -42,15 +42,16 @@ public class TestBootDashModelContext implements BootDashModelContext {
 	private IScopedPropertyStore<IProject> projectProperties;
 	private IScopedPropertyStore<RunTargetType> runTargetProperties;
 	private LiveVariable<Pattern> bootProjectExclusion = new LiveVariable<>(BootPreferences.DEFAULT_BOOT_PROJECT_EXCLUDE);
-	private IPropertyStore viewProperties = new MockPropertyStore();
+	private IPropertyStore viewProperties = new InMemoryPropertyStore();
+	private IPropertyStore privateProperties = new InMemoryPropertyStore();
 
 	public TestBootDashModelContext(IWorkspace workspace, ILaunchManager launchMamager) {
 		try {
 			this.workspace = workspace;
 			this.launchManager = launchMamager;
 			stateLoc = StsTestUtil.createTempDirectory("plugin-state", null);
-			this.projectProperties = new MockScopedPropertyStore<IProject>();
-			this.runTargetProperties = new MockScopedPropertyStore<RunTargetType>();
+			this.projectProperties = new MockScopedPropertyStore<>();
+			this.runTargetProperties = new MockScopedPropertyStore<>();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -100,6 +101,11 @@ public class TestBootDashModelContext implements BootDashModelContext {
 	@Override
 	public IPropertyStore getViewProperties() {
 		return viewProperties;
+	}
+
+	@Override
+	public IPropertyStore getPrivatePropertyStore() {
+		return privateProperties;
 	}
 
 }

@@ -33,6 +33,7 @@ import org.junit.Assert;
 import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.metadata.InMemoryPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
@@ -44,7 +45,6 @@ import org.springframework.ide.eclipse.boot.dash.model.RunTargets;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockMultiSelection;
-import org.springframework.ide.eclipse.boot.dash.test.mocks.MockPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockSecuredCredentialStore;
 import org.springframework.ide.eclipse.boot.dash.util.Stylers;
@@ -85,9 +85,11 @@ public class BootDashViewModelHarness {
 
 	public static class MockContext implements BootDashModelContext {
 
-		private IPropertyStore viewProperties = new MockPropertyStore();
-		private IScopedPropertyStore<IProject> projectProperties = new MockScopedPropertyStore<IProject>();
-		private IScopedPropertyStore<RunTargetType> runtargetProperties = new MockScopedPropertyStore<RunTargetType>();
+		private IPropertyStore viewProperties = new InMemoryPropertyStore();
+		private IPropertyStore privateProperties = new InMemoryPropertyStore();
+
+		private IScopedPropertyStore<IProject> projectProperties = new MockScopedPropertyStore<>();
+		private IScopedPropertyStore<RunTargetType> runtargetProperties = new MockScopedPropertyStore<>();
 		private SecuredCredentialsStore secureStore = new MockSecuredCredentialStore();
 		private File stateLocation;
 		private LiveVariable<Pattern> bootProjectExclusion = new LiveVariable<>(BootPreferences.DEFAULT_BOOT_PROJECT_EXCLUDE);
@@ -139,6 +141,11 @@ public class BootDashViewModelHarness {
 		public IPropertyStore getViewProperties() {
 			return viewProperties;
 		}
+
+		@Override
+		public IPropertyStore getPrivatePropertyStore() {
+			return privateProperties;
+		}
 	}
 
 	public BootDashModel getRunTargetModel(RunTargetType type) {
@@ -148,7 +155,7 @@ public class BootDashViewModelHarness {
 	}
 
 	public List<BootDashModel> getRunTargetModels(RunTargetType type) {
-		ArrayList<BootDashModel> models = new ArrayList<BootDashModel>();
+		ArrayList<BootDashModel> models = new ArrayList<>();
 		for (BootDashModel m : model.getSectionModels().getValue()) {
 			if (m.getRunTarget().getType().equals(type)) {
 				models.add(m);
@@ -172,7 +179,7 @@ public class BootDashViewModelHarness {
 	}
 
 	private List<RunTarget> getRunTargets(RunTargetType targetType) {
-		ArrayList<RunTarget> list = new ArrayList<RunTarget>();
+		ArrayList<RunTarget> list = new ArrayList<>();
 		for (RunTarget runTarget : model.getRunTargets().getValues()) {
 			if (runTarget.getType().equals(targetType)) {
 				list.add(runTarget);

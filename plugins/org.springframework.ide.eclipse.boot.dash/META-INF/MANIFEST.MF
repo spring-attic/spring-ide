@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Spring Boot Dashboard View
 Bundle-SymbolicName: org.springframework.ide.eclipse.boot.dash;singleton:=true
-Bundle-Version: 3.8.2.qualifier
+Bundle-Version: 3.8.4.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.boot.dash.BootDashActivator
 Bundle-Vendor: Pivotal Inc
 Require-Bundle: org.eclipse.ui,
@@ -23,9 +23,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.console,
  org.eclipse.debug.ui,
  org.eclipse.ui.forms,
- org.apache.commons.lang,
  org.json,
- org.springframework.ide.eclipse.boot.properties.editor,
  com.google.guava;bundle-version="15.0.0",
  org.eclipse.equinox.security,
  org.eclipse.ui.views.properties.tabbed,
@@ -35,7 +33,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.jface.text,
  org.dadacoalition.yedit,
  org.eclipse.ui.workbench,
- org.springframework.ide.eclipse.editor.support,
  org.yaml.snakeyaml,
  org.eclipse.compare,
  org.springframework.ide.eclipse.cloudfoundry.manifest.editor,
@@ -43,15 +40,16 @@ Require-Bundle: org.eclipse.ui,
  org.springsource.ide.eclipse.commons.cloudfoundry.client.v2,
  com.fasterxml.jackson.core.jackson-databind,
  com.fasterxml.jackson.core.jackson-core,
- io.projectreactor.reactor-core;bundle-version="3.0.0",
+ io.projectreactor.reactor-core;bundle-version="3.0.5",
  org.reactivestreams.reactive-streams;bundle-version="1.0.0",
- org.springframework.ide.eclipse.core,
  org.slf4j.api;bundle-version="1.7.2",
  org.eclipse.core.net,
+ org.apache.httpcomponents.httpclient,
+ org.apache.httpcomponents.httpcore,
  org.springsource.ide.eclipse.commons.core,
  org.springframework.web,
- org.apache.httpcomponents.httpclient,
- org.apache.httpcomponents.httpcore
+ org.apache.commons.lang3,
+ org.springframework.ide.eclipse.editor.support
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
@@ -69,6 +67,5 @@ Export-Package: org.springframework.ide.eclipse.boot.dash,
  org.springframework.ide.eclipse.boot.dash.util,
  org.springframework.ide.eclipse.boot.dash.views,
  org.springframework.ide.eclipse.boot.dash.views.sections
-Import-Package: org.springframework.core,
- org.springframework.web.client,
+Import-Package: org.springframework.web.client,
  org.yaml.snakeyaml

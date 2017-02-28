@@ -48,7 +48,7 @@ public class NewSpringBootWizardTest extends TestCase {
 
 	public void testBuildshipProjectCreation() throws Exception {
 		IProject project = harness.createBootProject("simple-buildship",
-				withImportStrategy("GRADLE-Buildship")
+				withImportStrategy("GRADLE-Buildship 2.x")
 		);
 		assertTrue(project.hasNature(org.eclipse.buildship.core.configuration.GradleProjectNature.ID));
 		assertTrue(project.hasNature(SpringCore.NATURE_ID));

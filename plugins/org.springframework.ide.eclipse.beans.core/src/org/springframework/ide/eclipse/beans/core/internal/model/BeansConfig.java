@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2015 Spring IDE Developers
+ * Copyright (c) 2004, 2017 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -756,10 +756,13 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 			final ReaderEventListener eventListener, final ClassLoader classloader) {
 		SafeRunner.run(new ISafeRunnable() {
 
+			@Override
 			public void handleException(Throwable exception) {
-				BeansCorePlugin.log(exception);
+				BeansCorePlugin.log(new Status(IStatus.WARNING, BeansCorePlugin.PLUGIN_ID, 
+						"Error occured while running bean post processors", exception));
 			}
 
+			@Override
 			public void run() throws Exception {
 				ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
 
@@ -770,6 +773,9 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 				try {
 					postProcessor.postProcess(BeansConfigPostProcessorFactory.createPostProcessingContext(BeansConfig.this,
 							beans.values(), eventListener, problemReporter, beanNameGenerator, registry, problems));
+				}
+				catch (Exception e) {
+					handleException(e);
 				}
 				finally {
 					Thread.currentThread().setContextClassLoader(contextLoader);

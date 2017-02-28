@@ -5,17 +5,12 @@
 	<parent>
 		<groupId>org.springframework.ide.eclipse</groupId>
 		<artifactId>org.springframework.ide.eclipse.parent</artifactId>
-		<version>3.8.2-SNAPSHOT</version>
+		<version>3.8.4-SNAPSHOT</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 	<groupId>org.springframework.ide.eclipse</groupId>
 	<artifactId>org.springframework.ide.eclipse.boot.test</artifactId>
 	<packaging>eclipse-test-plugin</packaging>
-	
-	<properties>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
-	</properties>
 	
 	<build>
 		<plugins>
@@ -38,6 +33,11 @@
 						<extraRequirements>
 							<requirement>
 								<type>eclipse-feature</type>
+								<id>org.eclipse.buildship</id>
+								<versionRange>0.0.0</versionRange>
+							</requirement>
+							<requirement>
+								<type>eclipse-feature</type>
 								<id>org.springsource.ide.eclipse.gradle.feature</id>
 								<versionRange>0.0.0</versionRange>
 							</requirement>
@@ -57,5 +57,28 @@
 			</plugin>
 		</plugins>
 	</build>
+	
+	<profiles>
+		<profile>
+			<id>e45</id>
+			<repositories>
+				<repository>
+					<id>buildship2</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/buildship/updates/e45/releases/2.x/</url>
+				</repository>
+			</repositories>
+		</profile>
+		<profile>
+			<id>e46</id>
+			<repositories>
+				<repository>
+					<id>buildship2</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/buildship/updates/e46/releases/2.x/</url>
+				</repository>
+			</repositories>
+		</profile>
+	</profiles>
 
 </project>

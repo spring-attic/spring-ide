@@ -33,27 +33,50 @@ import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.getChild;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.getTextValue;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.performOnDOMDocument;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.project.MavenProject;
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationType;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.debug.ui.RefreshTab;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
+import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.m2e.actions.MavenLaunchConstants;
 import org.eclipse.m2e.core.MavenPlugin;
+import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.IMavenProjectRegistry;
+import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.m2e.core.ui.internal.UpdateMavenProjectJob;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits.Operation;
@@ -68,8 +91,10 @@ import org.springframework.ide.eclipse.boot.core.Repo;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
-import org.springframework.ide.eclipse.editor.support.util.StringUtil;
+import org.springframework.ide.eclipse.boot.util.DumpOutput;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -78,6 +103,14 @@ import org.w3c.dom.Element;
  */
 @SuppressWarnings("restriction")
 public class MavenSpringBootProject extends SpringBootProject {
+
+	/**
+	 * Debug flag, may be flipped on temporarily by test code to spy on the output of maven
+	 * execution.
+	 */
+	public static boolean DUMP_MAVEN_OUTPUT = false;
+
+	private static final String MVN_LAUNCH_MODE = "run";
 
 	//TODO: properly handle pom manipulation when pom file is open / dirty in an editor.
 	// minimum requirement: detect and prohibit by throwing an error.
@@ -104,12 +137,17 @@ public class MavenSpringBootProject extends SpringBootProject {
 	}
 
 	private MavenProject getMavenProject() throws CoreException {
-		IMavenProjectRegistry pr = MavenPlugin.getMavenProjectRegistry();
-		IMavenProjectFacade mpf = pr.getProject(project);
+		IMavenProjectFacade mpf = getMavenProjectFacade();
 		if (mpf!=null) {
 			return mpf.getMavenProject(new NullProgressMonitor());
 		}
 		return null;
+	}
+
+	private IMavenProjectFacade getMavenProjectFacade() {
+		IMavenProjectRegistry pr = MavenPlugin.getMavenProjectRegistry();
+		IMavenProjectFacade mpf = pr.getProject(project);
+		return mpf;
 	}
 
 	private IFile getPomFile() {
@@ -218,7 +256,7 @@ public class MavenSpringBootProject extends SpringBootProject {
 	@Override
 	public void setStarters(Collection<SpringBootStarter> _starters) throws CoreException {
 		try {
-			final Set<MavenId> starters = new HashSet<MavenId>();
+			final Set<MavenId> starters = new HashSet<>();
 			for (SpringBootStarter s : _starters) {
 				starters.add(s.getMavenId());
 			}
@@ -488,7 +526,7 @@ public class MavenSpringBootProject extends SpringBootProject {
 	}
 
 	private void createElementWithTextMaybe(Element parent, String name, String text) {
-		if (StringUtil.hasText(text)) {
+		if (StringUtils.isNotBlank(text)) {
 			createElementWithText(parent, name, text);
 		}
 	}
@@ -497,5 +535,129 @@ public class MavenSpringBootProject extends SpringBootProject {
 	public String getDependencyFileName() {
 		return "pom.xml";
 	}
+
+	@Override
+	public String getPackaging() throws CoreException {
+		MavenProject mp = getMavenProject();
+		if (mp!=null) {
+			return mp.getPackaging();
+		}
+		return null;
+	}
+
+	@Override
+	public File executePackagingScript(IProgressMonitor monitor) throws CoreException {
+		monitor.beginTask("Building War file", 100);
+		try {
+			ILaunchConfiguration launchConf = createLaunchConfiguration(project, "package");
+			ILaunch launch = launchConf.launch(MVN_LAUNCH_MODE, SubMonitor.convert(monitor, 10), true, true);
+			if (DUMP_MAVEN_OUTPUT) {
+				launch.getProcesses()[0].getStreamsProxy().getOutputStreamMonitor().addListener(new DumpOutput("%mvn-out"));
+				launch.getProcesses()[0].getStreamsProxy().getErrorStreamMonitor().addListener(new DumpOutput("%mvn-err"));
+			}
+
+			LaunchUtils.whenTerminated(launch).get();
+			int exitValue = launch.getProcesses()[0].getExitValue();
+			if (exitValue!=0) {
+				throw ExceptionUtil.coreException("Non-zero exit-code("+exitValue+") from maven war packaging. Check maven console for errors!");
+			}
+			return findWarFile();
+		} catch (ExecutionException | InterruptedException e) {
+			throw ExceptionUtil.coreException(e);
+		} finally {
+			monitor.done();
+		}
+	}
+
+	private File findWarFile() throws CoreException {
+		File warFile = getWarFile();
+		if (warFile==null) {
+			throw ExceptionUtil.coreException("Couldn't determine where to find the war file after 'mvn package'");
+		} else if (!warFile.isFile()) {
+			throw ExceptionUtil.coreException("Couldn't find file to deploy at '"+warFile+"' after running 'mvn package'");
+		}
+		return warFile;
+	}
+
+	private File getWarFile() throws CoreException {
+		MavenProject mpf = getMavenProject();
+		if (mpf!=null) {
+			String buildDir = mpf.getBuild().getDirectory();
+			String fName = mpf.getBuild().getFinalName();
+			String type = mpf.getPackaging();
+			if (buildDir!=null && fName!=null && type!=null) {
+				return new File(new File(buildDir), fName+"."+type);
+			}
+		}
+		return null;
+	}
+
+	///////////////////////////////////////////////////////////////////////////////////////
+	/// m2e cruft... copied from hither and tither.
+
+	private ILaunchConfiguration createLaunchConfiguration(IContainer basedir, String goal) {
+		try {
+			ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
+			ILaunchConfigurationType launchConfigurationType = launchManager
+					.getLaunchConfigurationType(MavenLaunchConstants.LAUNCH_CONFIGURATION_TYPE_ID);
+
+			String rawConfigName = basedir.getName()+"-build-war";
+			String safeConfigName = launchManager.generateLaunchConfigurationName(rawConfigName);
+
+			ILaunchConfigurationWorkingCopy workingCopy = launchConfigurationType.newInstance(null, safeConfigName);
+			workingCopy.setAttribute(MavenLaunchConstants.ATTR_POM_DIR, basedir.getLocation().toOSString());
+			workingCopy.setAttribute(MavenLaunchConstants.ATTR_GOALS, goal);
+			workingCopy.setAttribute(MavenLaunchConstants.ATTR_SKIP_TESTS, true);
+			workingCopy.setAttribute(IDebugUIConstants.ATTR_PRIVATE, true);
+			workingCopy.setAttribute(RefreshTab.ATTR_REFRESH_SCOPE, "${project}"); //$NON-NLS-1$
+			workingCopy.setAttribute(RefreshTab.ATTR_REFRESH_RECURSIVE, true);
+
+			setProjectConfiguration(workingCopy, basedir);
+
+			IPath path = getJREContainerPath(basedir);
+			if(path != null) {
+				workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_JRE_CONTAINER_PATH, path.toPortableString());
+			}
+
+			// TODO when launching Maven with debugger consider to add the following property
+			// -Dmaven.surefire.debug="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8000 -Xnoagent -Djava.compiler=NONE"
+
+			return workingCopy;
+		} catch(CoreException ex) {
+			Log.log(ex);
+		}
+		return null;
+	}
+
+	// TODO ideally it should use MavenProject, but it is faster to scan IJavaProjects
+	private IPath getJREContainerPath(IContainer basedir) throws CoreException {
+		IProject project = basedir.getProject();
+		if(project != null && project.hasNature(JavaCore.NATURE_ID)) {
+			IJavaProject javaProject = JavaCore.create(project);
+			IClasspathEntry[] entries = javaProject.getRawClasspath();
+			for(int i = 0; i < entries.length; i++ ) {
+				IClasspathEntry entry = entries[i];
+				if(JavaRuntime.JRE_CONTAINER.equals(entry.getPath().segment(0))) {
+					return entry.getPath();
+				}
+			}
+		}
+		return null;
+	}
+
+	private void setProjectConfiguration(ILaunchConfigurationWorkingCopy workingCopy, IContainer basedir) {
+		IMavenProjectRegistry projectManager = MavenPlugin.getMavenProjectRegistry();
+		IFile pomFile = basedir.getFile(new Path(IMavenConstants.POM_FILE_NAME));
+		IMavenProjectFacade projectFacade = projectManager.create(pomFile, false, new NullProgressMonitor());
+		if(projectFacade != null) {
+			ResolverConfiguration configuration = projectFacade.getResolverConfiguration();
+
+			String selectedProfiles = configuration.getSelectedProfiles();
+			if(selectedProfiles != null && selectedProfiles.length() > 0) {
+				workingCopy.setAttribute(MavenLaunchConstants.ATTR_PROFILES, selectedProfiles);
+			}
+		}
+	}
+
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013-2015 Pivotal, Inc.
+ * Copyright (c) 2013, 2016 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,36 +15,38 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
+import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.core.BootPreferences;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.DependencyGroup;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Option;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Type;
 import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
 import org.springframework.ide.eclipse.boot.wizard.content.BuildType;
 import org.springframework.ide.eclipse.boot.wizard.content.CodeSet;
 import org.springframework.ide.eclipse.boot.wizard.importing.ImportStrategy;
 import org.springframework.ide.eclipse.boot.wizard.importing.ImportUtils;
-import org.springframework.ide.eclipse.boot.wizard.json.InitializrServiceSpec;
-import org.springframework.ide.eclipse.boot.wizard.json.InitializrServiceSpec.Dependency;
-import org.springframework.ide.eclipse.boot.wizard.json.InitializrServiceSpec.DependencyGroup;
-import org.springframework.ide.eclipse.boot.wizard.json.InitializrServiceSpec.Option;
-import org.springframework.ide.eclipse.boot.wizard.json.InitializrServiceSpec.Type;
-import org.springframework.util.StringUtils;
-import org.springsource.ide.eclipse.commons.core.preferences.StsProperties;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadableItem;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
@@ -62,13 +64,11 @@ import org.springsource.ide.eclipse.commons.livexp.ui.ProjectLocationSection;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 
 /**
- * A ZipUrlImportWizard is a simple wizard in which one can paste a url
- * pointing to a zip file. The zip file is supposed to contain a maven (or gradle)
- * project in the root of the zip.
+ * This is the model for the 'New Spring Starter Project' wizard.
  */
 public class NewSpringBootWizardModel {
 
-	private static final Map<String,BuildType> KNOWN_TYPES = new HashMap<String, BuildType>();
+	private static final Map<String,BuildType> KNOWN_TYPES = new HashMap<>();
 	static {
 		KNOWN_TYPES.put("gradle-project", BuildType.GRADLE); // New version of initialzr app
 		KNOWN_TYPES.put("maven-project", BuildType.MAVEN); // New versions of initialzr app
@@ -81,7 +81,7 @@ public class NewSpringBootWizardModel {
 	 * Lists known query parameters that map onto a String input field. The default values for these
 	 * parameters will be pulled from the json spec document.
 	 */
-	private static final Map<String,String> KNOWN_STRING_INPUTS = new LinkedHashMap<String, String>();
+	private static final Map<String,String> KNOWN_STRING_INPUTS = new LinkedHashMap<>();
 	static {
 		KNOWN_STRING_INPUTS.put("name", "Name");
 		KNOWN_STRING_INPUTS.put("groupId", "Group");
@@ -91,46 +91,46 @@ public class NewSpringBootWizardModel {
 		KNOWN_STRING_INPUTS.put("packageName", "Package");
 	};
 
-	private static final Map<String, String> KNOWN_SINGLE_SELECTS = new LinkedHashMap<String, String>();
+	private static final Map<String, String> KNOWN_SINGLE_SELECTS = new LinkedHashMap<>();
 	static {
 		KNOWN_SINGLE_SELECTS.put("packaging", "Packaging:");
 		KNOWN_SINGLE_SELECTS.put("javaVersion", "Java Version:");
 		KNOWN_SINGLE_SELECTS.put("language", "Language:");
-		KNOWN_SINGLE_SELECTS.put("bootVersion", "Boot Version:");
+		KNOWN_SINGLE_SELECTS.put("bootVersion", "Spring Boot Version:");
 	}
 
 	private final URLConnectionFactory urlConnectionFactory;
 	private final String JSON_URL;
 	private PopularityTracker popularities;
 	private PreferredSelections preferredSelections;
+	private DefaultDependencies defaultDependencies;
 
 	public NewSpringBootWizardModel(IPreferenceStore prefs) throws Exception {
 		this(
-				BootWizardActivator.getUrlConnectionFactory(),
-				StsProperties.getInstance(new NullProgressMonitor()),
+				BootActivator.getUrlConnectionFactory(),
 				prefs
 		);
 	}
 
 	public NewSpringBootWizardModel() throws Exception {
 		this(
-				BootWizardActivator.getUrlConnectionFactory(),
-				StsProperties.getInstance(new NullProgressMonitor()),
+				BootActivator.getUrlConnectionFactory(),
 				BootWizardActivator.getDefault().getPreferenceStore()
 		);
 	}
 
-	public NewSpringBootWizardModel(URLConnectionFactory urlConnectionFactory, StsProperties stsProps, IPreferenceStore prefs) throws Exception {
-		this(urlConnectionFactory, stsProps.get("spring.initializr.json.url"), prefs);
+	public NewSpringBootWizardModel(URLConnectionFactory urlConnectionFactory, IPreferenceStore prefs) throws Exception {
+		this(urlConnectionFactory, BootPreferences.getInitializrUrl(), prefs);
 	}
 
 	public NewSpringBootWizardModel(URLConnectionFactory urlConnectionFactory, String jsonUrl, IPreferenceStore prefs) throws Exception {
 		this.popularities = new PopularityTracker(prefs);
 		this.preferredSelections = new PreferredSelections(prefs);
+		this.defaultDependencies = new DefaultDependencies(prefs);
 		this.urlConnectionFactory = urlConnectionFactory;
 		this.JSON_URL = jsonUrl;
 
-		baseUrl = new LiveVariable<String>("<computed>");
+		baseUrl = new LiveVariable<>("<computed>");
 		baseUrlValidator = new UrlValidator("Base Url", baseUrl);
 
 		discoverOptions(stringInputs, dependencies);
@@ -138,7 +138,7 @@ public class NewSpringBootWizardModel {
 
 		projectName = stringInputs.getField("name");
 		projectName.validator(new NewProjectNameValidator(projectName.getVariable()));
-		location = new LiveVariable<String>(ProjectLocationSection.getDefaultProjectLocation(projectName.getValue()));
+		location = new LiveVariable<>(ProjectLocationSection.getDefaultProjectLocation(projectName.getValue()));
 		locationValidator = new NewProjectLocationValidator("Location", location, projectName.getVariable());
 		Assert.isNotNull(projectName, "The service at "+JSON_URL+" doesn't specify a 'name' text input");
 
@@ -159,6 +159,7 @@ public class NewSpringBootWizardModel {
 		addBuildTypeValidator();
 
 		preferredSelections.restore(this);
+		defaultDependencies.restore(dependencies);
 	}
 
 	/**
@@ -188,11 +189,11 @@ public class NewSpringBootWizardModel {
 	}
 
 	@SuppressWarnings("unchecked")
-	public final FieldArrayModel<String> stringInputs = new FieldArrayModel<String>(
+	public final FieldArrayModel<String> stringInputs = new FieldArrayModel<>(
 			//The fields need to be discovered by parsing json from rest endpoint.
 	);
 
-	public final HierarchicalMultiSelectionFieldModel<Dependency> dependencies = new HierarchicalMultiSelectionFieldModel<Dependency>(Dependency.class, "dependencies")
+	public final HierarchicalMultiSelectionFieldModel<Dependency> dependencies = new HierarchicalMultiSelectionFieldModel<>(Dependency.class, "dependencies")
 			.label("Dependencies:");
 
 	private final FieldModel<String> projectName; //an alias for stringFields.getField("name");
@@ -204,7 +205,7 @@ public class NewSpringBootWizardModel {
 	public final LiveVariable<String> baseUrl;
 	public final LiveExpression<ValidationResult> baseUrlValidator;
 
-	public final LiveVariable<String> downloadUrl = new LiveVariable<String>();
+	public final LiveVariable<String> downloadUrl = new LiveVariable<>();
 	private IWorkingSet[] workingSets = new IWorkingSet[0];
 	private RadioGroups radioGroups = new RadioGroups();
 	private RadioGroup bootVersion;
@@ -223,12 +224,49 @@ public class NewSpringBootWizardModel {
 	}
 
 	/**
+	 * Retrieves currently set default dependencies
+	 * @return list of default dependencies check-box models
+	 */
+	public List<CheckBoxModel<Dependency>> getDefaultDependencies() {
+		return defaultDependencies.getDependencies(dependencies);
+	}
+
+	/**
+	 * Retrieves frequently used dependencies based on currently set default dependencies and the most popular dependencies
+	 *
+	 * @param numberOfMostPopular max number of most popular dependencies
+	 * @return list of frequently used dependencies
+	 */
+	public List<CheckBoxModel<Dependency>> getFrequentlyUsedDependencies(int numberOfMostPopular) {
+		List<CheckBoxModel<Dependency>> defaultDependencies = getDefaultDependencies();
+		Set<String> defaultDependecyIds = getDefaultDependenciesIds();
+		getMostPopular(numberOfMostPopular).stream().filter(checkboxModel -> {
+			return !defaultDependecyIds.contains(checkboxModel.getValue().getId());
+		}).forEach(defaultDependencies::add);
+		// Sort alphbetically
+		defaultDependencies.sort(new Comparator<CheckBoxModel<Dependency>>() {
+			@Override
+			public int compare(CheckBoxModel<Dependency> d1, CheckBoxModel<Dependency> d2) {
+				return d1.getLabel().compareTo(d2.getLabel());
+			}
+		});
+		return defaultDependencies;
+	}
+
+	public Set<String> getDefaultDependenciesIds() {
+		return defaultDependencies.getDependciesIdSet();
+	}
+
+	/**
 	 * Shouldn't be public really. This is just to make it easier to call from unit test.
 	 */
 	public void updateUsageCounts() {
 		popularities.incrementUsageCount(dependencies.getCurrentSelection());
 	}
 
+	public boolean saveDefaultDependencies() {
+		return defaultDependencies.save(dependencies);
+	}
 
 	public void performFinish(IProgressMonitor mon) throws InvocationTargetException, InterruptedException {
 		mon.beginTask("Importing "+baseUrl.getValue(), 4);
@@ -251,10 +289,10 @@ public class NewSpringBootWizardModel {
 					projectNameValue,
 					cs
 			));
-			oper.run(new SubProgressMonitor(mon, 3));
+			oper.run(SubMonitor.convert(mon, 3));
 
 			IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectNameValue);
-			addToWorkingSets(project, new SubProgressMonitor(mon, 1));
+			addToWorkingSets(project, SubMonitor.convert(mon, 1));
 
 		} catch (IOException e) {
 			throw new InvocationTargetException(e);
@@ -388,7 +426,7 @@ public class NewSpringBootWizardModel {
 	private LiveExpression<Boolean> createEnablementExp(final RadioGroup bootVersion, final Dependency dep) {
 		try {
 			String versionRange = dep.getVersionRange();
-			if (StringUtils.hasText(versionRange)) {
+			if (StringUtils.isNotBlank(versionRange)) {
 				return new LiveExpression<Boolean>() {
 					{ dependsOn(bootVersion.getSelection().selection); }
 					@Override

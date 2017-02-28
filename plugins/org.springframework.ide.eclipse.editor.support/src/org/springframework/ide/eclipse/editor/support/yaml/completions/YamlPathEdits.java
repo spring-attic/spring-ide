@@ -102,7 +102,9 @@ public class YamlPathEdits extends DocumentEdits {
 			String key = path.getSegment(i).toPropString();
 			buf.append(YamlUtil.stringEscape(key));
 			buf.append(":");
-			indent += YamlIndentUtil.INDENT_BY;
+			if (i<path.size()-1) {
+				indent += YamlIndentUtil.INDENT_BY;
+			}
 		}
 		buf.append(indentUtil.applyIndentation(appendText, indent));
 		return buf.toString();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2007 Spring IDE Developers
+ * Copyright (c) 2006, 2016 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,11 +12,11 @@ package org.springframework.ide.eclipse.beans.ui.search.internal.queries;
 
 import java.util.regex.Pattern;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jface.util.Assert;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.ISearchResult;
 import org.eclipse.search.ui.text.Match;
@@ -25,10 +25,10 @@ import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchMessa
 import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchResult;
 import org.springframework.ide.eclipse.beans.ui.search.internal.BeansSearchScope;
 import org.springframework.ide.eclipse.core.MessageUtils;
-import org.springframework.ide.eclipse.core.PatternUtils;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
+import org.springsource.ide.eclipse.commons.core.PatternUtils;
 
 /**
  * @author Torsten Juergeleit

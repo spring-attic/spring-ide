@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.zip.ZipFile;
 
 import org.eclipse.core.runtime.Assert;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentProperties;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -39,11 +40,15 @@ public class CFPushArguments implements AutoCloseable {
 	private String buildpack;
 	private String command;
 	private String stack;
+	private String healthCheckType;
 	private Map<String, String> env = ImmutableMap.of();
 	private Integer instances;
 	private List<String> services = ImmutableList.of();
 	private ZipFile applicationData;
 	private boolean noStart = false;
+
+	public CFPushArguments() {
+	}
 
 	public String getAppName() {
 		return appName;
@@ -124,6 +129,15 @@ public class CFPushArguments implements AutoCloseable {
 	public void setNoStart(boolean noStart) {
 		this.noStart = noStart;
 	}
+	public String getHealthCheckType() {
+		if (healthCheckType==null) {
+			return DeploymentProperties.DEFAULT_HEALTH_CHECK_TYPE;
+		}
+		return healthCheckType;
+	}
+	public void setHealthCheckType(String healthCheckType) {
+		this.healthCheckType = healthCheckType;
+	}
 	public List<String> getRoutes() {
 		return routes;
 	}
@@ -138,7 +152,7 @@ public class CFPushArguments implements AutoCloseable {
 		return "CFPushArguments [appName=" + appName + ", routes=" + routes + ", memory=" + memory + ", diskQuota="
 				+ diskQuota + ", timeout=" + timeout + ", buildpack=" + buildpack + ", command=" + command + ", stack="
 				+ stack + ", env=" + env + ", instances=" + instances + ", services=" + services + ", noStart="
-				+ noStart + "]";
+				+ noStart + ", healthCheckType="+ healthCheckType+" ]";
 	}
 
 

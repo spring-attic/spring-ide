@@ -5,14 +5,14 @@
 
 	<groupId>org.springframework.ide.eclipse</groupId>
 	<artifactId>org.springframework.ide.eclipse.parent</artifactId>
-	<version>3.8.2-SNAPSHOT</version>
+	<version>3.8.4-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<organization>
 		<name>SpringSource, a division of VMware, Inc.</name>
 		<url>http://springsource.com</url>
 	</organization>
-	<url>http://springide.org</url>
+	<url>http://spring.io/tools</url>
 	<inceptionYear>2004</inceptionYear>
 
 	<prerequisites>
@@ -57,7 +57,6 @@
 	</distributionManagement>
 
 	<properties>
-	    <misc.p2.repo.version>3.8.2.201608241946</misc.p2.repo.version>
 		<p2.qualifier>SNAPSHOT</p2.qualifier>
 		<p2.sign>false</p2.sign>
 		<p2.repository.name>Spring IDE</p2.repository.name>
@@ -80,8 +79,6 @@
 		<test.skip>${maven.test.skip}</test.skip>
 		<maven.test.error.ignore>false</maven.test.error.ignore>
 		<maven.test.failure.ignore>false</maven.test.failure.ignore>
-		<maven.compiler.source>1.7</maven.compiler.source>
-		<maven.compiler.target>1.7</maven.compiler.target>
 		<encoding>UTF-8</encoding>
 		<test.osvmargs></test.osvmargs>
 		<test.vmargs>${test.osvmargs} -Dreactor.io.epoll=false -Dspring.initializr.json.url=http://start-development.cfapps.io -Dorg.slf4j.simpleLogger.log.cloudfoundry-client=debug</test.vmargs>
@@ -89,6 +86,11 @@
 	</properties>
 
 	<modules>
+
+		<!-- gradle -->
+		<module>plugins/org.springframework.ide.eclipse.gradle</module>
+		<module>plugins/org.springframework.ide.eclipse.buildship</module>
+		<module>plugins/org.springframework.ide.eclipse.buildship20</module>
 
 		<!-- boot -->
 		<module>plugins/org.springframework.ide.eclipse.boot</module>
@@ -198,10 +200,6 @@
 		<module>plugins/org.springframework.ide.eclipse.roo.ui</module>
 		<module>features/org.springframework.ide.eclipse.roo.feature</module>
 		
-		<!-- gradle -->
-		<module>plugins/org.springframework.ide.eclipse.gradle</module>
-		<module>plugins/org.springframework.ide.eclipse.buildship</module>
-
 		<!-- maven -->
 		<module>plugins/org.springframework.ide.eclipse.maven</module>
 		<module>features/org.springframework.ide.eclipse.maven.feature</module>
@@ -212,6 +210,10 @@
 		<!-- CFT integration -->
 		<module>plugins/org.springframework.ide.eclipse.cft</module>
 		<module>features/org.springframework.ide.eclipse.cft.feature</module>
+
+		<!-- AERI integration -->
+		<module>plugins/org.springframework.ide.eclipse.aeri</module>
+		<module>features/org.springframework.ide.eclipse.aeri.feature</module>
 
 		<!-- sources -->
 		<module>features/org.springframework.ide.eclipse.feature.source</module>
@@ -230,6 +232,7 @@
         <module>features/org.springframework.ide.eclipse.boot.feature.source</module>
         <module>features/org.springframework.ide.eclipse.boot.dash.feature.source</module>
         <module>features/org.springframework.ide.eclipse.cft.feature.source</module>
+        <module>features/org.springframework.ide.eclipse.aeri.feature.source</module>
         
 		<!-- site -->
 		<module>releng/org.springframework.ide.eclipse.site</module>
@@ -450,11 +453,6 @@
 		  			<url>http://dist.springsource.org/snapshot/GRECLIPSE/e4.4/</url>
 				</repository>
 				<repository>
-		  			<id>buildship</id>
-		  			<layout>p2</layout>
-		  			<url>http://download.eclipse.org/buildship/updates/e44/releases/1.0/</url>
-				</repository>
-				<repository>
 					<id>eclipse-integration-commons</id>
 					<layout>p2</layout>
 					<url>http://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}/e4.4/</url>
@@ -501,7 +499,7 @@
 				<repository>
 					<id>cft</id>
 					<layout>p2</layout>
-					<url>http://download.eclipse.org/cft/1.0.1.M1/</url>
+					<url>http://download.eclipse.org/cft/1.0.1.RC1/</url>
 				</repository>
 				<repository>
 					<id>eclipse-integration-commons</id>
@@ -540,12 +538,17 @@
 				<repository>
 					<id>swtbot</id>
 					<layout>p2</layout>
-					<url>http://download.eclipse.org/technology/swtbot/snapshots</url>
+					<url>http://download.eclipse.org/technology/swtbot/releases/latest/</url>
 				</repository>
 				<repository>
 		  			<id>groovy</id>
 		  			<layout>p2</layout>
 		  			<url>http://dist.springsource.org/snapshot/GRECLIPSE/e4.6/</url>
+				</repository>
+				<repository>
+					<id>cft</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/cft/1.0.1.RC1/</url>
 				</repository>
 				<repository>
 					<id>eclipse-integration-commons</id>
@@ -611,11 +614,6 @@
 			<layout>p2</layout>
 			<url>http://dist.springsource.com/release/TOOLS/third-party/yedit</url>
 		</repository>
- 		<repository>
- 			<id>p2-thirdparty-bundles</id>
- 			<layout>p2</layout>
- 			<url>http://dist.springsource.com/release/TOOLS/third-party/misc-p2-repo/${misc.p2.repo.version}</url>
- 		</repository>
 <!-- 		<repository> -->
 <!-- 			<id>yedit</id> -->
 <!-- 			<layout>p2</layout> -->

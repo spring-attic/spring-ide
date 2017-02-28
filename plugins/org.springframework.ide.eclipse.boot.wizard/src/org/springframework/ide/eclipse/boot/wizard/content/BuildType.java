@@ -44,7 +44,7 @@ public enum BuildType {
 	 * be imported with the corresponding ImportStrategy.
 	 */
 	private Path buildScriptPath;
-	private List<ImportStrategyHolder> strategies = new ArrayList<ImportStrategyHolder>();
+	private List<ImportStrategyHolder> strategies = new ArrayList<>();
 	private String displayName;
 	private boolean hasDefaultStrategy = false;
 
@@ -71,7 +71,7 @@ public enum BuildType {
 
 	public List<ImportStrategy> getImportStrategies() {
 		contributions.initialize();
-		ArrayList<ImportStrategy> instances = new ArrayList<ImportStrategy>(strategies.size());
+		ArrayList<ImportStrategy> instances = new ArrayList<>(strategies.size());
 		for (ImportStrategyHolder f : strategies) {
 			instances.add(f.get());
 		}
@@ -90,18 +90,6 @@ public enum BuildType {
 	 * The option that is preferred by the UI as the initial selection.
 	 */
 	public static final BuildType DEFAULT = MAVEN;
-
-//	/**
-//	 * This will return the first import strategy. This method is deprecated, it is provided only
-//	 * to avoid completely breaking code that assumes only a single strategy per build-type is available.
-//	 * <p>
-//	 * Code using this method will work, but will only be able to use one of the import strategies.
-//	 * It should be rewritten to support multiple strategies (i.e. use getImportStrategies() method.
-//	 */
-//	@Deprecated
-//	public ImportStrategy getImportStrategy() {
-//		return getImportStrategies().get(0);
-//	}
 
 	public void addStrategy(ImportStrategyHolder strategyHolder) {
 		strategies.add(strategyHolder);

@@ -43,7 +43,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.springframework.boot.configurationmetadata.Deprecation;
-import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.DeprecationUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.StsValueHint;
@@ -131,8 +130,8 @@ public class TypeUtil {
 	}
 
 
-	private static final Map<String, String> PRIMITIVE_TYPE_NAMES = new HashMap<String, String>();
-	private static final Map<String, Type> PRIMITIVE_TO_BOX_TYPE = new HashMap<String, Type>();
+	private static final Map<String, String> PRIMITIVE_TYPE_NAMES = new HashMap<>();
+	private static final Map<String, Type> PRIMITIVE_TO_BOX_TYPE = new HashMap<>();
 	static {
 		PRIMITIVE_TYPE_NAMES.put("java.lang.Boolean", "boolean");
 
@@ -153,7 +152,7 @@ public class TypeUtil {
 
 	public static final Type INTEGER_TYPE = new Type("java.lang.Integer", null);
 
-	private static final Set<String> ASSIGNABLE_TYPES = new HashSet<String>(Arrays.asList(
+	private static final Set<String> ASSIGNABLE_TYPES = new HashSet<>(Arrays.asList(
 			"java.lang.Boolean",
 			"java.lang.String",
 			"java.lang.Short",
@@ -168,19 +167,19 @@ public class TypeUtil {
 			"java.lang.String[]"
 	));
 
-	private static final Set<String> ATOMIC_TYPES = new HashSet<String>(PRIMITIVE_TYPE_NAMES.keySet());
+	private static final Set<String> ATOMIC_TYPES = new HashSet<>(PRIMITIVE_TYPE_NAMES.keySet());
 	static {
 		ATOMIC_TYPES.add(INET_ADDRESS_TYPE_NAME);
 		ATOMIC_TYPES.add(STRING_TYPE_NAME);
 		ATOMIC_TYPES.add(CLASS_TYPE_NAME);
 	}
 
-	private static final Map<String, String[]> TYPE_VALUES = new HashMap<String, String[]>();
+	private static final Map<String, String[]> TYPE_VALUES = new HashMap<>();
 	static {
 		TYPE_VALUES.put("java.lang.Boolean", new String[] { "true", "false" });
 	}
 
-	private static final Map<String,ValueParser> VALUE_PARSERS = new HashMap<String, ValueParser>();
+	private static final Map<String,ValueParser> VALUE_PARSERS = new HashMap<>();
 	static {
 		VALUE_PARSERS.put(Byte.class.getName(), new RadixableParser() {
 			public Object parse(String str, int radix) {
@@ -624,7 +623,7 @@ public class TypeUtil {
 				Collection<StsValueHint> keyHints = getAllowedValues(keyType, enumMode);
 				if (CollectionUtil.hasElements(keyHints)) {
 					Type valueType = getDomainType(type);
-					ArrayList<TypedProperty> properties = new ArrayList<TypedProperty>(keyHints.size());
+					ArrayList<TypedProperty> properties = new ArrayList<>(keyHints.size());
 					for (StsValueHint hint : keyHints) {
 						String propName = hint.getValue();
 						properties.add(new TypedProperty(propName, valueType, hint.getDescriptionProvider(), hint.getDeprecation()));
@@ -641,7 +640,7 @@ public class TypeUtil {
 				List<IMethod> getters = getGetterMethods(eclipseType);
 				//TODO: getters inherited from super classes?
 				if (getters!=null && !getters.isEmpty()) {
-					ArrayList<TypedProperty> properties = new ArrayList<TypedProperty>(getters.size());
+					ArrayList<TypedProperty> properties = new ArrayList<>(getters.size());
 					for (IMethod m : getters) {
 						Deprecation deprecation = DeprecationUtil.extract(m);
 						Type propType = null;
@@ -708,7 +707,7 @@ public class TypeUtil {
 			if (eclipseType!=null && eclipseType.isClass()) {
 				IMethod[] allMethods = eclipseType.getMethods();
 				if (ArrayUtils.hasElements(allMethods)) {
-					ArrayList<IMethod> getters = new ArrayList<IMethod>();
+					ArrayList<IMethod> getters = new ArrayList<>();
 					for (IMethod m : allMethods) {
 						if (!isStatic(m) && isPublic(m)) {
 							String mname = m.getElementName();

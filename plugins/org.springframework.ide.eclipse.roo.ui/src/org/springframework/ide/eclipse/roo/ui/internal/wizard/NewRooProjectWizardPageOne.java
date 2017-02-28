@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2012 - 2016 GoPivotal, Inc.
+ *  Copyright (c) 2012 - 2017 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -454,6 +454,7 @@ public class NewRooProjectWizardPageOne extends WizardPage {
 		}
 		
 		protected void updateEnablement() {
+			String version = null;
 			if (getProjectType() != ProjectType.PROJECT) {
 				packagingGroup.setEnabled(false);
 				for (Control c : packagingGroup.getChildren()) {
@@ -463,11 +464,17 @@ public class NewRooProjectWizardPageOne extends WizardPage {
 				IRooInstall install = null;
 				if (useDefaultRooInstall()) {
 					install = RooCoreActivator.getDefault().getInstallManager().getDefaultRooInstall();
+					if(install != null){
+						version = install.getVersion();
+					}
 				}
 				else {
 					String installName = getRooInstallName();
 					if (installName != null) {
 						install = RooCoreActivator.getDefault().getInstallManager().getRooInstall(installName);
+						if(install != null) {
+							version = install.getVersion();
+						}
 					}
 				}
 				
@@ -478,28 +485,16 @@ public class NewRooProjectWizardPageOne extends WizardPage {
 				}
 			}
 			
-			
 			// Checks if Spring Roo 2.0+ version is selected
-			String version = null;
-			if (useDefaultRooInstall()) {
-				version = RooCoreActivator.getDefault().getInstallManager().getDefaultRooInstall().getVersion();
-			}
-			else {
-				String installName = getRooInstallName();
-				if (installName != null) {
-					version = RooCoreActivator.getDefault().getInstallManager().getRooInstall(installName).getVersion();
-				}
-			}
-			
 			// Roo Addon Suite generation is only available on Spring Roo 2.0+ version
-			if(!version.startsWith("2") && getProjectType().equals(ProjectType.ADDON_SUITE)){
+			if(version != null && !version.startsWith("2") && getProjectType().equals(ProjectType.ADDON_SUITE)){
 				MessageDialog.openInformation(getShell(), "Spring Roo Alert", "You are trying to generate an Spring Roo Addon Suite, but this functionality is only available on Spring Roo 2.0+ versions."
 						+ " Please, install an Spring Roo 2.0+ distribution to continue.");
 				fNameGroup.fTemplateField.selectItem(0);
 			}
 			
 			// Multimodule generation is only available on Spring Roo 2.0+ version
-			if (!version.startsWith("2") && (getProjectType().equals(ProjectType.MULTIMODULE_BASIC)
+			if (version != null && !version.startsWith("2") && (getProjectType().equals(ProjectType.MULTIMODULE_BASIC)
 					|| getProjectType().equals(ProjectType.MULTIMODULE_STANDARD))) {
 				MessageDialog.openInformation(getShell(), "Spring Roo Alert", "You are trying to generate multimodule project, but this functionality is only available on Spring Roo 2.0+ versions."
 						+ " Please, install an Spring Roo 2.0+ distribution to continue.");
