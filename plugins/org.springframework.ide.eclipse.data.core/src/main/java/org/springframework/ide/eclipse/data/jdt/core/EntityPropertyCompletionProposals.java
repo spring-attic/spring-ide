@@ -49,10 +49,6 @@ public class EntityPropertyCompletionProposals extends JavaCompletionProposalCom
 	private static final ISharedImages IMAGES = new SharedImages();
 	private static final Image KEYWORD = DataCoreImages.getImage(DataCoreImages.IMG_OBJS_KEY);
 
-	/* 
-	 * (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComputer#computeCompletionProposals(org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
-	 */
 	@Override
 	public List<ICompletionProposal> computeCompletionProposals(ContentAssistInvocationContext context,
 			IProgressMonitor monitor) {
