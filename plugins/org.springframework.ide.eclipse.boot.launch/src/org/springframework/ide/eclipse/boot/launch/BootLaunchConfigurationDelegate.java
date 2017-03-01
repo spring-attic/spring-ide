@@ -44,6 +44,8 @@ import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springsource.ide.eclipse.commons.core.util.OsUtils;
 
+import com.google.common.collect.ImmutableList;
+
 /**
  * @author Kris De Volder
  */
@@ -111,6 +113,10 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 	 * a whole bunch of inherited code just so we can modify it to add an extra argument.
 	 */
 	private static final ThreadLocal<ILaunch> CURRENT_LAUNCH = new ThreadLocal<>();
+
+	private static final List<PropVal> DEFAULT_PROPS = ImmutableList.of(
+			new PropVal("management.security.enabled", "false", true)
+	);
 
 	@Override
 	public void launch(ILaunchConfiguration conf, String mode,
@@ -256,6 +262,7 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		setEnableLifeCycle(wc, DEFAULT_ENABLE_LIFE_CYCLE);
 		setTerminationTimeout(wc,""+DEFAULT_TERMINATION_TIMEOUT);
 		setJMXPort(wc, ""+DEFAULT_JMX_PORT);
+		setProperties(wc, DEFAULT_PROPS);
 		if (!OsUtils.isWindows()) {
 			setVMArgs(wc, ENABLE_CHEAP_ENTROPY_VM_ARGS);
 		}
