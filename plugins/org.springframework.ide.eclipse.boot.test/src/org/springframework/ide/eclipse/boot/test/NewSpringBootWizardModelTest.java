@@ -422,27 +422,12 @@ public class NewSpringBootWizardModelTest extends TestCase {
 		searchBox.setValue(pattern);
 		Filter<Dependency> filter = model.getDependencyFilter().getValue();
 
-		LiveVariable<Boolean> selection = new LiveVariable<>(false);
-		LiveVariable<Boolean> enablement = new LiveVariable<>(true);
-
 		Dependency dep = new Dependency();
 		dep.setId(id);
-		dep.setName(null);
+		dep.setName(label);
 		dep.setDescription(desc);
-		CheckBoxModel<Dependency> cb = new CheckBoxModel<>(label, dep, selection, enablement);
 
-		assertEquals(expect, filter.accept(cb.getValue()));
-
-		// No matter what, filter should allways accept checbox that has already been selected:
-		selection.setValue(true);
-		assertEquals(true, filter.accept(cb.getValue()));
-
-		// Check that enablement is ignored by filter (i.e. setting enablement false does not change
-		// whether filter accepts the cb
-		enablement.setValue(true);
-		assertEquals(true, filter.accept(cb.getValue()));
-		selection.setValue(false);
-		assertEquals(expect, filter.accept(cb.getValue()));
+		assertEquals(expect, filter.accept(dep));
 	}
 
 	private CheckBoxModel<Dependency> getCheckboxById(List<CheckBoxModel<Dependency>> list, String id) {
