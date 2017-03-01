@@ -25,12 +25,9 @@ import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageWithSections;
 
 public abstract class MultipleViewsDependencyPage extends WizardPageWithSections {
 	private static final int NUM_COLUMNS_FREQUENTLY_USED = 3;
-	private static final int MAX_MOST_POPULAR = 3*NUM_COLUMNS_FREQUENTLY_USED;
-	private static final int DEPENDENCY_SECTION_WIDTH = 200;
-	private static final int DEPENDENCY_SECTION_HEIGHT = 200;
+	private static final int MAX_MOST_POPULAR = 3 * NUM_COLUMNS_FREQUENTLY_USED;
 
 	private CheckBoxesSection<Dependency> frequentlyUsedCheckboxes;
-
 
 	private final NewSpringBootWizardModel model;
 
@@ -38,7 +35,7 @@ public abstract class MultipleViewsDependencyPage extends WizardPageWithSections
 		super("page2", "New Spring Starter Project Dependencies", null);
 		this.model = getModel();
 	}
-	
+
 	abstract protected NewSpringBootWizardModel getModel();
 
 	private void refreshFrequentlyUsedDependencies() {
@@ -69,11 +66,11 @@ public abstract class MultipleViewsDependencyPage extends WizardPageWithSections
 		sections.add(
 			new GroupSection(this, null,
 				new SearchBoxSection(this, model.getDependencyFilterBoxText()) {
-					@Override
-					protected String getSearchHint() {
-						return "Type to search dependencies";
-					}
-				},
+			@Override
+			protected String getSearchHint() {
+				return "Type to search dependencies";
+			}
+		},
 
 				new ButtonSection(this, "Make Default", () -> {
 					if (model.saveDefaultDependencies()) {
@@ -89,12 +86,12 @@ public abstract class MultipleViewsDependencyPage extends WizardPageWithSections
 			)
 			.columns(3, false)
 		);
-		
+
 		sections.add(createFrequentlyUsedSection());
-		
+
 		// Shared selection model between the different "dependency" sections
 		SelectionModel<String> categorySelection = new SelectionModel<>();
-		
+
 		sections.add(
 				new GroupSection(this, null,
 						new GroupSection(this, "Categories", new ChooseCategorySection(this, 
@@ -104,10 +101,10 @@ public abstract class MultipleViewsDependencyPage extends WizardPageWithSections
 						new GroupSection(this, "Dependencies", new ChooseDependencySection(this,
 								model, 
 								categorySelection)),
-						
+
 //						new GroupSection(this, "Dependencies", new FilteredDependenciesSection(this,
-//								model, model.getDependencyFilter())),
-						
+				// model, model.getDependencyFilter())),
+
 						new GroupSection(this, "Selected", new SelectedDependenciesSection(this,
 								model))
 					)
@@ -116,7 +113,7 @@ public abstract class MultipleViewsDependencyPage extends WizardPageWithSections
 
 		return sections;
 	}
-	
+
 	protected GroupSection createFrequentlyUsedSection() {
 		List<CheckBoxModel<Dependency>> frequentDependencies = model.getFrequentlyUsedDependencies(MAX_MOST_POPULAR);
 		frequentlyUsedCheckboxes = new CheckBoxesSection<>(this, frequentDependencies).columns(NUM_COLUMNS_FREQUENTLY_USED);
