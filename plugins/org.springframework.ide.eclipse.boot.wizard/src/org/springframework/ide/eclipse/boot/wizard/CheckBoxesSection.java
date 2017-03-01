@@ -131,7 +131,10 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 				}
 				model.getSelection().addListener(selectionListener = new ValueListener<Boolean>() {
 					public void gotValue(LiveExpression<Boolean> exp, Boolean value) {
-						if (value!=null) {
+						// note: checkbox button may be null in cases where the
+						// model keeps changing in the container section and the selection
+						// listener is notified after the button was disposed
+						if (value!=null && cb != null && !cb.isDisposed()) {
 							cb.setSelection(value);
 						}
 					}
@@ -192,9 +195,9 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 		 * Apply filter and return whether this widget's visibility has changed as a result.
 		 * @return Whether visibility of this widget changed.
 		 */
-		public boolean applyFilter(Filter<CheckBoxModel<T>> filter) {
+		public boolean applyFilter(Filter<T> filter) {
 			boolean wasVisible = isVisible.getValue();
-			isVisible.setValue(filter.accept(model));
+			isVisible.setValue(filter.accept(model.getValue()));
 			boolean changed = wasVisible != isVisible.getValue();
 			return changed;
 		}
@@ -257,7 +260,7 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 		}
 	}
 
-	public boolean applyFilter(Filter<CheckBoxModel<T>> filter) {
+	public boolean applyFilter(Filter<T> filter) {
 		if (subsections!=null) {
 			boolean visibilityChanged = false;
 			for (WizardPageSection subsection : subsections) {

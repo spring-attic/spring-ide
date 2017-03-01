@@ -518,7 +518,7 @@ public class NewSpringBootWizardModel {
 		return filterBox.getText();
 	}
 
-	public LiveExpression<Filter<CheckBoxModel<Dependency>>> getDependencyFilter() {
+	public LiveExpression<Filter<Dependency>> getDependencyFilter() {
 		return filterBox.getFilter();
 	}
 

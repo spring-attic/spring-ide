@@ -28,6 +28,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
+import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
 /**
  * Model for a UI widget that offers multiple choices. Could be represented
@@ -198,9 +199,32 @@ public class MultiSelectionFieldModel<T> {
 		return Collections.unmodifiableList(checkboxes);
 	}
 	
+	/**
+	 * Converts all the current selections into CheckBoxModel objects. One checkbox to
+	 * represent each choice.
+	 */
+	public List<CheckBoxModel<T>> getSelectionsAsCheckBoxModels() {
+		List<CheckBoxModel<T>> checkboxes = new ArrayList<CheckBoxModel<T>>(labelMap.size());
+		for (T choice : labelMap.keySet()) {
+			CheckBoxModel<T> cb;
+			LiveVariable<Boolean> selection = getSelection(choice);
+			if (selection.getValue()) {
+				checkboxes.add(cb = new CheckBoxModel<T>(getLabel(choice), choice, selection, getEnablement(choice)));
+				cb.setTooltip(getTooltip(choice));
+			}
+		}
+		return Collections.unmodifiableList(checkboxes);
+	}
+	
 	public void clearSelection() {
 		selections.values().forEach(liveVar -> {
 			liveVar.setValue(false);
+		});
+	}
+	
+	public void addSelectionListener(ValueListener<Boolean> listener) {
+		selections.values().forEach(livevar -> {
+			livevar.addListener(listener);
 		});
 	}
 
