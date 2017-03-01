@@ -60,6 +60,9 @@ public class ManifestYamlEditorTest {
 				// ---------------
 				"random-route: <*>",
 				// ---------------
+				"routes:\n"+
+				"- <*>",
+				// ---------------
 				"services:\n"+
 				"- <*>",
 				// ---------------
@@ -133,6 +136,10 @@ public class ManifestYamlEditorTest {
 				// ---------------
 				"applications:\n" +
 				"- random-route: <*>",
+				// ---------------
+				"applications:\n" +
+				"- routes:\n"+
+				"  - <*>",
 				// ---------------
 				"applications:\n" +
 				"- services:\n"+
