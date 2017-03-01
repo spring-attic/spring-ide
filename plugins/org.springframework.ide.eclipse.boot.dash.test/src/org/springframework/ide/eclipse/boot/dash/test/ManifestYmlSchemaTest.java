@@ -52,6 +52,7 @@ public class ManifestYmlSchemaTest {
 			"no-route",
 			"path",
 			"random-route",
+			"routes",
 			"services",
 			"stack",
 			"timeout"
@@ -76,6 +77,7 @@ public class ManifestYmlSchemaTest {
 			"no-route",
 			"path",
 			"random-route",
+			"routes",
 			"services",
 			"stack",
 			"timeout"
