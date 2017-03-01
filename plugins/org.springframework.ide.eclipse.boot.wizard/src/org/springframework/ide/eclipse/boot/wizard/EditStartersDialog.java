@@ -43,7 +43,7 @@ public class EditStartersDialog extends DialogWithSections {
 		this.searchBoxModel = new DependencyFilterBox();
 	}
 
-	private void applyFilter(Filter<CheckBoxModel<Dependency>> filter, ExpandableSection expandable, CheckBoxesSection<Dependency> checkboxes) {
+	private void applyFilter(Filter<Dependency> filter, ExpandableSection expandable, CheckBoxesSection<Dependency> checkboxes) {
 		boolean visChanged = checkboxes.applyFilter(filter);
 
 		if (checkboxes.isCreated()) {
@@ -89,11 +89,11 @@ public class EditStartersDialog extends DialogWithSections {
 				)
 			);
 			expandable.getExpansionState().setValue(false);
-			searchBoxModel.getFilter().addListener(new UIValueListener<Filter<CheckBoxModel<Dependency>>>() {
+			searchBoxModel.getFilter().addListener(new UIValueListener<Filter<Dependency>>() {
 				@Override
 				protected void uiGotValue(
-						LiveExpression<Filter<CheckBoxModel<Dependency>>> exp,
-						Filter<CheckBoxModel<Dependency>> value
+						LiveExpression<Filter<Dependency>> exp,
+						Filter<Dependency> value
 				) {
 					applyFilter(value, expandable, checkboxes);
 				}
