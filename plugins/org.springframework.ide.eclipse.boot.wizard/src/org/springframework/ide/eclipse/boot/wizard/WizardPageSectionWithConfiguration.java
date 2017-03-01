@@ -18,38 +18,25 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
+import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageWithSections;
 
 public abstract class WizardPageSectionWithConfiguration extends WizardPageSection {
 
-	private final SectionConfiguration configuration;
-	
-	public WizardPageSectionWithConfiguration(IPageWithSections owner, SectionConfiguration configuration) {
+
+	public WizardPageSectionWithConfiguration(IPageWithSections owner) {
 		super(owner);
-		this.configuration = configuration;
+	}
+
+	protected WizardPageWithSections getWizardOwner() {
+		return (WizardPageWithSections) owner;
 	}
 
 	protected Composite area(Composite parent) {
 
 		Composite area = new Composite(parent, SWT.NONE);
-		GridData data = null;
-		GridLayout layout = null;
-		if (configuration != null) {
-			data = configuration.getSectionAreaLayoutData();
-			layout = configuration.getSectionAreaLayout();
-		} 
-	
-		if (layout != null) {
-			area.setLayout(layout);
-		} else {
-			GridLayoutFactory.fillDefaults().numColumns(1).applyTo(area);
-		}
-		
-		if (data != null) {
-			area.setLayoutData(data);
-		} else {
-			GridDataFactory.fillDefaults().grab(true, true).applyTo(area);
-		}
-		
+		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(area);
+		GridDataFactory.fillDefaults().grab(true, true).applyTo(area);
+
 		return area;
 	}
 

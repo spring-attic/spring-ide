@@ -168,7 +168,7 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 			super("page2", "New Spring Starter Project", null);
 		}
 
-		private void applyFilter(Filter<CheckBoxModel<Dependency>> filter, ExpandableSection expandable, CheckBoxesSection<Dependency> checkboxes) {
+		private void applyFilter(Filter<Dependency> filter, ExpandableSection expandable, CheckBoxesSection<Dependency> checkboxes) {
 			boolean visChanged = checkboxes.applyFilter(filter);
 
 			if (checkboxes.isCreated()) {
@@ -248,11 +248,11 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 					)
 				);
 				expandable.getExpansionState().setValue(false);
-				model.getDependencyFilter().addListener(new UIValueListener<Filter<CheckBoxModel<Dependency>>>() {
+				model.getDependencyFilter().addListener(new UIValueListener<Filter<Dependency>>() {
 					@Override
 					protected void uiGotValue(
-							LiveExpression<Filter<CheckBoxModel<Dependency>>> exp,
-							Filter<CheckBoxModel<Dependency>> value
+							LiveExpression<Filter<Dependency>> exp,
+							Filter<Dependency> value
 					) {
 						applyFilter(value, expandable, checkboxes);
 					}

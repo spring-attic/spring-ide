@@ -49,17 +49,17 @@ public class ChooseCategorySection extends WizardPageSectionWithConfiguration {
 	private ILabelProvider labelProvider = new SimpleLabelProvider();
 	List<String> hiddenCategories = new ArrayList<>();
 	
-	public ChooseCategorySection(IPageWithSections owner, NewSpringBootWizardModel model, SelectionModel<String> selection, SectionConfiguration configuration) {
-		super(owner, configuration);
+	public ChooseCategorySection(IPageWithSections owner, NewSpringBootWizardModel model, SelectionModel<String> selection) {
+		super(owner);
 		this.selection = selection;
 		this.model = model;
 		this.categories = model.dependencies.getCategories().toArray(new String[]{});
 	
-		model.getDependencyFilter().addListener(new UIValueListener<Filter<CheckBoxModel<Dependency>>>() {
+		model.getDependencyFilter().addListener(new UIValueListener<Filter<Dependency>>() {
 			@Override
 			protected void uiGotValue(
-					LiveExpression<Filter<CheckBoxModel<Dependency>>> exp,
-					Filter<CheckBoxModel<Dependency>> value
+					LiveExpression<Filter<Dependency>> exp,
+					Filter<Dependency> value
 			) {
 				applyFilter(value);
 			}
@@ -124,7 +124,7 @@ public class ChooseCategorySection extends WizardPageSectionWithConfiguration {
 		control.addPaintListener(l);
 	}
 	
-	private void applyFilter(Filter<CheckBoxModel<Dependency>> filter) {
+	private void applyFilter(Filter<Dependency> filter) {
 		hiddenCategories.clear();
 		if (viewer != null && !viewer.getControl().isDisposed()) {
 			
@@ -155,8 +155,8 @@ public class ChooseCategorySection extends WizardPageSectionWithConfiguration {
 		}
 	}
 	
-	private boolean applyFilterOnItem(Filter<CheckBoxModel<Dependency>> filter, CheckBoxModel<Dependency> model) {
-		return filter.accept(model);
+	private boolean applyFilterOnItem(Filter<Dependency> filter, CheckBoxModel<Dependency> model) {
+		return filter.accept(model.getValue());
 	}
 	
 	private class ChoicesFilter extends ViewerFilter {

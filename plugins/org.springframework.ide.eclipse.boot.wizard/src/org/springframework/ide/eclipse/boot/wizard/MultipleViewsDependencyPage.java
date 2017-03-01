@@ -95,22 +95,21 @@ public abstract class MultipleViewsDependencyPage extends WizardPageWithSections
 		// Shared selection model between the different "dependency" sections
 		SelectionModel<String> categorySelection = new SelectionModel<>();
 		
-		int categoriesHeight = 20*model.dependencies.getCategories().size();
-		SectionConfiguration catConfing = new SectionConfiguration(DEPENDENCY_SECTION_WIDTH, categoriesHeight, 1);
-		SectionConfiguration depConfing = new SectionConfiguration(DEPENDENCY_SECTION_WIDTH, DEPENDENCY_SECTION_HEIGHT, 1);
-		SectionConfiguration selectedConfing = new SectionConfiguration(DEPENDENCY_SECTION_WIDTH, DEPENDENCY_SECTION_HEIGHT, 1);
 		sections.add(
 				new GroupSection(this, null,
 						new GroupSection(this, "Categories", new ChooseCategorySection(this, 
 								model,
-								categorySelection, catConfing)),
+								categorySelection)),
 
 						new GroupSection(this, "Dependencies", new ChooseDependencySection(this,
 								model, 
-								categorySelection, depConfing)),
+								categorySelection)),
+						
+//						new GroupSection(this, "Dependencies", new FilteredDependenciesSection(this,
+//								model, model.getDependencyFilter())),
 						
 						new GroupSection(this, "Selected", new SelectedDependenciesSection(this,
-								model, selectedConfing))
+								model))
 					)
 					.columns(3, true)
 				);

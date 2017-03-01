@@ -195,9 +195,9 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 		 * Apply filter and return whether this widget's visibility has changed as a result.
 		 * @return Whether visibility of this widget changed.
 		 */
-		public boolean applyFilter(Filter<CheckBoxModel<T>> filter) {
+		public boolean applyFilter(Filter<T> filter) {
 			boolean wasVisible = isVisible.getValue();
-			isVisible.setValue(filter.accept(model));
+			isVisible.setValue(filter.accept(model.getValue()));
 			boolean changed = wasVisible != isVisible.getValue();
 			return changed;
 		}
@@ -260,7 +260,7 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 		}
 	}
 
-	public boolean applyFilter(Filter<CheckBoxModel<T>> filter) {
+	public boolean applyFilter(Filter<T> filter) {
 		if (subsections!=null) {
 			boolean visibilityChanged = false;
 			for (WizardPageSection subsection : subsections) {
