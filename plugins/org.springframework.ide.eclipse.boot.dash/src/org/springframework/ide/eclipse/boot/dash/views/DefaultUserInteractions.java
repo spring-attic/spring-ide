@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.views;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -29,7 +30,6 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentPropertiesDialog;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.ManifestDiffDialog;
@@ -337,13 +337,13 @@ public class DefaultUserInteractions implements UserInteractions {
 	}
 
 	@Override
-	public boolean confirmApplicationReplacement(String title, String message, CFApplicationDetail details) {
+	public boolean confirmApplicationReplacement(String title, String message, List<String> services) {
 		final boolean[] result = new boolean[] { false };
 		getShell().getDisplay().syncExec(new Runnable() {
 			@Override
 			public void run() {
 				ReplaceExistingApplicationDialog dialog = new ReplaceExistingApplicationDialog(getShell(), title, message,
-						details.getServices());
+						services);
 				result[0] = dialog.open() == IDialogConstants.OK_ID;
 			}
 		});

@@ -373,7 +373,7 @@ public class NewSpringBootWizardModelTest extends TestCase {
 		NewSpringBootWizardModel model = parseFrom(INITIALIZR_JSON);
 
 		LiveVariable<String> searchBox = model.getDependencyFilterBoxText();
-		LiveExpression<Filter<CheckBoxModel<Dependency>>> filter = model.getDependencyFilter();
+		LiveExpression<Filter<Dependency>> filter = model.getDependencyFilter();
 
 		assertEquals("", searchBox.getValue());
 		assertEquals(Filters.acceptAll(),filter.getValue());
@@ -420,29 +420,14 @@ public class NewSpringBootWizardModelTest extends TestCase {
 			String id, String label, String desc) {
 		LiveVariable<String> searchBox = model.getDependencyFilterBoxText();
 		searchBox.setValue(pattern);
-		Filter<CheckBoxModel<Dependency>> filter = model.getDependencyFilter().getValue();
-
-		LiveVariable<Boolean> selection = new LiveVariable<>(false);
-		LiveVariable<Boolean> enablement = new LiveVariable<>(true);
+		Filter<Dependency> filter = model.getDependencyFilter().getValue();
 
 		Dependency dep = new Dependency();
 		dep.setId(id);
-		dep.setName(null);
+		dep.setName(label);
 		dep.setDescription(desc);
-		CheckBoxModel<Dependency> cb = new CheckBoxModel<>(label, dep, selection, enablement);
 
-		assertEquals(expect, filter.accept(cb));
-
-		// No matter what, filter should allways accept checbox that has already been selected:
-		selection.setValue(true);
-		assertEquals(true, filter.accept(cb));
-
-		// Check that enablement is ignored by filter (i.e. setting enablement false does not change
-		// whether filter accepts the cb
-		enablement.setValue(true);
-		assertEquals(true, filter.accept(cb));
-		selection.setValue(false);
-		assertEquals(expect, filter.accept(cb));
+		assertEquals(expect, filter.accept(dep));
 	}
 
 	private CheckBoxModel<Dependency> getCheckboxById(List<CheckBoxModel<Dependency>> list, String id) {

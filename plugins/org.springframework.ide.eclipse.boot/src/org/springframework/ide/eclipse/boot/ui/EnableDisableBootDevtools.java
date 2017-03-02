@@ -11,9 +11,17 @@
 package org.springframework.ide.eclipse.boot.ui;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
@@ -29,6 +37,7 @@ import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.MavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
@@ -108,12 +117,44 @@ public class EnableDisableBootDevtools implements IObjectActionDelegate {
 		}
 		action.setEnabled(project!=null);
 		if (bootProject!=null) {
-			action.setText(hasDevTools(bootProject)?"Remove Boot Devtools":"Add Boot Devtools");
+			try {
+				action.setText(fastHasDevTools(bootProject)?"Remove Boot Devtools":"Add Boot Devtools");
+			} catch (TimeoutException | InterruptedException e) {
+				action.setText("Add/Remove Boot Devtools");
+			} catch (Exception e) {
+				//Unexpected
+				Log.log(e);
+			}
 		} else if (project!=null) {
 			//action shouldn't really be enabled, but it is enabled so that it can
 			// fail with an explanation when the user tries it.
 			action.setText("Add/Remove Boot Devtools");
 		}
+	}
+
+	/**
+	 * Like hasDevTools, but suitable for calling on the UI thread. This operation may fail
+	 * with a {@link TimeoutException} if it can not be readily determined whether a project
+	 * has dev tools as a dependency (this may happen, for example because m2e is still in the process of
+	 * resolving the dependencies). It would be undesirable to block on the UI thread to wait for this
+	 * process to complete.
+	 */
+	private boolean fastHasDevTools(ISpringBootProject bootProject) throws TimeoutException, InterruptedException, ExecutionException {
+		CompletableFuture<Boolean> result = new CompletableFuture<>();
+		Job job = new Job("Check for devtools") {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					result.complete(hasDevTools(bootProject));
+				} catch (Throwable e) {
+					result.completeExceptionally(e);
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		job.setSystem(true);
+		job.schedule();
+		return result.get(100, TimeUnit.MILLISECONDS);
 	}
 
 	private boolean hasDevTools(ISpringBootProject bootProject) {

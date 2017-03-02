@@ -104,6 +104,12 @@ public class InitializrServiceSpec {
 			return id;
 		}
 
+		@Override
+		public String getName() {
+			String name = super.getName();
+			return name!=null?name:getId();
+		}
+
 		public void setId(String id) {
 			this.id = id;
 		}
@@ -199,7 +205,7 @@ public class InitializrServiceSpec {
 	/////////////////////////////////////////////////////////////////
 
 	public Map<String, String> getTextInputs() throws JSONException {
-		Map<String,String> defaults = new HashMap<String, String>();
+		Map<String,String> defaults = new HashMap<>();
 		Iterator<String> props = data.keys();
 		while(props.hasNext()) {
 			String key = props.next();

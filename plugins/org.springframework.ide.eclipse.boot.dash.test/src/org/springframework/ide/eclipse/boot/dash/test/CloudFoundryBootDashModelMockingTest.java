@@ -1322,7 +1322,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		waitForState(app, RunState.INACTIVE, 3000);
 
 		harness.answerDeploymentPrompt(ui, appName, appName);
-		Mockito.doReturn(true).when(ui).confirmOperation(same("Replace Existing Application"), any());
+		Mockito.doReturn(true).when(ui).confirmApplicationReplacement(any(), any(), any());
 		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
 
 		System.out.println(app.getRunState());
@@ -1331,7 +1331,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertEquals(project, app.getProject());
 		assertEquals(1, deployedApp.getPushCount());
 
-		verify(ui).confirmOperation(any(), any());
+		verify(ui).confirmApplicationReplacement(any(), any(), any());
 	}
 
 
@@ -1349,14 +1349,14 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertNull(app.getProject());
 
 		harness.answerDeploymentPrompt(ui, appName, appName);
-		doReturn(false).when(ui).confirmOperation(same("Replace Existing Application"), any());
+		doReturn(false).when(ui).confirmApplicationReplacement(any(), any(), any());
 		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
 
 		waitForJobsToComplete();
 		assertNull(app.getProject()); // since op was canceled it should not have set the project on the app.
 		assertEquals(0, deployedApp.getPushCount());							  // since op was canceled it should not have deployed the app.
 
-		verify(ui).confirmOperation(any(), any());
+		verify(ui).confirmApplicationReplacement(any(), any(), any());
 	}
 
 	@Test public void manifestDiffDialogNotShownWhenNothingChanged() throws Exception {

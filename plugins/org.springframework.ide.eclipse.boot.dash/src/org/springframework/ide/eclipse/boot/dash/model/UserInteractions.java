@@ -11,12 +11,12 @@
 package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.dialogs.IInputValidator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.dialogs.CustomizeAppsManagerURLDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.CustomizeAppsManagerURLDialogModel;
@@ -42,7 +42,7 @@ public interface UserInteractions {
 	void openLaunchConfigurationDialogOnGroup(ILaunchConfiguration selection, String launchGroup);
 	void openUrl(String url);
 	boolean confirmOperation(String title, String message);
-	boolean confirmApplicationReplacement(String title, String message, CFApplicationDetail details);
+	boolean confirmApplicationReplacement(String title, String message, List<String> services);
 	void openDialog(ToggleFiltersDialogModel model);
 	void openPasswordDialog(PasswordDialogModel model);
 	String selectRemoteEureka(BootDashViewModel model, String title, String message, String initialValue, IInputValidator validator);

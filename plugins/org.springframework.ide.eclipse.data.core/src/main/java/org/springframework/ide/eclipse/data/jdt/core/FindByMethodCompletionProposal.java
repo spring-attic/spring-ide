@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2012 Spring IDE Developers
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Spring IDE Developers - initial API and implementation
+ *******************************************************************************/
 package org.springframework.ide.eclipse.data.jdt.core;
 
 import java.util.ArrayList;
@@ -39,17 +49,10 @@ import org.springsource.ide.eclipse.commons.core.StatusHandler;
 public class FindByMethodCompletionProposal implements IJavaCompletionProposal, ICompletionProposalExtension2 {
 
 	private final String propertyName;
-
 	private final Class<?> propertyClass;
-
 	private final Class<?> domainClass;
-
 	private final int startOffset;
-
-	private final int endOffset;
-
 	private IRegion selectedRegion;
-
 	private final ICompilationUnit cu;
 
 	public FindByMethodCompletionProposal(String propertyName, Class<?> propertyClass, Class<?> domainClass,
@@ -58,7 +61,6 @@ public class FindByMethodCompletionProposal implements IJavaCompletionProposal, 
 		this.propertyClass = propertyClass;
 		this.domainClass = domainClass;
 		this.startOffset = startOffset;
-		this.endOffset = endOffset;
 
 		this.selectedRegion = new Region(startOffset, endOffset);
 		cu = javaContext.getCompilationUnit();
@@ -194,7 +196,7 @@ public class FindByMethodCompletionProposal implements IJavaCompletionProposal, 
 
 			methodStr.append(");");
 
-			document.replace(startOffset + importOffset, endOffset - startOffset, methodStr.toString());
+			document.replace(startOffset + importOffset, offset - startOffset, methodStr.toString());
 
 			for (LinkedPositionGroup currGroup : groups) {
 				model.addGroup(currGroup);
