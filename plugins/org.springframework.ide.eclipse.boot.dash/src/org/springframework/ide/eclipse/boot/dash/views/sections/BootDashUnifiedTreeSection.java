@@ -62,7 +62,6 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.livexp.ElementwiseListener;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
-import org.springframework.ide.eclipse.boot.dash.livexp.ui.ReflowUtil;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
@@ -91,6 +90,8 @@ import org.springsource.ide.eclipse.commons.ui.UiUtil;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+
+import org.springsource.ide.eclipse.commons.livexp.ui.util.ReflowUtil;
 
 /**
  * Displays all runtargets and elements in a single 'unified' tree viewer.
