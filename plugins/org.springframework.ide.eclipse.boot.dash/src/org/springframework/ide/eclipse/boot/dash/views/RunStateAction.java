@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2016 Pivotal Software, Inc.
+ * Copyright (c) 2015, 2017 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,7 +20,6 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
-import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
 
@@ -122,11 +121,7 @@ public abstract class RunStateAction extends AbstractBootDashElementsAction {
 	}
 
 	protected boolean goalStateAppliesTo(BootDashElement e) {
-		RunTarget target = e.getTarget();
-		if (target!=null) {
-			return target.supportedGoalStates().contains(goalState);
-		}
-		return false;
+		return e.supportedGoalStates().contains(goalState);
 	}
 
 

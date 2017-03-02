@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2016 Pivotal, Inc.
+ * Copyright (c) 2015, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import java.util.EnumSet;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
@@ -100,4 +101,14 @@ public interface BootDashElement extends Nameable, Taggable {
 	boolean hasDevtools();
 
 	String getUrl();
+
+	/**
+	 * @return Subset of the runstate that a user can request when changing a
+	 *         DashBoardElement's 'run-state'. Essentially, this allows
+	 *         determining whether a given BootDahsElement can support the
+	 *         'stop', 'run' and 'debug' operations which request that the
+	 *         element be brought into a given run-state.
+	 */
+	EnumSet<RunState> supportedGoalStates();
+
 }

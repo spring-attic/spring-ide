@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -651,6 +651,7 @@ public class BootDashActionTests {
 		RunTarget target = RunTargets.LOCAL;
 		when(element.getBootDashModel()).thenReturn(harness.getRunTargetModel(RunTargetTypes.LOCAL));
 		when(element.getTarget()).thenReturn(target);
+		when(element.supportedGoalStates()).thenReturn(RunTargets.LOCAL_RUN_GOAL_STATES);
 		return element;
 	}
 

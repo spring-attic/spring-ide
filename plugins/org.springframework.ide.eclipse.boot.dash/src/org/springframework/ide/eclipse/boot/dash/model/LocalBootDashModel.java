@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2016 Pivotal, Inc.
+ * Copyright (c) 2015, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -24,12 +25,17 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaProject;
+import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.core.cli.BootCliCommand;
 import org.springframework.ide.eclipse.boot.core.cli.BootCliUtils;
 import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
 import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager.BootInstallListener;
+import org.springframework.ide.eclipse.boot.core.cli.CloudCliUtils;
 import org.springframework.ide.eclipse.boot.core.cli.install.IBootInstall;
 import org.springframework.ide.eclipse.boot.dash.devtools.DevtoolsPortRefresher;
+import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchConfRunStateTracker;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchConfigurationTracker;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
@@ -44,6 +50,7 @@ import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ProjectCha
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
@@ -63,10 +70,10 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 	ClasspathListenerManager classpathListenerManager;
 
 	private final LaunchConfRunStateTracker launchConfRunStateTracker = new LaunchConfRunStateTracker();
-	private final LocalServiceRunStateTracker launchConfLocalServiceRunStateTracker = new LocalServiceRunStateTracker();
 	final LaunchConfigurationTracker launchConfTracker = new LaunchConfigurationTracker(BootLaunchConfigurationDelegate.TYPE_ID);
 
 	LiveSetVariable<BootDashElement> elements; //lazy created
+	private LiveVariable<LocalCloudServiceDashElement[]> serviceElements = new LiveVariable<>(new LocalCloudServiceDashElement[0]);
 	private BootDashModelConsoleManager consoleManager;
 
 	private DevtoolsPortRefresher devtoolsPortRefresher;
@@ -74,6 +81,7 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 	private ValueListener<Pattern> projectExclusionListener;
 
 	private BootInstallListener bootInstallListener;
+	private IPropertyStore modelStore;
 
 	public class WorkspaceListener implements ProjectChangeListener, ClasspathListener {
 
@@ -95,6 +103,10 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 		this.projectElementFactory = new BootProjectDashElementFactory(this, context.getProjectProperties(), launchConfElementFactory);
 		this.consoleManager = new LocalElementConsoleManager();
 		this.projectExclusion = context.getBootProjectExclusion();
+
+		RunTargetType type = getRunTarget().getType();
+		IPropertyStore typeStore = PropertyStoreFactory.createForScope(type, context.getRunTargetProperties());
+		this.modelStore = PropertyStoreFactory.createSubStore(getRunTarget().getId(), typeStore);
 	}
 
 	void init() {
@@ -108,12 +120,20 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 					updateElementsFromWorkspace();
 				}
 			});
+
 			updateElementsFromWorkspace();
+
+			serviceElements.addListener((exp, value) -> {
+				updateElementsFromWorkspace();
+			});
+
+			// Refresh local cloud services after the listener refreshing UI is added
+			refreshLocalCloudServices();
 
 			bootInstallListener = new BootInstallListener() {
 				@Override
 				public void defaultInstallChanged() {
-					refresh(null);
+					refreshLocalCloudServices();
 				}
 			};
 			try {
@@ -121,14 +141,6 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 			} catch (Exception e) {
 				Log.log(e);
 			}
-			new Job("Loading local cloud services") {
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					fetchLocalServices();
-					return Status.OK_STATUS;
-				}
-			}.schedule();
-
 			this.devtoolsPortRefresher = new DevtoolsPortRefresher(this, projectElementFactory);
 		}
 	}
@@ -168,7 +180,6 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 		}
 		launchConfTracker.dispose();
 		launchConfRunStateTracker.dispose();
-		launchConfLocalServiceRunStateTracker.dispose();
 	}
 
 	void updateElementsFromWorkspace() {
@@ -179,6 +190,7 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 				newElements.add(element);
 			}
 		}
+		newElements.addAll(Arrays.asList(serviceElements.getValue()));
 		elements.replaceAll(newElements);
 		projectElementFactory.disposeAllExcept(newElements);
 	}
@@ -193,23 +205,17 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 	 */
 	public void refresh(UserInteractions ui) {
 		updateElementsFromWorkspace();
-		new Job("Loading local cloud services") {
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				fetchLocalServices();
-				return Status.OK_STATUS;
-			}
-		}.schedule();
 	}
 
-	private void fetchLocalServices() {
+	private LocalCloudServiceDashElement[] fetchLocalServices() {
+		List<LocalCloudServiceDashElement> localServices = new LinkedList<>();
 		try {
 			IBootInstall bootInstall = BootCliUtils.getSpringBootInstall();
-			if (BootCliUtils.supportsSpringCloud(bootInstall)) {
-				BootCliCommand cmd = new BootCliCommand(BootCliUtils.getSpringBootHome(bootInstall));
+			Version cloudCliVersion = CloudCliUtils.getVersion(bootInstall);
+			if (cloudCliVersion != null && CloudCliUtils.CLOUD_CLI_JAVA_OPTS_SUPPORTING_VERSIONS.includes(cloudCliVersion)) {
+				BootCliCommand cmd = new BootCliCommand(bootInstall.getHome());
 				try {
 					cmd.execute("cloud", "--list");
-					List<BootDashElement> localServices = new LinkedList<>();
 					if (!cmd.getOutput().startsWith("Exception in thread")) {
 						String[] outputLines = cmd.getOutput().split("\n");
 						String servicesLine = outputLines[outputLines.length - 1];
@@ -217,7 +223,6 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 							localServices.add(new LocalCloudServiceDashElement(this, id));
 						}
 					}
-					elements.addAll(localServices);
 				} catch (RuntimeException e) {
 					Log.log(e);
 				}
@@ -225,6 +230,17 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 		} catch (Exception e) {
 			// ignore
 		}
+		return localServices.toArray(new LocalCloudServiceDashElement[localServices.size()]);
+	}
+
+	private void refreshLocalCloudServices() {
+		new Job("Loading local cloud services") {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				serviceElements.setValue(fetchLocalServices());
+				return Status.OK_STATUS;
+			}
+		}.schedule();
 	}
 
 	@Override
@@ -234,10 +250,6 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 
 	public LaunchConfRunStateTracker getLaunchConfRunStateTracker() {
 		return launchConfRunStateTracker;
-	}
-
-	public LocalServiceRunStateTracker getLaunchConfLocalServiceRunStateTracker() {
-		return launchConfLocalServiceRunStateTracker;
 	}
 
 	public BootProjectDashElementFactory getProjectElementFactory() {
@@ -265,5 +277,9 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 	@Override
 	public String getDeletionConfirmationMessage(Collection<BootDashElement> value) {
 		return "Are you sure you want to delete the selected local launch configuration(s)? The configuration(s) will be permanently removed from the workspace.";
+	}
+
+	public IPropertyStore getModelStore() {
+		return modelStore;
 	}
 }

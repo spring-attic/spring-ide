@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,8 +11,6 @@
 package org.springframework.ide.eclipse.boot.dash.model;
 
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.*;
-
-import java.util.EnumSet;
 
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
@@ -37,11 +35,6 @@ public class LocalRunTarget extends AbstractRunTarget {
 
 	private LocalRunTarget() {
 		super(RunTargetTypes.LOCAL, "local");
-	}
-
-	@Override
-	public EnumSet<RunState> supportedGoalStates() {
-		return RunTargets.LOCAL_RUN_GOAL_STATES;
 	}
 
 	public ILaunchConfiguration createLaunchConfig(IJavaProject jp, IType mainType) throws Exception {

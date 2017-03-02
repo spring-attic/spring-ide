@@ -1,9 +1,22 @@
+/*******************************************************************************
+ * Copyright (c) 2015, 2017 Pivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Pivotal, Inc. - initial API and implementation
+ *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import static org.springframework.ide.eclipse.boot.dash.model.RunState.INACTIVE;
+import static org.springframework.ide.eclipse.boot.dash.model.RunState.RUNNING;
+
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutionException;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -13,33 +26,50 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.debug.ui.DebugUITools;
-import org.eclipse.swt.widgets.Display;
-import org.springframework.ide.eclipse.boot.dash.cli.LocalCloudServiceLaunchConfigurationDelegate;
-import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
-import org.springframework.ide.eclipse.boot.dash.util.RunStateTracker.RunStateListener;
+import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
+import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
+import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
+import org.springframework.ide.eclipse.boot.launch.cloud.cli.LocalCloudServiceLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.util.Log;
-import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
-import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableSet;
 
-public class LocalCloudServiceDashElement extends WrappingBootDashElement<String> {
+/**
+ * Spring Cloud CLI local service boot dash element implementation
+ *
+ * @author Alex Boyko
+ *
+ */
+public class LocalCloudServiceDashElement extends AbstractLaunchConfigurationsDashElement<String> {
+
+	private static final EnumSet<RunState> LOCAL_CLOUD_SERVICE_RUN_GOAL_STATES = EnumSet.of(INACTIVE, RUNNING);
 
 	private static final BootDashColumn[] COLUMNS = {BootDashColumn.NAME, BootDashColumn.LIVE_PORT, BootDashColumn.RUN_STATE_ICN};
 
-	private LiveExpression<RunState> runState;
-	private LiveExpression<Integer> livePort;
+	private static final LoadingCache<String, ILaunchConfigurationWorkingCopy> LAUNCH_CONFIG_CACHE = CacheBuilder.newBuilder().build(new CacheLoader<String, ILaunchConfigurationWorkingCopy>() {
 
-	public LocalCloudServiceDashElement(BootDashModel bootDashModel, String id) {
+		@Override
+		public ILaunchConfigurationWorkingCopy load(String key) throws Exception {
+			ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
+			ILaunchConfigurationType type = launchManager.getLaunchConfigurationType(LocalCloudServiceLaunchConfigurationDelegate.TYPE_ID);
+			ILaunchConfigurationWorkingCopy config = type.newInstance(null, key);
+			config.setAttribute(LocalCloudServiceLaunchConfigurationDelegate.ATTR_CLOUD_SERVICE_ID, key);
+			BootLaunchConfigurationDelegate.setEnableLiveBeanSupport(config, BootLaunchConfigurationDelegate.DEFAULT_ENABLE_LIVE_BEAN_SUPPORT);
+			BootLaunchConfigurationDelegate.setEnableLifeCycle(config, BootLaunchConfigurationDelegate.DEFAULT_ENABLE_LIFE_CYCLE);
+			BootLaunchConfigurationDelegate.setTerminationTimeout(config,""+BootLaunchConfigurationDelegate.DEFAULT_TERMINATION_TIMEOUT);
+			BootLaunchConfigurationDelegate.setJMXPort(config, ""+BootLaunchConfigurationDelegate.DEFAULT_JMX_PORT);
+			BootLaunchConfigurationDelegate.setEnableAnsiConsoleOutput(config, BootLaunchConfigurationDelegate.supportsAnsiConsoleOutput());
+			return config;
+		}
+
+	});
+
+	public LocalCloudServiceDashElement(LocalBootDashModel bootDashModel, String id) {
 		super(bootDashModel, id);
-		this.runState = createRunStateExp();
-		this.livePort = createLivePortExp(runState, "local.server.port");
-		addElementNotifier(runState);
 	}
 
 	@Override
@@ -47,59 +77,10 @@ public class LocalCloudServiceDashElement extends WrappingBootDashElement<String
 		return null;
 	}
 
-	@Override
-	public RunState getRunState() {
-		return runState.getValue();
-	}
-
-	@Override
-	public RunTarget getTarget() {
-		return getBootDashModel().getRunTarget();
-	}
-
-	@Override
-	public int getLivePort() {
-		return livePort.getValue();
-	}
-
-	@Override
-	public String getLiveHost() {
-		return runState.getValue() == RunState.RUNNING ? "localhost" : null;
-	}
-
-	@Override
-	public ILaunchConfiguration getActiveConfig() {
-		ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
-		ILaunchConfigurationType type = launchManager.getLaunchConfigurationType(LocalCloudServiceLaunchConfigurationDelegate.ID);
-		try {
-			for (ILaunchConfiguration config : launchManager.getLaunchConfigurations(type)) {
-				if (delegate.equals(config.getAttribute(LocalCloudServiceLaunchConfigurationDelegate.ATTR_CLOUD_SERVICE_ID, (String) null))) {
-					return config;
-				}
-			}
-		} catch (CoreException e) {
-			Log.log(e);
-		}
-		// There is no launch config for the service found, create it and return it then.
-		try {
-			ILaunchConfigurationWorkingCopy config = type.newInstance(null, getName());
-			config.setAttribute(LocalCloudServiceLaunchConfigurationDelegate.ATTR_CLOUD_SERVICE_ID, delegate);
-			return config;
-		} catch (CoreException e) {
-			Log.log(e);
-		}
-		return null;
-	}
-
-	@Override
-	public void stopAsync(UserInteractions ui) throws Exception {
-		stop(false);
-	}
-
-	private ImmutableSet<ILaunch> getLaunches() {
+	public ImmutableSet<ILaunch> getLaunches() {
 		List<ILaunch> launches = new ArrayList<>();
 		ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
-		ILaunchConfigurationType type = launchManager.getLaunchConfigurationType(LocalCloudServiceLaunchConfigurationDelegate.ID);
+		ILaunchConfigurationType type = launchManager.getLaunchConfigurationType(LocalCloudServiceLaunchConfigurationDelegate.TYPE_ID);
 		for (ILaunch launch : launchManager.getLaunches()) {
 			ILaunchConfiguration configuration = launch.getLaunchConfiguration();
 			try {
@@ -113,41 +94,8 @@ public class LocalCloudServiceDashElement extends WrappingBootDashElement<String
 		return ImmutableSet.copyOf(launches);
 	}
 
-	private void stop(boolean sync) throws Exception {
-		final CompletableFuture<Void> done = sync ? new CompletableFuture<>() : null;
-		ImmutableSet<ILaunch> launches = getLaunches();
-		if (sync) {
-			LaunchUtils.whenTerminated(launches, new Runnable() {
-				public void run() {
-					done.complete(null);
-				}
-			});
-		}
-		for (ILaunch launch : launches) {
-			launch.terminate();
-		}
-		if (sync) {
-			//Eclipse waits for 5 seconds before timing out. So we use a similar timeout but slightly
-			// larger. Windows case termination seem to fail silently sometimes so its up to us
-			// to handle here.
-			done.get(6, TimeUnit.SECONDS);
-		}
-	}
-
-	@Override
-	public void restart(RunState runingOrDebugging, UserInteractions ui) throws Exception {
-		stop(true);
-		Display.getDefault().syncExec(new Runnable() {
-			public void run() {
-				DebugUITools.launch(getActiveConfig(), ILaunchManager.RUN_MODE);
-			}
-		});
-	}
-
 	@Override
 	public void openConfig(UserInteractions ui) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -162,8 +110,7 @@ public class LocalCloudServiceDashElement extends WrappingBootDashElement<String
 
 	@Override
 	public Object getParent() {
-		// TODO Auto-generated method stub
-		return null;
+		return getBootDashModel();
 	}
 
 	@Override
@@ -177,64 +124,32 @@ public class LocalCloudServiceDashElement extends WrappingBootDashElement<String
 	}
 
 	@Override
-	public PropertyStoreApi getPersistentProperties() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	private LiveExpression<Integer> createLivePortExp(final LiveExpression<RunState> runState, final String propName) {
-		AsyncLiveExpression<Integer> exp = new AsyncLiveExpression<Integer>(-1, "Refreshing port info ("+propName+") for "+getName()) {
-			{
-				//Doesn't really depend on runState, but should be recomputed when runState changes.
-				dependsOn(runState);
-			}
-			@Override
-			protected Integer compute() {
-				return -1;
-			}
-		};
-		addDisposableChild(exp);
-		return exp;
-	}
-
-	private LiveExpression<RunState> createRunStateExp() {
-		final LocalServiceRunStateTracker tracker = getBootDashModel().getLaunchConfLocalServiceRunStateTracker();
-		final LiveExpression<RunState> exp = new LiveExpression<RunState>() {
-			protected RunState compute() {
-				return tracker.getState(delegate);
-			}
-
-			@Override
-			public void dispose() {
-				super.dispose();
-			}
-		};
-		final RunStateListener<String> runStateListener = new RunStateListener<String>() {
-			@Override
-			public void stateChanged(String serviceId) {
-				if (delegate.equals(serviceId)) {
-					exp.refresh();
-				}
-			}
-		};
-		tracker.addListener(runStateListener);
-		exp.onDispose(new DisposeListener() {
-			public void disposed(Disposable disposed) {
-				tracker.removeListener(runStateListener);
-			}
-		});
-		addDisposableChild(exp);
-		exp.refresh();
-		return exp;
-	}
-
-	@Override
 	public LocalBootDashModel getBootDashModel() {
 		return (LocalBootDashModel) super.getBootDashModel();
 	}
 
 	public String getId() {
 		return delegate;
+	}
+
+	@Override
+	protected IPropertyStore createPropertyStore() {
+		return PropertyStoreFactory.createSubStore("S-"+delegate, getBootDashModel().getModelStore());
+	}
+
+	@Override
+	public ImmutableSet<ILaunchConfiguration> getLaunchConfigs() {
+		try {
+			return ImmutableSet.of(LAUNCH_CONFIG_CACHE.get(delegate));
+		} catch (ExecutionException e) {
+			Log.log(e);
+			return ImmutableSet.of();
+		}
+	}
+
+	@Override
+	public EnumSet<RunState> supportedGoalStates() {
+		return LOCAL_CLOUD_SERVICE_RUN_GOAL_STATES;
 	}
 
 }

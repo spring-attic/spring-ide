@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.model.IProcess;
@@ -19,10 +17,8 @@ import org.eclipse.debug.internal.ui.views.console.ProcessConsole;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
-import org.springframework.ide.eclipse.boot.dash.cli.LocalCloudServiceLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.LocalCloudServiceDashElement;
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
@@ -88,37 +84,14 @@ public class LocalElementConsoleManager extends BootDashModelConsoleManager {
 		IConsoleManager manager = eclipseConsoleManager();
 		IConsole[] activeConsoles = manager.getConsoles();
 		if (activeConsoles != null) {
-			if (element instanceof LocalCloudServiceDashElement) {
-				LocalCloudServiceDashElement localServiceElement = (LocalCloudServiceDashElement) element;
-				// Local Services launches
-				for (ILaunch launch : DebugPlugin.getDefault().getLaunchManager().getLaunches()) {
-					try {
-						String serviceId = launch.getLaunchConfiguration().getAttribute(LocalCloudServiceLaunchConfigurationDelegate.ATTR_CLOUD_SERVICE_ID, (String) null);
-						if (localServiceElement.getId().equals(serviceId)) {
-							IProcess[] processes = launch.getProcesses();
-							if (processes != null) {
-								for (IProcess process : processes) {
-									IConsole console = getConsole(process, activeConsoles);
-									if (console!=null) {
-										return console;
-									}
-								}
-							}
-						}
-					} catch (CoreException e) {
-						// ignore
-					}
-				}
-			} else {
-				ImmutableSet<ILaunchConfiguration> launchConfs = element.getLaunchConfigs();
-				for (ILaunch launch : BootLaunchUtils.getLaunches(launchConfs)) {
-					IProcess[] processes = launch.getProcesses();
-					if (processes != null) {
-						for (IProcess process : processes) {
-							IConsole console = getConsole(process, activeConsoles);
-							if (console!=null) {
-								return console;
-							}
+			ImmutableSet<ILaunchConfiguration> launchConfs = element.getLaunchConfigs();
+			for (ILaunch launch : BootLaunchUtils.getLaunches(launchConfs)) {
+				IProcess[] processes = launch.getProcesses();
+				if (processes != null) {
+					for (IProcess process : processes) {
+						IConsole console = getConsole(process, activeConsoles);
+						if (console!=null) {
+							return console;
 						}
 					}
 				}

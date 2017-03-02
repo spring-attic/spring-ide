@@ -69,37 +69,50 @@
                afterSection="org.springframework.ide.eclipse.boot.dash.section.LocalGeneral, org.springframework.ide.eclipse.boot.dash.section.CloudFoundryGeneral"
                class="org.springframework.ide.eclipse.boot.dash.views.properties.RequestMappingPropertiesSection"
                id="org.springframework.ide.eclipse.boot.dash.section.RequestMappingsSection"
-               filter="org.springframework.ide.eclipse.boot.dash.views.properties.RequestMappingPropertiesFilter"
                tab="org.springframework.ide.eclipse.boot.dash.tab.RequestMappings">
             <input
-                  type="org.springframework.ide.eclipse.boot.dash.model.BootDashElement">
+                  type="org.springframework.ide.eclipse.boot.dash.model.LaunchConfDashElement">
+            </input>
+            <input
+                  type="org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement">
+            </input>
+            <input
+                  type="org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement">
             </input>
          </propertySection>
          <propertySection
                class="org.springframework.ide.eclipse.boot.dash.views.properties.LocalGeneralPropertiesSection"
-               filter="org.springframework.ide.eclipse.boot.dash.views.properties.LocalElementFilter"
                id="org.springframework.ide.eclipse.boot.dash.section.LocalGeneral"
                tab="org.springframework.ide.eclipse.boot.dash.tab.General">
             <input
-                  type="org.springframework.ide.eclipse.boot.dash.model.BootDashElement">
+                  type="org.springframework.ide.eclipse.boot.dash.model.LaunchConfDashElement">
+            </input>
+            <input
+                  type="org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement">
             </input>
          </propertySection>
          <propertySection
                class="org.springframework.ide.eclipse.boot.dash.views.properties.CloudFoundryAppPropertiesSection"
-               filter="org.springframework.ide.eclipse.boot.dash.views.properties.CloudFoundryAppElementFilter"
                id="org.springframework.ide.eclipse.boot.dash.section.CloudFoundryGeneral"
                tab="org.springframework.ide.eclipse.boot.dash.tab.General">
             <input
-                  type="org.springframework.ide.eclipse.boot.dash.model.BootDashElement">
+                  type="org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement">
             </input>
          </propertySection>
          <propertySection
                class="org.springframework.ide.eclipse.boot.dash.views.properties.CloudServiceGeneralPropertiesSection"
-               filter="org.springframework.ide.eclipse.boot.dash.views.properties.CloudServiceElementFilter"
                id="org.springframework.ide.eclipse.boot.dash.section.CloudServiceSection"
                tab="org.springframework.ide.eclipse.boot.dash.tab.General">
             <input
-                  type="org.springframework.ide.eclipse.boot.dash.model.BootDashElement">
+                  type="org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudServiceInstanceDashElement">
+            </input>
+         </propertySection>
+         <propertySection
+               class="org.springframework.ide.eclipse.boot.dash.views.properties.LocalCloudServiceGeneralPropertiesSection"
+               id="org.springframework.ide.eclipse.boot.dash.section.LocalCloudServiceGeneral"
+               tab="org.springframework.ide.eclipse.boot.dash.tab.General">
+            <input
+                  type="org.springframework.ide.eclipse.boot.dash.model.LocalCloudServiceDashElement">
             </input>
          </propertySection>
       </propertySections>
@@ -157,13 +170,6 @@
 	          sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
 	          sourcePathComputerId="org.eclipse.jdt.launching.sourceLookup.javaSourcePathComputer">
 	    </launchConfigurationType>
-     <launchConfigurationType
-           category="org.eclipse.ui.externaltools"
-           delegate="org.springframework.ide.eclipse.boot.dash.cli.LocalCloudServiceLaunchConfigurationDelegate"
-           id="org.springframework.ide.eclipse.boot.dash.cloud.cli.service"
-           modes="run"
-           name="Local Cloud Service">
-     </launchConfigurationType>
      <launchConfigurationType
            id="org.springsource.ide.eclipse.gradle.launch"
            modes="run"
