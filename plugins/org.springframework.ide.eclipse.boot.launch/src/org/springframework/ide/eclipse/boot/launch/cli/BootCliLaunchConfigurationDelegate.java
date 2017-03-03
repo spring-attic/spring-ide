@@ -31,6 +31,7 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
 import org.springframework.ide.eclipse.boot.core.cli.BootCliUtils;
 import org.springframework.ide.eclipse.boot.core.cli.install.IBootInstall;
+import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
@@ -93,7 +94,11 @@ public class BootCliLaunchConfigurationDelegate extends LaunchConfigurationDeleg
 	 * @throws Exception
 	 */
 	protected String[] getVmArgs(IBootInstall install, ILaunch launch, ILaunchConfiguration conf) throws Exception {
-		return new String[0];
+		if (BootLaunchConfigurationDelegate.supportsAnsiConsoleOutput()) {
+			return new String[] {"-Dspring.output.ansi.enabled=always"};
+		} else {
+			return new String[0];
+		}
 	}
 
 	/**
