@@ -28,7 +28,7 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IProcess;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
-import org.springframework.ide.eclipse.boot.launch.cloud.cli.LocalCloudServiceLaunchConfigurationDelegate;
+import org.springframework.ide.eclipse.boot.launch.cli.CloudCliServiceLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.boot.util.ProcessListenerAdapter;
@@ -115,7 +115,7 @@ public abstract class RunStateTracker<T> extends ProcessListenerAdapter implemen
 
 	protected boolean isInteresting(ILaunch l) {
 		return BootLaunchUtils.isBootLaunch(l)
-				|| LocalCloudServiceLaunchConfigurationDelegate.isLocalCloudServiceLaunch(l.getLaunchConfiguration());
+				|| CloudCliServiceLaunchConfigurationDelegate.isLocalCloudServiceLaunch(l.getLaunchConfiguration());
 	}
 
 	/**
@@ -155,7 +155,7 @@ public abstract class RunStateTracker<T> extends ProcessListenerAdapter implemen
 
 	protected ReadyStateMonitor createReadyStateTracker(ILaunch l) {
 		try {
-			if (BootLaunchConfigurationDelegate.canUseLifeCycle(l) || LocalCloudServiceLaunchConfigurationDelegate.canUseLifeCycle(l)) {
+			if (BootLaunchConfigurationDelegate.canUseLifeCycle(l) || CloudCliServiceLaunchConfigurationDelegate.canUseLifeCycle(l)) {
 				Provider<Integer> jmxPort = () -> BootLaunchConfigurationDelegate.getJMXPortAsInt(l);
 				return new SpringApplicationReadyStateMonitor(jmxPort);
 			}

@@ -46,7 +46,7 @@ import org.springframework.ide.eclipse.boot.dash.util.DebugUtil;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchConfRunStateTracker;
 import org.springframework.ide.eclipse.boot.dash.util.RunStateTracker.RunStateListener;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
-import org.springframework.ide.eclipse.boot.launch.cloud.cli.LocalCloudServiceLaunchConfigurationDelegate;
+import org.springframework.ide.eclipse.boot.launch.cli.CloudCliServiceLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
 import org.springframework.ide.eclipse.boot.launch.util.SpringApplicationLifeCycleClientManager;
 import org.springframework.ide.eclipse.boot.launch.util.SpringApplicationLifecycleClient;
@@ -488,7 +488,7 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 		debug("["+this.getName()+"] getLivePort("+propName+") conf = "+conf);
 		if (conf!=null && READY_STATES.contains(getRunState())) {
 			debug("["+this.getName()+"] getLivePort("+propName+") runstate ok");
-			if (BootLaunchConfigurationDelegate.canUseLifeCycle(conf) || LocalCloudServiceLaunchConfigurationDelegate.canUseLifeCycle(conf)) {
+			if (BootLaunchConfigurationDelegate.canUseLifeCycle(conf) || CloudCliServiceLaunchConfigurationDelegate.canUseLifeCycle(conf)) {
 				debug("["+this.getName()+"] getLivePort("+propName+") canUseLifeCycle ok");
 				//TODO: what if there are several launches? Right now we ignore all but the first
 				// non-terminated launch.

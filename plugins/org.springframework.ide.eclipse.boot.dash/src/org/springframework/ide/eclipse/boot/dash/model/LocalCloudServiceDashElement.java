@@ -29,8 +29,7 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
-import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
-import org.springframework.ide.eclipse.boot.launch.cloud.cli.LocalCloudServiceLaunchConfigurationDelegate;
+import org.springframework.ide.eclipse.boot.launch.cli.CloudCliServiceLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.util.Log;
 
 import com.google.common.cache.CacheBuilder;
@@ -51,21 +50,10 @@ public class LocalCloudServiceDashElement extends AbstractLaunchConfigurationsDa
 	private static final BootDashColumn[] COLUMNS = {BootDashColumn.NAME, BootDashColumn.LIVE_PORT, BootDashColumn.RUN_STATE_ICN};
 
 	private static final LoadingCache<String, ILaunchConfigurationWorkingCopy> LAUNCH_CONFIG_CACHE = CacheBuilder.newBuilder().build(new CacheLoader<String, ILaunchConfigurationWorkingCopy>() {
-
 		@Override
 		public ILaunchConfigurationWorkingCopy load(String key) throws Exception {
-			ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
-			ILaunchConfigurationType type = launchManager.getLaunchConfigurationType(LocalCloudServiceLaunchConfigurationDelegate.TYPE_ID);
-			ILaunchConfigurationWorkingCopy config = type.newInstance(null, key);
-			config.setAttribute(LocalCloudServiceLaunchConfigurationDelegate.ATTR_CLOUD_SERVICE_ID, key);
-			BootLaunchConfigurationDelegate.setEnableLiveBeanSupport(config, BootLaunchConfigurationDelegate.DEFAULT_ENABLE_LIVE_BEAN_SUPPORT);
-			BootLaunchConfigurationDelegate.setEnableLifeCycle(config, BootLaunchConfigurationDelegate.DEFAULT_ENABLE_LIFE_CYCLE);
-			BootLaunchConfigurationDelegate.setTerminationTimeout(config,""+BootLaunchConfigurationDelegate.DEFAULT_TERMINATION_TIMEOUT);
-			BootLaunchConfigurationDelegate.setJMXPort(config, ""+BootLaunchConfigurationDelegate.DEFAULT_JMX_PORT);
-			BootLaunchConfigurationDelegate.setEnableAnsiConsoleOutput(config, BootLaunchConfigurationDelegate.supportsAnsiConsoleOutput());
-			return config;
+			return CloudCliServiceLaunchConfigurationDelegate.createLaunchConfig(key);
 		}
-
 	});
 
 	public LocalCloudServiceDashElement(LocalBootDashModel bootDashModel, String id) {
@@ -80,11 +68,11 @@ public class LocalCloudServiceDashElement extends AbstractLaunchConfigurationsDa
 	public ImmutableSet<ILaunch> getLaunches() {
 		List<ILaunch> launches = new ArrayList<>();
 		ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
-		ILaunchConfigurationType type = launchManager.getLaunchConfigurationType(LocalCloudServiceLaunchConfigurationDelegate.TYPE_ID);
+		ILaunchConfigurationType type = launchManager.getLaunchConfigurationType(CloudCliServiceLaunchConfigurationDelegate.TYPE_ID);
 		for (ILaunch launch : launchManager.getLaunches()) {
 			ILaunchConfiguration configuration = launch.getLaunchConfiguration();
 			try {
-				if (configuration.getType() == type && delegate.equals(configuration.getAttribute(LocalCloudServiceLaunchConfigurationDelegate.ATTR_CLOUD_SERVICE_ID, (String) null))) {
+				if (configuration.getType() == type && delegate.equals(configuration.getAttribute(CloudCliServiceLaunchConfigurationDelegate.ATTR_CLOUD_SERVICE_ID, (String) null))) {
 					launches.add(launch);
 				}
 			} catch (CoreException e) {
