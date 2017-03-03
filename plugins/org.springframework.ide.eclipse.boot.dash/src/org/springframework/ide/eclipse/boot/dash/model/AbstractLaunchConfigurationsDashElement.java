@@ -38,6 +38,9 @@ import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
+import org.springframework.ide.eclipse.boot.dash.model.requestmappings.ActuatorClient;
+import org.springframework.ide.eclipse.boot.dash.model.requestmappings.JMXActuatorClient;
+import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RestActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKClient;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKLaunchTracker;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKTunnel;
@@ -481,6 +484,25 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 		return exp;
 	}
 
+	@Override
+	protected ActuatorClient getActuatorClient(URI target) {
+		return new JMXActuatorClient(getTypeLookup(), this::getJmxPort);
+	}
+
+	private int getJmxPort() {
+		for (ILaunchConfiguration c : getLaunchConfigs()) {
+			for (ILaunch l : LaunchUtils.getLaunches(c)) {
+				if (!l.isTerminated()) {
+					int port = BootLaunchConfigurationDelegate.getJMXPortAsInt(l);
+					if (port>0) {
+						return port;
+					}
+				}
+			}
+		}
+		return -1;
+	}
+
 	private int getLivePort(String propName) {
 		debug("["+this.getName()+"] getLivePort("+propName+")");
 		ILaunchConfiguration conf = getActiveConfig();
@@ -696,8 +718,4 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 	public LocalBootDashModel getBootDashModel() {
 		return (LocalBootDashModel) super.getBootDashModel();
 	}
-
-
-
-
 }

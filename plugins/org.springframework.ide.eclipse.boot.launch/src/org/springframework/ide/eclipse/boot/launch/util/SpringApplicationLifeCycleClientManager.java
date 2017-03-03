@@ -79,7 +79,7 @@ public class SpringApplicationLifeCycleClientManager {
 				if (resolvedPort==null || resolvedPort <=0) {
 					throw new IllegalStateException("JMX port not specified");
 				}
-				connector = SpringApplicationLifecycleClient.createLocalJmxConnector(resolvedPort);
+				connector = JMXClient.createLocalJmxConnector(resolvedPort);
 				client = new SpringApplicationLifecycleClient(
 						connector.getMBeanServerConnection(),
 						SpringApplicationLifecycleClient.DEFAULT_OBJECT_NAME

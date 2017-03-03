@@ -22,7 +22,7 @@ import java.util.List;
 
 import org.eclipse.jdt.core.IType;
 import org.junit.Test;
-import org.springframework.ide.eclipse.boot.dash.model.requestmappings.ActuatorClient;
+import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RestActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.TypeLookup;
 import org.springframework.web.client.RestClientException;
@@ -34,7 +34,7 @@ public class ActuatorClientTest {
 	@Test public void testBasic() throws RestClientException, Exception {
 		RestTemplate rest = mock(RestTemplate.class);
 		TypeLookup types = mock(TypeLookup.class);
-		ActuatorClient client = new ActuatorClient(new URI("http://sample"), types, rest);
+		RestActuatorClient client = new RestActuatorClient(new URI("http://sample"), types, rest);
 		when(rest.getForObject("http://sample/mappings", String.class))
 			.thenReturn(getContents("sample.json"));
 
@@ -47,7 +47,7 @@ public class ActuatorClientTest {
 	@Test public void testException() throws RestClientException, Exception {
 		RestTemplate rest = mock(RestTemplate.class);
 		TypeLookup types = mock(TypeLookup.class);
-		ActuatorClient client = new ActuatorClient(new URI("http://sample"), types, rest);
+		RestActuatorClient client = new RestActuatorClient(new URI("http://sample"), types, rest);
 
 		when(rest.getForObject("http://sample/mappings", String.class))
 			.thenThrow(new RestClientException("Something went wrong!"));
@@ -58,7 +58,7 @@ public class ActuatorClientTest {
 	@Test public void testUnparsableData() throws RestClientException, Exception {
 		RestTemplate rest = mock(RestTemplate.class);
 		TypeLookup types = mock(TypeLookup.class);
-		ActuatorClient client = new ActuatorClient(new URI("http://sample"), types, rest);
+		RestActuatorClient client = new RestActuatorClient(new URI("http://sample"), types, rest);
 
 		when(rest.getForObject("http://sample/mappings", String.class))
 			.thenReturn("{This is not json,,,");
@@ -85,7 +85,7 @@ public class ActuatorClientTest {
 		when(rest.getForObject("http://sample/mappings", String.class))
 			.thenReturn(json);
 
-		ActuatorClient client = new ActuatorClient(new URI("http://sample"), types, rest);
+		RestActuatorClient client = new RestActuatorClient(new URI("http://sample"), types, rest);
 		when(types.findType(fqTypeName)).thenReturn(type);
 
 		RequestMapping rm = assertRequestMappingWithPath(client.getRequestMappings(), "/env");
@@ -116,7 +116,7 @@ public class ActuatorClientTest {
 		when(rest.getForObject("http://sample/mappings", String.class))
 			.thenReturn(json);
 
-		ActuatorClient client = new ActuatorClient(new URI("http://sample"), types, rest);
+		RestActuatorClient client = new RestActuatorClient(new URI("http://sample"), types, rest);
 		when(types.findType(fqTypeName)).thenReturn(type);
 
 		List<RequestMapping> requestMappings = client.getRequestMappings();

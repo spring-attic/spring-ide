@@ -19,9 +19,6 @@ import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
-import javax.management.remote.JMXConnector;
-import javax.management.remote.JMXConnectorFactory;
-import javax.management.remote.JMXServiceURL;
 
 /**
  * A JMX client for the {@code SpringApplicationLifecycle} mbean. Permits to obtain
@@ -42,19 +39,6 @@ public class SpringApplicationLifecycleClient {
 			String jmxName) {
 		this.connection = connection;
 		this.objectName = toObjectName(jmxName);
-	}
-
-	/**
-	 * Create a connector for an {@link javax.management.MBeanServer} exposed on the
-	 * current machine and the current port. Security should be disabled.
-	 * @param port the port on which the mbean server is exposed
-	 * @return a connection
-	 * @throws IOException if the connection to that server failed
-	 */
-	public static JMXConnector createLocalJmxConnector(int port) throws IOException {
-		String url = "service:jmx:rmi:///jndi/rmi://127.0.0.1:" + port + "/jmxrmi";
-		JMXServiceURL serviceUrl = new JMXServiceURL(url);
-		return JMXConnectorFactory.connect(serviceUrl, null);
 	}
 
 	/**
