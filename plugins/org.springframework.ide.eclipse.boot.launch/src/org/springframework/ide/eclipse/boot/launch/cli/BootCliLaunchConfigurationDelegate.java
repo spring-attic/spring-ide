@@ -77,12 +77,15 @@ public class BootCliLaunchConfigurationDelegate extends LaunchConfigurationDeleg
 	 * @throws Exception
 	 */
 	protected String[] getEnv(IBootInstall install, ILaunch launch, ILaunchConfiguration conf) throws Exception {
+		List<String> env = new ArrayList<>(2);
+		IVMInstall vmInstall = verifyVMInstall(conf);
+		env.add("JAVA_HOME=" + vmInstall.getInstallLocation());
 		try {
-			return new String[] {"SPRING_HOME=" + install.getHome()};
+			env.add("SPRING_HOME=" + install.getHome());
 		} catch (Exception e) {
 			Log.log(e);
-			return new String[0];
 		}
+		return env.toArray(new String[env.size()]);
 	}
 
 	/**
