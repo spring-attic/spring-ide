@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -33,6 +32,7 @@ import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager.BootInst
 import org.springframework.ide.eclipse.boot.core.cli.CloudCliUtils;
 import org.springframework.ide.eclipse.boot.core.cli.install.IBootInstall;
 import org.springframework.ide.eclipse.boot.dash.devtools.DevtoolsPortRefresher;
+import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
@@ -50,7 +50,6 @@ import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ProjectCha
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
@@ -72,8 +71,10 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 	private final LaunchConfRunStateTracker launchConfRunStateTracker = new LaunchConfRunStateTracker();
 	final LaunchConfigurationTracker launchConfTracker = new LaunchConfigurationTracker(BootLaunchConfigurationDelegate.TYPE_ID);
 
-	LiveSetVariable<BootDashElement> elements; //lazy created
-	private LiveVariable<LocalCloudServiceDashElement[]> serviceElements = new LiveVariable<>(new LocalCloudServiceDashElement[0]);
+	private LiveSetVariable<BootProjectDashElement> applications; //lazy created
+	private LiveSetVariable<LocalCloudServiceDashElement> cloudCliservices;
+	private ObservableSet<BootDashElement> allElements;
+
 	private BootDashModelConsoleManager consoleManager;
 
 	private DevtoolsPortRefresher devtoolsPortRefresher;
@@ -110,8 +111,10 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 	}
 
 	void init() {
-		if (elements==null) {
-			this.elements = new LiveSetVariable<>(AsyncMode.SYNC);
+		if (allElements==null) {
+			this.applications = new LiveSetVariable<>(AsyncMode.SYNC);
+			this.cloudCliservices = new LiveSetVariable<>(AsyncMode.SYNC);
+			this.allElements = LiveSets.union(this.applications, this.cloudCliservices);
 			WorkspaceListener workspaceListener = new WorkspaceListener();
 			this.openCloseListenerManager = new ProjectChangeListenerManager(workspace, workspaceListener);
 			this.classpathListenerManager = new ClasspathListenerManager(workspaceListener);
@@ -121,14 +124,7 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 				}
 			});
 
-			updateElementsFromWorkspace();
-
-			serviceElements.addListener((exp, value) -> {
-				updateElementsFromWorkspace();
-			});
-
-			// Refresh local cloud services after the listener refreshing UI is added
-			refreshLocalCloudServices();
+			refresh(null);
 
 			bootInstallListener = new BootInstallListener() {
 				@Override
@@ -150,8 +146,9 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 	 * listening for changes to the workspace in order to keep itself in synch.
 	 */
 	public void dispose() {
-		if (elements!=null) {
-			elements = null;
+		if (applications!=null) {
+			applications.getValue().forEach(bde -> bde.dispose());
+			applications = null;
 			openCloseListenerManager.dispose();
 			openCloseListenerManager = null;
 			classpathListenerManager.dispose();
@@ -178,26 +175,32 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 				Log.log(e);
 			}
 		}
+		if (cloudCliservices != null) {
+			cloudCliservices.getValue().forEach(bde -> bde.dispose());
+			cloudCliservices = null;
+		}
+		if (allElements != null) {
+			allElements = null;
+		}
 		launchConfTracker.dispose();
 		launchConfRunStateTracker.dispose();
 	}
 
 	void updateElementsFromWorkspace() {
-		Set<BootDashElement> newElements = new HashSet<>();
+		Set<BootProjectDashElement> newElements = new HashSet<>();
 		for (IProject p : this.workspace.getRoot().getProjects()) {
-			BootDashElement element = projectElementFactory.createOrGet(p);
+			BootProjectDashElement element = projectElementFactory.createOrGet(p);
 			if (element!=null) {
 				newElements.add(element);
 			}
 		}
-		newElements.addAll(Arrays.asList(serviceElements.getValue()));
-		elements.replaceAll(newElements);
+		applications.replaceAll(newElements);
 		projectElementFactory.disposeAllExcept(newElements);
 	}
 
 	public synchronized ObservableSet<BootDashElement> getElements() {
 		init();
-		return elements;
+		return allElements;
 	}
 
 	/**
@@ -205,9 +208,10 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 	 */
 	public void refresh(UserInteractions ui) {
 		updateElementsFromWorkspace();
+		refreshLocalCloudServices();
 	}
 
-	private LocalCloudServiceDashElement[] fetchLocalServices() {
+	private List<LocalCloudServiceDashElement> fetchLocalServices() {
 		List<LocalCloudServiceDashElement> localServices = new LinkedList<>();
 		try {
 			IBootInstall bootInstall = BootCliUtils.getSpringBootInstall();
@@ -230,14 +234,16 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 		} catch (Exception e) {
 			// ignore
 		}
-		return localServices.toArray(new LocalCloudServiceDashElement[localServices.size()]);
+		return localServices;
 	}
 
 	private void refreshLocalCloudServices() {
 		new Job("Loading local cloud services") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				serviceElements.setValue(fetchLocalServices());
+				List<LocalCloudServiceDashElement> newCloudCliservices = fetchLocalServices();
+				cloudCliservices.getValue().forEach(bde -> bde.dispose());
+				cloudCliservices.replaceAll(newCloudCliservices);
 				return Status.OK_STATUS;
 			}
 		}.schedule();
