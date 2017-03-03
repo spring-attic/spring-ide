@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2013 GoPivotal, Inc.
+ *  Copyright (c) 2013, 2017 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -12,8 +12,8 @@ package org.springframework.ide.eclipse.boot.core.cli;
 
 import java.io.File;
 
-import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.cli.install.BootInstall;
+import org.springframework.ide.eclipse.boot.util.Log;
 
 /**
  * Sprint Boot Installation that is found in a local
@@ -42,20 +42,17 @@ public class LocalBootInstall extends BootInstall {
 			if (version==null) {
 				File[] jars = getBootLibJars();
 				for (File file : jars) {
-					//Lookin for a jar of the form "spring-boot-*-${version}.jar
-					String name = file.getName();
-					if (name.startsWith("spring-boot-") && name.endsWith(".jar")) {
-						int end = name.length()-4; //4 chars in ".jar"
-						int start = name.lastIndexOf("-");
-						if (start>=0) {
-							version = name.substring(start+1, end);
+					//Looking for a jar of the form "spring-boot-*-${version}.jar
+					if (file.getName().startsWith("spring-boot-")) {
+						version = BootCliUtils.getSpringBootCliJarVersion(file.getName());
+						if (version != null) {
 							break;
 						}
 					}
 				}
 			}
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 		} finally {
 			//No matter what, set the version before proceeding from here.
 			if (version==null) {

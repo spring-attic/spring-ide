@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal Software, Inc.
+ * Copyright (c) 2015, 2017 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,6 +28,7 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IProcess;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
+import org.springframework.ide.eclipse.boot.launch.cli.CloudCliServiceLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.boot.util.ProcessListenerAdapter;
@@ -85,7 +86,7 @@ public abstract class RunStateTracker<T> extends ProcessListenerAdapter implemen
 	private Map<T, RunState> activeStates = null;
 	private Map<ILaunch, ReadyStateMonitor> readyStateTrackers = null;
 	private ProcessTracker processTracker = null;
-	private ListenerList listeners = new ListenerList(); // listeners that are interested in us (i.e. clients)
+	private ListenerList<RunStateListener<T>> listeners = new ListenerList<>(); // listeners that are interested in us (i.e. clients)
 
 	private static <T> RunState getState(Map<T, RunState> states, T p) {
 		if (states!=null) {
@@ -113,7 +114,8 @@ public abstract class RunStateTracker<T> extends ProcessListenerAdapter implemen
 	protected abstract T getOwner(ILaunch l);
 
 	protected boolean isInteresting(ILaunch l) {
-		return BootLaunchUtils.isBootLaunch(l);
+		return BootLaunchUtils.isBootLaunch(l)
+				|| CloudCliServiceLaunchConfigurationDelegate.isLocalCloudServiceLaunch(l.getLaunchConfiguration());
 	}
 
 	/**
@@ -153,7 +155,7 @@ public abstract class RunStateTracker<T> extends ProcessListenerAdapter implemen
 
 	protected ReadyStateMonitor createReadyStateTracker(ILaunch l) {
 		try {
-			if (BootLaunchConfigurationDelegate.canUseLifeCycle(l)) {
+			if (BootLaunchConfigurationDelegate.canUseLifeCycle(l) || CloudCliServiceLaunchConfigurationDelegate.canUseLifeCycle(l)) {
 				Provider<Integer> jmxPort = () -> BootLaunchConfigurationDelegate.getJMXPortAsInt(l);
 				return new SpringApplicationReadyStateMonitor(jmxPort);
 			}

@@ -1,4 +1,14 @@
-package org.springframework.ide.eclipse.boot.core.cli;
+/*******************************************************************************
+ * Copyright (c) 2013, 2017 Pivotal Software, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   GoPivotal, Inc. - initial API and implementation
+ *******************************************************************************/
+package org.springframework.ide.eclipse.boot.launch.cli;
 
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTabGroup;
 import org.eclipse.debug.ui.ILaunchConfigurationDialog;
@@ -17,11 +27,11 @@ public class BootGroovyScriptLaunchConfigurationTabGroup extends
 //				new AppletParametersTab(),
 //				new JavaArgumentsTab(),
 //				new JavaJRETab(),
-//				new JavaClasspathTab(), 
+//				new JavaClasspathTab(),
 //				new CommonTab()
 		};
 		setTabs(tabs);
-		
+
 	}
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2013 GoPivotal, Inc.
+ *  Copyright (c) 2013, 2017 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -13,15 +13,14 @@ package org.springframework.ide.eclipse.boot.core.cli.install;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.net.URI;
-import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
-import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
-import org.springsource.ide.eclipse.commons.frameworks.core.util.ArrayEncoder;
+import org.springframework.ide.eclipse.boot.util.Log;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 public abstract class BootInstall implements IBootInstall {
 
@@ -52,6 +51,8 @@ public abstract class BootInstall implements IBootInstall {
 	private static final String UNKNOWN_VERSION = "Unknown";
 
 	File[] bootLibJars; //Set once we determined the location of the spring-boot jar(s) for this install.
+	
+	File[] extensionJars; // Extensions
 
 	private String name;
 
@@ -70,6 +71,20 @@ public abstract class BootInstall implements IBootInstall {
 		}
 		
 		return bootLibJars;
+	}
+
+	@Override
+	public File[] getExtensionsJars() throws Exception {
+		if (extensionJars == null && getHome() != null) {
+			File libFolder = new File(getHome(), "lib");
+			if (libFolder.exists()) {
+				File extFolder = new File(libFolder, "ext");
+				extensionJars = extFolder.exists() ? extFolder.listFiles(JAR_FILE_FILTER) : libFolder.listFiles();
+			} else {
+				extensionJars = NO_FILES;
+			}
+		}
+		return extensionJars;
 	}
 
 	@Override
@@ -140,7 +155,7 @@ public abstract class BootInstall implements IBootInstall {
 			String lastSegment = new Path(uri.getPath()).lastSegment();
 			return lastSegment;
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 			return null;
 		}
 	}
@@ -198,7 +213,7 @@ public abstract class BootInstall implements IBootInstall {
 				}
 			}
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 			return ExceptionUtil.status(e);
 		}
 	}

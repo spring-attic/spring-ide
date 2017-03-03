@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -71,7 +71,7 @@ public class BootProjectDashElementFactory implements Disposable {
 	/**
 	 * Clients should call this to allow factory to remove/dispose elements that are no longer interesting.
 	 */
-	public synchronized void disposeAllExcept(Set<BootDashElement> toRetain) {
+	public synchronized void disposeAllExcept(Set<? extends BootDashElement> toRetain) {
 		if (cache!=null) {
 			Iterator<BootProjectDashElement> iter = cache.values().iterator();
 			while (iter.hasNext()) {

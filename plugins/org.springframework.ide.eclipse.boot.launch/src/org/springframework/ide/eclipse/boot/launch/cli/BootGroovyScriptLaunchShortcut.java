@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 GoPivotal, Inc.
+ * Copyright (c) 2012, 2017 GoPivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,7 @@
  * Contributors:
  * GoPivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.ui;
+package org.springframework.ide.eclipse.boot.launch.cli;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -25,10 +25,8 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
-import org.springframework.ide.eclipse.boot.core.BootActivator;
-import org.springframework.ide.eclipse.boot.core.cli.BootGroovyScriptLaunchConfigurationDelegate;
+import org.springframework.ide.eclipse.boot.util.Log;
 
-@SuppressWarnings("restriction")
 public class BootGroovyScriptLaunchShortcut implements ILaunchShortcut {
 
 	@Override
@@ -37,7 +35,7 @@ public class BootGroovyScriptLaunchShortcut implements ILaunchShortcut {
 			IResource rsrc = getResource(selection);
 			launch(rsrc, mode);
 		} catch (Throwable e) {
-			BootActivator.log(e);
+			Log.log(e);
 		}
 	}
 
@@ -50,13 +48,13 @@ public class BootGroovyScriptLaunchShortcut implements ILaunchShortcut {
 
 	/**
 	 * Returns the singleton launch manager.
-	 * 
+	 *
 	 * @return launch manager
 	 */
 	private ILaunchManager getLaunchManager() {
 		return DebugPlugin.getDefault().getLaunchManager();
 	}
-	
+
 	protected ILaunchConfiguration createConfiguration(IFile rsrc) throws CoreException {
 		ILaunchConfigurationType configType = getConfigurationType();
 		String projectName = rsrc.getProject().getName();
@@ -97,7 +95,7 @@ public class BootGroovyScriptLaunchShortcut implements ILaunchShortcut {
 			}
 			System.out.println(input);
 		} catch (Throwable e) {
-			BootActivator.log(e);
+			Log.log(e);
 		}
 	}
 

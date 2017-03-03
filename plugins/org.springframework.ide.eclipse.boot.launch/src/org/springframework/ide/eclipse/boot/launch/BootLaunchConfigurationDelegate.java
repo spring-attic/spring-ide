@@ -33,7 +33,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.osgi.framework.Bundle;
-import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport;
 import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport.Feature;
@@ -84,7 +83,7 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 	public static final String ENABLE_LIVE_BEAN_SUPPORT = "spring.boot.livebean.enable";
 	public static final boolean DEFAULT_ENABLE_LIVE_BEAN_SUPPORT = true;
 
-	private static final String JMX_PORT = "spring.boot.livebean.port";
+	public static final String JMX_PORT = "spring.boot.livebean.port";
 	public static final int DEFAULT_JMX_PORT = 0; //means pick it dynamically
 
 	public static final String ANSI_CONSOLE_OUTPUT = "spring.boot.ansi.console";
@@ -173,7 +172,7 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 			}
 			return vmArgs;
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 		}
 		return super.getVMArguments(conf);
 	}
@@ -193,7 +192,7 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		try {
 			return conf.getAttribute(HIDE_FROM_BOOT_DASH, DEFAULT_HIDE_FROM_BOOT_DASH);
 		} catch (CoreException e) {
-			BootActivator.log(e);
+			Log.log(e);
 		}
 		return DEFAULT_HIDE_FROM_BOOT_DASH;
 	}
@@ -213,7 +212,7 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		try {
 			return conf.getAttribute(ENABLE_LIFE_CYCLE, DEFAULT_ENABLE_LIFE_CYCLE);
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 		}
 		return DEFAULT_ENABLE_LIFE_CYCLE;
 	}
@@ -269,7 +268,7 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		try {
 			return conf.getAttribute(TERMINATION_TIMEOUT, ""+DEFAULT_TERMINATION_TIMEOUT);
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 			return ""+DEFAULT_TERMINATION_TIMEOUT;
 		}
 	}
@@ -280,7 +279,7 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 			try {
 				return Long.parseLong(v);
 			} catch (Exception e) {
-				BootActivator.log(e);
+				Log.log(e);
 			}
 		}
 		return DEFAULT_TERMINATION_TIMEOUT;
@@ -309,7 +308,7 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		try {
 			return conf.getAttribute(ENABLE_LIVE_BEAN_SUPPORT, DEFAULT_ENABLE_LIVE_BEAN_SUPPORT);
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 		}
 		return DEFAULT_ENABLE_LIVE_BEAN_SUPPORT;
 	}
@@ -318,7 +317,7 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		try {
 			return conf.getAttribute(JMX_PORT, "");
 		} catch (CoreException e) {
-			BootActivator.log(e);
+			Log.log(e);
 		}
 		return "";
 	}
@@ -335,7 +334,7 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		try {
 			return conf.getAttribute(PROFILE, DEFAULT_PROFILE);
 		} catch (CoreException e) {
-			BootActivator.log(e);
+			Log.log(e);
 			return DEFAULT_PROFILE;
 		}
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2016 Pivotal, Inc.
+ * Copyright (c) 2015, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,7 +40,6 @@ import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.ActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.JMXActuatorClient;
-import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RestActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKClient;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKLaunchTracker;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKTunnel;
@@ -49,6 +48,7 @@ import org.springframework.ide.eclipse.boot.dash.util.DebugUtil;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchConfRunStateTracker;
 import org.springframework.ide.eclipse.boot.dash.util.RunStateTracker.RunStateListener;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
+import org.springframework.ide.eclipse.boot.launch.cli.CloudCliServiceLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
 import org.springframework.ide.eclipse.boot.launch.util.SpringApplicationLifeCycleClientManager;
 import org.springframework.ide.eclipse.boot.launch.util.SpringApplicationLifecycleClient;
@@ -509,7 +509,7 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 		debug("["+this.getName()+"] getLivePort("+propName+") conf = "+conf);
 		if (conf!=null && READY_STATES.contains(getRunState())) {
 			debug("["+this.getName()+"] getLivePort("+propName+") runstate ok");
-			if (BootLaunchConfigurationDelegate.canUseLifeCycle(conf)) {
+			if (BootLaunchConfigurationDelegate.canUseLifeCycle(conf) || CloudCliServiceLaunchConfigurationDelegate.canUseLifeCycle(conf)) {
 				debug("["+this.getName()+"] getLivePort("+propName+") canUseLifeCycle ok");
 				//TODO: what if there are several launches? Right now we ignore all but the first
 				// non-terminated launch.
@@ -718,4 +718,10 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 	public LocalBootDashModel getBootDashModel() {
 		return (LocalBootDashModel) super.getBootDashModel();
 	}
+
+	@Override
+	public EnumSet<RunState> supportedGoalStates() {
+		return RunTargets.LOCAL_RUN_GOAL_STATES;
+	}
+
 }
