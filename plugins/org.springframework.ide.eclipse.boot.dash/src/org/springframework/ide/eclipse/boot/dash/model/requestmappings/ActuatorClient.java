@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015-2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,27 +10,38 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model.requestmappings;
 
-import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.JLRMethodParser.JLRMethod;
-import org.springframework.util.StringUtils;
-import org.springframework.web.client.RestOperations;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.ide.eclipse.boot.util.Log;
 
-public class ActuatorClient {
+/**
+ * Abstract implementation of a ActuatorClient. The actuar client connects
+ * to an actuator endpoint retrieving some information from a running spring boot app.
+ * <p>
+ * This implementation is abstract because there is more than one way that we can
+ * connect to an actuator endpoint and retrieve the data from it. The method
+ * to retrieve the data is therefore an abstract method.
+ *
+ * @author Kris De Volder
+ */
+public abstract class ActuatorClient {
+
+	private final TypeLookup typeLookup;
+
+	public ActuatorClient(TypeLookup typeLookup) {
+		this.typeLookup = typeLookup;
+	}
 
 	/**
 	 * Wraps a (key,value) pair from the json returned from the 'mappings' endpoint in the
@@ -152,36 +163,9 @@ public class ActuatorClient {
 		}
 	}
 
-	private RestOperations rest;
-	private URI target;
-	private TypeLookup typeLookup;
-
-	public ActuatorClient(URI target, TypeLookup typeLookup) {
-		this(target, typeLookup, new RestTemplate());
-	}
-
-	public ActuatorClient(URI target, TypeLookup typeLookup, RestTemplate rest) {
-		this.target = target;
-		this.typeLookup = typeLookup;
-		this.rest = rest;
-	}
-	public List<RequestMapping> getRequestMappings() {
-		try {
-			String json = rest.getForObject(target+"/mappings", String.class);
-			if (json!=null) {
-				return parse(json);
-			}
-		} catch (Exception e) {
-			BootDashActivator.log(e);
-		}
-		return null;
-	}
-
-
 	@SuppressWarnings("unchecked")
-	private List<RequestMapping> parse(String json) throws Exception {
-		JSONTokener tokener = new JSONTokener(json);
-		JSONObject obj = new JSONObject(tokener);
+	private List<RequestMapping> parse(String json) throws JSONException {
+		JSONObject obj = new JSONObject(json);
 		Iterator<String> keys = obj.keys();
 		List<RequestMapping> result = new ArrayList<>();
 		while (keys.hasNext()) {
@@ -193,5 +177,17 @@ public class ActuatorClient {
 		return result;
 	}
 
+	public List<RequestMapping> getRequestMappings() {
+		try {
+			String json = getRequestMappingData();
+			if (json!=null) {
+				return parse(json);
+			}
+		} catch (Exception e) {
+			Log.log(e);
+		}
+		return null;
+	}
 
+	protected abstract String getRequestMappingData() throws Exception;
 }

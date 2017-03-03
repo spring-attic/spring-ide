@@ -25,6 +25,7 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
+import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RestActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.ActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.TypeLookup;
@@ -255,7 +256,7 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 					protected ImmutableList<RequestMapping> compute() {
 						URI target = actuatorUrl.getValue();
 						if (target!=null) {
-							ActuatorClient client = new ActuatorClient(target, getTypeLookup(), getRestTemplate());
+							ActuatorClient client = getActuatorClient(target);
 							List<RequestMapping> list = client.getRequestMappings();
 							if (list!=null) {
 								return ImmutableList.copyOf(client.getRequestMappings());
@@ -271,6 +272,10 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 			}
 		}
 		return liveRequestMappings.getValue();
+	}
+
+	protected ActuatorClient getActuatorClient(URI target) {
+		return new RestActuatorClient(target, getTypeLookup(), getRestTemplate());
 	}
 
 	protected RestTemplate getRestTemplate() {

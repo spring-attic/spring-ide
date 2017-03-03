@@ -93,7 +93,7 @@ public class EnableJmxSection extends DelegatingLaunchConfigurationTabSection {
 			terminationTimeoutWidget = new Text(row, SWT.BORDER);
 			GridDataFactory.fillDefaults().hint(UIConstants.fieldLabelWidthHint(terminationTimeoutWidget, 7), SWT.DEFAULT)
 				.applyTo(terminationTimeoutWidget);
-			terminationTimeoutWidget.setToolTipText("How long STS should wait, after asking Boot App nicely to stop, before attemptting to kill a the process more forcibly.");
+			terminationTimeoutWidget.setToolTipText("How long STS should wait, after asking Boot App nicely to stop, before attemptting to kill the process more forcibly.");
 
 			model.anyFeatureEnabled.addListener(new ValueListener<Boolean>() {
 				public void gotValue(LiveExpression<Boolean> exp, Boolean enable) {
@@ -111,12 +111,12 @@ public class EnableJmxSection extends DelegatingLaunchConfigurationTabSection {
 			connectCheckbox(model.liveBeanEnabled, liveBeanCheckbox);
 			connectCheckbox(model.lifeCycleEnabled, lifeCycleCheckbox);
 
-			connextTextWidget(model.port, portWidget);
-			connextTextWidget(model.terminationTimeout, terminationTimeoutWidget);
+			connectTextWidget(model.port, portWidget);
+			connectTextWidget(model.terminationTimeout, terminationTimeoutWidget);
 		}
 
 
-		private static void connextTextWidget(final LiveVariable<String> model, final Text widget) {
+		private static void connectTextWidget(final LiveVariable<String> model, final Text widget) {
 			model.addListener(new ValueListener<String>() {
 				public void gotValue(LiveExpression<String> exp, String value) {
 					String oldValue = widget.getText();
