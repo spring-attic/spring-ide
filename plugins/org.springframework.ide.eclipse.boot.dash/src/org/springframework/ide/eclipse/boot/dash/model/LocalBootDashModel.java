@@ -10,22 +10,23 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaProject;
-import org.osgi.framework.Version;
-import org.springframework.ide.eclipse.boot.core.cli.BootCliCommand;
 import org.springframework.ide.eclipse.boot.core.cli.BootCliUtils;
 import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
 import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager.BootInstallListener;
@@ -212,29 +213,18 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 	}
 
 	private List<LocalCloudServiceDashElement> fetchLocalServices() {
-		List<LocalCloudServiceDashElement> localServices = new LinkedList<>();
 		try {
 			IBootInstall bootInstall = BootCliUtils.getSpringBootInstall();
-			Version cloudCliVersion = CloudCliUtils.getVersion(bootInstall);
-			if (cloudCliVersion != null && CloudCliUtils.CLOUD_CLI_JAVA_OPTS_SUPPORTING_VERSIONS.includes(cloudCliVersion)) {
-				BootCliCommand cmd = new BootCliCommand(bootInstall.getHome());
-				try {
-					cmd.execute("cloud", "--list");
-					if (!cmd.getOutput().startsWith("Exception in thread")) {
-						String[] outputLines = cmd.getOutput().split("\n");
-						String servicesLine = outputLines[outputLines.length - 1];
-						for (String id : servicesLine.split(" ")) {
-							localServices.add(new LocalCloudServiceDashElement(this, id));
-						}
-					}
-				} catch (RuntimeException e) {
-					Log.log(e);
-				}
+			try {
+				return Arrays.stream(CloudCliUtils.getCloudServices(bootInstall)).map(serviceId -> new LocalCloudServiceDashElement(this, serviceId)).collect(Collectors.toList());
+			} catch (CoreException e) {
+				// Core Exception would be thrown if Spring Cloud CLI command fails to execute
+				Log.log(e);
 			}
 		} catch (Exception e) {
 			// ignore
 		}
-		return localServices;
+		return Collections.emptyList();
 	}
 
 	private void refreshLocalCloudServices() {
