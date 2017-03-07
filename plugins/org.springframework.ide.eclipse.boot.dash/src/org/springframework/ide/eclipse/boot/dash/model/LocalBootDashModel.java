@@ -13,8 +13,8 @@ package org.springframework.ide.eclipse.boot.dash.model;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -188,13 +188,10 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 	}
 
 	void updateElementsFromWorkspace() {
-		Set<BootProjectDashElement> newElements = new HashSet<>();
-		for (IProject p : this.workspace.getRoot().getProjects()) {
-			BootProjectDashElement element = projectElementFactory.createOrGet(p);
-			if (element!=null) {
-				newElements.add(element);
-			}
-		}
+		Set<BootProjectDashElement> newElements = Arrays.stream(this.workspace.getRoot().getProjects())
+			.map(projectElementFactory::createOrGet)
+			.filter(Objects::nonNull)
+			.collect(Collectors.toSet());
 		applications.replaceAll(newElements);
 		projectElementFactory.disposeAllExcept(newElements);
 	}
