@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,7 +36,7 @@ import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.editors.text.EditorsPlugin;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -46,13 +46,14 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.HyperlinkDete
 import org.springframework.ide.eclipse.editor.support.ForceableReconciler;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
 import org.springframework.ide.eclipse.editor.support.completions.ProposalProcessor;
+import org.springframework.ide.eclipse.editor.support.hover.HoverInfoTextHover;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInformationControlCreator;
 import org.springframework.ide.eclipse.editor.support.reconcile.DefaultQuickfixContext;
 import org.springframework.ide.eclipse.editor.support.reconcile.IReconcileEngine;
 import org.springframework.ide.eclipse.editor.support.reconcile.QuickfixContext;
 import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblemAnnotationHover;
 import org.springframework.ide.eclipse.editor.support.util.DefaultUserInteractions;
-import org.springframework.ide.eclipse.editor.support.hover.HoverInfoTextHover;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 @SuppressWarnings("restriction")
 public class SpringPropertiesFileSourceViewerConfiguration
@@ -65,7 +66,8 @@ extends PropertiesFileSourceViewerConfiguration implements IReconcileTrigger {
 	private SpringPropertiesReconcilerFactory fReconcilerFactory = new SpringPropertiesReconcilerFactory() {
 		@Override
 		protected IReconcileEngine createEngine() throws Exception {
-			return new SpringPropertiesReconcileEngine(getEngine().getIndexProvider(), getEngine().getTypeUtil());
+			SpringPropertiesCompletionEngine e = getEngine();
+			return new SpringPropertiesReconcileEngine(e.getIndexProvider(), e.getTypeUtil());
 		}
 	};
 	private ITextEditor editor;
@@ -81,18 +83,16 @@ extends PropertiesFileSourceViewerConfiguration implements IReconcileTrigger {
 	public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
 		try {
 			SpringPropertiesCompletionEngine engine = getEngine();
-			if (engine!=null) {
-				ContentAssistant a = new ContentAssistant();
-				a.setDocumentPartitioning(IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING);
-				a.setContentAssistProcessor(new ProposalProcessor(getEngine()), IDocument.DEFAULT_CONTENT_TYPE);
-				a.setContentAssistProcessor(new ProposalProcessor(getEngine()), IPropertiesFilePartitions.PROPERTY_VALUE);
-				a.enableColoredLabels(true);
-				a.enableAutoActivation(true);
-				a.setInformationControlCreator(new HoverInformationControlCreator(JavaPlugin.getAdditionalInfoAffordanceString()));
-				setSorter(a);
-				a.setRestoreCompletionProposalSize(getDialogSettings(sourceViewer, DIALOG_SETTINGS_KEY));
-				return a;
-			}
+			ContentAssistant a = new ContentAssistant();
+			a.setDocumentPartitioning(IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING);
+			a.setContentAssistProcessor(new ProposalProcessor(engine), IDocument.DEFAULT_CONTENT_TYPE);
+			a.setContentAssistProcessor(new ProposalProcessor(engine), IPropertiesFilePartitions.PROPERTY_VALUE);
+			a.enableColoredLabels(true);
+			a.enableAutoActivation(true);
+			a.setInformationControlCreator(new HoverInformationControlCreator(JavaPlugin.getAdditionalInfoAffordanceString()));
+			setSorter(a);
+			a.setRestoreCompletionProposalSize(getDialogSettings(sourceViewer, DIALOG_SETTINGS_KEY));
+			return a;
 		} catch (Exception e) {
 			SpringPropertiesEditorPlugin.log(e);
 		}
@@ -102,9 +102,15 @@ extends PropertiesFileSourceViewerConfiguration implements IReconcileTrigger {
 	private SpringPropertiesCompletionEngine getEngine() throws Exception {
 		if (engine==null) {
 			ITextEditor editor = getEditor();
-			if (editor!=null) {
-				IJavaProject jp = EditorUtility.getJavaProject(getEditor().getEditorInput());
-				if (jp!=null) {
+			if (editor == null) {
+				throw ExceptionUtil.coreException("Text editor is missing for the viewer to be configured");
+			} else {
+				IEditorInput editorInput = getEditor().getEditorInput();
+				IJavaProject jp = EditorUtility.getJavaProject(editorInput);
+				if (jp == null) {
+					throw ExceptionUtil.coreException("Unable to find Java project owning editor input: "
+							+ editorInput.getName() + " (Editor input: " + editorInput.getClass().getName() + ")");
+				} else {
 					engine = new SpringPropertiesCompletionEngine(jp);
 				}
 			}
@@ -124,9 +130,7 @@ extends PropertiesFileSourceViewerConfiguration implements IReconcileTrigger {
 			if (contentType.equals(IDocument.DEFAULT_CONTENT_TYPE)
 			|| contentType.equals(IPropertiesFilePartitions.PROPERTY_VALUE)) {
 				SpringPropertiesCompletionEngine engine = getEngine();
-				if (engine!=null) {
-					return new HoverInfoTextHover(sourceViewer, engine, delegate);
-				}
+				return new HoverInfoTextHover(sourceViewer, engine, delegate);
 			}
 		} catch (Exception e) {
 			SpringPropertiesEditorPlugin.log(e);
