@@ -159,6 +159,7 @@ public class EnableJmxFeaturesModel implements ILaunchConfigurationTabModel {
 
 	@Override
 	public void performApply(ILaunchConfigurationWorkingCopy conf) {
+		setEnableJMX(conf, jmxEnabled.getValue());
 		setEnableLiveBeanSupport(conf, liveBeanEnabled.getValue());
 		setEnableLifeCycle(conf, lifeCycleEnabled.getValue());
 		setJMXPort(conf, StringUtil.trim(port.getValue()));
