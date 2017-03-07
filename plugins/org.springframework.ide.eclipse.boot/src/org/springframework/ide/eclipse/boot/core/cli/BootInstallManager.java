@@ -69,7 +69,7 @@ public class BootInstallManager implements IBootInstallFactory {
 
 	private List<IBootInstall> installs = null;
 	private IBootInstall defaultInstall;
-	private ListenerList<BootInstallListener> installListeners = new ListenerList<>();
+	private ListenerList installListeners = new ListenerList();
 
 	private BootInstallManager() throws Exception {
 		downloader = new DownloadManager(null, determineCacheDir());
@@ -178,9 +178,9 @@ public class BootInstallManager implements IBootInstallFactory {
 		}
 		if ((this.defaultInstall != defaultInstall) || (this.defaultInstall != null && !this.defaultInstall.equals(defaultInstall))) {
 			this.defaultInstall = defaultInstall;
-			installListeners.forEach(listener -> {
-				listener.defaultInstallChanged();
-			});
+			for (Object listener : installListeners.getListeners()) {
+				((BootInstallListener)listener).defaultInstallChanged();
+			}
 		}
 	}
 	
