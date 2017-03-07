@@ -23,26 +23,39 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
+
 /**
  * A JMX client for interacting with specific mbean.
  *
  * @author Stephane Nicoll
  * @author Kris De Volder
  */
-public class JMXClient {
+public class JMXClient implements Disposable {
 
-	private ObjectName objectName;
+	private JMXConnector connector;
 	private MBeanServerConnection connection;
+	private ObjectName objectName;
 
 	public JMXClient(int port, String objectName) throws IOException {
 		this(createLocalJmxConnector(port), objectName);
 	}
 
-	public JMXClient(JMXConnector connector, String objectName) throws IOException {
-		this(connector.getMBeanServerConnection(), objectName);
+	private JMXClient(JMXConnector connector, String objectName) throws IOException {
+		this(connector, connector.getMBeanServerConnection(), objectName);
 	}
 
-	public JMXClient(MBeanServerConnection connection, String objectName) {
+	@Override
+	public void dispose() {
+		try {
+			this.connector.close();
+		} catch (IOException e) {
+			//Ignore
+		}
+	}
+
+	private JMXClient(JMXConnector connector, MBeanServerConnection connection, String objectName) {
+		this.connector = connector;
 		this.connection = connection;
 		this.objectName = toObjectName(objectName);
 	}

@@ -14,7 +14,6 @@ import java.io.File;
 import java.net.URL;
 
 import org.apache.commons.io.FileUtils;
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
@@ -26,12 +25,12 @@ import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.Down
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.UIThreadDownloadDisallowed;
 
 /**
- * A Boot Installation that is located in a zip file. It must be unzipped locally 
+ * A Boot Installation that is located in a zip file. It must be unzipped locally
  * before it can be used.
  * <p>
  * This class takes care of downloading and unzipping it automatically to to
  * cache directory located in the workspace.
- * 
+ *
  * @author Kris De Volder
  */
 public class ZippedBootInstall extends BootInstall {
@@ -47,7 +46,7 @@ public class ZippedBootInstall extends BootInstall {
 		public DownloadableZipItem(URL url, DownloadManager downloader) {
 			super(url, downloader);
 		}
-		
+
 		@Override
 		protected String getFileName() {
 			if (fileName==null) {
@@ -67,7 +66,7 @@ public class ZippedBootInstall extends BootInstall {
 			}
 			return fileName;
 		}
-		
+
 		private synchronized void unzip(File zipFile, File unzipDir) throws Exception {
 			if (unzipDir.exists()) {
 				//Already unzipped by someone else.
@@ -83,8 +82,8 @@ public class ZippedBootInstall extends BootInstall {
 				throw ExceptionUtil.exception(e);
 			}
 		}
-		
-		
+
+
 		/**
 		 * Force the item to be downloaded and unzipped locally. If an item is already downloaded
 		 * the cached local file will be returned immediately. Otherwise the method will block
@@ -112,7 +111,7 @@ public class ZippedBootInstall extends BootInstall {
 				throw e;
 			}
 		}
-		
+
 		@Override
 		public void clearCache() {
 			synchronized (downloader) {
@@ -152,7 +151,7 @@ public class ZippedBootInstall extends BootInstall {
 	public String getUrl() {
 		return uriString;
 	}
-	
+
 	@Override
 	protected boolean mayRequireDownload() {
 		//We can do better than just looking at the url (as the super method does).

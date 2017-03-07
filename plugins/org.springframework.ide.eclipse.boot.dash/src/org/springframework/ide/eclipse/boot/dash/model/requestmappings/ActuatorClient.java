@@ -25,6 +25,8 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.JLRMethodParser.JLRMethod;
 import org.springframework.ide.eclipse.boot.util.Log;
 
+import com.google.common.base.Objects;
+
 /**
  * Abstract implementation of a ActuatorClient. The actuar client connects
  * to an actuator endpoint retrieving some information from a running spring boot app.
@@ -160,6 +162,28 @@ public abstract class ActuatorClient {
 			return processOrPaths(extractPath(key))
 					.map(path -> new RequestMappingImpl(path, value, typeLookup))
 					.collect(Collectors.toList());
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((beanInfo == null) ? 0 : beanInfo.hashCode());
+			result = prime * result + ((path == null) ? 0 : path.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			RequestMappingImpl other = (RequestMappingImpl) obj;
+			return Objects.equal(this.path, other.path)
+				&& Objects.equal(this.getMethodString(), other.getMethodString());
 		}
 	}
 

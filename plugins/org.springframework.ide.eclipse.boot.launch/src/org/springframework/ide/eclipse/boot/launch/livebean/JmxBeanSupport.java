@@ -22,6 +22,7 @@ import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelega
 public class JmxBeanSupport {
 
 	public static enum Feature {
+		JMX(null),
 		LIVE_BEAN_GRAPH("-Dspring.liveBeansView.mbeanDomain"),
 		LIFE_CYCLE("-Dspring.application.admin.enabled=true");
 
@@ -47,7 +48,9 @@ public class JmxBeanSupport {
 				str.append(a+"\n");
 			}
 			for (Feature feature : enabled) {
-				str.append(feature.vmArg+"\n");
+				if (feature.vmArg!=null) {
+					str.append(feature.vmArg+"\n");
+				}
 			}
 			return str.toString();
 		} else {
