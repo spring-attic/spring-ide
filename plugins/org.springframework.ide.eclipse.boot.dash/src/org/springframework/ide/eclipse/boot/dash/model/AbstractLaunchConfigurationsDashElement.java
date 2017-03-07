@@ -360,7 +360,7 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	protected ILaunchConfiguration createLaunchConfigForEditing() throws Exception {
+	public ILaunchConfiguration createLaunchConfigForEditing() throws Exception {
 		IJavaProject jp = getJavaProject();
 		RunTarget target = getTarget();
 		IType[] mainTypes = guessMainTypes();
