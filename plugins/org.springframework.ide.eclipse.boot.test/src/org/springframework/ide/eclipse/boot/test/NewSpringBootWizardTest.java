@@ -11,12 +11,15 @@
 package org.springframework.ide.eclipse.boot.test;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springsource.ide.eclipse.commons.core.util.OsUtils;
+import org.springsource.ide.eclipse.commons.frameworks.test.util.ExternalCommand;
+import org.springsource.ide.eclipse.commons.frameworks.test.util.ExternalProcess;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withImportStrategy;
@@ -54,8 +57,12 @@ public class NewSpringBootWizardTest extends TestCase {
 		assertTrue(project.hasNature(SpringCore.NATURE_ID));
 	}
 
-	private void assertExecutable(IFile eclipseFile) {
+	private void assertExecutable(IFile eclipseFile) throws Exception {
 		File file = eclipseFile.getRawLocation().toFile();
-		assertTrue(file.canExecute());
+		if (!file.canExecute()) {
+			ExternalCommand cmd = new ExternalCommand("ls", "-lad", file.toString());
+			ExternalProcess process = new ExternalProcess(new File("."), cmd);
+			fail("File is not executable: "+file+"\n"+process);
+		}
 	}
 }
