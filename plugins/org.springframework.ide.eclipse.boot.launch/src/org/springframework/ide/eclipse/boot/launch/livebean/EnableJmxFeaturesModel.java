@@ -67,6 +67,7 @@ public class EnableJmxFeaturesModel implements ILaunchConfigurationTabModel {
 
 		this.port = new LiveVariable<>("");
 		this.terminationTimeout = new LiveVariable<>("");
+		jmxEnabled.addListener(makeDirty());
 		liveBeanEnabled.addListener(makeDirty());
 		lifeCycleEnabled.addListener(makeDirty());
 		port.addListener(makeDirty());
@@ -150,6 +151,7 @@ public class EnableJmxFeaturesModel implements ILaunchConfigurationTabModel {
 
 	@Override
 	public void initializeFrom(ILaunchConfiguration conf) {
+		jmxEnabled.setValue(BootLaunchConfigurationDelegate.getEnableJmx(conf));
 		liveBeanEnabled.setValue(BootLaunchConfigurationDelegate.getEnableLiveBeanSupport(conf));
 		lifeCycleEnabled.setValue(BootLaunchConfigurationDelegate.getEnableLifeCycle(conf));
 		port.setValue(BootLaunchConfigurationDelegate.getJMXPort(conf));

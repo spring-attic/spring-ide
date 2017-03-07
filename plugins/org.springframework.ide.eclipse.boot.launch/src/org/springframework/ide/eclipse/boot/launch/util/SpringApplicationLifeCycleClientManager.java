@@ -48,7 +48,6 @@ public class SpringApplicationLifeCycleClientManager {
 	}
 
 	private static Provider<Integer> fixedPort(int resolvedPort) {
-		Assert.isLegal(resolvedPort>0, "JMX port must be > 0");
 		return () -> resolvedPort;
 	}
 
