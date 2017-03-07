@@ -68,7 +68,7 @@ public class JMXActuatorClient extends ActuatorClient {
 	private boolean isExpectedException(Exception _e) {
 		Throwable e = ExceptionUtil.getDeepestCause(_e);
 		String className = e.getClass().getSimpleName();
-		return className.equals("ConnectException");
+		return EXPECTED_EXCEPTIONS.contains(className);
 	}
 
 	private synchronized JMXClient getClient() throws Exception {
