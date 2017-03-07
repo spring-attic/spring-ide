@@ -78,7 +78,7 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
  * <p/>
  * Cloud application state should always be resolved from external sources
  */
-public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentity> implements Deletable, LogSink {
+public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> implements Deletable, LogSink {
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 
@@ -528,7 +528,6 @@ public class CloudAppDashElement extends WrappingBootDashElement<CloudAppIdentit
 		return getBootDashModel();
 	}
 
-	@Override
 	protected LiveExpression<URI> getActuatorUrl() {
 		LiveExpression<URI> urlExp = getCloudModel().getActuatorUrlFactory().createOrGet(this);
 		if (urlExp!=null) {

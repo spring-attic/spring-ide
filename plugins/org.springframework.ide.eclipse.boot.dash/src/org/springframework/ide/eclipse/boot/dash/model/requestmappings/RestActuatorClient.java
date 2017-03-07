@@ -11,10 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.model.requestmappings;
 
 import java.net.URI;
-import java.util.List;
 
-import org.json.JSONObject;
-import org.json.JSONTokener;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 

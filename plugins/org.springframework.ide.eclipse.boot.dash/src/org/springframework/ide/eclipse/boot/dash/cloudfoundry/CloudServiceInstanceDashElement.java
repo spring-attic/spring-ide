@@ -28,7 +28,7 @@ import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 
 import reactor.core.publisher.Mono;
 
-public class CloudServiceInstanceDashElement extends WrappingBootDashElement<String> implements AsyncDeletable {
+public class CloudServiceInstanceDashElement extends CloudDashElement<String> implements AsyncDeletable {
 
 	private static final EnumSet<RunState> SERVICE_RUN_GOAL_STATES = EnumSet.noneOf(RunState.class);
 

@@ -51,6 +51,7 @@ public class EnableJmxSection extends DelegatingLaunchConfigurationTabSection {
 
 
 	static class UI extends WizardPageSection {
+		private Button jmxCheckbox;
 		private Button liveBeanCheckbox;
 		private Button lifeCycleCheckbox;
 		private Text portWidget;
@@ -66,21 +67,29 @@ public class EnableJmxSection extends DelegatingLaunchConfigurationTabSection {
 		public void createContents(Composite page) {
 			Composite row = new Composite(page, SWT.NONE);
 			row.setLayout(GridLayoutFactory.fillDefaults().numColumns(3).create());
-			liveBeanCheckbox = new Button(row, SWT.CHECK);
-			liveBeanCheckbox.setText("Enable Live Bean support.");
-			liveBeanCheckbox.setToolTipText(computeTooltipText(
-					"Enables support for Live Beans Graph View by adding vm args:\n",
-					Feature.LIVE_BEAN_GRAPH));
+			jmxCheckbox = new Button(row, SWT.CHECK);
+			jmxCheckbox.setText("Enable JMX");
+			jmxCheckbox.setToolTipText(computeTooltipText(
+					"Enables JMX. This is required for Live Bean support and Life Cycle Management." +
+					"It also allows STS to access information about request-mappings on your app. "+
+					"Adds these vm args:\n", Feature.JMX));
 
 			String portToolTip = "The port used for communicating with JMX beans (0 means STS should pick the port automatically on startup). "
 					+ "The same port is used/shared by both 'Life Cycle Management' and the 'Live Beans Graph'";
 			Label label = new Label(row, SWT.NONE);
-			label.setText("JMX Port:");
+			label.setText("Port:");
 			portWidget = new Text(row, SWT.BORDER);
 			GridDataFactory.fillDefaults().hint(UIConstants.fieldLabelWidthHint(portWidget, 7), SWT.DEFAULT)
 				.applyTo(portWidget);
 			label.setToolTipText(portToolTip);
 			portWidget.setToolTipText(portToolTip);
+
+			liveBeanCheckbox = new Button(row, SWT.CHECK);
+			liveBeanCheckbox.setText("Enable Live Bean support.");
+			liveBeanCheckbox.setToolTipText(computeTooltipText(
+					"Enables support for Live Beans Graph View by adding vm args:\n",
+					Feature.LIVE_BEAN_GRAPH));
+			GridDataFactory.fillDefaults().span(3, 1).applyTo(liveBeanCheckbox);
 
 			lifeCycleCheckbox = new Button(row, SWT.CHECK);
 			lifeCycleCheckbox.setText("Enable Life Cycle Management.");
@@ -95,7 +104,7 @@ public class EnableJmxSection extends DelegatingLaunchConfigurationTabSection {
 				.applyTo(terminationTimeoutWidget);
 			terminationTimeoutWidget.setToolTipText("How long STS should wait, after asking Boot App nicely to stop, before attemptting to kill the process more forcibly.");
 
-			model.anyFeatureEnabled.addListener(new ValueListener<Boolean>() {
+			model.jmxEnabled.addListener(new ValueListener<Boolean>() {
 				public void gotValue(LiveExpression<Boolean> exp, Boolean enable) {
 					debug("anyFeature : "+enable);
 					portWidget.setEnabled(enable);
@@ -108,6 +117,7 @@ public class EnableJmxSection extends DelegatingLaunchConfigurationTabSection {
 				}
 			});
 
+			connectCheckbox(model.jmxEnabled, jmxCheckbox);
 			connectCheckbox(model.liveBeanEnabled, liveBeanCheckbox);
 			connectCheckbox(model.lifeCycleEnabled, lifeCycleCheckbox);
 

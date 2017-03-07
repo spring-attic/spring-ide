@@ -11,11 +11,12 @@
 package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.net.URI;
-import java.net.URISyntaxException;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -35,11 +36,13 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.launching.SocketUtil;
 import org.eclipse.swt.widgets.Display;
+import org.springframework.ide.eclipse.boot.dash.livexp.PollingLiveExp;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.ActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.JMXActuatorClient;
+import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKClient;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKLaunchTracker;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKTunnel;
@@ -84,6 +87,8 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 
 	public static final EnumSet<RunState> READY_STATES = EnumSet.of(RunState.RUNNING, RunState.DEBUGGING);
 
+	private static final Duration REQUEST_MAPPING_REFRESH_TIMEOUT = Duration.ofMinutes(2);
+
 	private LiveExpression<RunState> runState;
 	private LiveExpression<Integer> livePort;
 	private LiveExpression<Integer> actuatorPort;
@@ -92,6 +97,8 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 	private PropertyStoreApi persistentProperties;
 
 	private LiveExpression<URI> actuatorUrl;
+
+	private PollingLiveExp<List<RequestMapping>> liveRequestMappings;
 
 	public AbstractLaunchConfigurationsDashElement(LocalBootDashModel bootDashModel, T delegate) {
 		super(bootDashModel, delegate);
@@ -353,7 +360,7 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	protected ILaunchConfiguration createLaunchConfigForEditing() throws Exception {
+	public ILaunchConfiguration createLaunchConfigForEditing() throws Exception {
 		IJavaProject jp = getJavaProject();
 		RunTarget target = getTarget();
 		IType[] mainTypes = guessMainTypes();
@@ -484,9 +491,28 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 		return exp;
 	}
 
-	@Override
-	protected ActuatorClient getActuatorClient(URI target) {
+	protected ActuatorClient getActuatorClient() {
 		return new JMXActuatorClient(getTypeLookup(), this::getJmxPort);
+	}
+
+	@Override
+	public List<RequestMapping> getLiveRequestMappings() {
+		synchronized (this) {
+			if (liveRequestMappings==null) {
+				ActuatorClient client = getActuatorClient();
+				liveRequestMappings = PollingLiveExp.create(client::getRequestMappings);
+				addElementState(liveRequestMappings);
+				addDisposableChild(liveRequestMappings);
+				runState.addListener((e, runstate) -> {
+					if (READY_STATES.contains(runstate)) {
+						liveRequestMappings.refreshFor(REQUEST_MAPPING_REFRESH_TIMEOUT);
+					} else {
+						liveRequestMappings.refreshOnce();
+					}
+				});
+			}
+			return liveRequestMappings.getValue();
+		}
 	}
 
 	private int getJmxPort() {
@@ -553,32 +579,6 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 		}
 		debug("["+this.getName()+"] getLivePort("+propName+") => -1");
 		return -1;
-	}
-
-	@Override
-	protected LiveExpression<URI> getActuatorUrl() {
-		synchronized (this) {
-			if (actuatorUrl==null) {
-				actuatorUrl = new LiveExpression<URI>() {
-					{
-						dependsOn(actuatorPort);
-					}
-					protected URI compute() {
-						try {
-							Integer port = actuatorPort.getValue();
-							if (port!=null && port>0) {
-								return new URI("http://localhost:"+port);
-							}
-						} catch (URISyntaxException e) {
-							Log.log(e);
-						}
-						return null;
-					}
-				};
-				addDisposableChild(actuatorUrl);
-			};
-		}
-		return actuatorUrl;
 	}
 
 	public void restartAndExpose(RunState runMode, NGROKClient ngrokClient, String eurekaInstance, UserInteractions ui) throws Exception {

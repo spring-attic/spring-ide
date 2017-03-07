@@ -10,10 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
-import java.net.URI;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
-import java.util.List;
 
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -22,25 +20,19 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
-import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RestActuatorClient;
-import org.springframework.ide.eclipse.boot.dash.model.requestmappings.ActuatorClient;
-import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.TypeLookup;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springframework.ide.eclipse.boot.dash.util.Utils;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.web.client.RestTemplate;
-import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
 /**
@@ -61,8 +53,6 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 	private BootDashModel bootDashModel;
 	private TypeLookup typeLookup;
 	private ListenerList disposeListeners = new ListenerList();
-
-	private LiveExpression<ImmutableList<RequestMapping>> liveRequestMappings;
 
 	@SuppressWarnings("rawtypes")
 	private ValueListener elementStateNotifier = new ValueListener() {
@@ -247,37 +237,6 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 		}
 	}
 
-	@Override
-	public List<RequestMapping> getLiveRequestMappings() {
-		final LiveExpression<URI> actuatorUrl = getActuatorUrl();
-		synchronized (this) {
-			if (liveRequestMappings==null) {
-				liveRequestMappings = new AsyncLiveExpression<ImmutableList<RequestMapping>>(null, "Fetch request mappings for '"+getName()+"'") {
-					protected ImmutableList<RequestMapping> compute() {
-						URI target = actuatorUrl.getValue();
-						if (target!=null) {
-							ActuatorClient client = getActuatorClient(target);
-							List<RequestMapping> list = client.getRequestMappings();
-							if (list!=null) {
-								return ImmutableList.copyOf(client.getRequestMappings());
-							}
-						}
-						return null;
-					}
-
-				};
-				liveRequestMappings.dependsOn(actuatorUrl);
-				addElementState(liveRequestMappings);
-				addDisposableChild(liveRequestMappings);
-			}
-		}
-		return liveRequestMappings.getValue();
-	}
-
-	protected ActuatorClient getActuatorClient(URI target) {
-		return new RestActuatorClient(target, getTypeLookup(), getRestTemplate());
-	}
-
 	protected RestTemplate getRestTemplate() {
 		return new RestTemplate();
 	}
@@ -286,17 +245,8 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 	 * Ensure that element state notifications are fired when a given liveExp's value changes.
 	 */
 	@SuppressWarnings("unchecked")
-	private void addElementState(LiveExpression<?> state) {
+	protected void addElementState(LiveExpression<?> state) {
 		state.addListener(elementStateNotifier);
-	}
-
-	/**
-	 * Subclass should override to determine where to access the actuator for an app.
-	 * The Default implementation just returns null. Any functionality that depends on this
-	 * should in turn be disabled / return null.
-	 */
-	protected LiveExpression<URI> getActuatorUrl() {
-		return LiveExpression.constant(null);
 	}
 
 	@Override

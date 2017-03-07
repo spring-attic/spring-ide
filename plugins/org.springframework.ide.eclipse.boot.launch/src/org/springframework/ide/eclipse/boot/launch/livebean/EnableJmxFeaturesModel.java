@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch.livebean;
 
-import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.DEFAULT_ENABLE_LIFE_CYCLE;
+import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.*;
 import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.DEFAULT_ENABLE_LIVE_BEAN_SUPPORT;
 import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.DEFAULT_JMX_PORT;
 import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.DEFAULT_TERMINATION_TIMEOUT;
@@ -45,26 +45,28 @@ public class EnableJmxFeaturesModel implements ILaunchConfigurationTabModel {
 	public final String portFieldName = "JMX Port";
 	public final String timeOutFieldName = "Termination timeout";
 
+	public final LiveVariable<Boolean> jmxEnabled;
 	public final LiveVariable<Boolean> liveBeanEnabled;
 	public final LiveVariable<Boolean> lifeCycleEnabled;
-	public final LiveExpression<Boolean> anyFeatureEnabled;
 
 	public final LiveVariable<String> port;
 	public final LiveVariable<String> terminationTimeout;
 
 	private final Validator validator;
 
-	private LiveVariable<Boolean> dirtyState = new LiveVariable<Boolean>(false);
-
+	private LiveVariable<Boolean> dirtyState = new LiveVariable<>(false);
 
 	@SuppressWarnings("unchecked")
 	public EnableJmxFeaturesModel() {
-		this.liveBeanEnabled = new LiveVariable<Boolean>(DEFAULT_ENABLE_LIVE_BEAN_SUPPORT);
-		this.lifeCycleEnabled = new LiveVariable<Boolean>(DEFAULT_ENABLE_LIFE_CYCLE);
-		this.anyFeatureEnabled = new OrExpression(liveBeanEnabled, lifeCycleEnabled);
+		this.jmxEnabled = new LiveVariable<>(DEFAULT_ENABLE_JMX);
+		this.liveBeanEnabled = new LiveVariable<>(DEFAULT_ENABLE_LIVE_BEAN_SUPPORT);
+		this.lifeCycleEnabled = new LiveVariable<>(DEFAULT_ENABLE_LIFE_CYCLE);
 
-		this.port = new LiveVariable<String>("");
-		this.terminationTimeout = new LiveVariable<String>("");
+		autoEnableJmxWhen(liveBeanEnabled);
+		autoEnableJmxWhen(lifeCycleEnabled);
+
+		this.port = new LiveVariable<>("");
+		this.terminationTimeout = new LiveVariable<>("");
 		liveBeanEnabled.addListener(makeDirty());
 		lifeCycleEnabled.addListener(makeDirty());
 		port.addListener(makeDirty());
@@ -72,14 +74,16 @@ public class EnableJmxFeaturesModel implements ILaunchConfigurationTabModel {
 
 		this.validator = new Validator() {
 			{
-				dependsOn(anyFeatureEnabled);
-				dependsOn(port);
+				dependsOn(jmxEnabled);
+				dependsOn(lifeCycleEnabled);
+				dependsOn(liveBeanEnabled);
 				dependsOn(terminationTimeout);
+				dependsOn(port);
 			}
 
 			@Override
 			protected ValidationResult compute() {
-				boolean isEnabled = anyFeatureEnabled.getValue();
+				boolean isEnabled = jmxEnabled.getValue();
 				if (isEnabled) {
 					String portStr = port.getValue();
 					if (!hasText(portStr)) {
@@ -111,10 +115,24 @@ public class EnableJmxFeaturesModel implements ILaunchConfigurationTabModel {
 						return error(timeOutFieldName+" can't be parsed as an Integer");
 					}
 				}
+				if (liveBeanEnabled.getValue() && !jmxEnabled.getValue()) {
+					return error("Live Bean support requires JMX to be enabled");
+				}
+				if (lifeCycleEnabled.getValue() && !jmxEnabled.getValue()) {
+					return error("Lifecycle Management requires JMX to be enabled");
+				}
 				return ValidationResult.OK;
 			}
 
 		};
+	}
+
+	private void autoEnableJmxWhen(LiveVariable<Boolean> featureEnabled) {
+		featureEnabled.addListener((exp, value) -> {
+			if (value) {
+				jmxEnabled.setValue(true);
+			}
+		});
 	}
 
 	private boolean hasText(String portStr) {
@@ -152,6 +170,7 @@ public class EnableJmxFeaturesModel implements ILaunchConfigurationTabModel {
 	public void setDefaults(ILaunchConfigurationWorkingCopy conf) {
 		setEnableLiveBeanSupport(conf, DEFAULT_ENABLE_LIVE_BEAN_SUPPORT);
 		setEnableLifeCycle(conf, DEFAULT_ENABLE_LIFE_CYCLE);
+		setEnableJMX(conf, DEFAULT_ENABLE_JMX);
 		setJMXPort(conf, ""+DEFAULT_JMX_PORT);
 		setTerminationTimeout(conf, ""+DEFAULT_TERMINATION_TIMEOUT);
 	}

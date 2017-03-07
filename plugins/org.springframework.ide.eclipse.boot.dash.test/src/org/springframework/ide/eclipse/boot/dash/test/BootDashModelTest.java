@@ -68,6 +68,7 @@ import org.springframework.ide.eclipse.boot.core.IMavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.MavenId;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
+import org.springframework.ide.eclipse.boot.dash.model.AbstractLaunchConfigurationsDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElementsFilterBoxModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
@@ -377,9 +378,10 @@ public class BootDashModelTest {
 
 		ElementStateListener oldListener = listener;
 
-		ACondition.waitFor("listener calls", 1000, () ->
-			verify(oldListener, times(4)).stateChanged(element)
-		);
+		ACondition.waitFor("listener calls", 1000, () -> {
+			verify(oldListener, times(4)).stateChanged(element);
+			verify(oldListener, times(4)).stateChanged(childElement);
+		});
 		model.removeElementStateListener(oldListener);
 
 //		System.out.println("Element state listener REMOVED");
@@ -883,6 +885,84 @@ public class BootDashModelTest {
 			waitForState(element, RunState.INACTIVE);
 		}
 	}
+
+	@Test public void testRequestMappingsOnlyJmxEnabled() throws Exception {
+		do_testRequestMappingsOnlyJmxEnabled(RunState.RUNNING);
+	}
+
+	@Test public void testRequestMappingsOnlyJmxEnabled_DEBUG() throws Exception {
+		do_testRequestMappingsOnlyJmxEnabled(RunState.DEBUGGING);
+	}
+
+	private void do_testRequestMappingsOnlyJmxEnabled(RunState runMode) throws Exception, CoreException {
+		String projectName = "actuated-project";
+		IProject project = createBootProject(projectName,
+				bootVersionAtLeast("1.3.0"), //required for us to be able to determine the actuator port
+				withStarters("web", "actuator")     //required to actually *have* an actuator
+		);
+		createFile(project, "src/main/java/com/example/HelloController.java",
+				"package com.example;\n" +
+				"\n" +
+				"import org.springframework.web.bind.annotation.RequestMapping;\n" +
+				"import org.springframework.web.bind.annotation.RestController;\n" +
+				"\n" +
+				"@RestController\n" +
+				"public class HelloController {\n" +
+				"\n" +
+				"	@RequestMapping(\"/hello\")\n" +
+				"	public String hello() {\n" +
+				"		return \"Hello, World!\";\n" +
+				"	}\n" +
+				"\n" +
+				"}\n"
+		);
+		StsTestUtil.assertNoErrors(project);
+		final BootProjectDashElement element = getElement(projectName);
+		ILaunchConfigurationWorkingCopy wc = element.createLaunchConfigForEditing().getWorkingCopy();
+		BootLaunchConfigurationDelegate.setEnableLifeCycle(wc, false);
+		BootLaunchConfigurationDelegate.setEnableLiveBeanSupport(wc,false);
+		wc.doSave();
+		try {
+			waitForState(element, RunState.INACTIVE);
+			assertNull(element.getLiveRequestMappings()); // unknown since can only be determined when app is running
+
+			element.restart(runMode, ui);
+			waitForState(element, runMode);
+			ACondition.waitFor("Wait for request mappings", MODEL_UPDATE_TIMEOUT, () -> {
+				List<RequestMapping> mappings = element.getLiveRequestMappings();
+				assertNotNull(mappings);
+				assertTrue(!mappings.isEmpty()); //Even though this is an 'empty' app should have some mappings,
+				                                 // for example an 'error' page.
+			});
+
+			List<RequestMapping> mappings = element.getLiveRequestMappings();
+			System.out.println(">>> Found RequestMappings");
+			for (RequestMapping m : mappings) {
+				System.out.println(m.getPath());
+				assertNotNull(m.getPath());
+			}
+			System.out.println("<<< Found RequestMappings");
+
+			RequestMapping rm = assertRequestMappingWithPath(mappings, "/hello"); //We defined it so should be there
+			assertEquals("com.example.HelloController", rm.getFullyQualifiedClassName());
+			assertEquals("hello", rm.getMethodName());
+			assertEquals("com.example.HelloController", rm.getType().getFullyQualifiedName());
+
+			IMethod method = rm.getMethod();
+			assertEquals(rm.getType(), method.getDeclaringType());
+			assertEquals("hello", method.getElementName());
+
+			assertTrue(rm.isUserDefined());
+
+			rm = assertRequestMappingWithPath(mappings, "/error"); //Even empty apps should have a 'error' mapping
+			assertFalse(rm.isUserDefined());
+
+		} finally {
+			element.stopAsync(ui);
+			waitForState(element, RunState.INACTIVE);
+		}
+	}
+
 
 	@Test public void testDefaultRequestMapping() throws Exception {
 		String projectName = "sdfsd-project";

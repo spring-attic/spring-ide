@@ -83,7 +83,11 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 	public static final String ENABLE_LIVE_BEAN_SUPPORT = "spring.boot.livebean.enable";
 	public static final boolean DEFAULT_ENABLE_LIVE_BEAN_SUPPORT = true;
 
+	public static final String ENABLE_JMX = "spring.boot.jmx.enable";
+	public static final boolean DEFAULT_ENABLE_JMX = true;
+
 	public static final String JMX_PORT = "spring.boot.livebean.port";
+
 	public static final int DEFAULT_JMX_PORT = 0; //means pick it dynamically
 
 	public static final String ANSI_CONSOLE_OUTPUT = "spring.boot.ansi.console";
@@ -179,6 +183,9 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 
 	public static EnumSet<Feature> getEnabledJmxFeatures(ILaunchConfiguration conf) {
 		EnumSet<Feature> enabled = EnumSet.noneOf(Feature.class);
+		if (getEnableJmx(conf)) {
+			enabled.add(Feature.JMX);
+		}
 		if (getEnableLiveBeanSupport(conf)) {
 			 enabled.add(Feature.LIVE_BEAN_GRAPH);
 		}
@@ -217,6 +224,10 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		return DEFAULT_ENABLE_LIFE_CYCLE;
 	}
 
+	public static void setEnableJMX(ILaunchConfigurationWorkingCopy wc, boolean enable) {
+		wc.setAttribute(ENABLE_JMX, enable);
+	}
+
 	public static void setEnableLifeCycle(ILaunchConfigurationWorkingCopy wc, boolean enable) {
 		wc.setAttribute(ENABLE_LIFE_CYCLE, enable);
 	}
@@ -251,6 +262,7 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		if (mainType!=null) {
 			setMainType(wc, mainType);
 		}
+		setEnableJMX(wc, DEFAULT_ENABLE_JMX);
 		setEnableLiveBeanSupport(wc, DEFAULT_ENABLE_LIVE_BEAN_SUPPORT);
 		setEnableLifeCycle(wc, DEFAULT_ENABLE_LIFE_CYCLE);
 		setTerminationTimeout(wc,""+DEFAULT_TERMINATION_TIMEOUT);
@@ -303,6 +315,14 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		wc.setAttribute(ATTR_PROCESS_FACTORY_ID, klass.getName());
 	}
 
+	public static boolean getEnableJmx(ILaunchConfiguration conf) {
+		try {
+			return conf.getAttribute(ENABLE_JMX, DEFAULT_ENABLE_JMX);
+		} catch (Exception e) {
+			Log.log(e);
+		}
+		return DEFAULT_ENABLE_JMX;
+	}
 
 	public static boolean getEnableLiveBeanSupport(ILaunchConfiguration conf) {
 		try {
