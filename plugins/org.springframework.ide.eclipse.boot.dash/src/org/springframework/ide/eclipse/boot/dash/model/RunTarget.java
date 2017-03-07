@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2016 Pivotal, Inc.
+ * Copyright (c) 2015, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,8 +9,6 @@
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
-
-import java.util.EnumSet;
 
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
@@ -32,15 +30,6 @@ import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 public interface RunTarget extends IdAble, Nameable {
 
 	public abstract RunTargetType getType();
-
-	/**
-	 * @return Subset of the runstate that a user can request when changing a
-	 *         DashBoardElement's 'run-state'. Essentially, this allows
-	 *         determining whether a given BootDahsElement can support the
-	 *         'stop', 'run' and 'debug' operations which request that the
-	 *         element be brought into a given run-state.
-	 */
-	public abstract EnumSet<RunState> supportedGoalStates();
 
 	/**
 	 * Create a launch config for a given dash element and initialize it with

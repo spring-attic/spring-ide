@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2013 GoPivotal, Inc.
+ *  Copyright (c) 2013, 2016 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.osgi.service.prefs.BackingStoreException;
@@ -24,10 +25,11 @@ import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.cli.install.GenericBootInstall;
 import org.springframework.ide.eclipse.boot.core.cli.install.IBootInstall;
 import org.springframework.ide.eclipse.boot.core.cli.install.ZippedBootInstall;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.core.preferences.StsProperties;
-import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.ArrayEncoder;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 /**
  * Manages the boot installations that are configured in this workspace.
@@ -35,6 +37,10 @@ import org.springsource.ide.eclipse.commons.frameworks.core.util.ArrayEncoder;
  * @author Kris De Volder
  */
 public class BootInstallManager implements IBootInstallFactory {
+	
+	public interface BootInstallListener {
+		public void defaultInstallChanged();
+	}
 
 	private static final String BOOT_INSTALLS = "installs"; //Key used to store info in the prefs.
 
@@ -63,6 +69,7 @@ public class BootInstallManager implements IBootInstallFactory {
 
 	private List<IBootInstall> installs = null;
 	private IBootInstall defaultInstall;
+	private ListenerList<BootInstallListener> installListeners = new ListenerList<>();
 
 	private BootInstallManager() throws Exception {
 		downloader = new DownloadManager(null, determineCacheDir());
@@ -91,7 +98,7 @@ public class BootInstallManager implements IBootInstallFactory {
 						setDefaultInstall(install);
 					}
 				} catch (Exception e) {
-					BootActivator.log(e);
+					Log.log(e);
 				}
 			}
 		}
@@ -119,7 +126,7 @@ public class BootInstallManager implements IBootInstallFactory {
 		try {
 			di = getDefaultInstall();
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 		}
 		if (di==null) {
 			prefs.remove(DEFAULT_BOOT_INSTALL);
@@ -129,7 +136,7 @@ public class BootInstallManager implements IBootInstallFactory {
 		try {
 			prefs.flush();
 		} catch (BackingStoreException e) {
-			BootActivator.log(e);
+			Log.log(e);
 		}
 	}
 
@@ -156,7 +163,7 @@ public class BootInstallManager implements IBootInstallFactory {
 				}
 			}
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 			return new GenericBootInstall(url, name, ExceptionUtil.getMessage(e));
 		}
 	}
@@ -169,9 +176,14 @@ public class BootInstallManager implements IBootInstallFactory {
 		if (!installs.contains(defaultInstall)) {
 			installs.add(defaultInstall);
 		}
-		this.defaultInstall = defaultInstall;
+		if ((this.defaultInstall != defaultInstall) || (this.defaultInstall != null && !this.defaultInstall.equals(defaultInstall))) {
+			this.defaultInstall = defaultInstall;
+			installListeners.forEach(listener -> {
+				listener.defaultInstallChanged();
+			});
+		}
 	}
-
+	
 	public void setInstalls(Collection<IBootInstall> newInstalls) {
 		this.installs = new ArrayList<IBootInstall>(newInstalls);
 	}
@@ -182,6 +194,14 @@ public class BootInstallManager implements IBootInstallFactory {
 
 	public DownloadManager getDownloader() {
 		return downloader;
+	}
+	
+	public void addBootInstallListener(BootInstallListener listener) {
+		installListeners.add(listener);
+	}
+	
+	public void removeBootInstallListener(BootInstallListener listener) {
+		installListeners.remove(listener);
 	}
 
 }

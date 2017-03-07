@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2013 GoPivotal, Inc.
+ *  Copyright (c) 2013, 2017 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch.test;
 
-import static org.springframework.ide.eclipse.boot.core.cli.BootGroovyScriptLaunchConfigurationDelegate.setScript;
+import static org.springframework.ide.eclipse.boot.launch.cli.BootGroovyScriptLaunchConfigurationDelegate.setScript;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.springframework.ide.eclipse.boot.core.cli.BootGroovyScriptLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
+import org.springframework.ide.eclipse.boot.launch.cli.BootGroovyScriptLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.test.util.LaunchResult;
 import org.springframework.ide.eclipse.boot.test.util.LaunchUtil;
 

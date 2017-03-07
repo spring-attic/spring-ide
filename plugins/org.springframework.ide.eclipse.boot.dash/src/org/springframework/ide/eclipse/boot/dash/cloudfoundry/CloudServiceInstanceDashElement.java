@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Pivotal, Inc.
+ * Copyright (c) 2016, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,8 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
+import java.util.EnumSet;
+
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
@@ -20,7 +21,6 @@ import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.AsyncDeletable;
-import org.springframework.ide.eclipse.boot.dash.model.Deletable;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.WrappingBootDashElement;
@@ -29,6 +29,8 @@ import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import reactor.core.publisher.Mono;
 
 public class CloudServiceInstanceDashElement extends CloudDashElement<String> implements AsyncDeletable {
+
+	private static final EnumSet<RunState> SERVICE_RUN_GOAL_STATES = EnumSet.noneOf(RunState.class);
 
 	private static final BootDashColumn[] COLUMNS = {BootDashColumn.NAME, BootDashColumn.TAGS};
 
@@ -158,6 +160,11 @@ public class CloudServiceInstanceDashElement extends CloudDashElement<String> im
 
 	private ClientRequests getClient() {
 		return getTarget().getClient();
+	}
+
+	@Override
+	public EnumSet<RunState> supportedGoalStates() {
+		return SERVICE_RUN_GOAL_STATES;
 	}
 
 }

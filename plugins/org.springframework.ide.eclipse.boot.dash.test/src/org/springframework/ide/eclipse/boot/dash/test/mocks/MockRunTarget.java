@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal Software, Inc.
+ * Copyright (c) 2015, 2017 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,14 +10,12 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test.mocks;
 
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.NAME;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.DEFAULT_PATH;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.INSTANCES;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.NAME;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.PROJECT;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.TAGS;
-
-import java.util.EnumSet;
 
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
@@ -25,7 +23,6 @@ import org.eclipse.jdt.core.IType;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
-import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
@@ -47,11 +44,6 @@ public class MockRunTarget extends AbstractRunTarget implements RunTargetWithPro
 	}
 
 	private final BootDashColumn[] defaultColumns = { RUN_STATE_ICN, NAME, PROJECT, INSTANCES, DEFAULT_PATH, TAGS };
-
-	@Override
-	public EnumSet<RunState> supportedGoalStates() {
-		return  EnumSet.of(RunState.RUNNING, RunState.DEBUGGING);
-	}
 
 	@Override
 	public ILaunchConfiguration createLaunchConfig(IJavaProject jp, IType mainType) throws Exception {

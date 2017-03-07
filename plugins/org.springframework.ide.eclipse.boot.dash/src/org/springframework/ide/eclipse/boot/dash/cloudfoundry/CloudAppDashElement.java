@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2016 Pivotal, Inc.
+ * Copyright (c) 2015, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.net.URI;
 import java.security.GeneralSecurityException;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -34,13 +35,11 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement.CloudAppIdentity;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.OperationTracker.Task;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceStats;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.HealthChecks;
@@ -350,7 +349,7 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 			}
 			return false;
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 			return false;
 		}
 	}
@@ -520,7 +519,7 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 		try {
 			getCloudModel().getElementConsoleManager().writeToConsole(this, message, logType);
 		} catch (Exception e) {
-			BootDashActivator.log(e);
+			Log.log(e);
 		}
 	}
 
@@ -569,7 +568,7 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 		try {
 			return text == null ? null : ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(text));
 		} catch (IllegalArgumentException e) {
-			BootDashActivator.log(e);
+			Log.log(e);
 			return null;
 		}
 	}
@@ -582,7 +581,7 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 				getPersistentProperties().put(DEPLOYMENT_MANIFEST_FILE_PATH, file.getFullPath().toString());
 			}
 		} catch (Exception e) {
-			BootDashActivator.log(e);
+			Log.log(e);
 		}
 	}
 
@@ -746,6 +745,11 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 		// operation
 		operation.setSchedulingRule(null);
 		getCloudModel().runAsynch(operation, ui);
+	}
+
+	@Override
+	public EnumSet<RunState> supportedGoalStates() {
+		return CloudFoundryRunTarget.RUN_GOAL_STATES;
 	}
 
 }
