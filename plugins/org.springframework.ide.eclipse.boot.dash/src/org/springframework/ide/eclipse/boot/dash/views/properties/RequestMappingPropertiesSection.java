@@ -139,7 +139,7 @@ public class RequestMappingPropertiesSection extends AbstractBdePropertiesSectio
 		page.getControl().setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_RED));
 		FormData data;
 
-		labelText = getWidgetFactory().createLabel(composite, ""); //$NON-NLS-1$
+		labelText = getWidgetFactory().createLabel(composite, "", SWT.WRAP); //$NON-NLS-1$
 		data = new FormData();
 		data.left = new FormAttachment(0, 0);
 		data.right = new FormAttachment(100, 0);
@@ -182,7 +182,7 @@ public class RequestMappingPropertiesSection extends AbstractBdePropertiesSectio
 		if (bde == null) {
 			labelText.setText("Select single element in Boot Dashboard to see Request Mappings");
 		} else if (bde.getLiveRequestMappings() == null) {
-			labelText.setText("'" + bde.getName() + "' must be running and actuator 'mappings' endpoint must be enabled to obtain request mappings.");
+			labelText.setText("'" + bde.getName() + "' must be running with JMX enabled; and actuator 'mappings' endpoint must be enabled to obtain request mappings.");
 		} else {
 			labelText.setText("");
 		}
