@@ -24,9 +24,13 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaProject;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleEvent;
+import org.osgi.framework.BundleListener;
 import org.springframework.ide.eclipse.boot.core.cli.BootCliUtils;
 import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
 import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager.BootInstallListener;
@@ -126,6 +130,30 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 		RunTargetType type = getRunTarget().getType();
 		IPropertyStore typeStore = PropertyStoreFactory.createForScope(type, context.getRunTargetProperties());
 		this.modelStore = PropertyStoreFactory.createSubStore(getRunTarget().getId(), typeStore);
+
+		// Listen to M2E JDT plugin active event to refresh local boot project dash elements.
+		addMavenInitializationIssueEventHandling();
+	}
+
+	/**
+	 * Refresh boot project dash elements once m2e JDT plugin is fully
+	 * initialized. Boot project checks may not succeed in some cases if m2e JDT
+	 * hasn't completed it's start procedure
+	 */
+	private void addMavenInitializationIssueEventHandling() {
+		Bundle bundle = Platform.getBundle("org.eclipse.m2e.jdt");
+		if (bundle != null) {
+			BundleListener listener = new BundleListener() {
+				@Override
+				public void bundleChanged(BundleEvent event) {
+					if (event.getBundle() == bundle && event.getType() == BundleEvent.STARTED) {
+						updateElementsFromWorkspace();
+						bundle.getBundleContext().removeBundleListener(this);
+					}
+				}
+			};
+			bundle.getBundleContext().addBundleListener(listener);
+		}
 	}
 
 	void init() {
