@@ -10,8 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.test;
 
+import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withImportStrategy;
+
 import java.io.File;
-import java.io.IOException;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -21,8 +22,6 @@ import org.springsource.ide.eclipse.commons.core.util.OsUtils;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ExternalCommand;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ExternalProcess;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
-
-import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withImportStrategy;
 
 import junit.framework.TestCase;
 
