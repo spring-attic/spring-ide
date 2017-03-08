@@ -10,76 +10,88 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard;
 
-import java.util.List;
-
+import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
-import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.ui.ExpandableSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
+import org.springsource.ide.eclipse.commons.livexp.ui.Scroller;
+import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 
-public class FilteredDependenciesSection extends WizardPageSectionWithConfiguration {
-	private static final int NUM_DEP_COLUMNS = 1;
+public class FilteredDependenciesSection extends WizardPageSection {
 
 	protected final NewSpringBootWizardModel model;
 	private Composite dependencyArea;
+	private Scroller scroller;
 
 	private LiveExpression<Filter<Dependency>> filter;
 
-	public FilteredDependenciesSection(IPageWithSections owner, NewSpringBootWizardModel model, LiveExpression<Filter<Dependency>> filter) {
+	private Point sizeHint = new Point(SWT.DEFAULT, SWT.DEFAULT);
+
+	private int columns = 1;
+
+	public FilteredDependenciesSection(IPageWithSections owner, NewSpringBootWizardModel model,
+			LiveExpression<Filter<Dependency>> filter) {
 		super(owner);
 		this.model = model;
 		this.filter = filter;
 	}
 
+	public FilteredDependenciesSection sizeHint(Point sizeHint) {
+		if (sizeHint != null) {
+			this.sizeHint = sizeHint;
+		}
+		return this;
+	}
+
+	public FilteredDependenciesSection columns(int columns) {
+		this.columns = columns;
+		return this;
+	}
+
 	@Override
 	public void createContents(Composite page) {
-
-		// This dependency area stays active throughout the life of the
-		// dependency section. The contents of the area may change and are
-		// managed by the check boxes section created in this area when category
-		// selection changes
-		dependencyArea = area(page);
+		scroller = new Scroller(page);
+		GridDataFactory.fillDefaults().grab(true, true).minSize(sizeHint).hint(sizeHint).applyTo(scroller);
+		dependencyArea = scroller.getBody();
+		GridLayoutFactory.fillDefaults().applyTo(dependencyArea);
+		GridDataFactory.fillDefaults().grab(true, true).applyTo(dependencyArea);
 
 		for (String cat : model.dependencies.getCategories()) {
 			MultiSelectionFieldModel<Dependency> dependencyGroup = model.dependencies.getContents(cat);
-			CheckBoxesSection<Dependency> checkboxesSection = new CheckBoxesSection<Dependency>(getWizardOwner(),
-					dependencyGroup.getCheckBoxModels()).columns(NUM_DEP_COLUMNS);
-			ExpandableSection expandable = new ExpandableSection(getWizardOwner(), dependencyGroup.getLabel(),
-					checkboxesSection);
-
+			CheckBoxesSection<Dependency> checkboxesSection = new CheckBoxesSection<Dependency>(owner,
+					dependencyGroup.getCheckBoxModels()).columns(columns);
+			ExpandableSection expandable = new ExpandableSection(owner, dependencyGroup.getLabel(), checkboxesSection);
 			expandable.createContents(dependencyArea);
 
 			// Always expanded as it only shows selections. If there are no
 			// selections, the expandable
 			// section itself is hidden
-//			expandable.getExpansionState().setValue(true);
-//			expandable.setVisible(false);
+			expandable.getExpansionState().setValue(false);
 
-			this.filter.addListener((exp, value) -> makeSectionsVisible(expandable, checkboxesSection, cat));
+			this.filter.addListener((exp, value) -> onFilter(expandable, checkboxesSection, cat));
 		}
 	}
 
-	private void makeSectionsVisible(ExpandableSection expandable, CheckBoxesSection<Dependency> checkboxesSection,
-			String cat) {
-		expandable.setVisible(isVisible(cat));
-		checkboxesSection.applyFilter(this.filter.getValue());
-		layout();
-	}
+	private void onFilter(ExpandableSection expandable, CheckBoxesSection<Dependency> checkboxesSection, String cat) {
 
-	private boolean isVisible(String cat) {
-		MultiSelectionFieldModel<Dependency> dependencyGroup = model.dependencies.getContents(cat);
-		List<CheckBoxModel<Dependency>> models = dependencyGroup.getCheckBoxModels();
-		Filter<Dependency> filterVal = filter.getValue();
+		boolean visChanged = checkboxesSection.applyFilter(filter.getValue());
 
-		for (CheckBoxModel<Dependency> checkBoxModel : models) {
-			if (filterVal.accept(checkBoxModel.getValue())) {
-				return true;
+		if (checkboxesSection.isCreated()) {
+			boolean hasVisible = checkboxesSection.hasVisible();
+			expandable.setVisible(hasVisible);
+			if (hasVisible && visChanged) {
+				// Reveal if visibility changed
+				expandable.getExpansionState().setValue(true);
 			}
 		}
-		return false;
+
+		layout();
 	}
 
 	private void layout() {
@@ -87,7 +99,5 @@ public class FilteredDependenciesSection extends WizardPageSectionWithConfigurat
 			dependencyArea.layout(true);
 			dependencyArea.getParent().layout(true);
 		}
-		getWizardOwner().reflow();
 	}
-
 }

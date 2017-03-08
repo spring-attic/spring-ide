@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
@@ -37,9 +38,18 @@ import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.SimpleLabelProvider;
+import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 
-public class ChooseCategorySection extends WizardPageSectionWithConfiguration {
+/**
+ * This is one of the columns in a three-column version of the Spring starter
+ * wizard: column 1 is the category selection section.
+ * 
+ *
+ *
+ */
+@Deprecated
+public class ColumnSectionForCategories extends WizardPageSection {
 
 	private SelectionModel<String> selection;
 	private String[] categories; //The elements to choose from
@@ -49,7 +59,7 @@ public class ChooseCategorySection extends WizardPageSectionWithConfiguration {
 	private ILabelProvider labelProvider = new SimpleLabelProvider();
 	List<String> hiddenCategories = new ArrayList<>();
 	
-	public ChooseCategorySection(IPageWithSections owner, NewSpringBootWizardModel model, SelectionModel<String> selection) {
+	public ColumnSectionForCategories(IPageWithSections owner, NewSpringBootWizardModel model, SelectionModel<String> selection) {
 		super(owner);
 		this.selection = selection;
 		this.model = model;
@@ -101,6 +111,15 @@ public class ChooseCategorySection extends WizardPageSectionWithConfiguration {
 				}
 			}
 		});
+	}
+	
+	protected Composite area(Composite parent) {
+
+		Composite area = new Composite(parent, SWT.NONE);
+		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(area);
+		GridDataFactory.fillDefaults().grab(true, true).applyTo(area);
+
+		return area;
 	}
 	
 	protected void setSelectionInViewer() {

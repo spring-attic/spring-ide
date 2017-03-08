@@ -12,18 +12,29 @@ package org.springframework.ide.eclipse.boot.wizard;
 
 import java.util.List;
 
+import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
-import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.SelectionModel;
 import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
+import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 
-public class ChooseDependencySection extends WizardPageSectionWithConfiguration {
+/**
+ * This is one of the columns in a three-column version of the Spring starter
+ * wizard: column 2 is the dependency selection section.
+ * 
+ *
+ *
+ */
+@Deprecated
+public class ColumnSectionForSelection extends WizardPageSection {
 	private static final int NUM_DEP_COLUMNS = 1;
 
 	private final NewSpringBootWizardModel model;
@@ -32,7 +43,7 @@ public class ChooseDependencySection extends WizardPageSectionWithConfiguration 
 	private SelectionModel<String> categorySelection;
 	private Composite dependencyArea;
 
-	public ChooseDependencySection(IPageWithSections owner, NewSpringBootWizardModel model,
+	public ColumnSectionForSelection(IPageWithSections owner, NewSpringBootWizardModel model,
 			SelectionModel<String> categorySelection) {
 		super(owner);
 		this.model = model;
@@ -66,6 +77,15 @@ public class ChooseDependencySection extends WizardPageSectionWithConfiguration 
 				layout();
 			}
 		}
+	}
+	
+	protected Composite area(Composite parent) {
+
+		Composite area = new Composite(parent, SWT.NONE);
+		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(area);
+		GridDataFactory.fillDefaults().grab(true, true).applyTo(area);
+
+		return area;
 	}
 
 	protected GridLayout createLayout() {

@@ -10,18 +10,72 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard;
 
+import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Composite;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
+import org.springsource.ide.eclipse.commons.livexp.ui.Scroller;
+import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 
 import com.google.common.collect.ImmutableSet;
 
-public class SelectedDependenciesSection extends FilteredDependenciesSection {
+public class SelectedDependenciesSection extends WizardPageSection {
+
+	protected final NewSpringBootWizardModel model;
+	private Composite dependencyArea;
+	private Scroller scroller;
+
+	private LiveExpression<Filter<Dependency>> filter;
+
+	private Point sizeHint = new Point(SWT.DEFAULT, SWT.DEFAULT);
 
 	public SelectedDependenciesSection(IPageWithSections owner, NewSpringBootWizardModel model) {
-		super(owner, model, createFilter(model));
+		super(owner);
+		this.model = model;
+		this.filter = createFilter(model);
+	}
+
+	@Override
+	public void createContents(Composite page) {
+		scroller = new Scroller(page);
+		GridDataFactory.fillDefaults().grab(true, true).hint(sizeHint).applyTo(scroller);
+		dependencyArea = scroller.getBody();
+		GridLayoutFactory.fillDefaults().margins(5, 5).spacing(0, 0).applyTo(dependencyArea);
+		GridDataFactory.fillDefaults().grab(true, true).applyTo(dependencyArea);
+
+		for (String cat : model.dependencies.getCategories()) {
+			MultiSelectionFieldModel<Dependency> dependencyGroup = model.dependencies.getContents(cat);
+			SelectedSection<Dependency> checkboxesSection = new SelectedSection<Dependency>(owner,
+					dependencyGroup.getCheckBoxModels(), /* no label */ null);
+			checkboxesSection.createContents(dependencyArea);
+
+			this.filter.addListener((exp, value) -> onFilter(checkboxesSection, cat));
+		}
+	}
+
+	private void onFilter(SelectedSection<Dependency> checkboxesSection, String cat) {
+
+		checkboxesSection.applyFilter(filter.getValue());
+
+		if (checkboxesSection.isCreated()) {
+			boolean hasVisible = checkboxesSection.hasVisible();
+			checkboxesSection.setVisible(hasVisible);
+		}
+
+		layout();
+	}
+
+	private void layout() {
+		if (dependencyArea != null && !dependencyArea.isDisposed()) {
+			dependencyArea.layout(true);
+			dependencyArea.getParent().layout(true);
+		}
 	}
 
 	private static LiveExpression<Filter<Dependency>> createFilter(NewSpringBootWizardModel model) {
@@ -38,12 +92,19 @@ public class SelectedDependenciesSection extends FilteredDependenciesSection {
 		ValueListener<Boolean> selectionListener = (exp, val) -> {
 			filter.refresh();
 		};
-		
+
 		for (String cat : model.dependencies.getCategories()) {
 			MultiSelectionFieldModel<Dependency> dependencyGroup = model.dependencies.getContents(cat);
 			dependencyGroup.addSelectionListener(selectionListener);
 		}
 
 		return filter;
+	}
+
+	public SelectedDependenciesSection sizeHint(Point sizeHint) {
+		if (sizeHint != null) {
+			this.sizeHint = sizeHint;
+		}
+		return this;
 	}
 }
