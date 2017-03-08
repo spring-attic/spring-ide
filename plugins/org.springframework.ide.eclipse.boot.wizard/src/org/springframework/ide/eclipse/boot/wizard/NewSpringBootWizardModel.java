@@ -63,6 +63,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.validators.UrlValidator;
 import org.springsource.ide.eclipse.commons.livexp.ui.ProjectLocationSection;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 
+import com.google.common.base.Objects;
+
 /**
  * This is the model for the 'New Spring Starter Project' wizard.
  */
@@ -158,8 +160,42 @@ public class NewSpringBootWizardModel {
 
 		addBuildTypeValidator();
 
+		syncOneDirectionally(projectName, getArtifactId());
+
 		preferredSelections.restore(this);
 		defaultDependencies.restore(dependencies);
+	}
+
+	/**
+	 * Establish one-directional value copying from one field to another. When the two field have equal contents,
+	 * the value is copied from the 'fromField' to the 'toField' any time the 'fromField' is changed (keeping them
+	 * in sync).
+	 * <p>
+	 * However, when the toField is changed the value is not copied back to the fromField and the synchronization
+	 * at that point is 'broken' (until the fields again become equal, at which point syncing becomes enabled again).
+	 *
+	 * @param fromField
+	 * @param toField
+	 */
+	private void syncOneDirectionally(FieldModel<String> fromField, FieldModel<String> toField) {
+		if (fromField!=null && toField!=null) {
+			syncOneDirectionally(fromField.getVariable(), toField.getVariable());
+		}
+	}
+
+	private void syncOneDirectionally(LiveVariable<String> fromVar, LiveVariable<String> toVar) {
+		ValueListener<String> copyValue = (e, value) -> {
+			toVar.setValue(value);
+		};
+		ValueListener<String> enableOrDisableSyncing = (e, value) -> {
+			if (Objects.equal(fromVar.getValue(), toVar.getValue())){
+				fromVar.addListener(copyValue);
+			} else {
+				fromVar.removeListener(copyValue);
+			}
+		};
+		fromVar.addListener(enableOrDisableSyncing);
+		toVar.addListener(enableOrDisableSyncing);
 	}
 
 	/**
