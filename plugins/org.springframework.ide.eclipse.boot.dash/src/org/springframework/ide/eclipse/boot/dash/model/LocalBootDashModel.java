@@ -147,8 +147,13 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 				@Override
 				public void bundleChanged(BundleEvent event) {
 					if (event.getBundle() == bundle && event.getType() == BundleEvent.STARTED) {
-						updateElementsFromWorkspace();
-						bundle.getBundleContext().removeBundleListener(this);
+						try {
+							updateElementsFromWorkspace();
+						} catch (Throwable t) {
+							Log.log(t);
+						} finally {
+							bundle.getBundleContext().removeBundleListener(this);
+						}
 					}
 				}
 			};
