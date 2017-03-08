@@ -51,6 +51,7 @@ import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ProjectCha
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
@@ -84,6 +85,22 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 
 	private BootInstallListener bootInstallListener;
 	private IPropertyStore modelStore;
+
+	private LiveVariable<RefreshState> bootAppsRefreshState = new LiveVariable<>(RefreshState.READY);
+	private LiveVariable<RefreshState> cloudCliServicesRefreshState = new LiveVariable<>(RefreshState.READY);
+
+	private LiveExpression<RefreshState> refreshState = new LiveExpression<RefreshState>() {
+		{
+			dependsOn(bootAppsRefreshState);
+			dependsOn(cloudCliServicesRefreshState);
+			addListener((e,v) -> notifyModelStateChanged());
+		}
+
+		@Override
+		protected RefreshState compute() {
+			return RefreshState.merge(bootAppsRefreshState.getValue(), cloudCliServicesRefreshState.getValue());
+		}
+	};
 
 	public class WorkspaceListener implements ProjectChangeListener, ClasspathListener {
 
@@ -188,12 +205,17 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 	}
 
 	void updateElementsFromWorkspace() {
-		Set<BootProjectDashElement> newElements = Arrays.stream(this.workspace.getRoot().getProjects())
-			.map(projectElementFactory::createOrGet)
-			.filter(Objects::nonNull)
-			.collect(Collectors.toSet());
-		applications.replaceAll(newElements);
-		projectElementFactory.disposeAllExcept(newElements);
+		try {
+			bootAppsRefreshState.setValue(RefreshState.loading("Loading Workspace Boot Apps..."));
+			Set<BootProjectDashElement> newElements = Arrays.stream(this.workspace.getRoot().getProjects())
+					.map(projectElementFactory::createOrGet)
+					.filter(Objects::nonNull)
+					.collect(Collectors.toSet());
+				applications.replaceAll(newElements);
+				projectElementFactory.disposeAllExcept(newElements);
+		} finally {
+			bootAppsRefreshState.setValue(RefreshState.READY);
+		}
 	}
 
 	public synchronized ObservableSet<BootDashElement> getElements() {
@@ -228,10 +250,15 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 		new Job("Loading local cloud services") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				List<LocalCloudServiceDashElement> newCloudCliservices = fetchLocalServices();
-				cloudCliservices.getValue().forEach(bde -> bde.dispose());
-				cloudCliservices.replaceAll(newCloudCliservices);
-				return Status.OK_STATUS;
+				try {
+					cloudCliServicesRefreshState.setValue(RefreshState.loading("Fetching Local Cloud Sevices..."));
+					List<LocalCloudServiceDashElement> newCloudCliservices = fetchLocalServices();
+					cloudCliservices.getValue().forEach(bde -> bde.dispose());
+					cloudCliservices.replaceAll(newCloudCliservices);
+					return Status.OK_STATUS;
+				} finally {
+					cloudCliServicesRefreshState.setValue(RefreshState.READY);
+				}
 			}
 		}.schedule();
 	}
@@ -275,4 +302,10 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 	public IPropertyStore getModelStore() {
 		return modelStore;
 	}
+
+	@Override
+	public RefreshState getRefreshState() {
+		return refreshState.getValue();
+	}
+
 }
