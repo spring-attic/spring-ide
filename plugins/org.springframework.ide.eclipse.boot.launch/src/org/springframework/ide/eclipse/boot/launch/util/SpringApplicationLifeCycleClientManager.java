@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.boot.launch.util;
 import javax.inject.Provider;
 import javax.management.remote.JMXConnector;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.debug.core.ILaunch;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 
