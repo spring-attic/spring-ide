@@ -62,8 +62,7 @@ public class EnableJmxFeaturesModel implements ILaunchConfigurationTabModel {
 		this.liveBeanEnabled = new LiveVariable<>(DEFAULT_ENABLE_LIVE_BEAN_SUPPORT);
 		this.lifeCycleEnabled = new LiveVariable<>(DEFAULT_ENABLE_LIFE_CYCLE);
 
-		autoEnableJmxWhen(liveBeanEnabled);
-		autoEnableJmxWhen(lifeCycleEnabled);
+		autoDisableWhenJmxDisabled(liveBeanEnabled, lifeCycleEnabled);
 
 		this.port = new LiveVariable<>("");
 		this.terminationTimeout = new LiveVariable<>("");
@@ -116,22 +115,24 @@ public class EnableJmxFeaturesModel implements ILaunchConfigurationTabModel {
 						return error(timeOutFieldName+" can't be parsed as an Integer");
 					}
 				}
-				if (liveBeanEnabled.getValue() && !jmxEnabled.getValue()) {
-					return error("Live Bean support requires JMX to be enabled");
-				}
-				if (lifeCycleEnabled.getValue() && !jmxEnabled.getValue()) {
-					return error("Lifecycle Management requires JMX to be enabled");
-				}
+//				if (liveBeanEnabled.getValue() && !jmxEnabled.getValue()) {
+//					return error("Live Bean support requires JMX to be enabled");
+//				}
+//				if (lifeCycleEnabled.getValue() && !jmxEnabled.getValue()) {
+//					return error("Lifecycle Management requires JMX to be enabled");
+//				}
 				return ValidationResult.OK;
 			}
 
 		};
 	}
 
-	private void autoEnableJmxWhen(LiveVariable<Boolean> featureEnabled) {
-		featureEnabled.addListener((exp, value) -> {
-			if (value) {
-				jmxEnabled.setValue(true);
+	private void autoDisableWhenJmxDisabled(@SuppressWarnings("unchecked") LiveVariable<Boolean>... featuresToDisable) {
+		jmxEnabled.addListener((exp, value) -> {
+			if (!value) {
+				for (LiveVariable<Boolean> feature : featuresToDisable) {
+					feature.setValue(false);
+				}
 			}
 		});
 	}
