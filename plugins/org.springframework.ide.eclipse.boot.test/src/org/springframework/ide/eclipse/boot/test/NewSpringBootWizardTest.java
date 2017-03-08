@@ -59,6 +59,7 @@ public class NewSpringBootWizardTest extends TestCase {
 
 	private void assertExecutable(IFile eclipseFile) throws Exception {
 		File file = eclipseFile.getRawLocation().toFile();
+		assertTrue("File does not exist: "+file, file.exists());
 		if (!file.canExecute()) {
 			ExternalCommand cmd = new ExternalCommand("ls", "-lad", file.toString());
 			ExternalProcess process = new ExternalProcess(new File("."), cmd);
