@@ -60,4 +60,11 @@ public class DynamicSection extends ReflowableSection {
 	public LiveExpression<ValidationResult> getValidator() {
 		return validator;
 	}
+
+	@Override
+	public void dispose() {
+		//Detach validator wiring from nested validator (if any is still attached).
+		validator.setDelegate(null);
+		super.dispose();
+	}
 }
