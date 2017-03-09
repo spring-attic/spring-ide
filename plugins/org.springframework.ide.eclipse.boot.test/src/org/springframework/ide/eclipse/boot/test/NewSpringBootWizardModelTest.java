@@ -405,7 +405,34 @@ public class NewSpringBootWizardModelTest extends TestCase {
 		}
 		NewSpringBootWizardModel model = parseFrom(INITIALIZR_JSON);
 		assertEquals("demo-2", model.getProjectName().getValue());
+		assertEquals("demo-2", model.getArtifactId().getValue());
 		assertEquals(ValidationResult.OK, model.getProjectName().getValidator().getValue());
+	}
+	
+	public void testArtifactIdSyncWithProjectName() throws Exception {
+		NewSpringBootWizardModel model = parseFrom(INITIALIZR_JSON);
+		assertEquals("demo", model.getProjectName().getValue());
+		assertEquals("demo", model.getArtifactId().getValue());
+		
+		model.getProjectName().setValue("demo-1");
+		assertEquals("demo-1", model.getProjectName().getValue());
+		assertEquals("demo-1", model.getArtifactId().getValue());
+
+		model.getArtifactId().setValue("demo-project");
+		assertEquals("demo-1", model.getProjectName().getValue());
+		assertEquals("demo-project", model.getArtifactId().getValue());
+
+		model.getProjectName().setValue("demo-2");
+		assertEquals("demo-2", model.getProjectName().getValue());
+		assertEquals("demo-project", model.getArtifactId().getValue());
+
+		model.getArtifactId().setValue("demo-2");
+		assertEquals("demo-2", model.getProjectName().getValue());
+		assertEquals("demo-2", model.getArtifactId().getValue());
+		
+		model.getProjectName().setValue("demo-3");
+		assertEquals("demo-3", model.getProjectName().getValue());
+		assertEquals("demo-3", model.getArtifactId().getValue());
 	}
 
 	public void testRestoreFromOldBuildtypePreference() throws Exception {

@@ -72,6 +72,7 @@ import com.google.common.base.Objects;
 public class NewSpringBootWizardModel {
 
 	private static final String NAME_PROPRTY_ID = "name";
+	private static final String ARTIFACT_PROPERTY_ID = "artifactId";
 	
 	private static final Map<String,BuildType> KNOWN_TYPES = new HashMap<>();
 	static {
@@ -90,7 +91,7 @@ public class NewSpringBootWizardModel {
 	static {
 		KNOWN_STRING_INPUTS.put(NAME_PROPRTY_ID, "Name");
 		KNOWN_STRING_INPUTS.put("groupId", "Group");
-		KNOWN_STRING_INPUTS.put("artifactId", "Artifact");
+		KNOWN_STRING_INPUTS.put(ARTIFACT_PROPERTY_ID, "Artifact");
 		KNOWN_STRING_INPUTS.put("version", "Version");
 		KNOWN_STRING_INPUTS.put("description", "Description");
 		KNOWN_STRING_INPUTS.put("packageName", "Package");
@@ -133,7 +134,8 @@ public class NewSpringBootWizardModel {
 		this.preferredSelections = new PreferredSelections(prefs) {
 			@Override
 			protected boolean isInteresting(FieldModel<String> input) {
-				if (NAME_PROPRTY_ID.equals(input.getName())) {
+				if (NAME_PROPRTY_ID.equals(input.getName())
+						|| ARTIFACT_PROPERTY_ID.equals(input.getName())) {
 					return false;
 				}
 				return super.isInteresting(input);
@@ -172,6 +174,7 @@ public class NewSpringBootWizardModel {
 
 		addBuildTypeValidator();
 
+		getArtifactId().setValue(projectName.getValue());
 		syncOneDirectionally(projectName, getArtifactId());
 
 		preferredSelections.restore(this);
@@ -560,7 +563,7 @@ public class NewSpringBootWizardModel {
 	}
 
 	public FieldModel<String> getArtifactId() {
-		String fieldName = "artifactId";
+		String fieldName = ARTIFACT_PROPERTY_ID;
 		return getStringInput(fieldName);
 	}
 
