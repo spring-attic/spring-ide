@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2016 Pivotal, Inc.
+ * Copyright (c) 2013, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,6 +47,7 @@ import org.springframework.ide.eclipse.boot.wizard.content.BuildType;
 import org.springframework.ide.eclipse.boot.wizard.content.CodeSet;
 import org.springframework.ide.eclipse.boot.wizard.importing.ImportStrategy;
 import org.springframework.ide.eclipse.boot.wizard.importing.ImportUtils;
+import org.springsource.ide.eclipse.commons.core.util.NameGenerator;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadableItem;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
@@ -70,6 +71,8 @@ import com.google.common.base.Objects;
  */
 public class NewSpringBootWizardModel {
 
+	private static final String NAME_PROPRTY_ID = "name";
+	
 	private static final Map<String,BuildType> KNOWN_TYPES = new HashMap<>();
 	static {
 		KNOWN_TYPES.put("gradle-project", BuildType.GRADLE); // New version of initialzr app
@@ -85,7 +88,7 @@ public class NewSpringBootWizardModel {
 	 */
 	private static final Map<String,String> KNOWN_STRING_INPUTS = new LinkedHashMap<>();
 	static {
-		KNOWN_STRING_INPUTS.put("name", "Name");
+		KNOWN_STRING_INPUTS.put(NAME_PROPRTY_ID, "Name");
 		KNOWN_STRING_INPUTS.put("groupId", "Group");
 		KNOWN_STRING_INPUTS.put("artifactId", "Artifact");
 		KNOWN_STRING_INPUTS.put("version", "Version");
@@ -127,7 +130,15 @@ public class NewSpringBootWizardModel {
 
 	public NewSpringBootWizardModel(URLConnectionFactory urlConnectionFactory, String jsonUrl, IPreferenceStore prefs) throws Exception {
 		this.popularities = new PopularityTracker(prefs);
-		this.preferredSelections = new PreferredSelections(prefs);
+		this.preferredSelections = new PreferredSelections(prefs) {
+			@Override
+			protected boolean isInteresting(FieldModel<String> input) {
+				if (NAME_PROPRTY_ID.equals(input.getName())) {
+					return false;
+				}
+				return super.isInteresting(input);
+			}	
+		};
 		this.defaultDependencies = new DefaultDependencies(prefs);
 		this.urlConnectionFactory = urlConnectionFactory;
 		this.JSON_URL = jsonUrl;
@@ -137,9 +148,10 @@ public class NewSpringBootWizardModel {
 
 		discoverOptions(stringInputs, dependencies);
 		dependencies.sort();
-
-		projectName = stringInputs.getField("name");
+		
+		projectName = stringInputs.getField(NAME_PROPRTY_ID);
 		projectName.validator(new NewProjectNameValidator(projectName.getVariable()));
+		generateValidProjectName();
 		location = new LiveVariable<>(ProjectLocationSection.getDefaultProjectLocation(projectName.getValue()));
 		locationValidator = new NewProjectLocationValidator("Location", location, projectName.getVariable());
 		Assert.isNotNull(projectName, "The service at "+JSON_URL+" doesn't specify a 'name' text input");
@@ -196,6 +208,17 @@ public class NewSpringBootWizardModel {
 		};
 		fromVar.addListener(enableOrDisableSyncing);
 		toVar.addListener(enableOrDisableSyncing);
+	}
+	
+	private void generateValidProjectName() {
+		boolean projectNameValid = projectName.getValidator().getValue() == ValidationResult.OK;
+		if (!projectNameValid) {
+			NameGenerator generator = NameGenerator.create(projectName.getValue(), "-");
+			while (!projectNameValid) {
+				projectName.setValue(generator.generateNext());
+				projectNameValid = projectName.getValidator().getValue() == ValidationResult.OK;
+			}
+		}
 	}
 
 	/**
