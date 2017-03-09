@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2016 GoPivotal, Inc.
+ * Copyright (c) 2013, 2017 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,11 +26,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.junit.Assert;
-import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
+import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
 import org.springframework.ide.eclipse.boot.wizard.HierarchicalMultiSelectionFieldModel;
 import org.springframework.ide.eclipse.boot.wizard.MultiSelectionFieldModel;
 import org.springframework.ide.eclipse.boot.wizard.NewSpringBootWizardModel;
@@ -45,8 +48,10 @@ import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLC
 import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 import org.springsource.ide.eclipse.commons.livexp.util.Filters;
+import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 import junit.framework.TestCase;
 
@@ -63,6 +68,7 @@ public class NewSpringBootWizardModelTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
+		StsTestUtil.cleanUpProjects();
 	}
 
 	public static NewSpringBootWizardModel parseFrom(String resourcePath, IPreferenceStore store) throws Exception {
@@ -386,6 +392,47 @@ public class NewSpringBootWizardModelTest extends TestCase {
 		assertFilterAccepts(model, true, "foo", "something", "label", "desc FOO desc");
 		assertFilterAccepts(model, false, "foo", "foo", "label", "desc");
 
+	}
+	
+	public void testValidDefaultProjectName() throws Exception {
+		IProject p1 = ResourcesPlugin.getWorkspace().getRoot().getProject("demo");
+		if (!p1.exists()) {
+			p1.create(new NullProgressMonitor());
+		}
+		IProject p2 = ResourcesPlugin.getWorkspace().getRoot().getProject("demo-1");
+		if (!p2.exists()) {
+			p2.create(new NullProgressMonitor());
+		}
+		NewSpringBootWizardModel model = parseFrom(INITIALIZR_JSON);
+		assertEquals("demo-2", model.getProjectName().getValue());
+		assertEquals("demo-2", model.getArtifactId().getValue());
+		assertEquals(ValidationResult.OK, model.getProjectName().getValidator().getValue());
+	}
+	
+	public void testArtifactIdSyncWithProjectName() throws Exception {
+		NewSpringBootWizardModel model = parseFrom(INITIALIZR_JSON);
+		assertEquals("demo", model.getProjectName().getValue());
+		assertEquals("demo", model.getArtifactId().getValue());
+		
+		model.getProjectName().setValue("demo-1");
+		assertEquals("demo-1", model.getProjectName().getValue());
+		assertEquals("demo-1", model.getArtifactId().getValue());
+
+		model.getArtifactId().setValue("demo-project");
+		assertEquals("demo-1", model.getProjectName().getValue());
+		assertEquals("demo-project", model.getArtifactId().getValue());
+
+		model.getProjectName().setValue("demo-2");
+		assertEquals("demo-2", model.getProjectName().getValue());
+		assertEquals("demo-project", model.getArtifactId().getValue());
+
+		model.getArtifactId().setValue("demo-2");
+		assertEquals("demo-2", model.getProjectName().getValue());
+		assertEquals("demo-2", model.getArtifactId().getValue());
+		
+		model.getProjectName().setValue("demo-3");
+		assertEquals("demo-3", model.getProjectName().getValue());
+		assertEquals("demo-3", model.getArtifactId().getValue());
 	}
 
 	public void testRestoreFromOldBuildtypePreference() throws Exception {
