@@ -79,7 +79,7 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 	@Override
 	public void addPages() {
 		super.addPages();
-		addPage(new ExampleDynamicPage());
+		// addPage(new ExampleDynamicPage());
 		addPage(projectPage = new ProjectDetailsPage());
 		addPage(createDependencyPage());
 		addPage(new PageThree());
