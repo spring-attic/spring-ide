@@ -93,6 +93,18 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 	private LiveVariable<RefreshState> bootAppsRefreshState = new LiveVariable<>(RefreshState.READY);
 	private LiveVariable<RefreshState> cloudCliServicesRefreshState = new LiveVariable<>(RefreshState.READY);
 
+	private LiveExpression<Boolean> hideCloudCliServices = new LiveExpression<Boolean>() {
+		{
+			dependsOn(getViewModel().getToggleFilters().getSelectedFilters());
+		}
+
+		@Override
+		protected Boolean compute() {
+			return getViewModel().getToggleFilters().getSelectedFilters()
+					.contains(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES);
+		}
+	};
+
 	private LiveExpression<RefreshState> refreshState = new LiveExpression<RefreshState>() {
 		{
 			dependsOn(bootAppsRefreshState);
@@ -188,6 +200,10 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 			} catch (Exception e) {
 				Log.log(e);
 			}
+
+			// Listen to changes in "Hide Local Cloud Services" filter toggle
+			hideCloudCliServices.addListener((e, v) -> refreshLocalCloudServices());
+
 			this.devtoolsPortRefresher = new DevtoolsPortRefresher(this, projectElementFactory);
 		}
 	}
@@ -199,6 +215,7 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 	public void dispose() {
 		if (applications!=null) {
 			applications.getValue().forEach(bde -> bde.dispose());
+			applications.dispose();
 			applications = null;
 			openCloseListenerManager.dispose();
 			openCloseListenerManager = null;
@@ -228,11 +245,14 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 		}
 		if (cloudCliservices != null) {
 			cloudCliservices.getValue().forEach(bde -> bde.dispose());
+			cloudCliservices.dispose();
 			cloudCliservices = null;
 		}
 		if (allElements != null) {
+			allElements.dispose();
 			allElements = null;
 		}
+		hideCloudCliServices.dispose();
 		launchConfTracker.dispose();
 		launchConfRunStateTracker.dispose();
 	}
@@ -280,20 +300,25 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 	}
 
 	private void refreshLocalCloudServices() {
-		new Job("Loading local cloud services") {
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				try {
-					cloudCliServicesRefreshState.setValue(RefreshState.loading("Fetching Local Cloud Sevices..."));
-					List<LocalCloudServiceDashElement> newCloudCliservices = fetchLocalServices();
-					cloudCliservices.getValue().forEach(bde -> bde.dispose());
-					cloudCliservices.replaceAll(newCloudCliservices);
-					return Status.OK_STATUS;
-				} finally {
-					cloudCliServicesRefreshState.setValue(RefreshState.READY);
+		if (hideCloudCliServices.getValue()) {
+			cloudCliservices.getValue().forEach(bde -> bde.dispose());
+			cloudCliservices.replaceAll(Collections.emptySet());
+		} else {
+			new Job("Loading local cloud services") {
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					try {
+						cloudCliServicesRefreshState.setValue(RefreshState.loading("Fetching Local Cloud Sevices..."));
+						List<LocalCloudServiceDashElement> newCloudCliservices = fetchLocalServices();
+						cloudCliservices.getValue().forEach(bde -> bde.dispose());
+						cloudCliservices.replaceAll(newCloudCliservices);
+						return Status.OK_STATUS;
+					} finally {
+						cloudCliServicesRefreshState.setValue(RefreshState.READY);
+					}
 				}
-			}
-		}.schedule();
+			}.schedule();
+		}
 	}
 
 	@Override
