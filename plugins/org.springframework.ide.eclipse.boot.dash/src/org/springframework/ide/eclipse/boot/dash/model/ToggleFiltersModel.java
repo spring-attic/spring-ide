@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2016 Pivotal, Inc.
+ * Copyright (c) 2015, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -64,11 +64,18 @@ public class ToggleFiltersModel {
 		}
 	};
 
+	public static final FilterChoice FILTER_CHOICE_HIDE_NON_WORKSPACE_ELEMENTS = new FilterChoice("hide.non-workspace",
+			"Hide non-workspace elements", HIDE_NON_WORKSPACE_ELEMENTS);
+	public static final FilterChoice FILTER_CHOICE_HIDE_SOLITARY_CONFS = new FilterChoice("hide.solitary-launch-config",
+			"Hide solitary launch configs", HIDE_SOLITARY_CONFS, true);
+	public static final FilterChoice FILTER_CHOICE_HIDE_LOCAL_SERVICES = new FilterChoice("hide.local-cloud-services",
+			"Hide local cloud services", HIDE_LOCAL_SERVICES);
+
 	private static final String STORE_ID = "toggle-filters";
 	private static final FilterChoice[] FILTERS = {
-			new FilterChoice("hide.non-workspace", "Hide non-workspace elements", HIDE_NON_WORKSPACE_ELEMENTS),
-			new FilterChoice("hide.solitary-launch-config", "Hide solitary launch configs", HIDE_SOLITARY_CONFS, true),
-			new FilterChoice("hide.local-cloud-services", "Hide local cloud services", HIDE_LOCAL_SERVICES)
+			FILTER_CHOICE_HIDE_NON_WORKSPACE_ELEMENTS,
+			FILTER_CHOICE_HIDE_SOLITARY_CONFS,
+			FILTER_CHOICE_HIDE_LOCAL_SERVICES
 	};
 
 	private final PropertyStoreApi persistentProperties;
