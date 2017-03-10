@@ -17,6 +17,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Layout;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
@@ -40,7 +41,7 @@ public class DynamicSection extends ReflowableSection {
 		Layout l = GridLayoutFactory.fillDefaults().margins(0, 0).create();
 		composite.setLayout(l);
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(composite);
-		content.addListener((e, newContents) -> updateContent(newContents));
+		content.addListener(UIValueListener.from((e, newContents) -> updateContent(newContents)));
 	}
 
 	private void updateContent(IPageSection newContents) {
