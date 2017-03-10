@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,7 +23,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport.Feature;
 import org.springframework.ide.eclipse.boot.launch.util.DelegatingLaunchConfigurationTabSection;
@@ -77,7 +76,7 @@ public class EnableJmxSection extends DelegatingLaunchConfigurationTabSection {
 
 			String portToolTip = "The port used for communicating with JMX beans (0 means STS should pick the port automatically on startup). "
 					+ "The same port is used/shared by both 'Life Cycle Management' and the 'Live Beans Graph'";
-			Label label = new Label(composite, SWT.NONE);
+			final Label label = new Label(composite, SWT.NONE);
 			label.setText("Port:");
 			portWidget = new Text(composite, SWT.BORDER);
 			GridDataFactory.fillDefaults().hint(UIConstants.fieldLabelWidthHint(portWidget, 7), SWT.DEFAULT)
@@ -102,7 +101,7 @@ public class EnableJmxSection extends DelegatingLaunchConfigurationTabSection {
 					"Requires Boot 1.3.0. Allows Boot Dashboard View to track 'STARTING' state of Boot Apps; allows STS to ask Boot Apps to shutdown nicely. " +
 					"Adds these vm args: \n",
 					Feature.LIFE_CYCLE));
-			Label terminationTimeoutLabel = new Label(composite, SWT.NONE);
+			final Label terminationTimeoutLabel = new Label(composite, SWT.NONE);
 			terminationTimeoutLabel.setText("Termination timeout (ms):");
 			terminationTimeoutWidget = new Text(composite, SWT.BORDER);
 			GridDataFactory.fillDefaults().hint(UIConstants.fieldLabelWidthHint(terminationTimeoutWidget, 7), SWT.DEFAULT)
@@ -113,6 +112,7 @@ public class EnableJmxSection extends DelegatingLaunchConfigurationTabSection {
 				portWidget.setEnabled(enable);
 				liveBeanCheckbox.setEnabled(enable);
 				lifeCycleCheckbox.setEnabled(enable);
+				label.setEnabled(enable);
 				terminationTimeoutLabel.setEnabled(enable);
 			});
 			model.lifeCycleEnabled.addListener(new ValueListener<Boolean>() {
