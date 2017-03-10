@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.wizard;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -20,40 +21,39 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
-import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
-import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
+import org.springframework.ide.eclipse.boot.livexp.ui.DynamicSection;
 import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
-import org.springsource.ide.eclipse.commons.livexp.ui.ButtonSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.ChooseOneSectionCombo;
 import org.springsource.ide.eclipse.commons.livexp.ui.CommentSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.DescriptionSection;
-import org.springsource.ide.eclipse.commons.livexp.ui.ExpandableSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.GroupSection;
+import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.ProjectLocationSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.StringFieldSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
-import org.springsource.ide.eclipse.commons.livexp.util.Filter;
+import org.springsource.ide.eclipse.commons.livexp.util.Parser;
+
+import com.google.common.collect.ImmutableList;
 
 public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWizard {
 
 	private static final ImageDescriptor IMAGE = BootWizardImages.BOOT_WIZARD_ICON;
+	static final String NO_CONTENT_AVAILABLE = "No content available.";
 
-	private NewSpringBootWizardModel model;
+
+	private NewSpringBootWizardFactoryModel model;
 
 	private IStructuredSelection selection;
 
 	private WorkingSetSection workingSetSection;
 
-	private ProjectDetailsPage projectPage;
+	private WizardPageWithSections projectPage;
 
 	public NewSpringBootWizard() throws Exception {
 		setDefaultPageImageDescriptor(IMAGE);
@@ -62,7 +62,7 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 	//@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		try {
-			model = new NewSpringBootWizardModel();
+			model = new NewSpringBootWizardFactoryModel();
 			this.selection = selection;
 		} catch (Exception e) {
 			MessageDialog.openError(workbench.getActiveWorkbenchWindow().getShell(), "Error opening the wizard",
@@ -79,65 +79,36 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 	@Override
 	public void addPages() {
 		super.addPages();
-		// addPage(new ExampleDynamicPage());
-		addPage(projectPage = new ProjectDetailsPage());
-		addPage(createDependencyPage());
-		addPage(new PageThree());
+		Assert.isLegal(model!=null, "The Spring Starter Wizard model was not initialized. Unable to open the wizard.");
+		addPage(projectPage = new ProjectDetailsPage(model));
+		addPage(new MultipleViewsDependencyPage(model));
+		addPage(new PageThree(model));
 	}
 
-	private IWizardPage createDependencyPage() {
-
-		return new MultipleViewsDependencyPage() {
-
-			@Override
-			protected NewSpringBootWizardModel getModel() {
-				return model;
-			}
-		};
-	}
 
 	@Override
 	public boolean canFinish() {
 		return super.canFinish() && getContainer().getCurrentPage()!=projectPage;
 	}
+	
+	public class ProjectDetailsSection extends GroupSection {
 
-	private WizardPageSection createRadioGroupsSection(WizardPageWithSections owner) {
-		boolean notEmpty = false;
-		RadioGroup bootVersion = model.getBootVersion(); //This is placed specifically somewhere else so must skip it here
-		ArrayList<WizardPageSection> radioSections = new ArrayList<>();
-		for (RadioGroup radioGroup : model.getRadioGroups().getGroups()) {
-			if (radioGroup!=bootVersion) {
-				if (radioGroup.getRadios().length>1) {
-					//Don't add a UI elements for something that offers no real choice
-					radioSections.add(
-						new ChooseOneSectionCombo<>(owner, radioGroup.getLabel(), radioGroup.getSelection(), radioGroup.getRadios())
-						//new ChooseOneSectionCombo<RadioInfo>(owner, radioGroup.getLabel(), radioGroup.getSelection(), radioGroup.getRadios())
-					);
-					notEmpty = true;
-				}
-			}
+		private final NewSpringBootWizardModel model;
+
+		public ProjectDetailsSection(IPageWithSections owner, NewSpringBootWizardModel model) {
+			super(owner, null);
+			this.model = model;
+			addSections(createSections().toArray(new WizardPageSection[0]));
 		}
-		if (notEmpty) {
-			return new GroupSection(owner, null, radioSections.toArray(new WizardPageSection[radioSections.size()])).columns(2);
-		}
-		return null;
-	}
-
-	public class ProjectDetailsPage extends WizardPageWithSections {
-
-		protected ProjectDetailsPage() {
-			super("page1", "New Spring Starter Project", null);
-		}
-
-		@Override
-		protected List<WizardPageSection> createSections() {
+		
+		protected  List<WizardPageSection> createSections() {
 			List<WizardPageSection> sections = new ArrayList<>();
 
 			FieldModel<String> projectName = model.getProjectName();
-			sections.add(new StringFieldSection(this, projectName));
-			sections.add(new ProjectLocationSection(this, model.getLocation(), projectName.getVariable(), model.getLocationValidator()));
+			sections.add(new StringFieldSection(owner, projectName));
+			sections.add(new ProjectLocationSection(owner, model.getLocation(), projectName.getVariable(), model.getLocationValidator()));
 
-			WizardPageSection radios = createRadioGroupsSection(this);
+			WizardPageSection radios = createRadioGroupsSection(owner);
 			if (radios!=null) {
 				sections.add(radios);
 			}
@@ -145,134 +116,77 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 			for (FieldModel<String> f : model.stringInputs) {
 				//caution! we already created the section for projectName because we want it at the top
 				if (projectName!=f) {
-					sections.add(new StringFieldSection(this, f));
+					sections.add(new StringFieldSection(owner, f));
 				}
 			}
-
-			sections.add(workingSetSection = new WorkingSetSection(this, selection));
-
+			
+			sections.add(workingSetSection = new WorkingSetSection(owner, selection));
+			
 			return sections;
 		}
-
-	}
-
-	public class DependencyPage extends WizardPageWithSections {
-
-		private static final int NUM_DEP_COLUMNS = 4;
-		private static final int MAX_MOST_POPULAR = 3*NUM_DEP_COLUMNS;
-
-		private ExpandableSection frequentlyUsedSection;
-
-		private CheckBoxesSection<Dependency> frequentlyUsedCheckboxes;
-
-		protected DependencyPage() {
-			super("page2", "New Spring Starter Project", null);
-		}
-
-		private void applyFilter(Filter<Dependency> filter, ExpandableSection expandable, CheckBoxesSection<Dependency> checkboxes) {
-			boolean visChanged = checkboxes.applyFilter(filter);
-
-			if (checkboxes.isCreated()) {
-				boolean hasVisible = checkboxes.hasVisible();
-				expandable.setVisible(hasVisible);
-				if (hasVisible && visChanged) {
-					//Reveal if visibility changed
-					expandable.getExpansionState().setValue(true);
-					this.reflow();
-				}
-			}
-		}
-
-		private void refreshFrequentlyUsedDependencies() {
-			List<CheckBoxModel<Dependency>> dependenciesCheckboxes = model.getFrequentlyUsedDependencies(MAX_MOST_POPULAR);
-			frequentlyUsedCheckboxes.setModel(dependenciesCheckboxes);
-			frequentlyUsedSection.setVisible(!dependenciesCheckboxes.isEmpty());
-			reflow();
-		}
-
-		@Override
-		protected List<WizardPageSection> createSections() {
-			List<WizardPageSection> sections = new ArrayList<>();
-
-			RadioGroup bootVersion = model.getBootVersion();
-			sections.add(
-				new ChooseOneSectionCombo<>(this, bootVersion.getLabel(),
-							bootVersion.getSelection(), bootVersion.getRadios()
-				)
-				.useFieldLabelWidthHint(false)
-			);
-
-			sections.add(
-					new CommentSection(this, model.dependencies.getLabel())
-			);
-
-			List<CheckBoxModel<Dependency>> frequesntDependencies = model.getFrequentlyUsedDependencies(MAX_MOST_POPULAR);
-			frequentlyUsedCheckboxes = new CheckBoxesSection<>(this, frequesntDependencies)
-					.columns(NUM_DEP_COLUMNS);
-			frequentlyUsedSection = new ExpandableSection(this, "Frequently Used",
-					frequentlyUsedCheckboxes);
-			sections.add(frequentlyUsedSection);
-			frequentlyUsedSection.setVisible(!frequesntDependencies.isEmpty());
-
-			sections.add(
-				new GroupSection(this, null,
-					new SearchBoxSection(this, model.getDependencyFilterBoxText()) {
-						@Override
-						protected String getSearchHint() {
-							return "Type to search dependencies";
-						}
-					},
-
-					new ButtonSection(this, "Make Default", () -> {
-						if (model.saveDefaultDependencies()) {
-							refreshFrequentlyUsedDependencies();
-						}
-					})
-					.tooltip("Make currently selected dependencies selected by default"),
-
-					new ButtonSection(this, "Clear Selection", () -> {
-						model.dependencies.clearSelection();
-					})
-					.tooltip("Clear dependencies selection")
-				)
-				.columns(3, false)
-			);
-
-			for (String cat : model.dependencies.getCategories()) {
-				MultiSelectionFieldModel<Dependency> dependencyGroup = model.dependencies.getContents(cat);
-				final ExpandableSection expandable;
-				final CheckBoxesSection<Dependency> checkboxes;
-				sections.add(
-					expandable = new ExpandableSection(this, dependencyGroup.getLabel(),
-							checkboxes = new CheckBoxesSection<>(this, dependencyGroup.getCheckBoxModels())
-								.columns(NUM_DEP_COLUMNS)
-					)
-				);
-				expandable.getExpansionState().setValue(false);
-				model.getDependencyFilter().addListener(new UIValueListener<Filter<Dependency>>() {
-					@Override
-					protected void uiGotValue(
-							LiveExpression<Filter<Dependency>> exp,
-							Filter<Dependency> value
-					) {
-						applyFilter(value, expandable, checkboxes);
+		
+		private WizardPageSection createRadioGroupsSection(IPageWithSections owner) {
+			boolean notEmpty = false;
+			RadioGroup bootVersion = model.getBootVersion(); //This is placed specifically somewhere else so must skip it here
+			ArrayList<WizardPageSection> radioSections = new ArrayList<>();
+			for (RadioGroup radioGroup : model.getRadioGroups().getGroups()) {
+				if (radioGroup!=bootVersion) {
+					if (radioGroup.getRadios().length>1) {
+						//Don't add a UI elements for something that offers no real choice
+						radioSections.add(
+							new ChooseOneSectionCombo<>(owner, radioGroup.getLabel(), radioGroup.getSelection(), radioGroup.getRadios())
+							//new ChooseOneSectionCombo<RadioInfo>(owner, radioGroup.getLabel(), radioGroup.getSelection(), radioGroup.getRadios())
+						);
+						notEmpty = true;
 					}
-
-				});
+				}
 			}
-
-			return sections;
+			if (notEmpty) {
+				return new GroupSection(owner, null, radioSections.toArray(new WizardPageSection[radioSections.size()])).columns(2);
+			}
+			return null;
 		}
+
 	}
+	
+	public class ProjectDetailsPage extends WizardPageWithSections {
 
-	public class PageThree extends WizardPageWithSections {
+		protected NewSpringBootWizardFactoryModel model;
 
-		protected PageThree() {
-			super("page3", "New Spring Starter Project", null);
+		public ProjectDetailsPage(NewSpringBootWizardFactoryModel model) {
+			super("page1", "New Spring Starter Project", null);
+			this.model = model;
 		}
 
 		@Override
 		protected List<WizardPageSection> createSections() {
+
+			ChooseOneSectionCombo<String> comboSection = new ChooseOneSectionCombo<String>(this, model.getServiceUrlField(), model.getUrls()) 
+			.grabHorizontal(true);
+			comboSection.allowTextEdits(Parser.IDENTITY);
+		
+			DynamicSection dynamicSection = new DynamicSection(this, model.getModel().apply((dynamicModel) -> {
+				if (dynamicModel != null) {
+					return new ProjectDetailsSection(this, dynamicModel);
+				}
+				return new CommentSection(this, NO_CONTENT_AVAILABLE);
+			} ));
+
+			return ImmutableList.of(comboSection, dynamicSection);
+		}
+	}
+
+
+	public static class PageThree extends WizardPageWithSections {
+		
+		private final NewSpringBootWizardFactoryModel model;
+
+		protected PageThree(NewSpringBootWizardFactoryModel model) {
+			super("page3", "New Spring Starter Project", null);
+			this.model = model;
+		}
+
+		protected WizardPageSection createDynamicContent(NewSpringBootWizardModel model) {
 			List<WizardPageSection> sections = new ArrayList<>();
 
 			sections.add(new GroupSection(this, "Site Info",
@@ -280,19 +194,33 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 					new DescriptionSection(this, model.downloadUrl).label("Full Url").readOnly(false)
 			));
 
-			return sections;
+			return new WizardCompositeSection(this, sections.toArray(new WizardPageSection[0]));
 		}
+		
+		@Override
+		protected List<WizardPageSection> createSections() {
 
+			DynamicSection dynamicSection = new DynamicSection(this, model.getModel().apply((dynamicModel) -> {
+				if (dynamicModel != null) {
+					return createDynamicContent(dynamicModel);
+				}
+				return new CommentSection(this, NO_CONTENT_AVAILABLE);
+			} ));
+			return ImmutableList.of(dynamicSection);
+		}
 	}
 
 	@Override
 	public boolean performFinish() {
-		model.setWorkingSets(workingSetSection.getWorkingSets()); //must be in ui thread. Don't put in job!
+		if (model.getModel().getValue() == null) {
+			return false;
+		}
+		model.getModel().getValue().setWorkingSets(workingSetSection.getWorkingSets()); //must be in ui thread. Don't put in job!
 		Job job = new Job("Import Getting Started Content") {
 			@Override
 			protected IStatus run(IProgressMonitor mon) {
 				try {
-					model.performFinish(mon);
+					model.getModel().getValue().performFinish(mon);
 					return Status.OK_STATUS;
 				} catch (Throwable e) {
 					return ExceptionUtil.status(e);

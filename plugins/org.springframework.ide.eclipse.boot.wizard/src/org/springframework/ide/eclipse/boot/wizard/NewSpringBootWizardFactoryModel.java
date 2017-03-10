@@ -32,7 +32,7 @@ public class NewSpringBootWizardFactoryModel {
 
 	private final StringFieldModel serviceUrlField = new StringFieldModel("Service URL", null);
 	private final LiveVariable<ValidationResult> modelValidator = new LiveVariable<>(ValidationResult.OK);
-	private final LiveExpression<NewSpringBootWizardModel> model = new AsyncLiveExpression<NewSpringBootWizardModel>(null) {
+	private final LiveExpression<NewSpringBootWizardModel> model = new AsyncLiveExpression<NewSpringBootWizardModel>(null, "Building UI model") {
 		{
 			dependsOn(getServiceUrlField().getVariable());
 		}
@@ -52,17 +52,21 @@ public class NewSpringBootWizardFactoryModel {
 	};
 	private URLConnectionFactory urlConnectionFactory;
 	private IPreferenceStore prefs;
+	private String[] urls;
 
 	protected NewSpringBootWizardModel createModel(String url) throws Exception {
 		if (StringUtils.hasText(url)) {
 			return new NewSpringBootWizardModel(urlConnectionFactory, url, prefs);
+		} else {
+			throw new IllegalArgumentException("No URL entered");
 		}
-		return null;
 	}
 
 	public NewSpringBootWizardFactoryModel(URLConnectionFactory urlConnectionFactory, IPreferenceStore prefs) {
 		this.urlConnectionFactory = urlConnectionFactory;
 		this.prefs = prefs;
+		this.urls = new String[]{BootPreferences.getInitializrUrl()};
+		getServiceUrlField().validator(modelValidator);
 		getServiceUrlField().getVariable().setValue(BootPreferences.getInitializrUrl());
 	}
 
@@ -76,13 +80,12 @@ public class NewSpringBootWizardFactoryModel {
 	public StringFieldModel getServiceUrlField() {
 		return serviceUrlField;
 	}
-
-	public LiveExpression<ValidationResult> getModelValidator() {
-		return modelValidator;
+	
+	public String[] getUrls() {
+		return urls;
 	}
 
 	public LiveExpression<NewSpringBootWizardModel> getModel() {
 		return model;
 	}
-
 }
