@@ -61,7 +61,7 @@ public class NewSpringBootWizardTest extends TestCase {
 		assertTrue("File does not exist: "+file, file.exists());
 		if (!file.canExecute()) {
 			ExternalCommand cmd = new ExternalCommand("ls", "-la", file.getParent());
-			ExternalProcess process = new ExternalProcess(new File("."), cmd);
+			ExternalProcess process = new ExternalProcess(new File("."), cmd, true);
 			fail("File is not executable: "+file+"\n"+process);
 		}
 	}
