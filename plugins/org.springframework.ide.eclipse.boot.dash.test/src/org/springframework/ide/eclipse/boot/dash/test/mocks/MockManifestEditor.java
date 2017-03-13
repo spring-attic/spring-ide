@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Pivotal, Inc.
+ * Copyright (c) 2016, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalSorter;
 import org.springframework.ide.eclipse.boot.properties.editor.test.MockEditor;
 import org.springframework.ide.eclipse.boot.properties.editor.test.MockProblemCollector;
 import org.springframework.ide.eclipse.boot.properties.editor.test.MockYamlEditor;
+import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestYamlReconcileEngine;
 import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestYmlSchema;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
@@ -33,7 +34,6 @@ import org.springframework.ide.eclipse.editor.support.yaml.YamlCompletionEngine;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlASTProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.completions.SchemaBasedYamlAssistContextProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.hover.YamlHoverInfoProvider;
-import org.springframework.ide.eclipse.editor.support.yaml.reconcile.YamlSchemaBasedReconcileEngine;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YamlSchema;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 import org.yaml.snakeyaml.Yaml;
@@ -132,7 +132,7 @@ public class MockManifestEditor extends MockYamlEditor {
 	}
 
 	protected IReconcileEngine createReconcileEngine() {
-		return new YamlSchemaBasedReconcileEngine(astProvider, schema);
+		return new ManifestYamlReconcileEngine(astProvider, schema);
 	}
 
 	private boolean matchProblem(ReconcileProblem problem, String expect) {

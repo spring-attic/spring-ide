@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Pivotal, Inc.
+ * Copyright (c) 2016, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -343,6 +343,74 @@ public class ManifestYamlEditorTest {
 				"  instances: 2\n" +
 				"  memory: 1G\n" +
 				"  disk_quota: 2g\n"
+		);
+		editor.assertProblems(/*none*/);
+	}
+
+	@Test
+	public void reconcileRoutesAndLegacyRoutes() throws Exception {
+		MockManifestEditor editor;
+
+		//check for 'format' errors:
+		editor = new MockManifestEditor(
+				"applications:\n" +
+				"- name: foo\n" +
+				"  no-hostname: false\n" +
+				"  instances: 2\n" +
+				"  routes: \n"+
+				"  - route: app.springsource.org\n"+
+				"  memory: 1024M\n" +
+				"  domain: springsource.org\n" +
+				"  host: app\n" +
+				"  disk_quota: 2048M\n"
+		);
+		editor.assertProblems(
+				"no-hostname|legacy property",
+				"domain|legacy property",
+				"host|legacy property"
+		);
+
+		//check for 'format' errors:
+		editor = new MockManifestEditor(
+				"routes: \n"+
+				"- route: app.springsource.org\n"+
+				"applications:\n" +
+				"- name: foo\n" +
+				"  no-hostname: false\n" +
+				"  instances: 2\n" +
+				"  memory: 1024M\n" +
+				"  domain: springsource.org\n" +
+				"  host: app\n" +
+				"  disk_quota: 2048M\n"
+		);
+		editor.assertProblems(
+				"no-hostname|legacy property",
+				"domain|legacy property",
+				"host|legacy property"
+		);
+
+		//check for 'format' errors:
+		editor = new MockManifestEditor(
+				"routes: \n"+
+				"- route: app.springsource.org\n"+
+				"applications:\n" +
+				"- name: foo\n" +
+				"  instances: 2\n" +
+				"  memory: 1024M\n" +
+				"  disk_quota: 2048M\n"
+		);
+		editor.assertProblems(/*none*/);
+
+		//check for 'format' errors:
+		editor = new MockManifestEditor(
+				"applications:\n" +
+				"- name: foo\n" +
+				"  no-hostname: false\n" +
+				"  instances: 2\n" +
+				"  memory: 1024M\n" +
+				"  domain: springsource.org\n" +
+				"  host: app\n" +
+				"  disk_quota: 2048M\n"
 		);
 		editor.assertProblems(/*none*/);
 	}
