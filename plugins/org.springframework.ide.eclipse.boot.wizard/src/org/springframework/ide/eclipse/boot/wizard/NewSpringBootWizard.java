@@ -22,7 +22,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
@@ -46,8 +45,6 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 
 	private static final ImageDescriptor IMAGE = BootWizardImages.BOOT_WIZARD_ICON;
 	static final String NO_CONTENT_AVAILABLE = "No content available.";
-
-	public static final Point PROJECT_PAGE_MINIMUM_SIZE = new Point(500, 500);
 
 	private NewSpringBootWizardFactoryModel model;
 
@@ -173,7 +170,7 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 					return new ProjectDetailsSection(this, dynamicModel);
 				}
 				return new CommentSection(this, NO_CONTENT_AVAILABLE);
-			} )).setMinimumSize(PROJECT_PAGE_MINIMUM_SIZE);
+			} ));
 
 			return ImmutableList.of(comboSection, dynamicSection);
 		}
