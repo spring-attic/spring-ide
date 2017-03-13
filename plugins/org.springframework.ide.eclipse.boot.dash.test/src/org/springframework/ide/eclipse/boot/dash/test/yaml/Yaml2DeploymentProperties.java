@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Pivotal, Inc.
+ * Copyright (c) 2016, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudAp
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentProperties;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * Tests for parsing YAML deployment manifest into
@@ -73,6 +74,14 @@ public class Yaml2DeploymentProperties {
 	@Test
 	public void test_no_route_4() throws Exception {
 		CloudApplicationDeploymentProperties props = readDeploymentProperties("manifest-parse-data/no-route-4.yml");
+		HashSet<String> uris = new HashSet<>(props.getUris());
+		HashSet<String> expected = new HashSet<>();
+		assertEquals("Uris sets not equal", expected, uris);
+	}
+
+	@Test
+	public void test_no_route_5() throws Exception {
+		CloudApplicationDeploymentProperties props = readDeploymentProperties("manifest-parse-data/no-route-5.yml");
 		HashSet<String> uris = new HashSet<>(props.getUris());
 		HashSet<String> expected = new HashSet<>();
 		assertEquals("Uris sets not equal", expected, uris);
@@ -391,15 +400,6 @@ public class Yaml2DeploymentProperties {
 	}
 
 	@Test
-	public void test_routes() throws Exception {
-		CloudApplicationDeploymentProperties props = readDeploymentProperties("manifest-generate-data/routes.yml");
-
-		assertEquals("Routes and URIs not equal",
-				ImmutableList.of("privateapps.io", "tcp.domain.com:9999", "apphost.privateapps.io/somepath"),
-				ImmutableList.copyOf(props.getUris()));
-	}
-
-	@Test
 	public void test_routes_no_route() throws Exception {
 		// Manifest has a route but if "no-route" is also present, test that
 		// list of URI is empty in the props
@@ -407,5 +407,54 @@ public class Yaml2DeploymentProperties {
 				"manifest-generate-data/routes-no-route.yml");
 
 		assertEquals("Routes and URIs not equal", ImmutableList.of(), ImmutableList.copyOf(props.getUris()));
+	}
+
+	@Test
+	public void test_routes_1() throws Exception {
+		CloudApplicationDeploymentProperties props = readDeploymentProperties(
+				"manifest-parse-data/routes-1.yml");
+
+		assertEquals("Routes not equal", ImmutableSet.of("my-route.springsource.org"),  ImmutableSet.copyOf(props.getUris()));
+	}
+
+	@Test
+	public void test_routes_2() throws Exception {
+		CloudApplicationDeploymentProperties props = readDeploymentProperties(
+				"manifest-parse-data/routes-2.yml");
+
+		assertEquals("Routes not equal", ImmutableSet.of("my-route-1.springsource.org", "my-route-2.springsource.org"),  ImmutableSet.copyOf(props.getUris()));
+	}
+
+	@Test
+	public void test_routes_3() throws Exception {
+		CloudApplicationDeploymentProperties props = readDeploymentProperties(
+				"manifest-parse-data/routes-3.yml");
+
+		assertEquals("Routes not equal", ImmutableSet.of("my-app.springsource.org"), ImmutableSet.copyOf(props.getUris()));
+	}
+
+	@Test
+	public void test_routes_4() throws Exception {
+		CloudApplicationDeploymentProperties props = readDeploymentProperties(
+				"manifest-parse-data/routes-4.yml");
+
+		assertEquals("Routes not equal", ImmutableSet.of("my-route-1.springsource.org", "my-route-2.springsource.org"),  ImmutableSet.copyOf(props.getUris()));
+	}
+
+	@Test
+	public void test_routes_5() throws Exception {
+		CloudApplicationDeploymentProperties props = readDeploymentProperties(
+				"manifest-parse-data/routes-5.yml");
+
+		assertEquals("Routes not equal", ImmutableSet.of("my-route-1.springsource.org", "my-route-2.springsource.org",
+				"my-root-route-1.springsource.org"), ImmutableSet.copyOf(props.getUris()));
+	}
+
+	@Test
+	public void test_routes_6() throws Exception {
+		CloudApplicationDeploymentProperties props = readDeploymentProperties(
+				"manifest-parse-data/routes-6.yml");
+
+		assertEquals("Routes not equal", ImmutableSet.of("my-route-2.springsource.org"), ImmutableSet.copyOf(props.getUris()));
 	}
 }

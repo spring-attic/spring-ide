@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Pivotal, Inc.
+ * Copyright (c) 2016, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.text.edits.DeleteEdit;
@@ -236,7 +237,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 		TextEdit edit;
 
 		if (appNode == null) {
-			Map<Object, Object> obj = ApplicationManifestHandler.toYaml(props, cloudData);
+			Map<Object, Object> obj = ApplicationManifestHandler.toYaml(props, cloudData, isLegacyHostDomainManifestYaml(root));
 			if (applicationsValueNode == null) {
 				DumperOptions options = new DumperOptions();
 				options.setExplicitStart(true);
@@ -321,7 +322,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 			}
 
 			if (!new HashSet<>(getServices()).equals(new HashSet<>(props.getServices()))) {
-				getDifferencesForList(edits, ApplicationManifestHandler.SERVICES_PROP, props.getServices());
+				getDifferencesForList(edits, ApplicationManifestHandler.SERVICES_PROP, props.getServices(), String.class);
 			}
 
 			if (!getEnvironmentVariables().equals(props.getEnvironmentVariables())) {
@@ -334,9 +335,12 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 			Set<String> currentUris = getUris();
 			Set<String> otherUris = props.getUris();
 			if (!isRandomRouteMatch(currentUris, otherUris) && !currentUris.equals(otherUris)) {
-				getDifferenceForUris(props.getUris(), edits);
+				if (isLegacyHostDomainManifestYaml(root)) {
+					getLegacyDifferenceForUris(otherUris, edits);
+				} else {
+					getDifferenceForUris(otherUris, edits);
+				}
 			}
-
 		}
 		return edits.hasChildren() ? edits : null;
 	}
@@ -433,16 +437,16 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 	 *            the new value to set
 	 */
 	@SuppressWarnings("unchecked")
-	private void getDifferencesForList(MultiTextEdit me, String key, List<String> newValue) {
+	private <T> void getDifferencesForList(MultiTextEdit me, String key, List<T> newValue, Class<T> type) {
 		TextEdit edit;
 		/*
 		 * Moved new value entries in the set to avoid duplication
 		 */
-		LinkedHashSet<String> otherValue = new LinkedHashSet<>(newValue);
+		LinkedHashSet<T> otherValue = new LinkedHashSet<>(newValue);
 		/*
 		 * Get the list value from the root node
 		 */
-		List<String> rootList = root != appNode ? getPropertyValue(root, key, List.class) : Collections.emptyList();
+		List<T> rootList = root != appNode ? getPropertyValue(root, key, List.class) : Collections.emptyList();
 		if (rootList == null) {
 			rootList = Collections.emptyList();
 		}
@@ -455,7 +459,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 			 * Create an edit for a difference between the remaining list of
 			 * values and current app's node list
 			 */
-			edit = createEdit(appNode, new ArrayList<>(otherValue), key);
+			edit = createEdit(appNode, new ArrayList<>(otherValue), key, type);
 			if (edit != null) {
 				me.addChild(edit);
 			}
@@ -472,7 +476,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 						/*
 						 * Current app node
 						 */
-						edit = createEdit(application, newValue, key);
+						edit = createEdit(application, newValue, key, type);
 						if (edit != null) {
 							me.addChild(edit);
 						}
@@ -480,22 +484,22 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 						/*
 						 * Any other app node. Get its list value for the attribute
 						 */
-						List<String> currentValues = getPropertyValue(application, key, List.class);
+						List<T> currentValues = getPropertyValue(application, key, List.class);
 						if (currentValues == null) {
 							/*
 							 * There is no value for the property so just create an edit for the list from the root
 							 */
-							edit = createEdit(application, rootList, key);
+							edit = createEdit(application, rootList, key, type);
 						} else {
 							/*
 							 * Create a joint list of values from app's node list value and root node list value
 							 */
-							LinkedHashSet<String> values = new LinkedHashSet<>(currentValues);
+							LinkedHashSet<T> values = new LinkedHashSet<>(currentValues);
 							values.addAll(rootList);
 							/*
 							 * Create and edit with the new value being the joint list
 							 */
-							edit = createEdit(application, new ArrayList<>(values), key);
+							edit = createEdit(application, new ArrayList<>(values), key, type);
 						}
 						if (edit != null) {
 							me.addChild(edit);
@@ -506,7 +510,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 			/*
 			 * Remove the list from the root node
 			 */
-			edit = createEdit((MappingNode)root, Collections.<String>emptyList(), key);
+			edit = createEdit((MappingNode)root, (Object)null, key);
 			if (edit != null) {
 				me.addChild(edit);
 			}
@@ -616,6 +620,44 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 	}
 
 	private void getDifferenceForUris(Collection<String> uris, MultiTextEdit me) {
+		Boolean randomRoute = getAbsoluteValue(ApplicationManifestHandler.RANDOM_ROUTE_PROP, Boolean.class);
+		Boolean noRoute = getAbsoluteValue(ApplicationManifestHandler.NO_ROUTE_PROP, Boolean.class);
+		boolean otherNoRoute = uris.isEmpty();
+		boolean match = false;
+
+		if (otherNoRoute) {
+			if (!Boolean.TRUE.equals(noRoute)) {
+				getDifferenceForEntry(me, ApplicationManifestHandler.NO_ROUTE_PROP, true, false, Boolean.class);
+
+				if (getPropertyValue(appNode, ApplicationManifestHandler.RANDOM_ROUTE_PROP, Boolean.class) != null) {
+					me.addChild(createEdit(appNode, (String) null, ApplicationManifestHandler.RANDOM_ROUTE_PROP));
+				}
+			} else {
+				match = true;
+			}
+		} else {
+			if (Boolean.TRUE.equals(noRoute)) {
+				getDifferenceForEntry(me, ApplicationManifestHandler.NO_ROUTE_PROP, false, false, Boolean.class);
+			}
+
+			if (Boolean.TRUE.equals(randomRoute) && uris.size() == 1 && getAbsoluteValue(ApplicationManifestHandler.ROUTES_PROP, Map.class) == null) {
+				match = true;
+			} else if (getPropertyValue(appNode, ApplicationManifestHandler.RANDOM_ROUTE_PROP, Boolean.class) != null) {
+				me.addChild(createEdit(appNode, (String) null, ApplicationManifestHandler.RANDOM_ROUTE_PROP));
+			}
+		}
+
+		if (!match) {
+			getDifferencesForList(me, ApplicationManifestHandler.ROUTES_PROP, uris.stream().map(uri -> {
+				Map<Object, Object> routeObj = new LinkedHashMap<>();
+				routeObj.put(ApplicationManifestHandler.ROUTE_PROP, uri);
+				return routeObj;
+			}).collect(Collectors.toList()), Map.class);
+		}
+
+	}
+
+	private void getLegacyDifferenceForUris(Collection<String> uris, MultiTextEdit me) {
 		List<CFCloudDomain> domains = ApplicationManifestHandler.getCloudDomains(cloudData);
 
 		LinkedHashSet<String> otherHosts = new LinkedHashSet<>();
@@ -756,7 +798,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 		/*
 		 * Calculate edit for hosts list
 		 */
-		getDifferencesForList(me, ApplicationManifestHandler.SUB_DOMAINS_PROP, new ArrayList<>(otherHosts));
+		getDifferencesForList(me, ApplicationManifestHandler.SUB_DOMAINS_PROP, new ArrayList<>(otherHosts), String.class);
 
 		/*
 		 * Calculate current 'domain' attribute value
@@ -794,7 +836,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 		/*
 		 * Calculate edit for domains list
 		 */
-		getDifferencesForList(me, ApplicationManifestHandler.DOMAINS_PROP, new ArrayList<>(otherDomains));
+		getDifferencesForList(me, ApplicationManifestHandler.DOMAINS_PROP, new ArrayList<>(otherDomains), String.class);
 	}
 
 	/**
@@ -885,7 +927,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 		return m.getStartMark().getIndex();
 	}
 
-	private TextEdit createEdit(MappingNode parent, List<String> otherValue, String property) {
+	private <T> TextEdit createEdit(MappingNode parent, List<T> otherValue, String property, Class<T> type) {
 		NodeTuple tuple = findNodeTuple(parent, property);
 		if (tuple == null) {
 			if (otherValue != null && !otherValue.isEmpty()) {
@@ -920,34 +962,49 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 				if (tuple.getValueNode() instanceof SequenceNode) {
 					SequenceNode sequenceValue = (SequenceNode) tuple.getValueNode();
 					MultiTextEdit me = new MultiTextEdit();
-					Set<String> others = new LinkedHashSet<>();
+					Set<T> others = new LinkedHashSet<>();
 					others.addAll(otherValue);
 
 					/*
 					 * Remember the ending position of the last entry that remains in the list
 					 */
 					int appendIndex = sequenceValue.getEndMark().getIndex();
-					for (Node n : sequenceValue.getValue()) {
-						if (n instanceof ScalarNode) {
-							ScalarNode scalar = (ScalarNode) n;
-							if (others.contains(scalar.getValue())) {
-								// Entry exists, do nothing, just update the end position to append the missing entries
-								others.remove(scalar.getValue());
-								appendIndex  = scalar.getEndMark().getIndex();
-							} else {
-								/*
-								 * skip "- " prefix for the start position
-								 */
-								int start = scalar.getStartMark().getIndex();
-								for (; start > 0 && content.charAt(start) != '-' && content.charAt(start) != '\n'; start--);
-								int end = scalar.getEndMark().getIndex();
-								/*
-								 *  "- entry" start=2, end=7, need to include '\n' in the deletion
-								 */
-								me.addChild(createDeleteEditIncludingLine(start, end));
+					for (int index = 0; index < sequenceValue.getValue().size(); index++) {
+						Node n = sequenceValue.getValue().get(index);
+						T value  = getValue(n, type);
+						if (others.contains(value)) {
+							// Entry exists, do nothing, just update the end position to append the missing entries
+							others.remove(value);
+							appendIndex = n.getEndMark().getIndex();
+						} else {
+							/*
+							 * skip "- " prefix for the start position
+							 */
+							int start = n.getStartMark().getIndex();
+							for (; start > 0 && content.charAt(start) != '-' && content.charAt(start) != '\n'; start--);
+							int end = n.getEndMark().getIndex();
+
+							// If entry is object in the list don't remove the indent for the next entry in YAML (if there is a next YAML entry)
+							/*
+							 * - e: entry-1
+							 *   ^-start
+							 * - e: entry-2
+							 * ^-end
+							 */
+							if (n instanceof MappingNode && root.getEndMark().getIndex() != end) {
+								end -= sequenceValue.getStartMark().getColumn();
 							}
+							/*
+							 *  "- entry" start=2, end=7, need to include '\n' in the deletion
+							 */
+							DeleteEdit deleteEdit = createDeleteEditIncludingLine(start, end);
+							appendIndex = deleteEdit.getOffset();
+							me.addChild(deleteEdit);
 						}
 					}
+					/*
+					 * TODO: verify that further appendIndex manipulations are necessary!
+					 */
 					/*
 					 * Offset appendIndex to leave the line break for the previous entry in place. jump over spacing and line break.
 					 */
@@ -958,10 +1015,11 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 					if (!others.isEmpty() && content.charAt(appendIndex - 1) != '\n') {
 						me.addChild(new ReplaceEdit(appendIndex, 0, System.lineSeparator()));
 					}
+
 					/*
 					 * Add missing entries
 					 */
-					for (String s : others) {
+					for (T s : others) {
 						me.addChild(new ReplaceEdit(appendIndex, 0, serializeListEntry(s, sequenceValue.getStartMark().getColumn()).toString()));
 					}
 					return me.hasChildren() ? me : null;
@@ -1167,89 +1225,99 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Set<String> getUris() {
-		Boolean noRoute = getAbsoluteValue(ApplicationManifestHandler.NO_ROUTE_PROP, Boolean.class);
-		if (Boolean.TRUE.equals(noRoute)) {
-			return Collections.emptySet();
-		}
+		List<Map<?,?>> routes = getAbsoluteValue(ApplicationManifestHandler.ROUTES_PROP, List.class);
+		if (routes != null) {
+			return routes.stream()
+					.map(routeObj -> routeObj.get(ApplicationManifestHandler.ROUTE_PROP))
+					.filter(o -> o instanceof String)
+					.map(o -> (String) o)
+					.collect(Collectors.toSet());
+		} else {
+			Boolean noRoute = getAbsoluteValue(ApplicationManifestHandler.NO_ROUTE_PROP, Boolean.class);
+			if (Boolean.TRUE.equals(noRoute)) {
+				return Collections.emptySet();
+			}
 
-		List<CFCloudDomain> domains = ApplicationManifestHandler.getCloudDomains(cloudData);
-		LinkedHashSet<String> hostsSet = new LinkedHashSet<>();
-		LinkedHashSet<String> domainsSet = new LinkedHashSet<>();
+			List<CFCloudDomain> domains = ApplicationManifestHandler.getCloudDomains(cloudData);
+			LinkedHashSet<String> hostsSet = new LinkedHashSet<>();
+			LinkedHashSet<String> domainsSet = new LinkedHashSet<>();
 
-		/*
-		 * Gather domains from app node from 'domain' and 'domains' attributes
-		 */
-		String domain = getAbsoluteValue(ApplicationManifestHandler.DOMAIN_PROP, String.class);
-		if (domain != null) {
-			domainsSet.add(domain);
-		}
-		List<?> domainsList = getAbsoluteValue(ApplicationManifestHandler.DOMAINS_PROP, List.class);
-		if (domainsList != null) {
-			for (Object o : domainsList) {
-				if (o instanceof String && ApplicationManifestHandler.isDomainValid((String) o , domains)) {
-					domainsSet.add((String)o);
+			/*
+			 * Gather domains from app node from 'domain' and 'domains' attributes
+			 */
+			String domain = getAbsoluteValue(ApplicationManifestHandler.DOMAIN_PROP, String.class);
+			if (domain != null) {
+				domainsSet.add(domain);
+			}
+			List<?> domainsList = getAbsoluteValue(ApplicationManifestHandler.DOMAINS_PROP, List.class);
+			if (domainsList != null) {
+				for (Object o : domainsList) {
+					if (o instanceof String && ApplicationManifestHandler.isDomainValid((String) o , domains)) {
+						domainsSet.add((String)o);
+					}
 				}
 			}
-		}
 
-		/*
-		 * Gather hosts from app node from 'host' and 'hosts'
-		 * attributes.
-		 */
-		String host = getAbsoluteValue(ApplicationManifestHandler.SUB_DOMAIN_PROP, String.class);
-		if (host != null) {
-			hostsSet.add(host);
-		}
-		List<?> hostsList = getAbsoluteValue(ApplicationManifestHandler.SUB_DOMAINS_PROP, List.class);
-		if (hostsList != null) {
-			for (Object o : hostsList) {
-				if (o instanceof String) {
-					hostsSet.add((String)o);
+			/*
+			 * Gather hosts from app node from 'host' and 'hosts'
+			 * attributes.
+			 */
+			String host = getAbsoluteValue(ApplicationManifestHandler.SUB_DOMAIN_PROP, String.class);
+			if (host != null) {
+				hostsSet.add(host);
+			}
+			List<?> hostsList = getAbsoluteValue(ApplicationManifestHandler.SUB_DOMAINS_PROP, List.class);
+			if (hostsList != null) {
+				for (Object o : hostsList) {
+					if (o instanceof String) {
+						hostsSet.add((String)o);
+					}
 				}
 			}
-		}
 
-		/*
-		 * If no host names found check for "random-route: true" and
-		 * "no-hostname: true" otherwise take app name as the host name
-		 */
-		if (hostsSet.isEmpty()) {
-			Boolean randomRoute = getAbsoluteValue(ApplicationManifestHandler.RANDOM_ROUTE_PROP, Boolean.class);
-			if (Boolean.TRUE.equals(randomRoute)) {
-				hostsSet.add(ApplicationManifestHandler.RANDOM_VAR);
-				domainsSet.clear();
-				domainsSet.add(domains.get(0).getName());
-			} else {
-				Boolean noHostname = getAbsoluteValue(ApplicationManifestHandler.NO_HOSTNAME_PROP, Boolean.class);
-				if (!Boolean.TRUE.equals(noHostname)) {
-					hostsSet.add(getAppName());
-				}
-			}
-		}
-
-		/*
-		 * Set a domain if they are still empty
-		 */
-		if (domainsSet.isEmpty()) {
-			domainsSet.add(domains.get(0).getName());
-		}
-
-		/*
-		 * Compose URIs for application based on hosts and domains
-		 */
-		Set<String> uris = new HashSet<>();
-		for (String d : domainsSet) {
+			/*
+			 * If no host names found check for "random-route: true" and
+			 * "no-hostname: true" otherwise take app name as the host name
+			 */
 			if (hostsSet.isEmpty()) {
-				uris.add(new CloudApplicationURL(null, d).getUrl());
-			} else {
-				for (String h : hostsSet) {
-					uris.add(new CloudApplicationURL(h, d).getUrl());
+				Boolean randomRoute = getAbsoluteValue(ApplicationManifestHandler.RANDOM_ROUTE_PROP, Boolean.class);
+				if (Boolean.TRUE.equals(randomRoute)) {
+					hostsSet.add(ApplicationManifestHandler.RANDOM_VAR);
+					domainsSet.clear();
+					domainsSet.add(domains.get(0).getName());
+				} else {
+					Boolean noHostname = getAbsoluteValue(ApplicationManifestHandler.NO_HOSTNAME_PROP, Boolean.class);
+					if (!Boolean.TRUE.equals(noHostname)) {
+						hostsSet.add(getAppName());
+					}
 				}
 			}
-		}
 
-		return uris;
+			/*
+			 * Set a domain if they are still empty
+			 */
+			if (domainsSet.isEmpty()) {
+				domainsSet.add(domains.get(0).getName());
+			}
+
+			/*
+			 * Compose URIs for application based on hosts and domains
+			 */
+			Set<String> uris = new HashSet<>();
+			for (String d : domainsSet) {
+				if (hostsSet.isEmpty()) {
+					uris.add(new CloudApplicationURL(null, d).getUrl());
+				} else {
+					for (String h : hostsSet) {
+						uris.add(new CloudApplicationURL(h, d).getUrl());
+					}
+				}
+			}
+
+			return uris;
+		}
 	}
 
 	@Override
@@ -1265,13 +1333,17 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 		return DeploymentProperties.DEFAULT_MEMORY;
 	}
 
-	@SuppressWarnings("unchecked")
 	public static <V> V getPropertyValue(final Node n, final String key, Class<V> parameter) {
+        Node node = YamlGraphDeploymentProperties.findValueNode(n, key);
+        return getValue(node, parameter);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <V> V getValue(Node node, Class<V> parameter) {
 		return (V) new Constructor(parameter) {
 			@Override
 			public Object getSingleData(Class<?> type) {
 			      // Ensure that the stream contains a single document and construct it
-		        Node node = YamlGraphDeploymentProperties.findValueNode(n, key);
 		        if (node != null) {
 		        	if (type != null) {
 		        		node.setTag(new Tag(type));
@@ -1314,6 +1386,29 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 			}
 		}
 		return v;
+	}
+
+	private static boolean isLegacyHostDomainManifestYaml(Node n) {
+		if (isLegacyHostDomainManifestYamlNode(n)) {
+			return true;
+		} else {
+			Node applicationsObj = findValueNode(n, ApplicationManifestHandler.APPLICATIONS_PROP);
+			if (applicationsObj instanceof SequenceNode) {
+				return ((SequenceNode) applicationsObj).getValue().stream()
+						.map(o -> (Node) o)
+						.filter(YamlGraphDeploymentProperties::isLegacyHostDomainManifestYamlNode)
+						.findFirst().isPresent();
+			}
+		}
+		return false;
+	}
+
+	private static boolean isLegacyHostDomainManifestYamlNode(Node node) {
+		return findValueNode(node, ApplicationManifestHandler.DOMAIN_PROP) != null
+				|| findValueNode(node, ApplicationManifestHandler.SUB_DOMAIN_PROP) != null
+				|| findValueNode(node, ApplicationManifestHandler.DOMAINS_PROP) != null
+				|| findValueNode(node, ApplicationManifestHandler.SUB_DOMAINS_PROP) != null
+				|| findValueNode(node, ApplicationManifestHandler.NO_HOSTNAME_PROP) != null;
 	}
 
 }

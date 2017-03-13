@@ -3,4 +3,5 @@ applications:
 - name: app
   memory: 512M
   command: my-command
-  domain: springsource.org
+  routes:
+  - route: app.springsource.org

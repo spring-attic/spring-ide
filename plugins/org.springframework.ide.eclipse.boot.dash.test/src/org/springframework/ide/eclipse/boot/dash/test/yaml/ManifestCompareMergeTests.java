@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Pivotal, Inc.
+ * Copyright (c) 2016, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,7 +24,6 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.text.edits.TextEdit;
 import org.junit.Assert;
@@ -237,9 +236,27 @@ public class ManifestCompareMergeTests {
 	public void test_appNameNoMatch_2() throws Exception {
 		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
 		props.setAppName("app1");
-		props.setUris(Collections.singletonList("test-app.springsource.org"));
+		props.setUris(Collections.singletonList("test-app-1.springsource.org"));
 		props.setMemory(2048);
 		performMergeTest(getTestFile("mergeTestsData/appNameNoMatch-2.yml"), props, getTestFile("mergeTestsData/appNameNoMatch-2-expected.yml"));
+	}
+
+	@Test
+	public void test_appNameNoMatch_3() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app1");
+		props.setUris(Collections.singletonList("test-app-1.springsource.org"));
+		props.setMemory(2048);
+		performMergeTest(getTestFile("mergeTestsData/appNameNoMatch-3.yml"), props, getTestFile("mergeTestsData/appNameNoMatch-3-expected.yml"));
+	}
+
+	@Test
+	public void test_appNameNoMatch_4() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app1");
+		props.setUris(Collections.singletonList("app-1.springsource.org"));
+		props.setMemory(2048);
+		performMergeTest(getTestFile("mergeTestsData/appNameNoMatch-4.yml"), props, getTestFile("mergeTestsData/appNameNoMatch-4-expected.yml"));
 	}
 
 	@Test
@@ -862,5 +879,81 @@ public class ManifestCompareMergeTests {
 		performMergeTest(getTestFile("mergeTestsData/root-hosts-domains-3.yml"), props, getTestFile("mergeTestsData/root-hosts-domains-3-expected.yml"));
 	}
 
+	@Test
+	public void test_routes_1() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setMemory(2048);
+		props.setInstances(1);
+		props.setUris(Arrays.asList("app-1.springsource.org", "app-2.springsource.org", "app-3.springsource.org"));
+		performMergeTest(getTestFile("mergeTestsData/routes-1.yml"), props, getTestFile("mergeTestsData/routes-1-expected.yml"));
+	}
+
+	@Test
+	public void test_routes_2() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setMemory(2048);
+		props.setInstances(1);
+		props.setUris(Arrays.asList("app-1.springsource.org", "app-2.springsource.org", "app-3.springsource.org"));
+		performMergeTest(getTestFile("mergeTestsData/routes-2.yml"), props, getTestFile("mergeTestsData/routes-2-expected.yml"));
+	}
+
+	@Test
+	public void test_routes_3() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setMemory(2048);
+		props.setInstances(1);
+		props.setUris(Arrays.asList("app-1.springsource.org", "app-2.springsource.org", "app-3.springsource.org"));
+		performMergeTest(getTestFile("mergeTestsData/routes-3.yml"), props, getTestFile("mergeTestsData/routes-3-expected.yml"));
+	}
+
+	@Test
+	public void test_routes_4() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setMemory(2048);
+		props.setInstances(1);
+		props.setUris(Arrays.asList("app-1.springsource.org", "app-2.springsource.org", "app-3.springsource.org"));
+		performMergeTest(getTestFile("mergeTestsData/routes-4.yml"), props, getTestFile("mergeTestsData/routes-4-expected.yml"));
+	}
+
+	@Test
+	public void test_routes_5() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setMemory(2048);
+		props.setInstances(1);
+		props.setUris(Arrays.asList("app-1.springsource.org", "app-2.springsource.org", "app-3.springsource.org"));
+		performMergeTest(getTestFile("mergeTestsData/routes-5.yml"), props, getTestFile("mergeTestsData/routes-5-expected.yml"));
+	}
+
+	@Test
+	public void test_no_route_5() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setUris(Collections.<String>emptyList());
+		props.setMemory(2048);
+		performMergeTest(getTestFile("mergeTestsData/no-route-5.yml"), props, getTestFile("mergeTestsData/no-route-5-expected.yml"));
+	}
+
+	@Test
+	public void test_random_route_4() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setUris(Arrays.asList("app-1.springsource.org", "app-2.springsource.org", "app-3.springsource.org"));
+		props.setMemory(512);
+		performMergeTest(getTestFile("mergeTestsData/random-route-4.yml"), props, null);
+	}
+
+	@Test
+	public void test_random_route_5() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setUris(Arrays.asList("app.springsource.org"));
+		props.setMemory(512);
+		performMergeTest(getTestFile("mergeTestsData/random-route-5.yml"), props, getTestFile("mergeTestsData/random-route-5-expected.yml"));
+	}
 }
 

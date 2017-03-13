@@ -1,6 +1,8 @@
 ---
 applications:
 - name: app
-  memory: 512M
+  memory: 2048M
+  random-route: true
   routes:
   - route: app-1.springsource.org
+  - route: app-2.springsource.org

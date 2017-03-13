@@ -1,7 +1,0 @@
----
-applications:
-- name: app
-  routes:
-  - route: privateapps.io
-  - route: tcp.domain.com:9999
-  - route: apphost.privateapps.io/somepath

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2016 Pivotal, Inc.
+ * Copyright (c) 2015, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,7 +26,10 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.core.resources.IFile;
@@ -106,9 +109,9 @@ public class ApplicationManifestHandler {
 
 	public static final String STACK_PROP = "stack";
 
-	private static final String ROUTES_PROP = "routes";
+	public static final String ROUTES_PROP = "routes";
 
-	private static final String ROUTE_PROP = "route";
+	public static final String ROUTE_PROP = "route";
 
 	private final IProject project;
 
@@ -251,7 +254,7 @@ public class ApplicationManifestHandler {
 //	}
 //
 	@SuppressWarnings("unchecked")
-	protected <T> T getValue(Map<?, ?> containingMap, String propertyName, Class<T> type) {
+	protected static <T> T getValue(Map<?, ?> containingMap, String propertyName, Class<T> type) {
 		if (containingMap == null) {
 			return null;
 		}
@@ -402,8 +405,12 @@ public class ApplicationManifestHandler {
 		return true;
 	}
 
-	@SuppressWarnings("unchecked")
 	public static Map<Object, Object> toYaml(DeploymentProperties properties, Map<String, Object> cloudData) {
+		return toYaml(properties, cloudData, false);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static Map<Object, Object> toYaml(DeploymentProperties properties, Map<String, Object> cloudData, boolean legacyHostDomain) {
 		Map<Object, Object> deploymentInfoYaml = new LinkedHashMap<>();
 
 		Object applicationsObj = deploymentInfoYaml.get(APPLICATIONS_PROP);
@@ -456,43 +463,54 @@ public class ApplicationManifestHandler {
 			application.put(ApplicationManifestHandler.BUILDPACK_PROP, properties.getBuildpack());
 		}
 
-		Set<String> hosts = new LinkedHashSet<>();
-		Set<String> domains = new LinkedHashSet<>();
-
-		List<CFCloudDomain> cloudDomains = getCloudDomains(cloudData);
-		extractHostsAndDomains(properties.getUris(), cloudDomains, hosts, domains);
-		for (String uri : properties.getUris()) {
-			try {
-				// Find the first valid URL
-				CloudApplicationURL cloudAppUrl = CloudApplicationURL.getCloudApplicationURL(uri, cloudDomains);
-				if (cloudAppUrl.getSubdomain() != null) {
-					hosts.add(cloudAppUrl.getSubdomain());
+		if (legacyHostDomain) {
+			Set<String> hosts = new LinkedHashSet<>();
+			Set<String> domains = new LinkedHashSet<>();
+			List<CFCloudDomain> cloudDomains = getCloudDomains(cloudData);
+			extractHostsAndDomains(properties.getUris(), cloudDomains, hosts, domains);
+			for (String uri : properties.getUris()) {
+				try {
+					// Find the first valid URL
+					CloudApplicationURL cloudAppUrl = CloudApplicationURL.getCloudApplicationURL(uri, cloudDomains);
+					if (cloudAppUrl.getSubdomain() != null) {
+						hosts.add(cloudAppUrl.getSubdomain());
+					}
+					if (cloudAppUrl.getDomain() != null) {
+						domains.add(cloudAppUrl.getDomain());
+					}
+				} catch (Exception e) {
+					// ignore
 				}
-				if (cloudAppUrl.getDomain() != null) {
-					domains.add(cloudAppUrl.getDomain());
-				}
-			} catch (Exception e) {
-				// ignore
 			}
-		}
-
-		if (hosts.isEmpty() && domains.isEmpty()) {
-			application.put(NO_ROUTE_PROP, true);
-		} else {
-			if (hosts.isEmpty()) {
-				application.put(NO_HOSTNAME_PROP, true);
-			} else if (hosts.size() == 1) {
-				String host = hosts.iterator().next();
-				if (!properties.getAppName().equals(host)) {
-					application.put(SUB_DOMAIN_PROP, host);
-				}
+			if (hosts.isEmpty() && domains.isEmpty()) {
+				application.put(NO_ROUTE_PROP, true);
 			} else {
-				application.put(SUB_DOMAINS_PROP, new ArrayList<>(hosts));
+				if (hosts.isEmpty()) {
+					application.put(NO_HOSTNAME_PROP, true);
+				} else if (hosts.size() == 1) {
+					String host = hosts.iterator().next();
+					if (!properties.getAppName().equals(host)) {
+						application.put(SUB_DOMAIN_PROP, host);
+					}
+				} else {
+					application.put(SUB_DOMAINS_PROP, new ArrayList<>(hosts));
+				}
+				if (domains.size() == 1) {
+					application.put(DOMAIN_PROP, domains.iterator().next());
+				} else if (domains.size() > 1) {
+					application.put(DOMAINS_PROP, new ArrayList<>(domains));
+				}
 			}
-			if (domains.size() == 1) {
-				application.put(DOMAIN_PROP, domains.iterator().next());
-			} else if (domains.size() > 1) {
-				application.put(DOMAINS_PROP, new ArrayList<>(domains));
+		} else {
+			Set<String> uris = properties.getUris();
+			if (uris == null || uris.isEmpty()) {
+				application.put(NO_ROUTE_PROP, true);
+			} else {
+				application.put(ApplicationManifestHandler.ROUTES_PROP, uris.stream().map(uri -> {
+					Map<Object, Object> route = new LinkedHashMap<>();
+					route.put(ApplicationManifestHandler.ROUTE_PROP, uri);
+					return route;
+				}).collect(Collectors.toList()));
 			}
 		}
 
@@ -662,7 +680,7 @@ public class ApplicationManifestHandler {
 		}
 		return Boolean.TRUE.equals(noRoute);
 	}
-	
+
 	/**
 	 *
 	 * @param application
@@ -776,7 +794,6 @@ public class ApplicationManifestHandler {
 		return uris;
 	}
 
-	@SuppressWarnings("unchecked")
 	protected void readApplicationURL(Map<?, ?> application, Map<Object, Object> allResults,
 			CloudApplicationDeploymentProperties properties) {
 		/*
@@ -804,23 +821,34 @@ public class ApplicationManifestHandler {
 	private List<String> fromRoutesProperty(Map<?, ?> application, Map<Object, Object> allResults,
 			CloudApplicationDeploymentProperties properties) {
 		Set<String> uris = new LinkedHashSet<>();
+		List<CFCloudDomain> domains = getCloudDomains(cloudData);
 
 		// NOTE: based on how cf CLI interprets "routes", each route appears
 		// to be assumed to be "complete", meaning that no further construction
 		// of URIs based the route in combination with other properties like
 		// domains and hosts is required.
 		List<?> routes = getValue(application, ROUTES_PROP, List.class);
-		if (routes != null && !routes.isEmpty()) {
-			for (Object mapObj : routes) {
-				if (mapObj instanceof Map<?, ?>) {
-					Map<?, ?> routeMap = (Map<?, ?>) mapObj;
+		List<?> rootRoutes = getValue(allResults, ROUTES_PROP, List.class);
+		if (routes != null || rootRoutes != null) {
+			routes = routes == null ? Collections.emptyList() : routes;
+			rootRoutes = rootRoutes == null ? Collections.emptyList() : rootRoutes;
 
-					String routeVal = (String) routeMap.get(ROUTE_PROP);
-					if (routeVal != null) {
-						uris.add(routeVal);
+			return ImmutableList.copyOf(Stream.concat(routes.stream(), rootRoutes.stream())
+				.filter(o -> o instanceof Map<?,?>)
+				.map(o -> (Map<?,?>) o)
+				.map(routeMap -> routeMap.get(ROUTE_PROP))
+				.filter(Objects::nonNull)
+				.filter(route -> route instanceof String)
+				.map(route -> (String) route)
+				.filter(url -> {
+					try {
+						CloudApplicationURL cloudAppUrl = CloudApplicationURL.getCloudApplicationURL(url, domains);
+						return cloudAppUrl.getDomain() != null;
+					} catch (Exception e) {
+						return false;
 					}
-				}
-			}
+				})
+				.collect(Collectors.toSet()));
 		}
 		return ImmutableList.copyOf(uris);
 	}

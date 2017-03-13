@@ -1,7 +1,0 @@
----
-applications:
-- name: app
-  memory: 512M
-  domains:
-  - springsource.org
-  - spring.io
