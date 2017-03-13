@@ -2,5 +2,5 @@
 applications:
 - name: app
   memory: 512M
-  no-hostname: true
-  domain: springsource.org
+  routes:
+  - route: springsource.org

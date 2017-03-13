@@ -2,7 +2,6 @@
 applications:
 - name: app
   memory: 512M
-  hosts:
-  - app-1
-  - app-2
-  domain: springsource.org
+  routes:
+  - route: app-1.springsource.org
+  - route: app-2.spring.io

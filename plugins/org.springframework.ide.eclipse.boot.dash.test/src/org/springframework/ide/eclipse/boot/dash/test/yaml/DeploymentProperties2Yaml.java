@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Pivotal, Inc.
+ * Copyright (c) 2016, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -81,7 +81,7 @@ public class DeploymentProperties2Yaml {
 		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
 		props.setAppName("app");
 		props.setMemory(512);
-		props.setUris(Arrays.asList("app-1.springsource.org", "app-2.springsource.org"));
+		props.setUris(Arrays.asList("app-1.springsource.org", "app-2.spring.io"));
 		testDeploymentProperties(props, "manifest-generate-data/uri-2.yml");
 	}
 
@@ -92,33 +92,6 @@ public class DeploymentProperties2Yaml {
 		props.setMemory(512);
 		props.setUris(Arrays.asList("app-1.springsource.org"));
 		testDeploymentProperties(props, "manifest-generate-data/uri-3.yml");
-	}
-
-	@Test
-	public void test_uri_4() throws Exception {
-		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
-		props.setAppName("app");
-		props.setMemory(512);
-		props.setUris(Arrays.asList("app.springsource.org", "app.spring.io"));
-		testDeploymentProperties(props, "manifest-generate-data/uri-4.yml");
-	}
-
-	@Test
-	public void test_uri_5() throws Exception {
-		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
-		props.setAppName("app");
-		props.setMemory(512);
-		props.setUris(Arrays.asList("app-1.springsource.org", "app-1.spring.io"));
-		testDeploymentProperties(props, "manifest-generate-data/uri-5.yml");
-	}
-
-	@Test
-	public void test_uri_6() throws Exception {
-		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
-		props.setAppName("app");
-		props.setMemory(512);
-		props.setUris(Arrays.asList("app-1.springsource.org", "app-1.spring.io", "app-2.springsource.org", "app-2.spring.io"));
-		testDeploymentProperties(props, "manifest-generate-data/uri-6.yml");
 	}
 
 	@Test

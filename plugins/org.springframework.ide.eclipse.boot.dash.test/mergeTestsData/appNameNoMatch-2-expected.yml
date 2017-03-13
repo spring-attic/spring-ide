@@ -6,5 +6,5 @@ applications:
   domain: springsource.org
 - name: app1
   memory: 2048M
-  host: test-app
+  host: test-app-1
   domain: springsource.org
