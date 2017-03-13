@@ -57,7 +57,8 @@ public  class MultipleViewsDependencyPage extends WizardPageWithSections {
 				return createDynamicSections(dynamicModel);
 			}
 			return new CommentSection(this, NewSpringBootWizard.NO_CONTENT_AVAILABLE);
-		} ));
+		} )).setMinimumSize(NewSpringBootWizard.PROJECT_PAGE_MINIMUM_SIZE);	
+
 		return ImmutableList.of(dynamicSection);
 	}
 	

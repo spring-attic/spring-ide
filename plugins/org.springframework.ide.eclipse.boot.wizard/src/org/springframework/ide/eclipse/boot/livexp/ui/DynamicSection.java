@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.livexp.ui;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Layout;
@@ -29,6 +30,7 @@ public class DynamicSection extends ReflowableSection {
 	private Composite composite;
 
 	private final DelegatingLiveExp<ValidationResult> validator = new DelegatingLiveExp<>();
+	private Point minSize = null;
 
 	public DynamicSection(IPageWithSections owner, LiveExpression<IPageSection> content) {
 		super(owner);
@@ -40,8 +42,18 @@ public class DynamicSection extends ReflowableSection {
 		composite = new Composite(page, SWT.NONE);
 		Layout l = GridLayoutFactory.fillDefaults().margins(0, 0).create();
 		composite.setLayout(l);
-		GridDataFactory.fillDefaults().grab(true, true).applyTo(composite);
+		if (minSize != null) {
+			// To set a minimum size in general it seems both minSize and Hint have to be set
+			GridDataFactory.fillDefaults().grab(true, true).minSize(minSize).hint(minSize).applyTo(composite);
+		} else {
+			GridDataFactory.fillDefaults().grab(true, true).applyTo(composite);
+		}
 		content.addListener(UIValueListener.from((e, newContents) -> updateContent(newContents)));
+	}
+	
+	public DynamicSection setMinimumSize(Point minSize) {
+		this.minSize  = minSize;
+		return this;
 	}
 
 	private void updateContent(IPageSection newContents) {
