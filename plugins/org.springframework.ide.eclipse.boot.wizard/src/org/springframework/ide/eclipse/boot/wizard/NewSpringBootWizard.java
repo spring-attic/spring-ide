@@ -161,8 +161,7 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 		@Override
 		protected List<WizardPageSection> createSections() {
 
-			ChooseOneSectionCombo<String> comboSection = new ChooseOneSectionCombo<String>(this, model.getServiceUrlField(), model.getUrls()) 
-			.grabHorizontal(true);
+			ChooseOneSectionCombo<String> comboSection = new ChooseOneSectionCombo<String>(this, model.getServiceUrlField(), model.getUrls());
 			comboSection.allowTextEdits(Parser.IDENTITY);
 		
 			DynamicSection dynamicSection = new DynamicSection(this, model.getModel().apply((dynamicModel) -> {
