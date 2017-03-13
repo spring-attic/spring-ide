@@ -64,9 +64,11 @@ import org.cloudfoundry.operations.services.CreateServiceInstanceRequest;
 import org.cloudfoundry.operations.services.CreateUserProvidedServiceInstanceRequest;
 import org.cloudfoundry.operations.services.GetServiceInstanceRequest;
 import org.cloudfoundry.operations.services.ServiceInstance;
+import org.cloudfoundry.operations.services.ServiceInstanceSummary;
 import org.cloudfoundry.operations.services.UnbindServiceInstanceRequest;
 import org.cloudfoundry.operations.spaces.GetSpaceRequest;
 import org.cloudfoundry.operations.spaces.SpaceDetail;
+import org.cloudfoundry.reactor.ConnectionContext;
 import org.cloudfoundry.reactor.tokenprovider.AbstractUaaTokenProvider;
 import org.cloudfoundry.uaa.UaaClient;
 import org.cloudfoundry.util.PaginationUtils;
@@ -171,6 +173,8 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	private Mono<GetInfoResponse> info;
 	private Mono<String> spaceId;
 	private AbstractUaaTokenProvider _tokenProvider;
+	private ConnectionContext _connection;
+	private String refreshToken = null;
 
 	public DefaultClientRequestsV2(CloudFoundryClientCache clients, CFClientParams params) {
 		this.params = params;
@@ -178,6 +182,8 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		this._client = provider.client;
 		this._uaa = provider.uaaClient;
 		this._tokenProvider = (AbstractUaaTokenProvider) provider.tokenProvider;
+		this._connection = provider.connection;
+		_tokenProvider.getRefreshTokens(_connection).doOnNext((t) -> this.refreshToken = t).subscribe();
 		debug(">>> creating cf operations");
 		this._operations = DefaultCloudFoundryOperations.builder()
 				.cloudFoundryClient(_client)
@@ -339,6 +345,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 				_operations
 				.services()
 				.listInstances()
+				.flatMap(this::getServiceDetails)
 				.map(CFWrappingV2::wrap)
 				.collectList()
 				.map(ImmutableList::copyOf)
@@ -346,6 +353,15 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		);
 	}
 
+
+	private Mono<ServiceInstance> getServiceDetails(ServiceInstanceSummary summary) {
+		return log("operations.service.getServiceInstance",
+				_operations.services().getInstance(GetServiceInstanceRequest.builder()
+						.name(summary.getName())
+						.build()
+				)
+		);
+	}
 	/**
 	 * Get details for a given list of applications. This does a 'best' effort getting the details for
 	 * as many apps as possible but it does not guarantee that it will return details for each app in the
@@ -923,7 +939,8 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 				.build();
 		return log("operations.routes.map("+mapRouteReq+")",
 			_operations.routes().map(mapRouteReq)
-		);
+		)
+		.then();
 	}
 
 	private Mono<CFRoute> toRoute(Mono<Set<String>> domains, String desiredUrl) {
@@ -1064,7 +1081,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 			_operations.services().listInstances()
 		)
 		.filter((service) -> isBoundTo(service, appName))
-		.map(ServiceInstance::getName);
+		.map(ServiceInstanceSummary::getName);
 	}
 
 	public Mono<Set<String>> getBoundServicesSet(String appName) {
@@ -1079,7 +1096,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		.map(ImmutableList::copyOf);
 	}
 
-	private boolean isBoundTo(ServiceInstance service, String appName) {
+	private boolean isBoundTo(ServiceInstanceSummary service, String appName) {
 		return service.getApplications().stream()
 				.anyMatch((boundAppName) -> boundAppName.equals(appName));
 	}
@@ -1384,15 +1401,15 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	@Override
-	public String getRefreshToken() {
-		return _tokenProvider.getRefreshToken();
-	}
-
-	@Override
 	public Mono<String> getUserName() {
 		return log("uaa.getUsername",
 				_uaa.getUsername()
 		).timeout(GET_USERNAME_TIMEOUT);
+	}
+
+	@Override
+	public String getRefreshToken() {
+		return refreshToken;
 	}
 
 }

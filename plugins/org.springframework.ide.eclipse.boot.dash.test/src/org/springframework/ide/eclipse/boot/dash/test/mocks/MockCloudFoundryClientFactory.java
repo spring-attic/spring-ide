@@ -38,10 +38,12 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientReque
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshClientSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ReactorUtils;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.IApplicationLogConsole;
 import org.springframework.ide.eclipse.boot.dash.test.CfTestTargetParams;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -157,7 +159,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		private CFClientParams params;
 		private boolean connected = true;
 		private Boolean validCredentials = null;
-		private String refreshToken = null;
+		private final LiveVariable<String> refreshToken = new LiveVariable<>();
 
 		public MockClient(CFClientParams params) {
 			this.params = params;
@@ -348,7 +350,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 				return false;
 			}
 			//Validation of credentials is expected to update refresh token.
-			refreshToken = FAKE_REFRESH_TOKEN;
+			refreshToken.setValue(FAKE_REFRESH_TOKEN);
 			return true;
 		}
 
@@ -418,11 +420,6 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		}
 
 		@Override
-		public String getRefreshToken() {
-			return refreshToken;
-		}
-
-		@Override
 		public Mono<String> getUserName() {
 			return Mono.defer(() -> {
 				try {
@@ -432,6 +429,11 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 					return Mono.error(e);
 				}
 			});
+		}
+
+		@Override
+		public String getRefreshToken() {
+			return refreshToken.getValue();
 		}
 
 	}

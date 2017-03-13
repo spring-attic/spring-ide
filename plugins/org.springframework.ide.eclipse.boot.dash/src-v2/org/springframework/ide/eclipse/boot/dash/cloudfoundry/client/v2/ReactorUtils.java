@@ -17,14 +17,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.reactivestreams.Publisher;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 
 import reactor.core.publisher.Flux;

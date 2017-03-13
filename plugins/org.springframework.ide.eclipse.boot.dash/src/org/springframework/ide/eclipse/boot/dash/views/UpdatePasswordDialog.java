@@ -43,7 +43,6 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.SelectionModel;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.ui.ButtonSection;
-import org.springsource.ide.eclipse.commons.livexp.ui.CheckboxSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.ChooseOneSectionCombo;
 import org.springsource.ide.eclipse.commons.livexp.ui.CommentSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.DialogWithSections;

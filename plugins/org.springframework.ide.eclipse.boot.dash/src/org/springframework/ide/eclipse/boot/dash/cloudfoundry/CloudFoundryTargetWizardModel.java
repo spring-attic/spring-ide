@@ -21,7 +21,6 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials.CFCredentialType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFExceptions;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
@@ -36,7 +35,6 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAcce
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
 import org.springframework.ide.eclipse.boot.util.Log;
-import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.CompositeValidator;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -47,6 +45,8 @@ import org.springsource.ide.eclipse.commons.livexp.ui.Ilabelable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import com.google.common.collect.ImmutableSet;
+
+import reactor.core.publisher.Flux;
 
 /**
  * Cloud Foundry Target properties that uses {@link LiveExpression} and
