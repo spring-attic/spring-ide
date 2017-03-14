@@ -220,6 +220,8 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 			@Override
 			protected IStatus run(IProgressMonitor mon) {
 				try {
+					// TODO: maybe the model factory should have a perform finish that does a save, which then calls the underlying model perform finish
+					model.save();
 					model.getModel().getValue().performFinish(mon);
 					return Status.OK_STATUS;
 				} catch (Throwable e) {

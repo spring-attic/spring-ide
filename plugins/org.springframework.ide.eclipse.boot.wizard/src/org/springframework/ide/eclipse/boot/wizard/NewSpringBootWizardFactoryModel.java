@@ -88,4 +88,10 @@ public class NewSpringBootWizardFactoryModel {
 	public LiveExpression<NewSpringBootWizardModel> getModel() {
 		return model;
 	}
+	
+	public void save() {
+		if (serviceUrlField.getValue() != null) {
+			BootPreferences.addInitializrUrl(serviceUrlField.getValue());
+		}
+	}
 }
