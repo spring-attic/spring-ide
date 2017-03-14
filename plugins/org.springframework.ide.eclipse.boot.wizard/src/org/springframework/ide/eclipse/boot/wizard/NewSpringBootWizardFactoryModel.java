@@ -65,7 +65,7 @@ public class NewSpringBootWizardFactoryModel {
 	public NewSpringBootWizardFactoryModel(URLConnectionFactory urlConnectionFactory, IPreferenceStore prefs) {
 		this.urlConnectionFactory = urlConnectionFactory;
 		this.prefs = prefs;
-		this.urls = new String[]{BootPreferences.getInitializrUrl()};
+		this.urls = BootPreferences.getInitializrUrls();
 		getServiceUrlField().validator(modelValidator);
 		getServiceUrlField().getVariable().setValue(BootPreferences.getInitializrUrl());
 	}
@@ -80,7 +80,7 @@ public class NewSpringBootWizardFactoryModel {
 	public StringFieldModel getServiceUrlField() {
 		return serviceUrlField;
 	}
-	
+
 	public String[] getUrls() {
 		return urls;
 	}

@@ -10,9 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.core;
 
-import java.util.Arrays;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -21,6 +19,9 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChange
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 /**
  * @author Kris De Volder
@@ -103,7 +104,11 @@ public class BootPreferences implements IPreferenceChangeListener {
 	}
 
 	public static String getInitializrUrl() {
-		return BootActivator.getDefault().getPreferenceStore().getString(PREF_INITIALIZR_URL);
+		String[] urls = getInitializrUrls();
+		if (urls!=null && urls.length>0) {
+			return urls[0];
+		}
+		return null;
 	}
 
 	public static String getDefaultInitializrUrl() {
@@ -123,31 +128,59 @@ public class BootPreferences implements IPreferenceChangeListener {
 	}
 
 	/**
+	 * Adds a intializer url to the history (or moves it to front of list if it existed
+	 * before.
+	 */
+	public static void addInitializrUrl(String newUrl) {
+		//Added for Nieraj... warning not tested!
+		String newUrls = clean(
+				Flux.fromArray(getInitializrUrls())
+				.firstEmittingWith(Mono.just(newUrl))
+		)
+		.take(10) // limit history to 10 elements
+		.reduce(new StringBuilder(), (buf, s) -> buf.append(s + "\n"))
+		.map(StringBuilder::toString)
+		.block();
+		BootActivator.getDefault().getPreferenceStore().putValue(PREF_INITIALIZR_URL, newUrls);
+	}
+
+	public static String[] getInitializrUrls() {
+		String encodedUrls = BootActivator.getDefault().getPreferenceStore().getString(PREF_INITIALIZR_URL);
+		if (encodedUrls!=null) {
+			return decodeUrl(encodedUrls);
+		}
+		return new String[] {};
+	}
+
+	/**
 	 * Cleanup a number of items:
 	 *  - removing trailling / leading whitespace
 	 *  - remove emtpy elements
 	 *  - remove duplicate elements
 	 */
-	private static Stream<String> clean(String[] elements) {
-		return Arrays.asList(elements).stream()
-		.map(String::trim)
-		.filter((s) -> !s.isEmpty())
-		.distinct();
+	private static Flux<String> clean(Flux<String> elements) {
+		return elements
+				.map(String::trim)
+				.filter((s) -> !s.isEmpty())
+				.distinct();
+	}
+
+	private static Flux<String> clean(String[] elements) {
+		return clean(Flux.fromArray(elements));
 	}
 
 	public static String encodeUrls(String[] items) {
 		StringBuilder encoded = new StringBuilder();
-		Arrays.asList(items).stream()
-		.map(String::trim)
-		.filter((s) -> !s.isEmpty())
-		.distinct()
-		.forEach((s) -> encoded.append(s+"\n"));
+		clean(Flux.fromArray(items))
+		.doOnNext((s) -> encoded.append(s+"\n"))
+		.then()
+		.block();
 		return encoded.toString();
 	}
 
 	public static String[] decodeUrl(String stringList) {
 		return clean(stringList.split("\n"))
-		.toArray((size) -> new String[size]);
+		.toStream().toArray((sz) -> new String[sz]);
 	}
 
 }
