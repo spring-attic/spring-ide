@@ -13,8 +13,8 @@ package org.springframework.ide.eclipse.boot.dash.views.properties;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springframework.ide.eclipse.boot.dash.util.Stylers;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashLabels;
+import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 
 /**
  * Abstract common implementation for the Boot Dash Element feature control for

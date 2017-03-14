@@ -21,8 +21,8 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
 import org.springframework.ide.eclipse.boot.dash.model.Taggable;
-import org.springframework.ide.eclipse.boot.dash.util.Stylers;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 
 /**
  * Support for editing tags with the text cell editor
@@ -73,7 +73,7 @@ public class TagEditingSupport extends EditingSupport {
 			if (str.isEmpty()) {
 				taggable.setTags(null);
 			} else {
-				taggable.setTags(new LinkedHashSet<String>(Arrays.asList(TagUtils.parseTags(str))));
+				taggable.setTags(new LinkedHashSet<>(Arrays.asList(TagUtils.parseTags(str))));
 			}
 		}
 	}

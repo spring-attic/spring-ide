@@ -40,9 +40,9 @@ import org.eclipse.ui.dialogs.SelectionStatusDialog;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
-import org.springframework.ide.eclipse.boot.dash.util.Stylers;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashTreeLabelProvider;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashUnifiedTreeSection.BootModelViewerSorter;
+import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 
 /**
  * @author Martin Lippert

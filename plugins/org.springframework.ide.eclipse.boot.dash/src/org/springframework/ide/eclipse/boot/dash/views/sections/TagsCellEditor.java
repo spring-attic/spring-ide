@@ -17,7 +17,7 @@ import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.widgets.Composite;
 import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
-import org.springframework.ide.eclipse.boot.dash.util.Stylers;
+import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 
 /**
  * Cell editor for tags

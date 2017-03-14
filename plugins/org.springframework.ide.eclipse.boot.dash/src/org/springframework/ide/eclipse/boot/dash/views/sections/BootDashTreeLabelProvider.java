@@ -11,8 +11,8 @@
 package org.springframework.ide.eclipse.boot.dash.views.sections;
 
 import org.eclipse.jface.viewers.ColumnViewer;
-import org.springframework.ide.eclipse.boot.dash.util.Stylers;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashCellLabelProvider;
+import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 
 /**
  * @author Kris De Volder
