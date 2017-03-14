@@ -133,11 +133,7 @@ public class BootPreferences implements IPreferenceChangeListener {
 	 */
 	public static void addInitializrUrl(String newUrl) {
 		String newUrls = clean(
-				// Doesn't seem to work so commenting for now
-//				Flux.fromArray(getInitializrUrls())
-//				.firstEmittingWith(Mono.just(newUrl))
-				// Possible alternative:
-				Mono.just(newUrl).flux().concatWith(Flux.fromArray(getInitializrUrls()))
+			Flux.just(newUrl).concatWith(Flux.fromArray(getInitializrUrls()))
 		)
 		.take(10) // limit history to 10 elements
 		.reduce(new StringBuilder(), (buf, s) -> buf.append(s + "\n"))
