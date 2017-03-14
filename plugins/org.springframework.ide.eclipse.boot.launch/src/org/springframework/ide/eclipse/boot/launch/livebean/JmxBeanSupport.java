@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014-2015 Pivotal Software, Inc.
+ * Copyright (c) 2014, 2017 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -64,7 +64,8 @@ public class JmxBeanSupport {
 				"-Dcom.sun.management.jmxremote", //enable jmx to access the beans
 				"-D"+ JMX_PORT_PROP +"="+jmxPort,
 				"-Dcom.sun.management.jmxremote.authenticate=false",
-				"-Dcom.sun.management.jmxremote.ssl=false"
+				"-Dcom.sun.management.jmxremote.ssl=false",
+				"-Djava.rmi.server.hostname=localhost"
 		};
 	}
 
