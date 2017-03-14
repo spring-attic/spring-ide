@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.core;
 
+import java.util.Arrays;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -30,7 +32,7 @@ public class BootPreferences implements IPreferenceChangeListener {
 	public static final String PREF_IGNORE_SILENT_EXIT = "org.springframework.ide.eclipse.boot.ignore.silent.exit";
 	public static final boolean DEFAULT_PREF_IGNORE_SILENT_EXIT = true;
 	public static final String PREF_INITIALIZR_URL = "org.springframework.ide.eclipse.boot.wizard.initializr.url";
-	
+
 	// Boot Preference Page ID
 	public static final String BOOT_PREFERENCE_PAGE_ID = "org.springframework.ide.eclipse.boot.ui.preferences.BootPreferencePage";
 
@@ -99,13 +101,53 @@ public class BootPreferences implements IPreferenceChangeListener {
 	public LiveExpression<Pattern> getProjectExclusionExp() {
 		return projectExclude;
 	}
-	
+
 	public static String getInitializrUrl() {
 		return BootActivator.getDefault().getPreferenceStore().getString(PREF_INITIALIZR_URL);
 	}
-	
+
 	public static String getDefaultInitializrUrl() {
-		return BootActivator.getDefault().getPreferenceStore().getDefaultString(PREF_INITIALIZR_URL);
+		String[] urls = getDefaultInitializrUrls();
+		if (urls!=null && urls.length>0) {
+			return urls[0];
+		}
+		return null;
+	}
+
+	public static String[] getDefaultInitializrUrls() {
+		String encodedUrls = BootActivator.getDefault().getPreferenceStore().getDefaultString(PREF_INITIALIZR_URL);
+		if (encodedUrls!=null) {
+			return decodeUrl(encodedUrls);
+		}
+		return new String[] {};
+	}
+
+	/**
+	 * Cleanup a number of items:
+	 *  - removing trailling / leading whitespace
+	 *  - remove emtpy elements
+	 *  - remove duplicate elements
+	 */
+	private static Stream<String> clean(String[] elements) {
+		return Arrays.asList(elements).stream()
+		.map(String::trim)
+		.filter((s) -> !s.isEmpty())
+		.distinct();
+	}
+
+	public static String encodeUrls(String[] items) {
+		StringBuilder encoded = new StringBuilder();
+		Arrays.asList(items).stream()
+		.map(String::trim)
+		.filter((s) -> !s.isEmpty())
+		.distinct()
+		.forEach((s) -> encoded.append(s+"\n"));
+		return encoded.toString();
+	}
+
+	public static String[] decodeUrl(String stringList) {
+		return clean(stringList.split("\n"))
+		.toArray((size) -> new String[size]);
 	}
 
 }

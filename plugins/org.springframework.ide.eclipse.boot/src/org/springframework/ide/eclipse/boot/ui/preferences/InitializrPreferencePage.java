@@ -15,23 +15,26 @@ import static org.springframework.ide.eclipse.boot.core.BootPreferences.PREF_INI
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.eclipse.jface.dialogs.IInputValidator;
+import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
-import org.eclipse.jface.preference.StringFieldEditor;
+import org.eclipse.jface.preference.ListEditor;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.core.BootPreferences;
 
 /**
  * Preferences page for Spring IO Initializr IDE support
- * 
- * @author Alex Boyko
  *
+ * @author Alex Boyko
+ * @author Kris De Volder
  */
 public class InitializrPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
-	
-	private static final String LABEL_INITIALIZR_URL = "Initializr URL";
+
+	private static final String LABEL_INITIALIZR_URL = "Initializr URLs";
 	private static final String TOOLTIP_INITIALIZR_URL = "Spring Initializr server URL";
 	private static final String MSG_INVALID_URL_FORMAT = "Invalid URL format";
 
@@ -44,32 +47,49 @@ public class InitializrPreferencePage extends FieldEditorPreferencePage implemen
 	protected void createFieldEditors() {
 		Composite parent = getFieldEditorParent();
 
-		StringFieldEditor initializrUrl = new StringFieldEditor(PREF_INITIALIZR_URL, LABEL_INITIALIZR_URL, parent) {
+		ListEditor initializrUrl = new ListEditor(PREF_INITIALIZR_URL, LABEL_INITIALIZR_URL, parent) {
+
 
 			@Override
-			protected boolean checkState() {
-				// Checks if string has a correct URL format 
-				Text text = getTextControl();
-				if (text == null) {
-					return false;
-				}
-				try {
-					new URL(text.getText());
-					clearErrorMessage();
-					return true;
-				} catch (MalformedURLException e) {
-					setErrorMessage(MSG_INVALID_URL_FORMAT);
-					showErrorMessage();
-					return false;
+			protected String createList(String[] items) {
+				return BootPreferences.encodeUrls(items);
+			}
+
+			@Override
+			protected String getNewInputObject() {
+				return readUrl();
+			}
+
+			private String readUrl() {
+				InputDialog id = new InputDialog(getShell(), "Add Url", "Enter Url",
+						"http://", new IInputValidator() {
+					@Override
+					public String isValid(String newText) {
+						try {
+							new URL(newText);
+						} catch (MalformedURLException e) {
+							return MSG_INVALID_URL_FORMAT;
+						}
+						return null;
+					}
+				});
+				if (id.open() == Window.OK) {
+					return id.getValue();
+				} else {
+					return null;
 				}
 			}
-			
+
+			@Override
+			protected String[] parseString(String stringList) {
+				return BootPreferences.decodeUrl(stringList);
+			}
+
 		};
-		
 		initializrUrl.getLabelControl(parent).setToolTipText(TOOLTIP_INITIALIZR_URL);
-		initializrUrl.getTextControl(parent).setToolTipText(TOOLTIP_INITIALIZR_URL);
+		initializrUrl.getListControl(parent).setToolTipText(TOOLTIP_INITIALIZR_URL);
 		addField(initializrUrl);
 
 	}
-	
+
 }
