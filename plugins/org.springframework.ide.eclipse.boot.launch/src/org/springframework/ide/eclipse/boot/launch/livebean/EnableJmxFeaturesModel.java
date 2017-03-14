@@ -10,10 +10,12 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch.livebean;
 
-import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.*;
+import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.DEFAULT_ENABLE_JMX;
+import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.DEFAULT_ENABLE_LIFE_CYCLE;
 import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.DEFAULT_ENABLE_LIVE_BEAN_SUPPORT;
 import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.DEFAULT_JMX_PORT;
 import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.DEFAULT_TERMINATION_TIMEOUT;
+import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.setEnableJMX;
 import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.setEnableLifeCycle;
 import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.setEnableLiveBeanSupport;
 import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.setJMXPort;
@@ -27,7 +29,6 @@ import org.springframework.ide.eclipse.boot.launch.util.ILaunchConfigurationTabM
 import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
-import org.springsource.ide.eclipse.commons.livexp.core.OrExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
