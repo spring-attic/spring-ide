@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
@@ -139,7 +140,8 @@ public class BootPreferences implements IPreferenceChangeListener {
 		.reduce(new StringBuilder(), (buf, s) -> buf.append(s + "\n"))
 		.map(StringBuilder::toString)
 		.block();
-		BootActivator.getDefault().getPreferenceStore().putValue(PREF_INITIALIZR_URL, newUrls);
+		IPreferenceStore store = BootActivator.getDefault().getPreferenceStore();
+		store.setValue(PREF_INITIALIZR_URL, newUrls);
 	}
 
 	public static String[] getInitializrUrls() {
