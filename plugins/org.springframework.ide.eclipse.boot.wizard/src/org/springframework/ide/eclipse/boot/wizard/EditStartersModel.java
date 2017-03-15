@@ -47,6 +47,7 @@ public class EditStartersModel implements OkButtonHandler {
 
 	public static final Object JOB_FAMILY = "EditStartersModel.JOB_FAMILY";
 
+	public final DependencyFilterBox searchBox = new DependencyFilterBox();
 	private final ISpringBootProject project;
 	private final PopularityTracker popularities;
 	private final DefaultDependencies defaultDependencies;

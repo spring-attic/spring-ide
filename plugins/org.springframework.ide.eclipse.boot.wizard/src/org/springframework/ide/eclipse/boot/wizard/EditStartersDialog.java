@@ -10,11 +10,14 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard;
 
+import static org.springframework.ide.eclipse.boot.livexp.ui.DynamicSection.DEFAULT_MIN_SIZE;
+
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
@@ -43,13 +46,11 @@ public class EditStartersDialog extends DialogWithSections {
 	private static final int NUM_DEP_COLUMNS = 4;
 	static final String NO_CONTENT_AVAILABLE = "No content available.";
 	public InitializrFactoryModel<EditStartersModel> model;
-	private DependencyFilterBox searchBoxModel;
 
 	public EditStartersDialog(InitializrFactoryModel<EditStartersModel> model, Shell shell) {
 		super("Edit Spring Boot Starters", model, shell);
 		this.setShellStyle(SWT.RESIZE | getShellStyle());
 		this.model = model;
-		this.searchBoxModel = new DependencyFilterBox();
 	}
 
 	private void applyFilter(Filter<Dependency> filter, ExpandableSection expandable, CheckBoxesSection<Dependency> checkboxes) {
@@ -77,6 +78,7 @@ public class EditStartersDialog extends DialogWithSections {
 			}
 			return new CommentSection(this, NO_CONTENT_AVAILABLE);
 		} ));
+		dynamicSection.setHeightHint(null);
 
 		return ImmutableList.of(comboSection, dynamicSection);
 	}
@@ -94,7 +96,7 @@ public class EditStartersDialog extends DialogWithSections {
 			));
 		}
 
-		sections.addSections(new SearchBoxSection(this, searchBoxModel.getText()) {
+		sections.addSections(new SearchBoxSection(this, model.searchBox.getText()) {
 			@Override
 			protected String getSearchHint() {
 				return "Type to search dependencies";
@@ -112,7 +114,7 @@ public class EditStartersDialog extends DialogWithSections {
 				)
 			);
 			expandable.getExpansionState().setValue(false);
-			searchBoxModel.getFilter().addListener(new UIValueListener<Filter<Dependency>>() {
+			model.searchBox.getFilter().addListener(new UIValueListener<Filter<Dependency>>() {
 				@Override
 				protected void uiGotValue(
 						LiveExpression<Filter<Dependency>> exp,
