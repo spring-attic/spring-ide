@@ -25,6 +25,7 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
+import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.livexp.ui.DynamicSection;
 import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
 import org.springsource.ide.eclipse.commons.livexp.ui.ChooseOneSectionCombo;
@@ -46,7 +47,7 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 	private static final ImageDescriptor IMAGE = BootWizardImages.BOOT_WIZARD_ICON;
 	static final String NO_CONTENT_AVAILABLE = "No content available.";
 
-	private NewSpringBootWizardFactoryModel model;
+	private InitializrFactoryModel<NewSpringBootWizardModel> model;
 
 	private IStructuredSelection selection;
 
@@ -61,7 +62,7 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 	//@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		try {
-			model = new NewSpringBootWizardFactoryModel();
+			model = NewSpringBootWizardFactoryModel.create(BootActivator.getUrlConnectionFactory(), BootActivator.getDefault().getPreferenceStore());
 			this.selection = selection;
 		} catch (Exception e) {
 			MessageDialog.openError(workbench.getActiveWorkbenchWindow().getShell(), "Error opening the wizard",
@@ -89,7 +90,7 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 	public boolean canFinish() {
 		return super.canFinish() && getContainer().getCurrentPage()!=projectPage;
 	}
-	
+
 	public class ProjectDetailsSection extends GroupSection {
 
 		private final NewSpringBootWizardModel model;
@@ -99,7 +100,7 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 			this.model = model;
 			addSections(createSections().toArray(new WizardPageSection[0]));
 		}
-		
+
 		protected  List<WizardPageSection> createSections() {
 			List<WizardPageSection> sections = new ArrayList<>();
 
@@ -118,12 +119,12 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 					sections.add(new StringFieldSection(owner, f));
 				}
 			}
-			
+
 			sections.add(workingSetSection = new WorkingSetSection(owner, selection));
-			
+
 			return sections;
 		}
-		
+
 		private WizardPageSection createRadioGroupsSection(IPageWithSections owner) {
 			boolean notEmpty = false;
 			RadioGroup bootVersion = model.getBootVersion(); //This is placed specifically somewhere else so must skip it here
@@ -147,12 +148,12 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 		}
 
 	}
-	
+
 	public class ProjectDetailsPage extends WizardPageWithSections {
 
-		protected NewSpringBootWizardFactoryModel model;
+		protected InitializrFactoryModel<NewSpringBootWizardModel> model;
 
-		public ProjectDetailsPage(NewSpringBootWizardFactoryModel model) {
+		public ProjectDetailsPage(InitializrFactoryModel<NewSpringBootWizardModel> model) {
 			super("page1", "New Spring Starter Project", null);
 			this.model = model;
 		}
@@ -160,9 +161,9 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 		@Override
 		protected List<WizardPageSection> createSections() {
 
-			ChooseOneSectionCombo<String> comboSection = new ChooseOneSectionCombo<String>(this, model.getServiceUrlField(), model.getUrls());
+			ChooseOneSectionCombo<String> comboSection = new ChooseOneSectionCombo<>(this, model.getServiceUrlField(), model.getUrls());
 			comboSection.allowTextEdits(Parser.IDENTITY);
-		
+
 			// Note: have to set the project page in the dynamic section because the dynamic section composite
 			// gets created at the start, and determines the initial size of the wizard page, regardless of its content.
 			DynamicSection dynamicSection = new DynamicSection(this, model.getModel().apply((dynamicModel) -> {
@@ -178,10 +179,10 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 
 
 	public static class PageThree extends WizardPageWithSections {
-		
-		private final NewSpringBootWizardFactoryModel model;
 
-		protected PageThree(NewSpringBootWizardFactoryModel model) {
+		private final InitializrFactoryModel<NewSpringBootWizardModel> model;
+
+		protected PageThree(InitializrFactoryModel<NewSpringBootWizardModel> model) {
 			super("page3", "New Spring Starter Project", null);
 			this.model = model;
 		}
@@ -196,7 +197,7 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 
 			return new WizardCompositeSection(this, sections.toArray(new WizardPageSection[0]));
 		}
-		
+
 		@Override
 		protected List<WizardPageSection> createSections() {
 

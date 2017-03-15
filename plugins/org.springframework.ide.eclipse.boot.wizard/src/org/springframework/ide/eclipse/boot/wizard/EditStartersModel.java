@@ -57,19 +57,11 @@ public class EditStartersModel implements OkButtonHandler {
 	 */
 	private final List<Dependency> initialDependencies = new ArrayList<>();
 
-	public final HierarchicalMultiSelectionFieldModel<Dependency> dependencies = new HierarchicalMultiSelectionFieldModel<Dependency>(Dependency.class, "dependencies")
+	public final HierarchicalMultiSelectionFieldModel<Dependency> dependencies = new HierarchicalMultiSelectionFieldModel<>(Dependency.class, "dependencies")
 			.label("Dependencies:");
 
 	private HashSet<MavenId> activeStarters;
 	private SpringBootStarters starters;
-
-	public EditStartersModel(IProject selectedProject) throws Exception {
-		this(
-				selectedProject,
-				SpringBootCore.getDefault(),
-				BootWizardActivator.getDefault().getPreferenceStore()
-		);
-	}
 
 	public boolean isSupported() {
 		String notSupportedMsg = getNotSupportedMessage();
@@ -168,7 +160,7 @@ public class EditStartersModel implements OkButtonHandler {
 
 	private Set<MavenId> getActiveStarters() throws Exception {
 		if (this.activeStarters==null) {
-			this.activeStarters = new HashSet<MavenId>();
+			this.activeStarters = new HashSet<>();
 			List<IMavenCoordinates> deps = project.getDependencies();
 			if (deps!=null) {
 				for (IMavenCoordinates coords : deps) {
@@ -215,7 +207,7 @@ public class EditStartersModel implements OkButtonHandler {
 		}
 		return Collections.unmodifiableList(result);
 	}
-	
+
 	/**
 	 * Retrieves currently set default dependencies
 	 * @return list of default dependencies check-box models
@@ -223,10 +215,10 @@ public class EditStartersModel implements OkButtonHandler {
 	public List<CheckBoxModel<Dependency>> getDefaultDependencies() {
 		return defaultDependencies.getDependencies(dependencies);
 	}
-	
+
 	/**
 	 * Retrieves frequently used dependencies based on currently set default dependencies and the most popular dependencies
-	 * 
+	 *
 	 * @param numberOfMostPopular max number of most popular dependencies
 	 * @return list of frequently used dependencies
 	 */

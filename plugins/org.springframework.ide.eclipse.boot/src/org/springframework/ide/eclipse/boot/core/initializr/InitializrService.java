@@ -20,6 +20,8 @@ import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.ide.eclipse.boot.core.SimpleUriBuilder;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarters;
 import org.springframework.ide.eclipse.boot.util.Log;
+import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 public interface InitializrService {
 
@@ -29,7 +31,7 @@ public interface InitializrService {
 			try {
 				URL initializrUrl = new URL(BootPreferences.getInitializrUrl());
 				URL dependencyUrl = dependencyUrl(bootVersion, initializrUrl);
-				return new SpringBootStarters(
+				return SpringBootStarters.load(
 						initializrUrl, dependencyUrl,
 						BootActivator.getUrlConnectionFactory()
 				);
@@ -45,31 +47,27 @@ public interface InitializrService {
 			return new URL(builder.toString());
 		}
 	};
-	
-	public static final InitializrService CACHING = new InitializrService() {
-		
-		private SpringBootStarters cached = null;
-		
-		{
-			BootActivator.getDefault().getPreferenceStore().addPropertyChangeListener(new IPropertyChangeListener() {
-				@Override
-				public void propertyChange(PropertyChangeEvent event) {
-					if (BootPreferences.PREF_INITIALIZR_URL.equals(event.getProperty())) {
-						cached = null;
-					}
-				}
-			});
-		}
-		
-		@Override
-		public SpringBootStarters getStarters(String bootVersion) {
-			if (cached == null) {
-				cached = DEFAULT.getStarters(bootVersion);
-			}
-			return cached;
-		}
-	};
 
-	SpringBootStarters getStarters(String bootVersion);
+	SpringBootStarters getStarters(String bootVersion) throws Exception;
+
+	static InitializrService create(URLConnectionFactory urlConnectionFactory, String url) throws MalformedURLException {
+		URL initializrUrl = new URL(url);
+		return new InitializrService() {
+			@Override
+			public SpringBootStarters getStarters(String bootVersion) throws Exception {
+				URL dependencyUrl = dependencyUrl(bootVersion, initializrUrl);
+				return SpringBootStarters.load(
+						initializrUrl, dependencyUrl,
+						BootActivator.getUrlConnectionFactory()
+				);
+			}
+
+			private URL dependencyUrl(String bootVersion, URL initializerUrl) throws MalformedURLException {
+				SimpleUriBuilder builder = new SimpleUriBuilder(initializerUrl.toString()+"/dependencies");
+				builder.addParameter("bootVersion", bootVersion);
+				return new URL(builder.toString());
+			}
+		};
+	}
 
 }

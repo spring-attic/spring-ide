@@ -38,7 +38,8 @@ Require-Bundle: org.eclipse.core.resources,
  org.eclipse.m2e.launching,
  org.apache.commons.lang3,
  io.projectreactor.reactor-core,
- org.reactivestreams.reactive-streams
+ org.reactivestreams.reactive-streams,
+ com.google.guava
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.boot.core,

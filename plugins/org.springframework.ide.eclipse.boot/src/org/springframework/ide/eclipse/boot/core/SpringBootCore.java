@@ -60,7 +60,7 @@ public class SpringBootCore {
 	 */
 	public static SpringBootCore getDefault() {
 		if (instance==null) {
-			instance = new SpringBootCore(InitializrService.CACHING);
+			instance = new SpringBootCore(InitializrService.DEFAULT);
 		}
 		return instance;
 	}

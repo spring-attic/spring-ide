@@ -63,6 +63,7 @@ import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.boot.test.util.TestBracketter;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.boot.wizard.EditStartersModel;
 import org.springframework.ide.eclipse.boot.wizard.PopularityTracker;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
@@ -420,10 +421,14 @@ public class EditStartersModelTest {
 	}
 
 	private Element findDependency(ISpringBootProject project, Document pom, String id) {
-		SpringBootStarters starters = project.getStarterInfos();
-		MavenId mid = starters.getMavenId(id);
-		if (mid!=null) {
-			return findDependency(pom, mid);
+		try {
+			SpringBootStarters starters = project.getStarterInfos();
+			MavenId mid = starters.getMavenId(id);
+			if (mid!=null) {
+				return findDependency(pom, mid);
+			}
+		} catch (Exception e) {
+			Log.log(e);
 		}
 		return null;
 	}
@@ -570,9 +575,9 @@ public class EditStartersModelTest {
 		}
 
 		@Override
-		public SpringBootStarters getStarters(String bootVersion) {
+		public SpringBootStarters getStarters(String bootVersion) throws Exception {
 			if (unavailable) {
-				return null;
+				throw new IOException("Initializr Service Unavailable");
 			} else if (starters!=null) {
 				return starters;
 			} else {

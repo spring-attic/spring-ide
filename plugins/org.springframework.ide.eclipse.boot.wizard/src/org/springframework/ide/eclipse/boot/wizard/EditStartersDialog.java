@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2016 Pivotal, Inc.
+ * Copyright (c) 2013, 2016-2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,22 +10,30 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
+import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.core.SpringBootCore;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
+import org.springframework.ide.eclipse.boot.livexp.ui.DynamicSection;
 import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
+import org.springsource.ide.eclipse.commons.livexp.ui.ChooseOneSectionCombo;
+import org.springsource.ide.eclipse.commons.livexp.ui.CommentSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.DialogWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.ExpandableSection;
+import org.springsource.ide.eclipse.commons.livexp.ui.GroupSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
+import org.springsource.ide.eclipse.commons.livexp.util.Parser;
+
+import com.google.common.collect.ImmutableList;
 
 /**
  * @author Kris De Volder
@@ -33,10 +41,11 @@ import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 public class EditStartersDialog extends DialogWithSections {
 
 	private static final int NUM_DEP_COLUMNS = 4;
-	public EditStartersModel model;
+	static final String NO_CONTENT_AVAILABLE = "No content available.";
+	public InitializrFactoryModel<EditStartersModel> model;
 	private DependencyFilterBox searchBoxModel;
 
-	public EditStartersDialog(EditStartersModel model, Shell shell) {
+	public EditStartersDialog(InitializrFactoryModel<EditStartersModel> model, Shell shell) {
 		super("Edit Spring Boot Starters", model, shell);
 		this.setShellStyle(SWT.RESIZE | getShellStyle());
 		this.model = model;
@@ -59,19 +68,33 @@ public class EditStartersDialog extends DialogWithSections {
 
 	@Override
 	protected List<WizardPageSection> createSections() throws CoreException {
-		//return super.createSections();
-		ArrayList<WizardPageSection> sections = new ArrayList<>();
+		ChooseOneSectionCombo<String> comboSection = new ChooseOneSectionCombo<>(this, model.getServiceUrlField(), model.getUrls());
+		comboSection.allowTextEdits(Parser.IDENTITY);
+
+		DynamicSection dynamicSection = new DynamicSection(this, model.getModel().apply((dynamicModel) -> {
+			if (dynamicModel != null) {
+				return createDynamicContents(dynamicModel);
+			}
+			return new CommentSection(this, NO_CONTENT_AVAILABLE);
+		} ));
+
+		return ImmutableList.of(comboSection, dynamicSection);
+	}
+
+	protected WizardPageSection createDynamicContents(EditStartersModel model) {
+
+		GroupSection sections = new GroupSection(EditStartersDialog.this, null);
 //		sections.add(new CommentSection(this, "Project: "+model.getProjectName()));
 
 		List<CheckBoxModel<Dependency>> mostpopular = model.getFrequentlyUsedDependencies(4*NUM_DEP_COLUMNS);
 		if (!mostpopular.isEmpty()) {
-			sections.add(new ExpandableSection(this, "Frequently Used",
-					new CheckBoxesSection<Dependency>(this, mostpopular)
+			sections.addSections(new ExpandableSection(this, "Frequently Used",
+					new CheckBoxesSection<>(this, mostpopular)
 						.columns(NUM_DEP_COLUMNS)
 			));
 		}
 
-		sections.add(new SearchBoxSection(this, searchBoxModel.getText()) {
+		sections.addSections(new SearchBoxSection(this, searchBoxModel.getText()) {
 			@Override
 			protected String getSearchHint() {
 				return "Type to search dependencies";
@@ -82,9 +105,9 @@ public class EditStartersDialog extends DialogWithSections {
 			MultiSelectionFieldModel<Dependency> dependencyGroup = model.dependencies.getContents(cat);
 			final ExpandableSection expandable;
 			final CheckBoxesSection<Dependency> checkboxes;
-			sections.add(
+			sections.addSections(
 				expandable = new ExpandableSection(this, dependencyGroup.getLabel(),
-						checkboxes = new CheckBoxesSection<Dependency>(this, dependencyGroup.getCheckBoxModels())
+						checkboxes = new CheckBoxesSection<>(this, dependencyGroup.getCheckBoxModels())
 							.columns(NUM_DEP_COLUMNS)
 				)
 			);
@@ -105,15 +128,19 @@ public class EditStartersDialog extends DialogWithSections {
 	}
 
 	public static int openFor(IProject selectedProject, Shell shell) throws Exception {
-		EditStartersModel model = new EditStartersModel(selectedProject);
-		String notSupported = model.getNotSupportedMessage();
-		if (notSupported==null) {
-			return new EditStartersDialog(model, shell).open();
-		}
-		MessageDialog.openError(shell, "Couldn't open the 'Edit Starters' dialog",
-				notSupported
-		);
-		return 0;
+		InitializrFactoryModel<EditStartersModel> fmodel = new InitializrFactoryModel<>((url) -> {
+			if (url!=null) {
+				InitializrService initializr = InitializrService.create(BootActivator.getUrlConnectionFactory(), url);
+				SpringBootCore core = new SpringBootCore(initializr);
+				return new EditStartersModel(
+						selectedProject,
+						core,
+						BootActivator.getDefault().getPreferenceStore()
+				);
+			}
+			return null;
+		});
+		return new EditStartersDialog(fmodel, shell).open();
 	}
 
 }

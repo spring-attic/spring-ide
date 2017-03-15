@@ -13,8 +13,11 @@ package org.springframework.ide.eclipse.boot.core.internal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.Assert;
 import org.springframework.ide.eclipse.boot.core.IMavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.MavenId;
@@ -27,13 +30,17 @@ public abstract class SpringBootProject implements ISpringBootProject {
 
 	static final List<SpringBootStarter> NO_STARTERS = Collections.emptyList();
 	private final InitializrService initializr;
+	protected final IProject project;
+	private CompletableFuture<SpringBootStarters> cachedStarterInfos;
 
-	public SpringBootProject(InitializrService initializr) {
+	public SpringBootProject(IProject project, InitializrService initializr) {
+		Assert.isNotNull(project);
+		this.project = project;
 		this.initializr = initializr;
 	}
 
 	@Override
-	public List<SpringBootStarter> getKnownStarters() {
+	public List<SpringBootStarter> getKnownStarters() throws Exception {
 		SpringBootStarters infos = getStarterInfos();
 		if (infos!=null) {
 			List<String> knownIds = infos.getStarterIds();
@@ -48,20 +55,34 @@ public abstract class SpringBootProject implements ISpringBootProject {
 	}
 
 	@Override
-	public SpringBootStarters getStarterInfos() {
-		try {
-			String bootVersion = getBootVersion();
-			if (bootVersion!=null) {
-				return initializr.getStarters(bootVersion);
+	public SpringBootStarters getStarterInfos() throws Exception {
+		boolean firstAccess = false;
+		synchronized (this) {
+			if (cachedStarterInfos==null) {
+				firstAccess = true;
+				cachedStarterInfos = new CompletableFuture<>();
 			}
-		} catch (Exception e) {
-			Log.log(e);
 		}
-		return null;
+		if (firstAccess) {
+			try {
+				cachedStarterInfos.complete(fetchStarterInfos());
+			} catch (Throwable e) {
+				cachedStarterInfos.completeExceptionally(e);
+			}
+		}
+		return cachedStarterInfos.get();
+	}
+
+	private SpringBootStarters fetchStarterInfos() throws Exception {
+		String bootVersion = getBootVersion();
+		if (bootVersion!=null) {
+			return initializr.getStarters(bootVersion);
+		}
+		throw new IllegalStateException("Couldn't determine boot version for '"+project.getName()+"'");
 	}
 
 	@Override
-	public List<SpringBootStarter> getBootStarters() throws CoreException {
+	public List<SpringBootStarter> getBootStarters() throws Exception {
 		SpringBootStarters infos = getStarterInfos();
 		List<IMavenCoordinates> deps = getDependencies();
 		ArrayList<SpringBootStarter> starters = new ArrayList<>();
@@ -84,11 +105,15 @@ public abstract class SpringBootProject implements ISpringBootProject {
 	}
 
 	protected SpringBootStarter getStarter(MavenId mavenId) {
-		SpringBootStarters infos = getStarterInfos();
-		if (infos!=null) {
-			return infos.getStarter(mavenId);
+		try {
+			SpringBootStarters infos = getStarterInfos();
+			if (infos!=null) {
+				return infos.getStarter(mavenId);
+			}
+		} catch (Exception e) {
+			Log.log(e);
 		}
 		return null;
 	}
-	
+
 }

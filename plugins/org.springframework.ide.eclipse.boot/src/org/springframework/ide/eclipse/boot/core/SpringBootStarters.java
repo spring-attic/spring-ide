@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.core;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.eclipse.core.runtime.Platform;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrDependencySpec;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrDependencySpec.BomInfo;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrDependencySpec.DependencyInfo;
@@ -35,6 +37,8 @@ import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLC
  */
 public class SpringBootStarters {
 
+	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+
 	private InitializrDependencySpec dependencySpec;
 	private InitializrServiceSpec initializrSpec;
 	private HashMap<String, SpringBootStarter> byId;
@@ -45,11 +49,18 @@ public class SpringBootStarters {
 		this.initializrSpec = initializrSpec;
 	}
 
-	public SpringBootStarters(URL initializerUrl, URL dependencyUrl, URLConnectionFactory urlConnectionFactory) throws Exception {
-		this(
+	public static SpringBootStarters load(URL initializerUrl, URL dependencyUrl, URLConnectionFactory urlConnectionFactory) throws Exception {
+		debug("Loading spring boot starters from: "+dependencyUrl);
+		return new SpringBootStarters(
 				InitializrServiceSpec.parseFrom(urlConnectionFactory, initializerUrl),
 				InitializrDependencySpec.parseFrom(urlConnectionFactory, dependencyUrl)
 		);
+	}
+
+	private static void debug(String string) {
+		if (DEBUG) {
+			System.out.println(string);
+		}
 	}
 
 	public DependencyGroup[] getDependencyGroups() {

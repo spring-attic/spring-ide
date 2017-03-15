@@ -35,9 +35,9 @@ public  class MultipleViewsDependencyPage extends WizardPageWithSections {
 
 	private CheckBoxesSection<Dependency> frequentlyUsedCheckboxes;
 
-	protected final NewSpringBootWizardFactoryModel factoryModel;
+	protected final InitializrFactoryModel<NewSpringBootWizardModel> factoryModel;
 
-	protected MultipleViewsDependencyPage(NewSpringBootWizardFactoryModel factoryModel) {
+	protected MultipleViewsDependencyPage(InitializrFactoryModel<NewSpringBootWizardModel> factoryModel) {
 		super("page2", "New Spring Starter Project Dependencies", null);
 		this.factoryModel = factoryModel;
 	}
@@ -57,11 +57,11 @@ public  class MultipleViewsDependencyPage extends WizardPageWithSections {
 				return createDynamicSections(dynamicModel);
 			}
 			return new CommentSection(this, NewSpringBootWizard.NO_CONTENT_AVAILABLE);
-		} ));	
+		} ));
 
 		return ImmutableList.of(dynamicSection);
 	}
-	
+
 	protected WizardPageSection createDynamicSections(NewSpringBootWizardModel model) {
 		List<WizardPageSection> sections = new ArrayList<>();
 
@@ -79,17 +79,17 @@ public  class MultipleViewsDependencyPage extends WizardPageWithSections {
 	}
 
 	public WizardCompositeSection createTwoColumnSection(final NewSpringBootWizardModel model) {
-		return new WizardCompositeSection(this, 
-				new WizardCompositeSection(this, 
+		return new WizardCompositeSection(this,
+				new WizardCompositeSection(this,
 						new CommentSection(this, "Available:"),
 						getSearchSection(model),
-						new WizardGroupSection(this, null, 
+						new WizardGroupSection(this, null,
 								new FilteredDependenciesSection(this, model, model.getDependencyFilter())
 								.sizeHint(DEPENDENCY_SECTION_SIZE)
 								)),
-				new WizardCompositeSection(this, 
+				new WizardCompositeSection(this,
 						new CommentSection(this, "Selected:"),
-						new WizardGroupSection(this, null, 
+						new WizardGroupSection(this, null,
 								new SelectedDependenciesSection(this, model)
 								.sizeHint(DEPENDENCY_SECTION_SIZE)
 								),
@@ -122,9 +122,9 @@ public  class MultipleViewsDependencyPage extends WizardPageWithSections {
 	protected WizardPageSection createFrequentlyUsedSection(NewSpringBootWizardModel model) {
 		List<CheckBoxModel<Dependency>> frequentDependencies = model.getFrequentlyUsedDependencies(MAX_MOST_POPULAR);
 		frequentlyUsedCheckboxes = new CheckBoxesSection<>(this, frequentDependencies).columns(NUM_COLUMNS_FREQUENTLY_USED);
-		GroupSection frequentlyUsedSection = new GroupSection(this, 
+		GroupSection frequentlyUsedSection = new GroupSection(this,
 				null,
-				new CommentSection(this, "Frequently Used:"), 
+				new CommentSection(this, "Frequently Used:"),
 				new WizardGroupSection(this, null, frequentlyUsedCheckboxes));
 		frequentlyUsedSection.isVisible.setValue(!frequentDependencies.isEmpty());
 		return frequentlyUsedSection;

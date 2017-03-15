@@ -41,7 +41,7 @@ public interface ISpringBootProject {
 	 * from something like a pom.xml and the info that is listed there may also be incomplete.
 	 * @throws CoreException
 	 */
-	public List<IMavenCoordinates> getDependencies() throws CoreException;
+	public List<IMavenCoordinates> getDependencies() throws Exception;
 
 	/**
 	 * @return Infos about the known spring boot starters. These are 'discovered' by querying
@@ -49,7 +49,7 @@ public interface ISpringBootProject {
 	 *
 	 * TODO: if we have this, do we still need 'getKnownStarters' method?
 	 */
-	public SpringBootStarters getStarterInfos();
+	public SpringBootStarters getStarterInfos() throws Exception;
 
 	/**
 	 * @return Infos about the known spring boot starters. These are 'discovered' by querying
@@ -57,20 +57,21 @@ public interface ISpringBootProject {
 	 *
 	 * @throws CoreException
 	 */
-	public List<SpringBootStarter> getKnownStarters() throws CoreException;
+	public List<SpringBootStarter> getKnownStarters() throws Exception;
 
 	/**
 	 * Gets a list of bootstarters that are currently applied to the project.
 	 * @throws CoreException
+	 * @throws Exception
 	 */
-	public List<SpringBootStarter> getBootStarters() throws CoreException;
+	public List<SpringBootStarter> getBootStarters() throws Exception;
 
 	/**
 	 * Modify project classpath adding and/or removing starters to make them match the given
 	 * set of starters. Note that versions of starters are generally ignored by this operation.
 	 * @throws CoreException
 	 */
-	public void setStarters(Collection<SpringBootStarter> values) throws CoreException;
+	public void setStarters(Collection<SpringBootStarter> values) throws Exception;
 
 	/**
 	 * Modify project's classpath to add a given maven style dependency.
@@ -78,7 +79,7 @@ public interface ISpringBootProject {
 	 * for a maven project it will be added to the project's pom file in the
 	 * dependencies section.
 	 */
-	public void addMavenDependency(IMavenCoordinates dep, boolean preferManagedVersion) throws CoreException;
+	public void addMavenDependency(IMavenCoordinates dep, boolean preferManagedVersion) throws Exception;
 
 	/**
 	 * @since 3.7.0

@@ -123,12 +123,8 @@ public class MavenSpringBootProject extends SpringBootProject {
 
 	private static final String ENABLED = "enabled";
 
-	private IProject project;
-
 	public MavenSpringBootProject(IProject project, InitializrService initializr) {
-		super(initializr);
-		Assert.isNotNull(project);
-		this.project = project;
+		super(project, initializr);
 	}
 
 	@Override
