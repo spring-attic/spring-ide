@@ -258,17 +258,12 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 	}
 
 	void updateElementsFromWorkspace() {
-		try {
-			bootAppsRefreshState.setValue(RefreshState.loading("Loading Workspace Boot Apps..."));
-			Set<BootProjectDashElement> newElements = Arrays.stream(this.workspace.getRoot().getProjects())
-					.map(projectElementFactory::createOrGet)
-					.filter(Objects::nonNull)
-					.collect(Collectors.toSet());
-				applications.replaceAll(newElements);
-				projectElementFactory.disposeAllExcept(newElements);
-		} finally {
-			bootAppsRefreshState.setValue(RefreshState.READY);
-		}
+		Set<BootProjectDashElement> newElements = Arrays.stream(this.workspace.getRoot().getProjects())
+				.map(projectElementFactory::createOrGet)
+				.filter(Objects::nonNull)
+				.collect(Collectors.toSet());
+		applications.replaceAll(newElements);
+		projectElementFactory.disposeAllExcept(newElements);
 	}
 
 	public synchronized ObservableSet<BootDashElement> getElements() {
