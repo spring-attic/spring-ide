@@ -86,13 +86,18 @@ public  class MultipleViewsDependencyPage extends WizardPageWithSections {
 								.sizeHint(DEPENDENCY_SECTION_SIZE)
 							)
 							.grabVertical(true)
-						).grabVertical(true),
+							.noMargins(true)
+						)
+						.grabVertical(true)
+						.noMargins(true),
 				new GroupSection(this, null,
 						new CommentSection(this, "Selected:"),
 						new GroupSection(this, "",
 								new SelectedDependenciesSection(this, model)
 								.sizeHint(DEPENDENCY_SECTION_SIZE)
-							).grabVertical(true),
+							)
+							.grabVertical(true)
+							.noMargins(true),
 						new MakeDefaultSection(this, () -> {
 							if (model.saveDefaultDependencies()) {
 								refreshFrequentlyUsedDependencies(model);
