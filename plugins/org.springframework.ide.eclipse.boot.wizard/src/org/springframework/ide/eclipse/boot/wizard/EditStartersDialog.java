@@ -91,7 +91,9 @@ public class EditStartersDialog extends DialogWithSections {
 						new GroupSection(owner, "",
 							new FilteredDependenciesSection(owner, model.dependencies, model.searchBox.getFilter())
 							.sizeHint(DEPENDENCY_SECTION_SIZE)
-						).grabVertical(true)
+						)
+						.noMargins(true)
+						.grabVertical(true)
 					).grabVertical(true),
 					//Column 2:
 					new GroupSection(owner, null,
@@ -99,7 +101,9 @@ public class EditStartersDialog extends DialogWithSections {
 						new GroupSection(owner, "",
 							new SelectedDependenciesSection(owner, model.dependencies)
 							.sizeHint(DEPENDENCY_SECTION_SIZE)
-						).grabVertical(true)
+						)
+						.noMargins(true)
+						.grabVertical(true)
 					).grabVertical(true)
 				)
 				.grabVertical(true)
