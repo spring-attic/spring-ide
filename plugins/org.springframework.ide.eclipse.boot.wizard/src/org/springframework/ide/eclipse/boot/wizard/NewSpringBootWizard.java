@@ -161,7 +161,8 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 		@Override
 		protected List<WizardPageSection> createSections() {
 
-			ChooseOneSectionCombo<String> comboSection = new ChooseOneSectionCombo<>(this, model.getServiceUrlField(), model.getUrls());
+			ChooseOneSectionCombo<String> comboSection = new ChooseOneSectionCombo<>(this, model.getServiceUrlField(), model.getUrls())
+					.grabHorizontal(true);
 			comboSection.allowTextEdits(Parser.IDENTITY);
 
 			// Note: have to set the project page in the dynamic section because the dynamic section composite

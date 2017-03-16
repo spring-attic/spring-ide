@@ -55,7 +55,7 @@ public class EditStartersDialog extends DialogWithSections {
 
 	@Override
 	protected List<WizardPageSection> createSections() throws CoreException {
-		ChooseOneSectionCombo<String> comboSection = new ChooseOneSectionCombo<>(this, model.getServiceUrlField(), model.getUrls());
+		ChooseOneSectionCombo<String> comboSection = new ChooseOneSectionCombo<>(this, model.getServiceUrlField(), model.getUrls()).grabHorizontal(true);
 		comboSection.allowTextEdits(Parser.IDENTITY);
 
 		DynamicSection dynamicSection = new DynamicSection(this, model.getModel().apply((dynamicModel) -> {
