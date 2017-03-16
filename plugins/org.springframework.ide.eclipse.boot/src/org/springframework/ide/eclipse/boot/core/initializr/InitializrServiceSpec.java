@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2016 GoPivotal, Inc.
+ * Copyright (c) 2014, 2017 GoPivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -99,7 +99,8 @@ public class InitializrServiceSpec {
 		private String id;
 		private String description;
 		private String versionRange;
-
+		private Links links;
+		
 		public String getId() {
 			return id;
 		}
@@ -122,6 +123,14 @@ public class InitializrServiceSpec {
 			this.description = description;
 		}
 
+		public Links getLinks() {
+			return links;
+		}
+
+		public void setLinks(Links links) {
+			this.links = links;
+		}
+
 		public static Dependency[] from(JSONArray values) throws JSONException {
 			Dependency[] deps = new Dependency[values.length()];
 			for (int i = 0; i < deps.length; i++) {
@@ -131,10 +140,14 @@ public class InitializrServiceSpec {
 				deps[i].setName(obj.optString("name"));
 				deps[i].setDescription(obj.optString("description"));
 				deps[i].setVersionRange(obj.optString("versionRange"));
+				JSONObject linksObject = obj.optJSONObject("_links");
+				if (linksObject != null) {
+					deps[i].setLinks(Links.from(linksObject));
+				}
 			}
 			return deps;
 		}
-
+		
 		public void setVersionRange(String range) {
 			this.versionRange = range;
 		}
@@ -165,7 +178,79 @@ public class InitializrServiceSpec {
 			return true;
 		}
 	}
-
+	
+	public static class Links {
+		private Link[] guides = new Link[0];
+		private Link[] references = new Link[0];
+		public Link[] getGuides() {
+			return guides;
+		}
+		public void setGuides(Link[] guides) {
+			this.guides = guides;
+		}
+		public Link[] getReferences() {
+			return references;
+		}
+		public void setReferences(Link[] references) {
+			this.references = references;
+		}
+		public static Links from(JSONObject json) throws JSONException {
+			Links links = new Links();
+			Object guidesObj = json.opt("guide");
+			if (guidesObj instanceof JSONArray) {
+				links.setGuides(Link.from((JSONArray)guidesObj));
+			} else if (guidesObj instanceof JSONObject) {
+				links.setGuides(new Link[] {Link.from((JSONObject)guidesObj)});
+			}
+			Object refsObj = json.opt("reference");
+			if (refsObj instanceof JSONArray) {
+				links.setReferences(Link.from((JSONArray)refsObj));
+			} else if (refsObj instanceof JSONObject) {
+				links.setReferences(new Link[] {Link.from((JSONObject)refsObj)});
+			}
+			return links;
+		}
+	}
+	
+	public static class Link {
+		private String href;
+		private String title;
+		private boolean templated;
+		public String getHref() {
+			return href;
+		}
+		public void setHref(String href) {
+			this.href = href;
+		}
+		public String getTitle() {
+			return title;
+		}
+		public void setTitle(String description) {
+			this.title = description;
+		}
+		public boolean isTemplated() {
+			return templated;
+		}
+		public void setTemplated(boolean templated) {
+			this.templated = templated;
+		}
+		public static Link[] from(JSONArray values) throws JSONException{
+			Link[] links = new Link[values.length()];
+			for (int i = 0; i < values.length(); i++) {
+				JSONObject obj = values.getJSONObject(i);
+				links[i] = from(obj);
+			}
+			return links;
+		}
+		public static Link from(JSONObject obj) throws JSONException{
+			Link link = new Link();
+			link.setHref(obj.optString("href", null));
+			link.setTitle(obj.optString("title", null));
+			link.setTemplated(obj.optBoolean("templated", false));
+			return link;
+		}		
+	}
+	
 	public static class DependencyGroup extends Nameable {
 
 		private Dependency[] content;
@@ -204,6 +289,7 @@ public class InitializrServiceSpec {
 
 	/////////////////////////////////////////////////////////////////
 
+	@SuppressWarnings("unchecked")
 	public Map<String, String> getTextInputs() throws JSONException {
 		Map<String,String> defaults = new HashMap<>();
 		Iterator<String> props = data.keys();
