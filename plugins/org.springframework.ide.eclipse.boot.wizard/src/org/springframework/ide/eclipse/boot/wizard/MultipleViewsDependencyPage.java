@@ -75,37 +75,31 @@ public  class MultipleViewsDependencyPage extends WizardPageWithSections {
 
 		sections.add(createFrequentlyUsedSection(model));
 		sections.add(createTwoColumnSection(model));
-		return new WizardCompositeSection(this, sections.toArray(new WizardPageSection[0]));
+		return new GroupSection(this, null, sections.toArray(new WizardPageSection[0])).grabVertical(true);
 	}
 
-	public WizardCompositeSection createTwoColumnSection(final NewSpringBootWizardModel model) {
-		return new WizardCompositeSection(this,
-				new WizardCompositeSection(this,
+	public WizardPageSection createTwoColumnSection(final NewSpringBootWizardModel model) {
+		return new GroupSection(this,null,
+				new GroupSection(this, null,
 						new CommentSection(this, "Available:"),
 						getSearchSection(model),
-						new WizardGroupSection(this, null,
+						new GroupSection(this, "",
 								new FilteredDependenciesSection(this, model, model.getDependencyFilter())
 								.sizeHint(DEPENDENCY_SECTION_SIZE)
-								)),
-				new WizardCompositeSection(this,
+								).grabVertical(true)).grabVertical(true),
+				new GroupSection(this, null,
 						new CommentSection(this, "Selected:"),
-						new WizardGroupSection(this, null,
+						new GroupSection(this, "",
 								new SelectedDependenciesSection(this, model)
 								.sizeHint(DEPENDENCY_SECTION_SIZE)
-								),
+								).grabVertical(true),
 						new MakeDefaultSection(this, () -> {
 							if (model.saveDefaultDependencies()) {
 								refreshFrequentlyUsedDependencies(model);
 							}
 						}, () -> {
 							model.dependencies.clearSelection();
-						}))) {
-			@Override
-			protected void applyLayout(Composite composite) {
-				GridLayoutFactory.fillDefaults().numColumns(2).equalWidth(true)
-						.applyTo(composite);
-			}
-		};
+						}))).columns(2, true).grabVertical(true);
 	}
 
 	protected WizardPageSection getSearchSection(final NewSpringBootWizardModel model) {
@@ -125,7 +119,7 @@ public  class MultipleViewsDependencyPage extends WizardPageWithSections {
 		GroupSection frequentlyUsedSection = new GroupSection(this,
 				null,
 				new CommentSection(this, "Frequently Used:"),
-				new WizardGroupSection(this, null, frequentlyUsedCheckboxes));
+				new GroupSection(this, "", frequentlyUsedCheckboxes));
 		frequentlyUsedSection.isVisible.setValue(!frequentDependencies.isEmpty());
 		return frequentlyUsedSection;
 	}
