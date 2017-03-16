@@ -86,20 +86,26 @@ public  class MultipleViewsDependencyPage extends WizardPageWithSections {
 						new GroupSection(this, "",
 								new FilteredDependenciesSection(this, model, model.getDependencyFilter())
 								.sizeHint(DEPENDENCY_SECTION_SIZE)
-								).grabVertical(true)).grabVertical(true),
+							)
+							.grabVertical(true)
+						).grabVertical(true),
 				new GroupSection(this, null,
 						new CommentSection(this, "Selected:"),
 						new GroupSection(this, "",
 								new SelectedDependenciesSection(this, model)
 								.sizeHint(DEPENDENCY_SECTION_SIZE)
-								).grabVertical(true),
+							).grabVertical(true),
 						new MakeDefaultSection(this, () -> {
 							if (model.saveDefaultDependencies()) {
 								refreshFrequentlyUsedDependencies(model);
 							}
 						}, () -> {
 							model.dependencies.clearSelection();
-						}))).columns(2, true).grabVertical(true);
+						})
+					)
+				)
+				.columns(2, true)
+				.grabVertical(true);
 	}
 
 	protected WizardPageSection getSearchSection(final NewSpringBootWizardModel model) {
