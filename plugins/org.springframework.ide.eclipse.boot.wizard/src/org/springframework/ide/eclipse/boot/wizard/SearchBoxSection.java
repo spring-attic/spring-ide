@@ -15,6 +15,8 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -75,7 +77,15 @@ public class SearchBoxSection extends WizardPageSection implements Disposable {
 			}
 		});
 		if (grabFocus) {
-			searchBox.setFocus();
+			if (!searchBox.setFocus()) {
+				searchBox.addPaintListener(new PaintListener() {
+					@Override
+					public void paintControl(PaintEvent e) {
+						searchBox.setFocus();
+						searchBox.removePaintListener(this);
+					}
+				});
+			}
 		}
 //		IContentProposalProvider proposalProvider = new TagContentProposalProvider(viewModel);
 //		ContentProposalAdapter caAdapter = new ContentProposalAdapter(searchBox, new TextContentAdapter(), proposalProvider, UIUtils.CTRL_SPACE, null);

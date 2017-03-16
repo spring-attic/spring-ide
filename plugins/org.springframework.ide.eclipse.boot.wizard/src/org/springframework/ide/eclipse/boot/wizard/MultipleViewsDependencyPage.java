@@ -115,7 +115,7 @@ public  class MultipleViewsDependencyPage extends WizardPageWithSections {
 						protected String getSearchHint() {
 							return "Type to search dependencies";
 						}
-				}
+				}.grabFocus(true)
 		);
 	}
 
