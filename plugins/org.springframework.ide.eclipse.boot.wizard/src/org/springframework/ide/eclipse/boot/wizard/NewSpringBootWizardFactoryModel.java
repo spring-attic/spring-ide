@@ -11,16 +11,8 @@
 package org.springframework.ide.eclipse.boot.wizard;
 
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.springframework.ide.eclipse.boot.core.BootActivator;
-import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.util.StringUtils;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
-import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
-import org.springsource.ide.eclipse.commons.livexp.core.StringFieldModel;
-import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
-import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 /**
  * A 'FactoryModelModel' for NewSpringBootWizardModel. I.e. this is a model for the NewSpringBootWizard

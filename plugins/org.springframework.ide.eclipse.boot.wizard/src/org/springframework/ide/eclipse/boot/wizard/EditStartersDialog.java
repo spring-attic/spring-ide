@@ -15,9 +15,7 @@ import java.util.List;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
@@ -25,14 +23,11 @@ import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.boot.livexp.ui.DynamicSection;
 import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.ui.ChooseOneSectionCombo;
 import org.springsource.ide.eclipse.commons.livexp.ui.CommentSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.DialogWithSections;
-import org.springsource.ide.eclipse.commons.livexp.ui.ExpandableSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.GroupSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
-import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 import org.springsource.ide.eclipse.commons.livexp.util.Parser;
 
 import com.google.common.collect.ImmutableList;
@@ -42,10 +37,12 @@ import com.google.common.collect.ImmutableList;
  */
 public class EditStartersDialog extends DialogWithSections {
 
-	private static final int NUM_DEP_COLUMNS = 4;
+	private static final int NUM_DEP_COLUMNS = 3;
 	private static final Point DEPENDENCY_SECTION_SIZE = new Point(SWT.DEFAULT, 300);
 	static final String NO_CONTENT_AVAILABLE = "No content available.";
 	public InitializrFactoryModel<EditStartersModel> model;
+	private boolean firstSearchBox = true; //becomes false after the searchBox is created first time.
+	private long openingTime;
 
 	public EditStartersDialog(InitializrFactoryModel<EditStartersModel> model, Shell shell) {
 		super("Edit Spring Boot Starters", model, shell);
@@ -55,6 +52,7 @@ public class EditStartersDialog extends DialogWithSections {
 
 	@Override
 	protected List<WizardPageSection> createSections() throws CoreException {
+		openingTime = System.currentTimeMillis();
 		ChooseOneSectionCombo<String> comboSection = new ChooseOneSectionCombo<>(this, model.getServiceUrlField(), model.getUrls()).grabHorizontal(true);
 		comboSection.allowTextEdits(Parser.IDENTITY);
 
@@ -69,7 +67,6 @@ public class EditStartersDialog extends DialogWithSections {
 	}
 
 	protected WizardPageSection createDynamicContents(EditStartersModel model) {
-
 		EditStartersDialog owner = EditStartersDialog.this;
 		GroupSection sections = new GroupSection(owner, null)
 				.grabVertical(true);
@@ -129,7 +126,24 @@ public class EditStartersDialog extends DialogWithSections {
 			protected String getSearchHint() {
 				return "Type to search dependencies";
 			}
-		};
+		}
+		.grabFocus(searchBoxShouldGrabFocus());
+	}
+
+	private boolean searchBoxShouldGrabFocus() {
+		System.out.println("firstSeachBox = "+this.firstSearchBox);
+		try {
+			return this.firstSearchBox && isCloseToOpeningTime();
+		} finally {
+			this.firstSearchBox = false;
+		}
+	}
+
+	private boolean isCloseToOpeningTime() {
+		System.out.println("openingTime = "+openingTime);
+		long age = System.currentTimeMillis() - openingTime;
+		System.out.println("age = "+age);
+		return age < 3000;
 	}
 
 	public static int openFor(IProject selectedProject, Shell shell) throws Exception {

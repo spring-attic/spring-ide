@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard;
 
+import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -36,6 +37,7 @@ public class SearchBoxSection extends WizardPageSection implements Disposable {
 	private Text searchBox;
 	private LiveVariable<String> model;
 	private ValueListener<String> modelListener;
+	private boolean grabFocus;
 
 	public SearchBoxSection(IPageWithSections owner, LiveVariable<String> model) {
 		super(owner);
@@ -72,11 +74,12 @@ public class SearchBoxSection extends WizardPageSection implements Disposable {
 				}
 			}
 		});
-
+		if (grabFocus) {
+			searchBox.setFocus();
+		}
 //		IContentProposalProvider proposalProvider = new TagContentProposalProvider(viewModel);
 //		ContentProposalAdapter caAdapter = new ContentProposalAdapter(searchBox, new TextContentAdapter(), proposalProvider, UIUtils.CTRL_SPACE, null);
 //		caAdapter.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_REPLACE);
-
 	}
 
 	protected String getSearchHint() {
@@ -90,6 +93,15 @@ public class SearchBoxSection extends WizardPageSection implements Disposable {
 			modelListener = null;
 		}
 		searchBox.dispose();
+	}
+
+	/**
+	 * When the control for this section is created, it will attempt to immediately grab
+	 * keyboard focus.
+	 */
+	public SearchBoxSection grabFocus(boolean grab) {
+		this.grabFocus = grab;
+		return this;
 	}
 
 }
