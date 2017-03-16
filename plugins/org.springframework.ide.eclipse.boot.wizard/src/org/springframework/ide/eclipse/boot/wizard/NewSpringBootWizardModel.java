@@ -480,7 +480,11 @@ public class NewSpringBootWizardModel {
 		for (DependencyGroup dgroup : serviceSpec.getDependencies()) {
 			String catName = dgroup.getName();
 			for (Dependency dep : dgroup.getContent()) {
-				dependencies.choice(catName, dep.getName(), dep, dep.getDescription(), createEnablementExp(bootVersion, dep));
+				dependencies.choice(catName, dep.getName(), dep, /*dep.getDescription(),*/ () -> {
+					Map<String, String> variables = new HashMap<>();
+					variables.put("bootVersion", bootVersion.getSelection().selection.getValue().getValue());
+					return DependencyHtmlContent.generateHtmlTooltip(dep, variables);
+				}, createEnablementExp(bootVersion, dep));
 			}
 		}
 	}

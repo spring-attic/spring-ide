@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard;
 
+import java.util.function.Supplier;
+
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.StyledString;
@@ -22,6 +24,7 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.MouseTrackListener;
 import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -127,9 +130,11 @@ public class SelectedButtonSection<T> extends WizardPageSection {
 				.applyTo(label);
 
 		label.setText(model.getLabel());
-		String tooltip = model.getTooltip();
+		Supplier<String> tooltip = model.getTooltip();
 		if (tooltip != null) {
-			label.setToolTipText(tooltip);
+			HtmlTooltip htmlTooltip = new HtmlTooltip(label);
+			htmlTooltip.setShift(new Point(0, 0));
+			htmlTooltip.setHtml(tooltip);
 		}
 		
 		xButton.addDisposeListener(new DisposeListener() {

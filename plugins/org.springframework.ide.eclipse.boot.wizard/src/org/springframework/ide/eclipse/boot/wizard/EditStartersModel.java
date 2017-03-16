@@ -13,9 +13,11 @@ package org.springframework.ide.eclipse.boot.wizard;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
@@ -129,9 +131,11 @@ public class EditStartersModel implements OkButtonHandler {
 		if (starters!=null) {
 			for (DependencyGroup dgroup : starters.getDependencyGroups()) {
 				String catName = dgroup.getName();
+				Map<String, String> variables = new HashMap<>();
+				variables.put("bootVersion", starters.getBootVersion());
 				for (Dependency dep : dgroup.getContent()) {
 					if (starters.contains(dep.getId())) {
-						dependencies.choice(catName, dep.getName(), dep, dep.getDescription(), LiveExpression.constant(true));
+						dependencies.choice(catName, dep.getName(), dep, /*dep.getDescription()*/() -> DependencyHtmlContent.generateHtmlTooltip(dep, variables), LiveExpression.constant(true));
 						MavenId mavenId = starters.getMavenId(dep.getId());
 						boolean selected = activeStarters.contains(mavenId);
 						if (selected) {
@@ -142,6 +146,7 @@ public class EditStartersModel implements OkButtonHandler {
 				}
 			}
 		}
+		
 	}
 
 	private Set<MavenId> getActiveStarters() throws Exception {

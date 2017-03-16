@@ -27,7 +27,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.m2e.core,
  org.eclipse.m2e.maven.runtime,
  org.springsource.ide.eclipse.commons.frameworks.ui,
- org.eclipse.ui.forms
+ org.eclipse.ui.forms,
+ org.eclipse.jface.text
 Import-Package: org.springframework.http;version="[4.0.0,4.4.0)",
  org.springframework.util;version="[4.0.0,4.4.0)",
  org.springframework.http.client;version="[4.0.0,4.4.0)",

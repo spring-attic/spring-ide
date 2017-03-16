@@ -11,12 +11,14 @@
 package org.springframework.ide.eclipse.boot.wizard;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -49,7 +51,8 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 		private final LiveVariable<Boolean> selection;
 		private final LiveExpression<Boolean> enablement;
 		private final T value;
-		private String tooltip = null; //optional tooltip
+		private Supplier<String> tooltip = () -> null; //optional tooltip
+//		private String htmlTooltip = null;
 		public CheckBoxModel(String label, T value, LiveVariable<Boolean> selection, LiveExpression<Boolean> enablement) {
 			this.label = label;
 			this.value = value;
@@ -65,12 +68,18 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 		public LiveExpression<Boolean> getEnablement() {
 			return enablement;
 		}
-		public String getTooltip() {
+		public Supplier<String> getTooltip() {
 			return tooltip;
 		}
-		public void setTooltip(String tooltip) {
+		public void setTooltip(Supplier<String> tooltip) {
 			this.tooltip = tooltip;
 		}
+//		public String getHtmlTooltip() {
+//			return htmlTooltip;
+//		}
+//		public void setHtmlTooltip(String htmlTooltip) {
+//			this.htmlTooltip = htmlTooltip;
+//		}
 		public T getValue() {
 			return value;
 		}
@@ -79,7 +88,7 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 			return "CheckBox("+label+", "+getSelection().getValue()+")" ;
 		}
 	}
-
+	
 	private List<CheckBoxModel<T>> model;
 	private Composite composite;
 	private WizardPageSection[] subsections;
@@ -105,6 +114,7 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 	private static class CheckBox<T> extends WizardPageSection {
 
 		private Button cb;
+		private HtmlTooltip tooltip;
 		private CheckBoxModel<T> model;
 		private LiveVariable<Boolean> isVisible = new LiveVariable<Boolean>(true);
 		private ValueListener<Boolean> selectionListener;
@@ -125,10 +135,13 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 			if (page!=null && !page.isDisposed()) {
 				this.cb = new Button(page, SWT.CHECK);
 				cb.setText(model.getLabel());
-				String tooltip = model.getTooltip();
-				if (tooltip!=null) {
-					cb.setToolTipText(tooltip);
-				}
+				this.tooltip = new HtmlTooltip(cb);
+				this.tooltip.setShift(new Point(0, 0));
+//				Supplier<String> tooltipText = model.getTooltip();
+//				if (tooltipText!=null) {
+//					cb.setToolTipText(tooltip);
+					this.tooltip.setHtml(model.getTooltip());
+//				}
 				model.getSelection().addListener(selectionListener = new ValueListener<Boolean>() {
 					public void gotValue(LiveExpression<Boolean> exp, Boolean value) {
 						// note: checkbox button may be null in cases where the
@@ -137,6 +150,12 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 						if (value!=null && cb != null && !cb.isDisposed()) {
 							cb.setSelection(value);
 						}
+//						if (value.booleanValue()) {
+//							Rectangle r = cb.getBounds();
+//							tooltip.show(new Point(r.x, r.y + r.height));
+//						} else {
+//							tooltip.hide();
+//						}
 					}
 				});
 				GridDataFactory.fillDefaults().grab(true, false).applyTo(cb);
