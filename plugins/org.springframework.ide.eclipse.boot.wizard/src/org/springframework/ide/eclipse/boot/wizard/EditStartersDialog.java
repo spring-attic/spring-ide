@@ -10,14 +10,14 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard;
 
-import static org.springframework.ide.eclipse.boot.livexp.ui.DynamicSection.DEFAULT_MIN_SIZE;
-
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
@@ -25,8 +25,7 @@ import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.boot.livexp.ui.DynamicSection;
 import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.ui.ChooseOneSectionCombo;
 import org.springsource.ide.eclipse.commons.livexp.ui.CommentSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.DialogWithSections;
@@ -44,6 +43,7 @@ import com.google.common.collect.ImmutableList;
 public class EditStartersDialog extends DialogWithSections {
 
 	private static final int NUM_DEP_COLUMNS = 4;
+	private static final Point DEPENDENCY_SECTION_SIZE = new Point(SWT.DEFAULT, 300);
 	static final String NO_CONTENT_AVAILABLE = "No content available.";
 	public InitializrFactoryModel<EditStartersModel> model;
 
@@ -51,20 +51,6 @@ public class EditStartersDialog extends DialogWithSections {
 		super("Edit Spring Boot Starters", model, shell);
 		this.setShellStyle(SWT.RESIZE | getShellStyle());
 		this.model = model;
-	}
-
-	private void applyFilter(Filter<Dependency> filter, ExpandableSection expandable, CheckBoxesSection<Dependency> checkboxes) {
-		boolean visChanged = checkboxes.applyFilter(filter);
-
-		if (checkboxes.isCreated()) {
-			boolean hasVisible = checkboxes.hasVisible();
-			expandable.setVisible(hasVisible);
-			if (hasVisible && visChanged) {
-				//Reveal if visibility changed
-				expandable.getExpansionState().setValue(true);
-				this.reflow();
-			}
-		}
 	}
 
 	@Override
@@ -78,55 +64,68 @@ public class EditStartersDialog extends DialogWithSections {
 			}
 			return new CommentSection(this, NO_CONTENT_AVAILABLE);
 		} ));
-		dynamicSection.setHeightHint(null);
 
 		return ImmutableList.of(comboSection, dynamicSection);
 	}
 
 	protected WizardPageSection createDynamicContents(EditStartersModel model) {
 
-		GroupSection sections = new GroupSection(EditStartersDialog.this, null);
+		EditStartersDialog owner = EditStartersDialog.this;
+		GroupSection sections = new GroupSection(owner, null)
+				.grabVertical(true);
 //		sections.add(new CommentSection(this, "Project: "+model.getProjectName()));
 
 		List<CheckBoxModel<Dependency>> mostpopular = model.getFrequentlyUsedDependencies(4*NUM_DEP_COLUMNS);
 		if (!mostpopular.isEmpty()) {
-			sections.addSections(new ExpandableSection(this, "Frequently Used",
-					new CheckBoxesSection<>(this, mostpopular)
-						.columns(NUM_DEP_COLUMNS)
+			sections.addSections(new GroupSection(this, "Frequently Used",
+					new CheckBoxesSection<>(this, mostpopular).columns(NUM_DEP_COLUMNS)
 			));
 		}
 
-		sections.addSections(new SearchBoxSection(this, model.searchBox.getText()) {
+		sections.addSections(
+				new GroupSection(owner, null,
+					//Column 1:
+					new GroupSection(owner, null,
+						new CommentSection(owner, "Available:"),
+						searchBox(model),
+						new GroupSection(owner, "",
+							new FilteredDependenciesSection(owner, model.dependencies, model.searchBox.getFilter())
+							.sizeHint(DEPENDENCY_SECTION_SIZE)
+						).grabVertical(true)
+					).grabVertical(true),
+					//Column 2:
+					new GroupSection(owner, null,
+						new CommentSection(owner, "Selected:"),
+						new GroupSection(owner, "",
+							new SelectedDependenciesSection(owner, model.dependencies)
+							.sizeHint(DEPENDENCY_SECTION_SIZE)
+						).grabVertical(true)
+					).grabVertical(true)
+				)
+				.grabVertical(true)
+				.columns(2)
+		);
+
+
+		return sections;
+	}
+
+//	private Color getSystemColor(int c) {
+//		Display display = Display.getDefault();
+//		LiveVariable<Color> color = new LiveVariable<>();
+//		display.syncExec(() -> {
+//			color.setValue(display.getSystemColor(c));
+//		});
+//		return color.getValue();
+//	}
+
+	private SearchBoxSection searchBox(EditStartersModel model) {
+		return new SearchBoxSection(this, model.searchBox.getText()) {
 			@Override
 			protected String getSearchHint() {
 				return "Type to search dependencies";
 			}
-		});
-
-		for (String cat : model.dependencies.getCategories()) {
-			MultiSelectionFieldModel<Dependency> dependencyGroup = model.dependencies.getContents(cat);
-			final ExpandableSection expandable;
-			final CheckBoxesSection<Dependency> checkboxes;
-			sections.addSections(
-				expandable = new ExpandableSection(this, dependencyGroup.getLabel(),
-						checkboxes = new CheckBoxesSection<>(this, dependencyGroup.getCheckBoxModels())
-							.columns(NUM_DEP_COLUMNS)
-				)
-			);
-			expandable.getExpansionState().setValue(false);
-			model.searchBox.getFilter().addListener(new UIValueListener<Filter<Dependency>>() {
-				@Override
-				protected void uiGotValue(
-						LiveExpression<Filter<Dependency>> exp,
-						Filter<Dependency> value
-				) {
-					applyFilter(value, expandable, checkboxes);
-				}
-
-			});
-		}
-
-		return sections;
+		};
 	}
 
 	public static int openFor(IProject selectedProject, Shell shell) throws Exception {

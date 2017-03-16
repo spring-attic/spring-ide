@@ -25,7 +25,6 @@ import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 
 public class FilteredDependenciesSection extends WizardPageSection {
 
-	protected final NewSpringBootWizardModel model;
 	private Composite dependencyArea;
 	private Scroller scroller;
 
@@ -34,11 +33,17 @@ public class FilteredDependenciesSection extends WizardPageSection {
 	private Point sizeHint = new Point(SWT.DEFAULT, SWT.DEFAULT);
 
 	private int columns = 1;
+	private HierarchicalMultiSelectionFieldModel<Dependency> dependencies;
 
 	public FilteredDependenciesSection(IPageWithSections owner, NewSpringBootWizardModel model,
 			LiveExpression<Filter<Dependency>> filter) {
+		this(owner, model.dependencies, filter);
+	}
+
+	public FilteredDependenciesSection(IPageWithSections owner,  HierarchicalMultiSelectionFieldModel<Dependency> dependencies,
+			LiveExpression<Filter<Dependency>> filter) {
 		super(owner);
-		this.model = model;
+		this.dependencies = dependencies;
 		this.filter = filter;
 	}
 
@@ -62,9 +67,9 @@ public class FilteredDependenciesSection extends WizardPageSection {
 		GridLayoutFactory.fillDefaults().applyTo(dependencyArea);
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(dependencyArea);
 
-		for (String cat : model.dependencies.getCategories()) {
-			MultiSelectionFieldModel<Dependency> dependencyGroup = model.dependencies.getContents(cat);
-			CheckBoxesSection<Dependency> checkboxesSection = new CheckBoxesSection<Dependency>(owner,
+		for (String cat : dependencies.getCategories()) {
+			MultiSelectionFieldModel<Dependency> dependencyGroup = dependencies.getContents(cat);
+			CheckBoxesSection<Dependency> checkboxesSection = new CheckBoxesSection<>(owner,
 					dependencyGroup.getCheckBoxModels()).columns(columns);
 			ExpandableSection expandable = new ExpandableSection(owner, dependencyGroup.getLabel(), checkboxesSection);
 			expandable.createContents(dependencyArea);

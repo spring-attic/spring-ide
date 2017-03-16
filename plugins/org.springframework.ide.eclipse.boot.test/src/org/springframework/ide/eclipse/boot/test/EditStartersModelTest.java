@@ -115,7 +115,6 @@ public class EditStartersModelTest {
 		IProject project = harness.createBootProject("existingStartersSelected", withStarters("web", "actuator"));
 		ISpringBootProject bootProject = springBootCore.project(project);
 		EditStartersModel wizard = createWizard(project);
-		assertTrue(wizard.isSupported());
 
 		assertEquals(bootProject.getBootVersion(), wizard.getBootVersion());
 		assertStarterDeps(wizard.dependencies.getCurrentSelection(), "web", "actuator");
@@ -357,19 +356,19 @@ public class EditStartersModelTest {
 		assertRepoCount(1, pom);
 	}
 
-	@Test
-	public void serviceUnavailable() throws Exception {
-		String bootVersion = BOOT_1_3_X_RELEASE;
-		IProject project = harness.createBootProject("serviceUnavailable",
-				bootVersion(bootVersion), // boot version fixed
-				withStarters("web")
-		);
-
-		initializr.makeUnavailable();
-
-		EditStartersModel wizard = createWizard(project);
-		assertFalse(wizard.isSupported());
-	}
+//	@Test
+//	public void serviceUnavailable() throws Exception {
+//		String bootVersion = BOOT_1_3_X_RELEASE;
+//		IProject project = harness.createBootProject("serviceUnavailable",
+//				bootVersion(bootVersion), // boot version fixed
+//				withStarters("web")
+//		);
+//
+//		initializr.makeUnavailable();
+//
+//		EditStartersModel wizard = createWizard(project);
+//		assertFalse(wizard.isSupported());
+//	}
 
 	//TODO: testing of...
 	// - repository field in individual dependency taken into account?
@@ -441,6 +440,7 @@ public class EditStartersModelTest {
 
 
 	private EditStartersModel createWizard(IProject project) throws Exception {
+
 		return new EditStartersModel(
 				project,
 				springBootCore,

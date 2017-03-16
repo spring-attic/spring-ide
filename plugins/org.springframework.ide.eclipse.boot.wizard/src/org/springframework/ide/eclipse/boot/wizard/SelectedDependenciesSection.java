@@ -27,18 +27,22 @@ import com.google.common.collect.ImmutableSet;
 
 public class SelectedDependenciesSection extends WizardPageSection {
 
-	protected final NewSpringBootWizardModel model;
 	private Composite dependencyArea;
 	private Scroller scroller;
 
 	private LiveExpression<Filter<Dependency>> filter;
 
 	private Point sizeHint = new Point(SWT.DEFAULT, SWT.DEFAULT);
+	private HierarchicalMultiSelectionFieldModel<Dependency> dependencies;
+
+	public SelectedDependenciesSection(IPageWithSections owner, HierarchicalMultiSelectionFieldModel<Dependency> deps) {
+		super(owner);
+		this.dependencies = deps;
+		this.filter = createFilter(deps);
+	}
 
 	public SelectedDependenciesSection(IPageWithSections owner, NewSpringBootWizardModel model) {
-		super(owner);
-		this.model = model;
-		this.filter = createFilter(model);
+		this(owner, model.dependencies);
 	}
 
 	@Override
@@ -49,9 +53,9 @@ public class SelectedDependenciesSection extends WizardPageSection {
 		GridLayoutFactory.fillDefaults().margins(5, 5).spacing(0, 0).applyTo(dependencyArea);
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(dependencyArea);
 
-		for (String cat : model.dependencies.getCategories()) {
-			MultiSelectionFieldModel<Dependency> dependencyGroup = model.dependencies.getContents(cat);
-			SelectedSection<Dependency> checkboxesSection = new SelectedSection<Dependency>(owner,
+		for (String cat : dependencies.getCategories()) {
+			MultiSelectionFieldModel<Dependency> dependencyGroup = dependencies.getContents(cat);
+			SelectedSection<Dependency> checkboxesSection = new SelectedSection<>(owner,
 					dependencyGroup.getCheckBoxModels(), /* no label */ null);
 			checkboxesSection.createContents(dependencyArea);
 
@@ -78,13 +82,13 @@ public class SelectedDependenciesSection extends WizardPageSection {
 		}
 	}
 
-	private static LiveExpression<Filter<Dependency>> createFilter(NewSpringBootWizardModel model) {
+	private static LiveExpression<Filter<Dependency>> createFilter(HierarchicalMultiSelectionFieldModel<Dependency> dependencies) {
 		LiveExpression<Filter<Dependency>> filter = new LiveExpression<Filter<Dependency>>() {
 
 			@Override
 			protected Filter<Dependency> compute() {
 				ImmutableSet<Dependency> currentSelection = ImmutableSet
-						.copyOf(model.dependencies.getCurrentSelection());
+						.copyOf(dependencies.getCurrentSelection());
 				return (dependency) -> currentSelection.contains(dependency);
 			}
 		};
@@ -93,8 +97,8 @@ public class SelectedDependenciesSection extends WizardPageSection {
 			filter.refresh();
 		};
 
-		for (String cat : model.dependencies.getCategories()) {
-			MultiSelectionFieldModel<Dependency> dependencyGroup = model.dependencies.getContents(cat);
+		for (String cat : dependencies.getCategories()) {
+			MultiSelectionFieldModel<Dependency> dependencyGroup = dependencies.getContents(cat);
 			dependencyGroup.addSelectionListener(selectionListener);
 		}
 

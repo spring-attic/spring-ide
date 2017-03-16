@@ -64,21 +64,6 @@ public class EditStartersModel implements OkButtonHandler {
 	private HashSet<MavenId> activeStarters;
 	private SpringBootStarters starters;
 
-	public boolean isSupported() {
-		String notSupportedMsg = getNotSupportedMessage();
-		return notSupportedMsg == null;
-	}
-
-	public String getNotSupportedMessage() {
-		if (starters==null) {
-			String url = BootPreferences.getInitializrUrl();
-			boolean isDefault = BootPreferences.getDefaultInitializrUrl().equals(url);
-			return "Could not obtain starter dependencies information. This information is obtained by accessing the '"+ url + "' webservice. "
-					+ (isDefault ? "Are you connected to the internet?" : "Initializr URL can be specified via Preferences (Spring -> Boot -> Initializr)");
-		}
-		return null;
-	}
-
 	/**
 	 * Create EditStarters dialog model and initialize it based on a project selection.
 	 */
@@ -218,7 +203,7 @@ public class EditStartersModel implements OkButtonHandler {
 	}
 
 	/**
-	 * Retrieves frequently used dependencies based on currently set default dependencies and the most popular dependencies
+	 * Retrieves frequently used dependencies.
 	 *
 	 * @param numberOfMostPopular max number of most popular dependencies
 	 * @return list of frequently used dependencies
