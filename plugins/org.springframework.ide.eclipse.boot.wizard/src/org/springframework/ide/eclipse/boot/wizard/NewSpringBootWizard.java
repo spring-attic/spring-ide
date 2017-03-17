@@ -196,7 +196,7 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 					new DescriptionSection(this, model.downloadUrl).label("Full Url").readOnly(false)
 			));
 
-			return new WizardCompositeSection(this, sections.toArray(new WizardPageSection[0]));
+			return new GroupSection(this, null, sections.toArray(new WizardPageSection[0])).grabVertical(true);
 		}
 
 		@Override

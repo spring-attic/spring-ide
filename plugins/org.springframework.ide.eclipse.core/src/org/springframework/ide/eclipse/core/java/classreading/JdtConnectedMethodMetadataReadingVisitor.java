@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2015 Spring IDE Developers
+ * Copyright (c) 2013, 2017 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,7 +58,13 @@ public class JdtConnectedMethodMetadataReadingVisitor extends MethodMetadataRead
 	}
 	
 	public JavaModelSourceLocation createSourceLocation() throws JavaModelException {
-		return new JavaModelMethodSourceLocation(getJavaElement(), getReturnTypeName());
+		IJavaElement javaElement = getJavaElement();
+		if (javaElement == null) {
+			throw new NullPointerException("java element not found for: " + this.name + " - with desc: " + this.desc + " - on main type: " + mainType != null ? mainType.getElementName() : "null");
+		}
+		else {
+			return new JavaModelMethodSourceLocation(javaElement, getReturnTypeName());
+		}
 	}
 
 	private IMethod getMethodFromSignature(final String name, final String desc) {

@@ -12,18 +12,16 @@ package org.springframework.ide.eclipse.boot.wizard;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.viewers.StyledString;
-import org.eclipse.jface.viewers.StyledString.Styler;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.MouseTrackListener;
-import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -32,16 +30,15 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
-import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 
 public class SelectedButtonSection<T> extends WizardPageSection {
 
-	private static final String X_LABEL = "X";
+
 	private Composite buttonComp;
 	private ValueListener<Boolean> selectionListener;
-	private Stylers stylers;
+
 	
 	protected final CheckBoxModel<T> model;
 	protected final LiveVariable<Boolean> isVisible = new LiveVariable<Boolean>(true);
@@ -73,14 +70,11 @@ public class SelectedButtonSection<T> extends WizardPageSection {
 
 	private void createButtonArea() {
 		GridLayoutFactory.fillDefaults().numColumns(2).margins(0, 0).spacing(10, 0).applyTo(buttonComp);
-		StyledText xButton = new StyledText(buttonComp, SWT.READ_ONLY);
+		Label xButton = new Label(buttonComp, SWT.READ_ONLY);
 		GridDataFactory.fillDefaults().grab(false, false).align(SWT.BEGINNING, SWT.CENTER).applyTo(xButton);
-
-		stylers = new Stylers(xButton.getFont());
-		xButton.setCursor(new Cursor(xButton.getDisplay(), SWT.CURSOR_ARROW));
-		xButton.setBackground(buttonComp.getBackground());
-		xButton.setEditable(false);
-		applyDefaultX(xButton);
+		xButton.setText("X");
+		xButton.setFont(getBold());
+		applyDefaultEffects(xButton);
 		
 		xButton.addMouseListener(new MouseListener() {
 
@@ -111,12 +105,12 @@ public class SelectedButtonSection<T> extends WizardPageSection {
 
 			@Override
 			public void mouseExit(MouseEvent event) {
-				applyDefaultX(xButton);
+				applyDefaultEffects(xButton);
 			}
 
 			@Override
 			public void mouseEnter(MouseEvent event) {
-				applyBoldX(xButton);
+				applyHoverEffects(xButton);
 			}
 		});
 
@@ -131,34 +125,27 @@ public class SelectedButtonSection<T> extends WizardPageSection {
 		if (tooltip != null) {
 			label.setToolTipText(tooltip);
 		}
-		
-		xButton.addDisposeListener(new DisposeListener() {
-
-			@Override
-			public void widgetDisposed(DisposeEvent event) {
-				if (event.getSource() == xButton && stylers != null) {
-					stylers.dispose();
-				}
-			}
-		});
 	}
 
-	protected void applyBoldX(StyledText xButton) {
+	private Font getBold() {
+		// Note: fonts from the registry do not need to be managed outside for disposal.
+		return JFaceResources.getFontRegistry().getBold(JFaceResources.DEFAULT_FONT);
+	}
+
+	protected void applyHoverEffects(Label xButton) {
 		if (xButton != null && !xButton.isDisposed()) {
-			Styler styler = stylers.boldColoured(SWT.COLOR_DARK_RED);
-			StyledString text = new StyledString(X_LABEL, styler);
-			xButton.setText(text.getString());
-			xButton.setStyleRanges(text.getStyleRanges());
+			xButton.setForeground(getSystemColor(SWT.COLOR_RED));
 		}
 	}
 
-	protected void applyDefaultX(StyledText xButton) {
+	protected void applyDefaultEffects(Label xButton) {
 		if (xButton != null && !xButton.isDisposed()) {
-			Styler styler = stylers.darkGrey();
-			StyledString text = new StyledString(X_LABEL, styler);
-			xButton.setText(text.getString());
-			xButton.setStyleRanges(text.getStyleRanges());
+			xButton.setForeground(getSystemColor(SWT.COLOR_DARK_GRAY));
 		}
+	}
+	
+	protected Color getSystemColor(int colorCode) {
+		return Display.getDefault().getSystemColor(colorCode);
 	}
 
 	protected void removeSelection() {
