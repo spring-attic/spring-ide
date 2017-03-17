@@ -81,8 +81,9 @@ public class SearchBoxSection extends WizardPageSection implements Disposable {
 				searchBox.addPaintListener(new PaintListener() {
 					@Override
 					public void paintControl(PaintEvent e) {
-						searchBox.setFocus();
-						searchBox.removePaintListener(this);
+						if (searchBox.setFocus()) {
+							searchBox.removePaintListener(this);
+						}
 					}
 				});
 			}
