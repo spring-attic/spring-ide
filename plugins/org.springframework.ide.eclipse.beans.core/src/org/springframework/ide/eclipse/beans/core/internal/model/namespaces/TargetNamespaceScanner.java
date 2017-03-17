@@ -18,7 +18,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.core.SpringCoreUtils;
+import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -55,11 +55,11 @@ public class TargetNamespaceScanner {
 			
 			return doc.getDocumentElement().getAttribute("targetNamespace");
 		} catch (SAXException e) {
-			BeansCorePlugin.log(e);
+			BeansCorePlugin.logAsWarning(e);
 		} catch (IOException e) {
-			BeansCorePlugin.log(e);
+			BeansCorePlugin.logAsWarning(e);
 		} catch (ParserConfigurationException e) {
-			BeansCorePlugin.log(e);
+			BeansCorePlugin.logAsWarning(e);
 		}
 		finally {
 			Thread.currentThread().setContextClassLoader(ccl);
