@@ -18,8 +18,11 @@ import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.core.runtime.CoreException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -28,6 +31,7 @@ import org.osgi.framework.Version;
 import org.osgi.framework.VersionRange;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 /**
  * This class is the 'parsed' form of the json metadata for spring intializr service.
@@ -40,6 +44,17 @@ public class InitializrServiceSpec {
 
 	private JSONObject data;
 	public static final String JSON_CONTENT_TYPE_HEADER = "application/vnd.initializr.v2.1+json";
+	
+	/**
+	 * Boot version link template variable 
+	 */
+	public static final String BOOT_VERSION_LINK_TEMPLATE_VARIABLE = "bootVersion";
+	
+	/**
+	 * Pattern matching link template variables
+	 */
+	private static final Pattern LINK_TEMPLATE_VARIABLE_PATTERN = Pattern.compile("\\{(.*?)\\}");
+
 
 	public InitializrServiceSpec(JSONObject jsonObject) {
 		this.data = jsonObject;
@@ -379,6 +394,21 @@ public class InitializrServiceSpec {
 			//ignore
 		}
 		return new DependencyGroup[0];
+	}
+	
+	public static String substituteTemplateVariables(String template, Map<String, String> variableValues) throws CoreException {
+		Matcher matcher = LINK_TEMPLATE_VARIABLE_PATTERN.matcher(template);
+		String result = template;
+		while (matcher.find()) {
+			String variable = matcher.group(1);
+			String value = variableValues.get(variable);
+			if (value == null) {
+				throw ExceptionUtil.coreException("Initializr link has unknown " + variable + " in the template " + template);
+			} else {
+				result = result.replaceAll("\\{" + variable + "\\}", value);
+			}
+		}
+		return result;
 	}
 
 }

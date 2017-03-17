@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Supplier;
 
 import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -72,7 +73,7 @@ public class HierarchicalMultiSelectionFieldModel<T> {
 	/**
 	 * Add a choice to a category, create the category if it doesn't exist yet.
 	 */
-	public void choice(String catName, String name, T dep, String tooltipText, LiveExpression<Boolean> enablement) {
+	public void choice(String catName, String name, T dep, Supplier<String> tooltipText, LiveExpression<Boolean> enablement) {
 		MultiSelectionFieldModel<T> cat = ensureCategory(catName);
 		cat.choice(name, dep, tooltipText, enablement);
 	}

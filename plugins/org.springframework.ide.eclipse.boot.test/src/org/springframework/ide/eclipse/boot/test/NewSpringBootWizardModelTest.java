@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.junit.Assert;
@@ -728,4 +729,24 @@ public class NewSpringBootWizardModelTest extends TestCase {
 			assertEquals(expectNames[i], groups.get(i).getName());
 		}
 	}
+	
+	public void testTemplateVariableSubstitution() throws Exception {
+		Map<String, String> values = new HashMap<>();
+		values.put("bootVersion", "2.0.0");
+		values.put("stars", "5");
+		
+		String actual = InitializrServiceSpec.substituteTemplateVariables("Here is Spring Boot {bootVersion} version. It's rated with {stars} stars.", values);
+		assertEquals("Here is Spring Boot 2.0.0 version. It's rated with 5 stars.", actual);
+		
+		actual = InitializrServiceSpec.substituteTemplateVariables("Here is Spring Boot {bootVersion} version.", values);
+		assertEquals("Here is Spring Boot 2.0.0 version.", actual);
+		
+		try {
+			InitializrServiceSpec.substituteTemplateVariables("Here is Spring Boot {bootVersion} version. It's really {awesome} stuff!", values);
+			fail("Should have failed the template string variable substitution! Unknown variable expected!");
+		} catch (CoreException e) {
+			// ignore - let the test pass
+		}
+	}
+	
 }

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard;
 
+import java.util.function.Supplier;
+
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.resource.JFaceResources;
@@ -19,6 +21,7 @@ import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.MouseTrackListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -32,6 +35,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
+import org.springsource.ide.eclipse.commons.ui.HtmlTooltip;
 
 public class SelectedButtonSection<T> extends WizardPageSection {
 
@@ -121,9 +125,12 @@ public class SelectedButtonSection<T> extends WizardPageSection {
 				.applyTo(label);
 
 		label.setText(model.getLabel());
-		String tooltip = model.getTooltip();
+		Supplier<String> tooltip = model.getTooltip();
 		if (tooltip != null) {
-			label.setToolTipText(tooltip);
+			// Setup HTML tooltip and its content
+			HtmlTooltip htmlTooltip = new HtmlTooltip(label);
+			htmlTooltip.setShift(new Point(0, 0));
+			htmlTooltip.setHtml(tooltip);
 		}
 	}
 

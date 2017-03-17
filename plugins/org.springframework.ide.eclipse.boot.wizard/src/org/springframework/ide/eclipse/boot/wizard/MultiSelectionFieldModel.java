@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Supplier;
 
 import org.eclipse.core.runtime.Assert;
 import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
@@ -46,7 +47,7 @@ public class MultiSelectionFieldModel<T> {
 	private LiveExpression<ValidationResult> validator;
 
 	private Map<T,String> labelMap = new LinkedHashMap<T, String>();
-	private Map<T,String> tooltips = null; //don't allocate unless used.
+	private Map<T,Supplier<String>> tooltips = null; //don't allocate unless used.
 	private boolean mustSort;
 
 	private Map<T, LiveExpression<Boolean>> enablements = null;
@@ -113,12 +114,12 @@ public class MultiSelectionFieldModel<T> {
 		return this;
 	}
 
-	public void choice(String label, T value, String tooltipText) {
+	public void choice(String label, T value, Supplier<String> tooltipText) {
 		choice(label, value);
 		setTooltip(value, tooltipText);
 	}
 
-	public void choice(String label, T value, String tooltipText, LiveExpression<Boolean> enablement) {
+	public void choice(String label, T value, Supplier<String> tooltipText, LiveExpression<Boolean> enablement) {
 		choice(label, value, tooltipText);
 		if (enablements==null) {
 			enablements = new HashMap<T, LiveExpression<Boolean>>();
@@ -126,14 +127,14 @@ public class MultiSelectionFieldModel<T> {
 		enablements.put(value, enablement);
 	}
 
-	public void setTooltip(T value, String tooltipText) {
+	public void setTooltip(T value, Supplier<String> tooltipText) {
 		if (tooltips==null) {
-			tooltips = new HashMap<T, String>();
+			tooltips = new HashMap<T, Supplier<String>>();
 		}
 		tooltips.put(value,  tooltipText);
 	}
 
-	public String getTooltip(T value) {
+	public Supplier<String> getTooltip(T value) {
 		if (tooltips!=null) {
 			return tooltips.get(value);
 		}
