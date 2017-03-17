@@ -230,8 +230,8 @@ public class CFRoute {
 			return this;
 		}
 
-		public Builder path(String host) {
-			this.host = host;
+		public Builder path(String path) {
+			this.path = path;
 			return this;
 		}
 
