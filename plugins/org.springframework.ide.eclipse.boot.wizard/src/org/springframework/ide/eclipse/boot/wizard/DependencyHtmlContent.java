@@ -1,29 +1,50 @@
+/*******************************************************************************
+ * Copyright (c) 2017 Pivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Pivotal, Inc. - initial API and implementation
+ *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard;
 
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.internal.text.html.HTMLPrinter;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.Util;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.FontData;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Link;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Links;
 
+/**
+ * Utility class containing static method for creating HTML help/tooltip content for dependency
+ * 
+ * @author Alex Boyko
+ *
+ */
 @SuppressWarnings("restriction")
-public class DependencyHtmlContent {
+class DependencyHtmlContent {
 	
 	private static final String UNIT; // See https://bugs.eclipse.org/bugs/show_bug.cgi?id=155993
 	static {
 		UNIT= Util.isMac() ? "px" : "pt";   //$NON-NLS-1$//$NON-NLS-2$
 	}
 
-	public static String generateHtmlTooltip(Dependency dep, Map<String, String> variables) {
+	/**
+	 * Generates HTML documentation for a dependency
+	 * 
+	 * @param dep Dependency model
+	 * @param variables Map containing values for variables
+	 * @return HTML as a <code>string</code>
+	 */
+	public static String generateHtmlDocumentation(Dependency dep, Map<String, String> variables) {
 		StringBuffer buffer = new StringBuffer();
 		HTMLPrinter.insertPageProlog(buffer, 0, String.join("\n", styles()));
 		
@@ -58,26 +79,17 @@ public class DependencyHtmlContent {
 		return buffer.toString();
 	}
 	
-	private static String linkBullets(Link[] links, Map<String, String> variables) {
+	private static String linkBullets(Link[] links, Map<String, String> variableValues) {
 		StringBuffer bullets = new StringBuffer();
 		for (Link link : links) {
 			String href = link.getHref();
 			if (link.isTemplated()) {
 				if (href != null) {
-					Pattern p = Pattern.compile("\\{(.*?)\\}");
-					Matcher matcher = p.matcher(href);
-					while (matcher.find()) {
-						String variable = matcher.group(1);
-						String replacement = variables.get(variable);
-						if (replacement == null) {
-							BootWizardActivator.getDefault().getLog()
-									.log(new Status(IStatus.WARNING, BootWizardActivator.PLUGIN_ID,
-											"Initializr dependency link has unknown " + variable + " in link " + href));
-							href = null;
-							break;
-						} else {
-							href = href.replaceAll("\\{" + variable + "\\}", replacement);
-						}
+					try {
+						href = InitializrServiceSpec.substituteTemplateVariables(href, variableValues);
+					} catch (CoreException e) {
+						BootWizardActivator.log(e);
+						href = null;
 					}
 				}
 			}
@@ -89,11 +101,11 @@ public class DependencyHtmlContent {
 				if (link.getTitle() != null) {
 					sb.append(HTMLPrinter.convertToHTMLContent(link.getTitle()));
 				} else {
-//					if (href.contains("docs.spring.io")) {
-//						sb.append(HTMLPrinter.convertToHTMLContent("Spring Boot Reference Doc"));
-//					} else {
+					if (href.contains("docs.spring.io")) {
+						sb.append(HTMLPrinter.convertToHTMLContent("Spring Boot Reference Doc"));
+					} else {
 						sb.append(HTMLPrinter.convertToHTMLContent(href));
-//					}
+					}
 				}
 				sb.append("</a>");
 				HTMLPrinter.addBullet(bullets, sb.toString());
@@ -109,7 +121,7 @@ public class DependencyHtmlContent {
 		boolean italic= (fontData.getStyle() & SWT.ITALIC) != 0;
 		String size= Integer.toString(Math.max(5, fontData.getHeight() - 1)) + UNIT;
 		String family= "'" + fontData.getName() + "',sans-serif"; //$NON-NLS-1$ //$NON-NLS-2$
-		mainStyle.append("font-size:" + size + ";");
+		mainStyle.append("font-size:");
 		mainStyle.append(size);
 		mainStyle.append(';');
 		mainStyle.append("font-family:");

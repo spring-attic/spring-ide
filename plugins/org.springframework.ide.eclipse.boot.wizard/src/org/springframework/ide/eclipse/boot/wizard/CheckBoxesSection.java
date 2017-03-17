@@ -33,6 +33,7 @@ import org.springsource.ide.eclipse.commons.livexp.ui.CommentSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
+import org.springsource.ide.eclipse.commons.ui.HtmlTooltip;
 
 /**
  * A section that shows a series of checkboxes in rows and columns.
@@ -135,13 +136,15 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 			if (page!=null && !page.isDisposed()) {
 				this.cb = new Button(page, SWT.CHECK);
 				cb.setText(model.getLabel());
-				this.tooltip = new HtmlTooltip(cb);
-				this.tooltip.setShift(new Point(0, 0));
-//				Supplier<String> tooltipText = model.getTooltip();
-//				if (tooltipText!=null) {
-//					cb.setToolTipText(tooltip);
-					this.tooltip.setHtml(model.getTooltip());
-//				}
+				
+				Supplier<String> html = model.getTooltip();
+				if (html != null) {
+					// Setup HTML tooltip and its content
+					this.tooltip = new HtmlTooltip(cb);
+					this.tooltip.setShift(new Point(0, 0));
+					this.tooltip.setHtml(html);
+				}
+				
 				model.getSelection().addListener(selectionListener = new ValueListener<Boolean>() {
 					public void gotValue(LiveExpression<Boolean> exp, Boolean value) {
 						// note: checkbox button may be null in cases where the

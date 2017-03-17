@@ -38,6 +38,7 @@ import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
+import org.springsource.ide.eclipse.commons.ui.HtmlTooltip;
 
 public class SelectedButtonSection<T> extends WizardPageSection {
 
@@ -132,6 +133,7 @@ public class SelectedButtonSection<T> extends WizardPageSection {
 		label.setText(model.getLabel());
 		Supplier<String> tooltip = model.getTooltip();
 		if (tooltip != null) {
+			// Setup HTML tooltip and its content
 			HtmlTooltip htmlTooltip = new HtmlTooltip(label);
 			htmlTooltip.setShift(new Point(0, 0));
 			htmlTooltip.setHtml(tooltip);

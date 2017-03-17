@@ -34,6 +34,7 @@ import org.springframework.ide.eclipse.boot.core.MavenId;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarters;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.DependencyGroup;
 import org.springframework.ide.eclipse.boot.util.Log;
@@ -131,11 +132,16 @@ public class EditStartersModel implements OkButtonHandler {
 		if (starters!=null) {
 			for (DependencyGroup dgroup : starters.getDependencyGroups()) {
 				String catName = dgroup.getName();
+
+				// Setup template links variable values
 				Map<String, String> variables = new HashMap<>();
-				variables.put("bootVersion", starters.getBootVersion());
+				variables.put(InitializrServiceSpec.BOOT_VERSION_LINK_TEMPLATE_VARIABLE, starters.getBootVersion());
+				
 				for (Dependency dep : dgroup.getContent()) {
 					if (starters.contains(dep.getId())) {
-						dependencies.choice(catName, dep.getName(), dep, /*dep.getDescription()*/() -> DependencyHtmlContent.generateHtmlTooltip(dep, variables), LiveExpression.constant(true));
+						dependencies.choice(catName, dep.getName(), dep,
+								() -> DependencyHtmlContent.generateHtmlDocumentation(dep, variables),
+								LiveExpression.constant(true));
 						MavenId mavenId = starters.getMavenId(dep.getId());
 						boolean selected = activeStarters.contains(mavenId);
 						if (selected) {
