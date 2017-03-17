@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2016 GoPivotal, Inc.
+ * Copyright (c) 2013, 2017 GoPivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,7 +47,7 @@ public class MultiSelectionFieldModel<T> {
 	private LiveExpression<ValidationResult> validator;
 
 	private Map<T,String> labelMap = new LinkedHashMap<T, String>();
-	private Map<T,Supplier<String>> tooltips = null; //don't allocate unless used.
+	private Map<T,Supplier<String>> tooltipsHtml = null; //don't allocate unless used.
 	private boolean mustSort;
 
 	private Map<T, LiveExpression<Boolean>> enablements = null;
@@ -114,29 +114,29 @@ public class MultiSelectionFieldModel<T> {
 		return this;
 	}
 
-	public void choice(String label, T value, Supplier<String> tooltipText) {
+	public void choice(String label, T value, Supplier<String> tooltipHtml) {
 		choice(label, value);
-		setTooltip(value, tooltipText);
+		setTooltipHtml(value, tooltipHtml);
 	}
 
-	public void choice(String label, T value, Supplier<String> tooltipText, LiveExpression<Boolean> enablement) {
-		choice(label, value, tooltipText);
+	public void choice(String label, T value, Supplier<String> tooltipHtml, LiveExpression<Boolean> enablement) {
+		choice(label, value, tooltipHtml);
 		if (enablements==null) {
 			enablements = new HashMap<T, LiveExpression<Boolean>>();
 		}
 		enablements.put(value, enablement);
 	}
 
-	public void setTooltip(T value, Supplier<String> tooltipText) {
-		if (tooltips==null) {
-			tooltips = new HashMap<T, Supplier<String>>();
+	public void setTooltipHtml(T value, Supplier<String> tooltipHtml) {
+		if (tooltipsHtml==null) {
+			tooltipsHtml = new HashMap<T, Supplier<String>>();
 		}
-		tooltips.put(value,  tooltipText);
+		tooltipsHtml.put(value,  tooltipHtml);
 	}
 
-	public Supplier<String> getTooltip(T value) {
-		if (tooltips!=null) {
-			return tooltips.get(value);
+	public Supplier<String> getTooltipHtml(T value) {
+		if (tooltipsHtml!=null) {
+			return tooltipsHtml.get(value);
 		}
 		return null;
 	}
@@ -195,7 +195,7 @@ public class MultiSelectionFieldModel<T> {
 		for (T choice : labelMap.keySet()) {
 			CheckBoxModel<T> cb;
 			checkboxes.add(cb = new CheckBoxModel<T>(getLabel(choice), choice, getSelection(choice), getEnablement(choice)));
-			cb.setTooltip(getTooltip(choice));
+			cb.setTooltipHtml(getTooltipHtml(choice));
 		}
 		return Collections.unmodifiableList(checkboxes);
 	}

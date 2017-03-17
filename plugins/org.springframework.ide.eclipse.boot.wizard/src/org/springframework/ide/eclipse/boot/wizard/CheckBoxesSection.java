@@ -52,7 +52,7 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 		private final LiveVariable<Boolean> selection;
 		private final LiveExpression<Boolean> enablement;
 		private final T value;
-		private Supplier<String> tooltip; //optional tooltip
+		private Supplier<String> tooltipHtml; //optional HTML tooltip supplier 
 		public CheckBoxModel(String label, T value, LiveVariable<Boolean> selection, LiveExpression<Boolean> enablement) {
 			this.label = label;
 			this.value = value;
@@ -68,11 +68,11 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 		public LiveExpression<Boolean> getEnablement() {
 			return enablement;
 		}
-		public Supplier<String> getTooltip() {
-			return tooltip;
+		public Supplier<String> getTooltipHtml() {
+			return tooltipHtml;
 		}
-		public void setTooltip(Supplier<String> tooltip) {
-			this.tooltip = tooltip;
+		public void setTooltipHtml(Supplier<String> tooltipHtml) {
+			this.tooltipHtml = tooltipHtml;
 		}
 		public T getValue() {
 			return value;
@@ -130,7 +130,7 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 				this.cb = new Button(page, SWT.CHECK);
 				cb.setText(model.getLabel());
 				
-				Supplier<String> html = model.getTooltip();
+				Supplier<String> html = model.getTooltipHtml();
 				if (html != null) {
 					// Setup HTML tooltip and its content
 					this.tooltip = new HtmlTooltip(cb);

@@ -175,7 +175,7 @@ public class NewSpringBootWizardModelTest extends TestCase {
 					assertTrue("Labels not sorted: '"+lastLabel+"' > '"+label+"'", lastLabel.compareTo(label)<0);
 				}
 				lastLabel = label;
-				assertNotNull("No tooltip for: "+choice+" ["+label+"]", cat.getTooltip(choice));
+				assertNotNull("No tooltip for: "+choice+" ["+label+"]", cat.getTooltipHtml(choice).get());
 			}
 		}
 	}

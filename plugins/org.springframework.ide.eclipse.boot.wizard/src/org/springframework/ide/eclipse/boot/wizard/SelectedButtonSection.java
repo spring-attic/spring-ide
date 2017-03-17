@@ -125,7 +125,7 @@ public class SelectedButtonSection<T> extends WizardPageSection {
 				.applyTo(label);
 
 		label.setText(model.getLabel());
-		Supplier<String> tooltip = model.getTooltip();
+		Supplier<String> tooltip = model.getTooltipHtml();
 		if (tooltip != null) {
 			// Setup HTML tooltip and its content
 			HtmlTooltip htmlTooltip = new HtmlTooltip(label);

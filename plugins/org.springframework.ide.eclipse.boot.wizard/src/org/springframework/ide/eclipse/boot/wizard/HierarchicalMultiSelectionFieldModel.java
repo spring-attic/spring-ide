@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2016 Pivotal, Inc.
+ * Copyright (c) 2015, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -73,9 +73,9 @@ public class HierarchicalMultiSelectionFieldModel<T> {
 	/**
 	 * Add a choice to a category, create the category if it doesn't exist yet.
 	 */
-	public void choice(String catName, String name, T dep, Supplier<String> tooltipText, LiveExpression<Boolean> enablement) {
+	public void choice(String catName, String name, T dep, Supplier<String> tooltipHtml, LiveExpression<Boolean> enablement) {
 		MultiSelectionFieldModel<T> cat = ensureCategory(catName);
-		cat.choice(name, dep, tooltipText, enablement);
+		cat.choice(name, dep, tooltipHtml, enablement);
 	}
 
 	public void setSelection(String catName, T dep, boolean selected) {
