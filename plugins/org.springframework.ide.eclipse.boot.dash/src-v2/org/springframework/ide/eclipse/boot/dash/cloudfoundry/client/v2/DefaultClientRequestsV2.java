@@ -936,6 +936,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 				.domain(route.getDomain())
 				.host(route.getHost())
 				.path(route.getPath())
+				.port(route.getPort())
 				.build();
 		return log("operations.routes.map("+mapRouteReq+")",
 			_operations.routes().map(mapRouteReq)

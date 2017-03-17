@@ -40,6 +40,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFRoute;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentProperties;
 import org.springframework.ide.eclipse.boot.util.Log;
@@ -471,12 +472,12 @@ public class ApplicationManifestHandler {
 			for (String uri : properties.getUris()) {
 				try {
 					// Find the first valid URL
-					CloudApplicationURL cloudAppUrl = CloudApplicationURL.getCloudApplicationURL(uri, cloudDomains);
-					if (cloudAppUrl.getSubdomain() != null) {
-						hosts.add(cloudAppUrl.getSubdomain());
+					CFRoute route = CFRoute.toRoute(uri, cloudDomains);
+					if (route.getHost() != null) {
+						hosts.add(route.getHost());
 					}
-					if (cloudAppUrl.getDomain() != null) {
-						domains.add(cloudAppUrl.getDomain());
+					if (route.getDomain() != null) {
+						domains.add(route.getDomain());
 					}
 				} catch (Exception e) {
 					// ignore
@@ -521,12 +522,12 @@ public class ApplicationManifestHandler {
 		for (String uri : uris) {
 			try {
 				// Find the first valid URL
-				CloudApplicationURL cloudAppUrl = CloudApplicationURL.getCloudApplicationURL(uri, cloudDomains);
-				if (cloudAppUrl.getSubdomain() != null) {
-					hostsSet.add(cloudAppUrl.getSubdomain());
+				CFRoute route = CFRoute.toRoute(uri, cloudDomains);
+				if (route.getHost() != null) {
+					hostsSet.add(route.getHost());
 				}
-				if (cloudAppUrl.getDomain() != null) {
-					domainsSet.add(cloudAppUrl.getDomain());
+				if (route.getDomain() != null) {
+					domainsSet.add(route.getDomain());
 				}
 			} catch (Exception e) {
 				// ignore
@@ -783,10 +784,10 @@ public class ApplicationManifestHandler {
 		List<String> uris = new ArrayList<>(hostsSet.isEmpty() ? 1 : hostsSet.size() * domainsSet.size());
 		for (String d : domainsSet) {
 			if (hostsSet.isEmpty()) {
-				uris.add(new CloudApplicationURL(null, d).getUrl());
+				uris.add(CFRoute.builder().domain(d).build().getRoute());
 			} else {
 				for (String h : hostsSet) {
-					uris.add(new CloudApplicationURL(h, d).getUrl());
+					uris.add(CFRoute.builder().host(h).domain(d).build().getRoute());
 				}
 			}
 		}
@@ -842,8 +843,8 @@ public class ApplicationManifestHandler {
 				.map(route -> (String) route)
 				.filter(url -> {
 					try {
-						CloudApplicationURL cloudAppUrl = CloudApplicationURL.getCloudApplicationURL(url, domains);
-						return cloudAppUrl.getDomain() != null;
+						CFRoute route = CFRoute.toRoute(url, domains);
+						return route.getDomain() != null;
 					} catch (Exception e) {
 						return false;
 					}
