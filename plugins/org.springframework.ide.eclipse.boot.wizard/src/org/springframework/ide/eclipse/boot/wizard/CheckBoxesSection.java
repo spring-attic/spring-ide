@@ -53,7 +53,6 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 		private final LiveExpression<Boolean> enablement;
 		private final T value;
 		private Supplier<String> tooltip = () -> null; //optional tooltip
-//		private String htmlTooltip = null;
 		public CheckBoxModel(String label, T value, LiveVariable<Boolean> selection, LiveExpression<Boolean> enablement) {
 			this.label = label;
 			this.value = value;
@@ -75,12 +74,6 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 		public void setTooltip(Supplier<String> tooltip) {
 			this.tooltip = tooltip;
 		}
-//		public String getHtmlTooltip() {
-//			return htmlTooltip;
-//		}
-//		public void setHtmlTooltip(String htmlTooltip) {
-//			this.htmlTooltip = htmlTooltip;
-//		}
 		public T getValue() {
 			return value;
 		}
@@ -153,12 +146,6 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 						if (value!=null && cb != null && !cb.isDisposed()) {
 							cb.setSelection(value);
 						}
-//						if (value.booleanValue()) {
-//							Rectangle r = cb.getBounds();
-//							tooltip.show(new Point(r.x, r.y + r.height));
-//						} else {
-//							tooltip.hide();
-//						}
 					}
 				});
 				GridDataFactory.fillDefaults().grab(true, false).applyTo(cb);
