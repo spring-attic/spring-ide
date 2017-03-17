@@ -26,6 +26,7 @@ public class BootWizardImages {
 	private static ImageRegistry imageRegistry;
 	private static URL baseURL = null;
 
+	public static final ImageDescriptor BOOT_SMALL_ICON= create("etool16", "boot-icon.png");
 	public static final ImageDescriptor BOOT_WIZARD_ICON = create(WIZBAN, "boot_wizard.png");
 	public static final ImageDescriptor GUIDES_WIZARD_ICON = create(WIZBAN, "guides_wizard.png");
 

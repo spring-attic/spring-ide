@@ -202,6 +202,25 @@
             </menu>
       </menuContribution>
    </extension>
+   <extension
+         point="org.eclipse.wst.sse.ui.completionProposal">
+      <proposalCategory
+            icon="icons/full/etool16/boot-icon.png"
+            id="org.springframework.ide.eclipse.boot.proposalCategory"
+            name="Boot">
+      </proposalCategory>
+      <proposalComputer
+            activate="true"
+            categoryId="org.springframework.ide.eclipse.boot.proposalCategory"
+            class="org.springframework.ide.eclipse.boot.wizard.BootPomCompletionProposalComputer"
+            icon="icons/full/etool16/boot-icon.png"
+            id="org.springframework.ide.eclipse.boot.wizard.PomCompletionProposalComputer"
+            name="Boot Pom Completions">
+         <contentType
+               id="org.eclipse.m2e.core.pomFile">
+         </contentType>
+      </proposalComputer>
+   </extension>
  
     
 </plugin>

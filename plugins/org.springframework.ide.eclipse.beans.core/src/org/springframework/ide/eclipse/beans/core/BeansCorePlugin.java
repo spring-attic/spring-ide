@@ -331,14 +331,20 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 		getDefault().getLog().log(createErrorStatus(getResourceString("Plugin.internal_error"), exception));
 	}
 
-	/**
-	 * Returns a new {@link IStatus} with status "ERROR" for this plug-in.
-	 */
+	public static void logAsWarning(Throwable exception) {
+		getDefault().getLog().log(createWarningStatus(getResourceString("Plugin.internal_warning"), exception));
+	}
+
 	public static IStatus createErrorStatus(String message, Throwable exception) {
-		if (message == null) {
-			message = "";
-		}
-		return new Status(IStatus.ERROR, PLUGIN_ID, 0, message, exception);
+		return createStatus(IStatus.ERROR, message, exception);
+	}
+
+	public static IStatus createWarningStatus(String message, Throwable exception) {
+		return createStatus(IStatus.WARNING, message, exception);
+	}
+	
+	public static IStatus createStatus(int severity, String message, Throwable exception) {
+		return new Status(severity, PLUGIN_ID, 0, message == null ? "" : message, exception);
 	}
 
 	public static String getFormattedMessage(String key, Object... args) {

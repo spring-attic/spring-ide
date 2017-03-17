@@ -146,7 +146,7 @@ public class EditStartersDialog extends DialogWithSections {
 		return age < 3000;
 	}
 
-	public static int openFor(IProject selectedProject, Shell shell) throws Exception {
+	public static int openFor(IProject selectedProject, Shell shell) {
 		InitializrFactoryModel<EditStartersModel> fmodel = new InitializrFactoryModel<>((url) -> {
 			if (url!=null) {
 				InitializrService initializr = InitializrService.create(BootActivator.getUrlConnectionFactory(), url);

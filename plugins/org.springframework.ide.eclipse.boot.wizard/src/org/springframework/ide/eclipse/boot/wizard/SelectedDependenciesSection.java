@@ -50,7 +50,7 @@ public class SelectedDependenciesSection extends WizardPageSection {
 		scroller = new Scroller(page);
 		GridDataFactory.fillDefaults().grab(true, true).hint(sizeHint).applyTo(scroller);
 		dependencyArea = scroller.getBody();
-		GridLayoutFactory.fillDefaults().margins(5, 5).spacing(0, 0).applyTo(dependencyArea);
+		GridLayoutFactory.fillDefaults().spacing(0, 0).applyTo(dependencyArea);
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(dependencyArea);
 
 		for (String cat : dependencies.getCategories()) {
