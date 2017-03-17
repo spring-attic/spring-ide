@@ -52,7 +52,7 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 		private final LiveVariable<Boolean> selection;
 		private final LiveExpression<Boolean> enablement;
 		private final T value;
-		private Supplier<String> tooltip = () -> null; //optional tooltip
+		private Supplier<String> tooltip; //optional tooltip
 		public CheckBoxModel(String label, T value, LiveVariable<Boolean> selection, LiveExpression<Boolean> enablement) {
 			this.label = label;
 			this.value = value;
