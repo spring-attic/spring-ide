@@ -129,6 +129,7 @@ public class SelectedButtonSection<T> extends WizardPageSection {
 		if (tooltip != null) {
 			// Setup HTML tooltip and its content
 			HtmlTooltip htmlTooltip = new HtmlTooltip(label);
+			htmlTooltip.setMaxSize(700, 700);
 			htmlTooltip.setShift(new Point(0, 0));
 			htmlTooltip.setHtml(tooltip);
 		}

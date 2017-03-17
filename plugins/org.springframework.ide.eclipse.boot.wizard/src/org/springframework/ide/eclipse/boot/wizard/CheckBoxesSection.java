@@ -134,6 +134,7 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 				if (html != null) {
 					// Setup HTML tooltip and its content
 					this.tooltip = new HtmlTooltip(cb);
+					this.tooltip.setMaxSize(700, 700);
 					this.tooltip.setShift(new Point(0, 0));
 					this.tooltip.setHtml(html);
 				}

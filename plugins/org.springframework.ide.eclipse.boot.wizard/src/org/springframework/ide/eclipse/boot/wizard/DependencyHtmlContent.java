@@ -48,12 +48,15 @@ class DependencyHtmlContent {
 		StringBuffer buffer = new StringBuffer();
 		HTMLPrinter.insertPageProlog(buffer, 0, String.join("\n", styles()));
 		
-		buffer.append("<p>");
-		buffer.append(HTMLPrinter.convertToHTMLContent(dep.getDescription()));		
-		buffer.append("</p>");
-		
-		if (dep.getLinks() != null) {
-			Links links = dep.getLinks();
+		Links links = dep.getLinks();
+		// HTML Tooltip initial size calculations can't calculate <br/> height normally, can't tell new line jump from empty line
+		// Therefore use <p> if links are present, otherwise just plain text
+		if (links == null) {
+			buffer.append(HTMLPrinter.convertToHTMLContent(dep.getDescription()));
+		} else {
+			buffer.append("<p>");
+			buffer.append(HTMLPrinter.convertToHTMLContent(dep.getDescription()));
+			buffer.append("</p>");
 			if (links.getGuides() != null) {
 				String bullets = linkBullets(links.getGuides(), variables);
 				if (!bullets.isEmpty()) {
@@ -140,8 +143,7 @@ class DependencyHtmlContent {
 			"h5         { margin-top: 0px; margin-bottom: 0px; }",
 			"p 			{ margin-top: 1em; margin-bottom: 1em; }",
 			"ul	        { margin-top: 0px; margin-bottom: 0em; margin-left: 1em; padding-left: 1em; }",
-			"li	        { margin-top: 0px; margin-bottom: 0px; }",
-			"li p	    { margin-top: 0px; margin-bottom: 0px; }"
+			"li	        { margin-top: 0px; margin-bottom: 0px; }"
 		};		
 	}
 
