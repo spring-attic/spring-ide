@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Pivotal, Inc.
+ * Copyright (c) 2016, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -931,12 +931,19 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	private Mono<Void> mapRoute(String appName, CFRoute route) {
-		MapRouteRequest mapRouteReq = MapRouteRequest.builder()
-				.applicationName(appName)
-				.domain(route.getDomain())
-				.host(route.getHost())
-				.path(route.getPath())
-				.build();
+		org.cloudfoundry.operations.routes.MapRouteRequest.Builder builder = MapRouteRequest.builder()
+		.applicationName(appName)
+		.domain(route.getDomain())
+		.host(route.getHost());
+		// Don't set these unless they have values. Otherwise exception thrown. They are also mutually exclusive
+		// so only one or the other can be set but not both
+		if (StringUtils.hasText(route.getPath())) {
+			builder.path(route.getPath());
+		} else if (route.getPort() != CFRoute.NO_PORT) {
+			builder.port(route.getPort());
+		}
+
+		MapRouteRequest mapRouteReq = builder.build();
 		return log("operations.routes.map("+mapRouteReq+")",
 			_operations.routes().map(mapRouteReq)
 		)
@@ -945,22 +952,12 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	private Mono<CFRoute> toRoute(Mono<Set<String>> domains, String desiredUrl) {
 		return domains.then((ds) -> {
-			for (String d : ds) {
-				//TODO: we assume that there's no 'path' component for now, which simpiflies things. What if there is a path component?
-				if (desiredUrl.endsWith(d)) {
-					String host = desiredUrl.substring(0, desiredUrl.length()-d.length());
-					while (host.endsWith(".")) {
-						host = host.substring(0, host.length()-1);
-					}
-					CFRoute.Builder route = CFRoute.builder();
-					route.domain(d);
-					if (StringUtils.hasText(host)) {
-						route.host(host);
-					}
-					return Mono.just(route.build());
-				}
+			try {
+				CFRoute route = CFRoute.builder().from(desiredUrl, ds).build();
+				return Mono.just(route);
+			} catch (Exception e) {
+				return Mono.error(e);
 			}
-			return Mono.error(new IOException("Couldn't find a domain matching "+desiredUrl));
 		});
 	}
 

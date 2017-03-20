@@ -30,8 +30,8 @@ import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationURL;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFRoute;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
@@ -1308,10 +1308,10 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 			Set<String> uris = new HashSet<>();
 			for (String d : domainsSet) {
 				if (hostsSet.isEmpty()) {
-					uris.add(new CloudApplicationURL(null, d).getUrl());
+					uris.add(CFRoute.builder().domain(d).build().getRoute());
 				} else {
 					for (String h : hostsSet) {
-						uris.add(new CloudApplicationURL(h, d).getUrl());
+						uris.add(CFRoute.builder().host(h).domain(d).build().getRoute());
 					}
 				}
 			}

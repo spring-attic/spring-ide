@@ -24,10 +24,10 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudApplicationURL;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFRoute;
 
 public class CloudApplicationDeploymentProperties implements DeploymentProperties {
 
@@ -243,8 +243,9 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 
 		if (app == null) {
 			List<CFCloudDomain> domains = ApplicationManifestHandler.getCloudDomains(cloudData);
-			CloudApplicationURL cloudAppUrl = new CloudApplicationURL(project.getName(), domains.get(0).getName());
-			properties.setUris(Collections.singletonList(cloudAppUrl.getUrl()));
+
+			CFRoute route = CFRoute.builder().host(project.getName()).domain(domains.get(0).getName()).build();
+			properties.setUris(Collections.singletonList(route.getRoute()));
 		} else {
 			properties.setUris(app.getUris());
 		}
