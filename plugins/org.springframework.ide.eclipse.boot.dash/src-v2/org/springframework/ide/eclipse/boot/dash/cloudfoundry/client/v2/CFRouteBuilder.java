@@ -47,11 +47,13 @@ public class CFRouteBuilder {
 
 	public CFRouteBuilder path(String path) {
 		this.path = path;
+		setRoute(this.host, this.domain, this.path, this.port);
 		return this;
 	}
 
 	public CFRouteBuilder port(int port) {
 		this.port = port;
+		setRoute(this.host, this.domain, this.path, this.port);
 		return this;
 	}
 
@@ -224,7 +226,7 @@ public class CFRouteBuilder {
 			writer.append('/');
 			writer.append(path);
 		} else if (port != CFRoute.NO_PORT) {
-			writer.append('.');
+			writer.append(':');
 			writer.append(Integer.toString(port));
 		}
 
