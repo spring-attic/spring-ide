@@ -85,7 +85,7 @@ public class CFRouteBuilder {
 
 		matchedDomain = findDomain(hostDomain, domains);
 
-		if (!StringUtils.hasLength(matchedDomain)) {
+		if (!StringUtils.hasText(matchedDomain)) {
 			throw ExceptionUtil.coreException("Unable to parse domain from: " + fullRoute
 					+ ". The domain may not exist in the Cloud Foundry target. Please make sure that the URL uses a valid Cloud domain available in the Cloud Foundry target.");
 		}
