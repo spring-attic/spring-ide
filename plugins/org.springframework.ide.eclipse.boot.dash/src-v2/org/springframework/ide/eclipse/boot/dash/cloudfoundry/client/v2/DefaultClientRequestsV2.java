@@ -931,13 +931,19 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	private Mono<Void> mapRoute(String appName, CFRoute route) {
-		MapRouteRequest mapRouteReq = MapRouteRequest.builder()
-				.applicationName(appName)
-				.domain(route.getDomain())
-				.host(route.getHost())
-				.path(route.getPath())
-				.port(route.getPort())
-				.build();
+		org.cloudfoundry.operations.routes.MapRouteRequest.Builder builder = MapRouteRequest.builder()
+		.applicationName(appName)
+		.domain(route.getDomain())
+		.host(route.getHost());
+		// Don't set these unless they have values. Otherwise exception thrown. They are also mutually exclusive
+		// so only one or the other can be set but not both
+		if (StringUtils.hasText(route.getPath())) {
+			builder.path(route.getPath());
+		} else if (route.getPort() != CFRoute.NO_PORT) {
+			builder.port(route.getPort());
+		}
+
+		MapRouteRequest mapRouteReq = builder.build();
 		return log("operations.routes.map("+mapRouteReq+")",
 			_operations.routes().map(mapRouteReq)
 		)
