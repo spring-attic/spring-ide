@@ -15,12 +15,11 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.util.StringUtils;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
-
-import reactor.core.publisher.Flux;
 
 public class CFRouteBuilder {
 	private String domain;
@@ -234,10 +233,10 @@ public class CFRouteBuilder {
 	}
 
 	public CFRouteBuilder from(String desiredUrl, List<CFCloudDomain> cloudDomains) throws Exception {
-		List<String> domains = Flux.fromIterable(cloudDomains)
-		.map(CFCloudDomain::getName)
-		.collectList()
-		.block();
+		List<String> domains = cloudDomains
+								.stream()
+								.map(CFCloudDomain::getName)
+								.collect(Collectors.toList());
 		return from(desiredUrl, domains);
 	}
 
