@@ -23,12 +23,13 @@ public class CFRoute {
 	final private String fullRoute;
 
 
-	public CFRoute(Route route) {
+	// Package-private. Must use builder to build
+	CFRoute(Route route) {
 		// V2 client Route doesn't seem to have port API
 		this(route.getDomain(), route.getHost(), route.getPath(), NO_PORT, route.toString());
 	}
 
-	public CFRoute(String domain, String host, String path, int port, String fullRoute)  {
+	CFRoute(String domain, String host, String path, int port, String fullRoute)  {
 		super();
 		this.domain = domain;
 		this.host = host;
