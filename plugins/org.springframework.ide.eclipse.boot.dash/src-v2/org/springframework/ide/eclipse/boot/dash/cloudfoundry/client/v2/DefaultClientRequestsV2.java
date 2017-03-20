@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Pivotal, Inc.
+ * Copyright (c) 2016, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -946,22 +946,12 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	private Mono<CFRoute> toRoute(Mono<Set<String>> domains, String desiredUrl) {
 		return domains.then((ds) -> {
-			for (String d : ds) {
-				//TODO: we assume that there's no 'path' component for now, which simpiflies things. What if there is a path component?
-				if (desiredUrl.endsWith(d)) {
-					String host = desiredUrl.substring(0, desiredUrl.length()-d.length());
-					while (host.endsWith(".")) {
-						host = host.substring(0, host.length()-1);
-					}
-					CFRoute.Builder route = CFRoute.builder();
-					route.domain(d);
-					if (StringUtils.hasText(host)) {
-						route.host(host);
-					}
-					return Mono.just(route.build());
-				}
+			try {
+				CFRoute route = CFRoute.builder().from(desiredUrl, ds).build();
+				return Mono.just(route);
+			} catch (Exception e) {
+				return Mono.error(e);
 			}
-			return Mono.error(new IOException("Couldn't find a domain matching "+desiredUrl));
 		});
 	}
 

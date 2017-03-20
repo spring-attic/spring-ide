@@ -472,7 +472,7 @@ public class ApplicationManifestHandler {
 			for (String uri : properties.getUris()) {
 				try {
 					// Find the first valid URL
-					CFRoute route = CFRoute.toRoute(uri, cloudDomains);
+					CFRoute route = CFRoute.builder().from(uri, cloudDomains).build();
 					if (route.getHost() != null) {
 						hosts.add(route.getHost());
 					}
@@ -522,7 +522,7 @@ public class ApplicationManifestHandler {
 		for (String uri : uris) {
 			try {
 				// Find the first valid URL
-				CFRoute route = CFRoute.toRoute(uri, cloudDomains);
+				CFRoute route = CFRoute.builder().from(uri, cloudDomains).build();
 				if (route.getHost() != null) {
 					hostsSet.add(route.getHost());
 				}
@@ -843,7 +843,7 @@ public class ApplicationManifestHandler {
 				.map(route -> (String) route)
 				.filter(url -> {
 					try {
-						CFRoute route = CFRoute.toRoute(url, domains);
+						CFRoute route = CFRoute.builder().from(url, domains).build();
 						return route.getDomain() != null;
 					} catch (Exception e) {
 						return false;
