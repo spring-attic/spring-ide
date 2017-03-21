@@ -69,22 +69,24 @@ public class CFRouteBuilder {
 		String matchedHost = null;
 		String path = findPath(desiredUrl);
 		int port = findPort(desiredUrl);
-		String hostDomain = desiredUrl;
+		String hostAndDomain = desiredUrl;
 
 		if (port != CFRoute.NO_PORT && StringUtils.hasText(path)) {
 			throw ExceptionUtil.coreException(
 					"Route: " + desiredUrl + " cannot have both port and path. Port:" + port + " Path:" + path);
 		}
 
-		if (StringUtils.hasText(path) && hostDomain.indexOf(path) > 0) {
+		if (StringUtils.hasText(path) && hostAndDomain.indexOf(path) > 0) {
 			path(path);
-			hostDomain = hostDomain.substring(0, hostDomain.indexOf(path) - 1);
-		} else if (port != CFRoute.NO_PORT && hostDomain.indexOf(Integer.toString(port)) > 0) {
+			// one index less than the path will skip the starting '/'
+			hostAndDomain = hostAndDomain.substring(0, hostAndDomain.indexOf(path) - 1);
+		} else if (port != CFRoute.NO_PORT && hostAndDomain.indexOf(Integer.toString(port)) > 0) {
 			port(port);
-			hostDomain = hostDomain.substring(0, hostDomain.indexOf(Integer.toString(port)) - 1);
+			// one index less than the port will skip the starting ':'
+			hostAndDomain = hostAndDomain.substring(0, hostAndDomain.indexOf(Integer.toString(port)) - 1);
 		}
 
-		matchedDomain = findDomain(hostDomain, domains);
+		matchedDomain = findDomain(hostAndDomain, domains);
 
 		if (!StringUtils.hasText(matchedDomain)) {
 			throw ExceptionUtil.coreException("Unable to parse domain from: " + fullRoute
@@ -92,7 +94,8 @@ public class CFRouteBuilder {
 		}
 		domain(matchedDomain);
 
-		matchedHost = hostDomain.substring(0, hostDomain.length()-matchedDomain.length());
+		matchedHost = hostAndDomain.substring(0, hostAndDomain.length()-matchedDomain.length());
+		// Remove ending '.'
 		while (matchedHost.endsWith(".")) {
 			matchedHost = matchedHost.substring(0, matchedHost.length()-1);
 		}
@@ -117,7 +120,7 @@ public class CFRouteBuilder {
 			}
 		}
 		// Otherwise split on the first "." and try again
-		if (hostDomain.indexOf(".") + 1 >= 0) {
+		if (hostDomain.indexOf(".")  >= 0 && hostDomain.indexOf(".") + 1 < hostDomain.length()) {
 			String remaining = hostDomain.substring(hostDomain.indexOf(".") + 1, hostDomain.length());
 			return findDomain(remaining, domains);
 		} else {
@@ -134,7 +137,7 @@ public class CFRouteBuilder {
 		// No need to consider schemes like "http://" because route values in
 		// manifest.yml do not start with scheme.
 		// Based on routes.go code, the only occurrence of a ":" in a routes
-		// value is if the route is a tcp route
+		// value is if the route is a tcp route. There should be no other supported occurrence of ":"
 		String[] segments = desiredUrl.split(":");
 		return segments != null && segments.length == 2 ? Integer.parseInt(segments[1]) : CFRoute.NO_PORT;
 	}
