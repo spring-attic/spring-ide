@@ -413,16 +413,16 @@ public class CloudFoundryClientTest {
 			assertEquals(routes, ImmutableSet.copyOf(app.getUris()));
 		}
 
-		doSetRoutesTest(appName, ImmutableSet.of());
+		doSetRoutesTest(appName, ImmutableSet.of(), params.getRandomRoute());
 
 		for (String route : routes) {
-			doSetRoutesTest(appName, ImmutableSet.of(route));
+			doSetRoutesTest(appName, ImmutableSet.of(route), params.getRandomRoute());
 		}
 
 	}
 
-	private void doSetRoutesTest(String appName, ImmutableSet<String> routes) throws Exception {
-		ReactorUtils.get(client.setRoutes(appName, routes));
+	private void doSetRoutesTest(String appName, ImmutableSet<String> routes, boolean randomRoute) throws Exception {
+		ReactorUtils.get(client.setRoutes(appName, routes, randomRoute));
 		CFApplicationDetail app = client.getApplication(appName);
 		assertEquals(routes, ImmutableSet.copyOf(app.getUris()));
 	}

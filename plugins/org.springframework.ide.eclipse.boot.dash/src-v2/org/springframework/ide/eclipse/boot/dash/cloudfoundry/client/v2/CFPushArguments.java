@@ -46,6 +46,7 @@ public class CFPushArguments implements AutoCloseable {
 	private List<String> services = ImmutableList.of();
 	private ZipFile applicationData;
 	private boolean noStart = false;
+	private boolean randomRoute = false;
 
 	public CFPushArguments() {
 	}
@@ -110,6 +111,12 @@ public class CFPushArguments implements AutoCloseable {
 	public void setServices(List<String> services) {
 		this.services = services;
 	}
+	public boolean getRandomRoute() {
+		return this.randomRoute;
+	}
+	public void setRandomRoute(boolean randomRoute) {
+		this.randomRoute = randomRoute;
+	}
 	public ZipFile getApplicationData() {
 		return applicationData;
 	}
@@ -152,7 +159,7 @@ public class CFPushArguments implements AutoCloseable {
 		return "CFPushArguments [appName=" + appName + ", routes=" + routes + ", memory=" + memory + ", diskQuota="
 				+ diskQuota + ", timeout=" + timeout + ", buildpack=" + buildpack + ", command=" + command + ", stack="
 				+ stack + ", env=" + env + ", instances=" + instances + ", services=" + services + ", noStart="
-				+ noStart + ", healthCheckType="+ healthCheckType+" ]";
+				+ noStart + ", healthCheckType="+ healthCheckType+ ", randomRoute="+ randomRoute+" ]";
 	}
 
 

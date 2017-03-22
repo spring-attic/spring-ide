@@ -687,11 +687,12 @@ public class ApplicationManifestHandler {
 	 * @param application
 	 * @param allResults
 	 * @param properties
+	 * @param randomRoute true if random host should be generated
 	 * @return non-null list of URIs parsed from domains and hosts. May be empty
 	 */
 	@SuppressWarnings("unchecked")
 	private List<String> fromDomainsAndHosts(Map<?, ?> application, Map<Object, Object> allResults,
-			CloudApplicationDeploymentProperties properties) {
+			CloudApplicationDeploymentProperties properties, boolean randomRoute) {
 		List<CFCloudDomain> domains = getCloudDomains(cloudData);
 
 		HashSet<String> hostsSet = new LinkedHashSet<>();
@@ -749,11 +750,7 @@ public class ApplicationManifestHandler {
 		 * "no-hostname: true" otherwise take app name as the host name
 		 */
 		if (hostsSet.isEmpty()) {
-			Boolean randomRoute = getValue(application, RANDOM_ROUTE_PROP, Boolean.class);
-			if (randomRoute == null) {
-				randomRoute = getValue(allResults, RANDOM_ROUTE_PROP, Boolean.class);
-			}
-			if (Boolean.TRUE.equals(randomRoute)) {
+			if (randomRoute) {
 				hostsSet.add(extractHost("${random}", 10));
 				domainsSet.clear();
 				domainsSet.add(domains.get(0).getName());
@@ -797,6 +794,13 @@ public class ApplicationManifestHandler {
 
 	protected void readApplicationURL(Map<?, ?> application, Map<Object, Object> allResults,
 			CloudApplicationDeploymentProperties properties) {
+		Boolean randomRoute = getValue(application, RANDOM_ROUTE_PROP, Boolean.class);
+		if (randomRoute == null) {
+			randomRoute = getValue(allResults, RANDOM_ROUTE_PROP, Boolean.class);
+		}
+        boolean useRandomRoute = Boolean.TRUE.equals(randomRoute);
+        properties.setRandomRoute(useRandomRoute);
+
 		/*
 		 * Check for "no-route: true". If set then uris list should be empty
 		 */
@@ -812,7 +816,7 @@ public class ApplicationManifestHandler {
 			// Otherwise fall back to parsing from domains and hosts
 			List<String> uris = fromRoutesProperty(application, allResults, properties);
 			if (uris.isEmpty()) {
-				uris = fromDomainsAndHosts(application, allResults, properties);
+				uris = fromDomainsAndHosts(application, allResults, properties, useRandomRoute);
 			}
 
 			properties.setUris(uris);
@@ -823,16 +827,6 @@ public class ApplicationManifestHandler {
 			CloudApplicationDeploymentProperties properties) {
 		Set<String> uris = new LinkedHashSet<>();
 		List<CFCloudDomain> domains = getCloudDomains(cloudData);
-
-		Boolean randomRoute = getValue(application, RANDOM_ROUTE_PROP, Boolean.class);
-		if (randomRoute == null) {
-			randomRoute = getValue(allResults, RANDOM_ROUTE_PROP, Boolean.class);
-		}
-		// Random route works with "routes" properties. E.g. if a route is tcp, "random route" will set a random port
-		// However, how this random route is used doesn't need to be decided at this stage. The client and CF decides how
-		// to correctly interpret "random route" given a domain.
-        boolean useRandomRoute = Boolean.TRUE.equals(randomRoute);
-
 		List<?> routes = getValue(application, ROUTES_PROP, List.class);
 		List<?> rootRoutes = getValue(allResults, ROUTES_PROP, List.class);
 		if (routes != null || rootRoutes != null) {
@@ -848,7 +842,7 @@ public class ApplicationManifestHandler {
 				.map(route -> (String) route)
 				.filter(url -> {
 					try {
-						CFRoute route = CFRoute.builder().from(url, domains).randomPort(useRandomRoute).build();
+						CFRoute route = CFRoute.builder().from(url, domains).build();
 						return route.getDomain() != null;
 					} catch (Exception e) {
 						return false;
