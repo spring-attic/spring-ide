@@ -298,22 +298,22 @@ public class AopReferenceModelBuilderJob extends Job {
 
 		IResource file = config.getElementResource();
 		IJavaProject javaProject = JdtUtils.getJavaProject(file.getProject());
-		
+
 		if (javaProject != null) {
 			IAopProject aopProject = ((AopReferenceModel) Activator.getModel()).getProjectWithInitialization(javaProject);
-	
-			Set<IBean> beans = new LinkedHashSet<IBean>();
+
+			Set<IBean> beans = new LinkedHashSet<>();
 			beans.addAll(config.getBeans());
-	
+
 			// add component registered beans
 			for (IBeansComponent component : config.getComponents()) {
 				addBeansFromComponent(component, beans);
 			}
-	
+
 			buildAopReferencesForBeans(config, info, monitor, file, aopProject, beans);
 		}
 	}
-	
+
 	private void addBeansFromComponent(IBeansComponent bc, Set<IBean> beans) {
 		Set<IBean> nestedBeans = bc.getBeans();
 		for (IBean nestedBean : nestedBeans) {
@@ -321,7 +321,7 @@ public class AopReferenceModelBuilderJob extends Job {
 				beans.add(nestedBean);
 			}
 		}
-		
+
 		for (IBeansComponent component : bc.getComponents()) {
 			addBeansFromComponent(component, beans);
 		}
@@ -346,7 +346,7 @@ public class AopReferenceModelBuilderJob extends Job {
 				// "AopReferenceModelBuilder.aopBuilderClassPath", StringUtils.arrayToDelimitedString(
 				// ((URLClassLoader) classLoaderSupport.getProjectClassLoader()).getURLs(), ";")));
 
-				List<IAspectDefinition> aspectInfos = new ArrayList<IAspectDefinition>();
+				List<IAspectDefinition> aspectInfos = new ArrayList<>();
 				aspectInfos.addAll(buildAspectDefinitions(currentFile));
 
 				addAspectInfosFromImport(config, aspectInfos);
@@ -397,7 +397,7 @@ public class AopReferenceModelBuilderJob extends Job {
 	private void buildAopReferencesFromBeansConfigSets(IBeansProject project, IBeansConfig config,
 			IAspectDefinition info, IProgressMonitor monitor) {
 
-		Set<IBeansConfig> foundConfigs = new LinkedHashSet<IBeansConfig>();
+		Set<IBeansConfig> foundConfigs = new LinkedHashSet<>();
 		for (IBeansConfigSet configSet : project.getConfigSets()) {
 			if (configSet.getConfigs().contains(config)) {
 				Set<IBeansConfig> configs = configSet.getConfigs();
@@ -436,14 +436,14 @@ public class AopReferenceModelBuilderJob extends Job {
 
 		markerJob = new MarkerModifyingJob();
 		aspectDefinitionMatcher = new AspectDefinitionMatcher();
-		aspectDefinitionCache = new HashMap<IFile, List<IAspectDefinition>>();
+		aspectDefinitionCache = new HashMap<>();
 		aspectDefinitionBuilder = new AspectDefinitionBuilderHelper();
 		classLoaderSupport = createWeavingClassLoaderSupport();
-		
+
 		monitor.beginTask(Activator.getFormattedMessage("AopReferenceModelBuilder.startBuildingAopReferenceModel"),
 				affectedResources.size());
 
-		Map<IResource, IAopProject> processedProjects = new HashMap<IResource, IAopProject>();
+		Map<IResource, IAopProject> processedProjects = new HashMap<>();
 		try {
 			for (IResource currentResource : affectedResources) {
 				if (currentResource instanceof IFile) {
@@ -535,11 +535,11 @@ public class AopReferenceModelBuilderJob extends Job {
 	 */
 	private class MarkerModifyingJob extends Job {
 
-		private Map<IResource, List<IAopReference>> references = new HashMap<IResource, List<IAopReference>>();
+		private Map<IResource, List<IAopReference>> references = new HashMap<>();
 
-		private Set<IResource> resources = new HashSet<IResource>();
+		private Set<IResource> resources = new HashSet<>();
 
-		private Set<ThrowableHolder> throwables = new HashSet<ThrowableHolder>();
+		private Set<ThrowableHolder> throwables = new HashSet<>();
 
 		public MarkerModifyingJob() {
 			super("Creating AOP reference model markers");
@@ -551,7 +551,7 @@ public class AopReferenceModelBuilderJob extends Job {
 
 		public void addAopReference(IResource resource, Set<IAopReference> references) {
 			// create new list to prevent concurrent modification problems
-			this.references.put(resource, new ArrayList<IAopReference>(references));
+			this.references.put(resource, new ArrayList<>(references));
 		}
 
 		public void addResource(IResource resource) {
@@ -567,10 +567,10 @@ public class AopReferenceModelBuilderJob extends Job {
 		 */
 		private void handleException(Throwable t, IAspectDefinition info, IBean bean, IResource file) {
 			if (t instanceof NoClassDefFoundError || t instanceof ClassNotFoundException) {
-				AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
-						"AopReferenceModelBuilder.classDependencyError", t.getMessage(), info, bean));
-				AopReferenceModelMarkerUtils.createProblemMarker(file, Activator.getFormattedMessage(
-						"AopReferenceModelBuilder.buildPathIncomplete", t.getMessage()), IMarker.SEVERITY_ERROR, bean
+				String msg = Activator.getFormattedMessage(
+						"AopReferenceModelBuilder.classDependencyError", t.getMessage(), info, bean);
+				AopLog.log(AopLog.BUILDER, msg);
+				AopReferenceModelMarkerUtils.createProblemMarker(file, msg, IMarker.SEVERITY_ERROR, bean
 						.getElementStartLine(), AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, file);
 			}
 			else if (t instanceof IllegalArgumentException) {
