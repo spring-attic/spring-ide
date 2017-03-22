@@ -742,9 +742,6 @@
 					<storepass>${signing.store.password}</storepass>
 					<keypass>${signing.key.password}</keypass>
 					<tsa>http://timestamp.digicert.com</tsa>
-					<arguments>
-						<argument>-Djava.security.egd=file:/dev/./urandom</argument>
-					</arguments>
 				</configuration>
 			</plugin>
 		</plugins>
