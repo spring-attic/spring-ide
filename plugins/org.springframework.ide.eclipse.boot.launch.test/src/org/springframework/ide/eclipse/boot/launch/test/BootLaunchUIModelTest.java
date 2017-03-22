@@ -43,7 +43,7 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 
 	public class TestProfileHistory implements IProfileHistory {
 
-		private Map<String, String[]> map = new HashMap<String, String[]>();
+		private Map<String, String[]> map = new HashMap<>();
 
 		public String[] getHistory(IProject project) {
 			String[] h = map.get(project.getName());
@@ -377,6 +377,7 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 
 	public void testJmxValidator() throws Exception {
 		EnableJmxFeaturesModel eJmxModel = this.model.enableJmx;
+		LiveVariable<Boolean> jmx = eJmxModel.jmxEnabled;
 		LiveVariable<Boolean> liveBean = eJmxModel.liveBeanEnabled;
 		LiveVariable<Boolean> lifeCycle = eJmxModel.lifeCycleEnabled;
 		LiveVariable<String> port = eJmxModel.port;
@@ -392,18 +393,22 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 		port.setValue("Unparseable");
 		assertError("can't be parsed as an Integer", validator);
 
+		jmx.setValue(false);
 		liveBean.setValue(false);
 		lifeCycle.setValue(false);
 		assertOk(validator); //if disabled we shouldn't check the port as it doesn't matter.
 
+		jmx.setValue(true);
 		port.setValue("10000000");
 		liveBean.setValue(true);
 		assertError("should be smaller than", validator);
 
+		jmx.setValue(false);
 		liveBean.setValue(false);
 		port.setValue("-111");
 		assertOk(validator); //if disabled we shouldn't check the port as it doesn't matter.
 
+		jmx.setValue(true);
 		lifeCycle.setValue(true); //only enable lifeCycle
 		assertFalse(liveBean.getValue());
 		assertError("should be a positive", validator);
