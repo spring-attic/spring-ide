@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -192,6 +193,7 @@ public class GSGWizardModelTest {
 
 					return true;
 				} else {
+					fail("Expected downloadStates not reached. Actual states:\n"+actualContentDownloadStates);;
 					return false;
 				}
 			}
