@@ -93,6 +93,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.IApplicati
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springframework.ide.eclipse.boot.util.Log;
+import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springframework.util.StringUtils;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
@@ -931,15 +932,22 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	private Mono<Void> mapRoute(String appName, CFRoute route) {
+		// All routes need a domain, so always set it
 		org.cloudfoundry.operations.routes.MapRouteRequest.Builder builder = MapRouteRequest.builder()
 		.applicationName(appName)
 		.domain(route.getDomain())
-		.host(route.getHost());
-		// Don't set these unless they have values. Otherwise exception thrown. They are also mutually exclusive
-		// so only one or the other can be set but not both
+		.randomPort(route.randomPort());
+
+		// Let the client validate if any of these combinations are correct.
+		// However, only set these values only if they are present as always setting everything seems to cause errors even with
+		// valid routes
+		if (StringUtils.hasText(route.getHost())) {
+			builder.host(route.getHost());
+		}
 		if (StringUtils.hasText(route.getPath())) {
 			builder.path(route.getPath());
-		} else if (route.getPort() != CFRoute.NO_PORT) {
+		}
+		if (route.getPort() != CFRoute.NO_PORT) {
 			builder.port(route.getPort());
 		}
 
@@ -1009,16 +1017,24 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	private Mono<Void> unmapRoute(String appName, CFRoute route) {
-		String path = route.getPath();
 //		if (!StringUtil.hasText(path)) {
 //			//client doesn't like to get 'empty string' it will complain that route doesn't exist.
 //			path = null;
 //		}
-		UnmapRouteRequest req = UnmapRouteRequest.builder()
+		org.cloudfoundry.operations.routes.UnmapRouteRequest.Builder unmapBuilder = UnmapRouteRequest.builder()
 			.applicationName(appName)
 			.domain(route.getDomain())
-			.host(route.getHost())
-			.path(path)
+			.host(route.getHost());
+
+		// Have to check if port and path are set. Cannot just set them without checking
+		// otherwise exception throw, even if these values are "empty/null" in the route
+		if (route.getPort() != CFRoute.NO_PORT) {
+			unmapBuilder.port(route.getPort());
+		}
+		if (StringUtil.hasText(route.getPath())) {
+			unmapBuilder.path(route.getPath());
+		}
+		UnmapRouteRequest req = unmapBuilder
 			.build();
 		return log("operations.routes.unmap("+req+")",
 			_operations.routes().unmap(req)
@@ -1035,7 +1051,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		.flatMap((route) -> {
 			for (String app : route.getApplications()) {
 				if (app.equals(appName)) {
-					return Mono.just(new CFRoute(route));
+					return Mono.just(CFRoute.builder().from(route).build());
 				}
 			};
 			return Mono.empty();

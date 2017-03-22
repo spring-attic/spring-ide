@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2;
 
-import org.cloudfoundry.operations.routes.Route;
-
 public class CFRoute {
 
 	public static final int NO_PORT = -1;
@@ -21,21 +19,16 @@ public class CFRoute {
 	final private String path;
 	final private int port;
 	final private String fullRoute;
+	final private boolean randomPort;
 
-
-	// Package-private. Must use builder to build
-	CFRoute(Route route) {
-		// V2 client Route doesn't seem to have port API
-		this(route.getDomain(), route.getHost(), route.getPath(), NO_PORT, route.toString());
-	}
-
-	CFRoute(String domain, String host, String path, int port, String fullRoute)  {
+	CFRoute(String domain, String host, String path, int port, String fullRoute, boolean randomPort)  {
 		super();
 		this.domain = domain;
 		this.host = host;
 		this.path = path;
 		this.port = port;
 		this.fullRoute = fullRoute;
+		this.randomPort = randomPort;
 	}
 
 	public String getDomain() {
@@ -58,9 +51,13 @@ public class CFRoute {
 		return fullRoute;
 	}
 
+	public boolean randomPort() {
+		return randomPort;
+	}
+
 	@Override
 	public String toString() {
-		return "CFRoute [domain=" + domain + ", host=" + host + ", path=" + path + ", port=" + port + "]";
+		return "CFRoute [domain=" + domain + ", host=" + host + ", path=" + path + ", port=" + port + ", randomPort=" + randomPort +"]";
 	}
 
 	@Override
@@ -72,6 +69,7 @@ public class CFRoute {
 		result = prime * result + ((host == null) ? 0 : host.hashCode());
 		result = prime * result + ((path == null) ? 0 : path.hashCode());
 		result = prime * result + port;
+		result = prime * result + (randomPort ? 1231 : 1237);
 		return result;
 	}
 
@@ -105,6 +103,8 @@ public class CFRoute {
 		} else if (!path.equals(other.path))
 			return false;
 		if (port != other.port)
+			return false;
+		if (randomPort != other.randomPort)
 			return false;
 		return true;
 	}

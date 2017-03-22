@@ -11,12 +11,12 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2;
 
 import java.io.StringWriter;
-import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.cloudfoundry.operations.routes.Route;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.util.StringUtils;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
@@ -27,34 +27,55 @@ public class CFRouteBuilder {
 	private String path;
 	private int port = CFRoute.NO_PORT;
 	private String fullRoute;
+	private boolean randomPort;
 
 	public CFRoute build() {
-		return new CFRoute(this.domain, this.host, this.path, this.port, this.fullRoute);
+		return new CFRoute(this.domain, this.host, this.path, this.port, this.fullRoute, this.randomPort);
 	}
 
 	public CFRouteBuilder domain(String domain) {
 		this.domain = domain;
-		setRoute(this.host, this.domain, this.path, this.port);
+		// may seem like the more ideal place is to build the full route when building the route, rather than repeating
+		// the process each time a domain, host, path or port value is set
+		// but the "from" option should be allowed to overwrite the full route as well since it already
+		// has the full value. Therefore re-construct the full value if the route is being built piece by piece, but not in from
+		this.fullRoute = buildRouteVal(this.host, this.domain, this.path, this.port);
 		return this;
 	}
 
 	public CFRouteBuilder host(String host) {
 		this.host = host;
-		setRoute(this.host, this.domain, this.path, this.port);
+		this.fullRoute = buildRouteVal(this.host, this.domain, this.path, this.port);
 		return this;
 	}
 
 	public CFRouteBuilder path(String path) {
 		this.path = path;
-		setRoute(this.host, this.domain, this.path, this.port);
+		this.fullRoute = buildRouteVal(this.host, this.domain, this.path, this.port);
 		return this;
 	}
 
 	public CFRouteBuilder port(int port) {
 		this.port = port;
-		setRoute(this.host, this.domain, this.path, this.port);
+		this.fullRoute = buildRouteVal(this.host, this.domain, this.path, this.port);
 		return this;
 	}
+
+	public CFRouteBuilder randomPort(boolean randomPort) {
+		this.randomPort = randomPort;
+		return this;
+	}
+
+	public CFRouteBuilder from(Route route) {
+		// Route doesn't seem to have API to get a port
+		int port = CFRoute.NO_PORT;
+		domain(route.getDomain());
+		host(route.getHost());
+		path(route.getPath());
+		port(port);
+		return this;
+	}
+
 
 	public CFRouteBuilder from(String desiredUrl, Collection<String> domains) throws Exception {
 		// Based on CLI cf/actors/routes.go and testing CLI directly with different "routes" values:
@@ -64,6 +85,7 @@ public class CFRouteBuilder {
 		// 4. Route can just be domain, or host and domain
 		//
 		// Therefore, routes values cannot be treated as URIs or URLs, but a combination of domain, host, path and port
+		// NOTE: The validation above doesn't need to take place here. The client or CF will validate correct combinations of routes.
 
 		String matchedDomain = null;
 		String matchedHost = null;
@@ -71,16 +93,13 @@ public class CFRouteBuilder {
 		int port = findPort(desiredUrl);
 		String hostAndDomain = desiredUrl;
 
-		if (port != CFRoute.NO_PORT && StringUtils.hasText(path)) {
-			throw ExceptionUtil.coreException(
-					"Route: " + desiredUrl + " cannot have both port and path. Port:" + port + " Path:" + path);
-		}
-
+		// Remove the port and path parts of the route to get the hostAndDomain combination
 		if (StringUtils.hasText(path) && hostAndDomain.indexOf(path) > 0) {
 			path(path);
 			// one index less than the path will skip the starting '/'
 			hostAndDomain = hostAndDomain.substring(0, hostAndDomain.indexOf(path) - 1);
-		} else if (port != CFRoute.NO_PORT && hostAndDomain.indexOf(Integer.toString(port)) > 0) {
+		}
+		if (port != CFRoute.NO_PORT && hostAndDomain.indexOf(Integer.toString(port)) > 0) {
 			port(port);
 			// one index less than the port will skip the starting ':'
 			hostAndDomain = hostAndDomain.substring(0, hostAndDomain.indexOf(Integer.toString(port)) - 1);
@@ -142,76 +161,17 @@ public class CFRouteBuilder {
 		return segments != null && segments.length == 2 ? Integer.parseInt(segments[1]) : CFRoute.NO_PORT;
 	}
 
+
 	/**
-	 * This is the "old" version of the parser that may have incorrectly assumed that "routes" are URIs.
-	 * Retaining for reference for now. However, {@link #from(String, List)} should be used instead. This should be
-	 * deleted once {@link #from(String, List)} is verified as correct
-	 * @param fullRoute
-	 * @param domains
-	 * @return
-	 * @throws Exception
+	 * Builds a full route value. Some parts of boot dash need the full route value for compare/merge.
+	 *
+	 * @param host
+	 * @param domain
+	 * @param path
+	 * @param port
 	 */
-	@Deprecated
-	public CFRouteBuilder asHostDomainfrom(String fullRoute, List<CFCloudDomain> domains) throws Exception {
-		// String url = domain.getName();
-		// url = url.replace("http://", "");
-		URI newUri;
-		try {
-			newUri = URI.create(fullRoute);
-		} catch (IllegalArgumentException e) {
-			throw ExceptionUtil.exception(e);
-		}
+	protected String buildRouteVal(String host, String domain, String path, int port) {
 
-		String authority = newUri.getScheme() != null ? newUri.getAuthority() : newUri.getPath();
-		String parsedDomainName = null;
-		String parsedSubdomainName = null;
-
-		if (authority != null) {
-			for (CFCloudDomain domain : domains) {
-				// Be sure to check for last segment rather than last String
-				// value
-				// otherwise: Example: "validdomain" is a valid domain:
-				// sub.domainvaliddomain will be parsed
-				// successfully as a valid application URL, even though
-				// "domainvaliddomain" is not a valid domain. Instead, this
-				// should be the correct
-				// URL: sub.domain.validdomain. A URL with just "validdomain"
-				// should also
-				// parse the domain part correctly (but no subdomain)
-				String domainName = domain.getName();
-				String domainSegment = '.' + domainName;
-				if (authority.equals(domainName)) {
-					parsedDomainName = domainName;
-					break;
-				} else if (authority.endsWith(domainSegment)) {
-					parsedDomainName = domainName;
-					// Any portion of the authority before the separating '.' is
-					// the
-					// subdomain. To avoid including the separating '.' between
-					// subdomain and domain itself as being part of the
-					// subdomain, only parse the subdomain if there
-					// is an actual '.' before the domain value in the authority
-					if (domainSegment.length() < authority.length()) {
-						parsedSubdomainName = authority.substring(0, authority.lastIndexOf(domainSegment));
-					}
-					break;
-				}
-			}
-		}
-
-		if (parsedDomainName == null || parsedDomainName.trim().length() == 0) {
-			throw ExceptionUtil.coreException("Unable to parse domain from: " + fullRoute
-					+ ". The domain may not exist in the Cloud Foundry target. Please make sure that the URL uses a valid Cloud domain available in the Cloud Foundry target.");
-		}
-		host(parsedSubdomainName);
-		domain(parsedDomainName);
-		return this;
-	}
-
-	protected void setRoute(String host, String domain, String path, int port) {
-		if (host == null && domain == null) {
-			return;
-		}
 		StringWriter writer = new StringWriter();
 		if (StringUtils.hasText(host)) {
 			writer.append(host);
@@ -222,17 +182,19 @@ public class CFRouteBuilder {
 		if (StringUtils.hasText(domain)) {
 			writer.append(domain);
 		}
-
-		// Either path or port, but not both
-		if (StringUtils.hasText(path)) {
-			writer.append('/');
-			writer.append(path);
-		} else if (port != CFRoute.NO_PORT) {
+		if (port != CFRoute.NO_PORT) {
 			writer.append(':');
 			writer.append(Integer.toString(port));
 		}
+		if (StringUtils.hasText(path)) {
+			if (!path.startsWith("/")) {
+				writer.append('/');
+			}
+			writer.append(path);
+		}
 
-		this.fullRoute = writer.toString();
+
+		return writer.toString();
 	}
 
 	public CFRouteBuilder from(String desiredUrl, List<CFCloudDomain> cloudDomains) throws Exception {
@@ -242,6 +204,4 @@ public class CFRouteBuilder {
 								.collect(Collectors.toList());
 		return from(desiredUrl, domains);
 	}
-
-
 }
