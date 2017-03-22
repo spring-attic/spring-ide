@@ -27,10 +27,9 @@ public class CFRouteBuilder {
 	private String path;
 	private int port = CFRoute.NO_PORT;
 	private String fullRoute;
-	private boolean randomPort;
 
 	public CFRoute build() {
-		return new CFRoute(this.domain, this.host, this.path, this.port, this.fullRoute, this.randomPort);
+		return new CFRoute(this.domain, this.host, this.path, this.port, this.fullRoute);
 	}
 
 	public CFRouteBuilder domain(String domain) {
@@ -58,11 +57,6 @@ public class CFRouteBuilder {
 	public CFRouteBuilder port(int port) {
 		this.port = port;
 		this.fullRoute = buildRouteVal(this.host, this.domain, this.path, this.port);
-		return this;
-	}
-
-	public CFRouteBuilder randomPort(boolean randomPort) {
-		this.randomPort = randomPort;
 		return this;
 	}
 

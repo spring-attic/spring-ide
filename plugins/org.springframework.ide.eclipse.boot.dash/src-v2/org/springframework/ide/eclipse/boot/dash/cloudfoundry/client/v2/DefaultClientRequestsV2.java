@@ -722,7 +722,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		.then(getApplicationDetail(appName))
 		.then((appDetail) -> {
 			return Flux.merge(
-				setRoutes(appDetail, params.getRoutes()),
+				setRoutes(appDetail, params.getRoutes(), params.getRandomRoute()),
 				bindAndUnbindServices(appName, params.getServices())
 			).then();
 		})
@@ -766,7 +766,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		.then(getApplicationDetail(appName))
 		.then((appDetail) ->
 			Flux.merge(
-				setRoutes(appDetail, params.getRoutes()),
+				setRoutes(appDetail, params.getRoutes(), params.getRandomRoute()),
 				bindAndUnbindServices(appName, params.getServices())
 			).then()
 		)
@@ -884,7 +884,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		);
 	}
 
-	public Mono<Void> setRoutes(ApplicationDetail appDetails, Collection<String> desiredUrls) {
+	public Mono<Void> setRoutes(ApplicationDetail appDetails, Collection<String> desiredUrls, boolean randomRoute) {
 		debug("setting routes for '"+appDetails.getName()+"': "+desiredUrls);
 
 		//Carefull! It is not safe map/unnmap multiple routes in parallel. Doing so causes some of the
@@ -893,16 +893,16 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		//To avoid this problem we must execute all that map / unmap calls in sequence!
 		return ReactorUtils.sequence(
 				unmapUndesiredRoutes(appDetails.getName(), desiredUrls),
-				mapDesiredRoutes(appDetails, desiredUrls)
+				mapDesiredRoutes(appDetails, desiredUrls, randomRoute)
 		);
 	}
 
-	public Mono<Void> setRoutes(String appName, Collection<String> desiredUrls) {
+	public Mono<Void> setRoutes(String appName, Collection<String> desiredUrls, boolean randomRoute) {
 		return getApplicationDetail(appName)
-		.then(appDetails -> setRoutes(appDetails, desiredUrls));
+		.then(appDetails -> setRoutes(appDetails, desiredUrls, randomRoute));
 	}
 
-	private Mono<Void> mapDesiredRoutes(ApplicationDetail appDetail, Collection<String> desiredUrls) {
+	private Mono<Void> mapDesiredRoutes(ApplicationDetail appDetail, Collection<String> desiredUrls, boolean randomRoute) {
 		Set<String> currentUrls = ImmutableSet.copyOf(appDetail.getUrls());
 		Mono<Set<String>> domains = getDomainNames().cache();
 		String appName = appDetail.getName();
@@ -915,28 +915,28 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 				return Mono.empty();
 			} else {
 				debug("mapping: "+url);
-				return mapRoute(domains, appName, url);
+				return mapRoute(domains, appName, url, randomRoute);
 			}
 		}, 1) //!!!IN SEQUENCE!!!
 		.then();
 	}
 
-	private Mono<Void> mapRoute(Mono<Set<String>> domains, String appName, String desiredUrl) {
+	private Mono<Void> mapRoute(Mono<Set<String>> domains, String appName, String desiredUrl, boolean randomRoute) {
 		debug("mapRoute: "+appName+" -> "+desiredUrl);
 		return toRoute(domains, desiredUrl)
-		.then((CFRoute route) -> mapRoute(appName, route))
+		.then((CFRoute route) -> mapRoute(appName, route, randomRoute))
 		.doOnError((e) -> {
 			Log.info("mapRoute FAILED!");
 			Log.log(e);
 		});
 	}
 
-	private Mono<Void> mapRoute(String appName, CFRoute route) {
+	private Mono<Void> mapRoute(String appName, CFRoute route, boolean randomRoute) {
 		// All routes need a domain, so always set it
 		org.cloudfoundry.operations.routes.MapRouteRequest.Builder builder = MapRouteRequest.builder()
 		.applicationName(appName)
 		.domain(route.getDomain())
-		.randomPort(route.randomPort());
+		.randomPort(randomRoute);
 
 		// Let the client validate if any of these combinations are correct.
 		// However, only set these values only if they are present as always setting everything seems to cause errors even with

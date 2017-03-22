@@ -63,6 +63,7 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 	 */
 	private File archive;
 	private String healthCheckType;
+	private boolean randomeRoute = false;
 
 	public CloudApplicationDeploymentProperties() {
 		boundServices = new ArrayList<>();
@@ -181,6 +182,14 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 		this.instances = instances;
 	}
 
+	public void setRandomRoute(boolean randomRoute) {
+		this.randomeRoute = randomRoute;
+	}
+
+	public boolean getRandomRoute() {
+		return this.randomeRoute ;
+	}
+
 	public void setEnvironmentVariables(Map<String, String> environmentVariables) {
 		/*
 		 * Map should be read/write accessible hence create new instance rather
@@ -268,6 +277,7 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 		args.setInstances(getInstances());
 		args.setServices(getServices());
 		args.setApplicationData(getArchive());
+		args.setRandomRoute(getRandomRoute());
 		return args;
 	}
 
