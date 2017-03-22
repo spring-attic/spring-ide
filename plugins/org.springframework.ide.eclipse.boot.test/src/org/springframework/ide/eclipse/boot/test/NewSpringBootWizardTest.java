@@ -17,6 +17,7 @@ import java.io.File;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.junit.Ignore;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springsource.ide.eclipse.commons.core.util.OsUtils;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ExternalCommand;
@@ -36,6 +37,7 @@ public class NewSpringBootWizardTest extends TestCase {
 		harness = new BootProjectTestHarness(ResourcesPlugin.getWorkspace());
 	}
 
+	@Ignore
 	public void test_STS_4260() throws Exception {
 		if (OsUtils.isWindows()) {
 			return;
