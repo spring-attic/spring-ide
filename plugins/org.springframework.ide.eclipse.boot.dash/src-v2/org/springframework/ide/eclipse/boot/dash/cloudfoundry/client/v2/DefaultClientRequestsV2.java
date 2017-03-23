@@ -932,15 +932,14 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	private Mono<Void> mapRoute(String appName, CFRoute route, boolean randomRoute) {
-		// All routes need a domain, so always set it
 		org.cloudfoundry.operations.routes.MapRouteRequest.Builder builder = MapRouteRequest.builder()
 		.applicationName(appName)
-		.domain(route.getDomain())
 		.randomPort(randomRoute);
-
 		// Let the client validate if any of these combinations are correct.
-		// However, only set these values only if they are present as always setting everything seems to cause errors even with
-		// valid routes
+		// However, only set these values only if they are present as not doing so causes NPE
+        if (StringUtils.hasText(route.getDomain())) {
+        	builder.domain(route.getDomain());
+        }
 		if (StringUtils.hasText(route.getHost())) {
 			builder.host(route.getHost());
 		}
@@ -962,6 +961,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		return domains.then((ds) -> {
 			try {
 				CFRoute route = CFRoute.builder().from(desiredUrl, ds).build();
+				route.validate();
 				return Mono.just(route);
 			} catch (Exception e) {
 				return Mono.error(e);

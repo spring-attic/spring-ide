@@ -267,6 +267,10 @@ public class ApplicationManifestHandler {
 		return null;
 	}
 
+	protected static boolean hasValue(Map<?, ?> containingMap, String propertyName) {
+		return containingMap != null && containingMap.containsKey(propertyName);
+	}
+
 	public static List<Map<?, ?>> getApplications(Map<?, ?> results) throws CoreException {
 
 		Object applicationsObj = results.get(APPLICATIONS_PROP);
@@ -814,11 +818,12 @@ public class ApplicationManifestHandler {
 			// also create a default URI from domain and app name if routes are available.
 			// This appears to be consistent with cf CLI behaviour as well.
 			// Otherwise fall back to parsing from domains and hosts
-			List<String> uris = fromRoutesProperty(application, allResults, properties);
-			if (uris.isEmpty()) {
+			List<String> uris = null;
+			if (hasRoutesProperty(application, allResults)) {
+				uris = fromRoutesProperty(application, allResults, properties);
+			} else {
 				uris = fromDomainsAndHosts(application, allResults, properties, useRandomRoute);
 			}
-
 			properties.setUris(uris);
 		}
 	}
@@ -839,18 +844,18 @@ public class ApplicationManifestHandler {
 				.map(routeMap -> routeMap.get(ROUTE_PROP))
 				.filter(Objects::nonNull)
 				.filter(route -> route instanceof String)
-				.map(route -> (String) route)
-				.filter(url -> {
-					try {
-						CFRoute route = CFRoute.builder().from(url, domains).build();
-						return route.getDomain() != null;
-					} catch (Exception e) {
-						return false;
-					}
+				.map(route -> {
+					String url = (String) route;
+					CFRoute rt = CFRoute.builder().from(url, domains).build();
+					return rt.getRoute();
 				})
 				.collect(Collectors.toSet()));
 		}
 		return ImmutableList.copyOf(uris);
+	}
+
+	protected boolean hasRoutesProperty(Map<?, ?> application, Map<Object, Object> allResults) {
+		return hasValue(application, ROUTES_PROP) || hasValue(allResults, ROUTES_PROP);
 	}
 
 	public static boolean isDomainValid(String domain, List<CFCloudDomain> domains) {
