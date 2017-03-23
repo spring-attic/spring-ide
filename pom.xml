@@ -742,6 +742,7 @@
 					<storepass>${signing.store.password}</storepass>
 					<keypass>${signing.key.password}</keypass>
 					<tsa>http://timestamp.digicert.com</tsa>
+					<verbose>true</verbose>
 				</configuration>
 			</plugin>
 		</plugins>
