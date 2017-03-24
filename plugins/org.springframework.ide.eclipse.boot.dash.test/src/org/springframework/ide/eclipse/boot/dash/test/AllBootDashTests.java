@@ -16,9 +16,9 @@ import org.junit.runners.Suite.SuiteClasses;
 import org.springframework.ide.eclipse.boot.dash.test.requestmappings.ActuatorClientTest;
 import org.springframework.ide.eclipse.boot.dash.test.yaml.AppNameReconcilerTest;
 import org.springframework.ide.eclipse.boot.dash.test.yaml.CFRouteTests;
-import org.springframework.ide.eclipse.boot.dash.test.yaml.DeploymentProperties2Yaml;
+import org.springframework.ide.eclipse.boot.dash.test.yaml.DeploymentProperties2YamlTest;
 import org.springframework.ide.eclipse.boot.dash.test.yaml.ManifestCompareMergeTests;
-import org.springframework.ide.eclipse.boot.dash.test.yaml.Yaml2DeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.test.yaml.Yaml2DeploymentPropertiesTest;
 
 @RunWith(Suite.class)
 @SuiteClasses({
@@ -29,8 +29,8 @@ import org.springframework.ide.eclipse.boot.dash.test.yaml.Yaml2DeploymentProper
 	PropertyFileStoreTest.class,
 
 	// Manifest YAML/Deployment Properties tests (less than 2 seconds per suite)
-	DeploymentProperties2Yaml.class,
-	Yaml2DeploymentProperties.class,
+	DeploymentProperties2YamlTest.class,
+	Yaml2DeploymentPropertiesTest.class,
 	AppNameReconcilerTest.class,
 	CFRouteTests.class,
 

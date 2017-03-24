@@ -35,7 +35,7 @@ import com.google.common.collect.ImmutableSet;
  * @author Alex Boyko
  *
  */
-public class Yaml2DeploymentProperties {
+public class Yaml2DeploymentPropertiesTest {
 
 	private static CloudApplicationDeploymentProperties readDeploymentProperties(final String filePath) throws Exception {
 		ApplicationManifestHandler handler = new ApplicationManifestHandler(null, ManifestCompareMergeTests.createCloudDataMap()) {
