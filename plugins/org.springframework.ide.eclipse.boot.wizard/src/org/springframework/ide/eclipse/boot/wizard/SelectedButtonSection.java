@@ -43,9 +43,9 @@ public class SelectedButtonSection<T> extends WizardPageSection {
 	private Composite buttonComp;
 	private ValueListener<Boolean> selectionListener;
 
-	
+
 	protected final CheckBoxModel<T> model;
-	protected final LiveVariable<Boolean> isVisible = new LiveVariable<Boolean>(true);
+	protected final LiveVariable<Boolean> isVisible = new LiveVariable<>(true);
 
 	public SelectedButtonSection(IPageWithSections owner, CheckBoxModel<T> model) {
 		super(owner);
@@ -79,7 +79,7 @@ public class SelectedButtonSection<T> extends WizardPageSection {
 		xButton.setText("X");
 		xButton.setFont(getBold());
 		applyDefaultEffects(xButton);
-		
+
 		xButton.addMouseListener(new MouseListener() {
 
 			@Override
@@ -130,7 +130,6 @@ public class SelectedButtonSection<T> extends WizardPageSection {
 			// Setup HTML tooltip and its content
 			HtmlTooltip htmlTooltip = new HtmlTooltip(label);
 			htmlTooltip.setMaxSize(400, 400);
-			htmlTooltip.setShift(new Point(0, 0));
 			htmlTooltip.setHtml(tooltip);
 		}
 	}
@@ -151,7 +150,7 @@ public class SelectedButtonSection<T> extends WizardPageSection {
 			xButton.setForeground(getSystemColor(SWT.COLOR_DARK_GRAY));
 		}
 	}
-	
+
 	protected Color getSystemColor(int colorCode) {
 		return Display.getDefault().getSystemColor(colorCode);
 	}
@@ -174,7 +173,7 @@ public class SelectedButtonSection<T> extends WizardPageSection {
 	/**
 	 * Apply filter and return whether this widget's visibility has changed as a
 	 * result.
-	 * 
+	 *
 	 * @return Whether visibility of this widget changed.
 	 */
 	public boolean applyFilter(Filter<T> filter) {

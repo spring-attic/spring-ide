@@ -52,7 +52,7 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 		private final LiveVariable<Boolean> selection;
 		private final LiveExpression<Boolean> enablement;
 		private final T value;
-		private Supplier<String> tooltipHtml; //optional HTML tooltip supplier 
+		private Supplier<String> tooltipHtml; //optional HTML tooltip supplier
 		public CheckBoxModel(String label, T value, LiveVariable<Boolean> selection, LiveExpression<Boolean> enablement) {
 			this.label = label;
 			this.value = value;
@@ -82,7 +82,7 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 			return "CheckBox("+label+", "+getSelection().getValue()+")" ;
 		}
 	}
-	
+
 	private List<CheckBoxModel<T>> model;
 	private Composite composite;
 	private WizardPageSection[] subsections;
@@ -110,7 +110,7 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 		private Button cb;
 		private HtmlTooltip tooltip;
 		private CheckBoxModel<T> model;
-		private LiveVariable<Boolean> isVisible = new LiveVariable<Boolean>(true);
+		private LiveVariable<Boolean> isVisible = new LiveVariable<>(true);
 		private ValueListener<Boolean> selectionListener;
 		private ValueListener<Boolean> enablementListener;
 
@@ -129,16 +129,15 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 			if (page!=null && !page.isDisposed()) {
 				this.cb = new Button(page, SWT.CHECK);
 				cb.setText(model.getLabel());
-				
+
 				Supplier<String> html = model.getTooltipHtml();
 				if (html != null) {
 					// Setup HTML tooltip and its content
 					this.tooltip = new HtmlTooltip(cb);
 					this.tooltip.setMaxSize(400, 400);
-					this.tooltip.setShift(new Point(0, 0));
 					this.tooltip.setHtml(html);
 				}
-				
+
 				model.getSelection().addListener(selectionListener = new ValueListener<Boolean>() {
 					public void gotValue(LiveExpression<Boolean> exp, Boolean value) {
 						// note: checkbox button may be null in cases where the
@@ -221,7 +220,7 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 			return "CheckBox("+model.getLabel()+")";
 		}
 	}
-	
+
 	protected GridLayout createLayout() {
 		return new GridLayout(numCols, true);
 	}
@@ -240,7 +239,7 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(composite);
 		createSubsections();
 	}
-	
+
 	private void createSubsections() {
 		subsections = new WizardPageSection[Math.max(1, model.size())];
 
@@ -255,7 +254,7 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 		}
 
 		for (int i = 0; i < model.size(); i++) {
-			subsections[i] = new CheckBox<T>(owner, model.get(i));
+			subsections[i] = new CheckBox<>(owner, model.get(i));
 			subsections[i].createContents(composite);
 		}
 	}
@@ -302,14 +301,14 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 		}
 		return false;
 	}
-	
+
 	boolean isCreated() {
 		return composite != null;
 	}
 
 	@Override
 	public void dispose() {
-		
+
 		if (subsections != null) {
 			for (WizardPageSection subsection : subsections) {
 				subsection.dispose();
@@ -317,7 +316,7 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 		}
 		super.dispose();
 	}
-	
+
 	public void setModel(List<CheckBoxModel<T>> model) {
 		dispose();
 		this.model = model;
