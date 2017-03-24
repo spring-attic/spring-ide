@@ -27,7 +27,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.ide.eclipse.boot.core.IMavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.MavenId;
@@ -136,7 +135,7 @@ public class EditStartersModel implements OkButtonHandler {
 				// Setup template links variable values
 				Map<String, String> variables = new HashMap<>();
 				variables.put(InitializrServiceSpec.BOOT_VERSION_LINK_TEMPLATE_VARIABLE, starters.getBootVersion());
-				
+
 				for (Dependency dep : dgroup.getContent()) {
 					if (starters.contains(dep.getId())) {
 						dependencies.choice(catName, dep.getName(), dep,
@@ -152,7 +151,7 @@ public class EditStartersModel implements OkButtonHandler {
 				}
 			}
 		}
-		
+
 	}
 
 	private Set<MavenId> getActiveStarters() throws Exception {

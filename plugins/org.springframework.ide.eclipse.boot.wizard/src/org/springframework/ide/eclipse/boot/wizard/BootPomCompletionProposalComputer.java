@@ -15,6 +15,7 @@ import static org.springframework.ide.eclipse.boot.wizard.BootWizardImages.*;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -25,6 +26,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.wst.sse.ui.contentassist.CompletionProposalInvocationContext;
 import org.eclipse.wst.sse.ui.contentassist.ICompletionProposalComputer;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.editor.support.util.DocumentUtil;
 
 import com.google.common.collect.ImmutableList;
@@ -54,7 +56,11 @@ public class BootPomCompletionProposalComputer implements ICompletionProposalCom
 
 			@Override
 			public void apply(IDocument document) {
-				EditStartersDialog.openFor(project, PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
+				try {
+					EditStartersDialog.openFor(project, PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
+				} catch (CoreException e) {
+					Log.log(e);
+				}
 			}
 
 			@Override

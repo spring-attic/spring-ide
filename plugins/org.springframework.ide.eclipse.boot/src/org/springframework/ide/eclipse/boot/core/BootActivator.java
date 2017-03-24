@@ -28,7 +28,7 @@ public class BootActivator extends AbstractUIPlugin {
 
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.boot"; //$NON-NLS-1$
-	
+
 	// The shared instance
 	private static BootActivator plugin;
 
@@ -96,8 +96,6 @@ public class BootActivator extends AbstractUIPlugin {
 
 	public static URLConnectionFactory getUrlConnectionFactory() {
 		final String userAgent = "STS/"+getDefault().getBundle().getVersion();
-		//TODO: post 3.7.2 the URLConnectionFactory in master will have support for adding userAgent string
-		//  so we do not have to implement it here by subclassing.
 		return new URLConnectionFactory() {
 			@Override
 			public URLConnection createConnection(URL url) throws IOException {
@@ -107,5 +105,5 @@ public class BootActivator extends AbstractUIPlugin {
 			}
 		};
 	}
-	
+
 }

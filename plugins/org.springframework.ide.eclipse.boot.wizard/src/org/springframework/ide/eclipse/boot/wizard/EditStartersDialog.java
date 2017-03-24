@@ -12,12 +12,21 @@ package org.springframework.ide.eclipse.boot.wizard;
 
 import java.util.List;
 
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.LocationKind;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.MessageDialogWithToggle;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
@@ -40,6 +49,10 @@ public class EditStartersDialog extends DialogWithSections {
 	private static final int NUM_DEP_COLUMNS = 3;
 	private static final Point DEPENDENCY_SECTION_SIZE = new Point(SWT.DEFAULT, 300);
 	static final String NO_CONTENT_AVAILABLE = "No content available.";
+
+	private static final int SAVE_BUTTON = 256;
+	private static final String AUTO_SAVE_DIRTY_POM = "EditStartersDialog.pom.autosave";
+
 	public InitializrFactoryModel<EditStartersModel> model;
 	private boolean firstSearchBox = true; //becomes false after the searchBox is created first time.
 	private long openingTime;
@@ -146,7 +159,14 @@ public class EditStartersDialog extends DialogWithSections {
 		return age < 3000;
 	}
 
-	public static int openFor(IProject selectedProject, Shell shell) {
+	public static int openFor(IProject selectedProject, Shell shell) throws CoreException {
+		IPreferenceStore preferenceStore = BootActivator.getDefault().getPreferenceStore();
+		ITextFileBuffer dirtyPom = getDirtyPomFile(selectedProject);
+		if (dirtyPom!=null) {
+			if (!savePom(selectedProject, shell, dirtyPom)) {
+				return MessageDialog.CANCEL;
+			}
+		}
 		InitializrFactoryModel<EditStartersModel> fmodel = new InitializrFactoryModel<>((url) -> {
 			if (url!=null) {
 				InitializrService initializr = InitializrService.create(BootActivator.getUrlConnectionFactory(), url);
@@ -154,12 +174,60 @@ public class EditStartersDialog extends DialogWithSections {
 				return new EditStartersModel(
 						selectedProject,
 						core,
-						BootActivator.getDefault().getPreferenceStore()
+						preferenceStore
 				);
 			}
 			return null;
 		});
 		return new EditStartersDialog(fmodel, shell).open();
+	}
+
+	/**
+	 * Ask the user if its okay to save the pom. If they say yes, save it.
+	 * <p>
+	 * @return true if the pom was saved.
+	 */
+	private static boolean savePom(IProject selectedProject, Shell shell, ITextFileBuffer dirtyPom) throws CoreException {
+		IPreferenceStore prefs = BootActivator.getDefault().getPreferenceStore();
+		boolean autoSave = prefs.getBoolean(AUTO_SAVE_DIRTY_POM);
+		boolean save = autoSave || askSavePom(selectedProject, shell, dirtyPom);
+		if (save) {
+			dirtyPom.commit(new NullProgressMonitor(), true);
+		}
+		return save;
+	}
+
+	private static boolean askSavePom(IProject selectedProject, Shell shell, ITextFileBuffer dirtyPom)
+			throws CoreException {
+		MessageDialogWithToggle dlg = new MessageDialogWithToggle(shell,
+				"Pom file needs saving!", null,
+				"The pom file for project '"+selectedProject.getName()+"' has unsaved edits. The 'Edit Starters' dialog makes changes to "
+						+ "the pom file on disk. Do you want to save it now?",
+				MessageDialog.WARNING,
+				new String[] { "Cancel", "Save Pom" },
+				1,
+				"Don't ask again and save automatically in the future",
+				false
+		);
+		int code = dlg.open();
+		if (code==SAVE_BUTTON) { //The Dialog has a weird logic but that's the number it gets for our 'save' button based on its position.
+			if (dlg.getToggleState()) {
+				BootActivator.getDefault().getPreferenceStore().setValue(AUTO_SAVE_DIRTY_POM, true);
+			}
+			return true;
+		}
+		return false;
+	}
+
+	private static ITextFileBuffer getDirtyPomFile(IProject project) {
+		if (project.isAccessible()) {
+			IFile pomFile = project.getFile("pom.xml");
+			ITextFileBuffer buffer = FileBuffers.getTextFileBufferManager().getTextFileBuffer(pomFile.getFullPath(), LocationKind.IFILE);
+			if (buffer!=null && buffer.isDirty()) {
+				return buffer;
+			}
+		}
+		return null;
 	}
 
 }
