@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.operation.IRunnableContext;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.boot.wizard.BootWizardActivator;
 import org.springframework.ide.eclipse.boot.wizard.github.auth.AuthenticatedDownloader;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager;
@@ -41,28 +42,30 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
  */
 public class ContentManager {
 
-	private final Map<Class<?>, TypedContentManager<?>> byClass = new HashMap<Class<?>, TypedContentManager<?>>();
-	private final List<ContentType<?>> types = new ArrayList<ContentType<?>>();
-		
+	private final Map<Class<?>, TypedContentManager<?>> byClass = new HashMap<>();
+	private final List<ContentType<?>> types = new ArrayList<>();
+
 	protected LiveVariable<DownloadState> prefetchContentTracker = new LiveVariable<>(DownloadState.NOT_STARTED);
+	protected Throwable prefetchContentError = null;
+
 	protected LiveVariable<DownloadState> prefetchContentProviderPropertiesTracker = new LiveVariable<>(
-			DownloadState.NOT_STARTED);	
+			DownloadState.NOT_STARTED);
 
 	public <T extends GSContent> void register(Class<T> klass, String description, ContentProvider<T> provider) {
 		try {
 			Assert.isLegal(!byClass.containsKey(klass), "A content provider for " + klass + " is already registered");
 
 			prefetchContentTracker.setValue(DownloadState.NOT_STARTED);
-			
-			ContentType<T> ctype = new ContentType<T>(klass, description);
+
+			ContentType<T> ctype = new ContentType<>(klass, description);
 			types.add(ctype);
 			DownloadManager downloader = downloadManagerFor(klass);
-			byClass.put(klass, new TypedContentManager<T>(downloader, provider));
+			byClass.put(klass, new TypedContentManager<>(downloader, provider));
 		} catch (Throwable e) {
 			BootWizardActivator.log(e);
 		}
 	}
-	
+
 	/**
 	 * Factory method to create a DownloadManager for a given content type name
 	 */
@@ -71,7 +74,7 @@ public class ContentManager {
 				new File(BootWizardActivator.getDefault().getStateLocation().toFile(), contentType.getSimpleName()))
 						.clearCache();
 	}
-	
+
 
 
 	/**
@@ -80,7 +83,7 @@ public class ContentManager {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T[] get(Class<T> type) {
-		
+
 		TypedContentManager<T> man = (TypedContentManager<T>) byClass.get(type);
 		if (man != null) {
 			return man.getAll();
@@ -98,7 +101,7 @@ public class ContentManager {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Will return content for the given content type, IF and only if, there is no prefetching currently under way. Otherwise it returns null.
 	 * @param ct
@@ -133,8 +136,9 @@ public class ContentManager {
 	 * Prefetch all the content. May require network access therefore do not run in the UI thread.
 	 */
 	public void prefetchAllContent(IProgressMonitor monitor) {
-		
+
 		prefetchContentTracker.setValue(DownloadState.IS_DOWNLOADING);
+		prefetchContentError = null;
 		try {
 			ContentType<?>[] allTypes = getTypes();
 
@@ -148,16 +152,24 @@ public class ContentManager {
 			}
 			// Inform any listeners that completion has just finished (e.g. to let listeners refresh the content in their views)
 			prefetchContentTracker.setValue(DownloadState.DOWNLOADING_COMPLETED);
+		} catch (Throwable e) {
+			prefetchContentError = e;
+			prefetchContentTracker.setValue(DownloadState.DOWNLOADING_FAILED);
+			throw e;
 		} finally {
 			// Mark the session as downloaded
 			prefetchContentTracker.setValue(DownloadState.DOWNLOADED);
 		}
 	}
-	
+
 	public LiveVariable<DownloadState> getPrefetchContentTracker() {
 		return prefetchContentTracker;
 	}
-	
+
+	public Throwable getPrefetchContentError() {
+		return prefetchContentError;
+	}
+
 	public LiveVariable<DownloadState> getPrefetchContentProviderPropertiesTracker() {
 		return prefetchContentProviderPropertiesTracker;
 	}
@@ -169,19 +181,19 @@ public class ContentManager {
 	public void prefetchInBackground(IRunnableContext runnableContext) {
 		try {
 			JobUtil.runBackgroundJobWithUIProgress((monitor) -> {
-	
+
 				prefetch(monitor);
-	
+
 			}, runnableContext, "Prefetching content...");
 		} catch (Exception e) {
 			BootWizardActivator.log(e);
 		}
 	}
-	
+
 	/**
 	 * Will prefetch (download) all content. This may be a long-running process
 	 * and is not expected to be run in the UI thread.
-	 * 
+	 *
 	 * @param monitor
 	 *            must not be null
 	 */
@@ -189,7 +201,7 @@ public class ContentManager {
 		String downloadLabel = "Downloading all content. Please wait...";
 		prefetchAllContent(SubMonitor.convert(monitor, downloadLabel, 50));
 	}
-	
+
 	/**
 	 * Disposes all prefetching tracking listeners. However, tracking states are preserved.
 	 */
@@ -198,7 +210,7 @@ public class ContentManager {
 		// on accumulating listeners over time, but the tracker states should be preserved.
 		DownloadState propertiesDownloadState = prefetchContentProviderPropertiesTracker.getValue();
 		DownloadState contentDownloadState = prefetchContentTracker.getValue();
-		
+
 		// Dispose all listeners to avoid memory leaks for listeners that keep getting accumulating over time.
 		prefetchContentProviderPropertiesTracker.dispose();
 		prefetchContentTracker.dispose();
@@ -207,18 +219,25 @@ public class ContentManager {
 		prefetchContentProviderPropertiesTracker = new LiveVariable<>(propertiesDownloadState);
 		prefetchContentTracker = new LiveVariable<>(contentDownloadState);
 	}
-	
+
 	public static enum DownloadState {
 		/**
 		 * Downloading currently under way
 		 */
 		IS_DOWNLOADING,
-		
+
 		/**
-		 * Active downloading session has just completed. For example, this state may be used to trigger refresh of content in views.
+		 * Active downloading session has just completed succesfully. For example, this state may be used to trigger
+		 * refresh of content in views.
 		 */
 		DOWNLOADING_COMPLETED,
-		
+
+		/**
+		 * Active downloading sessions has just completed with an exception. An explanation of the error may be retrieved
+		 * by calling the 'getException' method
+		 */
+		DOWNLOADING_FAILED,
+
 		/**
 		 * A "Post-downloading" state, different than
 		 * {@link #DOWNLOADING_COMPLETED}, that indicates that all content has
@@ -226,7 +245,7 @@ public class ContentManager {
 		 * required on any participants that are listening for this state.
 		 */
 		DOWNLOADED,
-		
+
 		/**
 		 * No downloading has been initiated yet
 		 */

@@ -27,7 +27,9 @@ import org.springframework.ide.eclipse.boot.wizard.guides.GSImportWizardModel;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 public class GSGWizardModelTest {
 
@@ -89,6 +91,7 @@ public class GSGWizardModelTest {
 
 		// Listener tests that each of the expected states occur during content
 		// downloading
+		LiveVariable<Throwable> error = new LiveVariable<>(null);
 		ValueListener<DownloadState> contentDownloadStateListener = new ValueListener<DownloadState>() {
 
 			@Override
@@ -98,6 +101,9 @@ public class GSGWizardModelTest {
 				// should be invoked multiple times during the prefetching
 				// operation
 				if (!actualContentDownloadStates.contains(actualDownloadState)) {
+					if (actualDownloadState==DownloadState.DOWNLOADING_FAILED) {
+						error.setValue(contentManager.getPrefetchContentError());
+					}
 					actualContentDownloadStates.add(actualDownloadState);
 				}
 
@@ -193,7 +199,10 @@ public class GSGWizardModelTest {
 
 					return true;
 				} else {
-					fail("Expected downloadStates not reached. Actual states:\n"+actualContentDownloadStates);;
+					fail(
+							"Expected downloadStates not reached.\n" +
+							"Actual states: "+actualContentDownloadStates+"\n"
+					);
 					return false;
 				}
 			}
