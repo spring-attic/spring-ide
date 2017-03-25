@@ -201,7 +201,10 @@ public class GSGWizardModelTest {
 				} else {
 					fail(
 							"Expected downloadStates not reached.\n" +
-							"Actual states: "+actualContentDownloadStates+"\n"
+							"Actual states: "+actualContentDownloadStates+"\n" +
+							error.getValue()==null
+								? ""
+								: "Error: "+ExceptionUtil.stacktrace(error.getValue())
 					);
 					return false;
 				}
