@@ -103,6 +103,14 @@ public class GithubClient {
 	}
 
 	/**
+	 * Fetch the remaining rate limit.
+	 */
+	public RateLimitResponse getRateLimit() throws IOException {
+		return get("/rate_limit", RateLimitResponse.class);
+	}
+
+
+	/**
 	 * Fetch info about repos under a given user name
 	 */
 	public Repo[] getUserRepos(String userName) {
@@ -141,7 +149,7 @@ public class GithubClient {
 			Class<?> componentType = type.getComponentType();
 			//Assume this means we have to support response pagination as described in:
 			//http://developer.github.com/v3/#pagination
-			ArrayList<Object> results = new ArrayList<Object>();
+			ArrayList<Object> results = new ArrayList<>();
 			do {
 				ResponseEntity<T> entity = client.getForEntity(url, type, vars);
 				Object[] pageResults = (Object[])entity.getBody(); //cast is safe because T is an array type.
@@ -205,7 +213,7 @@ public class GithubClient {
 		rest = credentials.apply(rest);
 
 		//Add json parsing capability using Jackson mapper.
-		List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
 		messageConverters.add(new Spring3MappingJacksonHttpMessageConverter());
 
 		rest.setMessageConverters(messageConverters);

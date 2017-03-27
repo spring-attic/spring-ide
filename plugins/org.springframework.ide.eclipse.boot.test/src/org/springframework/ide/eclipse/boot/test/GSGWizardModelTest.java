@@ -14,6 +14,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -23,6 +24,7 @@ import org.junit.Test;
 import org.springframework.ide.eclipse.boot.wizard.content.ContentManager;
 import org.springframework.ide.eclipse.boot.wizard.content.ContentManager.DownloadState;
 import org.springframework.ide.eclipse.boot.wizard.content.ContentType;
+import org.springframework.ide.eclipse.boot.wizard.github.GithubClient;
 import org.springframework.ide.eclipse.boot.wizard.guides.GSImportWizardModel;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
@@ -33,8 +35,15 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 public class GSGWizardModelTest {
 
+
 	@Test
 	public void testPrefetchingGettingStartedContent() throws Exception {
+		if (!isEnoughRateLimitAvailable()) {
+			System.out.println("Skipping testPrefetchingGettingStartedContent: not enough github api limit available!");
+			// skip test if we'r running low on github rest api rate limit.
+			return;
+		}
+
 		// Prefetching involves testing the download "states" for two different
 		// steps that occur in series (prefetching content provider properties,
 		// followed by prefetching actual content):
@@ -214,6 +223,15 @@ public class GSGWizardModelTest {
 				}
 			}
 		};
+	}
+
+	/**
+	 * Check github api rate limit has some requests available.
+	 * @return true if there's not enough requests limit available to run the test.
+	 */
+	private boolean isEnoughRateLimitAvailable() throws IOException {
+		GithubClient github = new GithubClient();
+		return github.getRateLimit().getRate().getRemaining() > 8;
 	}
 
 	public static GSImportWizardModel getModel() throws Exception {
