@@ -161,23 +161,27 @@ public class GSGWizardModelTest {
 		new ACondition(30 * 1000) {
 			@Override
 			public boolean test() throws Exception {
+				if (actualContentDownloadStates.contains(DownloadState.DOWNLOADING_FAILED)) {
+					Throwable e = contentManager.getPrefetchContentError();
+					if (e!=null) {
+						throw new RuntimeException("Problem downloading: ", e);
+					}
+				}
 				if (actualContentDownloadStates.size() == 4) {
 
 					assertEquals(
-							"Expected the first prefetching content download state to be: " + DownloadState.NOT_STARTED,
-							actualContentDownloadStates.get(0), DownloadState.NOT_STARTED);
+							"First prefetching content download state", DownloadState.NOT_STARTED,
+								actualContentDownloadStates.get(0));
 
 					assertEquals(
-							"Expected the second prefetching content download state to be: "
-									+ DownloadState.IS_DOWNLOADING,
-							actualContentDownloadStates.get(1), DownloadState.IS_DOWNLOADING);
+							"Second prefetching content download state", DownloadState.IS_DOWNLOADING,
+							actualContentDownloadStates.get(1));
 					assertEquals(
-							"Expected the third prefetching content download state to be: "
-									+ DownloadState.DOWNLOADING_COMPLETED,
-							actualContentDownloadStates.get(2), DownloadState.DOWNLOADING_COMPLETED);
+							"Third prefetching content download state",  DownloadState.DOWNLOADING_COMPLETED,
+							actualContentDownloadStates.get(2));
 					assertEquals(
-							"Expected the fourth prefetching content download state to be: " + DownloadState.DOWNLOADED,
-							actualContentDownloadStates.get(3), DownloadState.DOWNLOADED);
+							"Fourth prefetching content download state", DownloadState.DOWNLOADED,
+							actualContentDownloadStates.get(3));
 
 					// Final state must be "post downloaded" state
 					assertEquals(
