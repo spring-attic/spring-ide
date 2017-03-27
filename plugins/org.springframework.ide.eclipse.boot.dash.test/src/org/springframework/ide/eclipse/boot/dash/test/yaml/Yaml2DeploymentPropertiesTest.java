@@ -430,7 +430,7 @@ public class Yaml2DeploymentPropertiesTest {
 		CloudApplicationDeploymentProperties props = readDeploymentProperties(
 				"manifest-parse-data/routes-3.yml");
 
-		assertEquals("Routes not equal", ImmutableSet.of("my-app.springsource.org"), ImmutableSet.copyOf(props.getUris()));
+		assertEquals("Routes not equal", ImmutableSet.of(), ImmutableSet.copyOf(props.getUris()));
 	}
 
 	@Test
@@ -455,6 +455,6 @@ public class Yaml2DeploymentPropertiesTest {
 		CloudApplicationDeploymentProperties props = readDeploymentProperties(
 				"manifest-parse-data/routes-6.yml");
 
-		assertEquals("Routes not equal", ImmutableSet.of("my-route-2.springsource.org"), ImmutableSet.copyOf(props.getUris()));
+		assertEquals("Routes not equal", ImmutableSet.of("my-route-1.invaliddomain.org", "my-route-2.springsource.org"), ImmutableSet.copyOf(props.getUris()));
 	}
 }
