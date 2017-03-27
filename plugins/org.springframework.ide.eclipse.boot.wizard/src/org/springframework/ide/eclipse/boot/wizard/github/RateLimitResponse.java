@@ -40,14 +40,37 @@ public class RateLimitResponse {
 		}
 	}
 
-	private RateLimit rate;
+	@JsonIgnoreProperties(ignoreUnknown=true)
+	public static class RateLimits {
+
+		private RateLimit core;
+		private RateLimit search;
+
+		public RateLimit getCore() {
+			return core;
+		}
+		public void setCore(RateLimit core) {
+			this.core = core;
+		}
+		public RateLimit getSearch() {
+			return search;
+		}
+		public void setSearch(RateLimit search) {
+			this.search = search;
+		}
+	}
+
+	private RateLimits resources;
+
+	public RateLimits getResources() {
+		return resources;
+	}
+
+	public void setResources(RateLimits resources) {
+		this.resources = resources;
+	}
 
 	public RateLimit getRate() {
-		return rate;
+		return getResources().getCore();
 	}
-
-	public void setRate(RateLimit rate) {
-		this.rate = rate;
-	}
-
 }
