@@ -10,14 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2;
 
-import java.io.StringWriter;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.cloudfoundry.operations.routes.Route;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.util.StringUtils;
 
 public class CFRouteBuilder {
@@ -72,7 +71,29 @@ public class CFRouteBuilder {
 		return this;
 	}
 
-	public CFRouteBuilder from(String desiredUrl, Collection<String> domains)  {
+	/**
+	 * Builds a {@link CFRoute} given a desiredUrl. This does NOT validate, and
+	 * will attempt to build a route the best way it can given the desiredUrl.
+	 * External components, like the CF Java client, can then validate the
+	 * CFRoute.
+	 *
+	 * @param desiredUrl
+	 * @param domains
+	 * @return this builder
+	 */
+	public CFRouteBuilder from(String desiredUrl, Collection<String> domains) {
+
+
+		//If it is empty or null, there is nothing to build. However, be sure that the
+		// full route value is non-null, even if the "components" may be null
+		if (!StringUtils.hasText(desiredUrl)) {
+			this.fullRoute = CFRoute.EMPTY_ROUTE;
+			return this;
+		} else {
+			// Be sure to set the full route.
+			this.fullRoute = desiredUrl;
+		}
+
 		// Based on CLI cf/actors/routes.go and testing CLI directly with
 		// different "routes" values:
 		// 1. Paths is not allowed in TCP route (valid TCP route:
@@ -90,65 +111,72 @@ public class CFRouteBuilder {
 		// However, We may want to implement similar
 		// validation to the CF manifest editor though.
 
-		String matchedDomain = null;
 		String matchedHost = null;
-		String hostAndDomain = desiredUrl;
-		String path = null;
-		int port = CFRoute.NO_PORT;
+		String hostAndDomain = null;
 
 		// Split into hostDomain segment, port and path
-		String[] pathSegments = hostAndDomain.split("/");
-		if (pathSegments != null && pathSegments.length > 0) {
-			if (pathSegments.length > 1) {
-				path = String.join("/", Arrays.copyOfRange(pathSegments, 1, pathSegments.length));
-				// Path has to start with "/" or CF throws exception
-				if (!path.startsWith("/")) {
-					path("/" + path);
-				}
+		int slashIndex = desiredUrl.indexOf('/');
+		if (slashIndex >= 0) {
+			hostAndDomain = desiredUrl.substring(0, slashIndex);
+			String tempPath = desiredUrl.substring(slashIndex);
+			// Do not set empty strings. If there is no path, then it should be
+			// null
+			if (StringUtils.hasText(tempPath)) {
+				this.path = tempPath;
 			}
-			hostAndDomain = pathSegments[0];
+		} else {
+			hostAndDomain = desiredUrl;
 		}
 
-		String[] portSegments = hostAndDomain.split(":");
-		if (portSegments != null && portSegments.length > 0) {
-
+		// CF Route builder does not validate, so don't allow exceptions to
+		// prevent parsing of the route. The builder should attempt to build
+		// a route the best way it can, even if it may have invalid information.
+		// This allows external participants, like the CF Java client, to
+		// perform validation
+		try {
+			String[] portSegments = hostAndDomain.split(":");
 			if (portSegments.length == 2) {
-				port = Integer.parseInt(portSegments[1]);
-				port(port);
+				hostAndDomain = portSegments[0];
+				this.port = Integer.parseInt(portSegments[1]);
 			}
-
-			hostAndDomain = portSegments[0];
+		} catch (NumberFormatException e) {
+			Log.log(e);
 		}
 
-		matchedDomain = findDomain(hostAndDomain, domains);
+		this.domain = findDomain(hostAndDomain, domains);
 
-		if (matchedDomain != null) {
-			domain(matchedDomain);
-			matchedHost = hostAndDomain.substring(0, hostAndDomain.length() - matchedDomain.length());
-			while (matchedHost.endsWith(".")) {
+		if (this.domain != null) {
+			matchedHost = hostAndDomain.substring(0, hostAndDomain.length() - this.domain.length());
+			if (matchedHost.endsWith(".")) {
 				matchedHost = matchedHost.substring(0, matchedHost.length() - 1);
 			}
 
+			// Don't set empty strings
 			if (StringUtils.hasText(matchedHost)) {
-				host(matchedHost);
+				this.host = matchedHost;
 			}
-		} else  {
-			// Do a basic split on '.', where first segment is the host, and the rest domain
-			String[] remainingSegments = hostAndDomain.split("\\.");
-			if (remainingSegments != null && remainingSegments.length > 0) {
-				if (remainingSegments.length > 1) {
-					String domain = String.join(".", Arrays.copyOfRange(remainingSegments, 1, remainingSegments.length));
-					domain(domain);
+		} else {
+			// Do a basic split on '.', where first segment is the host, and the
+			// rest domain
+			int firstDotIndex = hostAndDomain.indexOf('.');
+			if (firstDotIndex >= 0) {
+				String tempDomain = hostAndDomain.substring(firstDotIndex + 1);
+				// Don't set empty strings
+				if (StringUtils.hasText(tempDomain)) {
+					this.domain = tempDomain;
 				}
-				host(remainingSegments[0]);
+
+				String tempHost = hostAndDomain.substring(0, firstDotIndex);
+				if (StringUtils.hasText(tempHost)) {
+					this.host = tempHost;
+				}
 			} else {
-				// set the whole remaining value as a host
-				host(hostAndDomain);
+				if (StringUtils.hasText(hostAndDomain)) {
+					this.host = hostAndDomain;
+				}
 			}
 		}
 
-		// Be sure to set the full route:
-		this.fullRoute = desiredUrl;
 		return this;
 	}
 
@@ -163,7 +191,7 @@ public class CFRouteBuilder {
 			}
 		}
 		// Otherwise split on the first "." and try again
-		if (hostDomain.indexOf(".")  >= 0 && hostDomain.indexOf(".") + 1 < hostDomain.length()) {
+		if (hostDomain.indexOf(".") >= 0 && hostDomain.indexOf(".") + 1 < hostDomain.length()) {
 			String remaining = hostDomain.substring(hostDomain.indexOf(".") + 1, hostDomain.length());
 			return findDomain(remaining, domains);
 		} else {
@@ -172,46 +200,45 @@ public class CFRouteBuilder {
 	}
 
 	/**
-	 * A basic building of a full route value. It performs no validation, just builds based on
-	 * whether the parameter are set
+	 * A basic building of a full route value. It performs no validation, just
+	 * builds based on whether the parameter are set
 	 *
 	 * @param host
 	 * @param domain
 	 * @param path
 	 * @param port
-	 * @return Route value build with the given components. Empty if all
-	 *         components are empty or null.
+	 * @return Route value build with the given components. Always returns a non-null route. Empty route if no arguments are passed.
 	 */
 	public static String buildRouteVal(String host, String domain, String path, int port) {
 
-		StringWriter writer = new StringWriter();
+		StringBuilder builder = new StringBuilder();
 		if (StringUtils.hasText(host)) {
-			writer.append(host);
+			builder.append(host);
 		}
 
 		if (StringUtils.hasText(domain)) {
 			if (StringUtils.hasText(host)) {
-				writer.append('.');
+				builder.append('.');
 			}
-			writer.append(domain);
+			builder.append(domain);
 		}
 
 		if (port != CFRoute.NO_PORT) {
-			writer.append(':');
-			writer.append(Integer.toString(port));
+			builder.append(':');
+			builder.append(Integer.toString(port));
 		}
 
 		if (StringUtils.hasText(path)) {
 			if (!path.startsWith("/")) {
-				writer.append('/');
+				builder.append('/');
 			}
-			writer.append(path);
+			builder.append(path);
 		}
 
-		return writer.toString();
+		return builder.toString();
 	}
 
-	public CFRouteBuilder from(String desiredUrl, List<CFCloudDomain> cloudDomains)  {
+	public CFRouteBuilder from(String desiredUrl, List<CFCloudDomain> cloudDomains) {
 		List<String> domains = cloudDomains
 								.stream()
 								.map(CFCloudDomain::getName)

@@ -16,6 +16,7 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 public class CFRoute {
 
 	public static final int NO_PORT = -1;
+	public static final String EMPTY_ROUTE = "";
 
 	final private String domain;
 	final private String host;
