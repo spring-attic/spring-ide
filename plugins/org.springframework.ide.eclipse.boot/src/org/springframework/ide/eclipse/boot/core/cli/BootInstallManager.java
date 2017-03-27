@@ -18,6 +18,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.osgi.service.prefs.BackingStoreException;
@@ -37,7 +38,7 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
  * @author Kris De Volder
  */
 public class BootInstallManager implements IBootInstallFactory {
-	
+
 	public interface BootInstallListener {
 		public void defaultInstallChanged();
 	}
@@ -58,7 +59,7 @@ public class BootInstallManager implements IBootInstallFactory {
 		return stateLocation.append("installs").toFile();
 	}
 
-	public static BootInstallManager getInstance() throws Exception {
+	public static synchronized BootInstallManager getInstance() throws Exception {
 		if (instance==null) {
 			instance = new BootInstallManager();
 		}
@@ -73,7 +74,7 @@ public class BootInstallManager implements IBootInstallFactory {
 
 	private BootInstallManager() throws Exception {
 		downloader = new DownloadManager(null, determineCacheDir());
-		installs = new ArrayList<IBootInstall>();
+		installs = new ArrayList<>();
 		read();
 		if (installs.isEmpty()) {
 			setDefaultInstall(newInstall(StsProperties.getInstance().get("spring.boot.install.url"), null));
@@ -183,23 +184,23 @@ public class BootInstallManager implements IBootInstallFactory {
 			}
 		}
 	}
-	
+
 	public void setInstalls(Collection<IBootInstall> newInstalls) {
-		this.installs = new ArrayList<IBootInstall>(newInstalls);
+		this.installs = new ArrayList<>(newInstalls);
 	}
 
 	public Collection<IBootInstall> getInstalls() {
-		return new ArrayList<IBootInstall>(installs);
+		return new ArrayList<>(installs);
 	}
 
 	public DownloadManager getDownloader() {
 		return downloader;
 	}
-	
+
 	public void addBootInstallListener(BootInstallListener listener) {
 		installListeners.add(listener);
 	}
-	
+
 	public void removeBootInstallListener(BootInstallListener listener) {
 		installListeners.remove(listener);
 	}
