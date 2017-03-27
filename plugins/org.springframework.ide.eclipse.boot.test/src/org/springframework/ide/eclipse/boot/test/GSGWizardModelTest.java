@@ -231,7 +231,9 @@ public class GSGWizardModelTest {
 	 */
 	private boolean isEnoughRateLimitAvailable() throws IOException {
 		GithubClient github = new GithubClient();
-		return github.getRateLimit().getRate().getRemaining() > 8;
+		int remaining = github.getRateLimit().getRate().getRemaining();
+		System.out.println("github rate-limit remaining: "+remaining);
+		return remaining > 8; // Test needs 4 requests... add a bit of margin above that.
 	}
 
 	public static GSImportWizardModel getModel() throws Exception {
