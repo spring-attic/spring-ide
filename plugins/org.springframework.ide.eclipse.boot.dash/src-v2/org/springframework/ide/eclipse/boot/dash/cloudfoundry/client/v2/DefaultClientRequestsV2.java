@@ -94,7 +94,6 @@ import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.editor.support.util.StringUtil;
-import org.springframework.util.StringUtils;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import com.google.common.collect.ImmutableList;
@@ -937,17 +936,17 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 		// Let the client validate if any of these combinations are correct.
 		// However, only set these values only if they are present as not doing so causes NPE
-        if (StringUtils.hasText(route.getDomain())) {
+        if (StringUtil.hasText(route.getDomain())) {
         	if (isTcp(route.getDomain())) {
         		// Can only set random port if route is TCP route
         		builder.randomPort(randomRoute);
         	}
         	builder.domain(route.getDomain());
         }
-		if (StringUtils.hasText(route.getHost())) {
+		if (StringUtil.hasText(route.getHost())) {
 			builder.host(route.getHost());
 		}
-		if (StringUtils.hasText(route.getPath())) {
+		if (StringUtil.hasText(route.getPath())) {
 			builder.path(route.getPath());
 		}
 		if (route.getPort() != CFRoute.NO_PORT) {
