@@ -457,6 +457,72 @@ public class CloudFoundryBootDashModelIntegrationTest {
 		assertTrue("host is random generated on push", !host.equals(appName));
 	}
 
+	@Test public void httpRoute() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		IProject project = projects.createBootProject("to-deploy", withStarters("actuator", "web"));
+
+		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
+		waitForJobsToComplete();
+
+		final String appName = appHarness.randomAppName();
+		IFile manifestFile = createFile(project, "manifest.yml",
+				"applications:\n" +
+				"- name: "+appName+"\n" +
+				"  buildpack: java_buildpack\n" +
+				"  routes:\n" +
+				"  -route: " + 	appName + '.'+CFAPPS_IO() + "\n"
+
+		);
+		harness.answerDeploymentPrompt(ui, manifestFile);
+		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		ACondition.waitFor("app to appear", APP_IS_VISIBLE_TIMEOUT, () -> {
+			assertNotNull(model.getApplication(appName));
+		});
+
+		CloudAppDashElement app = model.getApplication(appName);
+
+		ACondition.waitFor("app to be running", APP_DEPLOY_TIMEOUT, () -> {
+			assertEquals(RunState.RUNNING, app.getRunState());
+		});
+
+		String host = app.getLiveHost();
+		assertEquals(appName, host);
+		assertEquals(appName + '.'+CFAPPS_IO(), app.getUrl());
+	}
+
+	@Test public void httpRouteWithPath() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		IProject project = projects.createBootProject("to-deploy", withStarters("actuator", "web"));
+
+		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
+		waitForJobsToComplete();
+
+		final String appName = appHarness.randomAppName();
+		IFile manifestFile = createFile(project, "manifest.yml",
+				"applications:\n" +
+				"- name: "+appName+"\n" +
+				"  buildpack: java_buildpack\n" +
+				"  routes:\n" +
+				"  -route: " + 	appName + '.'+CFAPPS_IO() + "\\myapppath\n"
+
+		);
+		harness.answerDeploymentPrompt(ui, manifestFile);
+		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		ACondition.waitFor("app to appear", APP_IS_VISIBLE_TIMEOUT, () -> {
+			assertNotNull(model.getApplication(appName));
+		});
+
+		CloudAppDashElement app = model.getApplication(appName);
+
+		ACondition.waitFor("app to be running", APP_DEPLOY_TIMEOUT, () -> {
+			assertEquals(RunState.RUNNING, app.getRunState());
+		});
+
+		String host = app.getLiveHost();
+		assertEquals(appName, host);
+		assertEquals(appName + '.'+CFAPPS_IO()+ "\\myapppath", app.getUrl());
+	}
+
 	private String pathJoin(String url, String append) {
 		while (url.endsWith("/")) {
 			url = url.substring(0, url.length()-1);
