@@ -931,13 +931,17 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		});
 	}
 
-	private Mono<Void> mapRoute(String appName, CFRoute route, boolean randomRoute) {
+	private Mono<Void> mapRoute(String appName, CFRoute route, boolean randomRoute)  {
 		org.cloudfoundry.operations.routes.MapRouteRequest.Builder builder = MapRouteRequest.builder()
-		.applicationName(appName)
-		.randomPort(randomRoute);
+		.applicationName(appName);
+
 		// Let the client validate if any of these combinations are correct.
 		// However, only set these values only if they are present as not doing so causes NPE
         if (StringUtils.hasText(route.getDomain())) {
+        	if (isTcp(route.getDomain())) {
+        		// Can only set random port if route is TCP route
+        		builder.randomPort(randomRoute);
+        	}
         	builder.domain(route.getDomain());
         }
 		if (StringUtils.hasText(route.getHost())) {
@@ -955,6 +959,11 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 			_operations.routes().map(mapRouteReq)
 		)
 		.then();
+	}
+
+	private boolean isTcp(String domain) {
+		//TODO: need to fill this in when the client can provider "RouterGroup" type of a domain
+		return false;
 	}
 
 	private Mono<CFRoute> toRoute(Mono<Set<String>> domains, String desiredUrl) {
