@@ -97,6 +97,10 @@ import reactor.core.publisher.Flux;
 public class CloudFoundryClientTest {
 
 	public String CFAPPS_IO() {
+		return get_CFAPPS_IO(clientParams);
+	}
+
+	public static String get_CFAPPS_IO(CFClientParams clientParams) {
 		String org = clientParams.getOrgName();
 		String api = clientParams.getApiUrl();
 		if (org.equals("application-platform-testing")) {

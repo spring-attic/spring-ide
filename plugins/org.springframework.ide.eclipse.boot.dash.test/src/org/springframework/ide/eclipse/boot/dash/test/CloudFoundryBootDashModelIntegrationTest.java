@@ -22,22 +22,16 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.ide.eclipse.boot.dash.test.BootDashModelTest.waitForJobsToComplete;
 import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.APP_DELETE_TIMEOUT;
 import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.APP_DEPLOY_TIMEOUT;
 import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.APP_IS_VISIBLE_TIMEOUT;
-import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.FETCH_REQUEST_MAPPINGS_TIMEOUT;
 import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.SERVICE_DELETE_TIMEOUT;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.createFile;
 
-import static org.springframework.ide.eclipse.boot.dash.test.BootDashModelTest.waitForJobsToComplete;
-
 import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
@@ -66,18 +60,14 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentia
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
 import org.springframework.ide.eclipse.boot.dash.dialogs.StoreCredentialsMode;
-import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel.ManifestType;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
-import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
-import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
-import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCFSpace;
-import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.test.AutobuildingEnablement;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.boot.test.util.TestBracketter;
+import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
@@ -398,6 +388,73 @@ public class CloudFoundryBootDashModelIntegrationTest {
 
 		verify(ui).promptApplicationDeploymentProperties(any());
 		verifyNoMoreInteractions(ui);
+	}
+
+	@Test public void randomRoute() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		IProject project = projects.createBootProject("to-deploy", withStarters("actuator", "web"));
+
+		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
+		waitForJobsToComplete();
+
+		final String appName = appHarness.randomAppName();
+		IFile manifestFile = createFile(project, "manifest.yml",
+				"applications:\n" +
+				"- name: "+appName+"\n" +
+				"  random-route: true\n" +
+				"  buildpack: java_buildpack"
+		);
+		harness.answerDeploymentPrompt(ui, manifestFile);
+		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		ACondition.waitFor("app to appear", APP_IS_VISIBLE_TIMEOUT, () -> {
+			assertNotNull(model.getApplication(appName));
+		});
+
+		CloudAppDashElement app = model.getApplication(appName);
+
+		ACondition.waitFor("app to be running", APP_DEPLOY_TIMEOUT, () -> {
+			assertEquals(RunState.RUNNING, app.getRunState());
+		});
+
+		String host = app.getLiveHost();
+		assertTrue("app has host", StringUtil.hasText(host));
+		assertTrue("host is random generated on push", !host.equals(appName));
+	}
+
+	private String CFAPPS_IO() {
+		return CloudFoundryClientTest.get_CFAPPS_IO(clientParams);
+	}
+
+	@Test public void randomRouteWithDomain() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		IProject project = projects.createBootProject("to-deploy", withStarters("actuator", "web"));
+
+		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
+		waitForJobsToComplete();
+
+		final String appName = appHarness.randomAppName();
+		IFile manifestFile = createFile(project, "manifest.yml",
+				"applications:\n" +
+				"- name: "+appName+"\n" +
+				"  domain: "+CFAPPS_IO() + "\n" +
+				"  random-route: true\n" +
+				"  buildpack: java_buildpack"
+		);
+		harness.answerDeploymentPrompt(ui, manifestFile);
+		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		ACondition.waitFor("app to appear", APP_IS_VISIBLE_TIMEOUT, () -> {
+			assertNotNull(model.getApplication(appName));
+		});
+
+		CloudAppDashElement app = model.getApplication(appName);
+
+		ACondition.waitFor("app to be running", APP_DEPLOY_TIMEOUT, () -> {
+			assertEquals(RunState.RUNNING, app.getRunState());
+		});
+
+		String host = app.getLiveHost();
+		assertTrue("app has host", StringUtil.hasText(host));
+		assertTrue("host is random generated on push", !host.equals(appName));
 	}
 
 	private String pathJoin(String url, String append) {
