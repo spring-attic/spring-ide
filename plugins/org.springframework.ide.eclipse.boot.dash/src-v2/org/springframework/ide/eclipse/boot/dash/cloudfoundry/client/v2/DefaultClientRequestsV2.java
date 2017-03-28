@@ -1000,20 +1000,20 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	private String getUrl(CFRoute route) {
-		String url = route.getDomain();
-		if (route.getHost()!=null) {
-			url = route.getHost() + "." + url;
-		}
-		String path = route.getPath();
-		if (path!=null) {
-			while (path.startsWith("/")) {
-				path = path.substring(1);
-			}
-			if (StringUtils.hasText(path)) {
-				url = url +"/" +path;
-			}
-		}
-		return url;
+//		String url = route.getDomain();
+//		if (route.getHost()!=null) {
+//			url = route.getHost() + "." + url;
+//		}
+//		String path = route.getPath();
+//		if (path!=null) {
+//			while (path.startsWith("/")) {
+//				path = path.substring(1);
+//			}
+//			if (StringUtils.hasText(path)) {
+//				url = url +"/" +path;
+//			}
+//		}
+		return route.getRoute();
 	}
 
 	private Mono<Void> unmapRoute(String appName, CFRoute route) {
