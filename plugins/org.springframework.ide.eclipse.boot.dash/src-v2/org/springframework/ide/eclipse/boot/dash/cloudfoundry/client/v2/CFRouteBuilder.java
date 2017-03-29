@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 import org.cloudfoundry.operations.routes.Route;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.util.Log;
-import org.springframework.util.StringUtils;
+import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 
 public class CFRouteBuilder {
 	private String domain;
@@ -86,7 +86,7 @@ public class CFRouteBuilder {
 
 		//If it is empty or null, there is nothing to build. However, be sure that the
 		// full route value is non-null, even if the "components" may be null
-		if (!StringUtils.hasText(desiredUrl)) {
+		if (!StringUtil.hasText(desiredUrl)) {
 			this.fullRoute = CFRoute.EMPTY_ROUTE;
 			return this;
 		} else {
@@ -121,7 +121,7 @@ public class CFRouteBuilder {
 			String tempPath = desiredUrl.substring(slashIndex);
 			// Do not set empty strings. If there is no path, then it should be
 			// null
-			if (StringUtils.hasText(tempPath)) {
+			if (StringUtil.hasText(tempPath)) {
 				this.path = tempPath;
 			}
 		} else {
@@ -152,7 +152,7 @@ public class CFRouteBuilder {
 			}
 
 			// Don't set empty strings
-			if (StringUtils.hasText(matchedHost)) {
+			if (StringUtil.hasText(matchedHost)) {
 				this.host = matchedHost;
 			}
 		} else {
@@ -162,16 +162,16 @@ public class CFRouteBuilder {
 			if (firstDotIndex >= 0) {
 				String tempDomain = hostAndDomain.substring(firstDotIndex + 1);
 				// Don't set empty strings
-				if (StringUtils.hasText(tempDomain)) {
+				if (StringUtil.hasText(tempDomain)) {
 					this.domain = tempDomain;
 				}
 
 				String tempHost = hostAndDomain.substring(0, firstDotIndex);
-				if (StringUtils.hasText(tempHost)) {
+				if (StringUtil.hasText(tempHost)) {
 					this.host = tempHost;
 				}
 			} else {
-				if (StringUtils.hasText(hostAndDomain)) {
+				if (StringUtil.hasText(hostAndDomain)) {
 					this.host = hostAndDomain;
 				}
 			}
@@ -212,12 +212,12 @@ public class CFRouteBuilder {
 	public static String buildRouteVal(String host, String domain, String path, int port) {
 
 		StringBuilder builder = new StringBuilder();
-		if (StringUtils.hasText(host)) {
+		if (StringUtil.hasText(host)) {
 			builder.append(host);
 		}
 
-		if (StringUtils.hasText(domain)) {
-			if (StringUtils.hasText(host)) {
+		if (StringUtil.hasText(domain)) {
+			if (StringUtil.hasText(host)) {
 				builder.append('.');
 			}
 			builder.append(domain);
@@ -228,7 +228,7 @@ public class CFRouteBuilder {
 			builder.append(Integer.toString(port));
 		}
 
-		if (StringUtils.hasText(path)) {
+		if (StringUtil.hasText(path)) {
 			if (!path.startsWith("/")) {
 				builder.append('/');
 			}
