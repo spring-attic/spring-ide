@@ -216,12 +216,13 @@ public class CFRouteTests {
 		Assert.assertEquals("myapp.spring.io:notAn1nt3g3r",route.getRoute());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
 
+		// Test parsing around the first encountered ':'
 		route = CFRoute.builder().from("http://myapp.spring.io", SPRING_CLOUD_DOMAINS).build();
 		Assert.assertEquals("http://myapp.spring.io",route.getRoute());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
 
 		route = CFRoute.builder().from("tcp.spring.io:8000:9000", SPRING_CLOUD_DOMAINS).build();
-		// Only one ":" is allowed. it should not be able to parse a port if more than ":" is encountered
+		// Only one ':' is allowed. it should not be able to parse a port if more than ':' is encountered
 		Assert.assertEquals("tcp.spring.io:8000:9000",route.getRoute());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
 
@@ -309,19 +310,19 @@ public class CFRouteTests {
 
 		// These variations of existing domains don't exist
 		String domain = CFRouteBuilder.findDomain("spring.io.", SPRING_CLOUD_DOMAINS);
-		Assert.assertEquals(null, domain);
+		Assert.assertNull(domain);
 
 		domain = CFRouteBuilder.findDomain("spring.cfapps.io", SPRING_CLOUD_DOMAINS);
-		Assert.assertEquals(null, domain);
+		Assert.assertNull(domain);
 
 		domain = CFRouteBuilder.findDomain("spring.io.cfapps", SPRING_CLOUD_DOMAINS);
-		Assert.assertEquals(null, domain);
+		Assert.assertNull(domain);
 
 		domain = CFRouteBuilder.findDomain("unknown", SPRING_CLOUD_DOMAINS);
-		Assert.assertEquals(null, domain);
+		Assert.assertNull(domain);
 
 		domain = CFRouteBuilder.findDomain("unknown.domain.io", SPRING_CLOUD_DOMAINS);
-		Assert.assertEquals(null, domain);
+		Assert.assertNull(domain);
 	}
 
 	@Test
@@ -340,10 +341,10 @@ public class CFRouteTests {
 	public void build_route_value_empty() throws Exception {
 
 		String val = CFRouteBuilder.buildRouteVal(null, null, null, CFRoute.NO_PORT);
-		Assert.assertEquals("", val);
+		Assert.assertEquals(CFRoute.EMPTY_ROUTE, val);
 
 		val = CFRouteBuilder.buildRouteVal("", "", "", CFRoute.NO_PORT);
-		Assert.assertEquals("", val);
+		Assert.assertEquals(CFRoute.EMPTY_ROUTE, val);
 
 	}
 
@@ -373,7 +374,6 @@ public class CFRouteTests {
 
 		val = CFRouteBuilder.buildRouteVal("appHost", "cfapps.io", "/path/to/app", 60101);
 		Assert.assertEquals("appHost.cfapps.io:60101/path/to/app", val);
-
 	}
 
 	@Test
@@ -384,7 +384,6 @@ public class CFRouteTests {
 		Assert.assertNull(route.getPath());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
 		Assert.assertEquals("spring.io", route.getRoute());
-
 	}
 
 	@Test
@@ -395,7 +394,6 @@ public class CFRouteTests {
 		Assert.assertNull(route.getPath());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
 		Assert.assertEquals("not.exist.io", route.getRoute());
-
 	}
 
 	@Test
@@ -573,7 +571,7 @@ public class CFRouteTests {
 	public void test_tcp_port_building() throws Exception {
 		CFRoute route = CFRoute.builder().domain("tcp.spring.io").port(8000).build();
 		Assert.assertEquals("tcp.spring.io",route.getDomain());
-		Assert.assertNull( route.getHost());
+		Assert.assertNull(route.getHost());
 		Assert.assertNull(route.getPath());
 		Assert.assertEquals(8000, route.getPort());
 		Assert.assertEquals("tcp.spring.io:8000", route.getRoute());
@@ -589,5 +587,4 @@ public class CFRouteTests {
 		Assert.assertEquals(8000, route.getPort());
 		Assert.assertEquals("myapp.spring.io:8000/mypath/additional", route.getRoute());
 	}
-
 }
