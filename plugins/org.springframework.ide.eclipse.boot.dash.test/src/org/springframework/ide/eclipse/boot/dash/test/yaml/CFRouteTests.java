@@ -23,15 +23,6 @@ public class CFRouteTests {
 	public static final List<String> SPRING_CLOUD_DOMAINS = Arrays.<String>asList("springsource.org", "spring.io",
 			"myowndomain.spring.io", "tcp.spring.io", "spring.framework");
 
-	@Test
-	public void test_domain_no_host() throws Exception {
-		CFRoute route = CFRoute.builder().from("spring.io", SPRING_CLOUD_DOMAINS).build();
-		Assert.assertEquals("spring.io", route.getDomain());
-		Assert.assertNull(route.getHost());
-		Assert.assertNull(route.getPath());
-		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
-		Assert.assertEquals("spring.io", route.getRoute());
-	}
 
 	@Test
 	public void test_domain_host() throws Exception {

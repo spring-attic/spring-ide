@@ -470,7 +470,7 @@ public class CloudFoundryBootDashModelIntegrationTest {
 				"- name: "+appName+"\n" +
 				"  buildpack: java_buildpack\n" +
 				"  routes:\n" +
-				"  -route: " + 	appName + '.'+CFAPPS_IO() + "\n"
+				"  - route: " + appName + '.'+CFAPPS_IO()
 
 		);
 		harness.answerDeploymentPrompt(ui, manifestFile);
@@ -487,7 +487,7 @@ public class CloudFoundryBootDashModelIntegrationTest {
 
 		String host = app.getLiveHost();
 		assertEquals(appName, host);
-		assertEquals(appName + '.'+CFAPPS_IO(), app.getUrl());
+		assertTrue(app.getUrl().contains(appName + '.'+CFAPPS_IO()));
 	}
 
 	@Test public void httpRouteWithPath() throws Exception {
@@ -503,7 +503,7 @@ public class CloudFoundryBootDashModelIntegrationTest {
 				"- name: "+appName+"\n" +
 				"  buildpack: java_buildpack\n" +
 				"  routes:\n" +
-				"  -route: " + 	appName + '.'+CFAPPS_IO() + "\\myapppath\n"
+				"  - route: " + appName + '.'+CFAPPS_IO() + "/myapppath"
 
 		);
 		harness.answerDeploymentPrompt(ui, manifestFile);
@@ -520,7 +520,7 @@ public class CloudFoundryBootDashModelIntegrationTest {
 
 		String host = app.getLiveHost();
 		assertEquals(appName, host);
-		assertEquals(appName + '.'+CFAPPS_IO()+ "\\myapppath", app.getUrl());
+		assertTrue(app.getUrl().contains(appName + '.'+CFAPPS_IO()+ "/myapppath"));
 	}
 
 	private String pathJoin(String url, String append) {
