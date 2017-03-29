@@ -419,6 +419,8 @@ public class CloudFoundryBootDashModelIntegrationTest {
 
 		String host = app.getLiveHost();
 		assertTrue("app has host", StringUtil.hasText(host));
+		assertTrue("app has default domain", host.endsWith("."+CFAPPS_IO()));
+		host = host.substring(0, host.length()-CFAPPS_IO().length()-1);
 		assertTrue("host is random generated on push", !host.equals(appName));
 	}
 
@@ -455,6 +457,8 @@ public class CloudFoundryBootDashModelIntegrationTest {
 
 		String host = app.getLiveHost();
 		assertTrue("app has host", StringUtil.hasText(host));
+		assertTrue("app has default domain", host.endsWith("."+CFAPPS_IO()));
+		host = host.substring(0, host.length()-CFAPPS_IO().length()-1);
 		assertTrue("host is random generated on push", !host.equals(appName));
 	}
 
