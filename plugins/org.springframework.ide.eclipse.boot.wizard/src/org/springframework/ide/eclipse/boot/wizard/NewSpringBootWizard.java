@@ -142,7 +142,7 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 				}
 			}
 			if (notEmpty) {
-				return new GroupSection(owner, null, radioSections.toArray(new WizardPageSection[radioSections.size()])).columns(2);
+				return new GroupSection(owner, null, radioSections.toArray(new WizardPageSection[radioSections.size()])).columns(2, false);
 			}
 			return null;
 		}
