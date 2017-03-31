@@ -741,8 +741,8 @@
 					<keystore>${signing.keystore}</keystore>
 					<storepass>${signing.store.password}</storepass>
 					<keypass>${signing.key.password}</keypass>
-					<tsa>http://timestamp.digicert.com</tsa>
-					<!-- Could try this, maybe it fix the signing fails? <tsa>https://freetsa.org</tsa> -->
+					<!-- suspected of being a bad tsa: <tsa>http://timestamp.digicert.com</tsa> -->
+					<tsa>https://freetsa.org</tsa>
 					<verbose>true</verbose>
 				</configuration>
 			</plugin>
