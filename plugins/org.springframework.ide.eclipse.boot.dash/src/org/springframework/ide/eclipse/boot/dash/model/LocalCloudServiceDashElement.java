@@ -47,7 +47,7 @@ public class LocalCloudServiceDashElement extends AbstractLaunchConfigurationsDa
 
 	private static final EnumSet<RunState> LOCAL_CLOUD_SERVICE_RUN_GOAL_STATES = EnumSet.of(INACTIVE, RUNNING);
 
-	private static final BootDashColumn[] COLUMNS = {BootDashColumn.NAME, BootDashColumn.LIVE_PORT, BootDashColumn.RUN_STATE_ICN};
+	private static final BootDashColumn[] COLUMNS = {BootDashColumn.NAME, BootDashColumn.LIVE_PORT, BootDashColumn.RUN_STATE_ICN, BootDashColumn.TAGS};
 
 	private static final LoadingCache<String, ILaunchConfigurationWorkingCopy> LAUNCH_CONFIG_CACHE = CacheBuilder.newBuilder().build(new CacheLoader<String, ILaunchConfigurationWorkingCopy>() {
 		@Override
