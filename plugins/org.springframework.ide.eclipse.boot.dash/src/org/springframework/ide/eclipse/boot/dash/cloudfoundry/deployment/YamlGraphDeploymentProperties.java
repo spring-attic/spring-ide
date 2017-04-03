@@ -992,7 +992,12 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 							 * ^-end
 							 */
 							if (n instanceof MappingNode && root.getEndMark().getIndex() != end) {
-								end -= sequenceValue.getStartMark().getColumn();
+								if (parent.getEndMark().getIndex() == n.getEndMark().getIndex()) {
+									// last entry in the list but not the last yaml piece in the document
+									end -= (parent.getStartMark().getColumn() - appNode.getStartMark().getColumn());
+								} else {
+									end -= sequenceValue.getStartMark().getColumn();
+								}
 							}
 							/*
 							 *  "- entry" start=2, end=7, need to include '\n' in the deletion
