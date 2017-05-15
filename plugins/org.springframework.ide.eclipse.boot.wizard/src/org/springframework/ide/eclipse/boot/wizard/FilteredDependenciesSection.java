@@ -84,18 +84,16 @@ public class FilteredDependenciesSection extends WizardPageSection {
 	}
 
 	private void onFilter(ExpandableSection expandable, CheckBoxesSection<Dependency> checkboxesSection, String cat) {
-
-		boolean visChanged = checkboxesSection.applyFilter(filter.getValue());
-
+		Filter<Dependency> filter = this.filter.getValue();
+		checkboxesSection.applyFilter(filter);
+		boolean isTrivialFilter = filter==null || filter.isTrivial();
 		if (checkboxesSection.isCreated()) {
 			boolean hasVisible = checkboxesSection.hasVisible();
 			expandable.setVisible(hasVisible);
-			if (hasVisible && visChanged) {
-				// Reveal if visibility changed
-				expandable.getExpansionState().setValue(true);
+			if (hasVisible) {
+				expandable.getExpansionState().setValue(!isTrivialFilter);
 			}
 		}
-
 		layout();
 	}
 
