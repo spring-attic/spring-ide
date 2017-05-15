@@ -212,6 +212,10 @@ public class EditStartersModel implements OkButtonHandler {
 		return defaultDependencies.getDependencies(dependencies);
 	}
 
+	public boolean saveDefaultDependencies() {
+		return defaultDependencies.save(dependencies);
+	}
+
 	/**
 	 * Retrieves frequently used dependencies.
 	 *

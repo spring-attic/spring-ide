@@ -113,7 +113,11 @@ public class EditStartersDialog extends DialogWithSections {
 							.sizeHint(DEPENDENCY_SECTION_SIZE)
 						)
 						.noMargins(true)
-						.grabVertical(true)
+						.grabVertical(true),
+						new MakeDefaultSection(owner,
+								model::saveDefaultDependencies,
+								model.dependencies::clearSelection
+						)
 					).grabVertical(true)
 				)
 				.grabVertical(true)
