@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.springsource.ide.eclipse.commons.cloudfoundry.client.v2
 Bundle-SymbolicName: org.springsource.ide.eclipse.commons.cloudfoundry.client.v2
-Bundle-Version: 3.8.4.qualifier
+Bundle-Version: 3.9.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: dependencies/cloudfoundry-client-2.8.0.RELEASE.jar,
  dependencies/cloudfoundry-client-reactor-2.8.0.RELEASE.jar,

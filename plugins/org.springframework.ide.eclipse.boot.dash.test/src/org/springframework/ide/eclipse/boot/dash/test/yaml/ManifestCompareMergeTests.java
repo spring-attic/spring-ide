@@ -929,6 +929,15 @@ public class ManifestCompareMergeTests {
 		performMergeTest(getTestFile("mergeTestsData/routes-5.yml"), props, getTestFile("mergeTestsData/routes-5-expected.yml"));
 	}
 
+	@Test
+	public void test_routes_6() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("demo-app");
+		props.setMemory(1024);
+		props.setInstances(1);
+		props.setUris(Arrays.asList("route-2.springsource.org"));
+		performMergeTest(getTestFile("mergeTestsData/routes-6.yml"), props, getTestFile("mergeTestsData/routes-6-expected.yml"));
+	}
 
 	@Test
 	public void test_routes_paths_ports() throws Exception {

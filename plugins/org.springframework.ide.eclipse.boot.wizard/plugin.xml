@@ -18,7 +18,7 @@
  <extension
        point="org.eclipse.ui.newWizards">
    <wizard
-         category="org.springframework.ide.eclipse.beans.ui.wizards.category"
+         category="org.springsource.ide.eclipse.boot.wizards.category"
          icon="icons/full/etool16/new_template_project_obj.png"
          class="org.springframework.ide.eclipse.boot.wizard.NewSpringBootWizard"
          hasPages="true"
@@ -28,9 +28,8 @@
        <description>Create new Spring Starter Project via the Spring Initializr Web Service</description>
    </wizard>
       
-      <!-- an 'alias' for the GS import wizard that shows up in the File >> New menu -->
       <wizard
-            category="org.springframework.ide.eclipse.beans.ui.wizards.category"
+            category="org.springsource.ide.eclipse.boot.wizards.category"
             class="org.springframework.ide.eclipse.boot.wizard.guides.GSImportWizard"
             icon="icons/full/etool16/new_template_project_obj.png"
             id="org.springsource.ide.eclipse.gettingstarted.wizards.import.generic.newalias"
@@ -42,21 +41,9 @@
          <selection class="org.eclipse.core.resources.IResource"/> 
       </wizard>
       
-      <wizard
-            category="org.springsource.ide.eclipse.gettingstarted.wizards.import.category"
-            class="org.springframework.ide.eclipse.boot.wizard.guides.GSImportWizard"
-            id="org.springsource.ide.eclipse.gettingstarted.wizards.import.generic"
-            icon="icons/full/etool16/new_template_project_obj.png"
-            name="Spring Getting Started Content"> 
-         <description> 
-            An import wizards that imports code associated with a Spring Getting Started Guide
-         </description> 
-         <selection class="org.eclipse.core.resources.IResource"/> 
-      </wizard>
-      
       <category
-            id="org.springsource.ide.eclipse.gettingstarted.wizards.import.category"
-            name="Spring">
+            id="org.springsource.ide.eclipse.boot.wizards.category"
+            name="Spring Boot">
       </category> 
 
  </extension>

@@ -63,6 +63,10 @@
 
   With regards to bug reports, please go to:
 
+  https://github.com/spring-projects/spring-ide/issues
+  
+  Older issues could be found in Spring IDE Jira which is now archived as read-only:
+  
   https://jira.springsource.org/browse/IDE
 
 ## Developing Spring IDE
