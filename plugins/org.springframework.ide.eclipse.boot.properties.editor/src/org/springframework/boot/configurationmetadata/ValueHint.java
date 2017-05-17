@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2015 the original author or authors.
+ * Copyright 2012-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,24 +26,7 @@ import java.io.Serializable;
  * @since 1.3.0
  */
 @SuppressWarnings("serial")
-public class ValueHint implements Serializable, Cloneable {
-
-	public static ValueHint withValue(Object value) {
-		ValueHint hint = new ValueHint();
-		hint.setValue(value);
-		return hint;
-	}
-
-	public ValueHint prefixWith(String prefix) {
-		try {
-			ValueHint clone = (ValueHint) this.clone();
-			clone.setValue(prefix+value);
-			return clone;
-		} catch (CloneNotSupportedException e) {
-			//This is supposed to be impossble.
-			throw new RuntimeException(e);
-		}
-	}
+public class ValueHint implements Serializable {
 
 	private Object value;
 
@@ -94,4 +77,5 @@ public class ValueHint implements Serializable, Cloneable {
 		return "ValueHint{" + "value=" + this.value + ", description='" + this.description
 				+ '\'' + '}';
 	}
+
 }

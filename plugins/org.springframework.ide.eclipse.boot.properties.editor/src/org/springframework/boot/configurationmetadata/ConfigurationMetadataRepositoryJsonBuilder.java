@@ -57,14 +57,13 @@ public final class ConfigurationMetadataRepositoryJsonBuilder {
 	 * metadata repository holds items that were loaded previously, these are ignored.
 	 * <p>
 	 * Leaves the stream open when done.
-	 * @param origin optional information object to help identify where the inputstream came from
 	 * @param inputStream the source input stream
 	 * @return this builder
 	 * @throws IOException in case of I/O errors
 	 */
 	public ConfigurationMetadataRepositoryJsonBuilder withJsonResource(
-			Object origin, InputStream inputStream) throws IOException {
-		return withJsonResource(origin, inputStream, this.defaultCharset);
+			InputStream inputStream) throws IOException {
+		return withJsonResource(inputStream, this.defaultCharset);
 	}
 
 	/**
@@ -74,18 +73,17 @@ public final class ConfigurationMetadataRepositoryJsonBuilder {
 	 * ignored.
 	 * <p>
 	 * Leaves the stream open when done.
-	 * @param origin optional information object to help identify where the inputstream came from
 	 * @param inputStream the source input stream
 	 * @param charset the charset of the input
 	 * @return this builder
 	 * @throws IOException in case of I/O errors
 	 */
 	public ConfigurationMetadataRepositoryJsonBuilder withJsonResource(
-			Object origin, InputStream inputStream, Charset charset) throws IOException {
+			InputStream inputStream, Charset charset) throws IOException {
 		if (inputStream == null) {
 			throw new IllegalArgumentException("InputStream must not be null.");
 		}
-		this.rawDatas.add(parseRaw(origin, inputStream, charset));
+		this.rawDatas.add(parseRaw(inputStream, charset));
 		return this;
 	}
 
@@ -100,10 +98,10 @@ public final class ConfigurationMetadataRepositoryJsonBuilder {
 		return result;
 	}
 
-	private RawConfigurationMetadata parseRaw(Object origin, InputStream in, Charset charset)
+	private RawConfigurationMetadata parseRaw(InputStream in, Charset charset)
 			throws IOException {
 		try {
-			return this.reader.read(origin, in, charset);
+			return this.reader.read(in, charset);
 		}
 		catch (IOException ex) {
 			throw new IllegalArgumentException(
@@ -205,7 +203,7 @@ public final class ConfigurationMetadataRepositoryJsonBuilder {
 			InputStream... inputStreams) throws IOException {
 		ConfigurationMetadataRepositoryJsonBuilder builder = create();
 		for (InputStream inputStream : inputStreams) {
-			builder = builder.withJsonResource(null, inputStream);
+			builder = builder.withJsonResource(inputStream);
 		}
 		return builder;
 	}

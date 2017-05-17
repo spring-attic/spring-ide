@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,22 +27,18 @@ import java.util.List;
  */
 class RawConfigurationMetadata {
 
-	private final Object origin;
-
 	private final List<ConfigurationMetadataSource> sources;
 
 	private final List<ConfigurationMetadataItem> items;
 
 	private final List<ConfigurationMetadataHint> hints;
 
-	RawConfigurationMetadata(Object parsedFrom,
-			List<ConfigurationMetadataSource> sources,
+	RawConfigurationMetadata(List<ConfigurationMetadataSource> sources,
 			List<ConfigurationMetadataItem> items,
 			List<ConfigurationMetadataHint> hints) {
-		this.origin = parsedFrom;
-		this.sources = new ArrayList<ConfigurationMetadataSource>(sources);
-		this.items = new ArrayList<ConfigurationMetadataItem>(items);
-		this.hints = new ArrayList<ConfigurationMetadataHint>(hints);
+		this.sources = new ArrayList<>(sources);
+		this.items = new ArrayList<>(items);
+		this.hints = new ArrayList<>(hints);
 		for (ConfigurationMetadataItem item : this.items) {
 			resolveName(item);
 		}
@@ -85,7 +81,7 @@ class RawConfigurationMetadata {
 			String dottedPrefix = groupId + ".";
 			String id = item.getId();
 			if (hasLength(groupId) && id.startsWith(dottedPrefix)) {
-				String name = id.substring(dottedPrefix.length(), id.length());
+				String name = id.substring(dottedPrefix.length());
 				item.setName(name);
 			}
 		}
@@ -93,14 +89,6 @@ class RawConfigurationMetadata {
 
 	private static boolean hasLength(String string) {
 		return (string != null && string.length() > 0);
-	}
-
-	@Override
-	public String toString() {
-		if (origin!=null) {
-			return "RawConfigurationMetadata("+origin+")";
-		}
-		return super.toString();
 	}
 
 }

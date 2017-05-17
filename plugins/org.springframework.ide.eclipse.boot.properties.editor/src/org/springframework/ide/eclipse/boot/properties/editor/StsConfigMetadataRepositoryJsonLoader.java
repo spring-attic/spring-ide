@@ -185,7 +185,8 @@ public class StsConfigMetadataRepositoryJsonLoader {
 	}
 
 	private void loadFromInputStream(Object origin, InputStream is) throws IOException {
-		builder.withJsonResource(origin, is);
+		builder.withJsonResource(is);
+		//builder.withJsonResource(origin, is);
 	}
 
 	/// Debug utils
