@@ -600,6 +600,11 @@
 					<url>http://download.eclipse.org/cft/1.1.0.M7/</url>
 				</repository>
 				<repository>
+		  			<id>buildship-for-testing</id>
+		  			<layout>p2</layout>
+		  			<url>http://download.eclipse.org/buildship/updates/e46/releases/1.0/</url>
+				</repository>
+				<repository>
 					<id>eclipse-integration-commons</id>
 					<layout>p2</layout>
 					<url>http://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}</url>
