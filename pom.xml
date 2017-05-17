@@ -559,6 +559,55 @@
 		</profile>
 		
 		<profile>
+			<id>e47</id>
+			<properties>
+				<p2.repository.name>Spring IDE for Eclipse 4.7</p2.repository.name>
+			</properties>
+			<repositories>
+				<repository>
+					<id>platform-e47</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/eclipse/updates/4.7/</url>
+				</repository>
+				<repository>
+					<id>oxygen</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/releases/oxygen/</url>
+				</repository>
+				<repository>
+					<id>ajdt</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/tools/ajdt/47/dev/update</url>
+				</repository>
+				<repository>
+					<id>orbit-oxygen</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/tools/orbit/downloads/drops/S20170505151127/repository/</url>
+				</repository>
+				<repository>
+					<id>swtbot</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/technology/swtbot/releases/latest/</url>
+				</repository>
+				<repository>
+		  			<id>groovy</id>
+		  			<layout>p2</layout>
+		  			<url>http://dist.springsource.org/snapshot/GRECLIPSE/e4.7/</url>
+				</repository>
+				<repository>
+					<id>cft</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/cft/1.1.0.M7/</url>
+				</repository>
+				<repository>
+					<id>eclipse-integration-commons</id>
+					<layout>p2</layout>
+					<url>http://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}</url>
+				</repository>
+			</repositories>
+		</profile>
+
+		<profile>
 			<id>bamboo-signing</id>
 			<properties>
 				<signing.store.password>${env.bamboo_signing_store_password}</signing.store.password>
