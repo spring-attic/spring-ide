@@ -25,13 +25,13 @@ import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpe
 
 /**
  * Utility class containing static method for creating HTML help/tooltip content for dependency
- * 
+ *
  * @author Alex Boyko
  *
  */
 @SuppressWarnings("restriction")
 class DependencyHtmlContent {
-	
+
 	private static final String UNIT; // See https://bugs.eclipse.org/bugs/show_bug.cgi?id=155993
 	static {
 		UNIT= Util.isMac() ? "px" : "pt";   //$NON-NLS-1$//$NON-NLS-2$
@@ -39,7 +39,7 @@ class DependencyHtmlContent {
 
 	/**
 	 * Generates HTML documentation for a dependency
-	 * 
+	 *
 	 * @param dep Dependency model
 	 * @param variables Map containing values for variables
 	 * @return HTML as a <code>string</code>
@@ -47,7 +47,7 @@ class DependencyHtmlContent {
 	public static String generateHtmlDocumentation(Dependency dep, Map<String, String> variables) {
 		StringBuffer buffer = new StringBuffer();
 		HTMLPrinter.insertPageProlog(buffer, 0, String.join("\n", styles()));
-		
+
 		Links links = dep.getLinks();
 		// HTML Tooltip initial size calculations can't calculate <br/> height normally, can't tell new line jump from empty line
 		// Therefore use <p> if links are present, otherwise just plain text
@@ -76,12 +76,12 @@ class DependencyHtmlContent {
 				}
 			}
 		}
-				
+
 		HTMLPrinter.addPageEpilog(buffer);
-		
+
 		return buffer.toString();
 	}
-	
+
 	private static String linkBullets(Link[] links, Map<String, String> variableValues) {
 		StringBuffer bullets = new StringBuffer();
 		for (Link link : links) {
@@ -116,13 +116,13 @@ class DependencyHtmlContent {
 		}
 		return bullets.toString();
 	}
-	
+
 	private static String[] styles() {
-		StringBuilder mainStyle = new StringBuilder();		
+		StringBuilder mainStyle = new StringBuilder();
 		FontData fontData = JFaceResources.getDialogFontDescriptor().getFontData()[0];
 		boolean bold= (fontData.getStyle() & SWT.BOLD) != 0;
 		boolean italic= (fontData.getStyle() & SWT.ITALIC) != 0;
-		String size= Integer.toString(Math.max(5, fontData.getHeight() - 1)) + UNIT;
+		String size= Integer.toString(Math.max(5, fontData.getHeight())) + UNIT;
 		String family= "'" + fontData.getName() + "',sans-serif"; //$NON-NLS-1$ //$NON-NLS-2$
 		mainStyle.append("font-size:");
 		mainStyle.append(size);
@@ -136,7 +136,7 @@ class DependencyHtmlContent {
 		mainStyle.append("font-style:");
 		mainStyle.append(italic ? "italic" : "normal");
 		mainStyle.append(';');
-		
+
 		return new String[] {
 			"html 		{" + mainStyle + "}",
 			"body, h4, h5, h6, p, table, td, caption, th, ul, ol, dl, li, dd, dt { font-size: 1em; }",
@@ -144,7 +144,7 @@ class DependencyHtmlContent {
 			"p 			{ margin-top: 1em; margin-bottom: 1em; }",
 			"ul	        { margin-top: 0px; margin-bottom: 0em; margin-left: 1em; padding-left: 1em; }",
 			"li	        { margin-top: 0px; margin-bottom: 0px; }"
-		};		
+		};
 	}
 
 }
