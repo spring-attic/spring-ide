@@ -184,7 +184,7 @@ public class PropertyInfo {
 	}
 	public void addSource(ConfigurationMetadataSource source) {
 		if (sources==null) {
-			sources = new ArrayList<PropertySource>();
+			sources = new ArrayList<>();
 		}
 		sources.add(new PropertySource(source));
 	}
@@ -202,6 +202,10 @@ public class PropertyInfo {
 
 	public boolean isDeprecated() {
 		return deprecation!=null;
+	}
+
+	public Deprecation getDeprecation() {
+		return deprecation;
 	}
 
 	public String getDeprecationReason() {

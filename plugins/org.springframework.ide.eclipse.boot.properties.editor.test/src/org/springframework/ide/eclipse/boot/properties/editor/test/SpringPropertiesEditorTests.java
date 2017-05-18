@@ -14,6 +14,7 @@ import static org.springframework.ide.eclipse.boot.properties.editor.reconciling
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertContains;
 
 import java.time.Duration;
+import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -28,6 +29,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.reconciling.Spring
 import org.springframework.ide.eclipse.boot.properties.editor.test.ApplicationYamlEditorTestHarness.YamlEditor;
 import org.springframework.ide.eclipse.boot.properties.editor.util.AptUtils;
 import org.springframework.ide.eclipse.boot.util.JavaProjectUtil;
+import org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity;
 import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
 
 import com.google.common.collect.ImmutableList;
@@ -871,7 +873,42 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"error.path|Deprecated!"
 				//no other problems
 		);
-
+	}
+	
+	public void testReconcileDeprecatedPropertyLevel() throws Exception {
+		IProject p = createPredefinedMavenProject("demo-deprecation-level");
+		IJavaProject jp = JavaCore.create(p);
+		useProject(jp);
+		
+		MockEditor editor = newEditor(
+				"# a comment\n"+
+				"foo.discouraged=Meh\n" +
+				"foo.removed=Ouch\n" +
+				"foo.unspecified=Woot?"
+		);
+		List<ReconcileProblem> ps = assertProblems(editor, 
+				"foo.discouraged|Deprecated",
+				"foo.removed|Deprecated",
+				"foo.unspecified|Deprecated"
+		);
+		assertEquals(ProblemSeverity.WARNING, ps.get(0).getType().getDefaultSeverity());
+		assertEquals(ProblemSeverity.ERROR, ps.get(1).getType().getDefaultSeverity());
+		assertEquals(ProblemSeverity.WARNING, ps.get(2).getType().getDefaultSeverity());
+	}
+	
+	public void testCompletionsDeprecatedPrpopertyLevel() throws Exception {
+		IProject p = createPredefinedMavenProject("demo-deprecation-level");
+		useProject(p);
+		
+		assertCompletionsDisplayString("foo.<*>", (c) -> c.getDisplayString().startsWith("foo."),
+				"foo.discouraged : String",
+				// foo.removed should not be suggested as it shouldn't be used.
+				"foo.unspecified : String"
+		);
+		assertStyledCompletions("foo.<*>", (c) -> c.getDisplayString().startsWith("foo."),
+				StyledStringMatcher.strikeout("foo.discouraged"),
+				StyledStringMatcher.strikeout("foo.unspecified")
+		);
 	}
 
 	public void testDeprecatedPropertyCompletion() throws Exception {
@@ -882,7 +919,6 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"server.error.path : String", // should be first because it is not deprecated, even though it is not as good a pattern match
 				"error.path : String"
 		);
-		//TODO: could we check that 'deprecated' completions are formatted with 'strikethrough font?
 		assertStyledCompletions("error.pa<*>",
 				StyledStringMatcher.plainFont("server.error.path : String"),
 				StyledStringMatcher.strikeout("error.path")

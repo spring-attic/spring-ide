@@ -39,6 +39,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.Bean
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypedProperty;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile.IndexNavigator;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory.ScoreableProposal;
 import org.springframework.ide.eclipse.editor.support.completions.DocumentEdits;
 import org.springframework.ide.eclipse.editor.support.completions.ProposalApplier;
@@ -200,22 +201,23 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 							Type type = p.getType();
 							edits.delete(queryOffset, query);
 							edits.createPathInPlace(contextNode, relativePath, queryOffset, appendTextFor(type));
-							proposals.add(completionFactory.beanProperty(doc.getDocument(),
+							completionFactory.beanProperty(doc.getDocument(),
 									contextPath.toPropString(), getType(),
-									query, p, score, edits, typeUtil)
-							);
+									query, p, score, edits, typeUtil
+							).ifPresent(proposals::add);
 						} else {
 							//property already defined
 							// instead of filtering, navigate to the place where its defined.
 							deleteQueryAndLine(doc, query, queryOffset, edits);
 							//Cast to SChildBearingNode cannot fail because otherwise definedProps would be the empty set.
 							edits.createPath((SChildBearingNode) contextNode, relativePath, "");
-							proposals.add(
-								completionFactory.beanProperty(doc.getDocument(),
+							completionFactory.beanProperty(doc.getDocument(),
 									contextPath.toPropString(), getType(),
-									query, p, score, edits, typeUtil)
-								.deemphasize() //deemphasize because it already exists
-							);
+									query, p, score, edits, typeUtil
+							).ifPresent((it) -> {
+								//deemphasize because it already exists
+								proposals.add(it.deemphasize());
+							});
 						}
 					}
 				}
@@ -399,13 +401,19 @@ public abstract class ApplicationYamlAssistContext extends AbstractYamlAssistCon
 				ArrayList<ICompletionProposal> completions = new ArrayList<ICompletionProposal>();
 				for (Match<PropertyInfo> match : matchingProps) {
 					ProposalApplier edits = createEdits(doc, offset, query, match);
-					ScoreableProposal completion = completionFactory.property(
+					completionFactory.property(
 							doc.getDocument(), edits, match, typeUtil
-					);
-					if (getContextRoot(doc).exists(YamlPath.fromProperty(match.data.getId()))) {
-						completion.deemphasize();
-					}
-					completions.add(completion);
+					)
+					.ifPresent(completion -> {
+						try {
+							if (getContextRoot(doc).exists(YamlPath.fromProperty(match.data.getId()))) {
+								completion.deemphasize();
+							}
+							completions.add(completion);
+						} catch (Exception e) {
+							Log.log(e);
+						}
+					});
 				}
 				return completions;
 			}

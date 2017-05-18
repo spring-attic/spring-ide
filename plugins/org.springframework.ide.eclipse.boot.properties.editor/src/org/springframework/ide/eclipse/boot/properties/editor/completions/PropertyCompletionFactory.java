@@ -10,8 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.completions;
 
+import java.util.Optional;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.IDocument;
+import org.springframework.boot.configurationmetadata.Deprecation.Level;
 import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
@@ -27,11 +30,14 @@ import org.springframework.ide.eclipse.editor.support.yaml.schema.YType;
 
 public class PropertyCompletionFactory extends CompletionFactory {
 
-	public ScoreableProposal property(IDocument doc, ProposalApplier applier, Match<PropertyInfo> prop, TypeUtil typeUtil) {
-		return new PropertyProposal(doc, applier, prop, typeUtil);
+	public Optional<ScoreableProposal> property(IDocument doc, ProposalApplier applier, Match<PropertyInfo> prop, TypeUtil typeUtil) {
+		if (prop.data.isDeprecated() && prop.data.getDeprecation().getLevel()==Level.ERROR) {
+			return Optional.empty();
+		}
+		return Optional.of(new PropertyProposal(doc, applier, prop, typeUtil));
 	}
 
-	public ScoreableProposal beanProperty(IDocument doc, final String contextProperty, final Type contextType, final String pattern, final TypedProperty property, final double score, ProposalApplier applier, final TypeUtil typeUtil) {
+	public Optional<ScoreableProposal> beanProperty(IDocument doc, final String contextProperty, final Type contextType, final String pattern, final TypedProperty property, final double score, ProposalApplier applier, final TypeUtil typeUtil) {
 		AbstractPropertyProposal proposal = new AbstractPropertyProposal(doc, applier) {
 
 			private HoverInfo hoverInfo;
@@ -72,9 +78,12 @@ public class PropertyCompletionFactory extends CompletionFactory {
 			}
 		};
 		if (property.isDeprecated()) {
+			if (property.getDeprecationLevel()==Level.ERROR) {
+				return Optional.empty();
+			}
 			proposal.deprecate();
 		}
-		return proposal;
+		return Optional.of(proposal);
 	}
 
 	private DocumentContextFinder documentContextFinder;

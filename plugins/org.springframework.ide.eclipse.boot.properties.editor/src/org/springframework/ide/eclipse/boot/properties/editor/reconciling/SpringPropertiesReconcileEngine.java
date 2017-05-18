@@ -11,16 +11,13 @@
 package org.springframework.ide.eclipse.boot.properties.editor.reconciling;
 
 import static org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCompletionEngine.isAssign;
-import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType.PROP_DEPRECATED;
-import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType.PROP_UNKNOWN_PROPERTY;
+import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType.*;
 import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem.problem;
 import static org.springframework.ide.eclipse.editor.support.util.StringUtil.commonPrefix;
 
-import java.util.Map;
 import java.util.regex.Pattern;
 
 import javax.inject.Provider;
-import javax.print.Doc;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
@@ -30,6 +27,8 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.TextUtilities;
+import org.springframework.boot.configurationmetadata.Deprecation;
+import org.springframework.boot.configurationmetadata.Deprecation.Level;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
@@ -144,11 +143,10 @@ public class SpringPropertiesReconcileEngine implements IReconcileEngine {
 	}
 
 	protected SpringPropertyProblem problemDeprecated(DocumentRegion trimmedRegion, PropertyInfo property) {
-		SpringPropertyProblem p = problem(PROP_DEPRECATED,
+		SpringPropertyProblem p = problem(deprecationProblemType(property.getDeprecation()),
 				TypeUtil.deprecatedPropertyMessage(
 						property.getId(), null,
-						property.getDeprecationReplacement(),
-						property.getDeprecationReason()
+						property.getDeprecation()
 				),
 				trimmedRegion
 		);
@@ -245,6 +243,13 @@ public class SpringPropertiesReconcileEngine implements IReconcileEngine {
 			//happens if looking for assignment char outside the document
 			return false;
 		}
+	}
+
+	public static SpringPropertiesProblemType deprecationProblemType(Deprecation deprecation) {
+		Level level = deprecation == null ? Level.WARNING : deprecation.getLevel();
+		return level==Level.ERROR
+				? SpringPropertiesProblemType.PROP_DEPRECATED_ERROR
+				: SpringPropertiesProblemType.PROP_DEPRECATED_WARNING;
 	}
 
 }

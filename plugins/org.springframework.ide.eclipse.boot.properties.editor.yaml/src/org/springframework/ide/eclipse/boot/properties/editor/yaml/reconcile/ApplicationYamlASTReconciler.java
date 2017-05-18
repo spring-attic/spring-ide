@@ -10,8 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile;
 
-import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType.YAML_DEPRECATED;
-import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType.YAML_DUPLICATE_KEY;
+import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType.*;
 import static org.springframework.ide.eclipse.editor.support.yaml.ast.NodeUtil.asScalar;
 import static org.springframework.ide.eclipse.editor.support.yaml.ast.YamlFileAST.getChildren;
 
@@ -21,6 +20,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.springframework.boot.configurationmetadata.Deprecation;
+import org.springframework.boot.configurationmetadata.Deprecation.Level;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.ReplaceDeprecatedPropertyQuickfix;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType;
@@ -355,7 +356,7 @@ public class ApplicationYamlASTReconciler implements YamlASTReconciler {
 
 	private void deprecatedProperty(PropertyInfo property, Node keyNode) {
 		SpringPropertyProblem problem = deprecatedPropertyProblem(property.getId(), null, keyNode,
-				property.getDeprecationReplacement(), property.getDeprecationReason());
+				property.getDeprecation());
 		problem.setMetadata(property);
 		problem.setProblemFixer(ReplaceDeprecatedYamlQuickfix.FIXER);
 		problems.accept(problem);
@@ -363,15 +364,21 @@ public class ApplicationYamlASTReconciler implements YamlASTReconciler {
 
 	private void deprecatedProperty(Type contextType, TypedProperty property, Node keyNode) {
 		SpringPropertyProblem problem = deprecatedPropertyProblem(property.getName(), typeUtil.niceTypeName(contextType),
-				keyNode, property.getDeprecationReplacement(), property.getDeprecationReason());
+				keyNode, property.getDeprecation());
 		problems.accept(problem);
 	}
 
-	protected SpringPropertyProblem deprecatedPropertyProblem(String name, String contextType, Node keyNode,
-			String replace, String reason) {
-		SpringPropertyProblem problem = problem(YAML_DEPRECATED, keyNode, TypeUtil.deprecatedPropertyMessage(name, contextType, replace, reason));
+	protected SpringPropertyProblem deprecatedPropertyProblem(String name, String contextType, Node keyNode, Deprecation deprecation) {
+		SpringPropertyProblem problem = problem(deprecationProblemType(deprecation), keyNode, TypeUtil.deprecatedPropertyMessage(name, contextType, deprecation));
 		problem.setPropertyName(name);
 		return problem;
+	}
+
+	private SpringPropertiesProblemType deprecationProblemType(Deprecation deprecation) {
+		Level level = deprecation == null ? Level.WARNING : deprecation.getLevel();
+		return level==Level.ERROR 
+				? SpringPropertiesProblemType.PROP_DEPRECATED_ERROR 
+				: SpringPropertiesProblemType.PROP_DEPRECATED_WARNING;
 	}
 
 	protected SpringPropertyProblem problem(SpringPropertiesProblemType type, Node node, String msg) {

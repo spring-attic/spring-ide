@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.properties.editor.test;
 
 import java.time.Duration;
+import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
@@ -19,6 +20,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.CachingValueProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
+import org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity;
 import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
 import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 
@@ -2449,8 +2451,6 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		assertProblems(editor,
 				"alt-name|No good anymore"
 		);
-
-
 	}
 
 	public void testDeprecatedBeanPropertyCompletions() throws Exception {
@@ -2776,6 +2776,43 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 					"  - of text\n"
 			);
 		}
+	}
+
+	public void testReconcileDeprecatedPropertyLevel() throws Exception {
+		IProject p = createPredefinedMavenProject("demo-deprecation-level");
+		IJavaProject jp = JavaCore.create(p);
+		useProject(jp);
+		
+		MockEditor editor = newEditor(
+				"# a comment\n"+
+				"foo:\n" +
+				"  discouraged: Meh\n" +
+				"  removed: Ouch\n" +
+				"  unspecified: Woot?"
+		);
+		List<ReconcileProblem> ps = assertProblems(editor, 
+				"discouraged|Deprecated",
+				"removed|Deprecated",
+				"unspecified|Deprecated"
+		);
+		assertEquals(ProblemSeverity.WARNING, ps.get(0).getType().getDefaultSeverity());
+		assertEquals(ProblemSeverity.ERROR, ps.get(1).getType().getDefaultSeverity());
+		assertEquals(ProblemSeverity.WARNING, ps.get(2).getType().getDefaultSeverity());
+	}
+	
+	public void testCompletionsDeprecatedPrpopertyLevel() throws Exception {
+		IProject p = createPredefinedMavenProject("demo-deprecation-level");
+		useProject(p);
+		
+		assertCompletionsDisplayString("foo.<*>", (c) -> c.getDisplayString().startsWith("foo."),
+				"foo.discouraged : String",
+				// foo.removed should not be suggested as it shouldn't be used.
+				"foo.unspecified : String"
+		);
+		assertStyledCompletions("foo.<*>", (c) -> c.getDisplayString().startsWith("foo."),
+				StyledStringMatcher.strikeout("foo.discouraged"),
+				StyledStringMatcher.strikeout("foo.unspecified")
+		);
 	}
 
 	public void testReconcileDuplicateProperties() throws Exception {

@@ -278,7 +278,7 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 
 	protected Collection<ICompletionProposal> createPropertyProposals(IDocument doc, Type type, int navOffset,
 			int offset, String prefix, List<TypedProperty> objectProperties) {
-		ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
+		ArrayList<ICompletionProposal> proposals = new ArrayList<>();
 		for (TypedProperty prop : objectProperties) {
 			double score = FuzzyMatcher.matchScore(prefix, prop.getName());
 			if (score!=0) {
@@ -287,9 +287,8 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 				DocumentEdits edits = new DocumentEdits(doc);
 				edits.delete(navOffset+1, offset);
 				edits.insert(offset, prop.getName()+postFix);
-				proposals.add(
-					completionFactory.beanProperty(doc, null, type, prefix, prop, score, edits, typeUtil)
-				);
+				completionFactory.beanProperty(doc, null, type, prefix, prop, score, edits, typeUtil)
+					.ifPresent(proposals::add);
 			}
 		}
 		return proposals;
@@ -405,7 +404,7 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 			if (propertyName!=null) {
 				Collection<StsValueHint> valueCompletions = getValueHints(query, propertyName, caseMode);
 				if (valueCompletions!=null && !valueCompletions.isEmpty()) {
-					ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
+					ArrayList<ICompletionProposal> proposals = new ArrayList<>();
 					for (StsValueHint hint : valueCompletions) {
 						String valueCandidate = hint.getValue();
 						double score = FuzzyMatcher.matchScore(query, valueCandidate);
@@ -515,7 +514,7 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 		if (prefix != null) {
 			Collection<Match<PropertyInfo>> matches = findMatches(prefix);
 			if (matches!=null && !matches.isEmpty()) {
-				ArrayList<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>(matches.size());
+				ArrayList<ICompletionProposal> proposals = new ArrayList<>(matches.size());
 				for (final Match<PropertyInfo> match : matches) {
 					ProposalApplier edits = new LazyProposalApplier() {
 						@Override
@@ -527,9 +526,8 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 							return edits;
 						}
 					};
-					proposals.add(
-						completionFactory.property(doc, edits, match, typeUtil)
-					);
+					completionFactory.property(doc, edits, match, typeUtil)
+						.ifPresent(proposals::add);
 				}
 				return proposals;
 			}

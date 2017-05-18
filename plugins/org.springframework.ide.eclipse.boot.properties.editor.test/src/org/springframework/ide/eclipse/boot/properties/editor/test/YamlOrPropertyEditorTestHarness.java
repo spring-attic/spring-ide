@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.properties.editor.test;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertContains;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertElements;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -20,6 +21,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -727,7 +730,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 	 * @param expectedProblems
 	 * @throws BadLocationException
 	 */
-	public void assertProblems(MockEditor editor, String... expectedProblems)
+	public List<ReconcileProblem> assertProblems(MockEditor editor, String... expectedProblems)
 			throws BadLocationException {
 		List<ReconcileProblem> actualProblems = reconcile(editor);
 		Collections.sort(actualProblems, PROBLEM_COMPARATOR);
@@ -745,6 +748,7 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 		if (bad!=null) {
 			fail(bad+problemSumary(editor, actualProblems));
 		}
+		return actualProblems;
 	}
 	private String problemSumary(MockEditor editor, List<ReconcileProblem> actualProblems) throws BadLocationException {
 		StringBuilder buf = new StringBuilder();
@@ -856,8 +860,14 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 	}
 
 	public void assertCompletionsDisplayString(String editorText, String... completionsLabels) throws Exception {
+		assertCompletionsDisplayString(editorText, (x) -> true, completionsLabels);
+	}
+
+	public void assertCompletionsDisplayString(String editorText, Predicate<ICompletionProposal> filter, String... completionsLabels) throws Exception {
 		MockEditor editor = newEditor(editorText);
-		ICompletionProposal[] completions = getCompletions(editor);
+		ICompletionProposal[] completions = Arrays.stream(getCompletions(editor))
+				.filter(filter)
+				.toArray((sz) -> new ICompletionProposal[sz]);
 		String[] actualLabels = new String[completions.length];
 		for (int i = 0; i < actualLabels.length; i++) {
 			actualLabels[i] = completions[i].getDisplayString();
@@ -866,8 +876,14 @@ public abstract class YamlOrPropertyEditorTestHarness extends TestCase {
 	}
 
 	public void assertStyledCompletions(String editorText, StyledStringMatcher... expectStyles) throws Exception {
+		assertStyledCompletions(editorText, (c) -> true, expectStyles);
+	}
+	
+	public void assertStyledCompletions(String editorText, Predicate<ICompletionProposal> filter, StyledStringMatcher... expectStyles) throws Exception {
 		MockEditor editor = newEditor(editorText);
-		ICompletionProposal[] completions = getCompletions(editor);
+		ICompletionProposal[] completions = Arrays.stream(getCompletions(editor))
+				.filter(filter)
+				.toArray((sz) -> new ICompletionProposal[sz]);
 		assertEquals("Wrong number of elements", expectStyles.length, completions.length);
 		for (int i = 0; i < expectStyles.length; i++) {
 			ICompletionProposal completion = completions[i];

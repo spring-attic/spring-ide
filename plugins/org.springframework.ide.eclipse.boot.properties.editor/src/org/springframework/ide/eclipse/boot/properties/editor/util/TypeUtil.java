@@ -855,7 +855,9 @@ public class TypeUtil {
 		return null;
 	}
 
-	public static String deprecatedPropertyMessage(String name, String contextType, String replace, String reason) {
+	public static String deprecatedPropertyMessage(String name, String contextType, Deprecation deprecation) {
+		String replace = deprecation.getReplacement();
+		String reason = deprecation.getReason();
 		StringBuilder msg = new StringBuilder("Property '"+name+"'");
 		if (StringUtil.hasText(contextType)) {
 			msg.append(" of type '"+contextType+"'");

@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.properties.editor.util;
 
 import org.springframework.boot.configurationmetadata.Deprecation;
+import org.springframework.boot.configurationmetadata.Deprecation.Level;
 import org.springframework.ide.eclipse.editor.support.hover.DescriptionProviders;
 import org.springframework.ide.eclipse.editor.support.util.HtmlSnippet;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypedProperty;
@@ -103,5 +104,12 @@ public class TypedProperty implements YTypedProperty {
 
 	public Deprecation getDeprecation() {
 		return deprecation;
+	}
+
+	public Level getDeprecationLevel() {
+		if (deprecation!=null) {
+			return deprecation.getLevel();
+		}
+		return null;
 	}
 }

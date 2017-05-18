@@ -18,6 +18,7 @@ import java.util.List;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.springframework.boot.configurationmetadata.Deprecation;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
@@ -223,10 +224,10 @@ public class PropertyNavigator {
 	}
 
 	private ReconcileProblem problemDeprecated(Type contextType, TypedProperty prop, int offset, int len) {
-		SpringPropertyProblem p = problem(SpringPropertiesProblemType.PROP_DEPRECATED,
+		SpringPropertyProblem p = problem(SpringPropertiesReconcileEngine.deprecationProblemType(prop.getDeprecation()),
 				TypeUtil.deprecatedPropertyMessage(
 						prop.getName(), typeUtil.niceTypeName(contextType),
-						prop.getDeprecationReplacement(), prop.getDeprecationReason()
+						prop.getDeprecation()
 				),
 				offset, len
 		);

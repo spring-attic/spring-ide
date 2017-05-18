@@ -37,7 +37,8 @@ public enum SpringPropertiesProblemType implements ProblemType {
 	PROP_VALUE_TYPE_MISMATCH("Expecting a value of a certain type, but value doesn't parse as such"),
 	PROP_INVALID_BEAN_PROPERTY("Accessing a named property in a type that doesn't provide a property accessor with that name"),
 	PROP_UNKNOWN_PROPERTY(WARNING, "Property-key not found in any configuration metadata on the project's classpath"),
-	PROP_DEPRECATED(WARNING, "Property is marked as Deprecated"),
+	PROP_DEPRECATED_WARNING(WARNING, "Property is marked as Deprecated, with Deprecation level 'Warning'"),
+	PROP_DEPRECATED_ERROR(ERROR, "Property is marked as Deprecated, with Deprecation level 'Error'"),
 	PROP_DUPLICATE_KEY("Multiple assignments to the same property value"),
 
 	YAML_SYNTAX_ERROR("Error parsing the input using snakeyaml"),
@@ -49,7 +50,8 @@ public enum SpringPropertiesProblemType implements ProblemType {
 	YAML_EXPECT_MAPPING("Expecting a 'mapping' node but found something else"),
 	YAML_EXPECT_BEAN_PROPERTY_NAME("Expecting a 'bean property' name but found something more complex"),
 	YAML_INVALID_BEAN_PROPERTY("Accessing a named property in a type that doesn't provide a property accessor with that name"),
-	YAML_DEPRECATED(WARNING, "Property is marked as Deprecated"),
+	YAML_DEPRECATED_WARNING(WARNING, "Property is marked as Deprecated, with Deprecation level 'Warning'"),
+	YAML_DEPRECATED_ERROR(ERROR, "Property is marked as Deprecated, with Deprecation level 'Error'"),
 	YAML_DUPLICATE_KEY("A mapping node contains multiple entries for the same key");
 
 	private final ProblemSeverity defaultSeverity;
@@ -87,7 +89,7 @@ public enum SpringPropertiesProblemType implements ProblemType {
 
 	private static SpringPropertiesProblemType[] withPrefix(String prefix) {
 		SpringPropertiesProblemType[] allValues = values();
-		ArrayList<SpringPropertiesProblemType> values = new ArrayList<SpringPropertiesProblemType>(allValues.length);
+		ArrayList<SpringPropertiesProblemType> values = new ArrayList<>(allValues.length);
 		for (SpringPropertiesProblemType v : allValues) {
 			if (v.toString().startsWith(prefix)) {
 				values.add(v);
