@@ -53,6 +53,7 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 /**
  * @author Kris De Volder
  */
+@SuppressWarnings("restriction")
 public class BootProjectTestHarness {
 
 	private static final boolean DEBUG = true;

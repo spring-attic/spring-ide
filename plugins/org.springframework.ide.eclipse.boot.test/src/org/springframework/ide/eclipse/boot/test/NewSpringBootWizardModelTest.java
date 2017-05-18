@@ -74,7 +74,11 @@ public class NewSpringBootWizardModelTest extends TestCase {
 
 	public static NewSpringBootWizardModel parseFrom(String resourcePath, IPreferenceStore store) throws Exception {
 		URL formUrl = resourceUrl(resourcePath);
-		return new NewSpringBootWizardModel(new URLConnectionFactory(), formUrl.toString(), store);
+		return new NewSpringBootWizardModel(new URLConnectionFactory(), formUrl.toString(), store) {
+			protected void importProject(org.eclipse.core.runtime.IProgressMonitor mon) throws java.lang.reflect.InvocationTargetException ,InterruptedException {
+				//do nothing (this is a fake wizard, not meant to create real projects).
+			}
+		};
 	}
 
 	public static NewSpringBootWizardModel parseFrom(String resourcePath) throws Exception {
@@ -396,18 +400,19 @@ public class NewSpringBootWizardModelTest extends TestCase {
 	}
 	
 	public void testValidDefaultProjectName() throws Exception {
-		IProject p1 = ResourcesPlugin.getWorkspace().getRoot().getProject("demo");
-		if (!p1.exists()) {
-			p1.create(new NullProgressMonitor());
-		}
-		IProject p2 = ResourcesPlugin.getWorkspace().getRoot().getProject("demo-1");
-		if (!p2.exists()) {
-			p2.create(new NullProgressMonitor());
-		}
+		ensureProject("demo");
+		ensureProject("demo-1");
 		NewSpringBootWizardModel model = parseFrom(INITIALIZR_JSON);
 		assertEquals("demo-2", model.getProjectName().getValue());
 		assertEquals("demo-2", model.getArtifactId().getValue());
 		assertEquals(ValidationResult.OK, model.getProjectName().getValidator().getValue());
+	}
+
+	private void ensureProject(String name) throws CoreException {
+		IProject p1 = ResourcesPlugin.getWorkspace().getRoot().getProject(name);
+		if (!p1.exists()) {
+			p1.create(new NullProgressMonitor());
+		}
 	}
 	
 	public void testArtifactIdSyncWithProjectName() throws Exception {
@@ -435,6 +440,28 @@ public class NewSpringBootWizardModelTest extends TestCase {
 		assertEquals("demo-3", model.getProjectName().getValue());
 		assertEquals("demo-3", model.getArtifactId().getValue());
 	}
+	
+	public void testProjectNameSavedAndRestored() throws Exception {
+		//See: https://www.pivotaltracker.com/story/show/145645973
+		IPreferenceStore prefs = new MockPrefsStore();
+		{
+			NewSpringBootWizardModel model = parseFrom(INITIALIZR_JSON, prefs);
+			model.getProjectName().setValue("another-name");
+			model.performFinish(new NullProgressMonitor());
+			assertEquals("another-name", model.getProjectName().getValue());
+		}
+		
+		{
+			NewSpringBootWizardModel model = parseFrom(INITIALIZR_JSON, prefs);
+			assertEquals("another-name", model.getProjectName().getValue());
+		}
+		
+		ensureProject("another-name");
+		{
+			NewSpringBootWizardModel model = parseFrom(INITIALIZR_JSON, prefs);
+			assertEquals("another-name-1", model.getProjectName().getValue());
+		}
+	}
 
 	public void testRestoreFromOldBuildtypePreference() throws Exception {
 		//We here test a weak requirement that the wizard model 'handles' it okay when
@@ -451,18 +478,18 @@ public class NewSpringBootWizardModelTest extends TestCase {
 		assertEquals(BuildType.MAVEN.getDefaultStrategy(), wizard.getImportStrategy());
 	}
 
-	private CheckBoxModel<Dependency> getCheckboxById(NewSpringBootWizardModel model, String id) {
-		CheckBoxModel<Dependency> found = null;
-		for (String cat : model.dependencies.getCategories()) {
-			for (CheckBoxModel<Dependency> cb : model.dependencies.getContents(cat).getCheckBoxModels()) {
-				if (cb.getValue().getId().equals(id)) {
-					Assert.assertNull(found);
-					found = cb;
-				}
-			}
-		}
-		return found;
-	}
+//	private CheckBoxModel<Dependency> getCheckboxById(NewSpringBootWizardModel model, String id) {
+//		CheckBoxModel<Dependency> found = null;
+//		for (String cat : model.dependencies.getCategories()) {
+//			for (CheckBoxModel<Dependency> cb : model.dependencies.getContents(cat).getCheckBoxModels()) {
+//				if (cb.getValue().getId().equals(id)) {
+//					Assert.assertNull(found);
+//					found = cb;
+//				}
+//			}
+//		}
+//		return found;
+//	}
 
 	private void assertFilterAccepts(NewSpringBootWizardModel model, boolean expect, String pattern,
 			String id, String label, String desc) {
@@ -486,7 +513,7 @@ public class NewSpringBootWizardModelTest extends TestCase {
 		}
 		return null;
 	}
-
+	
 	private void assertCheckboxes(List<CheckBoxModel<Dependency>> actuals, Dependency... expecteds) {
 		StringBuilder expectedIds = new StringBuilder();
 		for (Dependency e : expecteds) {

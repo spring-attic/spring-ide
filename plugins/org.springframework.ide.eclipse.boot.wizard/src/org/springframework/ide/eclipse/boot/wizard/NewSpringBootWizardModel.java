@@ -73,7 +73,7 @@ public class NewSpringBootWizardModel {
 
 	private static final String NAME_PROPRTY_ID = "name";
 	private static final String ARTIFACT_PROPERTY_ID = "artifactId";
-	
+
 	private static final Map<String,BuildType> KNOWN_TYPES = new HashMap<>();
 	static {
 		KNOWN_TYPES.put("gradle-project", BuildType.GRADLE); // New version of initialzr app
@@ -131,16 +131,7 @@ public class NewSpringBootWizardModel {
 
 	public NewSpringBootWizardModel(URLConnectionFactory urlConnectionFactory, String jsonUrl, IPreferenceStore prefs) throws Exception {
 		this.popularities = new PopularityTracker(prefs);
-		this.preferredSelections = new PreferredSelections(prefs) {
-			@Override
-			protected boolean isInteresting(FieldModel<String> input) {
-				if (NAME_PROPRTY_ID.equals(input.getName())
-						|| ARTIFACT_PROPERTY_ID.equals(input.getName())) {
-					return false;
-				}
-				return super.isInteresting(input);
-			}	
-		};
+		this.preferredSelections = new PreferredSelections(prefs);
 		this.defaultDependencies = new DefaultDependencies(prefs);
 		this.urlConnectionFactory = urlConnectionFactory;
 		this.JSON_URL = jsonUrl;
@@ -150,10 +141,9 @@ public class NewSpringBootWizardModel {
 
 		discoverOptions(stringInputs, dependencies);
 		dependencies.sort();
-		
+
 		projectName = stringInputs.getField(NAME_PROPRTY_ID);
 		projectName.validator(new NewProjectNameValidator(projectName.getVariable()));
-		generateValidProjectName();
 		location = new LiveVariable<>(ProjectLocationSection.getDefaultProjectLocation(projectName.getValue()));
 		locationValidator = new NewProjectLocationValidator("Location", location, projectName.getVariable());
 		Assert.isNotNull(projectName, "The service at "+JSON_URL+" doesn't specify a 'name' text input");
@@ -167,6 +157,7 @@ public class NewSpringBootWizardModel {
 			computedUrl.addField(group);
 		}
 		computedUrl.addListener(new ValueListener<String>() {
+			@Override
 			public void gotValue(LiveExpression<String> exp, String value) {
 				downloadUrl.setValue(value);
 			}
@@ -179,6 +170,7 @@ public class NewSpringBootWizardModel {
 
 		preferredSelections.restore(this);
 		defaultDependencies.restore(dependencies);
+		generateValidProjectName();
 	}
 
 	/**
@@ -212,7 +204,7 @@ public class NewSpringBootWizardModel {
 		fromVar.addListener(enableOrDisableSyncing);
 		toVar.addListener(enableOrDisableSyncing);
 	}
-	
+
 	private void generateValidProjectName() {
 		boolean projectNameValid = projectName.getValidator().getValue() == ValidationResult.OK;
 		if (!projectNameValid) {
@@ -334,6 +326,10 @@ public class NewSpringBootWizardModel {
 		mon.beginTask("Importing "+baseUrl.getValue(), 4);
 		updateUsageCounts();
 		preferredSelections.save(this);
+		importProject(mon);
+	}
+
+	protected void importProject(IProgressMonitor mon) throws InvocationTargetException, InterruptedException {
 		DownloadManager downloader = null;
 		try {
 			downloader = new DownloadManager(urlConnectionFactory).allowUIThread(allowUIThread);
@@ -452,6 +448,7 @@ public class NewSpringBootWizardModel {
 			}
 			//When a type is selected the 'baseUrl' should be update according to its action.
 			group.getSelection().selection.addListener(new ValueListener<RadioInfo>() {
+				@Override
 				public void gotValue(LiveExpression<RadioInfo> exp, RadioInfo value) {
 					try {
 						if (value!=null) {
@@ -484,7 +481,7 @@ public class NewSpringBootWizardModel {
 					// Setup link template variable values
 					Map<String, String> variables = new HashMap<>();
 					variables.put(InitializrServiceSpec.BOOT_VERSION_LINK_TEMPLATE_VARIABLE,
-							bootVersion.getSelection().selection.getValue().getValue());					
+							bootVersion.getSelection().selection.getValue().getValue());
 					return DependencyHtmlContent.generateHtmlDocumentation(dep, variables);
 				}, createEnablementExp(bootVersion, dep));
 			}
