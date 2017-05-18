@@ -37,28 +37,28 @@ public class GSZipFileCodeSet extends AGSContent {
 		this.zipUrl = zipUrl;
 	}
 
-	//@Override
+	@Override
 	public String getDescription() {
 		return "No description";
 	}
 
-	//@Override
+	@Override
 	public String getName() {
 		URL url = getHomePage();
 		return zipUrl.getPath();
 	}
 
-	//@Override
+	@Override
 	public String getDisplayName() {
 		return getName();
 	}
 
-	//@Override
+	@Override
 	public List<CodeSet> getCodeSets() throws UIThreadDownloadDisallowed {
 		return Arrays.asList((CodeSet)new ZipFileCodeSet(getName(), getZip(), new Path("/")));
 	}
 
-	//@Override
+	@Override
 	public URL getHomePage() {
 		//Isolated zip file. No home page!
 		return null;
@@ -72,7 +72,7 @@ public class GSZipFileCodeSet extends AGSContent {
 		}
 	}
 
-//	@Override
+	@Override
 	public DownloadableItem getZip() {
 		return new DownloadableItem(zipUrl(), downloader);
 	}

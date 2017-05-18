@@ -53,6 +53,7 @@ import org.springframework.ide.eclipse.boot.wizard.content.GSContent;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.SelectionModel;
+import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
@@ -97,15 +98,15 @@ public class ChooseTypedContentSection extends WizardPageSection {
 			this.content = content;
 		}
 
-		//@Override
+		@Override
 		public void dispose() {
 		}
 
-		//@Override
+		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		}
 
-		//@Override
+		@Override
 		public Object[] getElements(Object e) {
 			if (e==content) {
 				ContentType<?>[] types = content.getTypes();
@@ -122,7 +123,7 @@ public class ChooseTypedContentSection extends WizardPageSection {
 			return NO_ELEMENTS;
 		}
 
-		//@Override
+		@Override
 		public Object[] getChildren(Object e) {
 			try {
 				if (e instanceof ContentType<?>) {
@@ -135,7 +136,7 @@ public class ChooseTypedContentSection extends WizardPageSection {
 			}
 		}
 
-		//@Override
+		@Override
 		public Object getParent(Object e) {
 			if (e instanceof GSContent) {
 				return e.getClass();
@@ -145,7 +146,7 @@ public class ChooseTypedContentSection extends WizardPageSection {
 			return null;
 		}
 
-		//@Override
+		@Override
 		public boolean hasChildren(Object e) {
 			Object[] c = getChildren(e);
 			return c!=null && c.length>0;
@@ -315,6 +316,7 @@ public class ChooseTypedContentSection extends WizardPageSection {
 		}
 
 		whenVisible(treeviewer.getControl(), new Runnable() {
+			@Override
 			public void run() {
 				GSContent preSelect = selection.selection.getValue();
 				if (preSelect!=null) {
@@ -345,6 +347,7 @@ public class ChooseTypedContentSection extends WizardPageSection {
 		});
 
 		treeviewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				ISelection sel = treeviewer.getSelection();
 				if (sel.isEmpty()) {
@@ -371,8 +374,18 @@ public class ChooseTypedContentSection extends WizardPageSection {
 		});
 
 		searchBox.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				updateFilter();
+			}
+		});
+		content.getPrefetchContentTracker().addListener(new UIValueListener<ContentManager.DownloadState>() {
+			@Override
+			protected void uiGotValue(LiveExpression<DownloadState> exp, DownloadState value) {
+				if (DownloadState.DOWNLOADING_COMPLETED==value) {
+					updateFilter();
+					content.getPrefetchContentTracker().removeListener(this);
+				}
 			}
 		});
 	}
@@ -386,6 +399,7 @@ public class ChooseTypedContentSection extends WizardPageSection {
 
 	private void whenVisible(final Control control, final Runnable runnable) {
 		PaintListener l = new PaintListener() {
+			@Override
 			public void paintControl(PaintEvent e) {
 				runnable.run();
 				control.removePaintListener(this);

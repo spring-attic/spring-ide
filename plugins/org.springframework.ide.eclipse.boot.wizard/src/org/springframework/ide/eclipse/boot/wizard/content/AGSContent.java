@@ -22,7 +22,7 @@ public abstract class AGSContent implements GSContent {
 		this.downloader = dl;
 	}
 
-	//@Override
+	@Override
 	public CodeSet getCodeSet(String name) throws UIThreadDownloadDisallowed {
 		for (CodeSet cs : getCodeSets()) {
 			if (cs.getName().equals(name)) {
@@ -32,16 +32,17 @@ public abstract class AGSContent implements GSContent {
 		return null;
 	}
 
+	@Override
 	public boolean isDownloaded() {
 		return getZip().isDownloaded();
 	}
 
-	//@Override
+	@Override
 	public ValidationResult downloadStatus() {
 		return ValidationResult.from(getZip().getDownloadStatus());
 	}
 
-	//@Override
+	@Override
 	public void setDownloader(DownloadManager downloader) {
 		this.downloader = downloader;
 	}

@@ -54,7 +54,7 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
  * @author Nieraj Singh
  */
 public class GSImportWizardModel {
-	
+
 	/**
 	 * ContentManager instance that provides all the content that this wizard can import.
 	 * By default this is content discovered automatically with the default content manager
@@ -63,13 +63,13 @@ public class GSImportWizardModel {
 	 */
 	private ContentManager contentManager = GettingStartedContent.getInstance();
 
-	
+
 	// Tracks the download state of content from content manager
 	private final LiveVariable<DownloadState> prefetchContentTracker = contentManager.getPrefetchContentTracker();
-	
+
 	// Tracks the download state for content providers properties from content manager
 	private final LiveVariable<DownloadState> prefetchContentProviderPropsTracker = contentManager.getPrefetchContentProviderPropertiesTracker();
-	
+
 	/**
 	 * The chosen guide to import stuff from.
 	 */
@@ -102,11 +102,11 @@ public class GSImportWizardModel {
 			}
 		}
 	};
-	
+
 	static final ValidationResult isDownloadingMessage(GSContent g) {
 		return ValidationResult.info(g.getDisplayName()+" is downloading...");
 	}
-	
+
 	public class CodeSetValidator extends LiveExpression<ValidationResult> {
 
 		private final LiveVariable<GSContent> codesetProvider;
@@ -214,7 +214,7 @@ public class GSImportWizardModel {
 	 * The import strategy chosen by user
 	 */
 	private final LiveVariable<ImportStrategy> importStrategy = new LiveVariable<ImportStrategy>(BuildType.DEFAULT.getDefaultStrategy());
-	
+
 	private final LiveExpression<ValidationResult> codesetValidator = new CodeSetValidator(guide, codesets, validCodesetNames);
 	private final LiveExpression<ValidationResult> importStrategyValidator = new Validator() {
 		@Override
@@ -364,7 +364,7 @@ public class GSImportWizardModel {
 		description.dependsOn(rawSelection);
 
 		homePage.dependsOn(guide);
-	
+
 
 		validCodesetNames.dependsOn(guide);
 		validCodesetNames.dependsOn(isDownloaded);
@@ -372,7 +372,7 @@ public class GSImportWizardModel {
 		codesetValidator.dependsOn(isDownloaded);
 		//Note: some other dependsOn are registered inside CodeSetValidator class itself.
 		// isDownloaded is an exception because is still null when CodeSetValidator class gets
-		// instantiated.	
+		// instantiated.
 	}
 
 	/**
@@ -488,8 +488,6 @@ public class GSImportWizardModel {
 	public LiveExpression<Boolean> isDownloaded() {
 		return isDownloaded;
 	}
-	
-
 
 	public LiveVariable<Boolean> getEnableOpenHomePage() {
 		return enableOpenHomePage;
