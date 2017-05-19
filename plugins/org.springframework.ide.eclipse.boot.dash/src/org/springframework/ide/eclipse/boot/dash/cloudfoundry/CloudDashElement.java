@@ -32,7 +32,7 @@ public abstract class CloudDashElement<T> extends WrappingBootDashElement<T> {
 	private LiveExpression<ImmutableList<RequestMapping>> liveRequestMappings;
 
 	protected ActuatorClient getActuatorClient(URI target) {
-		return new RestActuatorClient(target, getTypeLookup(), getRestTemplate());
+		return new RestActuatorClient(target, getTypeLookup(), getRestClient());
 	}
 
 	@Override

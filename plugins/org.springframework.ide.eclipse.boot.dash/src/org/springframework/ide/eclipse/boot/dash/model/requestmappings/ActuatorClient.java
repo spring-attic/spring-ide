@@ -20,8 +20,6 @@ import java.util.stream.Stream;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.JLRMethodParser.JLRMethod;
 import org.springframework.ide.eclipse.boot.util.Log;
 
@@ -118,7 +116,7 @@ public abstract class ActuatorClient {
 					}
 				}
 			} catch (Exception e) {
-				BootDashActivator.log(e);
+				Log.log(e);
 			}
 			return null;
 		}
@@ -133,7 +131,6 @@ public abstract class ActuatorClient {
 		private static Stream<String> processOrPaths(String pathExp) {
 			if (pathExp.contains("||")) {
 				String[] paths = pathExp.split(Pattern.quote("||"));
-				ArrayList<RequestMapping> list = new ArrayList<>();
 				return Stream.of(paths).map(String::trim);
 			} else {
 				return Stream.of(pathExp);

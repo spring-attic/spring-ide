@@ -27,13 +27,13 @@ import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springframework.ide.eclipse.boot.dash.util.Utils;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
-import org.springframework.web.client.RestTemplate;
 import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
 import com.google.common.collect.ImmutableSet;
+import com.sun.jersey.api.client.Client;
 
 /**
  * Abstract base class that is convenient to implement {@link BootDashElement}.
@@ -237,8 +237,8 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 		}
 	}
 
-	protected RestTemplate getRestTemplate() {
-		return new RestTemplate();
+	protected Client getRestClient() {
+		return Client.create();
 	}
 
 	/**

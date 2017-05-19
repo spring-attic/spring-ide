@@ -12,8 +12,8 @@ package org.springframework.ide.eclipse.boot.dash.model.requestmappings;
 
 import java.net.URI;
 
-import org.springframework.web.client.RestOperations;
-import org.springframework.web.client.RestTemplate;
+import com.sun.jersey.api.client.Client;
+
 
 /**
  * Concretization of {@link ActuatorClient} which uses spring rest template to
@@ -23,22 +23,21 @@ import org.springframework.web.client.RestTemplate;
  */
 public class RestActuatorClient extends ActuatorClient {
 
-
-	private RestOperations rest;
 	private URI target;
+	private Client client;
 
 	public RestActuatorClient(URI target, TypeLookup typeLookup) {
-		this(target, typeLookup, new RestTemplate());
+		this(target, typeLookup, Client.create());
 	}
 
-	public RestActuatorClient(URI target, TypeLookup typeLookup, RestTemplate rest) {
+	public RestActuatorClient(URI target, TypeLookup typeLookup, Client client) {
 		super(typeLookup);
 		this.target = target;
-		this.rest = rest;
+		this.client = client;
 	}
 
 	@Override
 	protected String getRequestMappingData() throws Exception {
-		return rest.getForObject(target+"/mappings", String.class);
+		return client.resource(target).path("/mappings").get(String.class);
 	}
 }

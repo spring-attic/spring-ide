@@ -12,17 +12,20 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.net.URI;
 import java.security.GeneralSecurityException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-import org.apache.http.client.HttpClient;
-import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
 import org.apache.http.conn.ssl.SSLContextBuilder;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
-import org.apache.http.impl.client.HttpClients;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -33,8 +36,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement.CloudAppIdentity;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.OperationTracker.Task;
@@ -60,16 +61,18 @@ import org.springframework.ide.eclipse.boot.dash.model.Deletable;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
-import org.springframework.ide.eclipse.boot.dash.model.WrappingBootDashElement;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springframework.ide.eclipse.boot.dash.util.LogSink;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springframework.ide.eclipse.boot.util.Log;
-import org.springframework.web.client.RestTemplate;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
+
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.config.DefaultClientConfig;
+import com.sun.jersey.client.urlconnection.HTTPSProperties;
 
 /**
  * A handle to a Cloud application. NOTE: This element should NOT hold Cloud
@@ -538,20 +541,28 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 	}
 
 	@Override
-	protected RestTemplate getRestTemplate() {
+	protected Client getRestClient() {
 		CloudFoundryTargetProperties props = getTarget().getTargetProperties();
 		boolean skipSsl = props.isSelfsigned() || props.skipSslValidation();
 		if (skipSsl) {
-			HttpClient httpClient = HttpClients.custom()
-					.setHostnameVerifier(new AllowAllHostnameVerifier())
-					.setSslcontext(buildSslContext())
-					.build();
-			ClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
-			return new RestTemplate(requestFactory);
-		} else {
-			//This worked before so lets not try to fix that case.
-			return super.getRestTemplate();
+			try {
+				SSLContext sslcontext = SSLContext.getInstance("TLS");
+				sslcontext.init(null, new TrustManager[]{new X509TrustManager() {
+					public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {}
+					public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {}
+					public X509Certificate[] getAcceptedIssuers() { return new X509Certificate[0]; }
+				}}, new java.security.SecureRandom());
+				DefaultClientConfig cc = new DefaultClientConfig();
+				cc.getProperties().put(HTTPSProperties.PROPERTY_HTTPS_PROPERTIES, new HTTPSProperties(
+						(s1, s2) -> true, sslcontext
+				));
+				return Client.create(cc);
+			} catch (Exception e) {
+				Log.log(e);
+			}
 		}
+		//This worked before so lets not try to fix that case.
+		return super.getRestClient();
 	}
 
 	private javax.net.ssl.SSLContext buildSslContext()  {

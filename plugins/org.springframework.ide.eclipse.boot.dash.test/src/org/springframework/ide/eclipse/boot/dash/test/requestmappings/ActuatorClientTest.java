@@ -18,6 +18,7 @@ import static org.springframework.ide.eclipse.boot.dash.test.requestmappings.Req
 
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 import org.eclipse.jdt.core.IType;
@@ -25,18 +26,18 @@ import org.junit.Test;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RestActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.TypeLookup;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
+
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.WebResource;
 
 public class ActuatorClientTest {
 
-	@Test public void testBasic() throws RestClientException, Exception {
-		RestTemplate rest = mock(RestTemplate.class);
+	@Test public void testBasic() throws Exception {
+		Client rest = restClientReturning(getContents("sample.json"));
+
 		TypeLookup types = mock(TypeLookup.class);
 		RestActuatorClient client = new RestActuatorClient(new URI("http://sample"), types, rest);
-		when(rest.getForObject("http://sample/mappings", String.class))
-			.thenReturn(getContents("sample.json"));
 
 		List<RequestMapping> mappings = client.getRequestMappings();
 
@@ -44,31 +45,44 @@ public class ActuatorClientTest {
 		assertRequestMappingWithPath(mappings, "/**/favicon.ico");
 	}
 
-	@Test public void testException() throws RestClientException, Exception {
-		RestTemplate rest = mock(RestTemplate.class);
+	protected Client restClientReturning(String contents) throws Exception {
+		Client rest = mock(Client.class);
+		WebResource target = mock(WebResource.class);
+		WebResource resource = mock(WebResource.class);
+		when(rest.resource(new URI("http://sample"))).thenReturn(target);
+		when(target.path("/mappings")).thenReturn(resource);
+		when(resource.get(String.class)).thenReturn(contents);
+		return rest;
+	}
+
+	protected Client restClientThrowing(Throwable exeption) {
+		Client rest = mock(Client.class);
+		WebResource target = mock(WebResource.class);
+		WebResource resource = mock(WebResource.class);
+		when(rest.resource("http://sample")).thenReturn(target);
+		when(target.path("/mappings")).thenReturn(resource);
+		when(resource.get(String.class)).thenThrow(exeption);
+		return rest;
+	}
+
+	@Test public void testException() throws Exception {
+		Client rest = restClientThrowing(new RuntimeException("Something went wrong!"));
 		TypeLookup types = mock(TypeLookup.class);
+
 		RestActuatorClient client = new RestActuatorClient(new URI("http://sample"), types, rest);
-
-		when(rest.getForObject("http://sample/mappings", String.class))
-			.thenThrow(new RestClientException("Something went wrong!"));
-
 		assertNull(client.getRequestMappings());
 	}
 
-	@Test public void testUnparsableData() throws RestClientException, Exception {
-		RestTemplate rest = mock(RestTemplate.class);
+	@Test public void testUnparsableData() throws Exception {
+		Client rest = restClientReturning("{This is not json,,,");
 		TypeLookup types = mock(TypeLookup.class);
 		RestActuatorClient client = new RestActuatorClient(new URI("http://sample"), types, rest);
-
-		when(rest.getForObject("http://sample/mappings", String.class))
-			.thenReturn("{This is not json,,,");
 
 		assertNull(client.getRequestMappings());
 	}
 
 
 	@Test public void testRequestMappingInfos() throws Exception {
-		RestTemplate rest = mock(RestTemplate.class);
 		TypeLookup types = mock(TypeLookup.class);
 		IType type = mock(IType.class);
 
@@ -82,9 +96,7 @@ public class ActuatorClientTest {
 		String fqTypeName = "org.springframework.boot.actuate.endpoint.mvc.EndpointMvcAdapter";
 		String methodName = "invoke";
 
-		when(rest.getForObject("http://sample/mappings", String.class))
-			.thenReturn(json);
-
+		Client rest = restClientReturning(json);
 		RestActuatorClient client = new RestActuatorClient(new URI("http://sample"), types, rest);
 		when(types.findType(fqTypeName)).thenReturn(type);
 
@@ -99,7 +111,6 @@ public class ActuatorClientTest {
 	}
 
 	@Test public void testRequestMappingExpandOrPaths() throws Exception {
-		RestTemplate rest = mock(RestTemplate.class);
 		TypeLookup types = mock(TypeLookup.class);
 		IType type = mock(IType.class);
 
@@ -113,9 +124,7 @@ public class ActuatorClientTest {
 		String fqTypeName = "org.springframework.boot.actuate.endpoint.mvc.EndpointMvcAdapter";
 		String methodName = "invoke";
 
-		when(rest.getForObject("http://sample/mappings", String.class))
-			.thenReturn(json);
-
+		Client rest = restClientReturning(json);
 		RestActuatorClient client = new RestActuatorClient(new URI("http://sample"), types, rest);
 		when(types.findType(fqTypeName)).thenReturn(type);
 
