@@ -53,7 +53,6 @@ import org.springframework.ide.eclipse.boot.wizard.content.GSContent;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.SelectionModel;
-import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
@@ -78,14 +77,13 @@ public class ChooseTypedContentSection extends WizardPageSection {
 	public class PrefetchContentListener implements ValueListener<DownloadState> {
 		@Override
 		public void gotValue(LiveExpression<DownloadState> exp, DownloadState downloadState) {
-			if (downloadState == DownloadState.DOWNLOADING_COMPLETED) {
+//			if (downloadState == DownloadState.DOWNLOADED || downloadState == D) {
 				Display.getDefault().asyncExec(() -> {
 					if (treeviewer != null && !treeviewer.getTree().isDisposed()) {
-						treeviewer.refresh();
-						treeviewer.expandAll();
+						updateFilter();
 					}
 				});
-			}
+//			}
 		}
 	}
 
@@ -129,7 +127,7 @@ public class ChooseTypedContentSection extends WizardPageSection {
 				if (e instanceof ContentType<?>) {
 					return content.getWithPrefetchCheck((ContentType<?>)e);
 				}
-				return null;
+				return new Object[0];
 			} catch (Throwable error) {
 				BootWizardActivator.log(error);
 				return new Object[] {error};
@@ -377,15 +375,6 @@ public class ChooseTypedContentSection extends WizardPageSection {
 			@Override
 			public void modifyText(ModifyEvent e) {
 				updateFilter();
-			}
-		});
-		content.getPrefetchContentTracker().addListener(new UIValueListener<ContentManager.DownloadState>() {
-			@Override
-			protected void uiGotValue(LiveExpression<DownloadState> exp, DownloadState value) {
-				if (DownloadState.DOWNLOADING_COMPLETED==value) {
-					updateFilter();
-					content.getPrefetchContentTracker().removeListener(this);
-				}
 			}
 		});
 	}

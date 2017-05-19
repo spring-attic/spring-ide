@@ -51,7 +51,7 @@ public class ContentManager {
 	protected LiveVariable<DownloadState> prefetchContentProviderPropertiesTracker = new LiveVariable<>(
 			DownloadState.NOT_STARTED);
 
-	public <T extends GSContent> void register(Class<T> klass, String description, ContentProvider<T> provider) {
+	public synchronized <T extends GSContent> void register(Class<T> klass, String description, ContentProvider<T> provider) {
 		try {
 			Assert.isLegal(!byClass.containsKey(klass), "A content provider for " + klass + " is already registered");
 
@@ -91,7 +91,7 @@ public class ContentManager {
 		return null;
 	}
 
-	public ContentType<?>[] getTypes() {
+	public synchronized ContentType<?>[] getTypes() {
 		return types.toArray(new ContentType<?>[types.size()]);
 	}
 
@@ -121,6 +121,7 @@ public class ContentManager {
 		ContentManager cm = new ContentManager();
 		cm.register(type, description, new ContentProvider<T>() {
 			// @Override
+			@Override
 			public T[] fetch(DownloadManager downloader) {
 				@SuppressWarnings("unchecked")
 				T[] array = (T[]) Array.newInstance(type, 1);
