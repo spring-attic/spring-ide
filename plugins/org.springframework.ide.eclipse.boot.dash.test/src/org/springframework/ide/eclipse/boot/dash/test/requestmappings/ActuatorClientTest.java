@@ -28,8 +28,6 @@ import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMa
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.TypeLookup;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.WebResource;
 
 public class ActuatorClientTest {
 

@@ -20,9 +20,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.core.Configuration;
 
 import org.apache.http.conn.ssl.SSLContextBuilder;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
@@ -69,10 +73,6 @@ import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
-
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
-import com.sun.jersey.client.urlconnection.HTTPSProperties;
 
 /**
  * A handle to a Cloud application. NOTE: This element should NOT hold Cloud
@@ -546,17 +546,17 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 		boolean skipSsl = props.isSelfsigned() || props.skipSslValidation();
 		if (skipSsl) {
 			try {
-				SSLContext sslcontext = SSLContext.getInstance("TLS");
-				sslcontext.init(null, new TrustManager[]{new X509TrustManager() {
+				SSLContext sslContext = SSLContext.getInstance("TLS");
+				sslContext.init(null, new TrustManager[]{new X509TrustManager() {
 					public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {}
 					public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {}
 					public X509Certificate[] getAcceptedIssuers() { return new X509Certificate[0]; }
 				}}, new java.security.SecureRandom());
-				DefaultClientConfig cc = new DefaultClientConfig();
-				cc.getProperties().put(HTTPSProperties.PROPERTY_HTTPS_PROPERTIES, new HTTPSProperties(
-						(s1, s2) -> true, sslcontext
-				));
-				return Client.create(cc);
+				HostnameVerifier verifier = (a1, a2) -> true;
+				return ClientBuilder.newBuilder()
+					.sslContext(sslContext)
+					.hostnameVerifier(verifier)
+					.build();
 			} catch (Exception e) {
 				Log.log(e);
 			}

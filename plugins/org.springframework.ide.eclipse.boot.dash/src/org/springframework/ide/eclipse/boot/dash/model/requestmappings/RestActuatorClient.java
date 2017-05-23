@@ -12,7 +12,8 @@ package org.springframework.ide.eclipse.boot.dash.model.requestmappings;
 
 import java.net.URI;
 
-import com.sun.jersey.api.client.Client;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
 
 
 /**
@@ -27,7 +28,7 @@ public class RestActuatorClient extends ActuatorClient {
 	private Client client;
 
 	public RestActuatorClient(URI target, TypeLookup typeLookup) {
-		this(target, typeLookup, Client.create());
+		this(target, typeLookup, ClientBuilder.newClient());
 	}
 
 	public RestActuatorClient(URI target, TypeLookup typeLookup, Client client) {
@@ -38,6 +39,6 @@ public class RestActuatorClient extends ActuatorClient {
 
 	@Override
 	protected String getRequestMappingData() throws Exception {
-		return client.resource(target).path("/mappings").get(String.class);
+		return client.target(target).path("/mappings").request().get(String.class);
 	}
 }

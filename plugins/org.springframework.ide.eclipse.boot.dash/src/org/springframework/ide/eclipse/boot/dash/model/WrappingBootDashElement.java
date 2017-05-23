@@ -13,6 +13,9 @@ package org.springframework.ide.eclipse.boot.dash.model;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -33,7 +36,6 @@ import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
 import com.google.common.collect.ImmutableSet;
-import com.sun.jersey.api.client.Client;
 
 /**
  * Abstract base class that is convenient to implement {@link BootDashElement}.
@@ -238,7 +240,7 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 	}
 
 	protected Client getRestClient() {
-		return Client.create();
+		return ClientBuilder.newClient();
 	}
 
 	/**

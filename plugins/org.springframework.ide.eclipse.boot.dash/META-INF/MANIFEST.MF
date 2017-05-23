@@ -49,7 +49,7 @@ Require-Bundle: org.eclipse.ui,
  org.springsource.ide.eclipse.commons.core,
  org.apache.commons.lang3,
  org.springframework.ide.eclipse.editor.support,
- com.sun.jersey;bundle-version="1.17.0"
+ javax.ws.rs;bundle-version="2.0.1"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
