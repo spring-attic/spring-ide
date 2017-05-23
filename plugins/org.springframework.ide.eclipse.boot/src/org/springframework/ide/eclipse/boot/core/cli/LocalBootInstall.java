@@ -44,7 +44,7 @@ public class LocalBootInstall extends BootInstall {
 				for (File file : jars) {
 					//Looking for a jar of the form "spring-boot-*-${version}.jar
 					if (file.getName().startsWith("spring-boot-")) {
-						version = BootCliUtils.getSpringBootCliJarVersion(file.getName());
+						version = getSpringBootCliJarVersion(file.getName());
 						if (version != null) {
 							break;
 						}
@@ -71,4 +71,22 @@ public class LocalBootInstall extends BootInstall {
 	protected boolean mayRequireDownload() {
 		return false;
 	}
+	
+	/**
+	 * Extract the version of the JAR from its file name
+	 * @param fileName JAR file name
+	 * @return version of the JAR
+	 */
+	private static String getSpringBootCliJarVersion(String fileName) {
+		String version = null;
+		if (fileName.startsWith("spring-") && fileName.endsWith(".jar")) {
+			int end = fileName.length()-4; //4 chars in ".jar"
+			int start = fileName.lastIndexOf("-");
+			if (start>=0) {
+				version = fileName.substring(start+1, end);
+			}
+		}
+		return version; 
+	}
+
 }

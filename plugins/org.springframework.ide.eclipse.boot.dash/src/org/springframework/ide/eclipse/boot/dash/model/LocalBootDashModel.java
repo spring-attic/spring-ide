@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
@@ -31,10 +30,10 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
-import org.springframework.ide.eclipse.boot.core.cli.BootCliUtils;
+import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
 import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager.BootInstallListener;
-import org.springframework.ide.eclipse.boot.core.cli.CloudCliUtils;
+import org.springframework.ide.eclipse.boot.core.cli.install.CloudCliInstall;
 import org.springframework.ide.eclipse.boot.core.cli.install.IBootInstall;
 import org.springframework.ide.eclipse.boot.dash.devtools.DevtoolsPortRefresher;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
@@ -284,12 +283,16 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 
 	private List<LocalCloudServiceDashElement> fetchLocalServices() {
 		try {
-			IBootInstall bootInstall = BootCliUtils.getSpringBootInstall();
-			try {
-				return Arrays.stream(CloudCliUtils.getCloudServices(bootInstall)).map(serviceId -> new LocalCloudServiceDashElement(this, serviceId)).collect(Collectors.toList());
-			} catch (CoreException e) {
-				// Core Exception would be thrown if Spring Cloud CLI command fails to execute
-				Log.log(e);
+			IBootInstall bootInstall = BootInstallManager.getInstance().getDefaultInstall();
+			if (bootInstall != null) {
+				CloudCliInstall cloudCliInstall = bootInstall.getExtension(CloudCliInstall.class);
+				if (cloudCliInstall != null) {
+					Version cloudCliVersion = cloudCliInstall.getVersion();
+					if (cloudCliVersion != null
+							&& CloudCliInstall.CLOUD_CLI_JAVA_OPTS_SUPPORTING_VERSIONS.includes(cloudCliVersion)) {
+						return Arrays.stream(cloudCliInstall.getCloudServices()).map(serviceId -> new LocalCloudServiceDashElement(this, serviceId)).collect(Collectors.toList());
+					}
+				}
 			}
 		} catch (Exception e) {
 			// ignore

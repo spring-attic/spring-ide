@@ -25,8 +25,8 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.osgi.framework.Version;
 import org.osgi.framework.VersionRange;
-import org.springframework.ide.eclipse.boot.core.cli.BootCliUtils;
-import org.springframework.ide.eclipse.boot.core.cli.CloudCliUtils;
+import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
+import org.springframework.ide.eclipse.boot.core.cli.install.CloudCliInstall;
 import org.springframework.ide.eclipse.boot.core.cli.install.IBootInstall;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport;
@@ -63,33 +63,38 @@ public class CloudCliServiceLaunchConfigurationDelegate extends BootCliLaunchCon
 
 	protected String[] getProgramArgs(IBootInstall bootInstall, ILaunch launch, ILaunchConfiguration configuration) {
 		try {
-			int jmxPort = getJmxPort(configuration);
+			CloudCliInstall cloudCliInstall = bootInstall.getExtension(CloudCliInstall.class);
+			if (cloudCliInstall == null) {
+				Log.error("No Spring Cloud CLI installation found");
+			} else {
+				int jmxPort = getJmxPort(configuration);
 
-			// Set the JMX port for launch
-			launch.setAttribute(BootLaunchConfigurationDelegate.JMX_PORT, String.valueOf(jmxPort));
+				// Set the JMX port for launch
+				launch.setAttribute(BootLaunchConfigurationDelegate.JMX_PORT, String.valueOf(jmxPort));
 
-			String serviceId = configuration.getAttribute(ATTR_CLOUD_SERVICE_ID, (String) null);
+				String serviceId = configuration.getAttribute(ATTR_CLOUD_SERVICE_ID, (String) null);
 
-			List<String> vmArgs = getCloudCliServiceVmArguments(configuration, jmxPort);
-			List<String> args = new ArrayList<>(3 + vmArgs.size());
-			args.add("cloud");
-			args.add(serviceId);
-			if (!vmArgs.isEmpty()) {
-				args.add("--");
-				args.add("--logging.level.org.springframework.cloud.launcher.deployer=DEBUG");
-				Version cloudCliVersion = CloudCliUtils.getVersion(bootInstall);
-				// Format of java options changes as of spring-cloud-cli 1.3.0
-				if (cloudCliVersion != null && SPRING_CLOUD_CLI_JAVA_OPTS_FORMAT_CHANGE_VERSION_RANGE.includes(cloudCliVersion)) {
-					args.add("--spring.cloud.launcher.deployables." + serviceId + ".properties.spring.cloud.deployer.local.javaOpts=" + String.join(",", vmArgs));
-				} else {
-					args.add("--spring.cloud.launcher.deployables." + serviceId + ".properties.JAVA_OPTS=" + String.join(",", vmArgs));
+				List<String> vmArgs = getCloudCliServiceVmArguments(configuration, jmxPort);
+				List<String> args = new ArrayList<>(3 + vmArgs.size());
+				args.add(CloudCliInstall.COMMAND_PREFIX);
+				args.add(serviceId);
+				if (!vmArgs.isEmpty()) {
+					args.add("--");
+					args.add("--logging.level.org.springframework.cloud.launcher.deployer=DEBUG");
+					Version cloudCliVersion = cloudCliInstall.getVersion();
+					// Format of java options changes as of spring-cloud-cli 1.3.0
+					if (cloudCliVersion != null && SPRING_CLOUD_CLI_JAVA_OPTS_FORMAT_CHANGE_VERSION_RANGE.includes(cloudCliVersion)) {
+						args.add("--spring.cloud.launcher.deployables." + serviceId + ".properties.spring.cloud.deployer.local.javaOpts=" + String.join(",", vmArgs));
+					} else {
+						args.add("--spring.cloud.launcher.deployables." + serviceId + ".properties.JAVA_OPTS=" + String.join(",", vmArgs));
+					}
 				}
+				return args.toArray(new String[args.size()]);
 			}
-			return args.toArray(new String[args.size()]);
 		} catch (Exception e) {
 			Log.log(e);
-			return new String[0];
 		}
+		return new String[0];
 	}
 
 	private int getJmxPort(ILaunchConfiguration configuration) {
@@ -145,12 +150,12 @@ public class CloudCliServiceLaunchConfigurationDelegate extends BootCliLaunchCon
 			if (!TYPE_ID.equals(conf.getType().getIdentifier())) {
 				return false;
 			}
-			IBootInstall bootInstall = BootCliUtils.getSpringBootInstall();
-			if (!SPRING_CLOUD_CLI_JAVA_OPTS_FORMAT_CHANGE_VERSION_RANGE.includes(Version.valueOf(BootCliUtils.getSpringBootInstall().getVersion()))) {
+			IBootInstall bootInstall = BootInstallManager.getInstance().getDefaultInstall();
+			if (bootInstall == null || !SPRING_CLOUD_CLI_JAVA_OPTS_FORMAT_CHANGE_VERSION_RANGE.includes(Version.valueOf(bootInstall.getVersion()))) {
 				return false;
 			}
-			Version cloudCliVersion = CloudCliUtils.getVersion(bootInstall);
-			if (cloudCliVersion == null || !CloudCliUtils.CLOUD_CLI_JAVA_OPTS_SUPPORTING_VERSIONS.includes(cloudCliVersion)) {
+			Version cloudCliVersion = bootInstall.getExtension(CloudCliInstall.class) == null ? null : bootInstall.getExtension(CloudCliInstall.class).getVersion();
+			if (cloudCliVersion == null || !CloudCliInstall.CLOUD_CLI_JAVA_OPTS_SUPPORTING_VERSIONS.includes(cloudCliVersion)) {
 				return false;
 			}
 			return BootLaunchConfigurationDelegate.getEnableLifeCycle(conf);

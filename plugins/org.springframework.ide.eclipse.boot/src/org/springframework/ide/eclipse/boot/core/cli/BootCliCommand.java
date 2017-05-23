@@ -52,6 +52,9 @@ public class BootCliCommand {
 
 	public int execute(String... arguments) {
 		try {
+			if (script != null && script.exists()) {
+				script.setExecutable(true);
+			}
 			return this.processRunner.run(getProcessWorkingFolder(), getProcessArguments(arguments));
 		}
 		catch (IOException e) {

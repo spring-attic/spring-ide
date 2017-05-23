@@ -13,6 +13,8 @@ package org.springframework.ide.eclipse.boot.core.cli.install;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IStatus;
@@ -26,8 +28,10 @@ public abstract class BootInstall implements IBootInstall {
 
 	private static final File[] NO_FILES = new File[0];
 
-	protected final String uriString;
+	static final String CLOUD_CLI_LIB_PREFIX = "spring-cloud-cli";
 
+	protected final String uriString;
+	
 	/**
 	 * Creates a BootInstall pointing to given url and a optional 
 	 * name. If the name is null or empty then a name will be
@@ -52,10 +56,8 @@ public abstract class BootInstall implements IBootInstall {
 
 	File[] bootLibJars; //Set once we determined the location of the spring-boot jar(s) for this install.
 	
-	File[] extensionJars; // Extensions
-
 	private String name;
-
+	
 	public abstract File getHome() throws Exception;
 
 	public File[] getBootLibJars() throws Exception {
@@ -73,18 +75,15 @@ public abstract class BootInstall implements IBootInstall {
 		return bootLibJars;
 	}
 
-	@Override
-	public File[] getExtensionsJars() throws Exception {
-		if (extensionJars == null && getHome() != null) {
+	protected File[] getExtensionsJars() throws Exception {
+		if (getHome() != null) {
 			File libFolder = new File(getHome(), "lib");
 			if (libFolder.exists()) {
 				File extFolder = new File(libFolder, "ext");
-				extensionJars = extFolder.exists() ? extFolder.listFiles(JAR_FILE_FILTER) : libFolder.listFiles();
-			} else {
-				extensionJars = NO_FILES;
+				return extFolder.exists() ? extFolder.listFiles(JAR_FILE_FILTER) : libFolder.listFiles();
 			}
 		}
-		return extensionJars;
+		return NO_FILES;
 	}
 
 	@Override
@@ -235,4 +234,38 @@ public abstract class BootInstall implements IBootInstall {
 		boolean isCertainlyLocal = url!=null && url.startsWith("file:");
 		return !isCertainlyLocal;
 	}
+
+	protected CloudCliInstall getCloudCliInstall() {
+		File[] springCloudJars = findExtensionJars(CLOUD_CLI_LIB_PREFIX);
+		return springCloudJars == null || springCloudJars.length == 0 ? null : new CloudCliInstall(this);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T extends IBootInstallExtension> T getExtension(Class<T> extension) {
+		if (CloudCliInstall.class.isAssignableFrom(extension)) {
+			return (T) getCloudCliInstall();
+		}
+		return null;
+	}
+	
+	/**
+	 * Finds Spring Boot CLI extension JAR lib files 
+	 * @param prefix prefix of the lib file
+	 * @return matching JAR lib files
+	 */
+	protected File[] findExtensionJars(String prefix) {
+		List<File> jars = new ArrayList<>();
+		try {
+			for (File lib : getExtensionsJars()) {
+				if (lib.getName().startsWith(prefix)) {
+					jars.add(lib);
+				}
+			}
+		} catch (Exception e) {
+			// ignore
+		}
+		return jars.toArray(new File[jars.size()]);
+	}
+	
 }

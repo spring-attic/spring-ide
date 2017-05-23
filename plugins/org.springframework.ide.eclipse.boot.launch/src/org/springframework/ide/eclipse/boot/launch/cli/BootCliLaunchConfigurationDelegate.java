@@ -29,7 +29,7 @@ import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMRunner;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
-import org.springframework.ide.eclipse.boot.core.cli.BootCliUtils;
+import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
 import org.springframework.ide.eclipse.boot.core.cli.install.IBootInstall;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.util.Log;
@@ -149,7 +149,7 @@ public class BootCliLaunchConfigurationDelegate extends LaunchConfigurationDeleg
 		//  - source locators (for debugging processes)
 		//  - launching in debug mode
 		try {
-			IBootInstall install = BootCliUtils.getSpringBootInstall();
+			IBootInstall install = BootInstallManager.getInstance().getDefaultInstall();
 			IVMInstall vm = verifyVMInstall(conf);
 			IVMRunner runner = vm.getVMRunner(mode);
 
