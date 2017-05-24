@@ -33,8 +33,8 @@ import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.Down
  * manage them already existed before this framework was implemented.
  */
 public class GettingStartedContent extends ContentManager {
-	
-	 // IMPORTANT NOTE: Because this is a singleton class, 
+
+	 // IMPORTANT NOTE: Because this is a singleton class,
 	// CARE needs to be taken with any listeners registered, especially in live expressions.
 	// The ContentManager super class has two tracker LiveVariables to track
 	// registration of content providers and downloading of content.
@@ -45,7 +45,7 @@ public class GettingStartedContent extends ContentManager {
 
 	private final static boolean ADD_REAL =  true;
 	private final static boolean ADD_MOCKS = false; // (""+Platform.getLocation()).contains("kdvolder")
-	
+
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder")
 				|| (""+Platform.getLocation()).contains("bamboo");
 
@@ -55,7 +55,7 @@ public class GettingStartedContent extends ContentManager {
 		}
 		return INSTANCE;
 	}
-	
+
 	@Override
 	protected void prefetch(IProgressMonitor monitor) {
 		// Register the content providers as part of prefetching, as registering
@@ -64,7 +64,7 @@ public class GettingStartedContent extends ContentManager {
 		registerAllContentProviders(SubMonitor.convert(monitor, registeringProvidersLabel, 50));
 		super.prefetch(monitor);
 	}
-	
+
 	private final GithubClient github = new GithubClient();
 
 
@@ -77,6 +77,7 @@ public class GettingStartedContent extends ContentManager {
 		if (cachedRepos==null) {
 			Repo[] repos = github.getOrgRepos("spring-guides");
 			Arrays.sort(repos, new Comparator<Repo>() {
+				@Override
 				public int compare(Repo o1, Repo o2) {
 					return o1.getName().compareTo(o2.getName());
 				}
@@ -93,7 +94,7 @@ public class GettingStartedContent extends ContentManager {
 		}
 		return cachedRepos;
 	}
-	
+
 	/**
 	 * Registering content providers may require network access if content provider properties
 	 * need to be fetched external. Avoid running in UI thread.
@@ -114,13 +115,14 @@ public class GettingStartedContent extends ContentManager {
 
 	/**
 	 * Will register all content providers using STS properties.
-	 * 
+	 *
 	 */
 	public void registerAllWithStsProperties(final StsProperties stsProps) {
 		//Guides: are discoverable because they are all repos in org on github
 		register(GettingStartedGuide.class, GettingStartedGuide.GUIDE_DESCRIPTION_TEXT,
 			new ContentProvider<GettingStartedGuide>() {
 //					@Override
+				@Override
 				public GettingStartedGuide[] fetch(DownloadManager downloader) {
 					LinkedHashMap<String, GettingStartedGuide> guides = new LinkedHashMap<String, GettingStartedGuide>();
 					if (ADD_MOCKS) {
@@ -172,7 +174,7 @@ public class GettingStartedContent extends ContentManager {
 		register(ReferenceApp.class, ReferenceApp.REFERENCE_APP_DESCRIPTION,
 			new ContentProvider<ReferenceApp>() {
 
-//				@Override
+			@Override
 			public ReferenceApp[] fetch(DownloadManager downloader) {
 				ReferenceAppMetaData[] infos = github.get(stsProps.get("spring.reference.app.discovery.url"), ReferenceAppMetaData[].class);
 				ReferenceApp[] apps = new ReferenceApp[infos.length];
@@ -225,7 +227,7 @@ public class GettingStartedContent extends ContentManager {
 
 	private <A> Collection<A> asList(A[] tutorials) {
 		if (tutorials==null) {
-			return Collections.EMPTY_LIST;
+			return Collections.emptyList();
 		} else {
 			return Arrays.asList(tutorials);
 		}

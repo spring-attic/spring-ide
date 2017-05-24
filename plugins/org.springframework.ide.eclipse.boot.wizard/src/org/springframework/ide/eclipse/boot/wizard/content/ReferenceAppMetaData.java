@@ -10,25 +10,27 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard.content;
 
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * JSON metadata about reference apps retrieved from some external url.
- * 
+ *
  * @author Kris De Volder
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ReferenceAppMetaData {
 
 	@JsonProperty("name")
 	private String name; //optional. If not provided reference app name will be repo name
-	
+
 	@JsonProperty("type")
 	private String type; //only legal value now is "github". In the future maybe we will allow other types of metadata
 						  // to define to other ways/places of obtaining the sample code.
-	
+
 	@JsonProperty("description")
 	private String description; //optional if not provided will use the github repo's description
-	
+
 	@JsonProperty("owner")
 	private String owner; //mandatory: github repo owner name
 
@@ -48,5 +50,5 @@ public class ReferenceAppMetaData {
 	public String getRepo() {
 		return repo;
 	}
-	
+
 }

@@ -17,9 +17,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -29,6 +26,10 @@ import org.springframework.ide.eclipse.boot.wizard.github.Repo;
 import org.springsource.ide.eclipse.commons.core.preferences.StsProperties;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.UIThreadDownloadDisallowed;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Content for a Spring Tutorial provided via a Github Repo
@@ -80,6 +81,7 @@ public class TutorialGuide extends GithubRepoContent {
 		return this.getClass().getSimpleName()+"("+getName()+")";
 	}
 
+	@Override
 	public List<CodeSet> getCodeSets() throws UIThreadDownloadDisallowed {
 		if (codesets==null) {
 			CodeSet root = CodeSet.fromZip("ROOT", getZip(), getRootPath());
@@ -186,6 +188,7 @@ public class TutorialGuide extends GithubRepoContent {
 	/**
 	 * A more 'beautiful' name derived from the guide's repository name.
 	 */
+	@Override
 	public String getDisplayName() {
 		return beatify(getName());
 	}

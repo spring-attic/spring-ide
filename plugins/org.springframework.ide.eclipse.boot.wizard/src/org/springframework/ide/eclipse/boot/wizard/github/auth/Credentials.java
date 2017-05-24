@@ -12,6 +12,8 @@ package org.springframework.ide.eclipse.boot.wizard.github.auth;
 
 import java.net.URLConnection;
 
+import javax.ws.rs.client.Client;
+
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -20,25 +22,25 @@ import org.springframework.web.client.RestTemplate;
  * Github support two mechanims basic authentication and oauth. Separate
  * subclasses can be created to implement these mechanisms. For now
  * only basic auth will be implemented.
- * 
+ *
  * @author Kris De Volder
  */
 public abstract class Credentials {
 
 	/**
-	 * Apply the credentials to a given RestTemplate instance. 
+	 * Apply the credentials to a given RestTemplate instance.
 	 * <p>
-	 * This returns a RestTemplate instance base on the target 
+	 * This returns a RestTemplate instance base on the target
 	 * instance adding some processing to authenticate with
 	 * given Credentials.
 	 * <p>
 	 * This method may return a wrapped version of target
 	 * RestTemplate, or it may mutate the original.
 	 * <p>
-	 * @return new (wrapped) RestTemplate or mutated original 
+	 * @return new (wrapped) RestTemplate or mutated original
 	 * RestTemplate.
 	 */
-	public abstract RestTemplate apply(RestTemplate rest);
+	public abstract Client apply(Client rest);
 
 	/**
 	 * Add authentication headers to a url connection.

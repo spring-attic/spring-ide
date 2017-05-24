@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2013 VMware, Inc.
+ *  Copyright (c) 2013-2017 Pivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -13,17 +13,16 @@ package org.springframework.ide.eclipse.boot.wizard.github.auth;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLConnection;
-import java.util.List;
 import java.util.regex.Pattern;
 
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientRequestContext;
+import javax.ws.rs.client.ClientRequestFilter;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.ext.Provider;
+
 import org.apache.commons.codec.binary.Base64;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpRequest;
-import org.springframework.http.client.ClientHttpRequestExecution;
-import org.springframework.http.client.ClientHttpRequestInterceptor;
-import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.ide.eclipse.boot.wizard.BootWizardActivator;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * Uses basic authentication username and passwd to access github rest api.
@@ -31,6 +30,20 @@ import org.springframework.web.client.RestTemplate;
  * @author Kris De Volder
  */
 public class BasicAuthCredentials extends Credentials {
+
+	@Provider
+	public class BasicAuthFilter implements ClientRequestFilter {
+		@Override
+		public void filter(ClientRequestContext request) throws IOException {
+			if (matchHost(request.getUri().getHost())) {
+				MultivaluedMap<String, Object> headers = request.getHeaders();
+				if (!headers.containsKey("Authorization")) {
+					String authString = computeAuthString();
+					headers.add("Authorization", authString);
+				}
+			}
+		}
+	}
 
 	private final Pattern host;
 	private final String username;
@@ -55,23 +68,8 @@ public class BasicAuthCredentials extends Credentials {
 	}
 
 	@Override
-	public RestTemplate apply(RestTemplate rest) {
-		List<ClientHttpRequestInterceptor> interceptors = rest.getInterceptors();
-		interceptors.add(new ClientHttpRequestInterceptor() {
-			public ClientHttpResponse intercept(HttpRequest request, byte[] body,
-					ClientHttpRequestExecution execution) throws IOException {
-				if (matchHost(request.getURI().getHost())) {
-					HttpHeaders headers = request.getHeaders();
-					if (!headers.containsKey("Authorization")) {
-						String authString = computeAuthString();
-						headers.add("Authorization", authString);
-					}
-				}
-				return execution.execute(request, body);
-			}
-
-		});
-		return rest;
+	public Client apply(Client rest) {
+		return rest.register(new BasicAuthFilter());
 	}
 
 	@Override
@@ -93,5 +91,4 @@ public class BasicAuthCredentials extends Credentials {
 			return true;
 		}
 	}
-
 }
