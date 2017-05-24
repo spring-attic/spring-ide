@@ -14,8 +14,6 @@ import java.net.URLConnection;
 
 import javax.ws.rs.client.Client;
 
-import org.springframework.web.client.RestTemplate;
-
 /**
  * Credentials provide a means to authenticate for using the gihub rest API.
  * <p>
@@ -28,17 +26,17 @@ import org.springframework.web.client.RestTemplate;
 public abstract class Credentials {
 
 	/**
-	 * Apply the credentials to a given RestTemplate instance.
+	 * Apply the credentials to a given {@link Client} instance.
 	 * <p>
-	 * This returns a RestTemplate instance base on the target
+	 * This returns a {@link Client} instance base on the target
 	 * instance adding some processing to authenticate with
 	 * given Credentials.
 	 * <p>
 	 * This method may return a wrapped version of target
-	 * RestTemplate, or it may mutate the original.
+	 * {@link Client}, or it may mutate the original.
 	 * <p>
-	 * @return new (wrapped) RestTemplate or mutated original
-	 * RestTemplate.
+	 * @return new (wrapped) {@link Client} or mutated original
+	 * {@link Client}.
 	 */
 	public abstract Client apply(Client rest);
 

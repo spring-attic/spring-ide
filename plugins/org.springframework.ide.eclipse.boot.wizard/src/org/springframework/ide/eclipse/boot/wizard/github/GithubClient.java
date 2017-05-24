@@ -62,7 +62,7 @@ public class GithubClient {
 	private static final int CONNECT_TIMEOUT = 10000;
 
 	private static final boolean DEBUG = false;
-	private static final boolean LOG_GITHUB_RATE_LIMIT = false;
+//	private static final boolean LOG_GITHUB_RATE_LIMIT = false;
 
 	private final Credentials credentials;
 	private final Client client;
