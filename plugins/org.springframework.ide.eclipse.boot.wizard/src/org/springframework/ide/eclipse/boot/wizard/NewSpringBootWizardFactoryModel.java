@@ -11,7 +11,7 @@
 package org.springframework.ide.eclipse.boot.wizard;
 
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.springframework.util.StringUtils;
+import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
 
 /**
@@ -24,7 +24,7 @@ public class NewSpringBootWizardFactoryModel {
 
 	public static InitializrFactoryModel<NewSpringBootWizardModel> create(URLConnectionFactory urlConnectionFactory, IPreferenceStore prefs) {
 		return new InitializrFactoryModel<>((url) -> {
-			if (StringUtils.hasText(url)) {
+			if (StringUtil.hasText(url)) {
 				return new NewSpringBootWizardModel(urlConnectionFactory, url, prefs);
 			} else {
 				throw new IllegalArgumentException("No URL entered");

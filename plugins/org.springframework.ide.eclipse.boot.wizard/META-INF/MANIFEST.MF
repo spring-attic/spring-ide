@@ -33,12 +33,6 @@ Require-Bundle: org.eclipse.ui,
  com.fasterxml.jackson.core.jackson-annotations;bundle-version="2.6.2",
  com.fasterxml.jackson.core.jackson-core;bundle-version="2.6.2",
  com.fasterxml.jackson.core.jackson-databind;bundle-version="2.6.2"
-Import-Package: org.springframework.http;version="[4.0.0,4.4.0)",
- org.springframework.util;version="[4.0.0,4.4.0)",
- org.springframework.http.client;version="[4.0.0,4.4.0)",
- org.springframework.http.converter;version="[4.0.0,4.4.0)",
- org.springframework.web.client;version="[4.0.0,4.4.0)",
- org.springframework.http.client.support;version="[4.0.0,4.4.0)"
 Bundle-Activator: org.springframework.ide.eclipse.boot.wizard.BootWizardActivator
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.boot.wizard,

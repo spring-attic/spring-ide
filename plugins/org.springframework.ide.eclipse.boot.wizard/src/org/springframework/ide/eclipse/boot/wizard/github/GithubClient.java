@@ -40,7 +40,6 @@ import org.springframework.ide.eclipse.boot.wizard.BootWizardActivator;
 import org.springframework.ide.eclipse.boot.wizard.github.auth.BasicAuthCredentials;
 import org.springframework.ide.eclipse.boot.wizard.github.auth.Credentials;
 import org.springframework.ide.eclipse.boot.wizard.github.auth.NullCredentials;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -181,11 +180,7 @@ public class GithubClient {
 			} while (webtarget!=null);
 			return (T) results.toArray((Object[])Array.newInstance(componentType, results.size()));
 		} else {
-			try {
-				return  client.target(url).resolveTemplates(vars).request(MediaType.APPLICATION_JSON).get(type);
-			} catch (HttpServerErrorException e) {
-				throw new Error("Error reading: "+url);
-			}
+			return  client.target(url).resolveTemplates(vars).request(MediaType.APPLICATION_JSON).get(type);
 		}
 	}
 
