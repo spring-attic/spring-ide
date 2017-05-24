@@ -18,13 +18,16 @@ import static org.springframework.ide.eclipse.boot.dash.test.requestmappings.Req
 
 import java.io.InputStream;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
+
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
 
 import org.eclipse.jdt.core.IType;
 import org.junit.Test;
-import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RestActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
+import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RestActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.TypeLookup;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 
@@ -45,21 +48,25 @@ public class ActuatorClientTest {
 
 	protected Client restClientReturning(String contents) throws Exception {
 		Client rest = mock(Client.class);
-		WebResource target = mock(WebResource.class);
-		WebResource resource = mock(WebResource.class);
-		when(rest.resource(new URI("http://sample"))).thenReturn(target);
+		WebTarget target = mock(WebTarget.class);
+		WebTarget resource = mock(WebTarget.class);
+		Invocation.Builder requestBuilder = mock(Invocation.Builder.class);
+		when(rest.target(new URI("http://sample"))).thenReturn(target);
 		when(target.path("/mappings")).thenReturn(resource);
-		when(resource.get(String.class)).thenReturn(contents);
+		when(resource.request()).thenReturn(requestBuilder);
+		when(requestBuilder.get(String.class)).thenReturn(contents);
 		return rest;
 	}
 
-	protected Client restClientThrowing(Throwable exeption) {
+	protected Client restClientThrowing(Throwable exeption) throws Exception {
 		Client rest = mock(Client.class);
-		WebResource target = mock(WebResource.class);
-		WebResource resource = mock(WebResource.class);
-		when(rest.resource("http://sample")).thenReturn(target);
+		WebTarget target = mock(WebTarget.class);
+		WebTarget resource = mock(WebTarget.class);
+		Invocation.Builder requestBuilder = mock(Invocation.Builder.class);
+		when(rest.target(new URI("http://sample"))).thenReturn(target);
 		when(target.path("/mappings")).thenReturn(resource);
-		when(resource.get(String.class)).thenThrow(exeption);
+		when(resource.request()).thenReturn(requestBuilder);
+		when(requestBuilder.get(String.class)).thenThrow(exeption);
 		return rest;
 	}
 
