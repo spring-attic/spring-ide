@@ -25,7 +25,7 @@ import static org.springframework.ide.eclipse.boot.dash.test.BootDashViewModelHa
 import static org.springframework.ide.eclipse.boot.dash.test.BootDashViewModelHarness.getLabel;
 import static org.springframework.ide.eclipse.boot.dash.test.requestmappings.RequestMappingAsserts.assertRequestMappingWithPath;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.bootVersionAtLeast;
-import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
+import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.*;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertElements;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.createFile;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.setContents;
@@ -806,10 +806,11 @@ public class BootDashModelTest {
 		String projectName = "actuated-project";
 		IProject project = createBootProject(projectName,
 				bootVersionAtLeast("1.3.0"), //required for us to be able to determine the actuator port
-				withStarters("web", "actuator")     //required to actually *have* an actuator
+				withStarters("web", "actuator"),     //required to actually *have* an actuator
+				setPackage("com.example.demo")
 		);
-		createFile(project, "src/main/java/com/example/HelloController.java",
-				"package com.example;\n" +
+		createFile(project, "src/main/java/com/example/demo/HelloController.java",
+				"package com.example.demo;\n" +
 				"\n" +
 				"import org.springframework.web.bind.annotation.RequestMapping;\n" +
 				"import org.springframework.web.bind.annotation.RestController;\n" +
@@ -853,9 +854,9 @@ public class BootDashModelTest {
 			RequestMapping rm;
 			//Case 2 examples (path extracted from 'pseudo' json in the key)
 			rm = assertRequestMappingWithPath(mappings, "/hello"); //We defined it so should be there
-			assertEquals("com.example.HelloController", rm.getFullyQualifiedClassName());
+			assertEquals("com.example.demo.HelloController", rm.getFullyQualifiedClassName());
 			assertEquals("hello", rm.getMethodName());
-			assertEquals("com.example.HelloController", rm.getType().getFullyQualifiedName());
+			assertEquals("com.example.demo.HelloController", rm.getType().getFullyQualifiedName());
 
 			IMethod method = rm.getMethod();
 			assertEquals(rm.getType(), method.getDeclaringType());
@@ -898,10 +899,11 @@ public class BootDashModelTest {
 		String projectName = "actuated-project";
 		IProject project = createBootProject(projectName,
 				bootVersionAtLeast("1.3.0"), //required for us to be able to determine the actuator port
-				withStarters("web", "actuator")     //required to actually *have* an actuator
+				withStarters("web", "actuator"), //required to actually *have* an actuator
+				setPackage("com.example.demo")
 		);
-		createFile(project, "src/main/java/com/example/HelloController.java",
-				"package com.example;\n" +
+		createFile(project, "src/main/java/com/example/demo/HelloController.java",
+				"package com.example.demo;\n" +
 				"\n" +
 				"import org.springframework.web.bind.annotation.RequestMapping;\n" +
 				"import org.springframework.web.bind.annotation.RestController;\n" +
@@ -944,9 +946,9 @@ public class BootDashModelTest {
 			System.out.println("<<< Found RequestMappings");
 
 			RequestMapping rm = assertRequestMappingWithPath(mappings, "/hello"); //We defined it so should be there
-			assertEquals("com.example.HelloController", rm.getFullyQualifiedClassName());
+			assertEquals("com.example.demo.HelloController", rm.getFullyQualifiedClassName());
 			assertEquals("hello", rm.getMethodName());
-			assertEquals("com.example.HelloController", rm.getType().getFullyQualifiedName());
+			assertEquals("com.example.demo.HelloController", rm.getType().getFullyQualifiedName());
 
 			IMethod method = rm.getMethod();
 			assertEquals(rm.getType(), method.getDeclaringType());
