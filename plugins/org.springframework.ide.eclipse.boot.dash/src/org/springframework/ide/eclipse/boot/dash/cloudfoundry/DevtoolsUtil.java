@@ -240,26 +240,26 @@ public class DevtoolsUtil {
 		return new ProcessTracker(new ProcessListenerAdapter() {
 			@Override
 			public void debugTargetCreated(ProcessTracker tracker, IDebugTarget target) {
-				handleStateChange(target.getLaunch());
+				handleStateChange(target.getLaunch(), "debugTargetCreated");
 			}
 			@Override
 			public void debugTargetTerminated(ProcessTracker tracker, IDebugTarget target) {
-				handleStateChange(target.getLaunch());
+				handleStateChange(target.getLaunch(), "debugTargetTerminated");
 			}
 
 			@Override
 			public void processTerminated(ProcessTracker tracker, IProcess process) {
-				handleStateChange(process.getLaunch());
+				handleStateChange(process.getLaunch(), "processTerminated");
 			}
 			@Override
 			public void processCreated(ProcessTracker tracker, IProcess process) {
-				handleStateChange(process.getLaunch());
+				handleStateChange(process.getLaunch(), "processCreated");
 			}
-			private void handleStateChange(ILaunch l) {
+			private void handleStateChange(ILaunch l, Object info) {
 				CloudAppDashElement e = DevtoolsUtil.getElement(l, viewModel);
 				if (e!=null) {
 					BootDashModel model = e.getBootDashModel();
-					model.notifyElementChanged(e);
+					model.notifyElementChanged(e, info);
 				}
 			}
 		});

@@ -143,7 +143,7 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 	private void dependsOn(LiveExpression<?> liveProperty) {
 		liveProperty.addListener(new ValueListener() {
 			public void gotValue(LiveExpression exp, Object value) {
-				getBootDashModel().notifyElementChanged(BootProjectDashElement.this);
+				getBootDashModel().notifyElementChanged(BootProjectDashElement.this, "livePropertyChanged("+exp+", "+value+")");
 			}
 		});
 	}
@@ -213,7 +213,7 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 			);
 			children.addListener(new ValueListener<ImmutableSet<BootDashElement>>() {
 				public void gotValue(LiveExpression<ImmutableSet<BootDashElement>> exp, ImmutableSet<BootDashElement> value) {
-					getBootDashModel().notifyElementChanged(BootProjectDashElement.this);
+					getBootDashModel().notifyElementChanged(BootProjectDashElement.this, "children changed");
 					refreshRunState();
 				}
 			});

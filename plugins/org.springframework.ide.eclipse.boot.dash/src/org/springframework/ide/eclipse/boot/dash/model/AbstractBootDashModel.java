@@ -13,14 +13,26 @@ package org.springframework.ide.eclipse.boot.dash.model;
 import java.util.Comparator;
 
 import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.core.runtime.Platform;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 
 public abstract class AbstractBootDashModel extends AbstractDisposable implements BootDashModel {
 
+	private static final boolean DEBUG =
+			(""+Platform.getLocation()).contains("bamboo") ||
+			(""+Platform.getLocation()).contains("kdvolder")
+			;
 	private final BootDashViewModel parent;
 	private final RunTarget target;
+
+	private static void debug(String string) {
+		if (DEBUG) {
+			System.out.println(string);
+		}
+	}
+
 
 	public AbstractBootDashModel(RunTarget target, BootDashViewModel parent) {
 		super();
@@ -34,7 +46,9 @@ public abstract class AbstractBootDashModel extends AbstractDisposable implement
 
 	ListenerList elementStateListeners = new ListenerList();
 
-	public void notifyElementChanged(BootDashElement element) {
+	@Override
+	public void notifyElementChanged(BootDashElement element, Object reason) {
+		debug("notifyElementChanged("+element.getName() + ", "+reason);
 		if (element!=null) {
 			for (Object l : elementStateListeners.getListeners()) {
 				((BootDashModel.ElementStateListener) l).stateChanged(element);

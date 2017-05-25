@@ -419,7 +419,10 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 				debug("runstate for "+it+" => "+state);
 				return state;
 			}
-
+			@Override
+			public String toString() {
+				return "LiveExp(runState)";
+			}
 			@Override
 			public void dispose() {
 				super.dispose();
@@ -447,6 +450,10 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 	private LiveExpression<Integer> createActualInstancesExp() {
 		final LaunchConfRunStateTracker tracker = runStateTracker();
 		final LiveExpression<Integer> exp = new LiveExpression<Integer>(0) {
+			@Override
+			public String toString() {
+				return "LiveExp(actualInstances)";
+			}
 			protected Integer compute() {
 				int activeCount = 0;
 				for (ILaunchConfiguration c : getLaunchConfigs()) {
@@ -485,6 +492,10 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 			@Override
 			protected Integer compute() {
 				return getLivePort(propName);
+			}
+			@Override
+			public String toString() {
+				return "LivePortExp("+propName+")";
 			}
 		};
 		addDisposableChild(exp);

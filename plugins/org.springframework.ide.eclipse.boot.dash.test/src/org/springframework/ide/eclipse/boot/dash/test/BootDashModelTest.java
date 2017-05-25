@@ -502,7 +502,10 @@ public class BootDashModelTest {
 		//4 changes:  INACTIVE -> STARTING, STARTING -> RUNNING, livePort(set), actualInstances++
 		verify(oldListener, times(4)).stateChanged(element);
 		//3 changes: RUNNING -> INACTIVE, liveport(unset), actualInstances--
-		verify(listener, times(3)).stateChanged(element);
+		ElementStateListener newListener = listener;
+		ACondition.waitFor("listener calls", 1000, () ->
+			verify(newListener, times(3)).stateChanged(element)
+		);
 	}
 
 	@Test public void projectElementDisposedWhenProjectClosed() throws Exception {

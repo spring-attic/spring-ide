@@ -59,7 +59,7 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 	@SuppressWarnings("rawtypes")
 	private ValueListener elementStateNotifier = new ValueListener() {
 		public void gotValue(LiveExpression exp, Object value) {
-			getBootDashModel().notifyElementChanged(WrappingBootDashElement.this);
+			getBootDashModel().notifyElementChanged(WrappingBootDashElement.this, "ValueChanged("+exp+", "+value+")");
 		}
 	};
 
@@ -150,7 +150,7 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 			} else {
 				getPersistentProperties().put(TAGS_KEY, newTags.toArray(new String[newTags.size()]));
 			}
-			bootDashModel.notifyElementChanged(this);
+			bootDashModel.notifyElementChanged(this, "setTags");
 		} catch (Exception e) {
 			BootDashActivator.log(e);
 		}
@@ -175,7 +175,7 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 	public final void setDefaultRequestMappingPath(String defaultPath) {
 		try {
 			getPersistentProperties().put(DEFAULT_RM_PATH_KEY, defaultPath);
-			bootDashModel.notifyElementChanged(this);
+			bootDashModel.notifyElementChanged(this, "setDefaultRequestMappingPath");
 		} catch (Exception e) {
 			BootDashActivator.log(e);
 		}
@@ -261,7 +261,7 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 			elementNotifier = new ValueListener<Object>() {
 				@Override
 				public void gotValue(LiveExpression<Object> exp, Object value) {
-					getBootDashModel().notifyElementChanged(WrappingBootDashElement.this);
+					getBootDashModel().notifyElementChanged(WrappingBootDashElement.this, "ValueChanged("+exp+", "+value+")");
 				}
 			};
 		}

@@ -83,11 +83,11 @@ public abstract class DebugSupport {
 		return new ProcessTracker(new ProcessListenerAdapter() {
 			@Override
 			public void debugTargetCreated(ProcessTracker tracker, IDebugTarget target) {
-				handleStateChange(target.getLaunch());
+				handleStateChange(target.getLaunch(), "debugTargetCreated");
 			}
 			@Override
 			public void debugTargetTerminated(ProcessTracker tracker, IDebugTarget target) {
-				handleStateChange(target.getLaunch());
+				handleStateChange(target.getLaunch(), "debugTargetTerminated");
 			}
 
 			@Override
@@ -100,11 +100,11 @@ public abstract class DebugSupport {
 				//Typically a debug strategy only needs to care about debugtargets, not IProcesses.
 				// So nothing to do here.
 			}
-			private void handleStateChange(ILaunch l) {
+			private void handleStateChange(ILaunch l, Object info) {
 				CloudAppDashElement e = getElementFor(l, viewModel);
 				if (e!=null) {
 					BootDashModel model = e.getBootDashModel();
-					model.notifyElementChanged(e);
+					model.notifyElementChanged(e, info);
 				}
 			}
 		});

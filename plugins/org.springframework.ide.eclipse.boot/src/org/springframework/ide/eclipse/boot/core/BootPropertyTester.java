@@ -36,7 +36,6 @@ public class BootPropertyTester extends PropertyTester {
 	private static final Pattern JAR_VERSION_REGEXP = Pattern.compile(".*\\-([^.]+\\.[^.]+\\.[^.]+\\.[^.]+)\\.jar");
 
 	public BootPropertyTester() {
-		// TODO Auto-generated constructor stub
 	}
 
 	//@Override

@@ -190,7 +190,7 @@ public class BootDashViewModelTest {
 
 		////Fire event///////////
 
-		bdm.notifyElementChanged(element);
+		bdm.notifyElementChanged(element, "FIRST event fired by the test");
 
 		/////Verify listener
 
@@ -201,7 +201,7 @@ public class BootDashViewModelTest {
 		reset(listener);
 
 		harness.model.removeElementStateListener(listener);
-		bdm.notifyElementChanged(element);
+		bdm.notifyElementChanged(element, "SECOND event fired by the test");
 
 		verifyZeroInteractions(listener);
 
@@ -240,7 +240,7 @@ public class BootDashViewModelTest {
 
 		////Fire event///////////
 
-		bdm.notifyElementChanged(element);
+		bdm.notifyElementChanged(element, "event fired by the test");
 
 		/////Verify listener
 

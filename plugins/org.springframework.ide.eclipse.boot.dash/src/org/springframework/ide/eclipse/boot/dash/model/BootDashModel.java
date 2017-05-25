@@ -54,7 +54,16 @@ public interface BootDashModel {
 
 	BootDashViewModel getViewModel();
 
-	void notifyElementChanged(BootDashElement element);
+	/**
+	 * Send notification to listenters that a given element's state changed.
+	 *
+	 * @param element The element that changed
+	 * @param info Some additional info, more or less reflects the 'reason' for the change event.
+	 *          This can be used to be to log/track the cause of a change event.
+	 *          This can be very useful to debug test failures. It is not really intended to be
+	 *          used for any other purpose.
+	 */
+	void notifyElementChanged(BootDashElement element, Object info);
 
 	RefreshState getRefreshState();
 

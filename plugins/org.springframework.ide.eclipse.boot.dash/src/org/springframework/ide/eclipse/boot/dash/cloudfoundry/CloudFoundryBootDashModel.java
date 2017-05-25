@@ -254,7 +254,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 				 * Update BDEs
 				 */
 				for (CloudAppDashElement app : appsToRefresh) {
-					notifyElementChanged(app);
+					notifyElementChanged(app, "resourceChanged");
 				}
 			} catch (OperationCanceledException oce) {
 				Log.log(oce);
@@ -453,7 +453,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 			// a Job now.
 		}
 		if (changed) {
-			notifyElementChanged(addedElement);
+			notifyElementChanged(addedElement, "addElement detected setProject caused a change");
 		}
 		return addedElement;
 	}
