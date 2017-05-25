@@ -57,6 +57,8 @@
 	</distributionManagement>
 
 	<properties>
+	    <sts.test.failure.ignore>true</sts.test.failure.ignore> 
+	            <!-- Careful!!! This is fine on bamboo, but usually you don't want this! -->
 		<p2.qualifier>SNAPSHOT</p2.qualifier>
 		<p2.sign>false</p2.sign>
 		<p2.repository.name>Spring IDE</p2.repository.name>
@@ -914,7 +916,7 @@
 							</dependency>
 						</dependencies>
 					<testFailureIgnore>
-						true
+						${sts.test.failure.ignore}
 					</testFailureIgnore>
 					</configuration>
 				</plugin>
