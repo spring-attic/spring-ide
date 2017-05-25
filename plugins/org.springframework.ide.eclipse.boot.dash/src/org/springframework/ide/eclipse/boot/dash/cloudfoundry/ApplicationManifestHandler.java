@@ -709,24 +709,16 @@ public class ApplicationManifestHandler {
 		if (domain == null) {
 			domain = getValue(allResults, DOMAIN_PROP, String.class);
 		}
-		if (domain != null && isDomainValid(domain, domains)) {
+		if (domain != null) {
 			domainsSet.add(domain);
 		}
 		List<String> domainList = (List<String>) getValue(allResults, DOMAINS_PROP, List.class);
 		if (domainList != null) {
-			for (String d : domainList) {
-				if (isDomainValid(d, domains)) {
-					domainsSet.add(d);
-				}
-			}
+			domainsSet.addAll(domainList);
 		}
 		domainList = (List<String>) getValue(application, DOMAINS_PROP, List.class);
 		if (domainList != null) {
-			for (String d : domainList) {
-				if (isDomainValid(d, domains)) {
-					domainsSet.add(d);
-				}
-			}
+			domainsSet.addAll(domainList);
 		}
 
 		/*
@@ -856,15 +848,6 @@ public class ApplicationManifestHandler {
 
 	protected boolean hasRoutesProperty(Map<?, ?> application, Map<Object, Object> allResults) {
 		return hasValue(application, ROUTES_PROP) || hasValue(allResults, ROUTES_PROP);
-	}
-
-	public static boolean isDomainValid(String domain, List<CFCloudDomain> domains) {
-		for (CFCloudDomain cloudDomain : domains) {
-			if (cloudDomain.getName().equals(domain)) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	public static boolean isStackValid(String stack, List<CFStack> stacks) {

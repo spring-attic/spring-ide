@@ -1256,13 +1256,9 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 			if (domain != null) {
 				domainsSet.add(domain);
 			}
-			List<?> domainsList = getAbsoluteValue(ApplicationManifestHandler.DOMAINS_PROP, List.class);
+			List<String> domainsList = getAbsoluteValue(ApplicationManifestHandler.DOMAINS_PROP, List.class);
 			if (domainsList != null) {
-				for (Object o : domainsList) {
-					if (o instanceof String && ApplicationManifestHandler.isDomainValid((String) o , domains)) {
-						domainsSet.add((String)o);
-					}
-				}
+				domainsSet.addAll(domainsList);
 			}
 
 			/*
