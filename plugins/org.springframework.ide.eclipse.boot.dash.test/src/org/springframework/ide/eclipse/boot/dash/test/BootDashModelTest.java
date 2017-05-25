@@ -25,7 +25,8 @@ import static org.springframework.ide.eclipse.boot.dash.test.BootDashViewModelHa
 import static org.springframework.ide.eclipse.boot.dash.test.BootDashViewModelHarness.getLabel;
 import static org.springframework.ide.eclipse.boot.dash.test.requestmappings.RequestMappingAsserts.assertRequestMappingWithPath;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.bootVersionAtLeast;
-import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.*;
+import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.setPackage;
+import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertElements;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.createFile;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.setContents;
@@ -68,7 +69,6 @@ import org.springframework.ide.eclipse.boot.core.IMavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.MavenId;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
-import org.springframework.ide.eclipse.boot.dash.model.AbstractLaunchConfigurationsDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElementsFilterBoxModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
@@ -447,6 +447,7 @@ public class BootDashModelTest {
 		try {
 			waitForState(app, RunState.INACTIVE);
 			app.restart(runOrDebug, ui);
+			Thread.sleep(2000); //Give app a little bit of time to get going.
 			waitForState(app, runOrDebug);
 		} finally {
 			ACondition.waitFor("stop hammering", 20000, () -> {
