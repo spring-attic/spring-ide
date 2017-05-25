@@ -20,7 +20,6 @@ import java.util.HashSet;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
@@ -225,11 +224,11 @@ public class Yaml2DeploymentPropertiesTest {
 		assertEquals("Uris sets not equal", expected, uris);
 	}
 
-	@Test @Ignore
+	@Test
 	public void test_domains_6() throws Exception {
 		CloudApplicationDeploymentProperties props = readDeploymentProperties("manifest-parse-data/domains-6.yml");
 		HashSet<String> uris = new HashSet<>(props.getUris());
-		HashSet<String> expected = new HashSet<>(Collections.singletonList("my-app.springsource.org"));
+		HashSet<String> expected = new HashSet<>(Collections.singletonList("my-app.spring.what"));
 		assertEquals("Uris sets not equal", expected, uris);
 	}
 
