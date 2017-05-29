@@ -46,18 +46,8 @@ public class BootDashboardArchiver implements ICloudFoundryArchiver {
 	public CFApplicationArchive getApplicationArchive(IModule module, IServer server, IModuleResource[] resources,
 			IProgressMonitor monitor) throws CoreException {
 
-		CloudFoundryApplicationModule appModule = CloudServerUtil.getCloudFoundryApplicationModule(module, server);
+		CloudFoundryApplicationModule appModule = CloudServerUtil.getExistingCloudModule(module, server);
 		CloudFoundryServer cloudServer = CloudServerUtil.getCloudServer(server);
-
-		if (appModule == null) {
-			throw asCoreException(
-					"No cloud application module resolved. Unable to archive the application. Refresh the server instance and retry the operation.");
-		}
-
-		if (cloudServer == null) {
-			throw asCoreException(
-					"No Cloud Foundry server resolved. Verify that the Cloud Foundry server instance is connected.");
-		}
 
 		IProject project = getProject(appModule);
 
