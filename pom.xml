@@ -538,6 +538,11 @@
 					<url>http://download.eclipse.org/tools/orbit/downloads/drops/R20170307180635/repository/</url>
 				</repository>
 				<repository>
+					<id>mylyn</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/mylyn/releases/latest</url>
+				</repository>
+				<repository>
 					<id>swtbot</id>
 					<layout>p2</layout>
 					<url>http://download.eclipse.org/technology/swtbot/releases/latest/</url>
