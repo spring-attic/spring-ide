@@ -31,7 +31,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.m2e.core;bundle-version="1.0.0";resolution:=optional,
  org.eclipse.m2e.core.ui;bundle-version="1.0.0";resolution:=optional,
  org.eclipse.m2e.maven.runtime;bundle-version="1.0.0";resolution:=optional,
- org.eclipse.m2e.jdt;bundle-version="1.0.0";resolution:=optional
+ org.eclipse.m2e.jdt;bundle-version="1.0.0";resolution:=optional,
+ org.eclipse.jdt.core.manipulation
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Eclipse-LazyStart: true
 Bundle-ActivationPolicy: lazy;exclude:="org.springframework.ide.eclipse.roo.ui.internal.listener"
