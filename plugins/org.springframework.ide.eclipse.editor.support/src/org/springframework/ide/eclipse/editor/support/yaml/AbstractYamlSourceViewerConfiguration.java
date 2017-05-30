@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2016 Pivotal, Inc.
+ * Copyright (c) 2015, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,7 +52,7 @@ import org.yaml.snakeyaml.Yaml;
  */
 public abstract class AbstractYamlSourceViewerConfiguration extends YEditSourceViewerConfiguration {
 
-	private static final Set<String> ANNOTIONS_SHOWN_IN_TEXT = new HashSet<String>();
+	private static final Set<String> ANNOTIONS_SHOWN_IN_TEXT = new HashSet<>();
 	static {
 		ANNOTIONS_SHOWN_IN_TEXT.add("org.eclipse.jdt.ui.warning");
 		ANNOTIONS_SHOWN_IN_TEXT.add("org.eclipse.jdt.ui.error");
@@ -122,7 +122,7 @@ public abstract class AbstractYamlSourceViewerConfiguration extends YEditSourceV
 		    a.enableAutoInsert(true);
 		    a.enableAutoActivation(true);
 			a.setRestoreCompletionProposalSize(getDialogSettings());
-			ProposalProcessor processor = new ProposalProcessor(getCompletionEngine());
+			ProposalProcessor processor = new ProposalProcessor(getCompletionEngine(viewer));
 			a.setContentAssistProcessor(processor, IDocument.DEFAULT_CONTENT_TYPE);
 			a.setSorter(CompletionFactory.SORTER);
 		}
@@ -134,9 +134,9 @@ public abstract class AbstractYamlSourceViewerConfiguration extends YEditSourceV
 		if (contentType.equals(IDocument.DEFAULT_CONTENT_TYPE) && ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK==stateMask) {
 			ITextHover delegate = getTextAnnotationHover(sourceViewer);
 			try {
-				HoverInfoProvider hoverProvider = getHoverProvider();
+				HoverInfoProvider hoverProvider = getHoverProvider(sourceViewer);
 				if (hoverProvider!=null) {
-					return new HoverInfoTextHover(sourceViewer, getHoverProvider(), delegate);
+					return new HoverInfoTextHover(sourceViewer, getHoverProvider(sourceViewer), delegate);
 				}
 			} catch (Exception e) {
 				EditorSupportActivator.log(e);
@@ -147,15 +147,15 @@ public abstract class AbstractYamlSourceViewerConfiguration extends YEditSourceV
 		}
 	}
 
-	public final ICompletionEngine getCompletionEngine() {
+	public final ICompletionEngine getCompletionEngine(ISourceViewer viewer) {
 		if (completionEngine==null) {
-			completionEngine = new YamlCompletionEngine(getStructureProvider(), getAssistContextProvider());
+			completionEngine = new YamlCompletionEngine(getStructureProvider(), getAssistContextProvider(viewer));
 		}
 		return completionEngine;
 	}
 
-	protected final HoverInfoProvider getHoverProvider() {
-		return new YamlHoverInfoProvider(getAstProvider(), getStructureProvider(), getAssistContextProvider());
+	protected final HoverInfoProvider getHoverProvider(ISourceViewer viewer) {
+		return new YamlHoverInfoProvider(getAstProvider(), getStructureProvider(), getAssistContextProvider(viewer));
 	}
 
 	protected final YamlASTProvider getAstProvider() {
@@ -200,7 +200,7 @@ public abstract class AbstractYamlSourceViewerConfiguration extends YEditSourceV
 	protected abstract String getPluginId();
 	protected abstract IPreferenceStore getPreferencesStore();
 	protected abstract YamlStructureProvider getStructureProvider();
-	protected abstract YamlAssistContextProvider getAssistContextProvider();
+	protected abstract YamlAssistContextProvider getAssistContextProvider(ISourceViewer viewer);
 
 	protected IReconcilingStrategy createReconcilerStrategy(ISourceViewer sourceViewer) {
 		return null;
