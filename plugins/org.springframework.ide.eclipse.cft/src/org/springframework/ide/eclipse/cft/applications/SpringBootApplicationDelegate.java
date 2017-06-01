@@ -29,7 +29,7 @@ public class SpringBootApplicationDelegate extends ModuleResourceApplicationDele
 	}
 
 	@Override
-	public boolean shouldSetDefaultUrl(CloudFoundryApplicationModule appModule) {
+	public boolean suggestUrl(CloudFoundryApplicationModule appModule) {
 		return ProjectUtils.isSpringBootProject(appModule);
 	}
 

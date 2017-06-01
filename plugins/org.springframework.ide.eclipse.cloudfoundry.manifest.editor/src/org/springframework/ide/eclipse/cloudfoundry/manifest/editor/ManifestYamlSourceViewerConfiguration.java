@@ -37,7 +37,7 @@ public class ManifestYamlSourceViewerConfiguration extends AbstractYamlSourceVie
 	}
 
 	@Override
-	protected YamlAssistContextProvider getAssistContextProvider() {
+	protected YamlAssistContextProvider getAssistContextProvider(ISourceViewer viewer) {
 		return assistContextProvider;
 	}
 

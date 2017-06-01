@@ -16,7 +16,7 @@ import java.util.List;
 import org.eclipse.cft.server.core.internal.ApplicationUrlLookupService;
 import org.eclipse.cft.server.core.internal.CloudFoundryServer;
 import org.eclipse.cft.server.core.internal.CloudServerUtil;
-import org.eclipse.cft.server.core.internal.ValueValidationUtil;
+import org.eclipse.cft.server.core.internal.StringUtils;
 import org.eclipse.cft.server.core.internal.client.CloudFoundryApplicationModule;
 import org.eclipse.cft.server.ui.DefaultApplicationWizardDelegate;
 import org.eclipse.cft.server.ui.internal.wizards.ApplicationWizardDelegate;
@@ -67,7 +67,7 @@ public class SpringBootAppWizardDelegate extends DefaultApplicationWizardDelegat
 		@Override
 		protected void setUrlInDescriptor(String url) {
 
-			if (ValueValidationUtil.isEmpty(url)) {
+			if (StringUtils.isEmpty(url)) {
 				// Set an empty list if URL is empty as it can cause problems
 				// when
 				// deploying a standalone application
