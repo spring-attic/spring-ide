@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Pivotal, Inc.
+ * Copyright (c) 2016, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.cft;
 import org.eclipse.cft.server.core.internal.CloudFoundryPlugin;
 import org.eclipse.cft.server.core.internal.CloudFoundryServer;
 import org.eclipse.cft.server.core.internal.client.CloudFoundryApplicationModule;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.wst.server.core.IModule;
 
 public class CFTConsole {
@@ -53,6 +54,21 @@ public class CFTConsole {
 			if (appModule != null) {
 				message = prefix + " - " + message + '\n'; 
 				CloudFoundryPlugin.getCallback().printToConsole(server, appModule, message, false, error);
+			}
+		}
+	}
+	
+	public void printToConsole(String appName, CloudFoundryServer server, String message) {
+		if (server != null) {
+			try {
+				CloudFoundryApplicationModule appModule = server.getExistingCloudModule(appName);
+
+				if (appModule != null) {
+					message = prefix + " - " + message + '\n'; 
+					CloudFoundryPlugin.getCallback().printToConsole(server, appModule, message, false, false);
+				}
+			} catch (CoreException e) {
+				Log.log(e);
 			}
 		}
 	}
