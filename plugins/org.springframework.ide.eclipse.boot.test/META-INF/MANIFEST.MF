@@ -34,6 +34,6 @@ Require-Bundle: org.eclipse.ui,
  org.glassfish.jersey.core.jersey-common;bundle-version="2.22.1"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Bundle-Vendor: GoPivotal Inc.
+Bundle-Vendor: Pivotal Inc.
 Export-Package: org.springframework.ide.eclipse.boot.test,
  org.springframework.ide.eclipse.boot.test.util
