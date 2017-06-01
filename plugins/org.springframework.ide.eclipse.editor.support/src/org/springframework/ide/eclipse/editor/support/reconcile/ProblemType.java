@@ -22,6 +22,6 @@ package org.springframework.ide.eclipse.editor.support.reconcile;
  * @author Kris De Volder
  */
 public interface ProblemType {
+	String getId();
 	ProblemSeverity getDefaultSeverity();
-	String toString();
 }

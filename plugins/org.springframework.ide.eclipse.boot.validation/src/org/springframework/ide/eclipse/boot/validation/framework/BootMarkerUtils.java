@@ -49,7 +49,7 @@ public class BootMarkerUtils {
 				int start = problem.getStart();
 				if (start>=0) {
 					attributes.put(IMarker.CHAR_START, start);
-					attributes.put(IMarker.CHAR_END, start + problem.getLen());
+					attributes.put(IMarker.CHAR_END, problem.getEnd());
 				}
 				if (problem.getErrorId() != null) {
 					attributes.put(IValidationProblemMarker.ERROR_ID, problem.getErrorId());

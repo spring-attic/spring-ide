@@ -19,5 +19,5 @@ public interface ValidationProblem {
 	String getErrorId();
 	String getRuleId();
 	int getStart();
-	int getLen();
+	int getEnd();
 }

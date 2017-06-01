@@ -124,4 +124,9 @@ public enum SpringPropertiesProblemType implements ProblemType {
 		}
 		throw new IllegalStateException("Bug: unknown editor type for "+this);
 	}
+
+	@Override
+	public String getId() {
+		return this.name();
+	}
 }

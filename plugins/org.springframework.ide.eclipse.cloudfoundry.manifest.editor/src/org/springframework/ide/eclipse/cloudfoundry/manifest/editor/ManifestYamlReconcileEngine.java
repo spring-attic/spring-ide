@@ -39,7 +39,7 @@ public class ManifestYamlReconcileEngine extends YamlSchemaBasedReconcileEngine 
 	
 	private static final ProblemType LEGACY_PROPERTY_PROBLEM = new ProblemType() {
 		@Override
-		public String toString() {
+		public String getId() {
 			return "ManifestYamlLegacyPropertyProblem";
 		}
 		@Override

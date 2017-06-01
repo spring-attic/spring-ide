@@ -13,6 +13,15 @@
 	<persistent value="true" />
 </extension>
 
+<extension point="org.eclipse.core.resources.markers"
+		 id="problemmarker"
+		 name="%springProblemMarker">
+	  <super type="org.eclipse.core.resources.problemmarker"/>
+	  <super type="org.eclipse.core.resources.textmarker"/>
+	<attribute name="ruleId"/>
+	<attribute name="errorId"/>
+</extension>
+
 <extension point="org.eclipse.ui.ide.markerSupport">
 		<markerTypeCategory name="Spring Boot Problem">
 			<markerTypeReference id="org.springframework.ide.eclipse.boot.validation.problemmarker"/>
@@ -22,19 +31,19 @@
 <extension
 	point="org.eclipse.ui.ide.markerResolution">
 	<markerResolutionGenerator
-		markerType="org.springframework.ide.eclipse.boot.problemmarker"
-		class="org.springframework.ide.eclipse.boot.quickfix.BootMarkerResolutionGenerator">
+		markerType="org.springframework.ide.eclipse.boot.validation.problemmarker"
+		class="org.springframework.ide.eclipse.boot.validation.quickfix.BootMarkerResolutionGenerator">
 	</markerResolutionGenerator>
 </extension>
-    <extension
-          id="springbootbuilder"
-          point="org.eclipse.core.resources.builders">
-       <builder>
-          <run
-                class="org.springframework.ide.eclipse.boot.validation.framework.SpringBootProjectBuilder">
-          </run>
-       </builder>
-    </extension>
 
+<extension
+  id="springbootbuilder"
+  point="org.eclipse.core.resources.builders">
+   <builder>
+      <run
+            class="org.springframework.ide.eclipse.boot.validation.framework.SpringBootProjectBuilder">
+      </run>
+   </builder>
+</extension>
 
 </plugin>

@@ -29,8 +29,12 @@ public class YamlSchemaProblems {
 	private static ProblemType problemType(final String typeName) {
 		return new ProblemType() {
 			@Override
-			public String toString() {
+			public String getId() {
 				return typeName;
+			}
+			@Override
+			public String toString() {
+				return getId();
 			}
 			@Override
 			public ProblemSeverity getDefaultSeverity() {

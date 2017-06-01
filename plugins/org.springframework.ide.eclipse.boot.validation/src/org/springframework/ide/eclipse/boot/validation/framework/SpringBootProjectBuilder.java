@@ -102,7 +102,7 @@ public class SpringBootProjectBuilder extends IncrementalProjectBuilder {
 	}
 	
 	private IValidationContext validationContext(IResource rsrc, IValidationRule rule) {
-		return (IResource cu, ProblemType problemId, String msg, int offset, int len) -> {
+		return (IResource cu, ProblemType problemId, String msg, int offset, int end) -> {
 			ValidationProblem problem = new ValidationProblem() {
 				public int getStart() {
 					return offset;
@@ -137,8 +137,8 @@ public class SpringBootProjectBuilder extends IncrementalProjectBuilder {
 				}
 				
 				@Override
-				public int getLen() {
-					return len;
+				public int getEnd() {
+					return end;
 				}
 				
 				@Override

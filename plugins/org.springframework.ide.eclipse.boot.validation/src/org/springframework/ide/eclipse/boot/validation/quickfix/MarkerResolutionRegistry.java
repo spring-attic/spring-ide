@@ -34,9 +34,9 @@ public class MarkerResolutionRegistry {
 	 * Marker attribute used to associate a resolution generator via registry to
 	 * a marker. This attribute must be set on
 	 */
-	public static final String QUICK_FIX_ID = IValidationProblemMarker.ERROR_ID;
+	public static final String QUICK_FIX_ID_ATTR = IValidationProblemMarker.ERROR_ID;
 
-	private Map<ProblemType, IMarkerResolutionGenerator2> registry;
+	private Map<String, IMarkerResolutionGenerator2> registry;
 
 	/**
 	 * Obtain the generator for the given marker. Never returns null, will return
@@ -44,7 +44,7 @@ public class MarkerResolutionRegistry {
 	 */
 	public synchronized IMarkerResolutionGenerator2 generator(IMarker marker) {
 		if (registry!=null) {
-			String id = marker.getAttribute(QUICK_FIX_ID, null);
+			String id = marker.getAttribute(QUICK_FIX_ID_ATTR, null);
 			if (id!=null) {
 				IMarkerResolutionGenerator2 registered = registry.get(id);
 				if (registered!=null) {
@@ -70,9 +70,9 @@ public class MarkerResolutionRegistry {
 		}
 		IMarkerResolutionGenerator2 existing = registry.get(id);
 		if (existing!=null) {
-			registry.put(id, compose(existing, generator));
+			registry.put(id.getId(), compose(existing, generator));
 		} else {
-			registry.put(id,  generator);
+			registry.put(id.getId(),  generator);
 		}
 	}
 
