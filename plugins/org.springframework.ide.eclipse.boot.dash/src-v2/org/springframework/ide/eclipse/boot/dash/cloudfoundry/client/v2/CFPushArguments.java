@@ -45,6 +45,7 @@ public class CFPushArguments implements AutoCloseable {
 	private Integer instances;
 	private List<String> services = ImmutableList.of();
 	private ZipFile applicationData;
+	private File applicationDataAsFile;
 	private boolean noStart = false;
 	private boolean randomRoute = false;
 
@@ -120,6 +121,9 @@ public class CFPushArguments implements AutoCloseable {
 	public ZipFile getApplicationData() {
 		return applicationData;
 	}
+	public File getApplicationDataAsFile() {
+		return applicationDataAsFile;
+	}
 	@Override
 	public void close() throws Exception {
 		if (applicationData!=null) {
@@ -128,6 +132,7 @@ public class CFPushArguments implements AutoCloseable {
 	}
 	public void setApplicationData(File archive) throws Exception {
 		Assert.isLegal(applicationData==null, "Can only set this once");
+		this.applicationDataAsFile=archive;
 		this.applicationData = new ZipFile(archive);
 	}
 	public boolean isNoStart() {

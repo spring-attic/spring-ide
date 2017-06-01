@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2;
 
-import static org.cloudfoundry.util.tuple.TupleUtils.function;
-
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Collection;
@@ -26,7 +24,6 @@ import java.util.function.Predicate;
 
 import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.client.v2.applications.ApplicationEntity;
-import org.cloudfoundry.client.v2.applications.CreateApplicationRequest;
 import org.cloudfoundry.client.v2.applications.GetApplicationResponse;
 import org.cloudfoundry.client.v2.applications.UpdateApplicationRequest;
 import org.cloudfoundry.client.v2.applications.UpdateApplicationResponse;
@@ -45,10 +42,12 @@ import org.cloudfoundry.doppler.LogMessage;
 import org.cloudfoundry.operations.CloudFoundryOperations;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.applications.ApplicationDetail;
+import org.cloudfoundry.operations.applications.ApplicationHealthCheck;
 import org.cloudfoundry.operations.applications.DeleteApplicationRequest;
 import org.cloudfoundry.operations.applications.GetApplicationEnvironmentsRequest;
 import org.cloudfoundry.operations.applications.GetApplicationRequest;
 import org.cloudfoundry.operations.applications.LogsRequest;
+import org.cloudfoundry.operations.applications.PushApplicationRequest;
 import org.cloudfoundry.operations.applications.RestartApplicationRequest;
 import org.cloudfoundry.operations.applications.StartApplicationRequest;
 import org.cloudfoundry.operations.applications.StopApplicationRequest;
@@ -80,14 +79,12 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicati
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshClientSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshHost;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v1.DefaultClientRequestsV1;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CloudFoundryClientCache.CFClientProvider;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.IApplicationLogConsole;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
@@ -165,9 +162,6 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	private CloudFoundryClient _client ;
 	private UaaClient _uaa;
 	private CloudFoundryOperations _operations;
-
-	@Deprecated
-	private DefaultClientRequestsV1 _v1;
 
 	private Mono<String> orgId;
 	private Mono<GetInfoResponse> info;
@@ -491,10 +485,6 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	public void logout() {
 		_operations = null;
 		_client = null;
-		if (_v1!=null) {
-			_v1.logout();
-			_v1 = null;
-		}
 	}
 
 	public boolean isLoggedOut() {
@@ -705,102 +695,61 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	@Override
 	public void push(CFPushArguments params, CancelationToken cancelationToken) throws Exception {
-		String appName = params.getAppName();
 		ReactorUtils.get(APP_START_TIMEOUT, cancelationToken,
-			ifApplicationExists(appName,
-				((app) -> pushExisting(app, params)),
-				firstPush(params)
-			)
+				v2Push(params)
 		);
 	}
 
-	private Mono<Void> pushExisting(ApplicationDetail app, CFPushArguments params) {
+	private Mono<Void> v2Push(CFPushArguments params) {
 		String appName = params.getAppName();
-		UUID appId = UUID.fromString(app.getId());
-		return updateApp(appId, params)
+
+		// Routes are set AFTER push, so for initial push, make sure no route is set
+		boolean noRoute = true;
+
+		// Environment variables require app start, so for initial push, do not start app.
+		// This will happen afterwards
+		boolean noStart = true;
+		PushApplicationRequest req = PushApplicationRequest
+				.builder()
+				.name(appName)
+				// resource matching occurs under the hood in the push operation
+				.application(params.getApplicationDataAsFile().toPath())
+				.memory(params.getMemory())
+				.diskQuota(params.getDiskQuota())
+				.timeout(params.getTimeout())
+				.healthCheckType(resolveHealthCheckType(params.getHealthCheckType()).orElse(null))
+				.buildpack(params.getBuildpack())
+				.command(params.getCommand())
+				.stack(params.getStack())
+				.noStart(noStart)
+				.noRoute(noRoute)
+				.instances(params.getInstances())
+				.build();
+
+		return log("client.applications.push("+req+")",
+				_operations.applications().push(req
+					)
+		 )
+		.then(mono_debug("Updating routes, bound services, and environment variables..."))
 		.then(getApplicationDetail(appName))
 		.then((appDetail) -> {
 			return Flux.merge(
 				setRoutes(appDetail, params.getRoutes(), params.getRandomRoute()),
-				bindAndUnbindServices(appName, params.getServices())
+				bindAndUnbindServices(appName, params.getServices()),
+				// This requires app restart
+				setEnvVars(appDetail, params.getEnv())
 			).then();
 		})
-		.then(mono_debug("Uploading[1]..."))
-		.then(Mono.fromCallable(() -> {
-			debug("Uploading[2]...");
-			v1().uploadApplication(appName, params.getApplicationData());
-			debug("Uploading[2] DONE");
-			return "who cares";
-		}))
-		.then(mono_debug("Uploading[1] DONE"))
+		// Start app only after environment variables are set
 		.then(params.isNoStart()
-			? stopApp(appName)
-			: restartApp(appName)
-		);
-	}
-
-	private DefaultClientRequestsV1 v1() throws Exception {
-		if (_v1==null) {
-			CFClientParams v1params = new CFClientParams(
-					params.getApiUrl(),
-					params.getUsername(),
-					CFCredentials.fromRefreshToken(getRefreshToken()),
-					params.isSelfsigned(),
-					params.getOrgName(),
-					params.getSpaceName(),
-					params.skipSslValidation()
-			);
-			_v1 = new DefaultClientRequestsV1(v1params);
-		}
-		return _v1;
+				? stopApp(appName)
+				: restartApp(appName)
+		)
+		.then(Mono.empty());
 	}
 
 	private Mono<Void> mono_debug(String string) {
 		return Mono.fromRunnable(() -> debug(string));
-	}
-
-	private Mono<Void> firstPush(CFPushArguments params) {
-		String appName = params.getAppName();
-		return createApp(params)
-		.then(getApplicationDetail(appName))
-		.then((appDetail) ->
-			Flux.merge(
-				setRoutes(appDetail, params.getRoutes(), params.getRandomRoute()),
-				bindAndUnbindServices(appName, params.getServices())
-			).then()
-		)
-		.then(Mono.fromCallable(() -> {
-			v1().uploadApplication(appName, params.getApplicationData());
-			return "who cares";
-		}))
-		.then(params.isNoStart()
-			? Mono.empty()
-			: startApp(appName)
-		)
-		.then();
-	}
-
-	private Mono<UUID> createApp(CFPushArguments params) {
-		return spaceId.and(getStackId(params))
-		.then(function((spaceId, stackId) -> {
-			CreateApplicationRequest req = CreateApplicationRequest.builder()
-					.spaceId(spaceId)
-					.stackId(stackId.orElse(null))
-					.name(params.getAppName())
-					.memory(params.getMemory())
-					.diskQuota(params.getDiskQuota())
-					.healthCheckType(params.getHealthCheckType())
-					.healthCheckTimeout(params.getTimeout())
-					.buildpack(params.getBuildpack())
-					.command(params.getCommand())
-					.environmentJsons(params.getEnv())
-					.instances(params.getInstances())
-					.build();
-			return log("client.applications.create("+req+")",
-				_client.applicationsV2().create(req)
-			);
-		}))
-		.map(response -> UUID.fromString(response.getMetadata().getId()));
 	}
 
 	private Mono<Optional<String>> getStackId(CFPushArguments params) {
@@ -818,61 +767,15 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		}
 	}
 
-
-	private Mono<UUID> updateApp(UUID appId, CFPushArguments params) {
-		return getStackId(params)
-		.then((stackId) -> {
-			UpdateApplicationRequest req = UpdateApplicationRequest.builder()
-				.applicationId(appId.toString())
-				.name(params.getAppName())
-				.memory(params.getMemory())
-				.diskQuota(params.getDiskQuota())
-				.healthCheckType(params.getHealthCheckType())
-				.healthCheckTimeout(params.getTimeout())
-				.buildpack(params.getBuildpack())
-				.command(params.getCommand())
-				.stackId(stackId.orElse(null))
-				.environmentJsons(params.getEnv())
-				.instances(params.getInstances())
-				.build();
-			return log("client.applications.update("+req+")",
-				_client.applicationsV2().update(req)
-			);
-		})
-		.then(Mono.just(appId));
+	private Optional<ApplicationHealthCheck> resolveHealthCheckType(String type) {
+		ApplicationHealthCheck appHealthCheck = null;
+		if ("port".equals(type)) {
+			appHealthCheck = ApplicationHealthCheck.PORT;
+		} else if ("none".equals(type)) {
+			appHealthCheck = ApplicationHealthCheck.NONE;
+		}
+		return Optional.ofNullable(appHealthCheck);
 	}
-
-//	public void pushV2(CFPushArguments params, CancelationToken cancelationToken) throws Exception {
-//		debug("Pushing app starting: "+params.getAppName());
-//		//XXX CF V2: push should use 'manifest' in a future version of V2
-//		PushApplicationRequest pushRequest = toPushRequest(params)
-//				.noStart(true)
-//				.noRoute(true)
-//				.build();
-//		ReactorUtils.get(APP_START_TIMEOUT, cancelationToken,
-//			log("operations.applications().push("+pushRequest+")",
-//				_operations.applications()
-//				.push(pushRequest)
-//			)
-//			.then(getApplicationDetail(params.getAppName()))
-//			.then(appDetail -> {
-//				return Flux.merge(
-//					setRoutes(appDetail, params.getRoutes()),
-//					setEnvVars(appDetail, params.getEnv()),
-//					bindAndUnbindServices(params.getAppName(), params.getServices())
-//				)
-//				.then();
-//			})
-//			.then(() -> {
-//				if (!params.isNoStart()) {
-//					return startApp(params.getAppName());
-//				} else {
-//					return Mono.empty();
-//				}
-//			})
-//		);
-//		debug("Pushing app succeeded: "+params.getAppName());
-//	}
 
 	private Mono<ApplicationDetail> getApplicationDetail(String appName) {
 		return log("operations.applications.get(name="+appName+")",
@@ -1065,19 +968,6 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 			return Mono.empty();
 		});
 	}
-
-//	private static PushApplicationRequest.Builder toPushRequest(CFPushArguments params) {
-//		return PushApplicationRequest.builder()
-//		.name(params.getAppName())
-//		.memory(params.getMemory())
-//		.diskQuota(params.getDiskQuota())
-//		.timeout(params.getTimeout())
-//		.buildpack(params.getBuildpack())
-//		.command(params.getCommand())
-//		.stack(params.getStack())
-//		.instances(params.getInstances())
-//		.application(params.getApplicationData());
-//	}
 
 	public Mono<Void> bindAndUnbindServices(String appName, List<String> _services) {
 		debug("bindAndUnbindServices "+_services);
