@@ -14,15 +14,13 @@ import java.io.File;
 import java.net.URL;
 
 import org.apache.commons.io.FileUtils;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
-import org.osgi.framework.Version;
-import org.osgi.framework.VersionRange;
-import org.springframework.ide.eclipse.boot.core.BootActivator;
-import org.springframework.ide.eclipse.boot.core.cli.BootCliCommand;
+import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.core.ZipFileUtil;
-import org.springsource.ide.eclipse.commons.core.preferences.StsProperties;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager.DownloadRequestor;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadableItem;
@@ -43,8 +41,7 @@ import com.google.common.base.Suppliers;
  */
 public class ZippedBootInstall extends BootInstall {
 	
-	private static final String ORG_SPRINGFRAMEWORK_CLOUD_SPRING_CLOUD_CLI = "org.springframework.cloud:spring-cloud-cli:";
-	private Supplier<CloudCliInstall> cloudCliSupplier = Suppliers.memoize(() -> initCloudCliInstall());
+	private Supplier<CloudCliInstall> cloudCliInstallSupplier = Suppliers.memoize(this::initCloudCliInstall);
 
 	/**
 	 * TODO: DownloadableZipItem should probably be moved to commons
@@ -132,9 +129,31 @@ public class ZippedBootInstall extends BootInstall {
 			}
 		}
 	}
+	
+	private class InstallBootCliExtensionJob extends Job {
+		
+		private Class<? extends IBootInstallExtension> extensionType;
+		
+		InstallBootCliExtensionJob(String name, Class<? extends IBootInstallExtension> extensionType) {
+			super(name);
+			this.extensionType = extensionType;
+		}
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			try {
+				installExtension(extensionType);
+				return Status.OK_STATUS;
+			} catch (Exception e) {
+				return ExceptionUtil.status(e);
+			}
+		}
+		
+	}
 
 	private DownloadableItem zip;
 	private File home; //Will be set once the install is unzipped and ready for use.
+	private InstallBootCliExtensionJob installCloudCliJob = null;
 
 	public ZippedBootInstall(DownloadManager downloader, String uri, String name) throws Exception {
 		super(uri, name);
@@ -181,61 +200,33 @@ public class ZippedBootInstall extends BootInstall {
 		}
 	}
 	
-	private Version getLatestCloudCliVersion() {
-		Version bootVersion = Version.valueOf(getVersion());
-		if (VersionRange.valueOf("1.5.3").includes(bootVersion)) {
-			return Version.valueOf(StsProperties.getInstance().get("spring.boot.cloud.default.version"));
-		} else if (VersionRange.valueOf("[1.4.4,1.5.2)").includes(bootVersion)) {
-			return Version.valueOf("1.3.0.RELEASE");
-		} else if (VersionRange.valueOf("[1.2.2,1.4.4)").includes(bootVersion)) {
-			return Version.valueOf("1.2.3.RELEASE");
-//		} else if (VersionRange.valueOf("[1.3.7, 1.4.1)").includes(bootVersion)) {
-//			return Version.valueOf("1.1.6.RELEASE");
-//		} else if (VersionRange.valueOf("[1.3.5,1.3.7)").includes(bootVersion)) {
-//			return Version.valueOf("1.1.5.RELEASE");
-//		} else if (VersionRange.valueOf("[1.2.8,1.3.5)").includes(bootVersion)) {
-//			return Version.valueOf("1.0.6.RELEASE");
-//		} else if (VersionRange.valueOf("[1.2.6,1.2.8)").includes(bootVersion)) {
-//			return Version.valueOf("1.0.4.RELEASE");
-//		} else if (VersionRange.valueOf("[1.2.4,1.2.6)").includes(bootVersion)) {
-//			return Version.valueOf("1.0.3.RELEASE");
-//		} else if (VersionRange.valueOf("[1.2.3,1.2.4)").includes(bootVersion)) {
-//			return Version.valueOf("1.0.2.RELEASE");
-//		} else if (VersionRange.valueOf("[1.2.2,1.2.3)").includes(bootVersion)) {
-//			return Version.valueOf("1.0.0.RELEASE");
-		} else {
-			return null;
+	synchronized private CloudCliInstall initCloudCliInstall() {
+		if (installCloudCliJob == null) {
+			installCloudCliJob = new InstallBootCliExtensionJob("Auto install Spring Cloud CLI", CloudCliInstall.class);
+			installCloudCliJob.schedule();
 		}
-	}	
-
-	private CloudCliInstall initCloudCliInstall() {
-		File[] springCloudJars = findExtensionJars(CLOUD_CLI_LIB_PREFIX);
-		if (springCloudJars == null || springCloudJars.length == 0) {
+		long waitTime = 200L;
+		for (long waited = 0L; installCloudCliJob.getState() != Job.NONE && waited < 10000L; waited+=waitTime) {
 			try {
-				BootCliCommand cmd = new BootCliCommand(getHome());
-				Version latestCloudCliVersion = getLatestCloudCliVersion();
-				if (latestCloudCliVersion == null) {
-					return null;
-				}
-				int result = cmd.execute(IBootInstallExtension.INSTALL_COMMAND, ORG_SPRINGFRAMEWORK_CLOUD_SPRING_CLOUD_CLI + latestCloudCliVersion);
-				if (result != 0) {
-					return null;
-				} else {
-					springCloudJars = findExtensionJars(CLOUD_CLI_LIB_PREFIX);
-				}
-			} catch (Exception e) {
-				BootActivator.getDefault().getLog().log(ExceptionUtil.coreException(e).getStatus());
-				return null;
+				Thread.sleep(waitTime);
+			} catch (InterruptedException e) {
+				// ignore
 			}
 		}
-		return springCloudJars == null || springCloudJars.length == 0 ? null : new CachingCloudCliInstall(this) {
-			
-		};
+		if (installCloudCliJob.getState() != Job.NONE) {
+			Log.error("Timed out waiting for Spring Cloud CLI to be installed");
+		}
+		if (super.getCloudCliInstall() == null) {
+			return null;
+		} else {
+			return new CachingCloudCliInstall(this);
+		}
 	}
 
+	
 	@Override
-	public CloudCliInstall getCloudCliInstall() {
-		return cloudCliSupplier.get();
+	protected CloudCliInstall getCloudCliInstall() {
+		return cloudCliInstallSupplier.get();
 	}
 
 }

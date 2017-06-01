@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.core.cli.install;
 
+import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.core.cli.BootCliCommand;
 
 /**
@@ -25,11 +26,19 @@ public interface IBootInstallExtension {
 	 */
 	static String INSTALL_COMMAND = "install";
 	
+	static String UNINSTALL_COMMAND = "uninstall";
+	
 	/**
 	 * Creates Boot CLI command to execute for the extension
 	 * @return the Boot CLI extension command
 	 * @throws Exception
 	 */
 	BootCliCommand createCommand() throws Exception;
+	
+	/**
+	 * Version of the extension
+	 * @return the version
+	 */
+	Version getVersion();
 
 }

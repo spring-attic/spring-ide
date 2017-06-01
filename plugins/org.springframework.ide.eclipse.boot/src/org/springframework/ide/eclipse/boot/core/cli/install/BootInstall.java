@@ -20,15 +20,20 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
+import org.osgi.framework.Version;
+import org.osgi.framework.VersionRange;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.core.cli.BootCliCommand;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
+import com.google.common.collect.ImmutableList;
+
 public abstract class BootInstall implements IBootInstall {
-
-	private static final File[] NO_FILES = new File[0];
-
+	
 	static final String CLOUD_CLI_LIB_PREFIX = "spring-cloud-cli";
+	
+	private static final File[] NO_FILES = new File[0];
 
 	protected final String uriString;
 	
@@ -234,7 +239,51 @@ public abstract class BootInstall implements IBootInstall {
 		boolean isCertainlyLocal = url!=null && url.startsWith("file:");
 		return !isCertainlyLocal;
 	}
+	
+	@Override
+	public ImmutableList<Class<? extends IBootInstallExtension>> supportedExtensions() {
+		com.google.common.collect.ImmutableList.Builder<Class<? extends IBootInstallExtension>> builder = ImmutableList
+				.<Class<? extends IBootInstallExtension>>builder();
+		Version version = Version.valueOf(getVersion());
+		if (VersionRange.valueOf("1.2.2").includes(version)) {
+			builder.add(CloudCliInstall.class);
+		}
+		return builder.build();
+	}
 
+	@Override
+	public void installExtension(Class<? extends IBootInstallExtension> extensionType) throws Exception {
+		String mavenPrefix = BootInstallUtils.EXTENSION_TO_MAVEN_PREFIX_MAP.get(extensionType);
+		Version version = getLatestVersion(extensionType);
+		if (mavenPrefix != null && version != null) {
+			BootCliCommand cmd = new BootCliCommand(getHome());
+			int result = cmd.execute(IBootInstallExtension.INSTALL_COMMAND, mavenPrefix + version.toString());
+			if (result != 0) {
+				throw ExceptionUtil.coreException("Failed to execute extension install command");
+			}
+		}
+	}
+	
+	@Override
+	public void uninstallExtension(IBootInstallExtension extension) throws Exception {
+		String mavenPrefix = BootInstallUtils.EXTENSION_TO_MAVEN_PREFIX_MAP.get(extension.getClass());
+		Version version = extension.getVersion();
+		if (mavenPrefix != null && version != null) {
+			BootCliCommand cmd = new BootCliCommand(getHome());
+			int result = cmd.execute(IBootInstallExtension.UNINSTALL_COMMAND, mavenPrefix + version.toString());
+			if (result != 0) {
+				throw ExceptionUtil.coreException("Failed to execute extension uninstall command");
+			}
+		}
+	}
+
+	private Version getLatestVersion(Class<? extends IBootInstallExtension> extension) {
+		if (CloudCliInstall.class.isAssignableFrom(extension)) {
+			return BootInstallUtils.getLatestCloudCliVersion(Version.valueOf(getVersion()));
+		}
+		return null;
+	}
+	
 	protected CloudCliInstall getCloudCliInstall() {
 		File[] springCloudJars = findExtensionJars(CLOUD_CLI_LIB_PREFIX);
 		return springCloudJars == null || springCloudJars.length == 0 ? null : new CloudCliInstall(this);

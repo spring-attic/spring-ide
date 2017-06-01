@@ -138,6 +138,8 @@ public class InstalledBootInstallBlock implements ISelectionProvider {
 	private Button fRemoveButton;
 
 	private Button fEditButton;
+	
+	private Button fExtensions;
 
 	// index of column used for sorting
 	private int fSortColumn = 0;
@@ -254,6 +256,13 @@ public class InstalledBootInstallBlock implements ISelectionProvider {
 				editVM();
 			}
 		});
+		
+		fExtensions = SWTFactory.createPushButton(buttons, "Extensions...", null);
+		fExtensions.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event evt) {
+				showExtensions();
+			}
+		});
 
 		fRemoveButton = SWTFactory.createPushButton(buttons, "Remove...", null);
 		fRemoveButton.addListener(SWT.Selection, new Listener() {
@@ -267,6 +276,11 @@ public class InstalledBootInstallBlock implements ISelectionProvider {
 		fillWithWorkspaceJREs();
 		enableButtons();
 		fAddButton.setEnabled(JavaRuntime.getVMInstallTypes().length > 0);
+	}
+
+	private void showExtensions() {
+		IStructuredSelection selection = (IStructuredSelection) fVMList.getSelection();
+		new ExtensionsDialog(getShell(), (IBootInstall) selection.getFirstElement()).open();
 	}
 
 	/**
@@ -498,6 +512,7 @@ public class InstalledBootInstallBlock implements ISelectionProvider {
 		IStructuredSelection selection = (IStructuredSelection) fVMList.getSelection();
 		int selectionCount = selection.size();
 		fEditButton.setEnabled(selectionCount == 1);
+		fExtensions.setEnabled(selectionCount == 1);
 		if (selectionCount > 0 && selectionCount < fVMList.getTable().getItemCount()) {
 			fRemoveButton.setEnabled(true);
 		}

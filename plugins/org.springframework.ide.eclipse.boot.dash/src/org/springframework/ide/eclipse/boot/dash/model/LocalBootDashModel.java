@@ -295,7 +295,7 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 				}
 			}
 		} catch (Exception e) {
-			// ignore
+			Log.log(e);
 		}
 		return Collections.emptyList();
 	}

@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.core.cli.install;
 
 import java.io.File;
+import java.util.Collection;
 
 import org.eclipse.core.runtime.IStatus;
 
@@ -34,6 +35,26 @@ public interface IBootInstall {
 	 * @return the extension or <code>null</code> if extension isn't installed
 	 */
 	<T extends IBootInstallExtension> T getExtension(Class<T> extension);
+	
+	/**
+	 * Returns supported extensions
+	 * @return
+	 */
+	Collection<Class<? extends IBootInstallExtension>> supportedExtensions();
+	
+	/**
+	 * Install extension into Spring Boot CLI
+	 * @param extension class identifier of the extension 
+	 * @return runnable that installs the extension
+	 */
+	void installExtension(Class<? extends IBootInstallExtension> extension)  throws Exception;
+	
+	/**
+	 * Removes extension from Spring Boot CLI
+	 * @param extension extension
+	 * @return runnable that removes the extension
+	 */
+	void uninstallExtension(IBootInstallExtension extension)  throws Exception;
 	
 	/**
 	 * For installs that are zipped or non-local this deletes the cached info (i.e. unzipped and locally downloaded copy
