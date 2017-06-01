@@ -23,13 +23,14 @@ import java.util.regex.Pattern;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.text.IRegion;
 import org.springframework.ide.eclipse.editor.support.util.CollectionUtil;
-import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.util.YamlIndentUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 import org.springframework.ide.eclipse.editor.support.yaml.path.KeyAliases;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlNavigable;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPath;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPathSegment;
+
+import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 
 /**
  * A robust, coarse-grained parser that guesses the structure of a

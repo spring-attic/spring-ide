@@ -20,10 +20,10 @@ import java.util.Map;
 import org.junit.Test;
 import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestYmlSchema;
 import org.springframework.ide.eclipse.editor.support.hover.DescriptionProviders;
-import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeFactory.YBeanType;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeFactory.YSeqType;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypedProperty;
+import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;

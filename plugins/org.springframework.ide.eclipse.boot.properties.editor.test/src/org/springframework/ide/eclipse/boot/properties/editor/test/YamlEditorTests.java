@@ -22,7 +22,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.metadata.CachingVa
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
 import org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity;
 import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
-import org.springframework.ide.eclipse.editor.support.util.StringUtil;
+import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 
 /**
  * @author Kris De Volder

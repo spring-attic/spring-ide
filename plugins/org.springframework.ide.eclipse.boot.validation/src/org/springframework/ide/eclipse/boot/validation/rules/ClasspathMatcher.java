@@ -8,7 +8,7 @@
  * Contributors:
  *   Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.validation;
+package org.springframework.ide.eclipse.boot.validation.rules;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 
@@ -24,7 +24,7 @@ public abstract class ClasspathMatcher {
 	/**
 	 * A 'conservative' value to return when classpath is unknown. Depending on
 	 * what the matcher is used for this may be 'true' or 'false' (i.e. this value
-	 * has to be chosen to avoid false positives when a rule is beinch checked at
+	 * has to be chosen to avoid false positives when a rule is being checked at
 	 * a time when classpath is in a undefined/inconsistent state.
 	 */
 	private boolean defaultValue;

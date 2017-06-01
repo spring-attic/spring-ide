@@ -1,24 +1,25 @@
 /*******************************************************************************
- * Copyright (c) 2015 GoPivotal, Inc.
+ * Copyright (c) 2017 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Pivotal, Inc. - initial API and implementation
+ *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.quickfix;
+package org.springframework.ide.eclipse.boot.validation.quickfix;
 
-import static org.springframework.ide.eclipse.boot.quickfix.GeneratorComposition.NULL_GENERATOR;
-import static org.springframework.ide.eclipse.boot.quickfix.GeneratorComposition.compose;
+import static org.springframework.ide.eclipse.boot.validation.quickfix.GeneratorComposition.NULL_GENERATOR;
+import static org.springframework.ide.eclipse.boot.validation.quickfix.GeneratorComposition.compose;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.ui.IMarkerResolutionGenerator2;
-import org.springframework.ide.eclipse.core.model.validation.IValidationProblemMarker;
+import org.springframework.ide.eclipse.boot.validation.framework.IValidationProblemMarker;
+import org.springframework.ide.eclipse.editor.support.reconcile.ProblemType;
 
 /**
  * Manages associations quickfix ids and {@link IMarkerResolutionGenerator2} instances
@@ -35,7 +36,7 @@ public class MarkerResolutionRegistry {
 	 */
 	public static final String QUICK_FIX_ID = IValidationProblemMarker.ERROR_ID;
 
-	private Map<String, IMarkerResolutionGenerator2> registry;
+	private Map<ProblemType, IMarkerResolutionGenerator2> registry;
 
 	/**
 	 * Obtain the generator for the given marker. Never returns null, will return
@@ -63,9 +64,9 @@ public class MarkerResolutionRegistry {
 	 * @param id
 	 * @param generator
 	 */
-	public synchronized void register(String id, IMarkerResolutionGenerator2 generator) {
+	public synchronized void register(ProblemType id, IMarkerResolutionGenerator2 generator) {
 		if (registry==null) {
-			registry = new HashMap<String, IMarkerResolutionGenerator2>();
+			registry = new HashMap<>();
 		}
 		IMarkerResolutionGenerator2 existing = registry.get(id);
 		if (existing!=null) {

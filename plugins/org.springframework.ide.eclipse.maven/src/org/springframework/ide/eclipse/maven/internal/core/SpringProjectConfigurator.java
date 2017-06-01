@@ -44,6 +44,8 @@ public class SpringProjectConfigurator extends AbstractSpringProjectConfigurator
                     && art.getGroupId().equals("org.springframework")) {
                 SpringCoreUtils.addProjectNature(project, SpringCore.NATURE_ID,
                         monitor);
+                //TODO: the below is temporary, we need to find a better way of adding this builder to spring (boot) projects
+                SpringCoreUtils.addProjectBuilder(project, "org.springframework.ide.eclipse.boot.validation.springbootbuilder", monitor);
                 found = true;
             }
         }

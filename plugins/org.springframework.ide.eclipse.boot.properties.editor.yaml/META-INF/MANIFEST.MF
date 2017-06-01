@@ -18,7 +18,8 @@ Require-Bundle: org.eclipse.ui,
  org.springframework.ide.eclipse.boot,
  org.eclipse.core.resources,
  org.springframework.ide.eclipse.editor.support,
- com.google.guava
+ com.google.guava,
+ org.springsource.ide.eclipse.commons.core
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.boot.properties.editor.yaml,

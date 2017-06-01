@@ -12,9 +12,9 @@ package org.springframework.ide.eclipse.boot.properties.editor.yaml;
 
 import java.util.Collections;
 
-import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.path.KeyAliases;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
+import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 
 public class ApplicationYamlStructureProvider {
 

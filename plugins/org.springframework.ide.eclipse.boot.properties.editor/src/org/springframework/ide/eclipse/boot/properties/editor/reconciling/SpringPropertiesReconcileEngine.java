@@ -13,7 +13,7 @@ package org.springframework.ide.eclipse.boot.properties.editor.reconciling;
 import static org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCompletionEngine.isAssign;
 import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType.*;
 import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem.problem;
-import static org.springframework.ide.eclipse.editor.support.util.StringUtil.commonPrefix;
+import static org.springsource.ide.eclipse.commons.core.util.StringUtil.commonPrefix;
 
 import java.util.regex.Pattern;
 

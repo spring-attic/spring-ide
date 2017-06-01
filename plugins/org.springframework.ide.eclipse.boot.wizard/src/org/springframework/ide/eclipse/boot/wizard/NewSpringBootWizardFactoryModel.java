@@ -11,7 +11,7 @@
 package org.springframework.ide.eclipse.boot.wizard;
 
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.springframework.ide.eclipse.editor.support.util.StringUtil;
+import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
 
 /**

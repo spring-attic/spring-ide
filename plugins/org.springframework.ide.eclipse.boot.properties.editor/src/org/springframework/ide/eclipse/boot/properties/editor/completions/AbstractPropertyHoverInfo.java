@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.completions;
 
-import static org.springframework.ide.eclipse.editor.support.util.StringUtil.arrayToCommaDelimitedString;
-import static org.springframework.ide.eclipse.editor.support.util.StringUtil.collectionToCommaDelimitedString;
+import static org.springsource.ide.eclipse.commons.core.util.StringUtil.arrayToCommaDelimitedString;
+import static org.springsource.ide.eclipse.commons.core.util.StringUtil.collectionToCommaDelimitedString;
 
 import java.util.Collection;
 
@@ -20,7 +20,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.JavaTypeLinks
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.util.HtmlBuffer;
 import org.springframework.ide.eclipse.editor.support.util.HtmlSnippet;
-import org.springframework.ide.eclipse.editor.support.util.StringUtil;
+import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 
 /**
  * @author Kris De Volder

@@ -13,7 +13,7 @@ package org.springframework.ide.eclipse.boot.properties.editor.util;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
-import org.springframework.ide.eclipse.editor.support.util.StringUtil;
+import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 
 /**
  * Converts types in notation used by spring properties metadata into a 'Structured' form

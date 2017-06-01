@@ -8,15 +8,13 @@
  * Contributors:
  *   Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.validation;
+package org.springframework.ide.eclipse.boot.validation.rules;
 
-import static org.springframework.ide.eclipse.boot.quickfix.GeneratorComposition.NO_RESOLUTIONS;
-import static org.springframework.ide.eclipse.boot.validation.BootMarkerUtils.getProject;
+import static org.springframework.ide.eclipse.boot.validation.framework.BootMarkerUtils.getProject;
+import static org.springframework.ide.eclipse.boot.validation.quickfix.GeneratorComposition.NO_RESOLUTIONS;
 
-import org.eclipse.core.internal.resources.ResourceException;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IAnnotation;
@@ -32,12 +30,13 @@ import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.MavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
-import org.springframework.ide.eclipse.boot.quickfix.MarkerResolutionRegistry;
 import org.springframework.ide.eclipse.boot.util.Log;
-import org.springframework.ide.eclipse.core.model.IModelElement;
-import org.springframework.ide.eclipse.core.model.validation.IValidationContext;
-import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
-import org.springframework.ide.eclipse.core.model.validation.ValidationProblemAttribute;
+import org.springframework.ide.eclipse.boot.validation.framework.BootValidationRule;
+import org.springframework.ide.eclipse.boot.validation.framework.CompilationUnitElement;
+import org.springframework.ide.eclipse.boot.validation.framework.IModelElement;
+import org.springframework.ide.eclipse.boot.validation.framework.IValidationContext;
+import org.springframework.ide.eclipse.boot.validation.quickfix.MarkerResolutionRegistry;
+import org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 /**
@@ -53,7 +52,7 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
  */
 public class MissingConfigurationProcessorRule extends BootValidationRule {
 
-	private static final String PROBLEM_ID = "MISSING_CONFIGURATION_PROCESSOR";
+	private static final BootValidationProblemType PROBLEM_ID = new BootValidationProblemType("MISSING_CONFIGURATION_PROCESSOR", ProblemSeverity.WARNING);
 	private static final MavenCoordinates DEP_CONFIGURATION_PROCESSOR =
 			new MavenCoordinates("org.springframework.boot", "spring-boot-configuration-processor", null);
 
@@ -64,23 +63,23 @@ public class MissingConfigurationProcessorRule extends BootValidationRule {
 			try {
 				final ISpringBootProject project = SpringBootCore.create(getProject(marker));
 				return new IMarkerResolution[] {
-						new IMarkerResolution() {
-							@Override
-							public String getLabel() {
-								return "Add spring-boot-configuration-processor to pom.xml";
-							}
+					new IMarkerResolution() {
+						@Override
+						public String getLabel() {
+							return "Add spring-boot-configuration-processor to pom.xml";
+						}
 
-							@Override
-							public void run(IMarker marker) {
-								try {
-									project.addMavenDependency(DEP_CONFIGURATION_PROCESSOR, true, true);
-									project.updateProjectConfiguration(); //needed to actually enable APT, m2e does not
-															// automatically trigger this if a dependency gets added
-								} catch (Exception e) {
-									BootActivator.log(e);
-								}
+						@Override
+						public void run(IMarker marker) {
+							try {
+								project.addMavenDependency(DEP_CONFIGURATION_PROCESSOR, true, true);
+								project.updateProjectConfiguration(); //needed to actually enable APT, m2e does not
+														// automatically trigger this if a dependency gets added
+							} catch (Exception e) {
+								BootActivator.log(e);
 							}
 						}
+					}
 				};
 			} catch (Exception e) {
 				return NO_RESOLUTIONS;
@@ -95,7 +94,7 @@ public class MissingConfigurationProcessorRule extends BootValidationRule {
 					return true;
 				}
 			} catch (Exception e) {
-				BootActivator.log(e);
+				Log.log(e);
 			}
 			return false;
 		}
@@ -113,7 +112,7 @@ public class MissingConfigurationProcessorRule extends BootValidationRule {
 		protected boolean doMatch(IClasspathEntry[] classpath) {
 			for (IClasspathEntry e : classpath) {
 				if (isJarNameContaining(e, "spring-boot-configuration-processor")) {
-					//The rules is already satisfied so doesn't need to be checked
+					//The rule is already satisfied so doesn't need to be checked
 					return false;
 				}
 			}
@@ -123,10 +122,10 @@ public class MissingConfigurationProcessorRule extends BootValidationRule {
 
 	public static class ValidationVisitor {
 
-		private SpringBootValidationContext context;
-		private SpringCompilationUnit cu;
+		private IValidationContext context;
+		private CompilationUnitElement cu;
 
-		public ValidationVisitor(SpringBootValidationContext context, SpringCompilationUnit cu) {
+		public ValidationVisitor(IValidationContext context, CompilationUnitElement cu) {
 			this.context = context;
 			this.cu = cu;
 		}
@@ -145,7 +144,7 @@ public class MissingConfigurationProcessorRule extends BootValidationRule {
 			}
 		}
 
-		private void visit(IType t, SubProgressMonitor mon) throws Exception {
+		private void visit(IType t, IProgressMonitor mon) throws Exception {
 			IMethod[] methods = t.getMethods();
 			mon.beginTask(t.getElementName(), 1+methods.length);
 			try {
@@ -153,9 +152,6 @@ public class MissingConfigurationProcessorRule extends BootValidationRule {
 				if (annot!=null && annot.exists()) {
 					visit(annot);
 					mon.worked(1);
-				}
-				for (IMethod m : methods) {
-					visit(m, new SubProgressMonitor(mon, 1));
 				}
 			} finally {
 				mon.done();
@@ -202,10 +198,7 @@ public class MissingConfigurationProcessorRule extends BootValidationRule {
 
 		void warn(String msg, ISourceRange location) {
 			if (location!=null) {
-				context.warning(cu, PROBLEM_ID, msg,
-						new ValidationProblemAttribute(IMarker.CHAR_START, location.getOffset()),
-						new ValidationProblemAttribute(IMarker.CHAR_END, location.getOffset()+location.getLength())
-				);
+				context.problem(cu.getElementResource(), PROBLEM_ID, msg, location.getOffset(), location.getOffset()+location.getLength());
 
 //				context.addProblems(new ValidationProblem(PROBLEM_ID, IMarker.SEVERITY_WARNING,
 //						msg, cu.getElementResource(), location));
@@ -215,12 +208,13 @@ public class MissingConfigurationProcessorRule extends BootValidationRule {
 	}
 
 	@Override
-	public boolean supports(IModelElement element, IValidationContext context) {
-		return element instanceof SpringCompilationUnit;
+	public boolean supports(IModelElement element) {
+		return element instanceof CompilationUnitElement;
 	}
 
 	@Override
-	public void validate(SpringCompilationUnit cu, SpringBootValidationContext context, IProgressMonitor mon) {
+	public void validate(IModelElement _cu, IValidationContext context, IProgressMonitor mon) {
+		CompilationUnitElement cu = (CompilationUnitElement) _cu;
 		try{
 			if (CLASSPATH_MATCHER.match(cu.getClasspath())) {
 				ValidationVisitor visitor = new ValidationVisitor(context, cu);
@@ -234,6 +228,11 @@ public class MissingConfigurationProcessorRule extends BootValidationRule {
 				Log.log(e);
 			}
 		}
+	}
+
+	@Override
+	public String getId() {
+		return PROBLEM_ID.getId();
 	}
 
 }

@@ -5,21 +5,16 @@ import static org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2.get
 import javax.inject.Provider;
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 import org.springframework.boot.configurationmetadata.Deprecation;
 import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.editor.support.util.HtmlSnippet;
-import org.springframework.ide.eclipse.editor.support.util.StringUtil;
-
-import static org.springframework.ide.eclipse.boot.properties.editor.metadata.DeprecationUtil.*;
+import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 
 /**
  * Sts version of {@link ValueHint} contains similar data, but accomoates

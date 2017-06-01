@@ -21,7 +21,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEd
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType;
 import org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity;
 import org.springframework.ide.eclipse.editor.support.reconcile.ProblemType;
-import org.springframework.ide.eclipse.editor.support.util.StringUtil;
+import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 
 /**
  * @author Kris De Volder

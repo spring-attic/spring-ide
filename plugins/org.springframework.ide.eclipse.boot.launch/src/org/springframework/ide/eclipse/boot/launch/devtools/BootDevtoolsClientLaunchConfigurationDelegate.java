@@ -40,7 +40,7 @@ import org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurati
 import org.springframework.ide.eclipse.boot.launch.util.WaitFor;
 import org.springframework.ide.eclipse.boot.util.ProcessListenerAdapter;
 import org.springframework.ide.eclipse.boot.util.ProcessTracker;
-import org.springframework.ide.eclipse.editor.support.util.StringUtil;
+import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
 
 @SuppressWarnings("restriction")
@@ -55,7 +55,7 @@ public class BootDevtoolsClientLaunchConfigurationDelegate extends AbstractBootL
 	public static final String DEFAULT_REMOTE_SECRET = "";
 	public static final String DEBUG_PORT = "spring.devtools.remote.debug.local-port";
 
-	private final ThreadLocal<Integer> localDebugPort = new ThreadLocal<Integer>();
+	private final ThreadLocal<Integer> localDebugPort = new ThreadLocal<>();
 
 	@Override
 	public String getMainTypeName(ILaunchConfiguration configuration) throws CoreException {
@@ -65,7 +65,7 @@ public class BootDevtoolsClientLaunchConfigurationDelegate extends AbstractBootL
 	@Override
 	public String getProgramArguments(ILaunchConfiguration conf) throws CoreException {
 		List<PropVal> props = getProperties(conf);
-		ArrayList<String> args = new ArrayList<String>();
+		ArrayList<String> args = new ArrayList<>();
 		addPropertiesArguments(args, props);
 		String secret = getSecret(conf);
 		if (StringUtil.hasText(secret)) {
@@ -179,7 +179,7 @@ public class BootDevtoolsClientLaunchConfigurationDelegate extends AbstractBootL
 				abort(LaunchingMessages.JavaRemoteApplicationLaunchConfigurationDelegate_Connector_not_specified_2, null, IJavaLaunchConfigurationConstants.ERR_CONNECTOR_NOT_AVAILABLE);
 			}
 
-			final Map<String, String> argMap = new HashMap<String, String>();
+			final Map<String, String> argMap = new HashMap<>();
 
 	        int connectTimeout = Platform.getPreferencesService().getInt(
 	        		LaunchingPlugin.ID_PLUGIN,

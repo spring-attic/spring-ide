@@ -8,7 +8,7 @@
  * Contributors:
  *   Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.quickfix;
+package org.springframework.ide.eclipse.boot.validation.quickfix;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.ui.IMarkerResolution;

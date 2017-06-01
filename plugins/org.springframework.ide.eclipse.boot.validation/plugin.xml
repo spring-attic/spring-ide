@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension-point id="org.springframework.ide.eclipse.boot.validation.rule" name="org.springframework.ide.eclipse.boot.validation.rule" schema="schema/org.springframework.ide.eclipse.boot.validation.rule.exsd"/>
+
+<extension point="org.eclipse.core.resources.markers"
+	id="problemmarker"
+	name="Spring Boot Problem">
+    <super type="org.eclipse.core.resources.problemmarker"/>
+	<super type="org.eclipse.core.resources.textmarker"/>
+	<attribute name="ruleId"/>
+	<attribute name="errorId"/>
+	<persistent value="true" />
+</extension>
+
+<extension point="org.eclipse.ui.ide.markerSupport">
+		<markerTypeCategory name="Spring Boot Problem">
+			<markerTypeReference id="org.springframework.ide.eclipse.boot.validation.problemmarker"/>
+		</markerTypeCategory>
+</extension>
+
+<extension
+	point="org.eclipse.ui.ide.markerResolution">
+	<markerResolutionGenerator
+		markerType="org.springframework.ide.eclipse.boot.problemmarker"
+		class="org.springframework.ide.eclipse.boot.quickfix.BootMarkerResolutionGenerator">
+	</markerResolutionGenerator>
+</extension>
+    <extension
+          id="springbootbuilder"
+          point="org.eclipse.core.resources.builders">
+       <builder>
+          <run
+                class="org.springframework.ide.eclipse.boot.validation.framework.SpringBootProjectBuilder">
+          </run>
+       </builder>
+    </extension>
+
+
+</plugin>
