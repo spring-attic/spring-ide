@@ -44,3 +44,4 @@ Export-Package: org.springframework.ide.eclipse.boot.wizard,
  org.springframework.ide.eclipse.boot.wizard.guides,
  org.springframework.ide.eclipse.boot.wizard.guides.ext,
  org.springframework.ide.eclipse.boot.wizard.importing
+Bundle-Vendor: Pivotal Inc.

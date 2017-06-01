@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -144,7 +144,7 @@ public class ApplicationYamlSourceViewerConfiguration extends AbstractYamlSource
 	public IHyperlinkDetector[] getHyperlinkDetectors(ISourceViewer sourceViewer) {
 		SpringPropertiesHyperlinkDetector myDetector = null;
 		try {
-			myDetector = new SpringPropertiesHyperlinkDetector(getHoverProvider());
+			myDetector = new SpringPropertiesHyperlinkDetector(getHoverProvider(sourceViewer));
 		} catch (Exception e) {
 			SpringPropertiesEditorPlugin.log(e);
 		}
@@ -171,7 +171,7 @@ public class ApplicationYamlSourceViewerConfiguration extends AbstractYamlSource
 	}
 
 	@Override
-	public YamlAssistContextProvider getAssistContextProvider() {
+	public YamlAssistContextProvider getAssistContextProvider(ISourceViewer viewer) {
 		return assistContextProvider;
 	}
 

@@ -208,7 +208,7 @@ public class NewSpringBootWizardModel {
 	private void generateValidProjectName() {
 		boolean projectNameValid = projectName.getValidator().getValue() == ValidationResult.OK;
 		if (!projectNameValid) {
-			NameGenerator generator = NameGenerator.create(projectName.getValue(), "-");
+			NameGenerator generator = new NameGenerator(projectName.getValue());
 			while (!projectNameValid) {
 				projectName.setValue(generator.generateNext());
 				projectNameValid = projectName.getValidator().getValue() == ValidationResult.OK;

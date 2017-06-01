@@ -24,7 +24,8 @@ Require-Bundle: org.eclipse.core.resources,
  org.eclipse.ui.ide,
  org.springframework.ide.eclipse.quickfix,
  org.eclipse.ltk.core.refactoring,
- org.springframework.ide.eclipse.beans.core.autowire;resolution:=optional
+ org.springframework.ide.eclipse.beans.core.autowire;resolution:=optional,
+ org.eclipse.jdt.core.manipulation
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: %providerName
 Export-Package: 
