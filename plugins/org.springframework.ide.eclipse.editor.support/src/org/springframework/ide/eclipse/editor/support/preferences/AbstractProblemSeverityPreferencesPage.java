@@ -47,6 +47,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
  * configuring problem severities (based on a list of {@link ProblemType}s).
  * <p>
  * The page will provide a list of pulldowns to choose each problem's severity.
+ * <p>
+ * This is meant to be used in conjunction with a {@link PreferencesBasedSeverityProvider}
  *
  * @author Kris De Volder
  */
