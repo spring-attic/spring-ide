@@ -159,6 +159,9 @@ public class MissingConfigurationProcessorRule extends BootValidationRule {
 					visit(annot);
 					mon.worked(1);
 				}
+				for (IMethod m : methods) {
+					visit(m, new SubProgressMonitor(mon, 1));
+				}
 			} finally {
 				mon.done();
 			}

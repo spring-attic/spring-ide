@@ -49,7 +49,7 @@ import com.google.common.collect.ImmutableMap;
  */
 public class SpringBootProjectBuilder extends IncrementalProjectBuilder {
 	
-	private static String MARKER_ID = BootValidationActivator.PLUGIN_ID+".problemmarker";
+	public static String MARKER_ID = BootValidationActivator.PLUGIN_ID+".problemmarker";
 
 	public SpringBootProjectBuilder() {}
 		
