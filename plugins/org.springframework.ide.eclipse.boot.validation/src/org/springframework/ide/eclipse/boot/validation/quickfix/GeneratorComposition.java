@@ -8,7 +8,7 @@
  * Contributors:
  *   Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.quickfix;
+package org.springframework.ide.eclipse.boot.validation.quickfix;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -8,9 +8,7 @@
  * Contributors:
  *   Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.validation;
-
-import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
+package org.springframework.ide.eclipse.boot.validation.framework;
 
 /**
  * Abstract superclass for Spring Boot related validation rules. Not much here yet
@@ -19,6 +17,6 @@ import org.springframework.ide.eclipse.core.model.validation.IValidationRule;
  *
  * @author Kris De Volder
  */
-public abstract class BootValidationRule implements IValidationRule<SpringCompilationUnit, SpringBootValidationContext> {
+public abstract class BootValidationRule implements IValidationRule {
 
 }

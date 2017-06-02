@@ -17,9 +17,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.ide.eclipse.editor.support.util.FuzzyMatcher;
-import org.springframework.ide.eclipse.editor.support.util.StringUtil;
+import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 
 /**
  * A collection of data that can be searched with a simple 'fuzzy' string
@@ -67,7 +66,7 @@ public abstract class FuzzyMap<E> implements Iterable<E> {
 		return entries.values().iterator();
 	}
 
-	private TreeMap<String,E> entries = new TreeMap<String, E>();
+	private TreeMap<String,E> entries = new TreeMap<>();
 
 	protected abstract String getKey(E entry);
 
@@ -94,19 +93,19 @@ public abstract class FuzzyMap<E> implements Iterable<E> {
 			//Special case because
 			// 1) no need to search. Matches everything
 			// 2) want to use different way of sorting / scoring. See https://issuetracker.springsource.com/browse/STS-4008
-			ArrayList<Match<E>> matches = new ArrayList<Match<E>>(entries.size());
+			ArrayList<Match<E>> matches = new ArrayList<>(entries.size());
 			for (E v : entries.values()) {
-				matches.add(new Match<E>(pattern, 1.0, v));
+				matches.add(new Match<>(pattern, 1.0, v));
 			}
 			return matches;
 		} else {
 			//TODO: optimize somehow with a smarter index? (right now searches all map entries sequentially)
-			ArrayList<Match<E>> matches = new ArrayList<Match<E>>();
+			ArrayList<Match<E>> matches = new ArrayList<>();
 			for (Entry<String, E> e : entries.entrySet()) {
 				String key = e.getKey();
 				double score = FuzzyMatcher.matchScore(pattern, key);
 				if (score!=0.0) {
-					matches.add(new Match<E>(pattern, score, e.getValue()));
+					matches.add(new Match<>(pattern, score, e.getValue()));
 				}
 			}
 			return matches;

@@ -18,7 +18,6 @@ import java.util.List;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
-import org.springframework.boot.configurationmetadata.Deprecation;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
@@ -27,8 +26,8 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.Enum
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypedProperty;
 import org.springframework.ide.eclipse.editor.support.reconcile.IProblemCollector;
 import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
-import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.util.ValueParser;
+import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 
 /**
  * Helper class for {@link SpringPropertiesReconcileEngine} and {@link SpringPropertiesCompletionEngine}.

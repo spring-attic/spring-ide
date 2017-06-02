@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch.profiles;
 
-import static org.springframework.ide.eclipse.editor.support.util.StringUtil.*;
+import static org.springsource.ide.eclipse.commons.core.util.StringUtil.*;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -74,7 +74,7 @@ public class ProfileHistory implements IProfileHistory {
 	 */
 	public void updateHistory(IProject project, String profile) {
 		if (project!=null && hasText(profile)) {
-			LinkedList<String> history = new LinkedList<String>(
+			LinkedList<String> history = new LinkedList<>(
 					Arrays.asList(getHistory(project)));
 			history.remove(profile);
 			history.addFirst(profile);

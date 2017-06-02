@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
@@ -40,14 +39,12 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.Enum
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypedProperty;
 import org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile.IndexNavigator;
 import org.springframework.ide.eclipse.boot.util.Log;
-import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory.ScoreableProposal;
 import org.springframework.ide.eclipse.editor.support.completions.DocumentEdits;
 import org.springframework.ide.eclipse.editor.support.completions.ProposalApplier;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.util.CollectionUtil;
 import org.springframework.ide.eclipse.editor.support.util.DocumentRegion;
 import org.springframework.ide.eclipse.editor.support.util.FuzzyMatcher;
-import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.util.YamlIndentUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 import org.springframework.ide.eclipse.editor.support.yaml.completions.AbstractYamlAssistContext;
@@ -61,6 +58,7 @@ import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPathSegment.
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SChildBearingNode;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SKeyNode;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SNode;
+import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 
 /**
  * Represents a context insied a "application.yml" file relative to which we can provide

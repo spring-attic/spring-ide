@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile;
 
-import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType.*;
+import static org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType.YAML_DUPLICATE_KEY;
 import static org.springframework.ide.eclipse.editor.support.yaml.ast.NodeUtil.asScalar;
 import static org.springframework.ide.eclipse.editor.support.yaml.ast.YamlFileAST.getChildren;
 
@@ -23,7 +23,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.boot.configurationmetadata.Deprecation;
 import org.springframework.boot.configurationmetadata.Deprecation.Level;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
-import org.springframework.ide.eclipse.boot.properties.editor.quickfix.ReplaceDeprecatedPropertyQuickfix;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
@@ -33,7 +32,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.Bean
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypedProperty;
 import org.springframework.ide.eclipse.editor.support.reconcile.IProblemCollector;
-import org.springframework.ide.eclipse.editor.support.util.StringUtil;
+import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.util.ValueParser;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeRef;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeRef.Kind;

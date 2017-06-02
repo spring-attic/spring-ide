@@ -39,7 +39,7 @@ import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
-import org.springframework.ide.eclipse.editor.support.util.StringUtil;
+import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 
 @SuppressWarnings("restriction")
 public class BootDevtoolsClientLaunchShortcut implements ILaunchShortcut {
@@ -105,7 +105,7 @@ public class BootDevtoolsClientLaunchShortcut implements ILaunchShortcut {
 
 	private List<ILaunchConfiguration> findConfigurations(IProject project) throws CoreException {
 		ILaunchManager lm = getLaunchManager();
-		List<ILaunchConfiguration> configs = new ArrayList<ILaunchConfiguration>();
+		List<ILaunchConfiguration> configs = new ArrayList<>();
 		for (ILaunchConfiguration c : lm.getLaunchConfigurations(getLaunchType())) {
 			if (Objects.equals(BootLaunchConfigurationDelegate.getProject(c), project)) {
 				configs.add(c);

@@ -8,34 +8,32 @@
  * Contributors:
  *   Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.validation;
+package org.springframework.ide.eclipse.boot.validation.framework;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.springframework.ide.eclipse.core.model.AbstractSourceModelElement;
-import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.springframework.ide.eclipse.boot.util.Log;
 
 /**
  * Model element that holds data for an {@link ICompilationUnit}.
  *
  * @author Kris De Volder
  */
-public class SpringCompilationUnit extends AbstractSourceModelElement {
+public class CompilationUnitElement implements IModelElement {
 
 	private ICompilationUnit cu;
 	private IClasspathEntry[] classpath;
 
-	public SpringCompilationUnit(ICompilationUnit cu, IModelElement parent,
-			String name) {
-		super(parent, name, null /* to be set during validation */);
+	public CompilationUnitElement(ICompilationUnit cu) {
 		Assert.isNotNull(cu);
 		this.cu = cu;
-	}
-
-	public int getElementType() {
-		return IBootModelElementTypes.COMPILATION_UNIT_TYPE;
 	}
 
 	public ICompilationUnit getCompilationUnit() {
@@ -61,6 +59,29 @@ public class SpringCompilationUnit extends AbstractSourceModelElement {
 				// log with messages about that.
 			}
 		return classpath;
+	}
+	
+	public static CompilationUnitElement create(IResource resource) {
+		try {
+			IJavaProject project = getJavaProject(resource);
+			if (project == null) {
+				return null;
+			}
+			if (resource.getType() == IResource.FILE) {
+				IJavaElement javaEl = JavaCore.create((IFile) resource);
+				if (javaEl instanceof ICompilationUnit) {
+					return new CompilationUnitElement((ICompilationUnit) javaEl);
+				}
+			}
+		} catch (Exception e) {
+			Log.log(e);
+		}
+		return null;
+	}
+
+	private static IJavaProject getJavaProject(IResource resource) {
+		IProject project = resource.getProject();
+		return JavaCore.create(project);
 	}
 
 }

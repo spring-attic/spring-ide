@@ -1,27 +1,23 @@
 /*******************************************************************************
- * Copyright (c) 2015 GoPivotal, Inc.
+ * Copyright (c) 2017 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Pivotal, Inc. - initial API and implementation
+ *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.validation;
+package org.springframework.ide.eclipse.boot.validation.framework;
 
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
-public class BootMarkerUtils {
-
-	public static IProject getProject(IMarker marker) {
-		IResource resource = marker.getResource();
-		if (resource!=null) {
-			return resource.getProject();
-		}
-		return null;
-	}
-
+public interface ValidationProblem {
+	IResource getResource();
+	String getMessage();
+	int getSeverity();
+	String getErrorId();
+	String getRuleId();
+	int getStart();
+	int getEnd();
 }

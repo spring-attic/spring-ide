@@ -18,8 +18,8 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
-import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YType;
+import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 
 /**
  * @author Kris De Volder
@@ -163,7 +163,7 @@ public class Type implements YType {
 	 * Note that springboot metadata 'normalizes' all primitive types to their corresponding box
 	 * types. So we do the same here.
 	 */
-	private static final Map<String,Type> TYPE_FROM_SIG = new HashMap<String, Type>();
+	private static final Map<String,Type> TYPE_FROM_SIG = new HashMap<>();
 	static {
 		sig2type("B", Byte.class);
 		sig2type("C", Character.class);

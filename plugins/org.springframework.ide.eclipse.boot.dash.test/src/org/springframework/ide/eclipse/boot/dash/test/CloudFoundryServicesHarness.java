@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.test;
 import static org.apache.commons.lang.RandomStringUtils.randomAlphabetic;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryClientTest.FLAKY_SERVICE_BROKER;
 
 import java.time.Duration;
 import java.util.HashSet;
@@ -21,13 +22,11 @@ import java.util.Set;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
 import org.springframework.ide.eclipse.boot.util.RetryUtil;
-import org.springframework.ide.eclipse.editor.support.util.StringUtil;
+import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import com.google.common.collect.ImmutableMap;
-
-import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryClientTest.FLAKY_SERVICE_BROKER;
 
 public class CloudFoundryServicesHarness implements Disposable {
 

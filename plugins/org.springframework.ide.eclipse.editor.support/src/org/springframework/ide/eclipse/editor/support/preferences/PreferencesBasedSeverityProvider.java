@@ -8,14 +8,16 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor.preferences;
+package org.springframework.ide.eclipse.editor.support.preferences;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ProjectScope;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
 import org.springframework.ide.eclipse.editor.support.reconcile.SeverityProvider;
 import org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity;
@@ -41,12 +43,15 @@ public class PreferencesBasedSeverityProvider implements SeverityProvider {
 		this.editorType = editorType;
 	}
 
-	@Override
-	public ProblemSeverity getSeverity(ReconcileProblem problem) {
-		return getSeverity(problem.getType());
+	public PreferencesBasedSeverityProvider(IProject project, String pluginId, EditorType editorType) {
+		this(
+				new ScopedPreferenceStore(new ProjectScope(project), pluginId),
+				new ScopedPreferenceStore(InstanceScope.INSTANCE, pluginId),
+				editorType
+		);
 	}
 
-	private synchronized ProblemSeverity getSeverity(ProblemType problemType) {
+	@Override public synchronized ProblemSeverity getSeverity(ProblemType problemType) {
 		if (cache==null) {
 			cache = new HashMap<>();
 		}
@@ -73,7 +78,7 @@ public class PreferencesBasedSeverityProvider implements SeverityProvider {
 	}
 
 	@Override
-	public synchronized void startReconciling() {
+	public synchronized void startSession() {
 		cache = null;
 	}
 }

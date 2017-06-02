@@ -16,20 +16,20 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-import static org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil.enableProjectPrefs;
-import static org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil.getSeverity;
-import static org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil.projectPreferencesEnabled;
-import static org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil.setSeverity;
+import static org.springframework.ide.eclipse.editor.support.preferences.ProblemSeverityPreferencesUtil.enableProjectPrefs;
+import static org.springframework.ide.eclipse.editor.support.preferences.ProblemSeverityPreferencesUtil.getSeverity;
+import static org.springframework.ide.eclipse.editor.support.preferences.ProblemSeverityPreferencesUtil.projectPreferencesEnabled;
+import static org.springframework.ide.eclipse.editor.support.preferences.ProblemSeverityPreferencesUtil.setSeverity;
 import static org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity.IGNORE;
 import static org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity.WARNING;
 
 import java.util.EnumSet;
 
 import org.eclipse.jface.text.IDocument;
-import org.springframework.ide.eclipse.boot.properties.editor.preferences.EditorType;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.IgnoreProblemTypeInProjectQuickfix;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType;
 import org.springframework.ide.eclipse.boot.test.MockPrefsStore;
+import org.springframework.ide.eclipse.editor.support.preferences.EditorType;
 import org.springframework.ide.eclipse.editor.support.reconcile.QuickfixContext;
 
 import junit.framework.TestCase;
