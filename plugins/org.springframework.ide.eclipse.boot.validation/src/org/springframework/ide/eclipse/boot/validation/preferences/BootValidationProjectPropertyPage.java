@@ -8,36 +8,34 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor.preferences;
+package org.springframework.ide.eclipse.boot.validation.preferences;
 
 import java.util.List;
 
-import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType;
+import org.springframework.ide.eclipse.boot.validation.BootValidationActivator;
+import org.springframework.ide.eclipse.boot.validation.rules.ValidationRuleDefinitions;
 import org.springframework.ide.eclipse.editor.support.preferences.AbstractProblemSeverityPreferencesPage;
 import org.springframework.ide.eclipse.editor.support.preferences.EditorType;
 import org.springframework.ide.eclipse.editor.support.preferences.ProblemSeverityPreferencesUtil;
 import org.springframework.ide.eclipse.editor.support.reconcile.ProblemType;
 
-import com.google.common.collect.ImmutableList;
-
 /**
  * @author Kris De Volder
  */
-public class SpringYamlEditorPreferencesPage extends AbstractProblemSeverityPreferencesPage {
+public class BootValidationProjectPropertyPage extends AbstractProblemSeverityPreferencesPage {
 
 	protected List<ProblemType> getProblemTypes() {
-		return ImmutableList.copyOf(SpringPropertiesProblemType.FOR_YAML);
+		return ValidationRuleDefinitions.getProblemTypes();
 	}
 
 	@Override
 	protected String getEnableProjectPreferencesKey() {
-		return ProblemSeverityPreferencesUtil.ENABLE_PROJECT_PREFERENCES(EditorType.YAML);
+		return ProblemSeverityPreferencesUtil.ENABLE_PROJECT_PREFERENCES(EditorType.JAVA);
 	}
 
 	@Override
 	protected String getPluginId() {
-		return SpringPropertiesEditorPlugin.PLUGIN_ID;
+		return BootValidationActivator.PLUGIN_ID;
 	}
 
 }

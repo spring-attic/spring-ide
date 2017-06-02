@@ -16,6 +16,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jdt.ui,
  com.google.guava,
  org.springsource.ide.eclipse.commons.core,
- org.springframework.ide.eclipse.editor.support
+ org.springframework.ide.eclipse.editor.support,
+ org.eclipse.jface,
+ org.springsource.ide.eclipse.commons.frameworks.core
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy

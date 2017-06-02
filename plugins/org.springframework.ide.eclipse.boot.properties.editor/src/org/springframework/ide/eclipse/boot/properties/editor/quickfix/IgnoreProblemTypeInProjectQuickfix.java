@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.quickfix;
 
+import static org.springframework.ide.eclipse.editor.support.preferences.ProblemSeverityPreferencesUtil.*;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -18,13 +20,11 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
-import org.springframework.ide.eclipse.boot.properties.editor.preferences.EditorType;
-import org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType;
+import org.springframework.ide.eclipse.editor.support.preferences.EditorType;
+import org.springframework.ide.eclipse.editor.support.preferences.ProblemSeverityPreferencesUtil;
 import org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity;
 import org.springframework.ide.eclipse.editor.support.reconcile.QuickfixContext;
-
-import static org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil.*;
 
 /**
  * Quickfix proposal to change a particular problem type's severity to 'Ignore' in

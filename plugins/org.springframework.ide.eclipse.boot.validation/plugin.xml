@@ -12,15 +12,6 @@
 	<persistent value="true" />
 </extension>
 
-<extension point="org.eclipse.core.resources.markers"
-		 id="problemmarker"
-		 name="%springProblemMarker">
-	  <super type="org.eclipse.core.resources.problemmarker"/>
-	  <super type="org.eclipse.core.resources.textmarker"/>
-	<attribute name="ruleId"/>
-	<attribute name="errorId"/>
-</extension>
-
 <extension point="org.eclipse.ui.ide.markerSupport">
 		<markerTypeCategory name="Spring Boot Problem">
 			<markerTypeReference id="org.springframework.ide.eclipse.boot.validation.problemmarker"/>
@@ -43,6 +34,35 @@
             class="org.springframework.ide.eclipse.boot.validation.framework.SpringBootProjectBuilder">
       </run>
    </builder>
+</extension>
+
+<extension
+	      point="org.eclipse.ui.preferencePages">
+	   <page
+	         name="Java Editor"
+	         category="org.springframework.ide.eclipse.boot.ui.preferences.BootPreferencePage"
+	         class="org.springframework.ide.eclipse.boot.validation.preferences.BootValidationPreferencesPage"
+	            id="org.springframework.ide.eclipse.boot.validation.preferences.BootValidationPreferencesPage">
+	   </page>
+</extension>  
+
+<extension
+     point="org.eclipse.ui.propertyPages">
+  <page
+        id="org.springframework.ide.eclipse.boot.validation.preferences.BootValidationProjectPropertyPage"
+        name="Boot Java Validation"
+        class="org.springframework.ide.eclipse.boot.validation.preferences.BootValidationProjectPropertyPage"
+        adaptable="true"
+        objectClass="org.eclipse.core.resources.IProject"
+        category="org.springframework.ide.eclipse.ui.projectPropertyPage">
+     <filter
+           name="nature"
+           value="org.springframework.ide.eclipse.core.springnature">
+     </filter>
+     <keywordReference
+           id="org.springframework.ide.eclipse.ui.keywords">
+     </keywordReference>
+  </page>
 </extension>
 
 </plugin>

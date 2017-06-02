@@ -24,4 +24,6 @@ package org.springframework.ide.eclipse.editor.support.reconcile;
 public interface ProblemType {
 	String getId();
 	ProblemSeverity getDefaultSeverity();
+	String getLabel();
+	String getDescription();
 }

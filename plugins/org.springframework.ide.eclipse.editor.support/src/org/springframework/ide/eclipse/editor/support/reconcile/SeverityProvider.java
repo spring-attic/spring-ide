@@ -18,12 +18,15 @@ package org.springframework.ide.eclipse.editor.support.reconcile;
  */
 public interface SeverityProvider {
 
-	ProblemSeverity getSeverity(ReconcileProblem problem);
+	ProblemSeverity getSeverity(ProblemType problemType);
 
 	/**
-	 * Called at the start of a reconciling session. This can be used by SeverityProviders that cache severities
+	 * Called at the start of a reconciling/validation session. This can be used by SeverityProviders that cache severities
 	 * as a good time clear the cache.
 	 */
-	void startReconciling();
+	void startSession();
 
+	default ProblemSeverity getSeverity(ReconcileProblem problem) {
+		return getSeverity(problem.getType());
+	}
 }

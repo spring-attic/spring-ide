@@ -52,7 +52,10 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
  */
 public class MissingConfigurationProcessorRule extends BootValidationRule {
 
-	private static final BootValidationProblemType PROBLEM_ID = new BootValidationProblemType("MISSING_CONFIGURATION_PROCESSOR", ProblemSeverity.WARNING);
+	public static final BootValidationProblemType PROBLEM_ID = new BootValidationProblemType("MISSING_CONFIGURATION_PROCESSOR", ProblemSeverity.WARNING, 
+			"Missing Configuration Processor",
+			"When using @ConfigurationProperties, it is recommended to add the Spring Boot Annotation Processor to a project's classpath"
+	);
 	private static final MavenCoordinates DEP_CONFIGURATION_PROCESSOR =
 			new MavenCoordinates("org.springframework.boot", "spring-boot-configuration-processor", null);
 
@@ -62,28 +65,31 @@ public class MissingConfigurationProcessorRule extends BootValidationRule {
 		public IMarkerResolution[] getResolutions(IMarker marker) {
 			try {
 				final ISpringBootProject project = SpringBootCore.create(getProject(marker));
-				return new IMarkerResolution[] {
-					new IMarkerResolution() {
-						@Override
-						public String getLabel() {
-							return "Add spring-boot-configuration-processor to pom.xml";
-						}
-
-						@Override
-						public void run(IMarker marker) {
-							try {
-								project.addMavenDependency(DEP_CONFIGURATION_PROCESSOR, true, true);
-								project.updateProjectConfiguration(); //needed to actually enable APT, m2e does not
-														// automatically trigger this if a dependency gets added
-							} catch (Exception e) {
-								BootActivator.log(e);
+				if (project!=null) {
+					return new IMarkerResolution[] {
+						new IMarkerResolution() {
+							@Override
+							public String getLabel() {
+								return "Add spring-boot-configuration-processor to pom.xml";
+							}
+	
+							@Override
+							public void run(IMarker marker) {
+								try {
+									project.addMavenDependency(DEP_CONFIGURATION_PROCESSOR, true, true);
+									project.updateProjectConfiguration(); //needed to actually enable APT, m2e does not
+															// automatically trigger this if a dependency gets added
+								} catch (Exception e) {
+									Log.log(e);
+								}
 							}
 						}
-					}
-				};
+					};
+				}
 			} catch (Exception e) {
-				return NO_RESOLUTIONS;
+				Log.log(e);
 			}
+			return NO_RESOLUTIONS;
 		}
 
 		@Override

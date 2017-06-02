@@ -15,8 +15,8 @@ import static org.springframework.ide.eclipse.editor.support.reconcile.ProblemSe
 
 import java.util.ArrayList;
 
-import org.springframework.ide.eclipse.boot.properties.editor.preferences.EditorType;
 import org.springframework.ide.eclipse.editor.support.reconcile.ProblemType;
+import org.springframework.ide.eclipse.editor.support.preferences.EditorType;
 import org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity;
 
 /**

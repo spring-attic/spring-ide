@@ -30,11 +30,15 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.validation.BootValidationActivator;
+import org.springframework.ide.eclipse.boot.validation.rules.ValidationRuleDefinitions;
+import org.springframework.ide.eclipse.editor.support.preferences.EditorType;
+import org.springframework.ide.eclipse.editor.support.preferences.PreferencesBasedSeverityProvider;
 import org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity;
 import org.springframework.ide.eclipse.editor.support.reconcile.ProblemType;
+import org.springframework.ide.eclipse.editor.support.reconcile.SeverityProvider;
 import org.springsource.ide.eclipse.commons.core.MarkerUtils;
+import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 
 /**
@@ -48,12 +52,10 @@ public class SpringBootProjectBuilder extends IncrementalProjectBuilder {
 	private static String MARKER_ID = BootValidationActivator.PLUGIN_ID+".problemmarker";
 
 	public SpringBootProjectBuilder() {}
-	
+		
 	private static Map<String, Object> classpathChanged = new ConcurrentHashMap<String, Object>();
-	
-	private Function<ProblemType, ProblemSeverity> severityProvider = (pt) -> pt.getDefaultSeverity(); 
-		//TODO: make severity configurable
-	
+	private static ClasspathListenerManager classpathListener;
+
 	/**
 	 * indicate that the classpath changed for the given project since the last build
 	 * This mirrors the same behavior as the JavaBuilder, which keeps a state between
@@ -64,11 +66,18 @@ public class SpringBootProjectBuilder extends IncrementalProjectBuilder {
 	 * 
 	 * @param projectName The name of the project
 	 */
-	public static void classpathChanged(String projectName) {
+	private static void classpathChanged(String projectName) {
 		classpathChanged.put(projectName, ImmutableMap.of());
 	}
 	
+	private static synchronized void ensureClasspathListener() {
+		if (classpathListener==null) {
+			classpathListener = new ClasspathListenerManager((jp) -> classpathChanged(jp.getElementName()));
+		}
+	}
+
 	protected final IProject[] build(final int kind, Map<String, String> args, final IProgressMonitor monitor) throws CoreException {
+		ensureClasspathListener();
 		final IProject project = getProject();
 		final IResourceDelta delta = getDelta(project);
 
@@ -102,7 +111,12 @@ public class SpringBootProjectBuilder extends IncrementalProjectBuilder {
 	}
 	
 	private IValidationContext validationContext(IResource rsrc, IValidationRule rule) {
+		SeverityProvider severityProvider = new PreferencesBasedSeverityProvider(rsrc.getProject(), BootValidationActivator.PLUGIN_ID, EditorType.JAVA);
 		return (IResource cu, ProblemType problemId, String msg, int offset, int end) -> {
+			ProblemSeverity severity = severityProvider.getSeverity(problemId);
+			if (severity==ProblemSeverity.IGNORE) {
+				return;
+			}
 			ValidationProblem problem = new ValidationProblem() {
 				public int getStart() {
 					return offset;
@@ -110,7 +124,6 @@ public class SpringBootProjectBuilder extends IncrementalProjectBuilder {
 				
 				@Override
 				public int getSeverity() {
-					ProblemSeverity severity = severityProvider.apply(problemId);
 					switch (severity) {
 					case ERROR:
 						return IMarker.SEVERITY_ERROR;

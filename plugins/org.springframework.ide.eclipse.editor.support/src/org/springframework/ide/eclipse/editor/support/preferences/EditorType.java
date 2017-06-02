@@ -8,10 +8,10 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor.preferences;
+package org.springframework.ide.eclipse.editor.support.preferences;
 
 public enum EditorType {
-	PROP, YAML;
+	PROP, YAML, JAVA;
 
 	public String getProblemTypePrefix() {
 		return this.toString()+"_";

@@ -8,17 +8,13 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor.preferences;
+package org.springframework.ide.eclipse.editor.support.preferences;
 
 import java.io.IOException;
 
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.jface.preference.IPersistentPreferenceStore;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.osgi.service.prefs.BackingStoreException;
-import org.springframework.ide.eclipse.boot.core.BootActivator;
-import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
-import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity;
 import org.springframework.ide.eclipse.editor.support.reconcile.ProblemType;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
@@ -32,24 +28,6 @@ public class ProblemSeverityPreferencesUtil {
 
 	public static final String ENABLE_PROJECT_PREFERENCES(EditorType et) {
 		return PREFERENCE_PREFIX+et+".project.prefs.enabled";
-	}
-
-	/**
-	 * Ensures that default preference  values for all problem types are entered into the
-	 * DefaultScope. Note that this mainly important for the preferences UI which displays the
-	 * defaults from the peferences store. Other consumers of the preference will
-	 * use ProblemType.getDefaultSeverity() when they can not find a default value in the store.
-	 */
-	public static void initializeDefaults() {
-		IEclipsePreferences defaults = SpringPropertiesEditorPlugin.getDefault().getDefaultPreferences();
-		for (SpringPropertiesProblemType problemType : SpringPropertiesProblemType.values()) {
-			defaults.put(getPreferenceName(problemType), problemType.getDefaultSeverity().toString());
-		}
-		try {
-			defaults.flush();
-		} catch (BackingStoreException e) {
-			BootActivator.log(e);
-		}
 	}
 
 	public static String getPreferenceName(ProblemType problemType) {
@@ -86,7 +64,7 @@ public class ProblemSeverityPreferencesUtil {
 			try {
 				((IPersistentPreferenceStore) preferences).save();
 			} catch (IOException e) {
-				BootActivator.log(e);
+				Log.log(e);
 			}
 		}
 	}

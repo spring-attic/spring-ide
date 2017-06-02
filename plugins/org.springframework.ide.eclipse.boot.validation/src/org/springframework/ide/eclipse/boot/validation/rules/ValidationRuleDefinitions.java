@@ -8,16 +8,21 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.validation.framework;
+package org.springframework.ide.eclipse.boot.validation.rules;
 
 import java.util.List;
 
-import org.springframework.ide.eclipse.boot.validation.rules.MissingConfigurationProcessorRule;
+import org.springframework.ide.eclipse.boot.validation.framework.IValidationRule;
+import org.springframework.ide.eclipse.editor.support.reconcile.ProblemType;
 
 import com.google.common.collect.ImmutableList;
 
 public class ValidationRuleDefinitions {
 
+	public static List<ProblemType> getProblemTypes() {
+		return ImmutableList.copyOf(BootValidationProblemType.values());
+	}
+	
 	private static List<IValidationRule> rules = ImmutableList.of(
 			(IValidationRule)new MissingConfigurationProcessorRule()
 	);
