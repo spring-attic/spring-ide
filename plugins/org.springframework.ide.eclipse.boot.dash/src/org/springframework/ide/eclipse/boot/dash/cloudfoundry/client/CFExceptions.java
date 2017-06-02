@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client;
 
-import org.cloudfoundry.client.lib.CloudFoundryException;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 /**
@@ -22,10 +21,6 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 public class CFExceptions {
 
 	public static boolean isAuthFailure(Exception e) {
-		if (e instanceof CloudFoundryException) {
-			//for v1
-			return e.getMessage().contains("403");
-		}
 		//TODO: what about v2, how does it signal auth failure exactly? (This doesn't matter now,
 		// because we hit it in V1, but it may matter once we completely get rid of V1. We will
 		// then likely hit a similar exception in V2 at a later time, but it probably won't
