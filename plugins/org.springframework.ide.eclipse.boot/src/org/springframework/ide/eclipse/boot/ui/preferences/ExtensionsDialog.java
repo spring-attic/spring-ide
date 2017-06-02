@@ -265,10 +265,14 @@ final class ExtensionsDialog extends TitleAreaDialog {
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
 						install.installExtension(extensionType);
-						getShell().getDisplay().asyncExec(() -> init());
+						if (getShell() != null && !getShell().isDisposed()) {
+							getShell().getDisplay().asyncExec(() -> init());
+						}
 						return Status.OK_STATUS;
 					} catch (Exception e) {
-						getShell().getDisplay().asyncExec(() -> init());
+						if (getShell() != null && !getShell().isDisposed()) {
+							getShell().getDisplay().asyncExec(() -> init());
+						}
 						return ExceptionUtil.status(e);
 					}
 				}
@@ -285,10 +289,14 @@ final class ExtensionsDialog extends TitleAreaDialog {
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
 						install.uninstallExtension(extension);
-						getShell().getDisplay().asyncExec(() -> init());
+						if (getShell() != null && !getShell().isDisposed()) {
+							getShell().getDisplay().asyncExec(() -> init());
+						}
 						return Status.OK_STATUS;
 					} catch (Exception e) {
-						getShell().getDisplay().asyncExec(() -> init());
+						if (getShell() != null && !getShell().isDisposed()) {
+							getShell().getDisplay().asyncExec(() -> init());
+						}
 						return ExceptionUtil.status(e);
 					}
 				}
