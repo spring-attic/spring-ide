@@ -20,7 +20,7 @@ import org.springframework.ide.eclipse.boot.launch.ExistingBootProjectSelectionV
 import org.springframework.ide.eclipse.boot.launch.SelectProjectLaunchTabModel;
 import org.springframework.ide.eclipse.boot.launch.devtools.DevtoolsEnabledValidator;
 import org.springframework.ide.eclipse.boot.launch.devtools.StringFieldLaunchTabModel;
-import org.springframework.ide.eclipse.editor.support.util.StringUtil;
+import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.CompositeValidator;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -111,7 +111,7 @@ public class SshDebugLaunchUIModel {
 	}
 
 	private SelectProjectLaunchTabModel createProjectSelectionModel() {
-		LiveVariable<IProject> project = new LiveVariable<IProject>();
+		LiveVariable<IProject> project = new LiveVariable<>();
 		CompositeValidator validator = new CompositeValidator();
 		validator.addChild(new ExistingBootProjectSelectionValidator(project));
 		validator.addChild(new DevtoolsEnabledValidator(project));

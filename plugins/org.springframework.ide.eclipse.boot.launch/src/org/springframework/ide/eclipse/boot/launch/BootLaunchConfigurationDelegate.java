@@ -12,7 +12,7 @@ package org.springframework.ide.eclipse.boot.launch;
 
 import static org.eclipse.debug.core.DebugPlugin.ATTR_PROCESS_FACTORY_ID;
 import static org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS;
-import static org.springframework.ide.eclipse.editor.support.util.StringUtil.hasText;
+import static org.springsource.ide.eclipse.commons.core.util.StringUtil.hasText;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,8 +40,8 @@ import org.springframework.ide.eclipse.boot.launch.process.BootProcessFactory;
 import org.springframework.ide.eclipse.boot.launch.profiles.ProfileHistory;
 import org.springframework.ide.eclipse.boot.launch.util.PortFinder;
 import org.springframework.ide.eclipse.boot.util.Log;
-import org.springframework.ide.eclipse.editor.support.util.StringUtil;
 import org.springsource.ide.eclipse.commons.core.util.OsUtils;
+import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 
 /**
  * @author Kris De Volder

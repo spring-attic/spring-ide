@@ -60,6 +60,8 @@ public class SpringProjectNature implements IProjectNature {
 		IProgressMonitor monitor = new NullProgressMonitor();
 		SpringCoreUtils.addProjectBuilder(project, SpringCore.BUILDER_ID,
 				monitor);
+        //TODO: the below is temporary, we need to find a better way of adding this builder to spring (boot) projects
+        SpringCoreUtils.addProjectBuilder(project, "org.springframework.ide.eclipse.boot.validation.springbootbuilder", monitor);
 	}
 
 	/**

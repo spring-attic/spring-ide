@@ -160,7 +160,7 @@ public class ReconcileStrategy implements IReconcilingStrategy, IReconcilingStra
 		}
 
 		public void beginCollecting() {
-			getSeverities().startReconciling();
+			getSeverities().startSession();
 			fAddAnnotations= new HashMap<Annotation, Position>();
 		}
 

@@ -25,7 +25,7 @@ import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEd
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo.PropertySource;
 import org.springframework.ide.eclipse.editor.support.util.HtmlSnippet;
-import org.springframework.ide.eclipse.editor.support.util.StringUtil;
+import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 
 /**
  * Information object that is displayed in SpringPropertiesTextHover's information
@@ -73,7 +73,7 @@ public class SpringPropertyHoverInfo extends AbstractPropertyHoverInfo {
 				List<PropertySource> sources = getSources();
 				SpringPropertiesCompletionEngine.debug("propertySources = "+sources);
 				if (!sources.isEmpty()) {
-					ArrayList<IJavaElement> elements = new ArrayList<IJavaElement>();
+					ArrayList<IJavaElement> elements = new ArrayList<>();
 					for (PropertySource source : sources) {
 						String typeName = source.getSourceType();
 						if (typeName!=null) {

@@ -22,6 +22,7 @@ import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlASTProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.reconcile.CompositeYamlASTReconciler;
 import org.springframework.ide.eclipse.editor.support.yaml.reconcile.YamlASTReconciler;
 import org.springframework.ide.eclipse.editor.support.yaml.reconcile.YamlSchemaBasedReconcileEngine;
+import org.springframework.ide.eclipse.editor.support.yaml.reconcile.YamlSchemaProblems;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YamlSchema;
 
 import com.google.common.collect.ImmutableSet;
@@ -37,16 +38,7 @@ public class ManifestYamlReconcileEngine extends YamlSchemaBasedReconcileEngine 
 	private static final ImmutableSet<String> ROUTES = ImmutableSet.of("routes");
 	private static final ImmutableSet<String> LEGACY_ROUTES = ImmutableSet.of("host", "hosts", "domain", "domains", "no-hostname");
 	
-	private static final ProblemType LEGACY_PROPERTY_PROBLEM = new ProblemType() {
-		@Override
-		public String toString() {
-			return "ManifestYamlLegacyPropertyProblem";
-		}
-		@Override
-		public ProblemSeverity getDefaultSeverity() {
-			return ProblemSeverity.ERROR;
-		}
-	};
+	private static final ProblemType LEGACY_PROPERTY_PROBLEM = YamlSchemaProblems.problemType("ManifestYamlLegacyPropertyProblem");
 	
 	private static ProblemFactory LEGACY_ROUTES_PROBLEM_FACTORY = (text, start, end) -> {
 		StringBuilder message = new StringBuilder();

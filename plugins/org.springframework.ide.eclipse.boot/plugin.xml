@@ -81,45 +81,6 @@
    </page>
    	</extension>
    	
-   	<extension
-       point="org.springframework.ide.eclipse.core.validators">
-    <validator
-          class="org.springframework.ide.eclipse.boot.validation.SpringBootValidator"
-          enabledByDefault="true"
-          icon="resources/icons/boot-icon.png"
-          id="bootvalidator"
-          markerId="problemmarker"
-          name="Boot Validator">
-    </validator>
-    <rules
-          validatorId="org.springframework.ide.eclipse.boot.bootvalidator">
-       <rule
-             class="org.springframework.ide.eclipse.boot.validation.MissingConfigurationProcessorRule"
-             description="Verify that spring-boot-configuration-processor is on classpath when @ConfigurationProperties is used"
-             enabledByDefault="true"
-             id="missingConfigurationProcessor"
-             name="Missing Configuration Processor">
-          <message id="MISSING_CONFIGURATION_PROCESSOR" label="Missing Configuration Processor" severity="WARNING" />
-       </rule>
-    </rules>
- </extension>
-   		<extension point="org.eclipse.core.resources.markers"
-			id="problemmarker"
-			name="Spring Boot Problem">
-		<super type="org.springframework.ide.eclipse.core.problemmarker" />
-		<attribute name="ruleId"/>
-		<attribute name="errorId"/>
-		<persistent value="true" />
-	</extension>
-   	
-   	<extension
-	point="org.eclipse.ui.ide.markerResolution">
-	<markerResolutionGenerator
-		markerType="org.springframework.ide.eclipse.boot.problemmarker"
-		class="org.springframework.ide.eclipse.boot.quickfix.BootMarkerResolutionGenerator">
-	</markerResolutionGenerator>
-</extension>
-
 <extension point="org.eclipse.ui.decorators">
 <decorator
     id="org.springframework.ide.eclipse.boot.ui.DevtoolsProjectDecorator"

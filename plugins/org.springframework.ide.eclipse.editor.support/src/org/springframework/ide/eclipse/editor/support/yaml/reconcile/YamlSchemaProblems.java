@@ -26,15 +26,29 @@ public class YamlSchemaProblems {
 	private static final ProblemType SCHEMA_PROBLEM = problemType("YamlSchemaProblem");
 	private static final ProblemType SYNTAX_PROBLEM = problemType("YamlSyntaxProblem");
 
-	private static ProblemType problemType(final String typeName) {
+	public static ProblemType problemType(final String typeName) {
 		return new ProblemType() {
 			@Override
-			public String toString() {
+			public String getId() {
 				return typeName;
+			}
+			@Override
+			public String toString() {
+				return getId();
 			}
 			@Override
 			public ProblemSeverity getDefaultSeverity() {
 				return ProblemSeverity.ERROR;
+			}
+			@Override
+			public String getLabel() {
+				//TODO: if we want a prefs page that allows controlling the severities of problems we need to implement this properly
+				return getId();
+			}
+			@Override
+			public String getDescription() {
+				//TODO: if we want a prefs page that allows controlling the severities of problems we need to implement this properly
+				return getId();
 			}
 		};
 	}

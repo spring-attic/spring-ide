@@ -14,9 +14,9 @@ import org.dadacoalition.yedit.editor.YEditSourceViewerConfiguration;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
-import org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Listener;
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertiesIndexManager;
+import org.springframework.ide.eclipse.editor.support.preferences.ProblemSeverityPreferencesUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.AbstractYamlEditor;
 
 public class SpringYamlEditor extends AbstractYamlEditor implements Listener<SpringPropertiesIndexManager>, IPropertyChangeListener {

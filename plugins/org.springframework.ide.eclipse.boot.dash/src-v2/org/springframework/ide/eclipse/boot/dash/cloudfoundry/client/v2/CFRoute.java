@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2;
 
-import org.springframework.ide.eclipse.editor.support.util.StringUtil;
+import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 public class CFRoute {

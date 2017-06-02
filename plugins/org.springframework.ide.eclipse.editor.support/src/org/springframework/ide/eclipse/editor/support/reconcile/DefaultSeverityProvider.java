@@ -19,12 +19,12 @@ package org.springframework.ide.eclipse.editor.support.reconcile;
 public class DefaultSeverityProvider implements SeverityProvider {
 
 	@Override
-	public ProblemSeverity getSeverity(ReconcileProblem problem) {
-		return problem.getType().getDefaultSeverity();
+	public ProblemSeverity getSeverity(ProblemType problemType) {
+		return problemType.getDefaultSeverity();
 	}
 
 	@Override
-	public void startReconciling() {
+	public void startSession() {
 	}
 
 }

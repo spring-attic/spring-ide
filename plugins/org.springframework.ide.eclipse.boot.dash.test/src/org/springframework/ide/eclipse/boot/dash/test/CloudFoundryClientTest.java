@@ -80,7 +80,7 @@ import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.boot.test.util.TestBracketter;
 import org.springframework.ide.eclipse.boot.util.RetryUtil;
 import org.springframework.ide.eclipse.boot.util.Thunk;
-import org.springframework.ide.eclipse.editor.support.util.StringUtil;
+import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;

@@ -22,11 +22,11 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.springframework.ide.eclipse.boot.properties.editor.preferences.EditorType;
-import org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertyProblem;
 import org.springframework.ide.eclipse.boot.test.MockPrefsStore;
+import org.springframework.ide.eclipse.editor.support.preferences.EditorType;
+import org.springframework.ide.eclipse.editor.support.preferences.ProblemSeverityPreferencesUtil;
 import org.springframework.ide.eclipse.editor.support.reconcile.QuickfixContext;
 import org.springframework.ide.eclipse.editor.support.util.UserInteractions;
 

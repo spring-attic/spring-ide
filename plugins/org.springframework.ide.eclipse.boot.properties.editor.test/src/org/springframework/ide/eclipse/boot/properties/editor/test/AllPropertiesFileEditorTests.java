@@ -23,7 +23,6 @@ import org.junit.runners.Suite.SuiteClasses;
 	QuickfixCreationTests.class,
 	IgnoreProblemTypeInWorkspaceQuickfixTests.class,
 	IgnoreProblemTypeInProjectQuickfixTests.class,
-	StringUtilTests.class,
 	MetaDataManipulatorTest.class,
 	SpringPropertiesEditorTests.class,
 	TypeUtilTests.class,

@@ -15,7 +15,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil.getSeverity;
+import static org.springframework.ide.eclipse.editor.support.preferences.ProblemSeverityPreferencesUtil.getSeverity;
 import static org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity.IGNORE;
 
 import java.util.EnumSet;

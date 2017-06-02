@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile;
 
-import static org.springframework.ide.eclipse.editor.support.util.StringUtil.*;
+import static org.springsource.ide.eclipse.commons.core.util.StringUtil.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,7 +19,7 @@ import java.util.List;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap.Match;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
-import org.springframework.ide.eclipse.editor.support.util.StringUtil;
+import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 
 /**
  * An index navigator allows selecting subset of a property index as if

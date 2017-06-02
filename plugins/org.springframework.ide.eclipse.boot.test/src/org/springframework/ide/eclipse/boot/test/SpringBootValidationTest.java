@@ -36,10 +36,12 @@ import org.hamcrest.TypeSafeMatcher;
 import org.junit.Test;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 
+import org.springframework.ide.eclipse.boot.validation.framework.SpringBootProjectBuilder;
+
 @SuppressWarnings("unchecked")
 public class SpringBootValidationTest extends AbstractBootValidationTest {
 
-	public static final String MARKER_TYPE = "org.springframework.ide.eclipse.core.problemmarker";
+	public static final String MARKER_ID = SpringBootProjectBuilder.MARKER_ID;
 
 	@Test
 	public void testScaffolding() throws Exception {
@@ -57,7 +59,7 @@ public class SpringBootValidationTest extends AbstractBootValidationTest {
 		IProject p = createPredefinedProject(projectName);
 
 		IFile r = (IFile) p.findMember(resourcePath);
-		IMarker[] markers = getAllMarkers(r, MARKER_TYPE);
+		IMarker[] markers = getAllMarkers(r, MARKER_ID);
 
 		//Finds @ConfigrationProperties on Class?
 		assertThat(markers, array(
@@ -76,7 +78,7 @@ public class SpringBootValidationTest extends AbstractBootValidationTest {
 		IProject p = createPredefinedProject(projectName);
 
 		IFile r = (IFile) p.findMember(resourcePath);
-		IMarker[] markers = getAllMarkers(r, MARKER_TYPE);
+		IMarker[] markers = getAllMarkers(r, MARKER_ID);
 
 		//Finds @ConfigrationProperties on Class?
 		assertThat(markers, array(
@@ -95,7 +97,7 @@ public class SpringBootValidationTest extends AbstractBootValidationTest {
 		final IProject p = createPredefinedProject(projectName);
 
 		final IFile r = (IFile) p.findMember(resourcePath);
-		IMarker[] markers = getAllMarkers(r, MARKER_TYPE);
+		IMarker[] markers = getAllMarkers(r, MARKER_ID);
 
 		//Finds @ConfigrationProperties on Class?
 		assertThat(markers, array(
@@ -122,7 +124,7 @@ public class SpringBootValidationTest extends AbstractBootValidationTest {
 		new ACondition("marker disapears after quickfix") {
 			public boolean test() throws Exception {
 				buildProject(p);
-				assertNoMarkers(getAllMarkers(r, MARKER_TYPE));
+				assertNoMarkers(getAllMarkers(r, MARKER_ID));
 				return true;
 			}
 		}.waitFor(10000);

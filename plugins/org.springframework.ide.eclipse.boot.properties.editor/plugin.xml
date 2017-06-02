@@ -71,7 +71,7 @@
          point="org.eclipse.ui.propertyPages">
       <page
             id="org.springframework.ide.eclipse.boot.properties.editor.preferences.SpringPropertiesEditorProjectPropertyPage"
-            name="Spring Properties Editor"
+            name="Boot Properties Editor"
             class="org.springframework.ide.eclipse.boot.properties.editor.preferences.SpringPropertiesEditorPreferencesPage"
             adaptable="true"
             objectClass="org.eclipse.core.resources.IProject"
@@ -86,7 +86,7 @@
       </page>
       <page
             id="org.springframework.ide.eclipse.boot.properties.editor.preferences.SpringYamlEditorProjectPropertyPage"
-            name="Spring Yaml Editor"
+            name="Boot Yaml Properties Editor"
             class="org.springframework.ide.eclipse.boot.properties.editor.preferences.SpringYamlEditorPreferencesPage"
             adaptable="true"
             objectClass="org.eclipse.core.resources.IProject"

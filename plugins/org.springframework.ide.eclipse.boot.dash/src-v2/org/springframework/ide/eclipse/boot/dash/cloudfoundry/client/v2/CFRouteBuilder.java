@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 import org.cloudfoundry.operations.routes.Route;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.util.Log;
-import org.springframework.ide.eclipse.editor.support.util.StringUtil;
+import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 
 public class CFRouteBuilder {
 	private String domain;

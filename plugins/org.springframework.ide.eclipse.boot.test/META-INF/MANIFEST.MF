@@ -31,7 +31,8 @@ Require-Bundle: org.eclipse.ui,
  org.springframework.ide.eclipse.boot.wizard;bundle-version="3.8.2",
  org.glassfish.jersey.bundles.repackaged.jersey-guava;bundle-version="2.22.1",
  org.glassfish.jersey.core.jersey-client;bundle-version="2.22.1",
- org.glassfish.jersey.core.jersey-common;bundle-version="2.22.1"
+ org.glassfish.jersey.core.jersey-common;bundle-version="2.22.1",
+ org.springframework.ide.eclipse.boot.validation
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: Pivotal Inc.

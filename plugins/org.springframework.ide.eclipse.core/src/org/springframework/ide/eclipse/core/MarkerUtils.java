@@ -20,9 +20,13 @@ import org.eclipse.core.runtime.CoreException;
 
 /**
  * Some {@link IMarker} helper methods.
+ * <p>
+ * Deprecated. Use the moved copy in commons.core instead.
+ * 
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  */
+@Deprecated
 public final class MarkerUtils {
 
 	public static final String ORIGINATING_RESOURCE_KEY = "originatingResource";

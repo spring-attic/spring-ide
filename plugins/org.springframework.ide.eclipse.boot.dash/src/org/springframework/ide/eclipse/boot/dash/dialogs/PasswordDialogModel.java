@@ -10,14 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.dialogs;
 
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetWizardModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetWizardModel.LoginMethod;
@@ -25,8 +17,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientPar
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
-import org.springframework.ide.eclipse.editor.support.util.StringUtil;
+import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
@@ -35,7 +26,6 @@ import org.springsource.ide.eclipse.commons.livexp.ui.OkButtonHandler;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoSink;
 
 /**
  * Password dialog model. Provides ability to specify password and whether it

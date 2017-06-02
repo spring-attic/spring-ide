@@ -21,9 +21,9 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.ui.IEditorInput;
-import org.springframework.ide.eclipse.boot.properties.editor.preferences.ProblemSeverityPreferencesUtil;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Listener;
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertiesIndexManager;
+import org.springframework.ide.eclipse.editor.support.preferences.ProblemSeverityPreferencesUtil;
 
 @SuppressWarnings("restriction")
 public class SpringPropertiesFileEditor extends PropertiesFileEditor implements Listener<SpringPropertiesIndexManager>, IPropertyChangeListener {
