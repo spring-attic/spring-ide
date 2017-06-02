@@ -153,7 +153,6 @@ public class ZippedBootInstall extends BootInstall {
 
 	private DownloadableItem zip;
 	private File home; //Will be set once the install is unzipped and ready for use.
-	private InstallBootCliExtensionJob installCloudCliJob = null;
 
 	public ZippedBootInstall(DownloadManager downloader, String uri, String name) throws Exception {
 		super(uri, name);
@@ -201,20 +200,20 @@ public class ZippedBootInstall extends BootInstall {
 	}
 	
 	synchronized private CloudCliInstall initCloudCliInstall() {
-		if (installCloudCliJob == null) {
-			installCloudCliJob = new InstallBootCliExtensionJob("Auto install Spring Cloud CLI", CloudCliInstall.class);
+		if (super.getCloudCliInstall() == null) {
+			InstallBootCliExtensionJob installCloudCliJob = new InstallBootCliExtensionJob("Auto install Spring Cloud CLI", CloudCliInstall.class);
 			installCloudCliJob.schedule();
-		}
-		long waitTime = 200L;
-		for (long waited = 0L; installCloudCliJob.getState() != Job.NONE && waited < 10000L; waited+=waitTime) {
-			try {
-				Thread.sleep(waitTime);
-			} catch (InterruptedException e) {
-				// ignore
+			long waitTime = 200L;
+			for (long waited = 0L; installCloudCliJob.getState() != Job.NONE && waited < 30000L; waited+=waitTime) {
+				try {
+					Thread.sleep(waitTime);
+				} catch (InterruptedException e) {
+					// ignore
+				}
 			}
-		}
-		if (installCloudCliJob.getState() != Job.NONE) {
-			Log.error("Timed out waiting for Spring Cloud CLI to be installed");
+			if (installCloudCliJob.getState() != Job.NONE) {
+				Log.error("Timed out waiting for Spring Cloud CLI to be installed");
+			}
 		}
 		if (super.getCloudCliInstall() == null) {
 			return null;
