@@ -69,12 +69,14 @@ import org.springframework.ide.eclipse.boot.core.IMavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.MavenId;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudServiceInstanceDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElementsFilterBoxModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.LaunchConfDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.LocalCloudServiceDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
@@ -129,13 +131,13 @@ public class BootDashModelTest {
 	@Test public void testNewSpringBootProject() throws Exception {
 
 //		assertWorkspaceProjects(/*none*/);
-		assertModelElements(/*none*/);
+		assertNonServiceElements(/*none*/);
 
 		String projectName = "testProject";
 		createBootProject(projectName);
 		new ACondition("Model update", MODEL_UPDATE_TIMEOUT) {
 			public boolean test() throws Exception {
-				assertModelElements("testProject");
+				assertNonServiceElements("testProject");
 				return true;
 			}
 		};
@@ -152,14 +154,14 @@ public class BootDashModelTest {
 	public void testSpringBootProjectChildren() throws Exception {
 
 //		assertWorkspaceProjects(/*none*/);
-		assertModelElements(/*none*/);
+		assertNonServiceElements(/*none*/);
 
 		String projectName = "testProject";
 		IProject project = createBootProject(projectName);
 		IJavaProject javaProject = JavaCore.create(project);
 		new ACondition("Model update", MODEL_UPDATE_TIMEOUT) {
 			public boolean test() throws Exception {
-				assertModelElements("testProject");
+				assertNonServiceElements("testProject");
 				return true;
 			}
 		};
@@ -188,14 +190,14 @@ public class BootDashModelTest {
 	 */
 	@Test
 	public void testSpringBootProjectHiddenChildren() throws Exception {
-		assertModelElements(/*none*/);
+		assertNonServiceElements(/*none*/);
 
 		String projectName = "testProject";
 		IProject project = createBootProject(projectName);
 		IJavaProject javaProject = JavaCore.create(project);
 		new ACondition("Model update", MODEL_UPDATE_TIMEOUT) {
 			public boolean test() throws Exception {
-				assertModelElements("testProject");
+				assertNonServiceElements("testProject");
 				return true;
 			}
 		};
@@ -261,9 +263,9 @@ public class BootDashModelTest {
 		String projectName = "testProject";
 		IProject project = createBootProject(projectName);
 
-		waitModelElements("testProject");
+		waitNonServiceElements("testProject");
 		project.delete(/*delete content*/true, /*force*/true, /*progress*/null);
-		waitModelElements(/*none*/);
+		waitNonServiceElements(/*none*/);
 	}
 
 	/**
@@ -273,13 +275,13 @@ public class BootDashModelTest {
 		String projectName = "testProject";
 		IProject project = createBootProject(projectName);
 
-		waitModelElements("testProject");
+		waitNonServiceElements("testProject");
 
 		project.close(null);
-		waitModelElements();
+		waitNonServiceElements();
 
 		project.open(null);
-		waitModelElements("testProject");
+		waitNonServiceElements("testProject");
 	}
 
 
@@ -304,7 +306,7 @@ public class BootDashModelTest {
 	private void doTestDeleteRunningLaunchConf(RunState runState) throws Exception, CoreException {
 		String projectName = "testProject";
 		createBootProject(projectName);
-		waitModelElements(projectName);
+		waitNonServiceElements(projectName);
 
 		BootProjectDashElement element = getElement(projectName);
 		element.openConfig(ui); //Ensure that at least one launch config exists.
@@ -352,7 +354,7 @@ public class BootDashModelTest {
 	protected void doTestLaunchConfRunStateChanges(RunState runState) throws Exception {
 		String projectName = "testProject";
 		createBootProject(projectName);
-		waitModelElements(projectName);
+		waitNonServiceElements(projectName);
 
 		BootProjectDashElement element = getElement(projectName);
 		element.openConfig(ui); //Ensure that at least one launch config exists.
@@ -478,7 +480,7 @@ public class BootDashModelTest {
 	protected void doTestRunStateChanges(RunState runState) throws Exception {
 		String projectName = "testProject";
 		createBootProject(projectName);
-		waitModelElements(projectName);
+		waitNonServiceElements(projectName);
 
 		ElementStateListener listener = mock(ElementStateListener.class);
 		model.addElementStateListener(listener);
@@ -512,7 +514,7 @@ public class BootDashModelTest {
 	@Test public void projectElementDisposedWhenProjectClosed() throws Exception {
 		String projectName = "testProject";
 		IProject project = createBootProject(projectName);
-		waitModelElements(projectName);
+		waitNonServiceElements(projectName);
 
 		BootProjectDashElement projectElement = getElement(projectName);
 		LiveVariable<Boolean> disposed = new LiveVariable<>(false);
@@ -528,7 +530,7 @@ public class BootDashModelTest {
 	@Test public void testRestartRunningProcessTest() throws Exception {
 		String projectName = "testProject";
 		createBootProject(projectName);
-		waitModelElements(projectName);
+		waitNonServiceElements(projectName);
 
 		final RunState[] RUN_STATES = {
 				RunState.RUNNING,
@@ -1323,19 +1325,26 @@ public class BootDashModelTest {
 		return null;
 	}
 
-	private void assertModelElements(String... expectedElementNames) {
+	private void assertNonServiceElements(String... expectedElementNames) {
 		Set<BootDashElement> elements = model.getElements().getValue();
 		Set<String> names = new HashSet<>();
 		for (BootDashElement e : elements) {
-			names.add(e.getName());
+			if (!isService(e)) {
+				names.add(e.getName());
+			}
 		}
 		assertElements(names, expectedElementNames);
 	}
 
-	public void waitModelElements(final String... expectedElementNames) throws Exception {
+	private boolean isService(BootDashElement e) {
+		return e instanceof LocalCloudServiceDashElement
+			|| e instanceof CloudServiceInstanceDashElement;
+	}
+
+	public void waitNonServiceElements(final String... expectedElementNames) throws Exception {
 		new ACondition("Model update", MODEL_UPDATE_TIMEOUT) {
 			public boolean test() throws Exception {
-				assertModelElements(expectedElementNames);
+				assertNonServiceElements(expectedElementNames);
 				return true;
 			}
 		};
