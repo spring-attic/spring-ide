@@ -686,6 +686,11 @@
 			<layout>p2</layout>
 			<url>http://dist.springsource.com/release/TOOLS/third-party/yedit</url>
 		</repository>
+		<repository>
+			<id>kotlin-eclipse</id>
+			<layout>p2</layout>
+			<url>https://dl.bintray.com/jetbrains/kotlin/eclipse-plugin/last/</url>
+		</repository>
 <!-- 		<repository> -->
 <!-- 			<id>yedit</id> -->
 <!-- 			<layout>p2</layout> -->
