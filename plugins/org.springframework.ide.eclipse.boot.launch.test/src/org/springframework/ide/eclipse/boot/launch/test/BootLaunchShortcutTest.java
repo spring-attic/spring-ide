@@ -78,6 +78,15 @@ public class BootLaunchShortcutTest extends BootLaunchTestCase {
 		);
 	}
 
+	public void testKotlinProjectFindTypes() throws Exception {
+		final IJavaProject project = createLaunchReadyKotlinProject("kotlin-bootapp");
+		ACondition.waitFor("Wait for kotlin main type", 20_000, () -> {
+			assertElements(findTypes(project), //something
+					"com.example.demo.KotlinBootappApplicationKt"
+			);
+		});
+	}
+
 	public void testMainClassFindTypes() throws Exception {
 		IJavaProject project = JavaCore.create(createLaunchReadyProject(PROJECT));
 		IType target = project.findType(ALT_MAIN_TYPE);

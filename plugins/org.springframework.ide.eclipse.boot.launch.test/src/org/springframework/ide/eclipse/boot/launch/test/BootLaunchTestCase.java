@@ -10,27 +10,37 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch.test;
 
-import org.eclipse.core.resources.IFile;
+import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withLanguage;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.boot.test.util.LaunchResult;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestCase;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
-import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil.StringInputStream;
 
 /**
  * @author Kris De Volder
  */
 public class BootLaunchTestCase extends StsTestCase {
+
+	private BootProjectTestHarness projects = new BootProjectTestHarness(ResourcesPlugin.getWorkspace());
 
 	/**
 	 * Create an empty project no nature, no nothing
@@ -89,6 +99,10 @@ public class BootLaunchTestCase extends StsTestCase {
 		IProject project = createPredefinedProject(projectName);
 		StsTestUtil.assertNoErrors(project);
 		return project;
+	}
+	
+	public IJavaProject createLaunchReadyKotlinProject(final String projectName) throws Exception {
+		return JavaCore.create(projects.createBootWebProject(projectName, withLanguage("kotlin")));
 	}
 
 }

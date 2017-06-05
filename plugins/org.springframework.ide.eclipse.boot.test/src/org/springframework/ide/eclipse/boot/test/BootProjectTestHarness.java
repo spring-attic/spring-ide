@@ -106,7 +106,17 @@ public class BootProjectTestHarness {
 			fail("Couldn't find packaging type '"+packagingTypeName+"' in the wizard model");
 		};
 	}
-
+	
+	public static WizardConfigurer withLanguage(final String language) {
+		return (wizard) -> {
+			RadioGroup languageRadio = wizard.getRadioGroups().getGroup("language");
+			assertNotNull("Couldn't find 'language' radiogroup in the wizard model", languageRadio);
+			RadioInfo l = languageRadio.getRadio(language);
+			assertNotNull("Couldn't find language '"+language+"' in the wizard model", l);
+			languageRadio.setValue(l);
+		};
+	}
+	
 	public static WizardConfigurer withStarters(final String... ids) {
 		if (ids.length>0) {
 			return new WizardConfigurer() {

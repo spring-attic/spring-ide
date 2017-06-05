@@ -18,6 +18,6 @@ Require-Bundle: org.eclipse.ui,
  org.springsource.ide.eclipse.commons.frameworks.core,
  org.springframework.ide.eclipse.boot.test,
  org.springsource.ide.eclipse.commons.frameworks.test.util
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: GoPivotal Inc.
