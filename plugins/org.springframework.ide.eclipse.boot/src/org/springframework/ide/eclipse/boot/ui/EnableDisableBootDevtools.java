@@ -38,7 +38,7 @@ import org.springframework.ide.eclipse.boot.core.MavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
 import org.springframework.ide.eclipse.boot.util.Log;
-import org.springframework.ide.eclipse.core.SpringCore;
+import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 public class EnableDisableBootDevtools implements IObjectActionDelegate {
@@ -193,7 +193,7 @@ public class EnableDisableBootDevtools implements IObjectActionDelegate {
 					Object el = ss.getFirstElement();
 					if (el instanceof IProject) {
 						IProject p = (IProject) el;
-						if (p.isAccessible() && p.hasNature(SpringCore.NATURE_ID)) {
+						if (p.isAccessible() && p.hasNature(SpringCoreUtils.NATURE_ID)) {
 							//only interested in spring projects.
 							return p;
 						}
