@@ -17,11 +17,11 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.widgets.Shell;
+import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.lsp.LSPBasedYamlAssistContextProvider;
 import org.springframework.ide.eclipse.editor.support.reconcile.IReconcileEngine;
 import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileStrategy;
 import org.springframework.ide.eclipse.editor.support.yaml.AbstractYamlSourceViewerConfiguration;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlAssistContextProvider;
-import org.springframework.ide.eclipse.editor.support.yaml.completions.SchemaBasedYamlAssistContextProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 
 /**
@@ -30,7 +30,6 @@ import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructu
 public class ManifestYamlSourceViewerConfiguration extends AbstractYamlSourceViewerConfiguration {
 
 	private ManifestYmlSchema schema = new ManifestYmlSchema(ManifestEditorActivator.getDefault().getBuildpackProvider());
-	private YamlAssistContextProvider assistContextProvider = new SchemaBasedYamlAssistContextProvider(schema);
 
 	public ManifestYamlSourceViewerConfiguration(Provider<Shell> shellProvider) {
 		super(shellProvider);
@@ -38,7 +37,7 @@ public class ManifestYamlSourceViewerConfiguration extends AbstractYamlSourceVie
 
 	@Override
 	protected YamlAssistContextProvider getAssistContextProvider(ISourceViewer viewer) {
-		return assistContextProvider;
+		return new LSPBasedYamlAssistContextProvider(viewer);
 	}
 
 	@Override
@@ -60,7 +59,7 @@ public class ManifestYamlSourceViewerConfiguration extends AbstractYamlSourceVie
 	private IReconcileEngine createReconcileEngine() {
 		return new ManifestYamlReconcileEngine(getAstProvider(), schema);
 	}
-
+	
 	@Override
 	protected IPreferenceStore getPreferencesStore() {
 		return ManifestEditorActivator.getDefault().getPreferenceStore();
