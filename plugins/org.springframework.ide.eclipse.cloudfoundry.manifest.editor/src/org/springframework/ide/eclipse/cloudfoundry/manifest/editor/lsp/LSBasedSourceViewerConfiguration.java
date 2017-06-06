@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Pivotal, Inc.
+ * Copyright (c) 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,42 +8,38 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.cloudfoundry.manifest.editor;
+package org.springframework.ide.eclipse.cloudfoundry.manifest.editor.lsp;
 
 import javax.inject.Provider;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.widgets.Shell;
+import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestEditorActivator;
 import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
-import org.springframework.ide.eclipse.editor.support.reconcile.IReconcileEngine;
-import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileStrategy;
 import org.springframework.ide.eclipse.editor.support.yaml.AbstractYamlSourceViewerConfiguration;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlAssistContextProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 
 /**
- * @author Kris De Volder
+ * @author Martin Lippert
  */
-public class ManifestYamlSourceViewerConfiguration extends AbstractYamlSourceViewerConfiguration {
+public class LSBasedSourceViewerConfiguration extends AbstractYamlSourceViewerConfiguration {
 
-	private ManifestYmlSchema schema = new ManifestYmlSchema(ManifestEditorActivator.getDefault().getBuildpackProvider());
-
-	public ManifestYamlSourceViewerConfiguration(Provider<Shell> shellProvider) {
+	public LSBasedSourceViewerConfiguration(Provider<Shell> shellProvider) {
 		super(shellProvider);
 	}
 
 	@Override
 	protected HoverInfoProvider getHoverProvider(ISourceViewer viewer) {
-		return super.getHoverProvider(viewer);
+		return new LSBasedHoverProvider(viewer);
 	}
 	
 	@Override
 	public ICompletionEngine getCompletionEngine(ISourceViewer viewer) {
-		return super.getCompletionEngine(viewer);
+		return new LSBasedCompletionEngine(viewer);
 	}
 
 	@Override
@@ -56,16 +52,6 @@ public class ManifestYamlSourceViewerConfiguration extends AbstractYamlSourceVie
 		return ManifestEditorActivator.getDefault().getDialogSettings();
 	}
 
-	@Override
-	protected IReconcilingStrategy createReconcilerStrategy(ISourceViewer viewer) {
-		IReconcileEngine engine = createReconcileEngine();
-		return new ReconcileStrategy(viewer, engine);
-	}
-
-	private IReconcileEngine createReconcileEngine() {
-		return new ManifestYamlReconcileEngine(getAstProvider(), schema);
-	}
-	
 	@Override
 	protected IPreferenceStore getPreferencesStore() {
 		return ManifestEditorActivator.getDefault().getPreferenceStore();

@@ -37,13 +37,13 @@ import org.eclipse.swt.graphics.Point;
  * @author Martin Lippert
  */
 @SuppressWarnings("restriction")
-public class SmartLSCompletionProposal implements ICompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2,
+public class LSBasedSmartCompletionProposal implements ICompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2,
 		ICompletionProposalExtension3, ICompletionProposalExtension4, ICompletionProposalExtension5,
 		ICompletionProposalExtension6, ICompletionProposalExtension7, IContextInformation {
 
 	private final LSCompletionProposal proposal;
 
-	public SmartLSCompletionProposal(LSCompletionProposal lsProposal) {
+	public LSBasedSmartCompletionProposal(LSCompletionProposal lsProposal) {
 		this.proposal = lsProposal;
 	}
 	
