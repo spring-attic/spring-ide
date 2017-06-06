@@ -79,8 +79,8 @@ public class BootLaunchShortcutTest extends BootLaunchTestCase {
 		);
 	}
 
-	@Ignore //Ignore because fails regularly in CI builds. Not sure why, probably something around provisioning the kotlin support in the test runtime.
-	public void testKotlinProjectFindTypes() throws Exception {
+	//Ignore because fails regularly in CI builds. Not sure why, probably something around provisioning the kotlin support in the test runtime.
+	public void IGNORE_testKotlinProjectFindTypes() throws Exception {
 		final IJavaProject project = createLaunchReadyKotlinProject("kotlin-bootapp");
 		ACondition.waitFor("Wait for kotlin main type", 20_000, () -> {
 			assertElements(findTypes(project), //something
