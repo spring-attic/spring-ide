@@ -147,14 +147,14 @@ public abstract class AbstractYamlSourceViewerConfiguration extends YEditSourceV
 		}
 	}
 
-	public final ICompletionEngine getCompletionEngine(ISourceViewer viewer) {
+	public ICompletionEngine getCompletionEngine(ISourceViewer viewer) {
 		if (completionEngine==null) {
 			completionEngine = new YamlCompletionEngine(getStructureProvider(), getAssistContextProvider(viewer));
 		}
 		return completionEngine;
 	}
 
-	protected final HoverInfoProvider getHoverProvider(ISourceViewer viewer) {
+	protected HoverInfoProvider getHoverProvider(ISourceViewer viewer) {
 		return new YamlHoverInfoProvider(getAstProvider(), getStructureProvider(), getAssistContextProvider(viewer));
 	}
 
