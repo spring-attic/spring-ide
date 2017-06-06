@@ -33,6 +33,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.osgi.framework.Bundle;
+import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport;
 import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport.Feature;
@@ -94,6 +96,8 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 	public static final int DEFAULT_JMX_PORT = 0; //means pick it dynamically
 
 	public static final String ANSI_CONSOLE_OUTPUT = "spring.boot.ansi.console";
+
+	public static final String FAST_STARTUP = "spring.boot.fast.startup";
 
 	private static final String PROFILE = "spring.boot.profile";
 	public static final String DEFAULT_PROFILE = "";
@@ -161,7 +165,8 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 	public String getVMArguments(ILaunchConfiguration conf)
 			throws CoreException {
 		try {
-			String vmArgs = super.getVMArguments(conf);
+			StringBuilder vmArgs = new StringBuilder(super.getVMArguments(conf));
+			// VM args for JMX connection
 			EnumSet<JmxBeanSupport.Feature> enabled = getEnabledJmxFeatures(conf);
 			if (!enabled.isEmpty()) {
 				int port = 0;
@@ -174,10 +179,16 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 					port = PortFinder.findFreePort(); //slightly better than calling JmxBeanSupport.randomPort()
 				}
 				String enableLiveBeanArgs = JmxBeanSupport.jmxBeanVmArgs(port, enabled);
-				vmArgs = enableLiveBeanArgs + vmArgs;
+				vmArgs.insert(0, enableLiveBeanArgs);
 				CURRENT_LAUNCH.get().setAttribute(JMX_PORT, ""+port);
 			}
-			return vmArgs;
+			// Fast startup VM args
+			String fastStartupArgs = BootActivator.getDefault().getPreferenceStore().getString(BootPreferences.PREF_BOOT_FAST_STARTUP_JVM_ARGS).trim();
+			boolean fastStartup = getFastStartup(conf) && fastStartupArgs != null && !fastStartupArgs.isEmpty();
+			if (fastStartup) {
+				vmArgs.append(fastStartupArgs);
+			}
+			return vmArgs.toString();
 		} catch (Exception e) {
 			Log.log(e);
 		}
@@ -227,12 +238,26 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		return DEFAULT_ENABLE_LIFE_CYCLE;
 	}
 
+	public static boolean getFastStartup(ILaunchConfiguration conf) {
+		boolean defaultValue = BootActivator.getDefault().getPreferenceStore().getBoolean(BootPreferences.PREF_BOOT_FAST_STARTUP_DEFAULT);
+		try {
+			return conf.getAttribute(FAST_STARTUP, defaultValue);
+		} catch (Exception e) {
+			Log.log(e);
+		}
+		return defaultValue;
+	}
+
 	public static void setEnableJMX(ILaunchConfigurationWorkingCopy wc, boolean enable) {
 		wc.setAttribute(ENABLE_JMX, enable);
 	}
 
 	public static void setEnableLifeCycle(ILaunchConfigurationWorkingCopy wc, boolean enable) {
 		wc.setAttribute(ENABLE_LIFE_CYCLE, enable);
+	}
+
+	public static void setFastStartup(ILaunchConfigurationWorkingCopy wc, boolean enable) {
+		wc.setAttribute(FAST_STARTUP, enable);
 	}
 
 	public static boolean canUseLifeCycle(ILaunchConfiguration conf) {
