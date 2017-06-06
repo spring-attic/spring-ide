@@ -38,6 +38,8 @@ import org.springsource.ide.eclipse.commons.frameworks.ui.internal.actions.Abstr
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
 
+import org.springframework.ide.eclipse.boot.util.Log;
+
 public class OpenLiveBeansGraphAction extends AbstractActionDelegate {
 
 	private static final String HOST = "127.0.0.1";
@@ -65,7 +67,7 @@ public class OpenLiveBeansGraphAction extends AbstractActionDelegate {
 			IProject project = getSelectedProject();
 			connectToProject(project);
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 			MessageDialog.openError(getShell(), "Error", ExceptionUtil.getMessage(e)+"\n\n"
 					+ "Check the error log for more details");
 		}
@@ -156,7 +158,7 @@ public class OpenLiveBeansGraphAction extends AbstractActionDelegate {
 				}
 			}
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 		}
 		return 0;
 	}
@@ -178,7 +180,7 @@ public class OpenLiveBeansGraphAction extends AbstractActionDelegate {
 				}
 			}
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 		}
 		return null;
 	}
@@ -200,10 +202,8 @@ public class OpenLiveBeansGraphAction extends AbstractActionDelegate {
 				}
 			}
 		} catch (CoreException e) {
-			BootActivator.log(e);
+			Log.log(e);
 		}
 		return candidateConfigs;
 	}
-
-
 }

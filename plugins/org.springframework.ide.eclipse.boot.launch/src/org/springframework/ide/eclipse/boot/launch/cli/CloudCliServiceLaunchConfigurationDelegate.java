@@ -132,7 +132,7 @@ public class CloudCliServiceLaunchConfigurationDelegate extends BootCliLaunchCon
 		ILaunchConfigurationType type = launchManager.getLaunchConfigurationType(TYPE_ID);
 		ILaunchConfigurationWorkingCopy config = type.newInstance(null, serviceId);
 		config.setAttribute(ATTR_CLOUD_SERVICE_ID, serviceId);
-		BootLaunchConfigurationDelegate.setEnableLiveBeanSupport(config, BootLaunchConfigurationDelegate.DEFAULT_ENABLE_LIVE_BEAN_SUPPORT);
+		BootLaunchConfigurationDelegate.setEnableLiveBeanSupport(config, BootLaunchConfigurationDelegate.DEFAULT_ENABLE_LIVE_BEAN_SUPPORT());
 		BootLaunchConfigurationDelegate.setEnableLifeCycle(config, BootLaunchConfigurationDelegate.DEFAULT_ENABLE_LIFE_CYCLE);
 		BootLaunchConfigurationDelegate.setTerminationTimeout(config,""+BootLaunchConfigurationDelegate.DEFAULT_TERMINATION_TIMEOUT);
 		BootLaunchConfigurationDelegate.setJMXPort(config, ""+BootLaunchConfigurationDelegate.DEFAULT_JMX_PORT);

@@ -100,6 +100,7 @@
 		<module>plugins/org.springframework.ide.eclipse.boot.dash</module>
 		<module>plugins/org.springframework.ide.eclipse.boot.dash.test</module>
 		<module>plugins/org.springframework.ide.eclipse.boot.launch</module>
+		<module>plugins/org.springframework.ide.eclipse.boot.launch.livebean</module>
 		<module>plugins/org.springframework.ide.eclipse.boot.launch.test</module>
 		<module>plugins/org.springframework.ide.eclipse.boot.properties.editor</module>
 		<module>plugins/org.springframework.ide.eclipse.boot.properties.editor.yaml</module>

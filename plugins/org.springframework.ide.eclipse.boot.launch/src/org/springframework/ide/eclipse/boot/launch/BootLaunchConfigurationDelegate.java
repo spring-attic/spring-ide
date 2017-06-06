@@ -81,7 +81,10 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 	public static final String BOOT_LAUNCH_MARKER = "isBootLaunch";
 
 	public static final String ENABLE_LIVE_BEAN_SUPPORT = "spring.boot.livebean.enable";
-	public static final boolean DEFAULT_ENABLE_LIVE_BEAN_SUPPORT = true;
+	public static final boolean DEFAULT_ENABLE_LIVE_BEAN_SUPPORT() {
+		BootLaunchActivator ins = BootLaunchActivator.getInstance();
+		return ins!=null && ins.isLiveBeanSupported();
+	}
 
 	public static final String ENABLE_JMX = "spring.boot.jmx.enable";
 	public static final boolean DEFAULT_ENABLE_JMX = true;
@@ -263,7 +266,7 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 			setMainType(wc, mainType);
 		}
 		setEnableJMX(wc, DEFAULT_ENABLE_JMX);
-		setEnableLiveBeanSupport(wc, DEFAULT_ENABLE_LIVE_BEAN_SUPPORT);
+		setEnableLiveBeanSupport(wc, DEFAULT_ENABLE_LIVE_BEAN_SUPPORT());
 		setEnableLifeCycle(wc, DEFAULT_ENABLE_LIFE_CYCLE);
 		setTerminationTimeout(wc,""+DEFAULT_TERMINATION_TIMEOUT);
 		setJMXPort(wc, ""+DEFAULT_JMX_PORT);
@@ -326,11 +329,11 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 
 	public static boolean getEnableLiveBeanSupport(ILaunchConfiguration conf) {
 		try {
-			return conf.getAttribute(ENABLE_LIVE_BEAN_SUPPORT, DEFAULT_ENABLE_LIVE_BEAN_SUPPORT);
+			return conf.getAttribute(ENABLE_LIVE_BEAN_SUPPORT, DEFAULT_ENABLE_LIVE_BEAN_SUPPORT());
 		} catch (Exception e) {
 			Log.log(e);
 		}
-		return DEFAULT_ENABLE_LIVE_BEAN_SUPPORT;
+		return DEFAULT_ENABLE_LIVE_BEAN_SUPPORT();
 	}
 
 	public static String getJMXPort(ILaunchConfiguration conf) {

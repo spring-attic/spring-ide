@@ -15,7 +15,7 @@ import java.util.EnumSet;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 
 /**
- * Helper methods to generate vm args for launch config with LiveBean support enabled.
+ * Helper methods to generate vm args for launch config with JMX support enabled.
  *
  * @author Kris De Volder
  */

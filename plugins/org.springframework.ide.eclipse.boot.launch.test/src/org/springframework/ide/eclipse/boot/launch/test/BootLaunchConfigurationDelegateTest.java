@@ -153,7 +153,7 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 
 	public void testGetSetLiveBean() throws Exception {
 		ILaunchConfigurationWorkingCopy wc = createWorkingCopy();
-		boolean deflt = BootLaunchConfigurationDelegate.DEFAULT_ENABLE_LIVE_BEAN_SUPPORT;
+		boolean deflt = BootLaunchConfigurationDelegate.DEFAULT_ENABLE_LIVE_BEAN_SUPPORT();
 		boolean other = !deflt;
 
 		assertEquals(deflt, BootLaunchConfigurationDelegate.getEnableLiveBeanSupport(wc));
