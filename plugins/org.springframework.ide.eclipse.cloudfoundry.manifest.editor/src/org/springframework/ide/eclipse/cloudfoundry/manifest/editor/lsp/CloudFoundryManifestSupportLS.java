@@ -62,7 +62,7 @@ public class CloudFoundryManifestSupportLS extends ProcessStreamConnectionProvid
 	}
 
 	protected String getLanguageServerJARLocation() {
-		String languageServer = "manifest-yaml-language-server-0.0.3-SNAPSHOT.jar";
+		String languageServer = "manifest-yaml-language-server-0.0.8-SNAPSHOT.jar";
 
 		Bundle bundle = Platform.getBundle(Constants.PLUGIN_ID);
 		File dataFile = bundle.getDataFile(languageServer);

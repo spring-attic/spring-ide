@@ -42,7 +42,8 @@
       </server>
       <contentTypeMapping
             contentType="org.springframework.ide.eclipse.manifest.yml"
-            id="org.eclipse.languageserver.languages.cloudfoundrymanifest">
+            id="org.eclipse.languageserver.languages.cloudfoundrymanifest"
+            languageId="manifest-yaml">
       </contentTypeMapping>
    </extension>
 
