@@ -719,6 +719,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 					.disk(params.getDiskQuota())
 					.timeout(params.getTimeout())
 					.healthCheckType(resolveHealthCheckType(params.getHealthCheckType()).orElse(null))
+					.healthCheckHttpEndpoint(params.getHealthCheckHttpEndpoint())
 					.buildpack(params.getBuildpack())
 					.command(params.getCommand())
 					.stack(params.getStack())
@@ -771,6 +772,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	private Optional<ApplicationHealthCheck> resolveHealthCheckType(String type) {
 		ApplicationHealthCheck appHealthCheck = null;
+		//TODO: PROCESS and HTTP hc-type (but presently still missing from the java client)
 		if ("port".equals(type)) {
 			appHealthCheck = ApplicationHealthCheck.PORT;
 		} else if ("none".equals(type)) {
