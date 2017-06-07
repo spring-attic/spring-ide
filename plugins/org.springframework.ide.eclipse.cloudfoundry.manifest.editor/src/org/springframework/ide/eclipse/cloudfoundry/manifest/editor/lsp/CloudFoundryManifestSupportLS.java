@@ -39,6 +39,10 @@ public class CloudFoundryManifestSupportLS extends ProcessStreamConnectionProvid
 		
 		List<String> commands = new ArrayList<>();
 		commands.add(getJDKLocation());
+		
+		commands.add("-Xdebug");
+		commands.add("-agentlib:jdwp=transport=dt_socket,address=9999,server=y,suspend=n");
+		
 		commands.add("-jar");
 		commands.add(getLanguageServerJARLocation());
 
