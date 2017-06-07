@@ -43,11 +43,12 @@ import org.cloudfoundry.operations.CloudFoundryOperations;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.applications.ApplicationDetail;
 import org.cloudfoundry.operations.applications.ApplicationHealthCheck;
+import org.cloudfoundry.operations.applications.ApplicationManifest;
 import org.cloudfoundry.operations.applications.DeleteApplicationRequest;
 import org.cloudfoundry.operations.applications.GetApplicationEnvironmentsRequest;
 import org.cloudfoundry.operations.applications.GetApplicationRequest;
 import org.cloudfoundry.operations.applications.LogsRequest;
-import org.cloudfoundry.operations.applications.PushApplicationRequest;
+import org.cloudfoundry.operations.applications.PushApplicationManifestRequest;
 import org.cloudfoundry.operations.applications.RestartApplicationRequest;
 import org.cloudfoundry.operations.applications.StartApplicationRequest;
 import org.cloudfoundry.operations.applications.StopApplicationRequest;
@@ -709,26 +710,27 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		// Environment variables require app start, so for initial push, do not start app.
 		// This will happen afterwards
 		boolean noStart = true;
-		PushApplicationRequest req = PushApplicationRequest
-				.builder()
-				.name(appName)
-				// resource matching occurs under the hood in the push operation
-				.application(params.getApplicationDataAsFile().toPath())
-				.memory(params.getMemory())
-				.diskQuota(params.getDiskQuota())
-				.timeout(params.getTimeout())
-				.healthCheckType(resolveHealthCheckType(params.getHealthCheckType()).orElse(null))
-				.buildpack(params.getBuildpack())
-				.command(params.getCommand())
-				.stack(params.getStack())
+		PushApplicationManifestRequest req = PushApplicationManifestRequest.builder()
+				.manifest(ApplicationManifest.builder()
+					.name(appName)
+					// resource matching occurs under the hood in the push operation
+					.path(params.getApplicationDataAsFile().toPath())
+					.memory(params.getMemory())
+					.disk(params.getDiskQuota())
+					.timeout(params.getTimeout())
+					.healthCheckType(resolveHealthCheckType(params.getHealthCheckType()).orElse(null))
+					.buildpack(params.getBuildpack())
+					.command(params.getCommand())
+					.stack(params.getStack())
+					.noRoute(noRoute)
+					.instances(params.getInstances())
+					.build()
+				)
 				.noStart(noStart)
-				.noRoute(noRoute)
-				.instances(params.getInstances())
 				.build();
 
-		return log("client.applications.push("+req+")",
-				_operations.applications().push(req
-					)
+		return log("client.applications.pushManifest("+req+")",
+				_operations.applications().pushManifest(req)
 		 )
 		.then(mono_debug("Updating routes, bound services, and environment variables..."))
 		.then(getApplicationDetail(appName))
