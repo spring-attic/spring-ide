@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch.test;
 
-import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.DEFAULT_ENABLE_DEBUG_OUTPUT;
+import static org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.DEFAULT_ENABLE_DEBUG_OUTPUT;
+import static org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.getEnableDebugOutput;
+import static org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.getProperties;
 import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.DEFAULT_ENABLE_LIVE_BEAN_SUPPORT;
-import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.getEnableDebugOutput;
 import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.getEnableLiveBeanSupport;
 import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.getJMXPort;
 import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.getProfile;
-import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.getProperties;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -35,12 +35,10 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.ui.PlatformUI;
-import org.junit.Ignore;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchShortcut;
 import org.springframework.ide.eclipse.boot.test.util.LaunchResult;
 import org.springframework.ide.eclipse.boot.test.util.LaunchUtil;
-
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 
 /**
