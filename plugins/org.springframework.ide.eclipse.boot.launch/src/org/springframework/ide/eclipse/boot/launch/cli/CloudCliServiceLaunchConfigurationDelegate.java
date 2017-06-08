@@ -45,22 +45,19 @@ import org.springframework.ide.eclipse.boot.util.Log;
  */
 public class CloudCliServiceLaunchConfigurationDelegate extends BootCliLaunchConfigurationDelegate {
 
-	private static final VersionRange SPRING_CLOUD_CLI_JAVA_OPTS_FORMAT_CHANGE_VERSION_RANGE = new VersionRange("1.3.0");
+	private static final VersionRange SPRING_CLOUD_CLI_SINGLE_PROCESS_VERSION_RANGE = new VersionRange("1.3.0");
 
 	public final static String TYPE_ID = "org.springframework.ide.eclipse.boot.launch.cloud.cli.service";
 
 	public final static String ATTR_CLOUD_SERVICE_ID = "local-cloud-service-id";
 
-	private List<String> getCloudCliServiceVmArguments(ILaunchConfiguration configuration, int jmxPort) {
+	private List<String> getCloudCliServiceLifeCycleVmArguments(ILaunchConfiguration configuration, int jmxPort) {
 		List<String> vmArgs = new ArrayList<>();
 			EnumSet<JmxBeanSupport.Feature> enabled = BootLaunchConfigurationDelegate
 					.getEnabledJmxFeatures(configuration);
 			if (!enabled.isEmpty()) {
 				String enableLiveBeanArgs = JmxBeanSupport.jmxBeanVmArgs(jmxPort, enabled);
 				vmArgs.addAll(Arrays.asList(enableLiveBeanArgs.split("\n")));
-			}
-			if (BootLaunchConfigurationDelegate.supportsAnsiConsoleOutput()) {
-				vmArgs.add("-Dspring.output.ansi.enabled=always");
 			}
 		return vmArgs;
 	}
@@ -73,22 +70,37 @@ public class CloudCliServiceLaunchConfigurationDelegate extends BootCliLaunchCon
 			} else {
 				String serviceId = configuration.getAttribute(ATTR_CLOUD_SERVICE_ID, (String) null);
 				Version cloudCliVersion = cloudCliInstall.getVersion();
+				List<String> vmArgs = new ArrayList<>();
 				List<String> args = new ArrayList<>();
+
 				args.add(CloudCliInstall.COMMAND_PREFIX);
 				args.add(serviceId);
+
+				if (cloudCliVersion != null && SPRING_CLOUD_CLI_SINGLE_PROCESS_VERSION_RANGE.includes(cloudCliVersion)) {
+					args.add("--deployer=thin");
+				}
+
+				args.add("--");
+				args.add("--logging.level.org.springframework.cloud.launcher.deployer=DEBUG");
+
+				// VM argument for the service log output
+				if (BootLaunchConfigurationDelegate.supportsAnsiConsoleOutput()) {
+					vmArgs.add("-Dspring.output.ansi.enabled=always");
+				}
+
 				if (canUseLifeCycle(cloudCliVersion)) {
 					int jmxPort = getJmxPort(configuration);
 					// Set the JMX port for launch
 					launch.setAttribute(BootLaunchConfigurationDelegate.JMX_PORT, String.valueOf(jmxPort));
+					vmArgs.addAll(getCloudCliServiceLifeCycleVmArguments(configuration, jmxPort));
 					// Set the JMX port connection jvm args for the service
-					List<String> vmArgs = getCloudCliServiceVmArguments(configuration, jmxPort);
 					if (!vmArgs.isEmpty()) {
-						args.add("--");
-						args.add("--logging.level.org.springframework.cloud.launcher.deployer=DEBUG");
 						args.add("--spring.cloud.launcher.deployables." + serviceId + ".properties.JAVA_OPTS=" + String.join(",", vmArgs));
 					}
 				} else {
-					args.add("--deployer=thin");
+					if (!vmArgs.isEmpty()) {
+						args.add("--spring.cloud.launcher.deployables." + serviceId + ".properties.spring.cloud.deployer.local.javaOpts=" + String.join(",", vmArgs));
+					}
 				}
 				return args.toArray(new String[args.size()]);
 			}
@@ -173,7 +185,7 @@ public class CloudCliServiceLaunchConfigurationDelegate extends BootCliLaunchCon
 		// Cloud CLI version below 1.2.0 and over 1.3.0 can't have JMX connection to cloud service hence life cycle should be disabled.
 		if (cloudCliVersion == null
 				|| !CloudCliInstall.CLOUD_CLI_JAVA_OPTS_SUPPORTING_VERSIONS.includes(cloudCliVersion)
-				|| SPRING_CLOUD_CLI_JAVA_OPTS_FORMAT_CHANGE_VERSION_RANGE.includes(cloudCliVersion)) {
+				|| SPRING_CLOUD_CLI_SINGLE_PROCESS_VERSION_RANGE.includes(cloudCliVersion)) {
 			return false;
 		}
 		return true;
