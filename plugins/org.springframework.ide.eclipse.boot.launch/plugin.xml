@@ -237,6 +237,10 @@
            id="org.springframework.ide.eclipse.boot.launch.process.BootProcessFactory"
            class="org.springframework.ide.eclipse.boot.launch.process.BootProcessFactory">
    </processFactory>
+   <processFactory
+         class="org.springframework.ide.eclipse.boot.launch.cli.CloudCliServiceLaunchConfigurationDelegate$CloudCliProcessFactory"
+         id="org.springframework.ide.eclipse.boot.launch.cli.CloudCliServiceLaunchConfigurationDelegate$CloudCliProcessFactory">
+   </processFactory>
  </extension>
    
    	 <extension point="org.eclipse.ui.console.consolePageParticipants">
