@@ -170,6 +170,117 @@ public class ManifestCompareMergeTests {
 	}
 
 	@Test
+	public void test_health_check_process() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setHealthCheckType("process");
+		performMergeTest(props,
+			"applications:\n" +
+			"- name: app\n" +
+			"  no-route: true\n"
+			, // ==>
+			"applications:\n" +
+			"- name: app\n" +
+			"  health-check-type: process\n" +
+			"  no-route: true\n"
+		);
+
+		performMergeTest(props,
+			"applications:\n" +
+			"- name: app\n" +
+			"  no-route: true\n" +
+			"  health-check-type: port\n"
+			, // ==>
+			"applications:\n" +
+			"- name: app\n" +
+			"  no-route: true\n" +
+			"  health-check-type: process\n"
+		);
+
+		// Test switch from http and http endpoint to process
+		performMergeTest(props,
+				"applications:\n" +
+				"- name: app\n" +
+				"  no-route: true\n" +
+				"  health-check-type: http\n" +
+				"  health-check-http-endpoint: /testhealth\n"
+				, // ==>
+				"applications:\n" +
+				"- name: app\n" +
+				"  no-route: true\n" +
+				"  health-check-type: process\n"
+			);
+
+		performMergeTest(props,
+			"applications:\n" +
+			"- name: app\n" +
+			"  no-route: true\n" +
+			"  health-check-type: process\n"
+			, // ==>
+			null
+		);
+	}
+
+	@Test
+	public void test_health_check_http_endpoint() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		// test both "http" type and "http endpoint", as both are used together
+		props.setHealthCheckType("http");
+		props.setHealthCheckHttpEndpoint("/testhealth");
+		performMergeTest(props,
+			"applications:\n" +
+			"- name: app\n" +
+			"  no-route: true\n"
+			, // ==>
+			"applications:\n" +
+			"- name: app\n" +
+			"  health-check-type: http\n" +
+			"  health-check-http-endpoint: /testhealth\n" +
+			"  no-route: true\n"
+		);
+
+		performMergeTest(props,
+			"applications:\n" +
+			"- name: app\n" +
+			"  no-route: true\n" +
+			"  health-check-type: port\n"
+			, // ==>
+			"applications:\n" +
+			"- name: app\n" +
+			"  health-check-http-endpoint: /testhealth\n" +
+			"  no-route: true\n" +
+			"  health-check-type: http\n"
+		);
+
+		// Test that old endpoint is replaced with new one
+		performMergeTest(props,
+				"applications:\n" +
+				"- name: app\n" +
+				"  no-route: true\n" +
+				"  health-check-type: http\n" +
+				"  health-check-http-endpoint: /oldtesthealth\n"
+				, // ==>
+				"applications:\n" +
+				"- name: app\n" +
+				"  no-route: true\n" +
+				"  health-check-type: http\n" +
+				"  health-check-http-endpoint: /testhealth\n"
+			);
+
+		performMergeTest(props,
+			"applications:\n" +
+			"- name: app\n" +
+			"  no-route: true\n" +
+			"  health-check-type: http\n" +
+			"  health-check-http-endpoint: /testhealth\n"
+			, // ==>
+			null
+		);
+	}
+
+
+	@Test
 	public void test_memory_1() throws Exception {
 		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
 		props.setAppName("app");
