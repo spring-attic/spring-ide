@@ -279,6 +279,7 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 		args.setDiskQuota(getDiskQuota());
 		args.setTimeout(getTimeout());
 		args.setHealthCheckType(getHealthCheckType());
+		args.setHealthCheckHttpEndpoint(getHealthCheckHttpEndpoint());
 		args.setBuildpack(getBuildpack());
 		args.setCommand(getCommand());
 		args.setStack(getStack());
