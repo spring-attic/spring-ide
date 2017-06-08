@@ -29,4 +29,5 @@ public interface ApplicationExtras {
 	Mono<Integer> getTimeout();
 	Mono<String> getCommand();
 	Mono<String> getHealthCheckType();
+	Mono<String> getHealthCheckHttpEndpoint();
 }

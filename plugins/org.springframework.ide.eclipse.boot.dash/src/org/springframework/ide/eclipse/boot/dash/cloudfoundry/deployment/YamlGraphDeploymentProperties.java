@@ -183,6 +183,11 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 	}
 
 	@Override
+	public String getHealthCheckHttpEndpoint() {
+		return getAbsoluteValue(ApplicationManifestHandler.HEALTH_CHECK_HTTP_ENDPOINT_PROP, String.class);
+	}
+
+	@Override
 	public String getStack() {
 		return getAbsoluteValue(ApplicationManifestHandler.STACK_PROP, String.class);
 	}
@@ -294,6 +299,11 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 			if (!Objects.equal(getHealthCheckType(), props.getHealthCheckType())) {
 				getDifferenceForEntry(edits, ApplicationManifestHandler.HEALTH_CHECK_TYPE_PROP, props.getHealthCheckType(),
 						DeploymentProperties.DEFAULT_HEALTH_CHECK_TYPE, String.class);
+			}
+
+			if (!Objects.equal(getHealthCheckHttpEndpoint(), props.getHealthCheckHttpEndpoint())) {
+				getDifferenceForEntry(edits, ApplicationManifestHandler.HEALTH_CHECK_HTTP_ENDPOINT_PROP, props.getHealthCheckHttpEndpoint(),
+						null, String.class);
 			}
 
 			if (!Objects.equal(getCommand(), props.getCommand())) {

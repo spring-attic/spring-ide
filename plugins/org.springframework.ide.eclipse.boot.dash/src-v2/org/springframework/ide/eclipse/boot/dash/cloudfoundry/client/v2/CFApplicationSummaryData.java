@@ -129,7 +129,7 @@ public class CFApplicationSummaryData implements CFApplication {
 
 	@Override
 	public String getHealthCheckHttpEndpoint() {
-		throw new IllegalStateException("Not implemented yet!");
+		return extras.getHealthCheckHttpEndpoint().block();
 	}
 
 }

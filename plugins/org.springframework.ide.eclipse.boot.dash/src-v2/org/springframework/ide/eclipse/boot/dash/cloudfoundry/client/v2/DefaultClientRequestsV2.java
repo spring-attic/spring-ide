@@ -271,6 +271,10 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 				entity.then((e) -> Mono.justOrEmpty(e.getHealthCheckType()))
 		);
 
+		Mono<String> healthCheckHttpEndpoint = prefetch("healthCheckHttpEndpoint",
+				entity.then((e) -> Mono.justOrEmpty(e.getHealthCheckHttpEndpoint()))
+		);
+
 		return new ApplicationExtras() {
 			@Override
 			public Mono<List<String>> getServices() {
@@ -304,6 +308,11 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 			@Override
 			public Mono<String> getHealthCheckType() {
 				return healthCheckType;
+			}
+
+			@Override
+			public Mono<String> getHealthCheckHttpEndpoint() {
+				return healthCheckHttpEndpoint;
 			}
 		};
 	}
@@ -772,11 +781,12 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	private Optional<ApplicationHealthCheck> resolveHealthCheckType(String type) {
 		ApplicationHealthCheck appHealthCheck = null;
-		//TODO: PROCESS and HTTP hc-type (but presently still missing from the java client)
-		if ("port".equals(type)) {
-			appHealthCheck = ApplicationHealthCheck.PORT;
-		} else if ("none".equals(type)) {
-			appHealthCheck = ApplicationHealthCheck.NONE;
+		if (type != null) {
+			try {
+				appHealthCheck = ApplicationHealthCheck.from(type);
+			} catch (IllegalArgumentException e) {
+				Log.log(e);
+			}
 		}
 		return Optional.ofNullable(appHealthCheck);
 	}

@@ -63,6 +63,7 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 	 */
 	private File archive;
 	private String healthCheckType;
+	private String healthCheckHttpEndpoint;
 	private boolean randomeRoute = false;
 
 	public CloudApplicationDeploymentProperties() {
@@ -119,6 +120,14 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 
 	public void setHealthCheckType(String healthCheckType) {
 		this.healthCheckType = healthCheckType;
+	}
+
+	public String getHealthCheckHttpEndpoint() {
+		return healthCheckHttpEndpoint;
+	}
+
+	public void setHealthCheckHttpEndpoint(String hche) {
+		this.healthCheckHttpEndpoint = hche;
 	}
 
 	public void setCommand(String command) {

@@ -36,6 +36,8 @@ public interface DeploymentProperties {
 
 	String getHealthCheckType();
 
+	String getHealthCheckHttpEndpoint();
+
 	String getBuildpack();
 
 	String getCommand();

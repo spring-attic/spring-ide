@@ -31,7 +31,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicati
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceStats;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.HealthChecks;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.InstanceState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ApplicationExtras;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFApplicationDetailData;
@@ -81,6 +80,7 @@ public class MockCFApplication {
 	private int diskQuota = 1024;
 	private Integer timeout = null;
 	private String healthCheckType = DeploymentProperties.DEFAULT_HEALTH_CHECK_TYPE;
+	private String healthCheckHttpEndpoint = null;
 	private String command = null;
 	private String stack = null;
 	private MockCloudFoundryClientFactory owner;
@@ -162,6 +162,14 @@ public class MockCFApplication {
 
 	public void setHealthCheckType(String t) {
 		this.healthCheckType = t;
+	}
+
+	public String getHealthCheckHttpEndpoint() {
+		return healthCheckHttpEndpoint;
+	}
+
+	public void setHealthCheckHttpEndpoint(String t) {
+		this.healthCheckHttpEndpoint = t;
 	}
 
 	public void setHealthCheckTypeMaybe(String t) {
@@ -271,6 +279,10 @@ public class MockCFApplication {
 			@Override
 			public Mono<String> getHealthCheckType() {
 				return just(healthCheckType);
+			}
+			@Override
+			public Mono<String> getHealthCheckHttpEndpoint() {
+				return just(healthCheckHttpEndpoint);
 			}
 
 		};
