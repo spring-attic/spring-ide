@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 import org.eclipse.jface.text.IDocument;
 import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestYamlExclusivePropertiesReconciler.ProblemFactory;
 import org.springframework.ide.eclipse.editor.support.reconcile.IProblemCollector;
-import org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity;
 import org.springframework.ide.eclipse.editor.support.reconcile.ProblemType;
 import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblemImpl;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlASTProvider;

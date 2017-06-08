@@ -27,6 +27,7 @@ import org.eclipse.lsp4e.server.ProcessStreamConnectionProvider;
 import org.eclipse.lsp4j.jsonrpc.messages.Message;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.osgi.framework.Bundle;
+import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestEditorActivator;
 
 /**
  * @author Martin Lippert
@@ -35,13 +36,15 @@ import org.osgi.framework.Bundle;
 public class CloudFoundryManifestSupportLS extends ProcessStreamConnectionProvider {
 
 	public CloudFoundryManifestSupportLS() {
-		System.out.println("CF MAMIFEST LANGUAGE SERVER CREATED !!!!!");
-		
+		if (!ManifestEditorActivator.getDefault().isLanguageServerEnabled()) {
+			return;
+		}
+
 		List<String> commands = new ArrayList<>();
 		commands.add(getJDKLocation());
 		
-		commands.add("-Xdebug");
-		commands.add("-agentlib:jdwp=transport=dt_socket,address=9999,server=y,suspend=n");
+//		commands.add("-Xdebug");
+//		commands.add("-agentlib:jdwp=transport=dt_socket,address=9999,server=y,suspend=n");
 		
 		commands.add("-jar");
 		commands.add(getLanguageServerJARLocation());
