@@ -804,7 +804,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jarsigner-plugin</artifactId>
-				<version>3.0.2</version>
+				<version>1.4.0</version>
 				<executions>
 					<execution>
 						<id>sign</id>
