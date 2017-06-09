@@ -48,6 +48,25 @@ public class Yaml2DeploymentPropertiesTest {
 	}
 
 	@Test
+	public void test_health_check_process() throws Exception {
+		CloudApplicationDeploymentProperties props = readDeploymentProperties("manifest-parse-data/health-check-process.yml");
+		assertEquals("Health check types not equal", "process", props.getHealthCheckType());
+	}
+
+	@Test
+	public void test_health_check_port() throws Exception {
+		CloudApplicationDeploymentProperties props = readDeploymentProperties("manifest-parse-data/health-check-port.yml");
+		assertEquals("Health check types not equal", "port", props.getHealthCheckType());
+	}
+
+	@Test
+	public void test_health_check_http() throws Exception {
+		CloudApplicationDeploymentProperties props = readDeploymentProperties("manifest-parse-data/health-check-http.yml");
+		assertEquals("Health check types not equal", "http", props.getHealthCheckType());
+		assertEquals("Health check http endpoints not equal", "/testhealth", props.getHealthCheckHttpEndpoint());
+	}
+
+	@Test
 	public void test_no_route_1() throws Exception {
 		CloudApplicationDeploymentProperties props = readDeploymentProperties("manifest-parse-data/no-route-1.yml");
 		HashSet<String> uris = new HashSet<>(props.getUris());

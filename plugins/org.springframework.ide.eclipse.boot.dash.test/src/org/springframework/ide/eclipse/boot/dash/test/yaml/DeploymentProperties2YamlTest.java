@@ -157,4 +157,15 @@ public class DeploymentProperties2YamlTest {
 		testDeploymentProperties(props, "manifest-generate-data/health-check-process.yml");
 	}
 
+	@Test
+	public void test_health_check_port() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setMemory(512);
+		props.setHealthCheckType("port");
+		props.setUris(Arrays.asList("app.springsource.org"));
+
+		testDeploymentProperties(props, "manifest-generate-data/health-check-port.yml");
+	}
+
 }
