@@ -256,6 +256,7 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 		properties.setDiskQuota(app == null ? DeploymentProperties.DEFAULT_MEMORY : app.getDiskQuota());
 		properties.setTimeout(app == null ? null : app.getTimeout());
 		properties.setHealthCheckType(app==null ? null : app.getHealthCheckType());
+		properties.setHealthCheckHttpEndpoint(app == null ? null : app.getHealthCheckHttpEndpoint());
 		properties.setCommand(app == null ? null : app.getCommand());
 		properties.setStack(app == null ? null : app.getStack());
 
