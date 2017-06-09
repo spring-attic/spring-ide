@@ -339,7 +339,7 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 	 *  2. The class must be registered to this ID using plugin.xml (extension point
 	 *  org.eclipse.debug.core.processFactories)
 	 */
-	public static void setProcessFactory(ILaunchConfigurationWorkingCopy wc, Class<BootProcessFactory> klass) {
+	public static void setProcessFactory(ILaunchConfigurationWorkingCopy wc, Class<? extends BootProcessFactory> klass) {
 		wc.setAttribute(ATTR_PROCESS_FACTORY_ID, klass.getName());
 	}
 
