@@ -549,6 +549,40 @@ public class ManifestCompareMergeTests {
 	}
 
 	@Test
+	public void test_health_check_http() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setMemory(2048);
+		props.setHealthCheckType("http");
+		props.setHealthCheckHttpEndpoint("/testhealth");
+		props.setUris(Collections.singletonList("app-1.springsource.org"));
+
+		performMergeTest(getTestFile("mergeTestsData/health-check-http.yml"), props, getTestFile("mergeTestsData/health-check-http-expected.yml"));
+	}
+
+	@Test
+	public void test_health_check_process_1() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setUris(Collections.singletonList("app-1.springsource.org"));
+		props.setMemory(2048);
+		props.setHealthCheckType("process");
+		performMergeTest(getTestFile("mergeTestsData/health-check-process.yml"), props, getTestFile("mergeTestsData/health-check-process-expected.yml"));
+	}
+
+	@Test
+	public void test_health_check_port_1() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setUris(Collections.singletonList("app-1.springsource.org"));
+		props.setMemory(2048);
+		// NOTE: port is a "default" value, so when setting port, the resulting manifest will have no health check type
+		// as no health check type is equivalent to having "port" type
+		props.setHealthCheckType("port");
+		performMergeTest(getTestFile("mergeTestsData/health-check-port.yml"), props, getTestFile("mergeTestsData/health-check-port-expected.yml"));
+	}
+
+	@Test
 	public void test_instances_1() throws Exception {
 		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
 		props.setAppName("app");
