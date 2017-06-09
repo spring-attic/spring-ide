@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Pivotal, Inc.
+ * Copyright (c) 2016-2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
+
 package org.springframework.ide.eclipse.editor.support.util;
 
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TypedRegion;
+
 
 /**
  * A non-sucky alternative to {@link IRegion}. Represents a region of text in a document.
@@ -64,6 +66,13 @@ public class DocumentRegion implements CharSequence {
 		this.doc = doc;
 		this.start = limitRange(start, 0, doc.getLength());
 		this.end = limitRange(end, start, doc.getLength());
+	}
+
+	/**
+	 * Create {@link DocumentRegion} covering the whole document.
+	 */
+	public DocumentRegion(IDocument doc) {
+		this(doc, 0, doc.getLength());
 	}
 
 	private int limitRange(int offset, int min, int max) {
@@ -264,4 +273,33 @@ public class DocumentRegion implements CharSequence {
 		return offset-start;
 	}
 
+	public int getLength() {
+		return length();
+	}
+
+	public boolean endsWith(CharSequence string) {
+		int myLen = length();
+		int strLen = string.length();
+		if (myLen>=strLen) {
+			for (int i = 0; i < strLen; i++) {
+				if (charAt(myLen-strLen+i)!=string.charAt(i)) {
+					return false;
+				}
+			}
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Take documentRegion at the end of
+	 */
+	public DocumentRegion textAtEnd(int numChars) {
+		numChars = Math.min(getLength(), numChars);
+		return new DocumentRegion(doc, end-numChars, end);
+	}
+
+//	public Range asRange() throws BadLocationException {
+//		return doc.toRange(asRegion());
+//	}
 }

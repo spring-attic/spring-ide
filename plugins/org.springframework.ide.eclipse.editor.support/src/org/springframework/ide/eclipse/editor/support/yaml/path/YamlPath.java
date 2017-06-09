@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.editor.support.yaml.path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeRef;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeRef.RootRef;
@@ -21,10 +22,12 @@ import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeRef.TupleValu
 import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPathSegment.YamlPathSegmentType;
 
+import reactor.core.publisher.Flux;
+
 /**
  * @author Kris De Volder
  */
-public class YamlPath {
+public class YamlPath extends AbstractYamlTraversal {
 
 	public static final YamlPath EMPTY = new YamlPath();
 	private final YamlPathSegment[] segments;
@@ -72,7 +75,7 @@ public class YamlPath {
 	 * by spliting the name at each dot.
 	 */
 	public static YamlPath fromProperty(String propName) {
-		ArrayList<YamlPathSegment> segments = new ArrayList<YamlPathSegment>();
+		ArrayList<YamlPathSegment> segments = new ArrayList<>();
 		for (String s : propName.split("\\.")) {
 			segments.add(YamlPathSegment.valueAt(s));
 		}
@@ -114,25 +117,31 @@ public class YamlPath {
 		return null;
 	}
 
+	public YamlPath prepend(YamlPathSegment s) {
+		YamlPathSegment[] newPath = new YamlPathSegment[segments.length+1];
+		newPath[0] = s;
+		System.arraycopy(segments, 0, newPath, 1, segments.length);
+		return new YamlPath(newPath);
+	}
+
 	public YamlPath append(YamlPathSegment s) {
 		YamlPathSegment[] newPath = Arrays.copyOf(segments, segments.length+1);
 		newPath[segments.length] = s;
 		return new YamlPath(newPath);
 	}
 
-	public <T extends YamlNavigable<T>> T traverse(T startNode) {
-		try {
-			T node = startNode;
+	@Override
+	public <T extends YamlNavigable<T>> Stream<T> traverseAmbiguously(T startNode) {
+		if (startNode!=null) {
+			Stream<T> result = Stream.of(startNode);
 			for (YamlPathSegment s : segments) {
-				if (node==null) {
-					return null;
-				}
-				node = node.traverse(s);
+				result = result.flatMap((node) -> {
+					return node.traverseAmbiguously(s);
+				});
 			}
-			return node;
-		} catch (Exception e) {
-			return null;
+			return result;
 		}
+		return Stream.empty();
 	}
 
 	public YamlPath dropFirst(int dropCount) {
@@ -168,6 +177,7 @@ public class YamlPath {
 	}
 
 
+	@Override
 	public boolean isEmpty() {
 		return segments.length==0;
 	}
@@ -183,7 +193,7 @@ public class YamlPath {
 	 * do not have a corresponding YamlPath. For such cases this method may return null.
 	 */
 	public static YamlPath fromASTPath(List<NodeRef<?>> path) {
-		List<YamlPathSegment> segments = new ArrayList<YamlPathSegment>(path.size());
+		List<YamlPathSegment> segments = new ArrayList<>(path.size());
 		for (NodeRef<?> nodeRef : path) {
 			switch (nodeRef.getKind()) {
 			case ROOT:
@@ -263,6 +273,41 @@ public class YamlPath {
 			}
 		}
 		return new YamlPath(common);
+	}
+
+	public static YamlPath decode(List<String> encodedSegments) {
+		return Flux.fromIterable(encodedSegments)
+				.map(YamlPathSegment::decode)
+				.collectList()
+				.map(YamlPath::new)
+				.block();
+	}
+
+	@Override
+	public YamlTraversal then(YamlTraversal _other) {
+		if (isEmpty()) {
+			return _other;
+		} else if (_other.isEmpty()) {
+			return this;
+		} else if (_other instanceof YamlPathSegment) {
+			return this.append((YamlPathSegment) _other);
+		} else if (_other instanceof YamlPath) {
+			YamlPath other = (YamlPath) _other;
+			return new YamlPath(
+				Stream.concat(
+					Arrays.stream(this.segments),
+					Arrays.stream(other.segments)
+				).toArray(sz -> new YamlPathSegment[sz])
+			);
+		} else {
+			return new SequencingYamlTraversal(this, _other);
+		}
+	}
+
+	@Override
+	public boolean canEmpty() {
+		//The empty path is the only one that 'canEmpty' since any step in path moves the cursor.
+		return isEmpty();
 	}
 
 }

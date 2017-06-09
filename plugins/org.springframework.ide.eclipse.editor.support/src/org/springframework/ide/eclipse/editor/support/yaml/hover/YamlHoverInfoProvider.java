@@ -12,8 +12,6 @@ package org.springframework.ide.eclipse.editor.support.yaml.hover;
 
 import java.util.List;
 
-import javax.swing.plaf.ListUI;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;

@@ -10,11 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.editor.support.yaml.completions;
 
-import org.eclipse.jface.text.IDocument;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfo;
 import org.springframework.ide.eclipse.editor.support.util.DocumentRegion;
-import org.springframework.ide.eclipse.editor.support.util.DocumentUtil;
 import org.springframework.ide.eclipse.editor.support.util.PrefixFinder;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlDocument;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPath;

@@ -50,4 +50,41 @@ public class ReconcileProblemImpl implements ReconcileProblem {
 		return len;
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + len;
+		result = prime * result + ((msg == null) ? 0 : msg.hashCode());
+		result = prime * result + offset;
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ReconcileProblemImpl other = (ReconcileProblemImpl) obj;
+		if (len != other.len)
+			return false;
+		if (msg == null) {
+			if (other.msg != null)
+				return false;
+		} else if (!msg.equals(other.msg))
+			return false;
+		if (offset != other.offset)
+			return false;
+		if (type == null) {
+			if (other.type != null)
+				return false;
+		} else if (!type.equals(other.type))
+			return false;
+		return true;
+	}
+
 }

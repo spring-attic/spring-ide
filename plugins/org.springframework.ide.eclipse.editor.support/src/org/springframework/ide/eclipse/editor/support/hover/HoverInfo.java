@@ -12,7 +12,6 @@ package org.springframework.ide.eclipse.editor.support.hover;
 
 import java.net.URI;
 import java.net.URLDecoder;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -137,7 +136,7 @@ public abstract class HoverInfo extends BrowserInformationControlInput {
 
 	private synchronized String registerAction(Runnable runnable) {
 		if (actions==null) {
-			actions = new HashMap<String, Runnable>();
+			actions = new HashMap<>();
 		}
 		String actionId = ""+actions.size();
 		actions.put(actionId, runnable);

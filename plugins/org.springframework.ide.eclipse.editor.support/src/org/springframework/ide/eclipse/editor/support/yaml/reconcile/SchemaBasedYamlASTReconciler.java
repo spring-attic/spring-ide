@@ -10,20 +10,37 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.editor.support.yaml.reconcile;
 
+import static org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil.getSimpleError;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.text.IDocument;
+import org.springframework.ide.eclipse.editor.support.reconcile.DuplicateFilterProblemCollector;
 import org.springframework.ide.eclipse.editor.support.reconcile.IProblemCollector;
+import org.springframework.ide.eclipse.editor.support.reconcile.ProblemType;
+import org.springframework.ide.eclipse.editor.support.reconcile.ProblemTypeProvider;
+import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileException;
+import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblemImpl;
+import org.springframework.ide.eclipse.editor.support.reconcile.ReplacementQuickfix;
+import org.springframework.ide.eclipse.editor.support.util.DocumentRegion;
+import org.springframework.ide.eclipse.editor.support.util.ValueParseException;
 import org.springframework.ide.eclipse.editor.support.util.ValueParser;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlFileAST;
+import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPath;
+import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPathSegment;
+import org.springframework.ide.eclipse.editor.support.yaml.schema.ASTDynamicSchemaContext;
+import org.springframework.ide.eclipse.editor.support.yaml.schema.DynamicSchemaContext;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YType;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypedProperty;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YamlSchema;
+import org.springframework.ide.eclipse.editor.support.yaml.schema.constraints.Constraint;
 import org.springframework.util.StringUtils;
+import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
@@ -37,8 +54,14 @@ public class SchemaBasedYamlASTReconciler implements YamlASTReconciler {
 	private final YamlSchema schema;
 	private final YTypeUtil typeUtil;
 
+	private List<Runnable> delayedConstraints = new ArrayList<>();
+	// keeps track of dynamic constraints discovered during reconciler walk
+	// the constraints are validated at the end of the walk rather than during the walk.
+	// This facilitates constraints that depend on, for example, the contents of the ast type cache being
+	// populated prior to checking.
+
 	public SchemaBasedYamlASTReconciler(IProblemCollector problems, YamlSchema schema) {
-		this.problems = problems;
+		this.problems = new DuplicateFilterProblemCollector(problems);
 		this.schema = schema;
 		this.typeUtil = schema.getTypeUtil();
 	}
@@ -49,25 +72,36 @@ public class SchemaBasedYamlASTReconciler implements YamlASTReconciler {
 		if (nodes!=null && !nodes.isEmpty()) {
 			mon.beginTask("Reconcile", nodes.size());
 			try {
-				for (Node node : nodes) {
-					reconcile(node, schema.getTopLevelType());
-					mon.worked(1);
+				if (nodes!=null && !nodes.isEmpty()) {
+					for (int i = 0; i < nodes.size(); i++) {
+						Node node = nodes.get(i);
+						reconcile(ast, new YamlPath(YamlPathSegment.valueAt(i)), /*parent*/null, node, schema.getTopLevelType());
+						mon.worked(1);
+					}
 				}
 			} finally {
+				verifyDelayedConstraints();
 				mon.done();
 			}
 		}
 	}
 
-	private void reconcile(Node node, YType type) {
+	private void reconcile(YamlFileAST ast, YamlPath path, Node parent, Node node, YType type) {
 		if (type!=null) {
+			DynamicSchemaContext schemaContext = new ASTDynamicSchemaContext(ast, path, node);
+//			type = typeUtil.inferMoreSpecificType(type, schemaContext);
+//			if (typeCollector!=null) {
+//				typeCollector.accept(node, type);
+//			}
+			checkConstraints(parent, node, type, schemaContext);
 			switch (node.getNodeId()) {
 			case mapping:
 				MappingNode map = (MappingNode) node;
 				if (typeUtil.isMap(type)) {
 					for (NodeTuple entry : map.getValue()) {
-						reconcile(entry.getKeyNode(), typeUtil.getKeyType(type));
-						reconcile(entry.getValueNode(), typeUtil.getDomainType(type));
+						String key = NodeUtil.asScalar(entry.getKeyNode());
+						reconcile(ast, keyAt(path, key), map, entry.getKeyNode(), typeUtil.getKeyType(type));
+						reconcile(ast, valueAt(path, key), map, entry.getValueNode(), typeUtil.getDomainType(type));
 					}
 				} else if (typeUtil.isBean(type)) {
 					Map<String, YTypedProperty> beanProperties = typeUtil.getPropertiesMap(type);
@@ -81,7 +115,15 @@ public class SchemaBasedYamlASTReconciler implements YamlASTReconciler {
 							if (prop==null) {
 								unknownBeanProperty(keyNode, type, key);
 							} else {
-								reconcile(entry.getValueNode(), prop.getType());
+								if (prop.isDeprecated()) {
+									String msg = prop.getDeprecationMessage();
+									if (StringUtil.hasText(msg)) {
+										problems.accept(YamlSchemaProblems.deprecatedProperty(msg, keyNode));
+									} else {
+										problems.accept(YamlSchemaProblems.deprecatedProperty(keyNode, type, prop));
+									}
+								}
+								reconcile(ast, valueAt(path, key), map, entry.getValueNode(), prop.getType());
 							}
 						}
 					}
@@ -92,8 +134,9 @@ public class SchemaBasedYamlASTReconciler implements YamlASTReconciler {
 			case sequence:
 				SequenceNode seq = (SequenceNode) node;
 				if (typeUtil.isSequencable(type)) {
-					for (Node el : seq.getValue()) {
-						reconcile(el, typeUtil.getDomainType(type));
+					for (int i = 0; i < seq.getValue().size(); i++) {
+						Node el = seq.getValue().get(i);
+						reconcile(ast, valueAt(path, i), seq, el, typeUtil.getDomainType(type));
 					}
 				} else {
 					expectTypeButFoundSequence(type, node);
@@ -104,10 +147,15 @@ public class SchemaBasedYamlASTReconciler implements YamlASTReconciler {
 					ValueParser parser = typeUtil.getValueParser(type);
 					if (parser!=null) {
 						try {
-							parser.parse(NodeUtil.asScalar(node));
+							String value = NodeUtil.asScalar(node);
+							if (value!=null) {
+								parser.parse(value);
+							}
 						} catch (Exception e) {
-							String msg = ExceptionUtil.getMessage(e);
-							valueParseError(type, node, msg);
+							ProblemType problemType = getProblemType(e);
+							DocumentRegion region = getRegion(e, ast.getDocument(), node);
+							String msg = getMessage(e);
+							valueParseError(type, region, msg, problemType, getValueReplacement(e));
 						}
 					}
 				} else {
@@ -120,12 +168,119 @@ public class SchemaBasedYamlASTReconciler implements YamlASTReconciler {
 		}
 	}
 
+	protected ReplacementQuickfix getValueReplacement(Exception _e) {
+		if (_e instanceof ReconcileException) {
+			ReconcileException e = (ReconcileException) _e;
+			return e.getReplacement();
+		}
+		return null;
+	}
+
+	protected DocumentRegion getRegion(Exception e, IDocument doc, Node node) {
+		DocumentRegion region = new DocumentRegion(doc, node.getStartMark().getIndex(), node.getEndMark().getIndex());
+		if (e instanceof ValueParseException) {
+			ValueParseException parseException = (ValueParseException) e;
+			int start = parseException.getStartIndex() >= 0
+					? Math.min(node.getStartMark().getIndex() + parseException.getStartIndex(),
+							node.getEndMark().getIndex())
+					: node.getStartMark().getIndex();
+			int end = parseException.getEndIndex() >= 0
+					? Math.min(node.getStartMark().getIndex() + parseException.getEndIndex(),
+							node.getEndMark().getIndex())
+					: node.getEndMark().getIndex();
+			region = new DocumentRegion(doc, start, end);
+		}
+		return region;
+	}
+
+	private String getMessage(Exception _e) {
+		Throwable e = ExceptionUtil.getDeepestCause(_e);
+
+		// If value parse exception, do not append any additional information
+		if (e instanceof ValueParseException) {
+			String msg = e.getMessage();
+			if (StringUtil.hasText(msg)) {
+				return msg;
+			} else {
+				return "An error occurred: " + getSimpleError(e);
+			}
+		} else {
+			return ExceptionUtil.getMessage(e);
+		}
+	}
+
+	protected ProblemType getProblemType(Exception _e) {
+		Throwable e = ExceptionUtil.getDeepestCause(_e);
+		return e instanceof ProblemTypeProvider ? ((ProblemTypeProvider) e).getProblemType() : YamlSchemaProblems.SCHEMA_PROBLEM;
+	}
+
+
+	protected void checkConstraints(Node parent, Node node, YType type, DynamicSchemaContext dc) {
+		//Check for other constraints attached to the type
+		for (Constraint constraint : typeUtil.getConstraints(type)) {
+			if (constraint!=null) {
+				delayedConstraints.add(() -> {
+					constraint.verify(dc, parent, node, type, problems);
+				});
+			}
+		}
+	}
+
+	private void verifyDelayedConstraints() {
+		for (Runnable runnable : delayedConstraints) {
+			runnable.run();
+		}
+		delayedConstraints.clear();
+	}
+
+	private YamlPath keyAt(YamlPath path, String key) {
+		if (path!=null && key!=null) {
+			return path.append(YamlPathSegment.keyAt(key));
+		}
+		return null;
+	}
+
+	private YamlPath valueAt(YamlPath path, int index) {
+		if (path!=null) {
+			return path.append(YamlPathSegment.valueAt(index));
+		}
+		return null;
+	}
+
+	private YamlPath valueAt(YamlPath path, String key) {
+		if (path!=null && key!=null) {
+			return path.append(YamlPathSegment.valueAt(key));
+		}
+		return null;
+	}
+
 	private void valueParseError(YType type, Node node, String parseErrorMsg) {
 		String msg= "Couldn't parse as '"+describe(type)+"'";
 		if (StringUtils.hasText(parseErrorMsg)) {
 			msg += " ("+parseErrorMsg+")";
 		}
 		problem(node, msg);
+	}
+
+	private void valueParseError(YType type, DocumentRegion region, String parseErrorMsg, ProblemType problemType, ReplacementQuickfix fix) {
+		if (!StringUtil.hasText(parseErrorMsg)) {
+			parseErrorMsg= "Couldn't parse as '"+describe(type)+"'";
+		}
+		ReconcileProblemImpl problem = YamlSchemaProblems.problem(problemType, parseErrorMsg, region);
+// TODO: backport quickfix support for deprecated replacement somehow.
+//		if (fix!=null && StringUtil.hasText(fix.replacement)) {
+//			try {
+//				problem.addQuickfix(
+//					new QuickfixData<>(quickfixes.SIMPLE_TEXT_EDIT,
+//						new ReplaceStringData(region, fix.replacement),
+//						fix.msg
+//					)
+//				);
+//			} catch (Exception e) {
+//				Log.log(e);
+//			}
+//		}
+		problems.accept(problem);
 	}
 
 	private void unknownBeanProperty(Node keyNode, YType type, String name) {

@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.jface.text.IDocument;
 import org.springframework.ide.eclipse.editor.support.util.Collector;
 import org.springframework.ide.eclipse.editor.support.util.IRequestor;
 import org.springframework.ide.eclipse.editor.support.util.RememberLast;
@@ -34,18 +35,20 @@ import org.yaml.snakeyaml.nodes.SequenceNode;
  */
 public class YamlFileAST {
 
+	private final IDocument doc;
 	private static final List<NodeRef<?>> NO_CHILDREN = Collections.emptyList();
 	private List<Node> nodes;
 
-	public YamlFileAST(Iterable<Node> iter) {
-		nodes = new ArrayList<Node>();
+	public YamlFileAST(IDocument doc, Iterable<Node> iter) {
+		this.doc = doc;
+		nodes = new ArrayList<>();
 		for (Node node : iter) {
 			nodes.add(node);
 		}
 	}
 
 	public List<NodeRef<?>> findPath(int offset) {
-		Collector<NodeRef<?>> path = new Collector<NodeRef<?>>();
+		Collector<NodeRef<?>> path = new Collector<>();
 		findPath(offset, path);
 		return path.get();
 	}
@@ -112,7 +115,7 @@ public class YamlFileAST {
 
 	private static List<NodeRef<?>> getChildren(SequenceNode seq) {
 		int nodes = seq.getValue().size();
-		ArrayList<NodeRef<?>> children = new ArrayList<NodeRef<?>>(nodes);
+		ArrayList<NodeRef<?>> children = new ArrayList<>(nodes);
 		for (int i = 0; i < nodes; i++) {
 			children.add(new SeqRef(seq, i));
 		}
@@ -121,7 +124,7 @@ public class YamlFileAST {
 
 	private static List<NodeRef<?>> getChildren(MappingNode map) {
 		int entries = map.getValue().size();
-		ArrayList<NodeRef<?>> children = new ArrayList<NodeRef<?>>(entries*2);
+		ArrayList<NodeRef<?>> children = new ArrayList<>(entries*2);
 		for (int i = 0; i < entries; i++) {
 			children.add(new TupleKeyRef(map, i));
 			children.add(new TupleValueRef(map, i));
@@ -130,7 +133,7 @@ public class YamlFileAST {
 	}
 
 	public NodeRef<?> findNodeRef(int offset) {
-		RememberLast<NodeRef<?>> lastNode = new RememberLast<NodeRef<?>>();
+		RememberLast<NodeRef<?>> lastNode = new RememberLast<>();
 		findPath(offset, lastNode);
 		return lastNode.get();
 	}
@@ -151,5 +154,8 @@ public class YamlFileAST {
 		nodes.set(index, value);
 	}
 
+	public IDocument getDocument() {
+		return doc;
+	}
 
 }

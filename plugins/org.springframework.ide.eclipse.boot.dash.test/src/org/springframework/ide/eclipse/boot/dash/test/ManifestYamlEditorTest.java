@@ -10,8 +10,12 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test;
 
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockManifestEditor;
+import org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity;
+import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
 
 public class ManifestYamlEditorTest {
 
@@ -36,6 +40,8 @@ public class ManifestYamlEditorTest {
 				// ---------------
 				"env:\n"+
 				"  <*>",
+				// ---------------
+				"health-check-http-endpoint: <*>",
 				// ----------------
 				"health-check-type: <*>",
 				// ---------------
@@ -105,6 +111,9 @@ public class ManifestYamlEditorTest {
 				"applications:\n" +
 				"- env:\n"+
 				"    <*>",
+				// ---------------
+				"applications:\n" +
+				"- health-check-http-endpoint: <*>",
 				// ---------------
 				"applications:\n" +
 				"- health-check-type: <*>",
@@ -178,31 +187,188 @@ public class ManifestYamlEditorTest {
 				"random-route: true<*>"
 		);
 		assertCompletions("health-check-type: <*>",
-				"health-check-type: none<*>",
-				"health-check-type: port<*>"
+				"health-check-type: http<*>",
+//				"health-check-type: none<*>", Still valid, but not suggested because its deprecated
+				"health-check-type: port<*>",
+				"health-check-type: process<*>"
 		);
+	}
+
+	@Test public void reconcileHealthCheckType() throws Exception {
+		MockManifestEditor editor;
+		ReconcileProblem problem;
+
+		editor = new MockManifestEditor(
+				"applications:\n" +
+				"- name: my-app\n" +
+				"  health-check-type: http\n" +
+				"  health-check-http-endpoint: /health"
+		);
+		editor.assertProblems(/*NONE*/);
+
+		editor = new MockManifestEditor(
+				"applications:\n" +
+				"- name: foo\n" +
+				"  health-check-type: none"
+		);
+		problem = editor.assertProblems("none|'none' is deprecated in favor of 'process'").get(0);
+		assertEquals(ProblemSeverity.WARNING, problem.getType().getDefaultSeverity());
+
+		editor = new MockManifestEditor(
+				"applications:\n" +
+				"- name: foo\n" +
+				"  health-check-type: port"
+		);
+		editor.assertProblems(/*NONE*/);
+
+		editor = new MockManifestEditor(
+				"applications:\n" +
+				"- name: foo\n" +
+				"  health-check-type: process"
+		);
+		editor.assertProblems(/*NONE*/);
+	}
+
+	@Test public void reconcileHealthHttpEndPointIgnoredWarning() throws Exception {
+		MockManifestEditor editor;
+		ReconcileProblem problem;
+
+		editor = new MockManifestEditor(
+				"applications:\n" +
+				"- name: my-app\n" +
+				"  health-check-type: process\n" +
+				"  health-check-http-endpoint: /health"
+		);
+		editor.assertProblems("health-check-http-endpoint|This has no effect unless `health-check-type` is `http` (but it is currently set to `process`)");
+
+		editor = new MockManifestEditor(
+				"health-check-type: http\n" +
+				"applications:\n" +
+				"- name: my-app\n" +
+				"  health-check-http-endpoint: /health"
+		);
+		editor.assertProblems(/*NONE*/);
+
+		editor = new MockManifestEditor(
+				"applications:\n" +
+				"- name: my-app\n" +
+				"  health-check-http-endpoint: /health"
+		);
+		problem = editor.assertProblems("health-check-http-endpoint|This has no effect unless `health-check-type` is `http` (but it is currently set to `port`)").get(0);
+		assertEquals(ProblemSeverity.WARNING, problem.getType().getDefaultSeverity());
+
+		editor = new MockManifestEditor(
+				"applications:\n" +
+				"- name: my-app\n" +
+				"  health-check-type: http\n" +
+				"  health-check-http-endpoint: /health"
+		);
+		editor.assertProblems(/*NONE*/);
+
+		editor = new MockManifestEditor(
+				"health-check-type: http\n" +
+				"applications:\n" +
+				"- name: my-app\n" +
+				"  health-check-type: process\n" +
+				"  health-check-http-endpoint: /health"
+		);
+		editor.assertProblems("health-check-http-endpoint|This has no effect unless `health-check-type` is `http` (but it is currently set to `process`)");
+
+		editor = new MockManifestEditor(
+				"health-check-http-endpoint: /health"
+		);
+		editor.assertProblems("health-check-http-endpoint|This has no effect unless `health-check-type` is `http` (but it is currently set to `port`)");
+
+		editor = new MockManifestEditor(
+				"health-check-type: process\n" +
+				"health-check-http-endpoint: /health"
+		);
+		editor.assertProblems("health-check-http-endpoint|This has no effect unless `health-check-type` is `http` (but it is currently set to `process`)");
 	}
 
 	@Test
 	public void hoverInfos() throws Exception {
 		MockManifestEditor editor = new MockManifestEditor(
-				"memory: 1G\n" +
-				"applications:\n" +
-				"  - buildpack: zbuildpack\n" +
-				"    domain: zdomain\n" +
-				"    name: foo\n" +
-				"    health-check-type: none"
+			"memory: 1G\n" +
+			"#comment\n" +
+			"inherit: base-manifest.yml\n"+
+			"applications:\n" +
+			"- buildpack: zbuildpack\n" +
+			"  domain: zdomain\n" +
+			"  name: foo\n" +
+			"  command: java main.java\n" +
+			"  disk_quota: 1024M\n" +
+			"  domains:\n" +
+			"  - pivotal.io\n" +
+			"  - otherdomain.org\n" +
+			"  env:\n" +
+			"    RAILS_ENV: production\n" +
+			"    RACK_ENV: production\n" +
+			"  host: apppage\n" +
+			"  hosts:\n" +
+			"  - apppage2\n" +
+			"  - appage3\n" +
+			"  instances: 2\n" +
+			"  no-hostname: true\n" +
+			"  no-route: true\n" +
+			"  path: somepath/app.jar\n" +
+			"  random-route: true\n" +
+			"  routes:\n" +
+			"  - route: tcp-example.com:1234\n" +
+			"  services:\n" +
+			"  - instance_ABC\n" +
+			"  - instance_XYZ\n" +
+			"  stack: cflinuxfs2\n" +
+			"  timeout: 80\n" +
+			"  health-check-type: none\n" +
+			"  health-check-http-endpoint: /health\n"
 		);
 		editor.assertIsHoverRegion("memory");
+		editor.assertIsHoverRegion("inherit");
 		editor.assertIsHoverRegion("applications");
 		editor.assertIsHoverRegion("buildpack");
 		editor.assertIsHoverRegion("domain");
 		editor.assertIsHoverRegion("name");
+		editor.assertIsHoverRegion("command");
+		editor.assertIsHoverRegion("disk_quota");
+		editor.assertIsHoverRegion("domains");
+		editor.assertIsHoverRegion("env");
+		editor.assertIsHoverRegion("host");
+		editor.assertIsHoverRegion("hosts");
+		editor.assertIsHoverRegion("instances");
+		editor.assertIsHoverRegion("no-hostname");
+		editor.assertIsHoverRegion("no-route");
+		editor.assertIsHoverRegion("path");
+		editor.assertIsHoverRegion("random-route");
+		editor.assertIsHoverRegion("routes");
+		editor.assertIsHoverRegion("services");
+		editor.assertIsHoverRegion("stack");
+		editor.assertIsHoverRegion("timeout");
+		editor.assertIsHoverRegion("health-check-type");
 
 		editor.assertHoverContains("memory", "Use the <code>memory</code> attribute to specify the memory limit");
 		editor.assertHoverContains("1G", "Use the <code>memory</code> attribute to specify the memory limit");
+		editor.assertHoverContains("inherit", "For example, every child of a parent manifest called <code>base-manifest.yml</code> begins like this:");
 		editor.assertHoverContains("buildpack", "use the <code>buildpack</code> attribute to specify its URL or name");
-		editor.assertHoverContains("health-check-type", "Use the <code>health-check-type</code> attribute to");
+	    editor.assertHoverContains("name", "The <code>name</code> attribute is the only required attribute");
+	    editor.assertHoverContains("command", "On the command line, use the <code>-c</code> option to specify the custom start command as the following example shows");
+	    editor.assertHoverContains("disk_quota", "Use the <code>disk_quota</code> attribute to allocate the disk space for your app instance");
+	    editor.assertHoverContains("domain", "You can use the <code>domain</code> attribute when you want your application to be served");
+	    editor.assertHoverContains("domains", "Use the <code>domains</code> attribute to provide multiple domains");
+	    editor.assertHoverContains("env", "The <code>env</code> block consists of a heading, then one or more environment variable/value pairs");
+	    editor.assertHoverContains("host", "Use the <code>host</code> attribute to provide a hostname, or subdomain, in the form of a string");
+	    editor.assertHoverContains("hosts", "Use the <code>hosts</code> attribute to provide multiple hostnames, or subdomains");
+	    editor.assertHoverContains("instances", "Use the <code>instances</code> attribute to specify the number of app instances that you want to start upon push");
+	    editor.assertHoverContains("no-hostname", "By default, if you do not provide a hostname, the URL for the app takes the form of <code>APP-NAME.DOMAIN</code>");
+	    editor.assertHoverContains("no-route", "You can use the <code>no-route</code> attribute with a value of <code>true</code> to prevent a route from being created for your application");
+	    editor.assertHoverContains("path", "You can use the <code>path</code> attribute to tell Cloud Foundry where to find your application");
+	    editor.assertHoverContains("random-route", "Use the <code>random-route</code> attribute to create a URL that includes the app name");
+	    editor.assertHoverContains("routes", "Each route for this app is created if it does not already exist");
+	    editor.assertHoverContains("services", "The <code>services</code> block consists of a heading, then one or more service instance names");
+	    editor.assertHoverContains("stack", "Use the <code>stack</code> attribute to specify which stack to deploy your application to.");
+	    editor.assertHoverContains("timeout", "The <code>timeout</code> attribute defines the number of seconds Cloud Foundry allocates for starting your application");
+	    editor.assertHoverContains("health-check-type", "Use the <code>health-check-type</code> attribute to");
+	    editor.assertHoverContains("health-check-http-endpoint", "customize the endpoint for the <code>http</code>");
 	}
 
 	@Test
@@ -295,7 +461,7 @@ public class ManifestYamlEditorTest {
 				"  disk_quota: 2048\n"
 		);
 		editor.assertProblems(
-				"not a number|Positive Integer",
+				"not a number|NumberFormatException",
 				"notBool|boolean",
 				"1024|Memory",
 				"2048|Memory"
@@ -310,9 +476,9 @@ public class ManifestYamlEditorTest {
 				"  disk_quota: -2048M\n"
 		);
 		editor.assertProblems(
-				"-3|Positive Integer",
-				"-1024M|Memory",
-				"-2048M|Memory"
+				"-3|Value must be at least 1",
+				"-1024M|Negative value is not allowed",
+				"-2048M|Negative value is not allowed"
 		);
 
 		//check that correct values are indeed accepted
@@ -347,72 +513,106 @@ public class ManifestYamlEditorTest {
 		editor.assertProblems(/*none*/);
 	}
 
-	@Test
-	public void reconcileRoutesAndLegacyRoutes() throws Exception {
+	@Test public void reconcileRoutesWithNoHost() throws Exception {
 		MockManifestEditor editor;
 
-		//check for 'format' errors:
 		editor = new MockManifestEditor(
-				"applications:\n" +
-				"- name: foo\n" +
-				"  no-hostname: false\n" +
-				"  instances: 2\n" +
-				"  routes: \n"+
-				"  - route: app.springsource.org\n"+
-				"  memory: 1024M\n" +
-				"  domain: springsource.org\n" +
-				"  host: app\n" +
-				"  disk_quota: 2048M\n"
+			"applications:\n" +
+			"- name: my-app\n" +
+			"  no-hostname: true\n" +
+			"  routes:\n" +
+			"  - route: myapp.org"
 		);
+		//editor.ignoreProblem("UnknownDomainProblem");
+
 		editor.assertProblems(
-				"no-hostname|legacy property",
-				"domain|legacy property",
-				"host|legacy property"
+			"no-hostname|Property cannot co-exist with property 'routes'",
+			"routes|Property cannot co-exist with properties [no-hostname]"
 		);
 
-		//check for 'format' errors:
 		editor = new MockManifestEditor(
-				"routes: \n"+
-				"- route: app.springsource.org\n"+
+				"no-hostname: true\n" +
 				"applications:\n" +
-				"- name: foo\n" +
-				"  no-hostname: false\n" +
-				"  instances: 2\n" +
-				"  memory: 1024M\n" +
-				"  domain: springsource.org\n" +
-				"  host: app\n" +
-				"  disk_quota: 2048M\n"
+				"- name: my-app\n" +
+				"  routes:\n" +
+				"  - route: myapp.org"
 		);
+		//editor.ignoreProblem("UnknownDomainProblem");
+
 		editor.assertProblems(
-				"no-hostname|legacy property",
-				"domain|legacy property",
-				"host|legacy property"
+			"no-hostname|Property cannot co-exist with property 'routes'",
+			"routes|Property cannot co-exist with properties [no-hostname]"
 		);
 
-		//check for 'format' errors:
 		editor = new MockManifestEditor(
-				"routes: \n"+
-				"- route: app.springsource.org\n"+
-				"applications:\n" +
-				"- name: foo\n" +
-				"  instances: 2\n" +
-				"  memory: 1024M\n" +
-				"  disk_quota: 2048M\n"
+			"no-hostname: true\n" +
+			"applications:\n" +
+			"- name: my-app\n" +
+			"  no-hostname: true\n" +
+			"  routes:\n" +
+			"  - route: myapp.org"
 		);
-		editor.assertProblems(/*none*/);
+		//editor.ignoreProblem("UnknownDomainProblem");
 
-		//check for 'format' errors:
+		editor.assertProblems(
+			"no-hostname|Property cannot co-exist with property 'routes'",
+			"no-hostname|Property cannot co-exist with property 'routes'",
+			"routes|Property cannot co-exist with properties [no-hostname]"
+		);
+
 		editor = new MockManifestEditor(
+			"no-hostname: true\n" +
+			"applications:\n" +
+			"- name: my-app\n" +
+			"  host: some-app\n" +
+			"  routes:\n" +
+			"  - route: myapp.org"
+		);
+		//editor.ignoreProblem("UnknownDomainProblem");
+
+		editor.assertProblems(
+			"no-hostname|Property cannot co-exist with property 'routes'",
+			"host|Property cannot co-exist with property 'routes'",
+			"routes|Property cannot co-exist with properties [host, no-hostname]"
+		);
+
+		editor = new MockManifestEditor(
+			"no-hostname: true\n" +
+			"applications:\n" +
+			"- name: my-app\n" +
+			"  routes:\n" +
+			"  - route: myapp.org\n" +
+			"- name: app2\n" +
+			"  routes:\n" +
+			"  - route: my-route.org"
+		);
+		//editor.ignoreProblem("UnknownDomainProblem");
+
+		editor.assertProblems(
+			"no-hostname|Property cannot co-exist with property 'routes'",
+			"routes|Property cannot co-exist with properties [no-hostname]",
+			"routes|Property cannot co-exist with properties [no-hostname]"
+		);
+	}
+
+	@Test public void deprecatedHealthCheckTypeQuickfix() throws Exception {
+		MockManifestEditor editor = new MockManifestEditor(
 				"applications:\n" +
 				"- name: foo\n" +
-				"  no-hostname: false\n" +
-				"  instances: 2\n" +
-				"  memory: 1024M\n" +
-				"  domain: springsource.org\n" +
-				"  host: app\n" +
-				"  disk_quota: 2048M\n"
+				"  health-check-type: none"
 		);
-		editor.assertProblems(/*none*/);
+		ReconcileProblem problem = editor.assertProblems("none|'none' is deprecated in favor of 'process'").get(0);
+		assertEquals(ProblemSeverity.WARNING, problem.getType().getDefaultSeverity());
+// TODO: quickfix not backported.
+//		CodeAction quickfix = editor.assertCodeAction(problem);
+//		assertEquals("Replace deprecated value 'none' by 'process'", quickfix.getLabel());
+//		quickfix.perform();
+//
+//		editor.assertRawText(
+//				"applications:\n" +
+//				"- name: foo\n" +
+//				"  health-check-type: process"
+//		);
 	}
 
 	//////////////////////////////////////////////////////////////////////////////

@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.cloudfoundry.manifest.editor;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
+import org.springframework.ide.eclipse.editor.support.util.ValueParseException;
 import org.springframework.ide.eclipse.editor.support.util.ValueParser;
 
 import com.google.common.collect.ImmutableSet;
@@ -26,8 +27,6 @@ import com.google.common.collect.Sets;
  */
 public class ManifestYmlValueParsers {
 
-	public static final ValueParser POS_INTEGER = integerRange(0, null);
-
 	public static final ValueParser MEMORY = new ValueParser() {
 
 		private final ImmutableSet<String> GIGABYTE = ImmutableSet.of("G", "GB");
@@ -35,19 +34,19 @@ public class ManifestYmlValueParsers {
 		private final Set<String> UNITS = Sets.union(GIGABYTE, MEGABYTE);
 
 		@Override
-		public Object parse(String str) {
+		public Object parse(String str) throws Exception {
 			str = str.trim();
 			String unit = getUnit(str.toUpperCase());
 			if (unit==null) {
-				throw new NumberFormatException(
-						"'"+str+"' doesn't end with a valid unit of memory ('M', 'MB', 'G' or 'GB')"
+				throw new ValueParseException(
+						"'"+str+"' doesn't end with a valid unit of Memory ('M', 'MB', 'G' or 'GB')"
 				);
 			}
 			str = str.substring(0, str.length()-unit.length());
 			int unitSize = GIGABYTE.contains(unit)?1024:1;
 			int value = Integer.parseInt(str);
 			if (value<0) {
-				throw new NumberFormatException("Negative value is not allowed");
+				throw new ValueParseException("Negative value is not allowed");
 			}
 			return value * unitSize;
 		}
@@ -61,30 +60,5 @@ public class ManifestYmlValueParsers {
 			return null;
 		}
 	};
-
-	public static ValueParser integerAtLeast(final Integer lowerBound) {
-		return integerRange(lowerBound, null);
-	}
-
-	public static ValueParser integerRange(final Integer lowerBound, final Integer upperBound) {
-		Assert.isLegal(lowerBound==null || upperBound==null || lowerBound <= upperBound);
-		return new ValueParser() {
-			@Override
-			public Object parse(String str) {
-				int value = Integer.parseInt(str);
-				if (lowerBound!=null && value<lowerBound) {
-					if (lowerBound==0) {
-						throw new NumberFormatException("Value must be positive");
-					} else {
-						throw new NumberFormatException("Value must be at least "+lowerBound);
-					}
-				}
-				if (upperBound!=null && value>upperBound) {
-					throw new NumberFormatException("Value must be at most "+upperBound);
-				}
-				return value;
-			}
-		};
-	}
 
 }

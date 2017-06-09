@@ -115,7 +115,7 @@ public class ReconcileStrategy implements IReconcilingStrategy, IReconcilingStra
 		return fDocument;
 	}
 
-	protected SeverityAwareProblemCollector createProblemCollector() {
+	protected IProblemCollector createProblemCollector() {
 		IAnnotationModel model= getAnnotationModel();
 		if (model == null)
 			return null;
@@ -161,13 +161,12 @@ public class ReconcileStrategy implements IReconcilingStrategy, IReconcilingStra
 
 		public void beginCollecting() {
 			getSeverities().startSession();
-			fAddAnnotations= new HashMap<Annotation, Position>();
+			fAddAnnotations= new HashMap<>();
 		}
 
 		public void endCollecting() {
-			List<Annotation> toRemove= new ArrayList<Annotation>();
+			List<Annotation> toRemove= new ArrayList<>();
 			synchronized (fLockObject) {
-				@SuppressWarnings("unchecked")
 				Iterator<Annotation> iter= fAnnotationModel.getAnnotationIterator();
 				while (iter.hasNext()) {
 					Annotation annotation= iter.next();
