@@ -804,7 +804,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jarsigner-plugin</artifactId>
-				<version>1.4</version>
+				<version>3.0.2</version>
 				<executions>
 					<execution>
 						<id>sign</id>
@@ -819,7 +819,8 @@
 					<keystore>${signing.keystore}</keystore>
 					<storepass>${signing.store.password}</storepass>
 					<keypass>${signing.key.password}</keypass>
-					<tsa>http://timestamp.digicert.com</tsa>
+					<tsa>http://sha256timestamp.ws.symantec.com/sha256/timestamp</tsa>
+<!--					<tsa>http://timestamp.digicert.com</tsa> -->
 					<!-- Could try this, maybe it fix the signing fails? <tsa>https://freetsa.org</tsa> -->
 					<verbose>true</verbose>
 				</configuration>
