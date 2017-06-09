@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2016 Pivotal, Inc.
+ * Copyright (c) 2015, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,6 +28,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.bootVersion;
+import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.addBootVersion;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
 
 import java.io.IOException;
@@ -77,7 +78,7 @@ import org.w3c.dom.Element;
 @SuppressWarnings("restriction")
 public class EditStartersModelTest {
 
-	private static final String BOOT_1_4_X_RELEASE = "1.4.7.RELEASE";
+	private static final String BOOT_1_3_X_RELEASE = "1.3.8.RELEASE";
 	private static final String REPOSITORY = "repository";
 	private static final String REPOSITORIES = "repositories";
 	private MockInitializrService initializr = new MockInitializrService();
@@ -226,7 +227,8 @@ public class EditStartersModelTest {
 	public void addMultipleStartersWithSameBom() throws Exception {
 		//This test uses more 'controlled' parameters:
 		IProject project = harness.createBootProject("addMultipleStartersWithSameBom",
-				bootVersion(BOOT_1_4_X_RELEASE), // boot version fixed
+				addBootVersion(BOOT_1_3_X_RELEASE),
+				bootVersion(BOOT_1_3_X_RELEASE), // boot version fixed
 				withStarters("web")
 		);
 		initializr.setInputs("sample"); // sample intializr json captured for this version
@@ -266,7 +268,8 @@ public class EditStartersModelTest {
 	public void addMultipleStartersWithDifferentBom() throws Exception {
 		//This test uses more 'controlled' parameters:
 		IProject project = harness.createBootProject("addMultipleStartersWithDifferentBom",
-				bootVersion(BOOT_1_4_X_RELEASE), // boot version fixed
+				addBootVersion(BOOT_1_3_X_RELEASE),
+				bootVersion(BOOT_1_3_X_RELEASE), // boot version fixed
 				withStarters("web")
 		);
 		initializr.setInputs("sample"); // sample intializr json captured for this version
@@ -304,8 +307,9 @@ public class EditStartersModelTest {
 	@Test
 	public void addBomWithSubsetOfRepos() throws Exception {
 		//This test uses more 'controlled' parameters:
-		String bootVersion = BOOT_1_4_X_RELEASE;
+		String bootVersion = BOOT_1_3_X_RELEASE;
 		IProject project = harness.createBootProject("addBomWithSubsetOfRepos",
+				addBootVersion(BOOT_1_3_X_RELEASE),
 				bootVersion(bootVersion), // boot version fixed
 				withStarters("web")
 		);
@@ -330,8 +334,9 @@ public class EditStartersModelTest {
 	@Test
 	public void addDependencyWithRepo() throws Exception {
 		//This test uses more 'controlled' parameters:
-		String bootVersion = BOOT_1_4_X_RELEASE;
+		String bootVersion = BOOT_1_3_X_RELEASE;
 		IProject project = harness.createBootProject("addDependencyWithRepo",
+				addBootVersion(BOOT_1_3_X_RELEASE),
 				bootVersion(bootVersion), // boot version fixed
 				withStarters("web")
 		);
