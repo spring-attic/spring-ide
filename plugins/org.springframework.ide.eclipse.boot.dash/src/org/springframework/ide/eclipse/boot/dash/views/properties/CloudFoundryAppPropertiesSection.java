@@ -29,7 +29,7 @@ public class CloudFoundryAppPropertiesSection extends AbstractBdeGeneralProperti
 				new InstancesPropertyControl(),
 				new UrlPropertyControl<>(BootDashElement.class, "URL:", ((e) -> e.getUrl())),
 				new DefaultPathPropertyControl(),
-				new HealthCheckPropertyControl(),
+				new ReadOnlyStringPropertyControl<>(CloudAppDashElement.class, "Healthcheck:", (e) -> e.getHealthCheck()),
 				new ReadOnlyStringPropertyControl<>(CloudAppDashElement.class, "Healthcheck Http Endpoint:", (e) -> e.getHealthCheckHttpEndpoint()),
 				new TagsPropertyControl()
 		};
