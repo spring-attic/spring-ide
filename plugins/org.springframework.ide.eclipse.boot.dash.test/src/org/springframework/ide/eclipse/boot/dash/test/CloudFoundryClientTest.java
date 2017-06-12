@@ -90,7 +90,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 import junit.framework.AssertionFailedError;
-import reactor.core.Cancellation;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -749,7 +749,7 @@ public class CloudFoundryClientTest {
 
 		String appName = appHarness.randomAppName();
 		IApplicationLogConsole listener = mock(IApplicationLogConsole.class);
-		Cancellation token = client.streamLogs(appName, listener);
+		Disposable token = client.streamLogs(appName, listener);
 		assertNotNull(token);
 
 		Future<Void> pushResult = doAsync(() -> {

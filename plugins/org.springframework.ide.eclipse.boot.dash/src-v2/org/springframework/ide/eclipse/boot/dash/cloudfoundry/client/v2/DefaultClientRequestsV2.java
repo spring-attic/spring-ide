@@ -101,6 +101,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
 import reactor.core.Cancellation;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -386,7 +387,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	@Override
-	public Cancellation streamLogs(String appName, IApplicationLogConsole logConsole) throws Exception {
+	public Disposable streamLogs(String appName, IApplicationLogConsole logConsole) throws Exception {
 		Flux<LogMessage> stream = log("operations.applications.logs()",
 			_operations.applications()
 			.logs(LogsRequest.builder()
@@ -399,7 +400,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		.retryWhen(retryInterval(Duration.ofMillis(500), Duration.ofMinutes(1)))
 		;
 
-		 Cancellation cancellation = ReactorUtils.sort(
+		 Disposable cancellation = ReactorUtils.sort(
 				stream,
 				(m1, m2) -> Long.compare(m1.getTimestamp(), m2.getTimestamp()),
 				Duration.ofSeconds(1)
