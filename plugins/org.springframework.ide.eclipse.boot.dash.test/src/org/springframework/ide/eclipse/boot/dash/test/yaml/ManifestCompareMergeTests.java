@@ -30,13 +30,14 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudData;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFCloudDomainData;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlGraphDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.test.AllBootDashTests;
-import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCFDomain;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 
 /**
@@ -50,9 +51,9 @@ public class ManifestCompareMergeTests {
 	public static final String DEFAULT_BUILDPACK = "java_buildpack_offline";
 
 	public static final List<CFCloudDomain> SPRING_CLOUD_DOMAINS = Arrays.<CFCloudDomain>asList(
-			new MockCFDomain("springsource.org"),
-			new MockCFDomain("spring.io"),
-			new MockCFDomain("spring.framework"));
+			new CFCloudDomainData("springsource.org"),
+			new CFCloudDomainData("spring.io"),
+			new CFCloudDomainData("spring.framework"));
 
 	public static final List<CFStack> SPRING_CLOUD_STACKS = Arrays.asList(new CFStack[] { new CFStack() {
 		@Override
@@ -61,12 +62,8 @@ public class ManifestCompareMergeTests {
 		}
 	}});
 
-	public static Map<String, Object> createCloudDataMap() {
-		Map<String, Object> cloudData = new HashMap<>();
-		cloudData.put(ApplicationManifestHandler.DOMAINS_PROP, SPRING_CLOUD_DOMAINS);
-		cloudData.put(ApplicationManifestHandler.BUILDPACK_PROP, DEFAULT_BUILDPACK);
-		cloudData.put(ApplicationManifestHandler.STACK_PROP, SPRING_CLOUD_STACKS);
-		return cloudData;
+	public static CloudData createCloudData() {
+		return new CloudData(SPRING_CLOUD_DOMAINS, DEFAULT_BUILDPACK, SPRING_CLOUD_STACKS);
 	}
 
 	private static void performMergeTest(File manifest, DeploymentProperties props, File expected) throws Exception {
@@ -77,7 +74,7 @@ public class ManifestCompareMergeTests {
 	}
 
 	private static void performMergeTest(DeploymentProperties props, String manifest, String expectText) throws Exception {
-		YamlGraphDeploymentProperties yamlGraphProps = new YamlGraphDeploymentProperties(manifest, props.getAppName(), createCloudDataMap());
+		YamlGraphDeploymentProperties yamlGraphProps = new YamlGraphDeploymentProperties(manifest, props.getAppName(), createCloudData());
 		TextEdit edit = yamlGraphProps.getDifferences(props);
 		if (expectText == null) {
 			assertEquals(null, edit);

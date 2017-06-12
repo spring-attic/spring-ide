@@ -31,6 +31,7 @@ import org.eclipse.ui.texteditor.DocumentProviderRegistry;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.IElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudData;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.AppNameAnnotation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.AppNameAnnotationModel;
@@ -228,7 +229,7 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 				selectedAppName.dispose();
 			});
 		}
-		
+
 		abstract String getManifestContents();
 
 		/**
@@ -424,7 +425,7 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 			public void elementContentAboutToBeReplaced(Object arg0) {
 			}
 		};
-		
+
 		{
 			onDispose((d) -> {
 				saveOrDiscardIfNeeded();
@@ -603,7 +604,7 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 				return result;
 			}
 		};
-		
+
 		{
 			onDispose((d) -> {
 				validator.dispose();
@@ -673,7 +674,7 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 	final private CFApplication deployedApp;
 
-	final private Map<String, Object> cloudData;
+	final private CloudData cloudData;
 
 	final IProject project;
 
@@ -685,7 +686,7 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 	final private Validator validator;
 
-	public DeploymentPropertiesDialogModel(UserInteractions ui, Map<String, Object> cloudData, IProject project, CFApplication deployedApp) {
+	public DeploymentPropertiesDialogModel(UserInteractions ui, CloudData cloudData, IProject project, CFApplication deployedApp) {
 		super();
 		this.ui = ui;
 		this.deployedApp = deployedApp;

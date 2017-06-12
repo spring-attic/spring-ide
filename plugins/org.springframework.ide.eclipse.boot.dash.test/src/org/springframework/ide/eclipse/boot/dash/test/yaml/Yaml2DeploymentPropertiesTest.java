@@ -38,7 +38,7 @@ import com.google.common.collect.ImmutableSet;
 public class Yaml2DeploymentPropertiesTest {
 
 	private static CloudApplicationDeploymentProperties readDeploymentProperties(final String filePath) throws Exception {
-		ApplicationManifestHandler handler = new ApplicationManifestHandler(null, ManifestCompareMergeTests.createCloudDataMap()) {
+		ApplicationManifestHandler handler = new ApplicationManifestHandler(null, ManifestCompareMergeTests.createCloudData()) {
 			@Override
 			protected InputStream getInputStream() throws Exception {
 				return new FileInputStream(ManifestCompareMergeTests.getTestFile(filePath));

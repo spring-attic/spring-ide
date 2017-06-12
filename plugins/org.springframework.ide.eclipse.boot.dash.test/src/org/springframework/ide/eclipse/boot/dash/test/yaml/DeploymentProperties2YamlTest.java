@@ -35,7 +35,7 @@ import org.yaml.snakeyaml.Yaml;
 public class DeploymentProperties2YamlTest {
 
 	private static void testDeploymentProperties(CloudApplicationDeploymentProperties props, String expectedYamlFilePath) throws Exception {
-		Map<Object, Object> map = ApplicationManifestHandler.toYaml(props, ManifestCompareMergeTests.createCloudDataMap());
+		Map<Object, Object> map = ApplicationManifestHandler.toYaml(props, ManifestCompareMergeTests.createCloudData());
 
 		DumperOptions options = new DumperOptions();
 		options.setExplicitStart(true);

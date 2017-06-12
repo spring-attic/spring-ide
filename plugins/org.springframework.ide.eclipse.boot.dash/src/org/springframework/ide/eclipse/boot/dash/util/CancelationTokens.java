@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.boot.dash.util;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 
 /**
  * Manages a set of CancelationTokens.

@@ -37,6 +37,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshClientSupport;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFCloudDomainData;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ReactorUtils;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.IApplicationLogConsole;
@@ -49,6 +50,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import reactor.core.Cancellation;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -61,7 +63,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
 	private Map<String, CFOrganization> orgsByName = new LinkedHashMap<>();
 	private Map<String, MockCFSpace> spacesByName = new LinkedHashMap<>();
-	private Map<String, MockCFDomain> domainsByName = new LinkedHashMap<>();
+	private Map<String, CFCloudDomainData> domainsByName = new LinkedHashMap<>();
 	private Map<String, MockCFBuildpack> buildpacksByName = new LinkedHashMap<>();
 	private Map<String, MockCFStack> stacksByName = new LinkedHashMap<>();
 
@@ -113,8 +115,8 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		return new MockClient(params);
 	}
 
-	public MockCFDomain defDomain(String name) {
-		MockCFDomain it = new MockCFDomain(name);
+	public CFCloudDomain defDomain(String name) {
+		CFCloudDomainData it = new CFCloudDomainData(name);
 		domainsByName.put(name, it);
 		return it;
 	}
@@ -184,7 +186,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		}
 
 		@Override
-		public Cancellation streamLogs(String appName, IApplicationLogConsole logConsole) throws Exception {
+		public Disposable streamLogs(String appName, IApplicationLogConsole logConsole) throws Exception {
 			checkConnection();
 			//TODO: This 'log streamer' is a total dummy for now. It doesn't stream any data and canceling it does nothing.
            return Flux.empty().subscribe();

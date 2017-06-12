@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -63,12 +64,15 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicati
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFDomainType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.HealthChecks;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshClientSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshHost;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFCloudDomainData;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFDomainStatus;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultCloudFoundryClientFactoryV2;
@@ -116,24 +120,24 @@ public class CloudFoundryClientTest {
 		throw new AssertionFailedError("unknown test environment, not sure what to expect here");
 	}
 
-	public String[] getExpectedDomains() {
+	public CFCloudDomain[] getExpectedDomains() {
 		String org = clientParams.getOrgName();
 		String api = clientParams.getApiUrl();
 		if (org.equals("application-platform-testing")) {
 			//PWS test space/org
-			return new String[] {
-					"cfapps.io"
+			return new CFCloudDomain[] {
+					new CFCloudDomainData("cfapps.io")
 			};
 		} else if (org.equals("pivot-kdevolder")) {
 			//PEZ
-			return new String[] {
-					"cfapps.pez.pivotal.io",
-					"pezapp.io"
+			return new CFCloudDomain[] {
+					new CFCloudDomainData("cfapps.pez.pivotal.io"),
+					new CFCloudDomainData("pezapp.io")
 			};
 		} else if (api.contains("api.tan.")) {
 			//TAN
-			return new String[] {
-					"tan.springapps.io"
+			return new CFCloudDomain[] {
+					new CFCloudDomainData("tan.springapps.io")
 			};
 		}
 		throw new AssertionFailedError("unknown test environment, not sure what to expect here");
@@ -703,14 +707,19 @@ public class CloudFoundryClientTest {
 		CFClientParams params = CfTestTargetParams.fromEnv();
 		client = createClient(params);
 		List<CFCloudDomain> domains = client.getDomains();
-		assertEquals(CFAPPS_IO(), domains.get(0).getName());
 
-		Set<String> names = Flux.fromIterable(domains)
-			.map(CFCloudDomain::getName)
-			.collectList()
-			.map(ImmutableSet::copyOf)
-			.block();
-		assertContains(names, getExpectedDomains());
+		for (CFCloudDomain d : domains) {
+			System.out.println(d.getName()+"\t"+d.getType());
+		}
+
+		assertContains(domains, getExpectedDomains());
+
+		assertEquals(CFAPPS_IO(), domains.stream()
+				.filter(d -> d.getStatus()==CFDomainStatus.SHARED && d.getType()==CFDomainType.HTTP)
+				.map(d -> d.getName())
+				.findFirst()
+				.orElse(null)
+		);
 	}
 
 	@Test
@@ -1067,14 +1076,14 @@ public class CloudFoundryClientTest {
 		}
 	}
 
-	private void assertContains(Set<String> strings, String... expecteds) {
-		for (String e : expecteds) {
+	private <T> void assertContains(Collection<T> strings, @SuppressWarnings("unchecked") T... expecteds) {
+		for (T e : expecteds) {
 			assertContains(e, strings);
 		}
 	}
 
-	private void assertContains(String expected, Set<String> names) {
-		assertTrue("Expected '"+expected+"' not found in: "+names, names.contains(expected));
+	private <T> void assertContains(T expected, Collection<T> set) {
+		assertTrue("Expected '"+expected+"' not found in: "+set, set.contains(expected));
 	}
 
 	private void assertNoServices(List<CFServiceInstance> services, String... serviceNames) throws Exception {

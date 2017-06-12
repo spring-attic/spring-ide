@@ -15,27 +15,29 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.cloudfoundry.client.v2.buildpacks.BuildpackResource;
-import org.cloudfoundry.client.v2.domains.DomainResource;
 import org.cloudfoundry.operations.applications.ApplicationDetail;
 import org.cloudfoundry.operations.applications.ApplicationSummary;
 import org.cloudfoundry.operations.applications.InstanceDetail;
+import org.cloudfoundry.operations.domains.Domain;
+import org.cloudfoundry.operations.domains.Status;
 import org.cloudfoundry.operations.organizations.OrganizationSummary;
 import org.cloudfoundry.operations.services.ServiceInstance;
 import org.cloudfoundry.operations.services.ServiceInstanceType;
 import org.cloudfoundry.operations.spaces.SpaceSummary;
 import org.cloudfoundry.operations.stacks.Stack;
-import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFAppState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFDomainType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFInstanceStats;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFOrganization;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
+import org.springframework.ide.eclipse.boot.util.Log;
 
 import com.google.common.collect.ImmutableList;
 
@@ -107,20 +109,29 @@ public class CFWrappingV2 {
 		return new CFApplicationDetailData(summary, instanceDetails);
 	}
 
-	public static CFCloudDomain wrap(DomainResource domainRsrc) {
-		if (domainRsrc!=null) {
-			String name = domainRsrc.getEntity().getName();
-			return new CFCloudDomain() {
-				public String getName() {
-					return name;
-				}
-				@Override
-				public String toString() {
-					return "CFCloudDomain("+name+")";
-				}
-			};
+	public static CFCloudDomain wrap(Domain domain) {
+		if (domain!=null) {
+			return new CFCloudDomainData(
+					domain.getName(),
+					CFWrappingV2.wrapDomainType(domain.getType()),
+					CFWrappingV2.wrap(domain.getStatus())
+			);
 		}
 		return null;
+	}
+
+	public static CFDomainStatus wrap(Status status) {
+		if (status!=null) {
+			return CFDomainStatus.valueOf(status.name());
+		}
+		return null;
+	}
+
+	public static CFDomainType wrapDomainType(String type) {
+		if (type!=null) {
+			return CFDomainType.valueOf(type.toUpperCase());
+		}
+		return CFDomainType.HTTP;
 	}
 
 	public static CFInstanceStats wrap(InstanceDetail instanceDetail) {
@@ -130,7 +141,7 @@ public class CFWrappingV2 {
 				try {
 					return CFInstanceState.valueOf(instanceDetail.getState());
 				} catch (Exception e) {
-					BootActivator.log(e);
+					Log.log(e);
 					return CFInstanceState.UNKNOWN;
 				}
 			}
@@ -147,7 +158,7 @@ public class CFWrappingV2 {
 		try {
 			state = CFAppState.valueOf(app.getRequestedState());
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 			state = CFAppState.UNKNOWN;
 		}
 
@@ -169,7 +180,7 @@ public class CFWrappingV2 {
 		try {
 			state = CFAppState.valueOf(app.getRequestedState());
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 			state = CFAppState.UNKNOWN;
 		}
 
@@ -229,7 +240,7 @@ public class CFWrappingV2 {
 		try {
 			return CFAppState.valueOf(s);
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 			return CFAppState.UNKNOWN;
 		}
 	}

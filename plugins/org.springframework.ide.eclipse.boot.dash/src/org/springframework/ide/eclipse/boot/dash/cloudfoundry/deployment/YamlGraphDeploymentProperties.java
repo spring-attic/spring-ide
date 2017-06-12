@@ -30,6 +30,7 @@ import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudData;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFRoute;
 import org.springframework.ide.eclipse.boot.util.Log;
@@ -66,9 +67,9 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 	private Node root;
 	private SequenceNode applicationsValueNode;
 	private Yaml yaml;
-	private Map<String, Object> cloudData;
+	private CloudData cloudData;
 
-	public YamlGraphDeploymentProperties(String content, String appName, Map<String, Object> cloudData) {
+	public YamlGraphDeploymentProperties(String content, String appName, CloudData cloudData) {
 		super();
 		this.appNode = null;
 		this.applicationsValueNode = null;
@@ -668,7 +669,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 	}
 
 	private void getLegacyDifferenceForUris(Collection<String> uris, MultiTextEdit me) {
-		List<CFCloudDomain> domains = ApplicationManifestHandler.getCloudDomains(cloudData);
+		List<CFCloudDomain> domains = cloudData.getDomains();
 
 		LinkedHashSet<String> otherHosts = new LinkedHashSet<>();
 		LinkedHashSet<String> otherDomains = new LinkedHashSet<>();
@@ -761,7 +762,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 			}
 
 			if (currentDomains.isEmpty() && !domains.isEmpty()) {
-				currentDomains.add(domains.get(0).getName());
+				currentDomains.add(cloudData.getDefaultDomain());
 			}
 		}
 
@@ -1255,7 +1256,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 				return Collections.emptySet();
 			}
 
-			List<CFCloudDomain> domains = ApplicationManifestHandler.getCloudDomains(cloudData);
+			List<CFCloudDomain> domains = cloudData.getDomains();
 			LinkedHashSet<String> hostsSet = new LinkedHashSet<>();
 			LinkedHashSet<String> domainsSet = new LinkedHashSet<>();
 
@@ -1297,7 +1298,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 				if (Boolean.TRUE.equals(randomRoute)) {
 					hostsSet.add(ApplicationManifestHandler.RANDOM_VAR);
 					domainsSet.clear();
-					domainsSet.add(domains.get(0).getName());
+					domainsSet.add(cloudData.getDefaultDomain());
 				} else {
 					Boolean noHostname = getAbsoluteValue(ApplicationManifestHandler.NO_HOSTNAME_PROP, Boolean.class);
 					if (!Boolean.TRUE.equals(noHostname)) {
@@ -1310,7 +1311,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 			 * Set a domain if they are still empty
 			 */
 			if (domainsSet.isEmpty()) {
-				domainsSet.add(domains.get(0).getName());
+				domainsSet.add(cloudData.getDefaultDomain());
 			}
 
 			/*

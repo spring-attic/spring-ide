@@ -46,9 +46,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudData;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFAppState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFDomainType;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFCloudDomainData;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFDomainStatus;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.AppNameAnnotationModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.AppNameReconciler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
@@ -56,7 +60,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.Deploym
 import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel.ManifestType;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
-import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCFDomain;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblemAnnotation;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlASTProvider;
@@ -66,6 +69,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 import org.yaml.snakeyaml.Yaml;
+
+import com.google.common.collect.ImmutableList;
 
 /**
  * Tests for {@link DeploymentPropertiesDialogModel}
@@ -91,13 +96,10 @@ public class DeploymentPropertiesDialogModelTests {
 
 	public static final String DEFAULT_BUILDPACK = "java_buildpack_offline";
 
-	public static final List<CFCloudDomain> SPRING_CLOUD_DOMAINS = Arrays.<CFCloudDomain>asList(new MockCFDomain("springsource.org"));
+	public static final List<CFCloudDomain> SPRING_CLOUD_DOMAINS = Arrays.<CFCloudDomain>asList(new CFCloudDomainData("springsource.org", CFDomainType.HTTP, CFDomainStatus.SHARED));
 
-	public static Map<String, Object> createCloudDataMap() {
-		Map<String, Object> cloudData = new HashMap<>();
-		cloudData.put(ApplicationManifestHandler.DOMAINS_PROP, SPRING_CLOUD_DOMAINS);
-		cloudData.put(ApplicationManifestHandler.BUILDPACK_PROP, DEFAULT_BUILDPACK);
-		return cloudData;
+	public static CloudData createCloudData() {
+		return new CloudData(SPRING_CLOUD_DOMAINS, DEFAULT_BUILDPACK, ImmutableList.of());
 	}
 
 	private BootProjectTestHarness projects;
@@ -165,7 +167,7 @@ public class DeploymentPropertiesDialogModelTests {
 	}
 
 	private void createDialogModel(IProject project, CFApplication deployedApp) {
-		model = new DeploymentPropertiesDialogModel(ui, createCloudDataMap(), project, deployedApp);
+		model = new DeploymentPropertiesDialogModel(ui, createCloudData(), project, deployedApp);
 		reconciler = addAppNameReconcilingFeature(model);
 	}
 
@@ -289,7 +291,7 @@ public class DeploymentPropertiesDialogModelTests {
 				"- name: " + project.getName() + "\n" +
 				"  memory: 512M\n"
 		);
-		model = new DeploymentPropertiesDialogModel(ui, createCloudDataMap(), project, null);
+		model = new DeploymentPropertiesDialogModel(ui, createCloudData(), project, null);
 		model.setSelectedManifest(file);
 		model.type.setValue(ManifestType.MANUAL);
 

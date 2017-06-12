@@ -52,6 +52,7 @@ import org.cloudfoundry.operations.applications.PushApplicationManifestRequest;
 import org.cloudfoundry.operations.applications.RestartApplicationRequest;
 import org.cloudfoundry.operations.applications.StartApplicationRequest;
 import org.cloudfoundry.operations.applications.StopApplicationRequest;
+import org.cloudfoundry.operations.domains.Domain;
 import org.cloudfoundry.operations.organizations.OrganizationDetail;
 import org.cloudfoundry.operations.organizations.OrganizationInfoRequest;
 import org.cloudfoundry.operations.organizations.OrganizationSummary;
@@ -378,7 +379,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		return Flux.fromIterable(appsToLookUp)
 		.flatMap((CFApplication appSummary) -> {
 			return getApplicationDetail(appSummary.getName())
-			.otherwise((error) -> {
+			.onErrorResume((error) -> {
 				Log.log(ExceptionUtil.coreException("getting application details for '"+appSummary.getName()+"' failed", error));
 				return Mono.empty();
 			})
@@ -615,15 +616,15 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	public List<CFCloudDomain> getDomains() throws Exception {
 		//XXX CF V2: list domains using 'operations' api.
 		return ReactorUtils.get(Duration.ofMinutes(2),
-			orgId.flatMap(this::requestDomains)
+			orgId.flatMapMany(this::requestDomains)
 			.map(CFWrappingV2::wrap)
 			.collectList()
 		);
 	}
 
-	private Flux<DomainResource> requestDomains(String orgId) {
-		return PaginationUtils.requestClientV2Resources((page) ->
-			client_listDomains(page)
+	private Flux<Domain> requestDomains(String orgId) {
+		return log("operations.domains.list",
+				_operations.domains().list()
 		);
 	}
 
@@ -693,8 +694,8 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	public Mono<Void> ifApplicationExists(String appName, Function<ApplicationDetail, Mono<Void>> then, Mono<Void> els) throws Exception {
 		return getApplicationDetail(appName)
 		.map((app) -> Optional.of(app))
-		.otherwiseIfEmpty(Mono.just(Optional.<ApplicationDetail>empty()))
-		.otherwise((error) -> Mono.just(Optional.<ApplicationDetail>empty()))
+		.switchIfEmpty(Mono.just(Optional.<ApplicationDetail>empty()))
+		.onErrorResume((error) -> Mono.just(Optional.<ApplicationDetail>empty()))
 		.then((Optional<ApplicationDetail> app) -> {
 			if (app.isPresent()) {
 				return then.apply(app.get());
@@ -896,8 +897,8 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	private Mono<Set<String>> getDomainNames() {
-		return orgId.flatMap(this::requestDomains)
-		.map((r) -> r.getEntity().getName())
+		return orgId.flatMapMany(this::requestDomains)
+		.map((r) -> r.getName())
 		.collectList()
 		.map(ImmutableSet::copyOf);
 	}
@@ -988,7 +989,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		debug("bindAndUnbindServices "+_services);
 		Set<String> services = ImmutableSet.copyOf(_services);
 		return getBoundServicesSet(appName)
-		.flatMap((boundServices) -> {
+		.flatMapMany((boundServices) -> {
 			debug("boundServices = "+boundServices);
 			Set<String> toUnbind = Sets.difference(boundServices, services);
 			Set<String> toBind = Sets.difference(services, boundServices);

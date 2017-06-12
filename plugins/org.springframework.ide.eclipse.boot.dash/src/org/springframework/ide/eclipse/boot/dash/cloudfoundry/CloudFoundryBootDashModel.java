@@ -619,7 +619,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		IProject project = cde.getProject();
 		CFApplication app = cde.getSummaryData();
 
-		Map<String, Object> cloudData = buildOperationCloudData(monitor, project);
+		CloudData cloudData = buildOperationCloudData(monitor, project);
 
 		CloudApplicationDeploymentProperties deploymentProperties = CloudApplicationDeploymentProperties.getFor(project, cloudData, app);
 		CloudAppDashElement element = app == null ? null : getApplication(app.getName());
@@ -754,7 +754,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	 * @throws Exception
 	 */
 	public CloudApplicationDeploymentProperties createDeploymentProperties(IProject project, UserInteractions ui, IProgressMonitor monitor) throws Exception {
-		Map<String, Object> cloudData = buildOperationCloudData(monitor, project);
+		CloudData cloudData = buildOperationCloudData(monitor, project);
 		CloudApplicationDeploymentProperties props = null;
 		if (ui != null) {
 			DeploymentPropertiesDialogModel dialogModel;
@@ -770,7 +770,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		return props;
 	}
 
-	public void addApplicationArchive(IProject project, CloudApplicationDeploymentProperties properties, Map<String, Object> cloudData,
+	public void addApplicationArchive(IProject project, CloudApplicationDeploymentProperties properties, CloudData cloudData,
 			UserInteractions ui, IProgressMonitor monitor) throws Exception {
 		ICloudApplicationArchiver archiver = getArchiver(properties, cloudData, ui, monitor);
 		if (archiver != null) {
@@ -787,7 +787,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 
 	protected ICloudApplicationArchiver getArchiver(
 			CloudApplicationDeploymentProperties deploymentProperties,
-			Map<String, Object> cloudData,
+			CloudData cloudData,
 			UserInteractions ui,
 			IProgressMonitor mon
 	) {
@@ -806,7 +806,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 
 	protected CloudApplicationArchiverStrategy[] getArchiverStrategies(
 			CloudApplicationDeploymentProperties deploymentProperties,
-			Map<String, Object> cloudData,
+			CloudData cloudData,
 			UserInteractions ui,
 			IProgressMonitor mon
 	) throws Exception {
@@ -855,12 +855,8 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		return services;
 	}
 
-	public Map<String, Object> buildOperationCloudData(IProgressMonitor monitor, IProject project) throws Exception {
-		Map<String, Object> cloudData = new HashMap<>();
-		cloudData.put(ApplicationManifestHandler.DOMAINS_PROP, getRunTarget().getDomains(monitor));
-		cloudData.put(ApplicationManifestHandler.BUILDPACK_PROP, getRunTarget().getBuildpack(project));
-		cloudData.put(ApplicationManifestHandler.STACK_PROP, getRunTarget().getStacks(monitor));
-		return cloudData;
+	public CloudData buildOperationCloudData(IProgressMonitor monitor, IProject project) throws Exception {
+		return new CloudData(getRunTarget().getDomains(monitor),  getRunTarget().getBuildpack(project), getRunTarget().getStacks(monitor));
 	}
 
 	public CloudDashElementFactory getElementFactory() {

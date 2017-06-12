@@ -11,9 +11,6 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;

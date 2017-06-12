@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test.mocks;
 
-import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ReactorUtils.just;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -252,37 +250,37 @@ public class MockCFApplication {
 		return new ApplicationExtras() {
 			@Override
 			public Mono<String> getStack() {
-				return just(stack);
+				return Mono.justOrEmpty(stack);
 			}
 			@Override
 			public Mono<List<String>> getServices() {
-				return just(services);
+				return Mono.justOrEmpty(services);
 			}
 
 			@Override
 			public Mono<Map<String, String>> getEnv() {
-				return just(env);
+				return Mono.justOrEmpty(env);
 			}
 
 			@Override
 			public Mono<String> getBuildpack() {
-				return just(buildpackUrl);
+				return Mono.justOrEmpty(buildpackUrl);
 			}
 			@Override
 			public Mono<Integer> getTimeout() {
-				return just(timeout);
+				return Mono.justOrEmpty(timeout);
 			}
 			@Override
 			public Mono<String> getCommand() {
-				return just(command);
+				return Mono.justOrEmpty(command);
 			}
 			@Override
 			public Mono<String> getHealthCheckType() {
-				return just(healthCheckType);
+				return Mono.justOrEmpty(healthCheckType);
 			}
 			@Override
 			public Mono<String> getHealthCheckHttpEndpoint() {
-				return just(healthCheckHttpEndpoint);
+				return Mono.justOrEmpty(healthCheckHttpEndpoint);
 			}
 
 		};
