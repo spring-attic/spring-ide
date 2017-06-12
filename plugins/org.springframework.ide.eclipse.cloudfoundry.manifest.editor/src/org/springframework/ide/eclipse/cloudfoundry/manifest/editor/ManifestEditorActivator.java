@@ -10,11 +10,15 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.cloudfoundry.manifest.editor;
 
+import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.Map;
 
 import javax.inject.Provider;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YValueHint;
 import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
@@ -66,7 +70,6 @@ public class ManifestEditorActivator extends AbstractUIPlugin {
 	
 	
 	/*
-	 * 
 	 * "Framework" to contribute value hints into manifest editor
 	 */
 	
@@ -79,8 +82,20 @@ public class ManifestEditorActivator extends AbstractUIPlugin {
 	public Provider<Collection<YValueHint>> getBuildpackProvider() {
 		return this.buildpackProvider;
 	}
-
+	
+	public void setCfTargetLoginOptions(Map<String, Object> cfTargetLoginOptions) {
+		try {
+			Class<?> lsClass = this.getClass().getClassLoader().loadClass("org.springframework.tooling.cloudfoundry.manifest.ls.CloudFoundryManifestLanguageServer");
+			Method lsMethod = lsClass.getMethod("setCfTargetLoginOptions", Object.class);
+			lsMethod.invoke(null, cfTargetLoginOptions);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public boolean isLanguageServerEnabled() {
-		return System.getProperty("cf-manifest-lsp", "true").equals("true");
+		Bundle lsBundle = Platform.getBundle("org.springframework.tooling.cloudfoundry.manifest.ls");
+		return lsBundle != null && lsBundle.getState() != Bundle.INSTALLED && System.getProperty("cf-manifest-lsp", "true").equals("true");
 	}
 }
