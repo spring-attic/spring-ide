@@ -29,7 +29,6 @@ import org.cloudfoundry.client.v2.applications.UpdateApplicationRequest;
 import org.cloudfoundry.client.v2.applications.UpdateApplicationResponse;
 import org.cloudfoundry.client.v2.buildpacks.ListBuildpacksRequest;
 import org.cloudfoundry.client.v2.buildpacks.ListBuildpacksResponse;
-import org.cloudfoundry.client.v2.domains.DomainResource;
 import org.cloudfoundry.client.v2.domains.ListDomainsRequest;
 import org.cloudfoundry.client.v2.domains.ListDomainsResponse;
 import org.cloudfoundry.client.v2.info.GetInfoRequest;
@@ -81,6 +80,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicati
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFDomainType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
@@ -101,7 +101,6 @@ import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
-import reactor.core.Cancellation;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -322,7 +321,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	private <T> Mono<T> prefetch(String id, Mono<T> toFetch) {
 		return toFetch
 //		.log(id + " before error handler")
-		.otherwise((error) -> {
+		.onErrorResume((error) -> {
 			Log.log(new IOException("Failed prefetch '"+id+"'", error));
 			return Mono.empty();
 		})
@@ -578,7 +577,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 				.list()
 			)
 			.flatMap((OrganizationSummary org) -> {
-				return operationsFor(org).flatMap((operations) ->
+				return operationsFor(org).flatMapMany((operations) ->
 					log("operations.spaces.list(org="+org.getId()+")",
 						operations
 						.spaces()
@@ -614,18 +613,56 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	@Override
 	public List<CFCloudDomain> getDomains() throws Exception {
-		//XXX CF V2: list domains using 'operations' api.
-		return ReactorUtils.get(Duration.ofMinutes(2),
-			orgId.flatMapMany(this::requestDomains)
-			.map(CFWrappingV2::wrap)
-			.collectList()
-		);
+		return getDomainsOracle()
+				.getDomainsList();
 	}
 
-	private Flux<Domain> requestDomains(String orgId) {
-		return log("operations.domains.list",
-				_operations.domains().list()
-		);
+	private DomainsOracle getDomainsOracle() {
+		return new DomainsOracle();
+	}
+
+	/**
+	 * DomainsOracle answers questions about domains. It only reads the domain information from
+	 * CF once. (However, every newly created instance of DomainsOracle will read the info the
+	 * first time it needs it.
+	 */
+	private class DomainsOracle {
+		private Mono<List<CFCloudDomain>> domains = orgId
+				.flatMapMany(this::requestDomains)
+				.map(CFWrappingV2::wrap)
+				.collectList()
+				.cache();
+
+		private Mono<Map<String, CFCloudDomain>> domainsByName = domains
+				.map(allDomains -> {
+					ImmutableMap.Builder<String, CFCloudDomain> builder = ImmutableMap.builder();
+					for (CFCloudDomain d : allDomains) {
+						builder.put(d.getName(), d);
+					}
+					return (Map<String, CFCloudDomain>)builder.build();
+				})
+				.cache();
+
+		public Mono<List<CFCloudDomain>> getDomainsMono() {
+			return domains;
+		}
+
+		public List<CFCloudDomain> getDomainsList() throws Exception {
+			return ReactorUtils.get(domains);
+		}
+
+		private Flux<Domain> requestDomains(String orgId) {
+			return log("operations.domains.list",
+					_operations.domains().list()
+			);
+		}
+
+		public Mono<Boolean> isTcp(String domainName) {
+			return domainsByName.then(dmap -> {
+				CFCloudDomain domain = dmap.get(domainName);
+				return Mono.just(domain!=null && domain.getType()==CFDomainType.TCP);
+			});
+		}
 	}
 
 	@Override
@@ -654,7 +691,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 			//TODO: we have 'real' appdetails now so we could get most of the 'application extras' info from that.
 			return CFWrappingV2.wrap(appDetail, getApplicationExtras(appName));
 		})
-		.otherwise(ReactorUtils.suppressException(IllegalArgumentException.class));
+		.onErrorResume(ReactorUtils.suppressException(IllegalArgumentException.class));
 	}
 
 	@Override
@@ -821,8 +858,8 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	private Mono<Void> mapDesiredRoutes(ApplicationDetail appDetail, Collection<String> desiredUrls, boolean randomRoute) {
+		DomainsOracle domains = getDomainsOracle();
 		Set<String> currentUrls = ImmutableSet.copyOf(appDetail.getUrls());
-		Mono<Set<String>> domains = getDomainNames().cache();
 		String appName = appDetail.getName();
 
 		debug("currentUrls = "+currentUrls);
@@ -839,53 +876,56 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		.then();
 	}
 
-	private Mono<Void> mapRoute(Mono<Set<String>> domains, String appName, String desiredUrl, boolean randomRoute) {
+	private Mono<Void> mapRoute(DomainsOracle domains, String appName, String desiredUrl, boolean randomRoute) {
 		debug("mapRoute: "+appName+" -> "+desiredUrl);
 		return toRoute(domains, desiredUrl)
-		.then((CFRoute route) -> mapRoute(appName, route, randomRoute))
+		.then((CFRoute route) -> mapRoute(domains, appName, route, randomRoute))
 		.doOnError((e) -> {
 			Log.info("mapRoute FAILED!");
 			Log.log(e);
 		});
 	}
 
-	private Mono<Void> mapRoute(String appName, CFRoute route, boolean randomRoute)  {
-		org.cloudfoundry.operations.routes.MapRouteRequest.Builder builder = MapRouteRequest.builder()
-		.applicationName(appName);
-
+	private Mono<Void> mapRoute(DomainsOracle domains, String appName, CFRoute route, boolean randomRoute)  {
 		// Let the client validate if any of these combinations are correct.
 		// However, only set these values only if they are present as not doing so causes NPE
-        if (StringUtil.hasText(route.getDomain())) {
-        	if (isTcp(route.getDomain())) {
-        		// Can only set random port if route is TCP route
-        		builder.randomPort(randomRoute);
-        	}
-        	builder.domain(route.getDomain());
-        }
-		if (StringUtil.hasText(route.getHost())) {
-			builder.host(route.getHost());
+		Mono<MapRouteRequest.Builder> _builder = Mono.just(MapRouteRequest.builder()
+				.applicationName(appName)
+		);
+		if (StringUtil.hasText(route.getDomain())) {
+			_builder = _builder.map(builder -> builder.domain(route.getDomain()));
 		}
-		if (StringUtil.hasText(route.getPath())) {
-			builder.path(route.getPath());
+		if (randomRoute) {
+			_builder = _builder.then((MapRouteRequest.Builder builder) ->
+				// Can only set random port to true if route is TCP route
+				domains.isTcp(route.getDomain()).map(isTcp -> {
+					return builder;
+				})
+			);
 		}
-		if (route.getPort() != CFRoute.NO_PORT) {
-			builder.port(route.getPort());
-		}
-
-		MapRouteRequest mapRouteReq = builder.build();
-		return log("operations.routes.map("+mapRouteReq+")",
-			_operations.routes().map(mapRouteReq)
-		)
+		_builder = _builder.map(builder -> {
+			if (StringUtil.hasText(route.getHost())) {
+				builder.host(route.getHost());
+			}
+			if (StringUtil.hasText(route.getPath())) {
+				builder.path(route.getPath());
+			}
+			if (route.getPort() != CFRoute.NO_PORT) {
+				builder.port(route.getPort());
+			}
+			return builder;
+		});
+		return _builder.then(builder -> {
+			MapRouteRequest mapRouteReq = builder.build();
+			return log("operations.routes.map("+mapRouteReq+")",
+				_operations.routes().map(mapRouteReq)
+			);
+		})
 		.then();
 	}
 
-	private boolean isTcp(String domain) {
-		//TODO: need to fill this in when the client can provider "RouterGroup" type of a domain
-		return false;
-	}
-
-	private Mono<CFRoute> toRoute(Mono<Set<String>> domains, String desiredUrl) {
-		return domains.then((ds) -> {
+	private Mono<CFRoute> toRoute(DomainsOracle domains, String desiredUrl) {
+		return domains.getDomainsMono().then((ds) -> {
 			try {
 				CFRoute route = CFRoute.builder().from(desiredUrl, ds).build();
 				route.validate();
@@ -894,13 +934,6 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 				return Mono.error(e);
 			}
 		});
-	}
-
-	private Mono<Set<String>> getDomainNames() {
-		return orgId.flatMapMany(this::requestDomains)
-		.map((r) -> r.getName())
-		.collectList()
-		.map(ImmutableSet::copyOf);
 	}
 
 //	private Set<String> getUrls(ApplicationDetail app) {
