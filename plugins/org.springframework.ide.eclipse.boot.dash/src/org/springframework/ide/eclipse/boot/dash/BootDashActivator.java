@@ -10,19 +10,28 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.eclipse.core.net.proxy.IProxyService;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.BootDashBuildpackHintProvider;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.BuildpackHintGenerator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultCloudFoundryClientFactoryV2;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultBootDashModelContext;
@@ -30,19 +39,10 @@ import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestEditorActivator;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.UnmodifiableIterator;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.inject.Inject;
-
-import org.eclipse.core.net.proxy.IProxyService;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -153,54 +153,67 @@ public class BootDashActivator extends AbstractUIPlugin {
 					// RunTargetTypes.LATTICE
 			);
 			ManifestEditorActivator.getDefault().setBuildpackProvider(new BootDashBuildpackHintProvider(model, new BuildpackHintGenerator()));
-			ManifestEditorActivator.getDefault().setCfTargetLoginOptions(getCfTargetLoginOptions(model));
+
+			model.getRunTargets().addListener(new ValueListener<ImmutableSet<RunTarget>>() {
+
+				@Override
+				public void gotValue(LiveExpression<ImmutableSet<RunTarget>> exp, ImmutableSet<RunTarget> value) {
+					updateManifestEditor(value);
+				}
+
+			});
+
 //			DebugSelectionListener debugSelectionListener = new DebugSelectionListener(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService());
 //			model.addDisposableChild(debugSelectionListener);
 		}
 		return model;
 	}
 
-	private Map<String, Object> getCfTargetLoginOptions(BootDashViewModel model) {
+
+	private void updateManifestEditor(ImmutableSet<RunTarget> value) {
+		Set<RunTarget> toUpdate = value == null ? ImmutableSet.of() : value;
+
+		List<Map<String, Object>> entries = getCfTargetLoginOptions(toUpdate);
+		if (entries != null && entries.size() > 0) {
+			Map<String, Object> result = new HashMap<>();
+			result.put("cfClientParams", entries);
+			ManifestEditorActivator.getDefault().setCfTargetLoginOptions(result);
+		} else {
+			ManifestEditorActivator.getDefault().setCfTargetLoginOptions(null);
+		}
+	}
+
+	private List<Map<String, Object>> getCfTargetLoginOptions(Collection<RunTarget> targets) {
 		List<Map<String, Object>> entries = new ArrayList<>();
 
-		LiveSetVariable<RunTarget> runTargets = model.getRunTargets();
-		ImmutableSet<RunTarget> targets = runTargets.getValues();
 		for (RunTarget runTarget : targets) {
 			if (runTarget instanceof CloudFoundryRunTarget) {
-				CloudFoundryTargetProperties properties = ((CloudFoundryRunTarget) runTarget).getTargetProperties();
-				String target = properties.getUrl();
-				String org = properties.getOrganizationName();
-				String space = properties.getSpaceName();
-				boolean sslDisabled = properties.skipSslValidation();
-
-				try {
-					ClientRequests client = ((CloudFoundryRunTarget) runTarget).getClientFactory().getClient(properties);
-					String token = client.getRefreshToken();
-
-					if (token != null) {
-						Map<String, Object> entry = new HashMap<>();
-						entry.put("Target", target);
-						entry.put("OrgName", org);
-						entry.put("SpaceName", space);
-						entry.put("SSLDisabled", sslDisabled);
-						entry.put("RefreshToken", token);
-
-						entries.add(entry);
-					}
-				}
-				catch (Exception e) {
-					e.printStackTrace();
-				}
+				collectTargetInfo((CloudFoundryRunTarget) runTarget, entries);
 			}
 		}
 
-		if (entries.size() > 0) {
-			Map<String, Object> result = new HashMap<>();
-			result.put("cfClientParams", entries);
-			return result;
-		}
-		else {
-			return null;
+		return entries;
+	}
+
+	private void collectTargetInfo(CloudFoundryRunTarget cloudFoundryRunTarget, List<Map<String, Object>> entries) {
+		CloudFoundryTargetProperties properties = cloudFoundryRunTarget.getTargetProperties();
+		String target = properties.getUrl();
+		String org = properties.getOrganizationName();
+		String space = properties.getSpaceName();
+		boolean sslDisabled = properties.skipSslValidation();
+
+		if (cloudFoundryRunTarget.isConnected()) {
+			String token = cloudFoundryRunTarget.getClient().getRefreshToken();
+			if (token != null) {
+				Map<String, Object> entry = new HashMap<>();
+				entry.put("Target", target);
+				entry.put("OrgName", org);
+				entry.put("SpaceName", space);
+				entry.put("SSLDisabled", sslDisabled);
+				entry.put("RefreshToken", token);
+
+				entries.add(entry);
+			}
 		}
 	}
 
