@@ -51,6 +51,7 @@ import org.yaml.snakeyaml.reader.StreamReader;
 import org.yaml.snakeyaml.resolver.Resolver;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * Deployment properties based on YAML Graph. Instance of this class has ability
@@ -1240,16 +1241,25 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 		}
 	}
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public Set<String> getUris() {
+	public List<String> getRoutes() {
 		List<Map<?,?>> routes = getAbsoluteValue(ApplicationManifestHandler.ROUTES_PROP, List.class);
 		if (routes != null) {
 			return routes.stream()
 					.map(routeObj -> routeObj.get(ApplicationManifestHandler.ROUTE_PROP))
 					.filter(o -> o instanceof String)
 					.map(o -> (String) o)
-					.collect(Collectors.toSet());
+					.collect(Collectors.toList());
+		}
+		return null;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public Set<String> getUris() {
+
+		List<String> routes = getRoutes();
+		if (routes != null) {
+			return ImmutableSet.copyOf(routes);
 		} else {
 			Boolean noRoute = getAbsoluteValue(ApplicationManifestHandler.NO_ROUTE_PROP, Boolean.class);
 			if (Boolean.TRUE.equals(noRoute)) {

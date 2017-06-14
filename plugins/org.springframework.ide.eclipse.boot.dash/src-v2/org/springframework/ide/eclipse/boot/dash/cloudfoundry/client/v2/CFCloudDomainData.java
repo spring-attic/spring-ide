@@ -80,4 +80,15 @@ public final class CFCloudDomainData implements CFCloudDomain {
 		return true;
 	}
 
+	/**
+	 * If the given hostAndDomain is of the form ${host}.${domain} then
+	 * return the host part. Otherwise return null.
+	 */
+	public String splitHost(String hostAndDomain) {
+		if (hostAndDomain.endsWith("."+name)) {
+			return hostAndDomain.substring(0, hostAndDomain.length()-name.length()-1);
+		}
+		return null;
+	}
+
 }

@@ -78,7 +78,7 @@ import com.google.common.collect.ImmutableSet;
  */
 public abstract class AbstractLaunchConfigurationsDashElement<T> extends WrappingBootDashElement<T> implements Duplicatable<LaunchConfDashElement> {
 
-	private static final boolean DEBUG = DebugUtil.isDevelopment();
+	private static final boolean DEBUG = false; //DebugUtil.isDevelopment();
 	private static void debug(String string) {
 		if (DEBUG) {
 			System.out.println(string);

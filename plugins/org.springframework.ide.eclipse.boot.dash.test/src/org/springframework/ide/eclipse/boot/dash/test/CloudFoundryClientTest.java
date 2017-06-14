@@ -892,6 +892,30 @@ public class CloudFoundryClientTest {
 	}
 
 	@Test
+	public void testRandomHost() throws Exception {
+		//It is now the responsibility of the client to interpret the 'random route' attribute and
+		// generate random host or port. This test checks if it does that.
+		String appName = appHarness.randomAppName();
+
+		CFPushArguments params = new CFPushArguments();
+		params.setAppName(appName);
+		params.setRoutes(CFAPPS_IO());
+		params.setApplicationData(getTestZip("testapp"));
+		params.setBuildpack("staticfile_buildpack");
+		params.setRandomRoute(true);
+		push(params);
+
+		CFApplicationDetail app = client.getApplication(appName);
+		List<String> uris = app.getUris();
+		assertEquals(1, uris.size());
+		String uri = uris.get(0);
+		String host = uri.split("\\.")[0];
+		String domain = uri.substring(host.length()+1);
+		assertEquals(CFAPPS_IO(), domain);
+		assertTrue(StringUtil.hasText(host));
+	}
+
+	@Test
 	public void testGetApplicationCommand() throws Exception {
 		String appName = appHarness.randomAppName();
 		String command = "something interesting";

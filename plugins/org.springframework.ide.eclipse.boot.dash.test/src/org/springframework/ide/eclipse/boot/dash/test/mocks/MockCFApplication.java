@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -33,7 +34,9 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.InstanceSta
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ApplicationExtras;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFApplicationDetailData;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFApplicationSummaryData;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFRoute;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.RouteBinding;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
@@ -73,7 +76,7 @@ public class MockCFApplication {
 	private int memory = 1024;
 	private List<String> services = new ArrayList<>();
 	private String buildpackUrl = null;
-	private List<String> uris = new ArrayList<>();
+	private List<RouteBinding> routes = new ArrayList<>();
 	private CFAppState state = CFAppState.STOPPED;
 	private int diskQuota = 1024;
 	private Integer timeout = null;
@@ -107,7 +110,6 @@ public class MockCFApplication {
 				1,
 				CFAppState.STOPPED
 		);
-		setUris(ImmutableList.of(name+"."+space.getDefaultDomain()));
 	}
 
 	public String getName() {
@@ -224,8 +226,8 @@ public class MockCFApplication {
 		return this.memory;
 	}
 
-	public void setUris(Collection<String> uris) {
-		this.uris = uris==null?null:ImmutableList.copyOf(uris);
+	public void setRoutes(Collection<RouteBinding> routes) {
+		this.routes = routes==null?null:ImmutableList.copyOf(routes);
 	}
 
 	public void setServices(Collection<String> services) {
@@ -239,11 +241,17 @@ public class MockCFApplication {
 				getRunningInstances(),
 				memory,
 				guid,
-				uris,
+				getUris(),
 				state,
 				diskQuota,
 				getExtras()
 		);
+	}
+
+	private List<String> getUris() {
+		return routes.stream()
+		.map(RouteBinding::toUri)
+		.collect(Collectors.toList());
 	}
 
 	private ApplicationExtras getExtras() {
@@ -294,7 +302,7 @@ public class MockCFApplication {
 						getRunningInstances(),
 						memory,
 						guid,
-						uris,
+						getUris(),
 						state,
 						diskQuota,
 						getExtras()

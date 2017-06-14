@@ -115,4 +115,8 @@ public class MockCFSpace extends CFSpaceData {
 		}
 	}
 
+	@Override
+	public String toString() {
+		return "MockCFSpace("+getName()+")";
+	}
 }

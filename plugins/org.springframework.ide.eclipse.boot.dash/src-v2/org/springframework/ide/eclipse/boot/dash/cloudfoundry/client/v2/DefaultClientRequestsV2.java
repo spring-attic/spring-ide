@@ -22,6 +22,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.client.v2.applications.ApplicationEntity;
 import org.cloudfoundry.client.v2.applications.GetApplicationResponse;
@@ -840,7 +841,8 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	public Mono<Void> setRoutes(ApplicationDetail appDetails, Collection<String> desiredUrls, boolean randomRoute) {
-		debug("setting routes for '"+appDetails.getName()+"': "+desiredUrls);
+		debug("setting routes for '"+appDetails.getName()+"': "+desiredUrls+", "+randomRoute);
+		DomainsOracle domains = new DomainsOracle();
 
 		//Carefull! It is not safe map/unnmap multiple routes in parallel. Doing so causes some of the
 		// operations to fail, presumably because of some 'optimisitic locking' being used in the database
@@ -848,7 +850,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		//To avoid this problem we must execute all that map / unmap calls in sequence!
 		return ReactorUtils.sequence(
 				unmapUndesiredRoutes(appDetails.getName(), desiredUrls),
-				mapDesiredRoutes(appDetails, desiredUrls, randomRoute)
+				mapDesiredRoutes(appDetails, domains, desiredUrls, randomRoute)
 		);
 	}
 
@@ -857,8 +859,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		.then(appDetails -> setRoutes(appDetails, desiredUrls, randomRoute));
 	}
 
-	private Mono<Void> mapDesiredRoutes(ApplicationDetail appDetail, Collection<String> desiredUrls, boolean randomRoute) {
-		DomainsOracle domains = getDomainsOracle();
+	private Mono<Void> mapDesiredRoutes(ApplicationDetail appDetail, DomainsOracle domains, Collection<String> desiredUrls, boolean randomRoute) {
 		Set<String> currentUrls = ImmutableSet.copyOf(appDetail.getUrls());
 		String appName = appDetail.getName();
 
@@ -899,6 +900,13 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 			_builder = _builder.then((MapRouteRequest.Builder builder) ->
 				// Can only set random port to true if route is TCP route
 				domains.isTcp(route.getDomain()).map(isTcp -> {
+					if (isTcp) {
+						builder.randomPort(randomRoute);
+					} else {
+						if (route.getHost()==null) {
+							builder.host(appName+"-"+RandomStringUtils.randomAlphabetic(8).toLowerCase());
+						}
+					}
 					return builder;
 				})
 			);

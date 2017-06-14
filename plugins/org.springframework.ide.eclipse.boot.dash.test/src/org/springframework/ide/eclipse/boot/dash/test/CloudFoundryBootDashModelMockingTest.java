@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -75,7 +76,9 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTarget
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials.CFCredentialType;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFDomainType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.HealthChecks;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFDomainStatus;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ReactorUtils;
 import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel.ManifestType;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
@@ -794,6 +797,64 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertEquals("freddy@bar", barSpace.getDisplayName());
 	}
 
+	@Test public void tcpRouteWithRandomPort() throws Exception {
+		String appName = "moriarty-app";
+		String apiUrl = "http://api.some-cloud.com";
+		String username = "freddy"; String password = MockCloudFoundryClientFactory.FAKE_PASSWORD;
+
+		MockCFSpace space = clientFactory.defSpace("my-org", "my-space");
+		clientFactory.defDomain("tcp.domain.com", CFDomainType.TCP, CFDomainStatus.SHARED);
+
+		assertEquals("cfmockapps.io", clientFactory.getDefaultDomain());
+
+		CloudFoundryBootDashModel target = harness.createCfTarget(new CFClientParams(apiUrl, username,
+				CFCredentials.fromPassword(password), false, "my-org", "my-space", false));
+		IProject project = projects.createBootProject("to-deploy", withStarters("web", "actuator"));
+		IFile manifest = createFile(project, "manifest.yml",
+				"applications:\n" +
+				"- name: "+appName+"\n" +
+				"  random-route: true\n" +
+				"  domain: tcp.domain.com"
+		);
+		harness.answerDeploymentPrompt(ui, manifest);
+		target.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		waitForApps(target, appName);
+		CloudAppDashElement app = getApplication(target, project);
+		waitForState(app, RunState.RUNNING, 10_000);
+
+		MockCFApplication deployedApp = space.getApplication(appName);
+		List<String> uris = deployedApp.getBasicInfo().getUris();
+		assertEquals(ImmutableList.of("tcp.domain.com:63000"), uris);
+	}
+
+	@Test public void tcpRouteWithFixedPort() throws Exception {
+		String appName = "moriarty-app";
+		String apiUrl = "http://api.some-cloud.com";
+		String username = "freddy"; String password = MockCloudFoundryClientFactory.FAKE_PASSWORD;
+
+		MockCFSpace space = clientFactory.defSpace("my-org", "my-space");
+		clientFactory.defDomain("tcp.domain.com", CFDomainType.TCP, CFDomainStatus.SHARED);
+
+		CloudFoundryBootDashModel target = harness.createCfTarget(new CFClientParams(apiUrl, username,
+				CFCredentials.fromPassword(password), false, "my-org", "my-space", false));
+		IProject project = projects.createBootProject("to-deploy", withStarters("web", "actuator"));
+		IFile manifest = createFile(project, "manifest.yml",
+				"applications:\n" +
+				"- name: "+appName+"\n" +
+				"  domain: tcp.domain.com:61001\n"
+		);
+		harness.answerDeploymentPrompt(ui, manifest);
+		target.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		waitForApps(target, appName);
+		CloudAppDashElement app = getApplication(target, project);
+		waitForState(app, RunState.RUNNING, 10_000);
+
+		MockCFApplication deployedApp = space.getApplication(appName);
+		List<String> uris = deployedApp.getBasicInfo().getUris();
+		assertEquals(ImmutableList.of("tcp.domain.com:61001"), uris);
+	}
+
+
 	@Test
 	public void customizeTargetLabelAction() throws Exception {
 		clientFactory.defSpace("my-org", "foo");
@@ -1278,6 +1339,8 @@ public class CloudFoundryBootDashModelMockingTest {
 		//TODO: can we check that deployment related jobs are really canceled/finished somehow?
 		//   can we check that they didn't pop errors?
 	}
+
+
 
 	@Test public void stopCancelsStart() throws Exception {
 		CFClientParams targetParams = CfTestTargetParams.fromEnv();

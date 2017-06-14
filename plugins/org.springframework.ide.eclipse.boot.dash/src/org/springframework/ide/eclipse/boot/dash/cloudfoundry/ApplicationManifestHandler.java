@@ -745,9 +745,10 @@ public class ApplicationManifestHandler {
 		 */
 		if (hostsSet.isEmpty()) {
 			if (randomRoute) {
-				hostsSet.add(extractHost("${random}", 10));
-				domainsSet.clear();
-				domainsSet.add(cloudData.getDefaultDomain());
+				//hostsSet.add(extractHost("${random}", 10));
+				if (domainsSet.isEmpty()) {
+					domainsSet.add(cloudData.getDefaultDomain());
+				}
 			} else {
 				Boolean noHostName = getValue(application, NO_HOSTNAME_PROP, Boolean.class);
 				if (noHostName == null) {
