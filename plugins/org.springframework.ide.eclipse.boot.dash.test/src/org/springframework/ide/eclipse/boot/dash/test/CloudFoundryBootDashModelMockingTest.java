@@ -841,7 +841,8 @@ public class CloudFoundryBootDashModelMockingTest {
 		IFile manifest = createFile(project, "manifest.yml",
 				"applications:\n" +
 				"- name: "+appName+"\n" +
-				"  domain: tcp.domain.com:61001\n"
+				"  routes: \n" +
+				"  - route: tcp.domain.com:61001\n"
 		);
 		harness.answerDeploymentPrompt(ui, manifest);
 		target.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
