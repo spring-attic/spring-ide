@@ -855,6 +855,36 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertEquals(ImmutableList.of("tcp.domain.com:61001"), uris);
 	}
 
+	@Test public void httpRouteWithRandomRoute() throws Exception {
+		String appName = "moriarty-app";
+		String apiUrl = "http://api.some-cloud.com";
+		String username = "freddy"; String password = MockCloudFoundryClientFactory.FAKE_PASSWORD;
+
+		MockCFSpace space = clientFactory.defSpace("my-org", "my-space");
+		clientFactory.defDomain("tcp.domain.com", CFDomainType.TCP, CFDomainStatus.SHARED);
+
+		assertEquals("cfmockapps.io", clientFactory.getDefaultDomain());
+
+		CloudFoundryBootDashModel target = harness.createCfTarget(new CFClientParams(apiUrl, username,
+				CFCredentials.fromPassword(password), false, "my-org", "my-space", false));
+		IProject project = projects.createBootProject("to-deploy", withStarters("web", "actuator"));
+		IFile manifest = createFile(project, "manifest.yml",
+				"applications:\n" +
+				"- name: "+appName+"\n" +
+				"  random-route: true\n"
+		);
+		harness.answerDeploymentPrompt(ui, manifest);
+		target.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		waitForApps(target, appName);
+		CloudAppDashElement app = getApplication(target, project);
+		waitForState(app, RunState.RUNNING, 10_000);
+
+		MockCFApplication deployedApp = space.getApplication(appName);
+		List<String> uris = deployedApp.getBasicInfo().getUris();
+		assertTrue(uris.size() == 1);
+		assertTrue(uris.get(0).length() > ".cfmockapps.io".length());
+		assertTrue(uris.get(0).endsWith(".cfmockapps.io"));
+	}
 
 	@Test
 	public void customizeTargetLabelAction() throws Exception {
@@ -1247,6 +1277,13 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertEquals((Integer)1, space.getPushCount(appName).getValue());
 		assertEquals(manifestFile, app.getDeploymentManifestFile());
 		assertEquals(512, (int) app.getMemory());
+		
+
+		MockCFApplication deployedApp = space.getApplication(appName);
+		List<String> uris = deployedApp.getBasicInfo().getUris();
+		assertTrue(uris.size() == 1);
+		assertEquals(ImmutableList.of(appName+".cfmockapps.io"), uris);
+
 	}
 
 	@Test public void simpleDeployWithDefaultManualManifest() throws Exception {
