@@ -18,10 +18,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.net.proxy.IProxyService;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -32,6 +28,8 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.BuildpackHintGener
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultCloudFoundryClientFactoryV2;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultBootDashModelContext;
@@ -67,6 +65,12 @@ public class BootDashActivator extends AbstractUIPlugin {
 	private static BootDashActivator plugin;
 
 	private BootDashViewModel model;
+
+	private final ValueListener<ClientRequests> clientsChangedListener = (exp, client) -> {
+		if (client instanceof DefaultClientRequestsV2) {
+			addRefreshTokenListener((DefaultClientRequestsV2) client);
+		}
+	};
 
 	/**
 	 * The constructor
@@ -158,7 +162,8 @@ public class BootDashActivator extends AbstractUIPlugin {
 
 				@Override
 				public void gotValue(LiveExpression<ImmutableSet<RunTarget>> exp, ImmutableSet<RunTarget> value) {
-					updateManifestEditor(value);
+					// On target changes, add the client listener in each target so that when the client changes, a notification is sent
+					addClientChangeListeners(value);
 				}
 
 			});
@@ -170,16 +175,33 @@ public class BootDashActivator extends AbstractUIPlugin {
 	}
 
 
-	private void updateManifestEditor(ImmutableSet<RunTarget> value) {
+	private void updateCloudTargetsInClientManifest(ImmutableSet<RunTarget> value) {
 		Set<RunTarget> toUpdate = value == null ? ImmutableSet.of() : value;
 
 		List<Map<String, Object>> entries = getCfTargetLoginOptions(toUpdate);
+		Map<String, Object> result = null;
+
 		if (entries != null && entries.size() > 0) {
-			Map<String, Object> result = new HashMap<>();
+			result = new HashMap<>();
 			result.put("cfClientParams", entries);
-			ManifestEditorActivator.getDefault().setCfTargetLoginOptions(result);
-		} else {
-			ManifestEditorActivator.getDefault().setCfTargetLoginOptions(null);
+		}
+
+		ManifestEditorActivator.getDefault().setCfTargetLoginOptions(result);
+	}
+
+	/**
+	 * Add a listener to be notified when the refresh token becomes available OR changes
+	 */
+	private void addRefreshTokenListener(DefaultClientRequestsV2 client) {
+		if (client != null && client.getRefreshTokens() != null && this.model != null
+				&& this.model.getRunTargets() != null) {
+			client.getRefreshTokens().doOnNext((token) ->
+			        // Although the refresh token change is for ONE client (i.e. one target)
+			        // compute cloud target information for ALL currently connected targets
+			        // as the manifest editor is updated with the full up-to-date list of connected
+			        // boot dash targets
+					updateCloudTargetsInClientManifest(this.model.getRunTargets().getValue())
+				).subscribe();
 		}
 	}
 
@@ -193,6 +215,16 @@ public class BootDashActivator extends AbstractUIPlugin {
 		}
 
 		return entries;
+	}
+
+	private void addClientChangeListeners(ImmutableSet<RunTarget> targets) {
+		if (targets != null) {
+			for (RunTarget runTarget : targets) {
+				if (runTarget instanceof CloudFoundryRunTarget) {
+					((CloudFoundryRunTarget) runTarget).addConnectionStateListener(clientsChangedListener);
+				}
+			}
+		}
 	}
 
 	private void collectTargetInfo(CloudFoundryRunTarget cloudFoundryRunTarget, List<Map<String, Object>> entries) {
