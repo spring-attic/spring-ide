@@ -13,10 +13,13 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.cloudfoundry.operations.domains.DefaultDomains;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFDomainType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFCloudDomainData;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFDomainStatus;
@@ -39,11 +42,12 @@ import com.google.common.collect.ImmutableMap;
  */
 public class RouteBuilder {
 
-	private Map<String, CFCloudDomainData> domainsByName = new LinkedHashMap<>();
+	private Map<String, CFCloudDomain> domainsByName = new LinkedHashMap<>();
+	private String defaultDomain;
 
-	public RouteBuilder(Collection<CFCloudDomainData> domains) {
-		ImmutableMap.Builder<String, CFCloudDomainData> builder = ImmutableMap.builder();
-		for (CFCloudDomainData d : domains) {
+	public RouteBuilder(Collection<CFCloudDomain> domains) {
+		ImmutableMap.Builder<String, CFCloudDomain> builder = ImmutableMap.builder();
+		for (CFCloudDomain d : domains) {
 			builder.put(d.getName(), d);
 		}
 		domainsByName = builder.build();
@@ -54,20 +58,31 @@ public class RouteBuilder {
 			return ImmutableList.of();
 		}
 		if (manifest.isRandomRoute()) {
-			getDomains(manifest);
-		}
-		Builder<RouteBinding> builder = ImmutableList.builder();
+			Builder<RouteBinding> builder = ImmutableList.builder();
+			List<String> domains = getDomains(manifest);
+			if (domains.isEmpty()) {
+				String dflt = getDefaultDomain();
+				if (dflt!=null) {
+					domains = ImmutableList.of(dflt);
+				}
+				for (String string : domains) {
 
+				}
+			}
+
+		}
 		if (manifest.getRoutes()!=null) {
+			Builder<RouteBinding> builder = ImmutableList.builder();
 			for (String desiredUri : manifest.getRoutes()) {
 				builder.add(buildRouteFromUri(desiredUri, manifest));
 			}
+			return builder.build();
 		}
-		return builder.build();
+		throw new IllegalStateException("Missing case?");
 	}
 
-	private void getDomains(RouteAttributes manifest) {
-		Set<String> domains = new HashSet<>();
+	private List<String> getDomains(RouteAttributes manifest) {
+		Set<String> domains = new LinkedHashSet<>();
 		List<String> ds = manifest.getDomains();
 		if (ds!=null) {
 			domains.addAll(ds);
@@ -76,6 +91,7 @@ public class RouteBuilder {
 		if (d!=null) {
 			domains.add(d);
 		}
+		return ImmutableList.copyOf(domains);
 	}
 
 	/**
@@ -84,7 +100,7 @@ public class RouteBuilder {
 	 */
 	private RouteBinding buildRouteFromUri(String _uri, RouteAttributes args) {
 		ParsedUri uri = new ParsedUri(_uri);
-		CFCloudDomainData bestDomain = domainsByName.values().stream()
+		CFCloudDomain bestDomain = domainsByName.values().stream()
 			.filter(domain -> domainCanBeUsedFor(domain, uri))
 			.max((d1, d2) -> Integer.compare(d1.getName().length(), d2.getName().length()))
 			.orElse(null);
@@ -99,14 +115,17 @@ public class RouteBuilder {
 	}
 
 	public String getDefaultDomain() {
-		return getDomains().stream()
-				.filter(d -> d.getStatus()==CFDomainStatus.SHARED && d.getType()==CFDomainType.HTTP)
-				.findFirst()
-				.map(d -> d.getName())
-				.orElse(null);
+		if (defaultDomain==null) {
+			defaultDomain = getDomains().stream()
+					.filter(d -> d.getStatus()==CFDomainStatus.SHARED && d.getType()==CFDomainType.HTTP)
+					.findFirst()
+					.map(d -> d.getName())
+					.orElse(null);
+		}
+		return defaultDomain;
 	}
 
-	private Collection<CFCloudDomainData> getDomains() {
+	private Collection<CFCloudDomain> getDomains() {
 		return domainsByName.values();
 	}
 
@@ -115,7 +134,7 @@ public class RouteBuilder {
 	 * target uri. This depends on a number of factors, such as the type of the domain
 	 * (TCP vs HTTP), the type of uri (e.g. whether it has a port component)
 	 */
-	private boolean domainCanBeUsedFor(CFCloudDomainData domainData, ParsedUri uri) {
+	private boolean domainCanBeUsedFor(CFCloudDomain domainData, ParsedUri uri) {
 		String domain = domainData.getName();
 		String hostAndDomain = uri.getHostAndDomain();
 		String host;

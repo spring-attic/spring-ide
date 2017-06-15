@@ -51,6 +51,7 @@ import org.yaml.snakeyaml.reader.StreamReader;
 import org.yaml.snakeyaml.resolver.Resolver;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
 /**
@@ -1431,6 +1432,23 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 				|| findValueNode(node, ApplicationManifestHandler.DOMAINS_PROP) != null
 				|| findValueNode(node, ApplicationManifestHandler.SUB_DOMAINS_PROP) != null
 				|| findValueNode(node, ApplicationManifestHandler.NO_HOSTNAME_PROP) != null;
+	}
+
+	public String getRawHost() {
+		return getAbsoluteValue(ApplicationManifestHandler.SUB_DOMAIN_PROP, String.class);
+	}
+	public List<String> getRawHosts() {
+		List<?> hostsList = getAbsoluteValue(ApplicationManifestHandler.SUB_DOMAINS_PROP, List.class);
+		if (hostsList != null) {
+			List<String> currentHosts = new ArrayList<>();
+			for (Object o : hostsList) {
+				if (o instanceof String) {
+					currentHosts.add((String) o);
+				}
+			}
+			return ImmutableList.copyOf(currentHosts);
+		}
+		return null;
 	}
 
 }

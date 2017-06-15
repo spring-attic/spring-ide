@@ -41,6 +41,8 @@ public class RouteAttributes {
 	public RouteAttributes(YamlGraphDeploymentProperties manifest) {
 		this.appName = manifest.getAppName();
 		this.routes = manifest.getRoutes();
+		this.host = manifest.getRawHost();
+		this.hosts = manifest.getRawHosts();
 	}
 
 	public List<String> getRoutes() {
