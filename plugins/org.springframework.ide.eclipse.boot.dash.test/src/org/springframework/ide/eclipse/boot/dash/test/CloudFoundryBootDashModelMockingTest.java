@@ -1277,7 +1277,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertEquals((Integer)1, space.getPushCount(appName).getValue());
 		assertEquals(manifestFile, app.getDeploymentManifestFile());
 		assertEquals(512, (int) app.getMemory());
-		
+
 
 		MockCFApplication deployedApp = space.getApplication(appName);
 		List<String> uris = deployedApp.getBasicInfo().getUris();
@@ -1493,31 +1493,26 @@ public class CloudFoundryBootDashModelMockingTest {
 		CFClientParams targetParams = CfTestTargetParams.fromEnv();
 		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
 		IProject project = projects.createBootProject("to-deploy", withStarters("web", "actuator"));
-		createFile(project, "manifest.yml",
+		IFile manifest = createFile(project, "manifest.yml",
 				"applications:\n" +
 				"- name: "+appName+"\n"
 		);
-		MockCFApplication deployedApp = space.defApp(appName);
-		deployedApp.start(CancelationTokens.NULL);
-
+		harness.answerDeploymentPrompt(ui, manifest);
 		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
+		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
 		waitForApps(model, appName);
-
 		CloudAppDashElement app = model.getApplication(appName);
-		app.setDeploymentManifestFile(project.getFile("manifest.yml"));
-		app.setProject(project);
+		waitForState(app, RunState.RUNNING, 10_000);
 		assertEquals(1, app.getActualInstances());
 
 //		deployedApp.scaleInstances(2); // change it 'externally'
 		assertEquals(1, app.getActualInstances()); //The model doesn't know yet that it has changed!
 
 //		harness.answerDeploymentPrompt(ui, appName, appName);
-
 		app.restart(RunState.RUNNING, ui);
-
 		waitForJobsToComplete();
 
-		//If no change was detected the manfiest compare dialog shouldn't have popped.
+		//If no change was detected the manifest compare dialog shouldn't have popped.
 		verify(ui, never()).openManifestDiffDialog(any());
 	}
 
