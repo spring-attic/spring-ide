@@ -46,6 +46,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -73,6 +74,8 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElemen
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetWizardModel.LoginMethod;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFAppState;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials.CFCredentialType;
@@ -120,7 +123,9 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 
@@ -797,7 +802,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertEquals("freddy@bar", barSpace.getDisplayName());
 	}
 
-	@Test public void tcpRouteWithRandomPort() throws Exception {
+	@Test public void pushTcpRouteWithRandomPort() throws Exception {
 		String appName = "moriarty-app";
 		String apiUrl = "http://api.some-cloud.com";
 		String username = "freddy"; String password = MockCloudFoundryClientFactory.FAKE_PASSWORD;
@@ -827,7 +832,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertEquals(ImmutableList.of("tcp.domain.com:63000"), uris);
 	}
 
-	@Test public void tcpRouteWithFixedPort() throws Exception {
+	@Test public void pushTcpRouteWithFixedPort() throws Exception {
 		String appName = "moriarty-app";
 		String apiUrl = "http://api.some-cloud.com";
 		String username = "freddy"; String password = MockCloudFoundryClientFactory.FAKE_PASSWORD;
@@ -851,11 +856,14 @@ public class CloudFoundryBootDashModelMockingTest {
 		waitForState(app, RunState.RUNNING, 10_000);
 
 		MockCFApplication deployedApp = space.getApplication(appName);
-		List<String> uris = deployedApp.getBasicInfo().getUris();
-		assertEquals(ImmutableList.of("tcp.domain.com:61001"), uris);
+		List<String> uris = deployedApp.getBasicInfo().getUris(); //Note: this info isn't retrieved via client!
+		assertEquals(ImmutableList.of("tcp.domain.com:61001"), uris); //Note: this info wasn't retrieved via client! Check if client info agrees
+		assertEquals(uris, target.getClient().getApplication(appName).getUris()); //Note: this info wasn't retrieved via client! Check if client info agrees
+
+		doUnchangedAppRestartTest(app, deployedApp);
 	}
 
-	@Test public void httpRouteWithRandomRoute() throws Exception {
+	@Test public void pushHttpRouteWithRandomRoute() throws Exception {
 		String appName = "moriarty-app";
 		String apiUrl = "http://api.some-cloud.com";
 		String username = "freddy"; String password = MockCloudFoundryClientFactory.FAKE_PASSWORD;
@@ -884,6 +892,8 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertTrue(uris.size() == 1);
 		assertTrue(uris.get(0).length() > ".cfmockapps.io".length());
 		assertTrue(uris.get(0).endsWith(".cfmockapps.io"));
+
+		doUnchangedAppRestartTest(app, deployedApp);
 	}
 
 	@Test
@@ -1227,7 +1237,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		waitForState(appElement, RunState.INACTIVE, 3000);
 	}
 
-	@Test public void simpleDeploy() throws Exception {
+	@Test public void pushSimple() throws Exception {
 		CFClientParams targetParams = CfTestTargetParams.fromEnv();
 		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
 		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
@@ -1247,7 +1257,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertEquals((Integer)1, space.getPushCount(appName).getValue());
 	}
 
-	@Test public void simpleDeployWithManifest() throws Exception {
+	@Test public void pushSimpleWithManifest() throws Exception {
 		CFClientParams targetParams = CfTestTargetParams.fromEnv();
 		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
 		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
@@ -1280,13 +1290,52 @@ public class CloudFoundryBootDashModelMockingTest {
 
 
 		MockCFApplication deployedApp = space.getApplication(appName);
-		List<String> uris = deployedApp.getBasicInfo().getUris();
+		CFApplication appInfo = deployedApp.getBasicInfo();
+		List<String> uris = appInfo.getUris();
 		assertTrue(uris.size() == 1);
 		assertEquals(ImmutableList.of(appName+".cfmockapps.io"), uris);
 
+		doUnchangedAppRestartTest(app, deployedApp);
 	}
 
-	@Test public void simpleDeployWithDefaultManualManifest() throws Exception {
+	protected void doUnchangedAppRestartTest(CloudAppDashElement app, MockCFApplication deployedApp) throws Exception {
+		//Try to restart app. Nothing should change because we haven't changed the manifest
+		CFApplication appInfo = deployedApp.getBasicInfo();
+		app.restart(RunState.RUNNING, ui);
+		waitForJobsToComplete();
+		waitForState(app, RunState.RUNNING, 10_000);
+
+		CFApplication newAppInfo = deployedApp.getBasicInfo();
+		assertSameAppState(appInfo, newAppInfo);
+		//If no change was detected the manifest compare dialog shouldn't have popped.
+		verify(ui, never()).openManifestDiffDialog(any());
+	}
+
+	private void assertSameAppState(CFApplication appInfo, CFApplication newAppInfo) {
+		assertEquals(appInfoCompareString(appInfo), appInfoCompareString(newAppInfo));
+	}
+
+	private String appInfoCompareString(CFApplication app) {
+		StringBuilder buf = new StringBuilder();
+		buf.append("name = " + app.getName());
+		buf.append("instances = " + app.getInstances());
+		buf.append("runningInstances = " + app.getRunningInstances());
+		buf.append("memory = " + app.getMemory());
+		buf.append("memory = " + app.getMemory());
+		buf.append("guid = " + app.getGuid());
+		buf.append("services = " + app.getServices());
+		buf.append("buildpack = " + app.getBuildpackUrl());
+		buf.append("uris = " + app.getUris());
+		buf.append("state = " + app.getState());
+		buf.append("diskQuota = " + app.getDiskQuota());
+		buf.append("timeout = " + app.getTimeout());
+		buf.append("command = " + app.getCommand());
+		buf.append("stack = " + app.getStack());
+		return buf.toString();
+	}
+
+
+	@Test public void pushSimpleWithDefaultManualManifest() throws Exception {
 		CFClientParams targetParams = CfTestTargetParams.fromEnv();
 		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
 		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
