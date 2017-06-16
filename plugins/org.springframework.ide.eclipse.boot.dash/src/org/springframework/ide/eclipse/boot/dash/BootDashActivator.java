@@ -175,7 +175,7 @@ public class BootDashActivator extends AbstractUIPlugin {
 	}
 
 
-	private void updateCloudTargetsInClientManifest(ImmutableSet<RunTarget> value) {
+	private void updateCloudTargetsInManifestEditor(ImmutableSet<RunTarget> value) {
 		Set<RunTarget> toUpdate = value == null ? ImmutableSet.of() : value;
 
 		List<Map<String, Object>> entries = getCfTargetLoginOptions(toUpdate);
@@ -200,7 +200,7 @@ public class BootDashActivator extends AbstractUIPlugin {
 			        // compute cloud target information for ALL currently connected targets
 			        // as the manifest editor is updated with the full up-to-date list of connected
 			        // boot dash targets
-					updateCloudTargetsInClientManifest(this.model.getRunTargets().getValue())
+					updateCloudTargetsInManifestEditor(this.model.getRunTargets().getValue())
 				).subscribe();
 		}
 	}
