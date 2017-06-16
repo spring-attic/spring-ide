@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Pivotal, Inc.
+ * Copyright (c) 2016, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,6 +42,7 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.OverviewRuler;
 import org.eclipse.jface.text.source.SourceViewer;
+import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -82,7 +83,9 @@ import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel.ManifestType;
+import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestEditorActivator;
 import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestYamlSourceViewerConfiguration;
+import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.lsp.LSBasedSourceViewerConfiguration;
 import org.springframework.ide.eclipse.editor.support.ForceableReconciler;
 import org.springframework.ide.eclipse.editor.support.util.ShellProviders;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -468,28 +471,44 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		IVerticalRuler fileVerticalRuler = appName == null ? new CompositeRuler() : /*new VerticalRuler(16, fileMarkerAnnotationAccess)*/ null;
 		fileYamlViewer = new SourceViewer(fileYamlComposite, fileVerticalRuler, fileOverviewRuler, true,
 				SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
-		ManifestYamlSourceViewerConfiguration fileYamlSourceViewerConfiguration = new ManifestYamlSourceViewerConfiguration(ShellProviders.from(composite)) {
 
-			@Override
-			protected IReconcilingStrategy createReconcilerStrategy(ISourceViewer viewer) {
-				CompositeReconcilingStrategy strategy = new CompositeReconcilingStrategy();
-				strategy.setReconcilingStrategies(new IReconcilingStrategy[] { super.createReconcilerStrategy(viewer),
-						new AppNameReconcilingStrategy(viewer, getAstProvider(), appName) });
-				return strategy;
-			}
+		SourceViewerConfiguration fileYamlSourceViewerConfiguration = null;
 
-			@Override
-			protected ForceableReconciler createReconciler(ISourceViewer sourceViewer) {
-				IReconcilingStrategy strategy = createReconcilerStrategy(sourceViewer);
-				if (strategy!=null) {
-					InstantForceableReconciler reconciler = new InstantForceableReconciler(strategy);
-					reconciler.setDelay(500);
-					return reconciler;
+		if (ManifestEditorActivator.getDefault().isLanguageServerEnabled()) {
+			fileYamlSourceViewerConfiguration = new LSBasedSourceViewerConfiguration(ShellProviders.from(composite)) {
+
+				@Override
+				protected IReconcilingStrategy createReconcilerStrategy(ISourceViewer viewer) {
+					return new AppNameReconcilingStrategy(viewer, getAstProvider(), appName);
 				}
-				return null;
-			}
+			};
+		}
+		else {
+			fileYamlSourceViewerConfiguration = new ManifestYamlSourceViewerConfiguration(ShellProviders.from(composite)) {
 
-		};
+				@Override
+				protected IReconcilingStrategy createReconcilerStrategy(ISourceViewer viewer) {
+					CompositeReconcilingStrategy strategy = new CompositeReconcilingStrategy();
+					strategy.setReconcilingStrategies(new IReconcilingStrategy[] { super.createReconcilerStrategy(viewer),
+							new AppNameReconcilingStrategy(viewer, getAstProvider(), appName) });
+					return strategy;
+				}
+
+				@Override
+				protected ForceableReconciler createReconciler(ISourceViewer sourceViewer) {
+					IReconcilingStrategy strategy = createReconcilerStrategy(sourceViewer);
+					if (strategy!=null) {
+						InstantForceableReconciler reconciler = new InstantForceableReconciler(strategy);
+						reconciler.setDelay(500);
+						return reconciler;
+					}
+					return null;
+				}
+
+			};
+
+		}
+
 		fileYamlViewer.configure(fileYamlSourceViewerConfiguration);
 		fileYamlViewer.getControl().setLayoutData(GridDataFactory.fillDefaults().grab(true, true).hint(SWT.DEFAULT, 200).create());
 
@@ -519,17 +538,30 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		manualYamlViewer = new SourceViewer(manualYamlComposite, manualVerticalRuler,
 				manualOverviewRuler, true,
 				SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
-		ManifestYamlSourceViewerConfiguration manualSourceViewerConfiguration = new ManifestYamlSourceViewerConfiguration(ShellProviders.from(composite)) {
 
-			@Override
-			protected IReconcilingStrategy createReconcilerStrategy(ISourceViewer viewer) {
-				CompositeReconcilingStrategy strategy = new CompositeReconcilingStrategy();
-				strategy.setReconcilingStrategies(new IReconcilingStrategy[] { super.createReconcilerStrategy(viewer),
-						new AppNameReconcilingStrategy(viewer, getAstProvider(), appName) });
-				return strategy;
-			}
+		SourceViewerConfiguration manualSourceViewerConfiguration = null;
+		if (ManifestEditorActivator.getDefault().isLanguageServerEnabled()) {
+			manualSourceViewerConfiguration = new LSBasedSourceViewerConfiguration(ShellProviders.from(composite)) {
 
-		};
+				@Override
+				protected IReconcilingStrategy createReconcilerStrategy(ISourceViewer viewer) {
+					return new AppNameReconcilingStrategy(viewer, getAstProvider(), appName);
+				}
+			};
+		}
+		else {
+			manualSourceViewerConfiguration = new ManifestYamlSourceViewerConfiguration(ShellProviders.from(composite)) {
+
+				@Override
+				protected IReconcilingStrategy createReconcilerStrategy(ISourceViewer viewer) {
+					CompositeReconcilingStrategy strategy = new CompositeReconcilingStrategy();
+					strategy.setReconcilingStrategies(new IReconcilingStrategy[] { super.createReconcilerStrategy(viewer),
+							new AppNameReconcilingStrategy(viewer, getAstProvider(), appName) });
+					return strategy;
+				}
+
+			};
+		}
 
 		manualYamlViewer.configure(manualSourceViewerConfiguration);
 		manualYamlViewer.getControl().setLayoutData(GridDataFactory.fillDefaults().grab(true, true).hint(SWT.DEFAULT, 200).create());

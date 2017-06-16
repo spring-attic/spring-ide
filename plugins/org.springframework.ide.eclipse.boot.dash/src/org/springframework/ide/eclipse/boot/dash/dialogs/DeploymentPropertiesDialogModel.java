@@ -228,7 +228,7 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 				selectedAppName.dispose();
 			});
 		}
-		
+
 		abstract String getManifestContents();
 
 		/**
@@ -424,7 +424,7 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 			public void elementContentAboutToBeReplaced(Object arg0) {
 			}
 		};
-		
+
 		{
 			onDispose((d) -> {
 				saveOrDiscardIfNeeded();
@@ -447,19 +447,19 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 			TextFileDocumentProvider docProvider = file == null ? null : getTextDocumentProvider(file);
 			if (docProvider != null && file != null && file.exists() && inputConnected) {
 				if (docProvider.canSaveDocument(file) && ui.confirmOperation("Changes Detected", "Manifest file '" + file.getFile().getFullPath().toOSString()
-								+ "' has been changed. Do you want to save changes or discard them?", new String[] {"Save", "Discard"}, 0) == 0) {
+								+ "' has been changed. Do you want to save changes or discard them?", new String[] {"Save", "Don't Save"}, 0) == 0) {
 					try {
 						docProvider.saveDocument(new NullProgressMonitor(), file, docProvider.getDocument(file), true);
 					} catch (CoreException e) {
 						Log.log(e);
 						ui.errorPopup("Failed Saving File", ExceptionUtil.getMessage(e));
 					}
-				} else {
-					try {
-						docProvider.resetDocument(file);
-					} catch (CoreException e) {
-						Log.log(e);
-					}
+//				} else {
+//					try {
+//						docProvider.resetDocument(file);
+//					} catch (CoreException e) {
+//						Log.log(e);
+//					}
 				}
 				disconnect(docProvider, file);
 			}
@@ -603,7 +603,7 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 				return result;
 			}
 		};
-		
+
 		{
 			onDispose((d) -> {
 				validator.dispose();
