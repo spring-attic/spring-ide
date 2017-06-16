@@ -52,4 +52,12 @@ public interface DeploymentProperties {
 
 	Set<String> getUris();
 
+	/**
+	 * If the origin of these properties is parsing yml content (from file or
+	 * embedded editor buffer, then this method retrieves the raw text of the
+	 * yml content). If the properties where obtained some other way (e.g. by reading
+	 * app state from CF itself, it returns null).
+	 */
+	default String getYamlContent() { return null; }
+
 }
