@@ -85,9 +85,12 @@ public class ManifestEditorActivator extends AbstractUIPlugin {
 	
 	public void setCfTargetLoginOptions(Map<String, Object> cfTargetLoginOptions) {
 		try {
-			Class<?> lsClass = this.getClass().getClassLoader().loadClass("org.springframework.tooling.cloudfoundry.manifest.ls.CloudFoundryManifestLanguageServer");
-			Method lsMethod = lsClass.getMethod("setCfTargetLoginOptions", Object.class);
-			lsMethod.invoke(null, cfTargetLoginOptions);
+			Bundle lsBundle = Platform.getBundle("org.springframework.tooling.cloudfoundry.manifest.ls");
+			if (lsBundle != null && lsBundle.getState() != Bundle.INSTALLED && System.getProperty("cf-manifest-lsp", "true").equals("true")) {
+				Class<?> lsClass = lsBundle.loadClass("org.springframework.tooling.cloudfoundry.manifest.ls.CloudFoundryManifestLanguageServer");
+				Method lsMethod = lsClass.getMethod("setCfTargetLoginOptions", Object.class);
+				lsMethod.invoke(null, cfTargetLoginOptions);
+			}
 		}
 		catch (Exception e) {
 			e.printStackTrace();

@@ -21,8 +21,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.lsp4e,
  org.eclipse.lsp4j,
  org.eclipse.lsp4j.jsonrpc,
- org.eclipse.jdt.launching,
- org.springframework.tooling.cloudfoundry.manifest.ls;bundle-version="0.0.9";resolution:=optional
+ org.eclipse.jdt.launching
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.cloudfoundry.manifest.editor,
  org.springframework.ide.eclipse.cloudfoundry.manifest.editor.lsp
