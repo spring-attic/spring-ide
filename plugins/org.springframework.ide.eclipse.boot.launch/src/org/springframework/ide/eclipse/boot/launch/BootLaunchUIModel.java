@@ -14,8 +14,11 @@ import static org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConf
 import static org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.ENABLE_DEBUG_OUTPUT;
 import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.ANSI_CONSOLE_OUTPUT;
 import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.DEFAULT_HIDE_FROM_BOOT_DASH;
+import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.FAST_STARTUP;
 import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.HIDE_FROM_BOOT_DASH;
 
+import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.ide.eclipse.boot.launch.livebean.EnableJmxFeaturesModel;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -62,6 +65,7 @@ public class BootLaunchUIModel {
 	public final EnableJmxFeaturesModel enableJmx;
 	public final LaunchTabSelectionModel<Boolean> hideFromDash;
 	public final LaunchTabSelectionModel<Boolean> ansiConsoleOutput;
+	public final LaunchTabSelectionModel<Boolean> fastStartup;
 
 	public BootLaunchUIModel(IProfileHistory profileHistory) {
 		project = SelectProjectLaunchTabModel.create();
@@ -71,6 +75,8 @@ public class BootLaunchUIModel {
 		enableJmx = new EnableJmxFeaturesModel();
 		hideFromDash = CheckboxLaunchTabModel.create(HIDE_FROM_BOOT_DASH, DEFAULT_HIDE_FROM_BOOT_DASH);
 		ansiConsoleOutput = CheckboxLaunchTabModel.create(ANSI_CONSOLE_OUTPUT, BootLaunchConfigurationDelegate.supportsAnsiConsoleOutput());
+		fastStartup = CheckboxLaunchTabModel.create(FAST_STARTUP, BootActivator.getDefault().getPreferenceStore()
+				.getBoolean(BootPreferences.PREF_BOOT_FAST_STARTUP_DEFAULT));
 	}
 
 }

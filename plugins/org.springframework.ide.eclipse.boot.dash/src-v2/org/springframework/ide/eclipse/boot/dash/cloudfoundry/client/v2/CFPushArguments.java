@@ -48,6 +48,7 @@ public class CFPushArguments implements AutoCloseable {
 	private File applicationDataAsFile;
 	private boolean noStart = false;
 	private boolean randomRoute = false;
+	private String healthCheckHttpEndpoint;
 
 	public CFPushArguments() {
 	}
@@ -167,5 +168,12 @@ public class CFPushArguments implements AutoCloseable {
 				+ noStart + ", healthCheckType="+ healthCheckType+ ", randomRoute="+ randomRoute+" ]";
 	}
 
+	public void setHealthCheckHttpEndpoint(String healthCheckHttpEndpoint) {
+		this.healthCheckHttpEndpoint = healthCheckHttpEndpoint;
+	}
+
+	public String getHealthCheckHttpEndpoint() {
+		return this.healthCheckHttpEndpoint;
+	}
 
 }

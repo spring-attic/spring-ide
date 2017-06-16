@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.ide.eclipse.editor.support.util.ValueParser;
+import org.springframework.ide.eclipse.editor.support.yaml.schema.constraints.Constraint;
 
 /**
  * An implementation of YTypeUtil provides implementations of various
@@ -37,4 +38,6 @@ public interface YTypeUtil {
 	//TODO: only one of these two should be enough?
 	List<YTypedProperty> getProperties(YType type);
 	Map<String, YTypedProperty> getPropertiesMap(YType yType);
+	List<Constraint> getConstraints(YType type);
+
 }

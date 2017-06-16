@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2016 Pivotal, Inc.
+ * Copyright (c) 2015, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -157,6 +157,21 @@ public class BootProjectTestHarness {
 		};
 	}
 
+	public static WizardConfigurer addBootVersion(String version) throws Exception {
+		return new WizardConfigurer() {
+			public void apply(NewSpringBootWizardModel wizard) {
+				RadioGroup bootVersionRadio = wizard.getBootVersion();
+				for (RadioInfo option : bootVersionRadio.getRadios()) {
+					if (option.getValue().equals(version)) {
+						return;
+					}
+				}
+				Version qualifierVersion = Version.valueOf(version);
+				bootVersionRadio.add(new RadioInfo(qualifierVersion.getMajor() + "." + qualifierVersion.getMinor() + "." + qualifierVersion.getMicro(), version, false));
+			}
+		};
+	}
+	
 	/**
 	 * @return A wizard configurer that ensures the selected 'boot version' is at least
 	 * a given version of boot.

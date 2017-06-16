@@ -915,6 +915,33 @@ public class CloudFoundryBootDashModelMockingTest {
 	}
 
 	@Test
+	public void testPushWithHttpHealthCheckType() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		CloudFoundryBootDashModel target =  harness.createCfTarget(targetParams);
+		final CloudFoundryBootDashModel model = harness.getCfTargetModel();
+
+		IProject project = projects.createBootProject("to-deploy", withStarters("actuator", "web"));
+		final String appName = appHarness.randomAppName();
+
+		IFile manifest = createFile(project, "manifest.yml",
+				"applications:\n" +
+				"- name: "+appName+"\n" +
+				"  health-check-type: http\n" +
+				"  health-check-http-endpoint: /health\n"
+		);
+		harness.answerDeploymentPrompt(ui, manifest);
+		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+
+		ACondition.waitFor("wait for app '"+ appName +"'to be RUNNING", 30000, () -> {
+			CloudAppDashElement app = model.getApplication(appName);
+			assertEquals(RunState.RUNNING, app.getRunState());
+			assertEquals("http", app.getHealthCheck());
+			assertEquals("/health", app.getHealthCheckHttpEndpoint());
+		});
+	}
+
+	@Test
 	public void testEnvVarsSetOnFirstDeploy() throws Exception {
 		CFClientParams targetParams = CfTestTargetParams.fromEnv();
 		clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());

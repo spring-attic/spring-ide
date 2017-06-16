@@ -232,35 +232,14 @@
             commandId="org.springsource.ide.eclipse.boot.BootLaunchShortcut.debug"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
    </extension>
-  
-      <extension
-         point="org.eclipse.ui.popupMenus">
-   	      <objectContribution
-            objectClass="org.eclipse.core.resources.IProject"
-            adaptable="true"
-            id="org.springframework.ide.eclipse.boot.launch.livebean.OpenLiveBeansGraphAction">
-         <visibility>
-         	<!-- TODO: only allow this for spring boot projects? -->
-	        <objectState
-	              name="nature"
-	              value="org.springframework.ide.eclipse.core.springnature">
-	        </objectState>
-         </visibility>
-         <action
-                   class="org.springframework.ide.eclipse.boot.launch.livebean.OpenLiveBeansGraphAction"
-                   enablesFor="+"
-                   icon="resources/icons/live-beans-graph.png"
-                   id="org.springframework.ide.eclipse.boot.ui.OpenLiveBeansGraphAction"
-                   label="Open Live Beans Graph"
-                   menubarPath="org.springframework.ide.eclipse.ui.tools/group0">
-         </action>
-      </objectContribution>
-   	</extension>
-
     <extension point="org.eclipse.debug.core.processFactories">
    <processFactory
            id="org.springframework.ide.eclipse.boot.launch.process.BootProcessFactory"
            class="org.springframework.ide.eclipse.boot.launch.process.BootProcessFactory">
+   </processFactory>
+   <processFactory
+         class="org.springframework.ide.eclipse.boot.launch.cli.CloudCliServiceLaunchConfigurationDelegate$CloudCliProcessFactory"
+         id="org.springframework.ide.eclipse.boot.launch.cli.CloudCliServiceLaunchConfigurationDelegate$CloudCliProcessFactory">
    </processFactory>
  </extension>
    

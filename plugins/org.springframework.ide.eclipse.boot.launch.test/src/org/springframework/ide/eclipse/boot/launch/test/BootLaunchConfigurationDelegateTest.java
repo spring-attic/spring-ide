@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal Software, Inc.
+ * Copyright (c) 2015, 2017 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,8 +20,10 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.internal.core.IInternalDebugCoreConstants;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
-import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
+import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.PropVal;
+import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport;
 import org.springframework.ide.eclipse.boot.test.util.LaunchResult;
 import org.springframework.ide.eclipse.boot.test.util.LaunchUtil;
@@ -126,6 +128,20 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		assertEquals(false, BootLaunchConfigurationDelegate.getEnableAnsiConsoleOutput(wc));
 	}
 
+	public void testSetGetFastStartup() throws Exception {
+		ILaunchConfigurationWorkingCopy wc = createWorkingCopy();
+		assertEquals(
+				BootActivator.getDefault().getPreferenceStore()
+						.getBoolean(BootPreferences.PREF_BOOT_FAST_STARTUP_DEFAULT),
+				BootLaunchConfigurationDelegate.getFastStartup(wc));
+
+		BootLaunchConfigurationDelegate.setFastStartup(wc, true);
+		assertEquals(true, BootLaunchConfigurationDelegate.getFastStartup(wc));
+
+		BootLaunchConfigurationDelegate.setFastStartup(wc, false);
+		assertEquals(false, BootLaunchConfigurationDelegate.getFastStartup(wc));
+	}
+	
 	public void testClearProperties() throws Exception {
 		ILaunchConfigurationWorkingCopy wc = createWorkingCopy();
 		BootLaunchConfigurationDelegate.setProperties(wc, Arrays.asList(
@@ -153,7 +169,7 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 
 	public void testGetSetLiveBean() throws Exception {
 		ILaunchConfigurationWorkingCopy wc = createWorkingCopy();
-		boolean deflt = BootLaunchConfigurationDelegate.DEFAULT_ENABLE_LIVE_BEAN_SUPPORT;
+		boolean deflt = BootLaunchConfigurationDelegate.DEFAULT_ENABLE_LIVE_BEAN_SUPPORT();
 		boolean other = !deflt;
 
 		assertEquals(deflt, BootLaunchConfigurationDelegate.getEnableLiveBeanSupport(wc));

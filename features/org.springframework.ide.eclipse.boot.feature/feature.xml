@@ -62,6 +62,18 @@
          version="0.0.0"
          unpack="false"/>
 
+   <!-- The livebean plugin can be removed without much loss of functionality. 
+        It ties in with the livebean graph of old-style STS 3 support
+        If this bundle is removed here the 'Open live beans graph' menu action
+        Won't be present, and the ui widgets in the launch conf editor related to
+        it will also be hidden -->
+   <plugin
+         id="org.springframework.ide.eclipse.boot.launch.livebean"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+         
    <plugin
          id="org.springframework.ide.eclipse.boot.properties.editor"
          download-size="0"

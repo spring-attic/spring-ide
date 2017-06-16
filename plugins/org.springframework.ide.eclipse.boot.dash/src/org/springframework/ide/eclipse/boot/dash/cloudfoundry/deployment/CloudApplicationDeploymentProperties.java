@@ -63,6 +63,7 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 	 */
 	private File archive;
 	private String healthCheckType;
+	private String healthCheckHttpEndpoint;
 	private boolean randomeRoute = false;
 
 	public CloudApplicationDeploymentProperties() {
@@ -119,6 +120,14 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 
 	public void setHealthCheckType(String healthCheckType) {
 		this.healthCheckType = healthCheckType;
+	}
+
+	public String getHealthCheckHttpEndpoint() {
+		return healthCheckHttpEndpoint;
+	}
+
+	public void setHealthCheckHttpEndpoint(String hche) {
+		this.healthCheckHttpEndpoint = hche;
 	}
 
 	public void setCommand(String command) {
@@ -247,6 +256,7 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 		properties.setDiskQuota(app == null ? DeploymentProperties.DEFAULT_MEMORY : app.getDiskQuota());
 		properties.setTimeout(app == null ? null : app.getTimeout());
 		properties.setHealthCheckType(app==null ? null : app.getHealthCheckType());
+		properties.setHealthCheckHttpEndpoint(app == null ? null : app.getHealthCheckHttpEndpoint());
 		properties.setCommand(app == null ? null : app.getCommand());
 		properties.setStack(app == null ? null : app.getStack());
 
@@ -270,6 +280,7 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 		args.setDiskQuota(getDiskQuota());
 		args.setTimeout(getTimeout());
 		args.setHealthCheckType(getHealthCheckType());
+		args.setHealthCheckHttpEndpoint(getHealthCheckHttpEndpoint());
 		args.setBuildpack(getBuildpack());
 		args.setCommand(getCommand());
 		args.setStack(getStack());

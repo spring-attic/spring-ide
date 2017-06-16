@@ -106,6 +106,8 @@ public class ApplicationManifestHandler {
 
 	public static final String HEALTH_CHECK_TYPE_PROP = "health-check-type";
 
+	public static final String HEALTH_CHECK_HTTP_ENDPOINT_PROP = "health-check-http-endpoint";
+
 	public static final String COMMAND_PROP = "command";
 
 	public static final String STACK_PROP = "stack";
@@ -324,6 +326,8 @@ public class ApplicationManifestHandler {
 
 		readHealthCheckType(appMap, allResults, properties);
 
+		readHealthCheckHttpEndpoint(appMap, allResults, properties);
+
 		readCommand(appMap, allResults, properties);
 
 		readStack(appMap, allResults, properties);
@@ -451,6 +455,10 @@ public class ApplicationManifestHandler {
 		String healthCheck = properties.getHealthCheckType();
 		if (healthCheck != null) {
 			application.put(ApplicationManifestHandler.HEALTH_CHECK_TYPE_PROP, healthCheck);
+		}
+		String healthCheckHttpEndpoint = properties.getHealthCheckHttpEndpoint();
+		if (healthCheckHttpEndpoint != null) {
+			application.put(ApplicationManifestHandler.HEALTH_CHECK_HTTP_ENDPOINT_PROP, healthCheckHttpEndpoint);
 		}
 		if (properties.getCommand() != null) {
 			application.put(ApplicationManifestHandler.COMMAND_PROP, properties.getCommand());
@@ -639,6 +647,17 @@ public class ApplicationManifestHandler {
 		}
 		if (hc != null) {
 			properties.setHealthCheckType(hc);
+		}
+	}
+
+	private void readHealthCheckHttpEndpoint(Map<?, ?> application, Map<Object, Object> allResults,
+			CloudApplicationDeploymentProperties properties) {
+		String hche = getValue(application, HEALTH_CHECK_HTTP_ENDPOINT_PROP, String.class);
+		if (hche == null) {
+			hche = getValue(allResults, HEALTH_CHECK_HTTP_ENDPOINT_PROP, String.class);
+		}
+		if (hche != null) {
+			properties.setHealthCheckHttpEndpoint(hche);
 		}
 	}
 

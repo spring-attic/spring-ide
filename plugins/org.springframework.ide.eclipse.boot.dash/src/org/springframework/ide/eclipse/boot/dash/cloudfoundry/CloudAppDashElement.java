@@ -411,6 +411,14 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 		return null;
 	}
 
+	public String getHealthCheckHttpEndpoint() {
+		CFApplication app = getSummaryData();
+		if (app != null) {
+			return app.getHealthCheckHttpEndpoint();
+		}
+		return null;
+	}
+
 	public CFApplication getSummaryData() {
 		return appData.getValue();
 	}

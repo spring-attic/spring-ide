@@ -19,7 +19,9 @@ Require-Bundle: org.eclipse.ui,
  org.springsource.ide.eclipse.commons.livexp;bundle-version="3.8.4",
  org.springsource.ide.eclipse.commons.frameworks.core,
  org.springsource.ide.eclipse.commons.core,
- org.springframework.ide.eclipse.boot
+ org.springframework.ide.eclipse.boot,
+ io.projectreactor.reactor-core,
+ org.reactivestreams.reactive-streams;bundle-version="1.0.0"
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.editor.support,
  org.springframework.ide.eclipse.editor.support.completions,
@@ -34,6 +36,7 @@ Export-Package: org.springframework.ide.eclipse.editor.support,
  org.springframework.ide.eclipse.editor.support.yaml.path,
  org.springframework.ide.eclipse.editor.support.yaml.reconcile,
  org.springframework.ide.eclipse.editor.support.yaml.schema,
+ org.springframework.ide.eclipse.editor.support.yaml.schema.constraints,
  org.springframework.ide.eclipse.editor.support.yaml.structure
 Import-Package: org.springframework.util
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

@@ -17,9 +17,15 @@ import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlASTProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YamlSchema;
 
 /**
+ * Note: Do NOT subclass this. It is meant to be 'complete' the parser and schema
+ * are meant to be the drivers of its entire behavior. Subclassing should not be required.
+ * <p>
+ * Instead if we require more capabilities then we should extend the 'powers' of
+ * the schema to express constraints.
+ *
  * @author Kris De Volder
  */
-public class YamlSchemaBasedReconcileEngine extends YamlReconcileEngine {
+public final class YamlSchemaBasedReconcileEngine extends YamlReconcileEngine {
 	private final YamlSchema schema;
 
 	public YamlSchemaBasedReconcileEngine(YamlASTProvider parser, YamlSchema schema) {

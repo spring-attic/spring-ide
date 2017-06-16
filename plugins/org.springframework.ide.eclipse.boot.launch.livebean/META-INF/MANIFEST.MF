@@ -1,0 +1,20 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.springframework.ide.eclipse.boot.launch.livebean
+Bundle-SymbolicName: org.springframework.ide.eclipse.boot.launch.livebean;singleton:=true
+Bundle-Version: 3.9.0.qualifier
+Bundle-Activator: org.springframework.ide.eclipse.boot.launch.livebean.BootLiveBeanActivator
+Bundle-Vendor: Pivotal Inc.
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.core.resources,
+ org.eclipse.debug.core,
+ org.eclipse.jdt.launching,
+ org.springframework.ide.eclipse.beans.ui.livegraph,
+ org.springframework.ide.eclipse.boot,
+ org.springframework.ide.eclipse.boot.launch,
+ org.springsource.ide.eclipse.commons.ui,
+ org.springsource.ide.eclipse.commons.livexp,
+ org.springsource.ide.eclipse.commons.frameworks.ui
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ActivationPolicy: lazy

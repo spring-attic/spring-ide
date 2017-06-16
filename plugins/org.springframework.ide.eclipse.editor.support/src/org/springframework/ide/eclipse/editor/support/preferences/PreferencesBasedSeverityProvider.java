@@ -18,10 +18,9 @@ import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
-import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem;
-import org.springframework.ide.eclipse.editor.support.reconcile.SeverityProvider;
 import org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity;
 import org.springframework.ide.eclipse.editor.support.reconcile.ProblemType;
+import org.springframework.ide.eclipse.editor.support.reconcile.SeverityProvider;
 
 /**
  * Implementation of {@link SeverityProvider} that determines the severity of a problem

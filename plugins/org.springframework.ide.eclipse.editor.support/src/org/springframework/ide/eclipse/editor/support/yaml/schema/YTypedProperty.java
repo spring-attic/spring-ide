@@ -19,4 +19,6 @@ public interface YTypedProperty {
 	String getName();
 	YType getType();
 	HtmlSnippet getDescription();
+	boolean isDeprecated();
+	String getDeprecationMessage();
 }

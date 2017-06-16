@@ -127,4 +127,9 @@ public class CFApplicationSummaryData implements CFApplication {
 		return extras.getEnv().block();
 	}
 
+	@Override
+	public String getHealthCheckHttpEndpoint() {
+		return extras.getHealthCheckHttpEndpoint().block();
+	}
+
 }

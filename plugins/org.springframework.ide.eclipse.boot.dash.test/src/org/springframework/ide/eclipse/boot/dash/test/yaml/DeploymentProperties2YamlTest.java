@@ -28,15 +28,15 @@ import org.yaml.snakeyaml.Yaml;
 
 /**
  * Tests for generating YAML files from {@link CloudApplicationDeploymentProperties}
- * 
+ *
  * @author Alex Boyko
  *
  */
 public class DeploymentProperties2YamlTest {
-	
+
 	private static void testDeploymentProperties(CloudApplicationDeploymentProperties props, String expectedYamlFilePath) throws Exception {
 		Map<Object, Object> map = ApplicationManifestHandler.toYaml(props, ManifestCompareMergeTests.createCloudDataMap());
-		
+
 		DumperOptions options = new DumperOptions();
 		options.setExplicitStart(true);
 		options.setCanonical(false);
@@ -45,7 +45,7 @@ public class DeploymentProperties2YamlTest {
 		options.setLineBreak(LineBreak.getPlatformLineBreak());
 
 		String generatedManifest = new Yaml(options).dump(map);
-		
+
 		File yamlFile = ManifestCompareMergeTests.getTestFile(expectedYamlFilePath);
 		FileInputStream inputStream = null;
 		try {
@@ -55,9 +55,9 @@ public class DeploymentProperties2YamlTest {
 			if (inputStream != null) {
 				inputStream.close();
 			}
-		}	
+		}
 	}
-	
+
 	@Test
 	public void test_no_route_1() throws Exception {
 		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
@@ -130,6 +130,42 @@ public class DeploymentProperties2YamlTest {
 		props.setStack("my-stack");
 		props.setUris(Arrays.asList("app.springsource.org"));
 		testDeploymentProperties(props, "manifest-generate-data/stack-1.yml");
+	}
+
+
+	@Test
+	public void test_health_check_http() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setMemory(512);
+		props.setHealthCheckType("http");
+		props.setHealthCheckHttpEndpoint("/testhealth");
+		props.setUris(Arrays.asList("app.springsource.org"));
+
+		testDeploymentProperties(props, "manifest-generate-data/health-check-http.yml");
+	}
+
+
+	@Test
+	public void test_health_check_process() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setMemory(512);
+		props.setHealthCheckType("process");
+		props.setUris(Arrays.asList("app.springsource.org"));
+
+		testDeploymentProperties(props, "manifest-generate-data/health-check-process.yml");
+	}
+
+	@Test
+	public void test_health_check_port() throws Exception {
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("app");
+		props.setMemory(512);
+		props.setHealthCheckType("port");
+		props.setUris(Arrays.asList("app.springsource.org"));
+
+		testDeploymentProperties(props, "manifest-generate-data/health-check-port.yml");
 	}
 
 }

@@ -22,6 +22,7 @@ import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileStrateg
 import org.springframework.ide.eclipse.editor.support.yaml.AbstractYamlSourceViewerConfiguration;
 import org.springframework.ide.eclipse.editor.support.yaml.YamlAssistContextProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.completions.SchemaBasedYamlAssistContextProvider;
+import org.springframework.ide.eclipse.editor.support.yaml.reconcile.YamlSchemaBasedReconcileEngine;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 
 /**
@@ -58,7 +59,7 @@ public class ManifestYamlSourceViewerConfiguration extends AbstractYamlSourceVie
 	}
 
 	private IReconcileEngine createReconcileEngine() {
-		return new ManifestYamlReconcileEngine(getAstProvider(), schema);
+		return new YamlSchemaBasedReconcileEngine(getAstProvider(), schema);
 	}
 
 	@Override

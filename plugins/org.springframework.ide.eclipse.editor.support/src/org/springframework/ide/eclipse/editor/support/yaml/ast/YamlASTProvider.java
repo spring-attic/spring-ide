@@ -78,7 +78,7 @@ public class YamlASTProvider {
 				cachedFor.removeDocumentListener(listener);
 			}
 			doc.addDocumentListener(listener);
-			cached = new YamlFileAST(yaml.composeAll(new StringReader(doc.get())));
+			cached = new YamlFileAST(doc, yaml.composeAll(new StringReader(doc.get())));
 			cachedFor = doc;
 		}
 		return cached;

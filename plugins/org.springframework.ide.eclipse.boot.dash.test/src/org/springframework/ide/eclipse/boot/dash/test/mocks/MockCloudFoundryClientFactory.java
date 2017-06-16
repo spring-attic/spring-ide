@@ -389,6 +389,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 			app.setStackMaybe(args.getStack());
 			app.setTimeoutMaybe(args.getTimeout());
 			app.setHealthCheckTypeMaybe(args.getHealthCheckType());
+			app.setHealthCheckHttpEndpoint(args.getHealthCheckHttpEndpoint());
 			app.setBits(IOUtil.toBytes(new FileInputStream(args.getApplicationData().getName())));
 			space.put(app);
 			space.getPushCount(app.getName()).increment();

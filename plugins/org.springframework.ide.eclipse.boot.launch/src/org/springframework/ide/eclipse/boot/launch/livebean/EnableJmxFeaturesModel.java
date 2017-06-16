@@ -24,6 +24,8 @@ import static org.springsource.ide.eclipse.commons.livexp.core.ValidationResult.
 
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.osgi.framework.Bundle;
+import org.springframework.ide.eclipse.boot.launch.BootLaunchActivator;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.util.ILaunchConfigurationTabModel;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
@@ -42,7 +44,6 @@ public class EnableJmxFeaturesModel implements ILaunchConfigurationTabModel {
 
 	private static final int MAX_PORT = 65536;
 
-
 	public final String portFieldName = "JMX Port";
 	public final String timeOutFieldName = "Termination timeout";
 
@@ -60,7 +61,7 @@ public class EnableJmxFeaturesModel implements ILaunchConfigurationTabModel {
 	@SuppressWarnings("unchecked")
 	public EnableJmxFeaturesModel() {
 		this.jmxEnabled = new LiveVariable<>(DEFAULT_ENABLE_JMX);
-		this.liveBeanEnabled = new LiveVariable<>(DEFAULT_ENABLE_LIVE_BEAN_SUPPORT);
+		this.liveBeanEnabled = new LiveVariable<>(DEFAULT_ENABLE_LIVE_BEAN_SUPPORT());
 		this.lifeCycleEnabled = new LiveVariable<>(DEFAULT_ENABLE_LIFE_CYCLE);
 
 		autoDisableWhenJmxDisabled(liveBeanEnabled, lifeCycleEnabled);
@@ -173,7 +174,7 @@ public class EnableJmxFeaturesModel implements ILaunchConfigurationTabModel {
 
 	@Override
 	public void setDefaults(ILaunchConfigurationWorkingCopy conf) {
-		setEnableLiveBeanSupport(conf, DEFAULT_ENABLE_LIVE_BEAN_SUPPORT);
+		setEnableLiveBeanSupport(conf, DEFAULT_ENABLE_LIVE_BEAN_SUPPORT());
 		setEnableLifeCycle(conf, DEFAULT_ENABLE_LIFE_CYCLE);
 		setEnableJMX(conf, DEFAULT_ENABLE_JMX);
 		setJMXPort(conf, ""+DEFAULT_JMX_PORT);
@@ -188,5 +189,13 @@ public class EnableJmxFeaturesModel implements ILaunchConfigurationTabModel {
 	@Override
 	public LiveExpression<ValidationResult> getValidator() {
 		return validator;
+	}
+
+	public boolean isLiveBeanSupported() {
+		BootLaunchActivator activator = BootLaunchActivator.getInstance();
+		if (activator!=null) {
+			return activator.isLiveBeanSupported();
+		}
+		return false;
 	}
 }

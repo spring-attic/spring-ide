@@ -112,4 +112,14 @@ public class TypedProperty implements YTypedProperty {
 		}
 		return null;
 	}
+
+	@Override
+	public String getDeprecationMessage() {
+		//Fake implementation, the boot editor doesn't use this anyways, its only here
+		// for schema-based reconciler.
+		if (getDeprecation()!=null) {
+			return "Deprecated";
+		}
+		return null;
+	}
 }

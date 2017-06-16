@@ -11,9 +11,9 @@
 package org.springframework.ide.eclipse.editor.support.yaml.schema;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -22,11 +22,20 @@ import java.util.Set;
 
 import javax.inject.Provider;
 
+import org.eclipse.core.runtime.Assert;
 import org.springframework.ide.eclipse.editor.support.hover.DescriptionProviders;
+import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileException;
+import org.springframework.ide.eclipse.editor.support.reconcile.ReplacementQuickfix;
 import org.springframework.ide.eclipse.editor.support.util.EnumValueParser;
 import org.springframework.ide.eclipse.editor.support.util.HtmlSnippet;
 import org.springframework.ide.eclipse.editor.support.util.ValueParser;
+import org.springframework.ide.eclipse.editor.support.yaml.reconcile.YamlSchemaProblems;
+import org.springframework.ide.eclipse.editor.support.yaml.schema.constraints.Constraint;
+import org.springframework.ide.eclipse.editor.support.yaml.schema.constraints.Constraints;
 
+import com.google.common.collect.ImmutableSet;
+
+import reactor.core.publisher.Flux;
 /**
  * Static utility method for creating YType objects representing either
  * 'array-like', 'map-like' or 'object-like' types which can be used
@@ -35,6 +44,19 @@ import org.springframework.ide.eclipse.editor.support.util.ValueParser;
  * @author Kris De Volder
  */
 public class YTypeFactory {
+
+	private static class Deprecation {
+		final String errorMsg;
+		final String replacement;
+		final String quickfixMsg;
+		public Deprecation(String errorMsg, String replacement, String quickfixMsg) {
+			super();
+			this.errorMsg = errorMsg;
+			this.replacement = replacement;
+			this.quickfixMsg = quickfixMsg;
+		}
+
+	}
 
 	public YType yseq(YType el) {
 		return new YSeqType(el);
@@ -108,6 +130,11 @@ public class YTypeFactory {
 		public ValueParser getValueParser(YType type) {
 			return ((AbstractType)type).getParser();
 		}
+		@Override
+		public List<Constraint> getConstraints(YType type) {
+			return ((AbstractType)type).getConstraints();
+		}
+
 	};
 
 	/////////////////////////////////////////////////////////////////////////////////////
@@ -122,9 +149,14 @@ public class YTypeFactory {
 		private final List<YValueHint> hints = new ArrayList<>();
 		private Map<String, YTypedProperty> cachedPropertyMap;
 		private Provider<Collection<YValueHint>> hintProvider;
+		private List<Constraint> constraints = new ArrayList<>(2);
 
 		public boolean isSequenceable() {
 			return false;
+		}
+
+		public List<Constraint> getConstraints() {
+			return constraints;
 		}
 
 		public boolean isBean() {
@@ -219,6 +251,14 @@ public class YTypeFactory {
 		public ValueParser getParser() {
 			return parser;
 		}
+		public AbstractType require(Constraint dynamicConstraint) {
+			this.constraints.add(dynamicConstraint);
+			return this;
+		}
+
+		public void requireOneOf(String... properties) {
+			this.constraints.add(Constraints.requireOneOf(properties));
+		}
 	}
 
 	public static class YMapType extends AbstractType {
@@ -311,11 +351,71 @@ public class YTypeFactory {
 		}
 	}
 
+	public class EnumTypeBuilder {
+
+		private String name;
+		private String[] values;
+
+		private Map<String, Deprecation> deprecations = new HashMap<>();
+
+		public EnumTypeBuilder(String name, String[] values) {
+			this.name = name;
+			this.values = values;
+		}
+
+		public YAtomicType build() {
+			EnumValueParser basicParser = new EnumValueParser(name, values);
+			YAtomicType t = yatomic(name);
+			t.addHints(getNonDeprecatedValues());
+			if (deprecations.isEmpty()) {
+				t.parseWith(basicParser);
+			} else {
+				t.parseWith(ValueParser.of((String value) -> {
+					basicParser.parse(value);
+					Deprecation d = deprecations.get(value);
+					if (d!=null) {
+						throw new ReconcileException(d.errorMsg, YamlSchemaProblems.DEPRECATED_VALUE)
+									.fixWith(new ReplacementQuickfix(d.quickfixMsg, d.replacement));
+					}
+					return value;
+				}));
+			}
+			return t;
+		}
+
+		public EnumTypeBuilder deprecate(String value, String msg) {
+			Assert.isLegal(ImmutableSet.copyOf(values).contains(value));
+			deprecations.put(value, new Deprecation(msg, null, null));
+			return this;
+		}
+
+		public EnumTypeBuilder deprecateWithReplacement(String value, String replacement) {
+			Assert.isLegal(ImmutableSet.copyOf(values).contains(value));
+			deprecations.put(value, new Deprecation(
+				"The value '"+value+"' is deprecated in favor of '"+replacement+"'",
+				replacement,
+				"Replace deprecated value '"+value+"' by '"+replacement+"'"
+			));
+			return this;
+		}
+
+		private String[] getNonDeprecatedValues() {
+			return Flux.fromArray(values)
+				.filter((value) -> !deprecations.containsKey(value))
+				.collectList()
+				.map(l -> l.toArray(new String[l.size()]))
+				.block();
+		}
+
+	}
+
 	public static class YTypedPropertyImpl implements YTypedProperty {
 
 		final private String name;
 		final private YType type;
 		private Provider<HtmlSnippet> descriptionProvider = DescriptionProviders.NO_DESCRIPTION;
+		private boolean isDeprecated;
+		private String deprecationMessage;
 
 		private YTypedPropertyImpl(String name, YType type) {
 			this.name = name;
@@ -346,6 +446,20 @@ public class YTypeFactory {
 			this.descriptionProvider = descriptionProvider;
 		}
 
+		@Override
+		public String getDeprecationMessage() {
+			return this.deprecationMessage;
+		}
+
+		@Override
+		public boolean isDeprecated() {
+			return this.isDeprecated;
+		}
+
+	}
+
+	public EnumTypeBuilder yenumBuilder(String name, String... values) {
+		return new EnumTypeBuilder(name, values);
 	}
 
 	public YAtomicType yatomic(String name) {

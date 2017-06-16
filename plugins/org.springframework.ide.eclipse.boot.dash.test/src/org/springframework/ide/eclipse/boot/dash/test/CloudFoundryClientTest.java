@@ -432,37 +432,50 @@ public class CloudFoundryClientTest {
 	}
 
 	@Test
-	public void testPushWithHealthcheckNone() throws Exception {
+	public void testPushWithBasicHealthcheckTypes() throws Exception {
 		//This test is to make sure that hc info is properly passed on by push operation
 		// to the 'real' cf client.
 		//Since the push works different on firt push and repush we have to check both!
 
 		String appName = appHarness.randomAppName();
 
-		// First push
-		try (CFPushArguments params = new CFPushArguments()) {
-			params.setAppName(appName);
-			params.setRoutes(appName+"."+CFAPPS_IO());
-			params.setApplicationData(getTestZip("testapp"));
-			params.setBuildpack("staticfile_buildpack");
-			params.setHealthCheckType(HealthChecks.HC_NONE);
-			push(params);
-			CFApplicationDetail app = client.getApplication(appName);
-			assertNotNull("Expected application to exist after push: " + appName, app);
-			assertEquals(HealthChecks.HC_NONE, app.getHealthCheckType());
-		}
+		String[] HC_TYPES = {
+				HealthChecks.HC_NONE,
+				HealthChecks.HC_PORT,
+				HealthChecks.HC_PROCESS
+		};
 
-		// re-push
+		for (String hcType : HC_TYPES) {
+			try (CFPushArguments params = new CFPushArguments()) {
+				params.setAppName(appName);
+				params.setRoutes(appName+"."+CFAPPS_IO());
+				params.setApplicationData(getTestZip("testapp"));
+				params.setBuildpack("staticfile_buildpack");
+				params.setHealthCheckType(hcType);
+				push(params);
+				CFApplicationDetail app = client.getApplication(appName);
+				assertNotNull("Expected application to exist after push: " + appName, app);
+				assertEquals(hcType, app.getHealthCheckType());
+			}
+		}
+	}
+
+	@Test
+	public void testPushAndSetHealthcheckHttpEndpoint() throws Exception {
+		String appName = appHarness.randomAppName();
+
 		try (CFPushArguments params = new CFPushArguments()) {
 			params.setAppName(appName);
 			params.setRoutes(appName+"."+CFAPPS_IO());
 			params.setApplicationData(getTestZip("testapp"));
 			params.setBuildpack("staticfile_buildpack");
-			params.setHealthCheckType(HealthChecks.HC_PORT);
+			params.setHealthCheckHttpEndpoint("/test.txt");
+			params.setHealthCheckType(HealthChecks.HC_HTTP);
 			push(params);
 			CFApplicationDetail app = client.getApplication(appName);
 			assertNotNull("Expected application to exist after push: " + appName, app);
-			assertEquals(HealthChecks.HC_PORT, app.getHealthCheckType());
+			assertEquals(HealthChecks.HC_HTTP, app.getHealthCheckType());
+			assertEquals("/test.txt", app.getHealthCheckHttpEndpoint());
 		}
 	}
 

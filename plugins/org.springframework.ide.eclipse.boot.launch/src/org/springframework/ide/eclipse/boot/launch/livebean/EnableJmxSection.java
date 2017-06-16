@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.launch.livebean;
 
 import java.util.EnumSet;
+import java.util.Optional;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -52,7 +53,7 @@ public class EnableJmxSection extends DelegatingLaunchConfigurationTabSection {
 
 	static class UI extends WizardPageSection {
 		private Button jmxCheckbox;
-		private Button liveBeanCheckbox;
+		private Optional<Button> liveBeanCheckbox = Optional.empty();
 		private Button lifeCycleCheckbox;
 		private Text portWidget;
 		private EnableJmxFeaturesModel model;
@@ -65,17 +66,24 @@ public class EnableJmxSection extends DelegatingLaunchConfigurationTabSection {
 
 		@Override
 		public void createContents(Composite page) {
+			boolean liveBeanSupported = model.isLiveBeanSupported();
+
 			Composite composite = new Composite(page, SWT.NONE);
 			composite.setLayout(GridLayoutFactory.fillDefaults().numColumns(3).create());
 			jmxCheckbox = new Button(composite, SWT.CHECK);
 			jmxCheckbox.setText("Enable JMX");
 			jmxCheckbox.setToolTipText(computeTooltipText(
-					"Enables JMX. This is required for Live Bean support and Life Cycle Management." +
+					"Enables JMX. This is required for " +
+					(liveBeanSupported ? "Live Bean support and " : "") +
+					"Life Cycle Management. " +
 					"It also allows STS to access information about request-mappings on your app. "+
-					"Adds these vm args:\n", Feature.JMX));
+					"Adds these vm args:\n", Feature.JMX
+			));
 
-			String portToolTip = "The port used for communicating with JMX beans (0 means STS should pick the port automatically on startup). "
-					+ "The same port is used/shared by both 'Life Cycle Management' and the 'Live Beans Graph'";
+			String portToolTip = "The port used for communicating with JMX beans (0 means STS should pick the port automatically on startup). ";
+			if (liveBeanSupported) {
+				portToolTip += "The same port is used/shared by both 'Life Cycle Management' and the 'Live Beans Graph'";
+			}
 			final Label label = new Label(composite, SWT.NONE);
 			label.setText("Port:");
 			portWidget = new Text(composite, SWT.BORDER);
@@ -88,12 +96,15 @@ public class EnableJmxSection extends DelegatingLaunchConfigurationTabSection {
 			GridLayout layout = GridLayoutFactory.fillDefaults().numColumns(3).margins(0, 0).create();
 			layout.marginLeft = UIConstants.fieldLabelWidthHint(label, 4);
 			composite.setLayout(layout);
-			liveBeanCheckbox = new Button(composite, SWT.CHECK);
-			liveBeanCheckbox.setText("Enable Live Bean support.");
-			liveBeanCheckbox.setToolTipText(computeTooltipText(
-					"Enables support for Live Beans Graph View by adding vm args:\n",
-					Feature.LIVE_BEAN_GRAPH));
-			GridDataFactory.fillDefaults().span(3, 1).applyTo(liveBeanCheckbox);
+			if (liveBeanSupported) {
+				Button liveBeanCheckbox = new Button(composite, SWT.CHECK);
+				liveBeanCheckbox.setText("Enable Live Bean support.");
+				liveBeanCheckbox.setToolTipText(computeTooltipText(
+						"Enables support for Live Beans Graph View by adding vm args:\n",
+						Feature.LIVE_BEAN_GRAPH));
+				GridDataFactory.fillDefaults().span(3, 1).applyTo(liveBeanCheckbox);
+				this.liveBeanCheckbox = Optional.of(liveBeanCheckbox);
+			}
 
 			lifeCycleCheckbox = new Button(composite, SWT.CHECK);
 			lifeCycleCheckbox.setText("Enable Life Cycle Management.");
@@ -110,7 +121,7 @@ public class EnableJmxSection extends DelegatingLaunchConfigurationTabSection {
 
 			model.jmxEnabled.addListener((exp, enable) -> {
 				portWidget.setEnabled(enable);
-				liveBeanCheckbox.setEnabled(enable);
+				liveBeanCheckbox.ifPresent(b -> b.setEnabled(enable));
 				lifeCycleCheckbox.setEnabled(enable);
 				label.setEnabled(enable);
 				terminationTimeoutLabel.setEnabled(enable);
@@ -123,7 +134,7 @@ public class EnableJmxSection extends DelegatingLaunchConfigurationTabSection {
 			});
 
 			connectCheckbox(model.jmxEnabled, jmxCheckbox);
-			connectCheckbox(model.liveBeanEnabled, liveBeanCheckbox);
+			liveBeanCheckbox.ifPresent(cb -> connectCheckbox(model.liveBeanEnabled, cb));
 			connectCheckbox(model.lifeCycleEnabled, lifeCycleCheckbox);
 
 			connectTextWidget(model.port, portWidget);

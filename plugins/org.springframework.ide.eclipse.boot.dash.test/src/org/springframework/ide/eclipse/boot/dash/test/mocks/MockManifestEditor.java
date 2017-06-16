@@ -12,7 +12,9 @@ package org.springframework.ide.eclipse.boot.dash.test.mocks;
 
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -23,7 +25,6 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalSorter;
 import org.springframework.ide.eclipse.boot.properties.editor.test.MockEditor;
 import org.springframework.ide.eclipse.boot.properties.editor.test.MockProblemCollector;
 import org.springframework.ide.eclipse.boot.properties.editor.test.MockYamlEditor;
-import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestYamlReconcileEngine;
 import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestYmlSchema;
 import org.springframework.ide.eclipse.editor.support.completions.CompletionFactory;
 import org.springframework.ide.eclipse.editor.support.hover.HoverInfoProvider;
@@ -34,6 +35,7 @@ import org.springframework.ide.eclipse.editor.support.yaml.YamlCompletionEngine;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlASTProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.completions.SchemaBasedYamlAssistContextProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.hover.YamlHoverInfoProvider;
+import org.springframework.ide.eclipse.editor.support.yaml.reconcile.YamlSchemaBasedReconcileEngine;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YamlSchema;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureProvider;
 import org.yaml.snakeyaml.Yaml;
@@ -94,7 +96,7 @@ public class MockManifestEditor extends MockYamlEditor {
 		return props;
 	}
 
-	public void assertProblems(String... expectedProblems) throws Exception {
+	public List<ReconcileProblem> assertProblems(String... expectedProblems) throws Exception {
 		List<ReconcileProblem> actualProblems = reconcile();
 		String bad = null;
 		if (actualProblems.size()!=expectedProblems.length) {
@@ -110,6 +112,7 @@ public class MockManifestEditor extends MockYamlEditor {
 		if (bad!=null) {
 			fail(bad+problemSumary(actualProblems));
 		}
+		return actualProblems;
 	}
 
 	public String problemSumary(List<ReconcileProblem> actualProblems) throws BadLocationException {
@@ -128,11 +131,31 @@ public class MockManifestEditor extends MockYamlEditor {
 		IReconcileEngine reconciler = createReconcileEngine();
 		MockProblemCollector problems=new MockProblemCollector();
 		reconciler.reconcile(getDocument(), problems, new NullProgressMonitor());
-		return problems.getAllProblems();
+		List<ReconcileProblem> sorted = new ArrayList<>(problems.getAllProblems());
+		Collections.sort(sorted, new Comparator<ReconcileProblem>() {
+
+			@Override
+			public int compare(ReconcileProblem o1, ReconcileProblem o2) {
+				int c = Integer.compare(o1.getOffset(), o2.getOffset());
+				if (c!=0) {
+					return c;
+				}
+				c = Integer.compare(o1.getLength(), o2.getLength());
+				if (c!=0) {
+					return c;
+				}
+				c = o1.getMessage().compareTo(o2.getMessage());
+				if (c!=0) {
+					return c;
+				}
+				return o1.getType().getId().compareTo(o2.getType().getId());
+			}
+		});
+		return sorted;
 	}
 
 	protected IReconcileEngine createReconcileEngine() {
-		return new ManifestYamlReconcileEngine(astProvider, schema);
+		return new YamlSchemaBasedReconcileEngine(astProvider, schema);
 	}
 
 	private boolean matchProblem(ReconcileProblem problem, String expect) {
