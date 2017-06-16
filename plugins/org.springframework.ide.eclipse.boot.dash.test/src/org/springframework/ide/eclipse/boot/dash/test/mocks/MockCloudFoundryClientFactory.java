@@ -44,8 +44,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFCloudD
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFDomainStatus;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.IApplicationLogConsole;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.ParsedUri;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.RouteBinding;
 import org.springframework.ide.eclipse.boot.dash.test.CfTestTargetParams;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;

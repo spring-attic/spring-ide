@@ -108,6 +108,11 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 		return null;
 	}
 
+	@Override
+	public String getYamlContent() {
+		return content;
+	}
+
 	public static DumperOptions createDumperOptions() {
 		DumperOptions options = new DumperOptions();
 		options.setExplicitStart(false);
