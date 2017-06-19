@@ -14,6 +14,10 @@ import javax.inject.Provider;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.text.ITextHover;
+import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.jface.text.source.DefaultAnnotationHover;
+import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestEditorActivator;
@@ -27,7 +31,7 @@ import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructu
  * @author Martin Lippert
  */
 public class LSBasedSourceViewerConfiguration extends AbstractYamlSourceViewerConfiguration {
-
+	
 	public LSBasedSourceViewerConfiguration(Provider<Shell> shellProvider) {
 		super(shellProvider);
 	}
@@ -66,4 +70,20 @@ public class LSBasedSourceViewerConfiguration extends AbstractYamlSourceViewerCo
 	protected YamlAssistContextProvider getAssistContextProvider(ISourceViewer viewer) {
 		return null;
 	}
+
+	@Override
+	protected ITextHover getTextAnnotationHover(ISourceViewer sourceViewer) {
+		return new LSBasedAnnotationHover(sourceViewer, getQuickfixContext(sourceViewer));
+	}
+	
+	@Override
+	public IAnnotationHover getAnnotationHover(ISourceViewer sourceViewer) {
+		return new DefaultAnnotationHover() {
+			@Override
+			protected boolean isIncluded(Annotation annotation) {
+				return LSBasedAnnotationHover.isLspAnnotation(annotation);
+			}
+		};
+	}
+	
 }
