@@ -1456,4 +1456,37 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 		return null;
 	}
 
+	public List<String> getRawDomains() {
+		List<?> hostsList = getAbsoluteValue(ApplicationManifestHandler.DOMAINS_PROP, List.class);
+		if (hostsList != null) {
+			List<String> currentHosts = new ArrayList<>();
+			for (Object o : hostsList) {
+				if (o instanceof String) {
+					currentHosts.add((String) o);
+				}
+			}
+			return ImmutableList.copyOf(currentHosts);
+		}
+		return null;
+	}
+
+	public boolean getRawNoRoute() {
+		Boolean v = getAbsoluteValue(ApplicationManifestHandler.NO_ROUTE_PROP, Boolean.class);
+		return v==null ? false : v;
+	}
+
+	public boolean getRawRandomRoute() {
+		Boolean v = getAbsoluteValue(ApplicationManifestHandler.RANDOM_ROUTE_PROP, Boolean.class);
+		return v==null ? false : v;
+	}
+
+	public String getRawDomain() {
+		return getAbsoluteValue(ApplicationManifestHandler.DOMAIN_PROP, String.class);
+	}
+
+	public boolean getRawNoHost() {
+		Boolean v = getAbsoluteValue(ApplicationManifestHandler.NO_HOSTNAME_PROP, Boolean.class);
+		return v==null ? false : v;
+	}
+
 }

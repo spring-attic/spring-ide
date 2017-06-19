@@ -44,6 +44,8 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFCloudD
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFDomainStatus;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.IApplicationLogConsole;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.ParsedUri;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.RouteBinding;
 import org.springframework.ide.eclipse.boot.dash.test.CfTestTargetParams;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
@@ -406,7 +408,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 			app.setTimeoutMaybe(args.getTimeout());
 			app.setHealthCheckTypeMaybe(args.getHealthCheckType());
 			app.setHealthCheckHttpEndpoint(args.getHealthCheckHttpEndpoint());
-			app.setBits(IOUtil.toBytes(new FileInputStream(args.getApplicationData().getName())));
+			app.setBits(IOUtil.toBytes(new FileInputStream(args.getApplicationDataAsFile())));
 			space.put(app);
 			space.getPushCount(app.getName()).increment();
 

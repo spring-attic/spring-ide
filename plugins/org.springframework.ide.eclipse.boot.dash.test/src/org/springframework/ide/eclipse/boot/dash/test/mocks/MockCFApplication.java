@@ -36,6 +36,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFApplic
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFApplicationSummaryData;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFRoute;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.RouteBinding;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;

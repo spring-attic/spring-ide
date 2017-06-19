@@ -28,76 +28,53 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlGra
  */
 public class RouteAttributes {
 
-	private String appName;
-	private List<String> routes;
-	private String host;
-	private List<String> hosts;
-	private String domain;
-	private List<String> domains;
-	private boolean noHost;
-	private boolean noRoute;
-	private boolean randomRoute;
+	private final String appName;
+	private final List<String> routes;
+	private final String host;
+	private final List<String> hosts;
+	private final String domain;
+	private final List<String> domains;
+	private final boolean noHost;
+	private final boolean noRoute;
+	private final boolean randomRoute;
 
 	public RouteAttributes(YamlGraphDeploymentProperties manifest) {
 		this.appName = manifest.getAppName();
 		this.routes = manifest.getRoutes();
+		this.domain = manifest.getRawDomain();
+		this.domains = manifest.getRawDomains();
 		this.host = manifest.getRawHost();
 		this.hosts = manifest.getRawHosts();
+		this.noRoute = manifest.getRawNoRoute();
+		this.randomRoute = manifest.getRawRandomRoute();
+		this.noHost = manifest.getRawNoHost();
 	}
 
 	public List<String> getRoutes() {
 		return routes;
 	}
-	public void setRoutes(List<String> routes) {
-		this.routes = routes;
-	}
 	public String getHost() {
 		return host;
-	}
-	public void setHost(String host) {
-		this.host = host;
 	}
 	public List<String> getHosts() {
 		return hosts;
 	}
-	public void setHosts(List<String> hosts) {
-		this.hosts = hosts;
-	}
 	public String getDomain() {
 		return domain;
-	}
-	public void setDomain(String domain) {
-		this.domain = domain;
 	}
 	public List<String> getDomains() {
 		return domains;
 	}
-	public void setDomains(List<String> domains) {
-		this.domains = domains;
-	}
 	public boolean isNoHost() {
 		return noHost;
-	}
-	public void setNoHost(boolean noHost) {
-		this.noHost = noHost;
 	}
 	public boolean isNoRoute() {
 		return noRoute;
 	}
-	public void setNoRoute(boolean noRoute) {
-		this.noRoute = noRoute;
-	}
 	public boolean isRandomRoute() {
 		return randomRoute;
-	}
-	public void setRandomRoute(boolean randomRoute) {
-		this.randomRoute = randomRoute;
 	}
 	public String getAppName() {
 		return appName;
 	}
-	public void setAppName(String appName) {
-		this.appName = appName;
-	}
-
 }

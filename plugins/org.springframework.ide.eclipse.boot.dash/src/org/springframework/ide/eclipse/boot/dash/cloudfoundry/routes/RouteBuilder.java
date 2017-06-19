@@ -11,17 +11,14 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.cloudfoundry.operations.domains.DefaultDomains;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFDomainType;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFCloudDomainData;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFDomainStatus;
 
 import com.google.common.collect.ImmutableList;
@@ -53,32 +50,111 @@ public class RouteBuilder {
 		domainsByName = builder.build();
 	}
 
+	/**
+	 * Builds the list of route bindings from a parsed manifest.yml's attributes.
+	 * <p>
+	 * The routes builder makes implicit assumptions that the manifest doesn't have
+	 * conflicting attributes (e.g. `host` and `random-route`).
+	 * <p>
+	 * If conflicting attributes *are* present then the routes builder will ignore
+	 * some of the conflicting attributes in a somewhat arbitrary way. So it will still
+	 * compute a list of route bindings rather than raise an exception.
+	 * <p>
+	 * A similar approach is taken for 'routes' definitions that can't be mapped onto
+	 * the list of known domains in a valid way. These routes will simply be silently
+	 * ignored.
+	 */
 	public List<RouteBinding> buildRoutes(RouteAttributes manifest) {
 		if (manifest.isNoRoute()) {
 			return ImmutableList.of();
 		}
 		if (manifest.isRandomRoute()) {
-			Builder<RouteBinding> builder = ImmutableList.builder();
-			List<String> domains = getDomains(manifest);
-			if (domains.isEmpty()) {
-				String dflt = getDefaultDomain();
-				if (dflt!=null) {
-					domains = ImmutableList.of(dflt);
-				}
-				for (String string : domains) {
-
-				}
-			}
-
+			return buildRandomRoutes(manifest);
 		}
 		if (manifest.getRoutes()!=null) {
-			Builder<RouteBinding> builder = ImmutableList.builder();
-			for (String desiredUri : manifest.getRoutes()) {
-				builder.add(buildRouteFromUri(desiredUri, manifest));
-			}
-			return builder.build();
+			return buildRoutesFromUris(manifest);
 		}
-		throw new IllegalStateException("Missing case?");
+		return buildRoutesFromHostsAndDomains(manifest);
+	}
+
+	private List<RouteBinding> buildRoutesFromHostsAndDomains(RouteAttributes manifest) {
+		if (manifest.isNoHost()) {
+			List<String> domains = getDomains(manifest);
+			ImmutableList.Builder<RouteBinding> routes = ImmutableList.builder();
+			for (String domain : domains) {
+				RouteBinding route = new RouteBinding();
+				route.setDomain(domain);
+				routes.add(route);
+			}
+			return routes.build();
+		} else {
+			List<String> hosts = getHosts(manifest);
+			List<String> domains = getDomains(manifest);
+			ImmutableList.Builder<RouteBinding> routes = ImmutableList.builder();
+			for (String host : hosts) {
+				for (String domain : domains) {
+					RouteBinding route = new RouteBinding();
+					route.setHost(host);
+					route.setDomain(domain);
+					routes.add(route);
+				}
+			}
+			return routes.build();
+		}
+	}
+
+	protected List<RouteBinding> buildRoutesFromUris(RouteAttributes manifest) {
+		Builder<RouteBinding> builder = ImmutableList.builder();
+		for (String desiredUri : manifest.getRoutes()) {
+			RouteBinding route = buildRouteFromUri(desiredUri, manifest);
+			if (route!=null) {
+				builder.add(route);
+			}
+		}
+		return builder.build();
+	}
+
+	protected List<RouteBinding> buildRandomRoutes(RouteAttributes manifest) {
+		Builder<RouteBinding> builder = ImmutableList.builder();
+		List<String> domains = getDomains(manifest);
+		for (String domain : domains) {
+			RouteBinding route = new RouteBinding();
+			route.setDomain(domain);
+			if (isTcpDomain(domain)) {
+				route.setPort(Randomized.random());
+			} else {
+				route.setHost(Randomized.random());
+			}
+			builder.add(route);
+		}
+		return builder.build();
+	}
+
+	private boolean isTcpDomain(String domainName) {
+		CFCloudDomain d = domainsByName.get(domainName);
+		if (d!=null) {
+			return d.getType()==CFDomainType.TCP;
+		}
+		return false;
+	}
+
+	private List<String> getHosts(RouteAttributes manifest) {
+		Set<String> builder = new LinkedHashSet<>();
+		String host = manifest.getHost();
+		if (host!=null) {
+			builder.add(host);
+		}
+		List<String> hosts = manifest.getHosts();
+		if (hosts!=null) {
+			builder.addAll(hosts);
+		}
+		if (builder.isEmpty()) {
+			String appName = manifest.getAppName();
+			if (appName!=null) {
+				builder.add(appName);
+			}
+		}
+		return ImmutableList.copyOf(builder);
 	}
 
 	private List<String> getDomains(RouteAttributes manifest) {
@@ -91,6 +167,17 @@ public class RouteBuilder {
 		if (d!=null) {
 			domains.add(d);
 		}
+		if (domains.isEmpty()) {
+			//This assumes 'getDomains' is only called in context where we actually
+			// want the domains from the 'domain' or 'domains' attributes. So, not
+			// for example, in a manifest with a 'routes' or a 'no-routes'.
+			//In these contexts, of the list of domains is empty, we generally want
+			// to fallback to using the defaultDomain.
+			String dflt = getDefaultDomain();
+			if (dflt!=null) {
+				domains.add(dflt);
+			}
+		}
 		return ImmutableList.copyOf(domains);
 	}
 
@@ -101,17 +188,18 @@ public class RouteBuilder {
 	private RouteBinding buildRouteFromUri(String _uri, RouteAttributes args) {
 		ParsedUri uri = new ParsedUri(_uri);
 		CFCloudDomain bestDomain = domainsByName.values().stream()
-			.filter(domain -> domainCanBeUsedFor(domain, uri))
+			.filter(domain -> matches(domain, uri))
 			.max((d1, d2) -> Integer.compare(d1.getName().length(), d2.getName().length()))
 			.orElse(null);
-		if (bestDomain==null) {
-			throw new IllegalStateException("No domain matching the given uri '"+_uri+"' could be found");
+		if (bestDomain!=null) {
+			RouteBinding route = new RouteBinding();
+			route.setDomain(bestDomain.getName());
+			route.setHost(bestDomain.splitHost(uri.getHostAndDomain()));
+			route.setPath(uri.getPath());
+			route.setPort(uri.getPort());
+			return route;
 		}
-		RouteBinding route = new RouteBinding();
-		route.setDomain(bestDomain.getName());
-		route.setHost(bestDomain.splitHost(uri.getHostAndDomain()));
-		route.setPort(uri.getPort());
-		return route;
+		return null;
 	}
 
 	public String getDefaultDomain() {
@@ -131,34 +219,23 @@ public class RouteBuilder {
 
 	/**
 	 * Determines whether a given domain can be used to construct a route for a given
-	 * target uri. This depends on a number of factors, such as the type of the domain
-	 * (TCP vs HTTP), the type of uri (e.g. whether it has a port component)
+	 * target uri. This check is strictly based on the names of the domain and target uri,
+	 * type of the domain/uri doesn't play into it (so, for example there are no 'smarts' here
+	 * to detect whether or not a domain's type is compatible with the uri type).
 	 */
-	private boolean domainCanBeUsedFor(CFCloudDomain domainData, ParsedUri uri) {
+	private boolean matches(CFCloudDomain domainData, ParsedUri uri) {
 		String domain = domainData.getName();
 		String hostAndDomain = uri.getHostAndDomain();
-		String host;
 		if (!hostAndDomain.endsWith(domain)) {
 			return false;
 		}
 		if (domain.length()==hostAndDomain.length()) {
 			//The uri matches domain precisely
-			host = null;
+			return true;
 		} else if (hostAndDomain.charAt(hostAndDomain.length()-domain.length()-1)=='.') {
-			//THe uri matches as ${host}.${domain}
-			host = hostAndDomain.substring(0, hostAndDomain.length()-domain.length()-1);
-		} else {
-			 //Couldn't match this domain to uri
-			return false;
+			//The uri matches as ${host}.${domain}
+			return true;
 		}
-		if (domainData.getType()==CFDomainType.TCP) {
-			return host==null; //TCP routes don't allow setting a host, only a port
-		} else if (domainData.getType()==CFDomainType.HTTP) {
-			return uri.getPort()==null; //HTTP routes don't allow setting a port only a host
-		} else {
-			throw new IllegalStateException("Unknown domain type: "+domainData.getType());
-		}
+		return false;
 	}
-
-
 }
