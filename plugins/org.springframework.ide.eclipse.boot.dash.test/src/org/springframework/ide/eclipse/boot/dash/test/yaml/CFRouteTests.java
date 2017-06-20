@@ -31,7 +31,7 @@ public class CFRouteTests {
 		Assert.assertEquals("myapp", route.getHost());
 		Assert.assertNull(route.getPath());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
-		Assert.assertEquals("myapp.spring.io", route.getRoute());
+		Assert.assertEquals("myapp.spring.io", route.toUri());
 	}
 
 	@Test
@@ -41,7 +41,7 @@ public class CFRouteTests {
 		Assert.assertNull(route.getHost());
 		Assert.assertNull(route.getPath());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
-		Assert.assertEquals("spring.io", route.getRoute());
+		Assert.assertEquals("spring.io", route.toUri());
 	}
 
 	@Test
@@ -51,7 +51,7 @@ public class CFRouteTests {
 		Assert.assertNull(route.getHost());
 		Assert.assertNull(route.getPath());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
-		Assert.assertEquals("myowndomain.spring.io", route.getRoute());
+		Assert.assertEquals("myowndomain.spring.io", route.toUri());
 	}
 
 	@Test
@@ -62,7 +62,7 @@ public class CFRouteTests {
 		Assert.assertEquals("app",route.getHost());
 		Assert.assertNull(route.getPath());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
-		Assert.assertEquals("app.doesnotexist.io", route.getRoute());
+		Assert.assertEquals("app.doesnotexist.io", route.toUri());
 	}
 
 	@Test
@@ -72,7 +72,7 @@ public class CFRouteTests {
 		Assert.assertEquals("app",route.getHost());
 		Assert.assertEquals("/withpath",route.getPath());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
-		Assert.assertEquals("app.doesnotexist.io/withpath", route.getRoute());
+		Assert.assertEquals("app.doesnotexist.io/withpath", route.toUri());
 	}
 
 	@Test
@@ -82,7 +82,7 @@ public class CFRouteTests {
 		Assert.assertEquals("app",route.getHost());
 		Assert.assertEquals("/withpath",route.getPath());
 		Assert.assertEquals(60100, route.getPort());
-		Assert.assertEquals("app.doesnotexist.io:60100/withpath", route.getRoute());
+		Assert.assertEquals("app.doesnotexist.io:60100/withpath", route.toUri());
 	}
 
 	@Test
@@ -92,7 +92,7 @@ public class CFRouteTests {
 		Assert.assertEquals("myapp", route.getHost());
 		Assert.assertNull(route.getPath());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
-		Assert.assertEquals("myapp.myowndomain.spring.io", route.getRoute());
+		Assert.assertEquals("myapp.myowndomain.spring.io", route.toUri());
 	}
 
 	@Test
@@ -102,7 +102,7 @@ public class CFRouteTests {
 		Assert.assertEquals("myapp", route.getHost());
 		Assert.assertEquals("/appPath", route.getPath());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
-		Assert.assertEquals("myapp.spring.io/appPath", route.getRoute());
+		Assert.assertEquals("myapp.spring.io/appPath", route.toUri());
 	}
 
 	@Test
@@ -113,7 +113,7 @@ public class CFRouteTests {
 		Assert.assertEquals("myapp", route.getHost());
 		Assert.assertEquals("/appPath/additionalSegment", route.getPath());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
-		Assert.assertEquals("myapp.spring.io/appPath/additionalSegment", route.getRoute());
+		Assert.assertEquals("myapp.spring.io/appPath/additionalSegment", route.toUri());
 	}
 
 	@Test
@@ -123,7 +123,7 @@ public class CFRouteTests {
 		Assert.assertNull(route.getHost());
 		Assert.assertNull(route.getPath());
 		Assert.assertEquals(9000, route.getPort());
-		Assert.assertEquals("tcp.spring.io:9000", route.getRoute());
+		Assert.assertEquals("tcp.spring.io:9000", route.toUri());
 	}
 
 	@Test
@@ -132,7 +132,7 @@ public class CFRouteTests {
 		Assert.assertNull(route.getDomain());
 		Assert.assertEquals("justhost",route.getHost());
 		Assert.assertEquals("/path",route.getPath());
-		Assert.assertEquals("justhost/path",route.getRoute());
+		Assert.assertEquals("justhost/path",route.toUri());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
 	}
 
@@ -146,49 +146,49 @@ public class CFRouteTests {
 		Assert.assertNull(route.getDomain());
 		Assert.assertNull(route.getHost());
 		Assert.assertNull(route.getPath());
-		Assert.assertEquals(CFRoute.EMPTY_ROUTE,route.getRoute());
+		Assert.assertEquals(CFRoute.EMPTY_ROUTE,route.toUri());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
 
 		route = CFRoute.builder().from(null, SPRING_CLOUD_DOMAINS).build();
 		Assert.assertNull(route.getDomain());
 		Assert.assertNull(route.getHost());
 		Assert.assertNull(route.getPath());
-		Assert.assertEquals(CFRoute.EMPTY_ROUTE,route.getRoute());
+		Assert.assertEquals(CFRoute.EMPTY_ROUTE,route.toUri());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
 
 		route = CFRoute.builder().from(".", SPRING_CLOUD_DOMAINS).build();
 		Assert.assertNull(route.getDomain());
 		Assert.assertNull(route.getHost());
 		Assert.assertNull(route.getPath());
-		Assert.assertEquals(".",route.getRoute());
+		Assert.assertEquals(".",route.toUri());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
 
 		route = CFRoute.builder().from("justhost", SPRING_CLOUD_DOMAINS).build();
 		Assert.assertNull(route.getDomain());
 		Assert.assertEquals("justhost",route.getHost());
 		Assert.assertNull(route.getPath());
-		Assert.assertEquals("justhost",route.getRoute());
+		Assert.assertEquals("justhost",route.toUri());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
 
 		route = CFRoute.builder().from("justhost.", SPRING_CLOUD_DOMAINS).build();
 		Assert.assertNull(route.getDomain());
 		Assert.assertEquals("justhost",route.getHost());
 		Assert.assertNull(route.getPath());
-		Assert.assertEquals("justhost.",route.getRoute());
+		Assert.assertEquals("justhost.",route.toUri());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
 
 		route = CFRoute.builder().from(".justdomain", SPRING_CLOUD_DOMAINS).build();
 		Assert.assertEquals("justdomain",route.getDomain());
 		Assert.assertNull(route.getHost());
 		Assert.assertNull(route.getPath());
-		Assert.assertEquals(".justdomain",route.getRoute());
+		Assert.assertEquals(".justdomain",route.toUri());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
 
 		route = CFRoute.builder().from("..justdomain", SPRING_CLOUD_DOMAINS).build();
 		Assert.assertEquals(".justdomain",route.getDomain());
 		Assert.assertNull(route.getHost());
 		Assert.assertNull(route.getPath());
-		Assert.assertEquals("..justdomain",route.getRoute());
+		Assert.assertEquals("..justdomain",route.toUri());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
 
 
@@ -196,14 +196,14 @@ public class CFRouteTests {
 		Assert.assertNull(route.getDomain());
 		Assert.assertNull(route.getHost());
 		Assert.assertEquals("/justpath/morepath",route.getPath());
-		Assert.assertEquals("/justpath/morepath",route.getRoute());
+		Assert.assertEquals("/justpath/morepath",route.toUri());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
 
 		route = CFRoute.builder().from("/", SPRING_CLOUD_DOMAINS).build();
 		Assert.assertNull(route.getDomain());
 		Assert.assertNull(route.getHost());
 		Assert.assertEquals("/",route.getPath());
-		Assert.assertEquals("/",route.getRoute());
+		Assert.assertEquals("/",route.toUri());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
 	}
 
@@ -213,17 +213,17 @@ public class CFRouteTests {
 		Assert.assertEquals("spring.io",route.getDomain());
 		Assert.assertEquals("myapp",route.getHost());
 		Assert.assertNull(route.getPath());
-		Assert.assertEquals("myapp.spring.io:notAn1nt3g3r",route.getRoute());
+		Assert.assertEquals("myapp.spring.io:notAn1nt3g3r",route.toUri());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
 
 		// Test parsing around the first encountered ':'
 		route = CFRoute.builder().from("http://myapp.spring.io", SPRING_CLOUD_DOMAINS).build();
-		Assert.assertEquals("http://myapp.spring.io",route.getRoute());
+		Assert.assertEquals("http://myapp.spring.io",route.toUri());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
 
 		route = CFRoute.builder().from("tcp.spring.io:8000:9000", SPRING_CLOUD_DOMAINS).build();
 		// Only one ':' is allowed. it should not be able to parse a port if more than ':' is encountered
-		Assert.assertEquals("tcp.spring.io:8000:9000",route.getRoute());
+		Assert.assertEquals("tcp.spring.io:8000:9000",route.toUri());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
 
 
@@ -231,7 +231,7 @@ public class CFRouteTests {
 		Assert.assertEquals("spring.io",route.getDomain());
 		Assert.assertEquals("myapp",route.getHost());
 		Assert.assertEquals("/",route.getPath());
-		Assert.assertEquals("myapp.spring.io:8000/",route.getRoute());
+		Assert.assertEquals("myapp.spring.io:8000/",route.toUri());
 		Assert.assertEquals(8000, route.getPort());
 	}
 
@@ -241,14 +241,14 @@ public class CFRouteTests {
 		Assert.assertEquals("spring.io",route.getDomain());
 		Assert.assertEquals("myapp",route.getHost());
 		Assert.assertEquals("//path",route.getPath());
-		Assert.assertEquals("myapp.spring.io//path",route.getRoute());
+		Assert.assertEquals("myapp.spring.io//path",route.toUri());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
 
 		route = CFRoute.builder().from("myapp.spring.io/", SPRING_CLOUD_DOMAINS).build();
 		Assert.assertEquals("spring.io",route.getDomain());
 		Assert.assertEquals("myapp",route.getHost());
 		Assert.assertEquals("/",route.getPath());
-		Assert.assertEquals("myapp.spring.io/",route.getRoute());
+		Assert.assertEquals("myapp.spring.io/",route.toUri());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
 	}
 
@@ -334,7 +334,7 @@ public class CFRouteTests {
 		Assert.assertEquals("myowndomain.spring.io", route.getDomain());
 		Assert.assertEquals("/hello", route.getPath());
         Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
-        Assert.assertEquals("hello-user.myowndomain.spring.io/hello", route.getRoute());
+        Assert.assertEquals("hello-user.myowndomain.spring.io/hello", route.toUri());
 	}
 
 	@Test
@@ -383,7 +383,7 @@ public class CFRouteTests {
 		Assert.assertNull(route.getHost());
 		Assert.assertNull(route.getPath());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
-		Assert.assertEquals("spring.io", route.getRoute());
+		Assert.assertEquals("spring.io", route.toUri());
 	}
 
 	@Test
@@ -393,7 +393,7 @@ public class CFRouteTests {
 		Assert.assertNull(route.getHost());
 		Assert.assertNull(route.getPath());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
-		Assert.assertEquals("not.exist.io", route.getRoute());
+		Assert.assertEquals("not.exist.io", route.toUri());
 	}
 
 	@Test
@@ -403,7 +403,7 @@ public class CFRouteTests {
 		Assert.assertNull(route.getHost());
 		Assert.assertNull(route.getPath());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
-		Assert.assertEquals(CFRoute.EMPTY_ROUTE, route.getRoute());
+		Assert.assertEquals(CFRoute.EMPTY_ROUTE, route.toUri());
 	}
 
 	@Test
@@ -413,7 +413,7 @@ public class CFRouteTests {
 		Assert.assertNull(route.getHost());
 		Assert.assertNull(route.getPath());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
-		Assert.assertEquals(CFRoute.EMPTY_ROUTE,route.getRoute());
+		Assert.assertEquals(CFRoute.EMPTY_ROUTE,route.toUri());
 	}
 
 	@Test
@@ -423,7 +423,7 @@ public class CFRouteTests {
 		Assert.assertNull(route.getPath());
 		Assert.assertEquals("myapp", route.getHost());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
-		Assert.assertEquals("myapp", route.getRoute());
+		Assert.assertEquals("myapp", route.toUri());
 	}
 
 	@Test
@@ -433,7 +433,7 @@ public class CFRouteTests {
 		Assert.assertNull(route.getPath());
 		Assert.assertNull(route.getHost());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
-		Assert.assertEquals(CFRoute.EMPTY_ROUTE, route.getRoute());
+		Assert.assertEquals(CFRoute.EMPTY_ROUTE, route.toUri());
 	}
 
 	@Test
@@ -443,7 +443,7 @@ public class CFRouteTests {
 		Assert.assertNull(route.getPath());
 		Assert.assertEquals("",route.getHost());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
-		Assert.assertEquals(CFRoute.EMPTY_ROUTE, route.getRoute());
+		Assert.assertEquals(CFRoute.EMPTY_ROUTE, route.toUri());
 	}
 
 	@Test
@@ -453,7 +453,7 @@ public class CFRouteTests {
 		Assert.assertEquals("myapp", route.getHost());
 		Assert.assertNull(route.getPath());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
-		Assert.assertEquals("myapp.spring.io", route.getRoute());
+		Assert.assertEquals("myapp.spring.io", route.toUri());
 	}
 
 	@Test
@@ -463,7 +463,7 @@ public class CFRouteTests {
 		Assert.assertNull(route.getHost());
 		Assert.assertEquals("/path",route.getPath());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
-		Assert.assertEquals("/path", route.getRoute());
+		Assert.assertEquals("/path", route.toUri());
 	}
 
 	@Test
@@ -473,7 +473,7 @@ public class CFRouteTests {
 		Assert.assertNull(route.getHost());
 		Assert.assertEquals("/path/additional",route.getPath());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
-		Assert.assertEquals("/path/additional", route.getRoute());
+		Assert.assertEquals("/path/additional", route.toUri());
 	}
 
 	@Test
@@ -483,7 +483,7 @@ public class CFRouteTests {
 		Assert.assertNull(route.getHost());
 		Assert.assertEquals("/path/",route.getPath());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
-		Assert.assertEquals("/path/", route.getRoute());
+		Assert.assertEquals("/path/", route.toUri());
 	}
 
 	@Test
@@ -493,7 +493,7 @@ public class CFRouteTests {
 		Assert.assertNull(route.getHost());
 		Assert.assertEquals("/mypath",route.getPath());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
-		Assert.assertEquals("spring.io/mypath", route.getRoute());
+		Assert.assertEquals("spring.io/mypath", route.toUri());
 	}
 
 	@Test
@@ -503,7 +503,7 @@ public class CFRouteTests {
 		Assert.assertEquals("myapp",route.getHost());
 		Assert.assertEquals("/mypath",route.getPath());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
-		Assert.assertEquals("myapp/mypath", route.getRoute());
+		Assert.assertEquals("myapp/mypath", route.toUri());
 	}
 
 	@Test
@@ -513,7 +513,7 @@ public class CFRouteTests {
 		Assert.assertEquals("myapp",route.getHost());
 		Assert.assertEquals("/myapp",route.getPath());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
-		Assert.assertEquals("myapp/myapp", route.getRoute());
+		Assert.assertEquals("myapp/myapp", route.toUri());
 	}
 
 	@Test
@@ -523,7 +523,7 @@ public class CFRouteTests {
 		Assert.assertEquals("myapp",route.getHost());
 		Assert.assertEquals("/mypath",route.getPath());
 		Assert.assertEquals(8000, route.getPort());
-		Assert.assertEquals("myapp:8000/mypath", route.getRoute());
+		Assert.assertEquals("myapp:8000/mypath", route.toUri());
 	}
 
 	@Test
@@ -533,7 +533,7 @@ public class CFRouteTests {
 		Assert.assertNull(route.getHost());
 		Assert.assertEquals("/mypath",route.getPath());
 		Assert.assertEquals(8000, route.getPort());
-		Assert.assertEquals("spring.io:8000/mypath", route.getRoute());
+		Assert.assertEquals("spring.io:8000/mypath", route.toUri());
 	}
 
 	@Test
@@ -543,7 +543,7 @@ public class CFRouteTests {
 		Assert.assertNull(route.getHost());
 		Assert.assertNull(route.getPath());
 		Assert.assertEquals(8000, route.getPort());
-		Assert.assertEquals(":8000", route.getRoute());
+		Assert.assertEquals(":8000", route.toUri());
 	}
 
 
@@ -554,7 +554,7 @@ public class CFRouteTests {
 		Assert.assertNull(route.getHost());
 		Assert.assertNull(route.getPath());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
-		Assert.assertEquals(CFRoute.EMPTY_ROUTE, route.getRoute());
+		Assert.assertEquals(CFRoute.EMPTY_ROUTE, route.toUri());
 	}
 
 	@Test
@@ -564,7 +564,7 @@ public class CFRouteTests {
 		Assert.assertNull(route.getHost());
 		Assert.assertNull(route.getPath());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
-		Assert.assertEquals(CFRoute.EMPTY_ROUTE, route.getRoute());
+		Assert.assertEquals(CFRoute.EMPTY_ROUTE, route.toUri());
 	}
 
 	@Test
@@ -574,7 +574,7 @@ public class CFRouteTests {
 		Assert.assertNull(route.getHost());
 		Assert.assertNull(route.getPath());
 		Assert.assertEquals(8000, route.getPort());
-		Assert.assertEquals("tcp.spring.io:8000", route.getRoute());
+		Assert.assertEquals("tcp.spring.io:8000", route.toUri());
 	}
 
 
@@ -585,6 +585,6 @@ public class CFRouteTests {
 		Assert.assertEquals("myapp", route.getHost());
 		Assert.assertEquals("/mypath/additional", route.getPath());
 		Assert.assertEquals(8000, route.getPort());
-		Assert.assertEquals("myapp.spring.io:8000/mypath/additional", route.getRoute());
+		Assert.assertEquals("myapp.spring.io:8000/mypath/additional", route.toUri());
 	}
 }

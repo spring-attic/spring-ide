@@ -14,10 +14,10 @@ import java.io.File;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.ZipFile;
 
 import org.eclipse.core.runtime.Assert;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.RouteBinding;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -29,7 +29,7 @@ import com.google.common.collect.ImmutableMap;
  * @author Nieraj Singh
  */
 public class CFPushArguments implements AutoCloseable {
-	private List<String> routes = ImmutableList.of();
+	private List<RouteBinding> routes = ImmutableList.of();
 	private String appName;
 	private Integer memory;
 	private Integer diskQuota;
@@ -43,7 +43,6 @@ public class CFPushArguments implements AutoCloseable {
 	private List<String> services = ImmutableList.of();
 	private File applicationDataAsFile;
 	private boolean noStart = false;
-	private boolean randomRoute = false;
 	private String healthCheckHttpEndpoint;
 
 	public CFPushArguments() {
@@ -109,12 +108,7 @@ public class CFPushArguments implements AutoCloseable {
 	public void setServices(List<String> services) {
 		this.services = services;
 	}
-	public boolean getRandomRoute() {
-		return this.randomRoute;
-	}
-	public void setRandomRoute(boolean randomRoute) {
-		this.randomRoute = randomRoute;
-	}
+
 	public File getApplicationDataAsFile() {
 		return applicationDataAsFile;
 	}
@@ -137,13 +131,13 @@ public class CFPushArguments implements AutoCloseable {
 	public void setHealthCheckType(String healthCheckType) {
 		this.healthCheckType = healthCheckType;
 	}
-	public List<String> getRoutes() {
+	public List<RouteBinding> getRoutes() {
 		return routes;
 	}
-	public void setRoutes(Collection<String> routes) {
+	public void setRoutes(Collection<RouteBinding> routes) {
 		this.routes = routes == null ? ImmutableList.of() : ImmutableList.copyOf(routes);
 	}
-	public void setRoutes(String... routes) {
+	public void setRoutes(RouteBinding... routes) {
 		setRoutes(ImmutableList.copyOf(routes));
 	}
 	@Override
@@ -151,7 +145,7 @@ public class CFPushArguments implements AutoCloseable {
 		return "CFPushArguments [appName=" + appName + ", routes=" + routes + ", memory=" + memory + ", diskQuota="
 				+ diskQuota + ", timeout=" + timeout + ", buildpack=" + buildpack + ", command=" + command + ", stack="
 				+ stack + ", env=" + env + ", instances=" + instances + ", services=" + services + ", noStart="
-				+ noStart + ", healthCheckType="+ healthCheckType+ ", randomRoute="+ randomRoute+" ]";
+				+ noStart + ", healthCheckType="+ healthCheckType;
 	}
 
 	public void setHealthCheckHttpEndpoint(String healthCheckHttpEndpoint) {

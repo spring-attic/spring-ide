@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes;
 
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFRoute;
+
 public class RouteBinding {
 
 	private Randomized<String> host;
@@ -46,6 +48,13 @@ public class RouteBinding {
 
 	public String getPath() {
 		return path;
+	}
+
+	public boolean isSatisfiedBy(CFRoute route) {
+		ParsedUri parsedUri = new ParsedUri(route.toUri());
+
+		throw new Error("Not completed yet");
+
 	}
 
 	/**

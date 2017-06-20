@@ -226,6 +226,10 @@ public class RouteBuilder {
 	private boolean matches(CFCloudDomain domainData, ParsedUri uri) {
 		String domain = domainData.getName();
 		String hostAndDomain = uri.getHostAndDomain();
+		return isInDomain(hostAndDomain, domain);
+	}
+
+	private boolean isInDomain(String hostAndDomain, String domain) {
 		if (!hostAndDomain.endsWith(domain)) {
 			return false;
 		}

@@ -776,10 +776,10 @@ public class ApplicationManifestHandler {
 		List<String> uris = new ArrayList<>(hostsSet.isEmpty() ? 1 : hostsSet.size() * domainsSet.size());
 		for (String d : domainsSet) {
 			if (hostsSet.isEmpty()) {
-				uris.add(CFRoute.builder().domain(d).build().getRoute());
+				uris.add(CFRoute.builder().domain(d).build().toUri());
 			} else {
 				for (String h : hostsSet) {
-					uris.add(CFRoute.builder().host(h).domain(d).build().getRoute());
+					uris.add(CFRoute.builder().host(h).domain(d).build().toUri());
 				}
 			}
 		}
@@ -838,7 +838,7 @@ public class ApplicationManifestHandler {
 				.map(route -> {
 					String url = (String) route;
 					CFRoute rt = CFRoute.builder().from(url, domains).build();
-					return rt.getRoute();
+					return rt.toUri();
 				})
 				.collect(Collectors.toSet()));
 		}

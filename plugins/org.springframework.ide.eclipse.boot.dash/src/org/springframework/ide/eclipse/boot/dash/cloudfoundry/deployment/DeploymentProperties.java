@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.RouteBinding;
+
 /**
  * Interface for Cloud Foundry application deployment properties
  *
@@ -50,7 +52,7 @@ public interface DeploymentProperties {
 
 	List<String> getServices();
 
-	Set<String> getUris();
+	Set<RouteBinding> getUris();
 
 	/**
 	 * If the origin of these properties is parsing yml content (from file or

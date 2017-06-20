@@ -23,12 +23,12 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudData;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFRoute;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.RouteBinding;
 
 public class CloudApplicationDeploymentProperties implements DeploymentProperties {
 
@@ -41,7 +41,7 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 	/*
 	 * URLs should never be null. If no URLs are needed, keep list empty
 	 */
-	private LinkedHashSet<String> urls;
+	private LinkedHashSet<RouteBinding> urls;
 
 	private String appName;
 
@@ -160,11 +160,11 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 	 *
 	 * @return never null
 	 */
-	public Set<String> getUris() {
+	public Set<RouteBinding> getUris() {
 		return urls;
 	}
 
-	public void setUris(Collection<String> urls) {
+	public void setUris(Collection<RouteBinding> urls) {
 		this.urls = urls == null ? new LinkedHashSet<>() : new LinkedHashSet<>(urls);
 	}
 
@@ -263,7 +263,7 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 
 		if (app == null) {
 			CFRoute route = CFRoute.builder().host(project.getName()).domain(cloudData.getDefaultDomain()).build();
-			properties.setUris(Collections.singletonList(route.getRoute()));
+			properties.setUris(Collections.singletonList(route.toUri()));
 		} else {
 			properties.setUris(app.getUris());
 		}

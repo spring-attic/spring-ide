@@ -49,7 +49,7 @@ public class CFRoute {
 		return port;
 	}
 
-	public String getRoute() {
+	public String toUri() {
 		return fullRoute;
 	}
 

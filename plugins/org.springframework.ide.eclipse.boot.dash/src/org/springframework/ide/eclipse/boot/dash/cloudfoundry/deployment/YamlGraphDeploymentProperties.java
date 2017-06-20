@@ -33,6 +33,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifes
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudData;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFRoute;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.RouteBinding;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
@@ -52,7 +53,6 @@ import org.yaml.snakeyaml.resolver.Resolver;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 
 /**
  * Deployment properties based on YAML Graph. Instance of this class has ability
@@ -350,17 +350,23 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 			/*
 			 * If any text edits are produced then there are differences in the URIs
 			 */
-			Set<String> currentUris = getUris();
-			Set<String> otherUris = props.getUris();
-			if (!isRandomRouteMatch(currentUris, otherUris) && !currentUris.equals(otherUris)) {
-				if (isLegacyHostDomainManifestYaml(root)) {
-					getLegacyDifferenceForUris(otherUris, edits);
-				} else {
-					getDifferenceForUris(otherUris, edits);
-				}
-			}
+			Set<RouteBinding> currentUris = getUris();
+			Set<RouteBinding> otherUris = props.getUris();
+			computeDifferences(edits, currentUris, otherUris);
 		}
 		return edits.hasChildren() ? edits : null;
+	}
+
+	private void computeDifferences(MultiTextEdit edits, Set<RouteBinding> currentUris, Set<RouteBinding> otherUris) {
+		throw new Error("Not yet implemented");
+		// Old implementation:
+		//		if (!isRandomRouteMatch(currentUris, otherUris) && !currentUris.equals(otherUris)) {
+//			if (isLegacyHostDomainManifestYaml(root)) {
+//				getLegacyDifferenceForUris(otherUris, edits);
+//			} else {
+//				getDifferenceForUris(otherUris, edits);
+//			}
+//		}
 	}
 
 	private boolean isRandomRouteMatch(Set<String> currentUris, Set<String> otherUris) {
@@ -1261,11 +1267,11 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Set<String> getUris() {
+	public Set<RouteBinding> getUris() {
 
 		List<String> routes = getRoutes();
 		if (routes != null) {
-			return ImmutableSet.copyOf(routes);
+			return toRouteBinding(routes);
 		} else {
 			Boolean noRoute = getAbsoluteValue(ApplicationManifestHandler.NO_ROUTE_PROP, Boolean.class);
 			if (Boolean.TRUE.equals(noRoute)) {
@@ -1336,16 +1342,20 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 			Set<String> uris = new HashSet<>();
 			for (String d : domainsSet) {
 				if (hostsSet.isEmpty()) {
-					uris.add(CFRoute.builder().domain(d).build().getRoute());
+					uris.add(CFRoute.builder().domain(d).build().toUri());
 				} else {
 					for (String h : hostsSet) {
-						uris.add(CFRoute.builder().host(h).domain(d).build().getRoute());
+						uris.add(CFRoute.builder().host(h).domain(d).build().toUri());
 					}
 				}
 			}
 
-			return uris;
+			return toRouteBinding(uris);
 		}
+	}
+
+	private Set<RouteBinding> toRouteBinding(Collection<String> routes) {
+		throw new Error("Not implemented yet");
 	}
 
 	@Override

@@ -90,6 +90,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshClientSu
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshHost;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CloudFoundryClientCache.CFClientProvider;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.IApplicationLogConsole;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.RouteBinding;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springframework.ide.eclipse.boot.util.Log;
@@ -840,8 +841,8 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		);
 	}
 
-	public Mono<Void> setRoutes(ApplicationDetail appDetails, Collection<String> desiredUrls, boolean randomRoute) {
-		debug("setting routes for '"+appDetails.getName()+"': "+desiredUrls+", "+randomRoute);
+	public Mono<Void> setRoutes(ApplicationDetail appDetails, Collection<RouteBinding> desiredUrls) {
+		debug("setting routes for '"+appDetails.getName()+"': "+desiredUrls);
 		DomainsOracle domains = new DomainsOracle();
 
 		//Carefull! It is not safe map/unnmap multiple routes in parallel. Doing so causes some of the
@@ -952,7 +953,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 //		.map((app) -> ImmutableSet.copyOf(app.getUrls()));
 //	}
 
-	private Mono<Void> unmapUndesiredRoutes(String appName, Collection<String> desiredUrls) {
+	private Mono<Void> unmapUndesiredRoutes(String appName, Collection<RouteBinding> desiredUrls) {
 		return getExistingRoutes(appName)
 		.flatMap((route) -> {
 			debug("unmap? "+route);
@@ -981,7 +982,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 //				url = url +"/" +path;
 //			}
 //		}
-		return route.getRoute();
+		return route.toUri();
 	}
 
 	private Mono<Void> unmapRoute(String appName, CFRoute route) {
