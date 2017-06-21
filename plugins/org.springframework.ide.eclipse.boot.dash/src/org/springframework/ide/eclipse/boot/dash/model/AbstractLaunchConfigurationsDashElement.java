@@ -103,8 +103,8 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 	public AbstractLaunchConfigurationsDashElement(LocalBootDashModel bootDashModel, T delegate) {
 		super(bootDashModel, delegate);
 		this.runState = createRunStateExp();
-		this.livePort = createLivePortExp(runState, "local.server.port");
-		this.actuatorPort = createLivePortExp(runState, "local.management.port");
+		this.livePort = createPortExpression(runState);
+		this.actuatorPort = createActuatorPortExpression(runState);
 		this.actualInstances = createActualInstancesExp();
 		addElementNotifier(livePort);
 		addElementNotifier(runState);
@@ -483,6 +483,14 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 		return exp;
 	}
 
+	protected LiveExpression<Integer> createPortExpression(final LiveExpression<RunState> runState) {
+		return createLivePortExp(runState, "local.server.port");
+	}
+
+	protected LiveExpression<Integer> createActuatorPortExpression(final LiveExpression<RunState> runState) {
+		return createLivePortExp(runState, "local.management.port");
+	}
+
 	private LiveExpression<Integer> createLivePortExp(final LiveExpression<RunState> runState, final String propName) {
 		AsyncLiveExpression<Integer> exp = new AsyncLiveExpression<Integer>(-1, "Refreshing port info ("+propName+") for "+getName()) {
 			{
@@ -558,7 +566,7 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 						if (jmxPort>0) {
 							SpringApplicationLifeCycleClientManager cm = null;
 							try {
-								cm = new SpringApplicationLifeCycleClientManager(() -> jmxPort);
+								cm = new SpringApplicationLifeCycleClientManager(jmxPort);
 								SpringApplicationLifecycleClient c = cm.getLifeCycleClient();
 								debug("["+this.getName()+"] getLivePort("+propName+") lifeCycleClient = "+c);
 								if (c!=null) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 GoPivotal, Inc.
+ * Copyright (c) 2015, 2017 GoPivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,16 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.util;
 
-import javax.inject.Provider;
-
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.launch.util.SpringApplicationLifeCycleClientManager;
 import org.springframework.ide.eclipse.boot.launch.util.SpringApplicationLifecycleClient;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 
 /**
  * An instance of this class starts checking a spring application's lifecyle using
@@ -33,55 +25,23 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
  *
  * @author Kris De Volder
  */
-public class SpringApplicationReadyStateMonitor implements ReadyStateMonitor {
+public class SpringApplicationReadyStateMonitor extends AbstractPollingAppReadyStateMonitor {
 
-	//////////////////////////////////////////////////////////////////////////
-	// public API
-
-	public static final long POLLING_INTERVAL = 500/*ms*/;
 	private SpringApplicationLifeCycleClientManager clientManager;
 
-	public SpringApplicationReadyStateMonitor(Provider<Integer> jmxPort) {
-		this.clientManager = new SpringApplicationLifeCycleClientManager(jmxPort);
-		this.job = new Job("Ready state poller") {
-			protected IStatus run(IProgressMonitor monitor) {
-				LiveVariable<Boolean> r = ready;
-				if (r!=null) { //null means disposed. Job may be lagging behind
-					r.setValue(checkReady());
-					if (!r.getValue()) {
-						this.schedule(POLLING_INTERVAL);
-					} else {
-						// don't reschedule
-					}
-				}
-				return Status.OK_STATUS;
-			}
-		};
-		job.setSystem(true);
-		job.schedule();
-	}
-
-	public LiveExpression<Boolean> getReady() {
-		return ready;
+	public SpringApplicationReadyStateMonitor(int jmxPort) {
+		super();
+		clientManager = new SpringApplicationLifeCycleClientManager(jmxPort);
 	}
 
 	public void dispose() {
-		clientManager.disposeClient();
-		if (job!=null) {
-			job.cancel();
-			job = null;
+		if (clientManager != null) {
+			clientManager.disposeClient();
 		}
-		ready = null;
+		super.dispose();
 	}
 
-	/////////////////////////////////////////////////////////////////////////
-	// implementation
-
-
-	private Job job;
-	private LiveVariable<Boolean> ready = new LiveVariable<>(false);
-
-	private boolean checkReady() {
+	protected boolean checkReady() {
 		try {
 			SpringApplicationLifecycleClient client = clientManager.getLifeCycleClient();
 			if (client!=null) {

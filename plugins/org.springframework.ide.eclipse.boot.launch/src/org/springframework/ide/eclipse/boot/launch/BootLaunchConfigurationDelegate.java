@@ -108,6 +108,8 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 	public static final String HIDE_FROM_BOOT_DASH = "spring.boot.dash.hidden";
 	public static final boolean DEFAULT_HIDE_FROM_BOOT_DASH = false;
 
+	public static final String PROCESS_ID = "spring.boot.process.id";
+
 	private static final String ENABLE_CHEAP_ENTROPY_VM_ARGS = "-Djava.security.egd=file:/dev/./urandom ";
 	private static final String TERMINATION_TIMEOUT = "spring.boot.lifecycle.termination.timeout";
 	public static final long DEFAULT_TERMINATION_TIMEOUT = 15000; // 15 seconds
