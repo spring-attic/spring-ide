@@ -830,6 +830,8 @@ public class CloudFoundryBootDashModelMockingTest {
 		MockCFApplication deployedApp = space.getApplication(appName);
 		List<String> uris = deployedApp.getBasicInfo().getUris();
 		assertEquals(ImmutableList.of("tcp.domain.com:63000"), uris);
+
+		doUnchangedAppRestartTest(app, deployedApp);
 	}
 
 	@Test public void pushTcpRouteWithFixedPort() throws Exception {
@@ -1255,6 +1257,9 @@ public class CloudFoundryBootDashModelMockingTest {
 		waitForState(app, RunState.RUNNING, 10000);
 
 		assertEquals((Integer)1, space.getPushCount(appName).getValue());
+
+		MockCFApplication deployedApp = space.getApplication(appName);
+		doUnchangedAppRestartTest(app, deployedApp);
 	}
 
 	@Test public void pushSimpleWithManifest() throws Exception {
@@ -1360,6 +1365,9 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertNull(app.getDeploymentManifestFile());
 		assertEquals(1024, (int) app.getMemory());
 		assertEquals(appName, app.getName());
+
+		MockCFApplication deployedApp = space.getApplication(appName);
+		doUnchangedAppRestartTest(app, deployedApp);
 	}
 
 	@Test public void warDeploy() throws Exception {
@@ -1964,6 +1972,9 @@ public class CloudFoundryBootDashModelMockingTest {
 		ACondition.waitFor("hcType in model", 3000, () -> {
 			assertEquals(expected, model.getApplication(appName).getHealthCheck());
 		});
+
+		MockCFApplication deployedApp = space.getApplication(appName);
+		doUnchangedAppRestartTest(model.getApplication(appName), deployedApp);
 	}
 
 	@Test public void updateTargetSsoAndStoreNothing() throws Exception {
