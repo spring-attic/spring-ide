@@ -17,9 +17,6 @@ import org.eclipse.jface.text.source.ISourceViewer;
 
 public class ReconcileProblemAnnotationHover extends AbstractAnnotationHover<ReconcileProblemAnnotation> {
 
-	private ISourceViewer sourceViewer;
-	private QuickfixContext context;
-
 	public ReconcileProblemAnnotationHover(ISourceViewer sourceViewer, QuickfixContext context) {
 		super(sourceViewer, context, ReconcileProblemAnnotation.class);
 	}
