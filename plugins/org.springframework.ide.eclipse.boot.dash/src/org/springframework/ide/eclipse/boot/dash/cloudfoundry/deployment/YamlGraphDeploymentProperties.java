@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.text.edits.DeleteEdit;
 import org.eclipse.text.edits.MultiTextEdit;
@@ -34,7 +35,10 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudData;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFRoute;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.RouteBinding;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.RouteBuilder;
 import org.springframework.ide.eclipse.boot.util.Log;
+import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlFileAST;
+import org.springframework.ide.eclipse.editor.support.yaml.path.YamlTraversal;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.DumperOptions.LineBreak;
@@ -54,6 +58,8 @@ import org.yaml.snakeyaml.resolver.Resolver;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 
+
+
 /**
  * Deployment properties based on YAML Graph. Instance of this class has ability
  * to compute text differences between this instance and deployment properties
@@ -70,47 +76,23 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 	private SequenceNode applicationsValueNode;
 	private Yaml yaml;
 	private CloudData cloudData;
+	private YamlFileAST ast;
 
 	public YamlGraphDeploymentProperties(String content, String appName, CloudData cloudData) {
-		super();
-		this.appNode = null;
-		this.applicationsValueNode = null;
-		this.root = null;
+		new App
+	}
+
+	public YamlGraphDeploymentProperties(Yaml yaml, YamlFileAST ast, Node appNode, CloudData cloudData) {
+		this.yaml = yaml;
+		this.ast = ast;
+		this.root = YamlTraversal.EMPTY.thenAnyChild().traverseToNode(ast);
+		this.applicationsValueNode = YamlTraversal.EMPTY
+				.thenAnyChild()
+				.thenValAt(ApplicationManifestHandler.APPLICATIONS_PROP)
+				.traverseToNode(ast, SequenceNode.class);
+		this.appNode = (appNode instanceof MappingNode) ? (MappingNode)appNode : null;
 		this.cloudData = cloudData;
-		this.content = content;
-		initializeYaml(appName);
-	}
-
-	private void initializeYaml(String appName) {
-		Composer composer = new Composer(new ParserImpl(new StreamReader(new InputStreamReader(new ByteArrayInputStream(content.getBytes())))), new Resolver());
-		root = composer.getSingleNode();
-
-		Node apps = YamlGraphDeploymentProperties.findValueNode(root, "applications");
-		if (apps instanceof SequenceNode) {
-			applicationsValueNode = (SequenceNode) apps;
-			appNode = findAppNode(applicationsValueNode, appName);
-		} else if (root instanceof MappingNode) {
-			appNode = (MappingNode) root;
-		}
-
-		this.yaml = new Yaml(createDumperOptions());
-	}
-
-	private static MappingNode findAppNode(SequenceNode seq, String name) {
-		if (name != null) {
-			for (Node n : seq.getValue()) {
-				Node nameValue = findValueNode(n, ApplicationManifestHandler.NAME_PROP);
-				if (nameValue instanceof ScalarNode && ((ScalarNode)nameValue).getValue().equals(name)) {
-					return (MappingNode) n;
-				}
-			}
-		}
-		return null;
-	}
-
-	@Override
-	public String getYamlContent() {
-		return content;
+		Assert.isLegal(root==null || applicationsValueNode==null || appNode==null, "Cloudfoundry Manifest doesn't have the expected strucuture.");
 	}
 
 	public static DumperOptions createDumperOptions() {
@@ -681,12 +663,12 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 
 	}
 
-	private void getLegacyDifferenceForUris(Collection<String> uris, MultiTextEdit me) {
+	private void getLegacyDifferenceForUris(Collection<RouteBinding> uris, MultiTextEdit me) {
 		List<CFCloudDomain> domains = cloudData.getDomains();
 
 		LinkedHashSet<String> otherHosts = new LinkedHashSet<>();
 		LinkedHashSet<String> otherDomains = new LinkedHashSet<>();
-		ApplicationManifestHandler.extractHostsAndDomains(uris, domains, otherHosts, otherDomains);
+		ApplicationManifestHandler.extractHostsAndDomains(uris, otherHosts, otherDomains);
 		boolean otherNoRoute = otherHosts.isEmpty() && otherDomains.isEmpty();
 		boolean otherNoHostname = otherHosts.isEmpty() && !otherDomains.isEmpty();
 
@@ -1253,7 +1235,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 		}
 	}
 
-	public List<String> getRoutes() {
+	public List<String> getRawRoutes() {
 		List<Map<?,?>> routes = getAbsoluteValue(ApplicationManifestHandler.ROUTES_PROP, List.class);
 		if (routes != null) {
 			return routes.stream()
@@ -1268,8 +1250,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 	@Override
 	@SuppressWarnings("unchecked")
 	public Set<RouteBinding> getUris() {
-
-		List<String> routes = getRoutes();
+		List<String> routes = getRawRoutes();
 		if (routes != null) {
 			return toRouteBinding(routes);
 		} else {

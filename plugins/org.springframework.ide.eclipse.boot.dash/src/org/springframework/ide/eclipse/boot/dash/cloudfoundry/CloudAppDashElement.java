@@ -703,7 +703,7 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 
 			checkTerminationRequested(cancelationToken, monitor);
 
-			CloudApplicationDeploymentProperties properties = deploymentProperties == null
+			DeploymentProperties properties = deploymentProperties == null
 					? getCloudModel().resolveDeploymentProperties(updatedApp, ui, monitor) : deploymentProperties;
 
 			// Update JAVA_OPTS env variable with Remote DevTools Client secret

@@ -28,22 +28,22 @@ import com.google.common.collect.ImmutableMap;
  * @author Kris De Volder
  * @author Nieraj Singh
  */
-public class CFPushArguments implements AutoCloseable {
+public class CFPushArguments {
 	private List<RouteBinding> routes = ImmutableList.of();
 	private String appName;
 	private Integer memory;
 	private Integer diskQuota;
 	private Integer timeout;
+	private String healthCheckType;
+	private String healthCheckHttpEndpoint;
 	private String buildpack;
 	private String command;
 	private String stack;
-	private String healthCheckType;
 	private Map<String, String> env = ImmutableMap.of();
 	private Integer instances;
 	private List<String> services = ImmutableList.of();
 	private File applicationDataAsFile;
 	private boolean noStart = false;
-	private String healthCheckHttpEndpoint;
 
 	public CFPushArguments() {
 	}
@@ -154,12 +154,6 @@ public class CFPushArguments implements AutoCloseable {
 
 	public String getHealthCheckHttpEndpoint() {
 		return this.healthCheckHttpEndpoint;
-	}
-
-	@Override
-	public void close() throws Exception {
-		//This used to do something more useful, we kept it for now to avoid having to
-		// change a lot of code. But calling `close` is no longer needed and does nothing.
 	}
 
 }

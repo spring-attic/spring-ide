@@ -14,6 +14,9 @@ import java.util.stream.Stream;
 
 import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlFileAST;
 import org.yaml.snakeyaml.nodes.Node;
+import org.yaml.snakeyaml.nodes.SequenceNode;
+
+import com.google.common.base.Predicate;
 
 public interface YamlTraversal {
 
@@ -162,5 +165,13 @@ public interface YamlTraversal {
 	 * allows a 'no movement' step.
 	 */
 	boolean canEmpty();
+
+	default <T extends Node> T traverseToNode(YamlFileAST ast, Class<T> nodeType) {
+		Node node = traverseToNode(ast);
+		if (nodeType.isInstance(node)) {
+			return nodeType.cast(node);
+		}
+		return null;
+	}
 
 }

@@ -10,10 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes;
 
+import java.util.Collection;
 import java.util.List;
 
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlGraphDeploymentProperties;
+
+import com.google.common.collect.ImmutableList;
 
 /**
  * Data object containing attributes from a manifest.yml related to route bindings.
@@ -28,19 +31,41 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlGra
  */
 public class RouteAttributes {
 
-	private final String appName;
-	private final List<String> routes;
-	private final String host;
-	private final List<String> hosts;
-	private final String domain;
-	private final List<String> domains;
-	private final boolean noHost;
-	private final boolean noRoute;
-	private final boolean randomRoute;
+	public static RouteAttributes fromUris(Collection<String> uris) {
+		RouteAttributes it = new RouteAttributes();
+		if (uris.isEmpty()) {
+			it.noRoute = true;
+		} else {
+			it.routes = ImmutableList.copyOf(uris);
+		}
+		return it;
+	}
+
+	private String appName;
+	private List<String> routes;
+	private String host;
+	private List<String> hosts;
+	private String domain;
+	private List<String> domains;
+	private boolean noHost;
+	private boolean noRoute;
+	private boolean randomRoute;
+
+	public RouteAttributes(String appName) {
+		this.appName = appName;
+		this.routes = null;
+		this.domain = null;
+		this.domains = null;
+		this.host = null;
+		this.hosts = null;
+		this.noRoute = false;
+		this.randomRoute = false;
+		this.noHost = false;
+	}
 
 	public RouteAttributes(YamlGraphDeploymentProperties manifest) {
 		this.appName = manifest.getAppName();
-		this.routes = manifest.getRoutes();
+		this.routes = manifest.getRawRoutes();
 		this.domain = manifest.getRawDomain();
 		this.domains = manifest.getRawDomains();
 		this.host = manifest.getRawHost();
@@ -48,6 +73,22 @@ public class RouteAttributes {
 		this.noRoute = manifest.getRawNoRoute();
 		this.randomRoute = manifest.getRawRandomRoute();
 		this.noHost = manifest.getRawNoHost();
+	}
+
+	public RouteAttributes(CFApplication app) {
+		this.appName = app.getName();
+		this.routes = app.getUris();
+		this.domain = null;
+		this.domains = null;
+		this.host = null;
+		this.hosts = null;
+		this.noRoute = false;
+		this.randomRoute = false;
+		this.noHost = false;
+	}
+
+	public RouteAttributes() {
+		// TODO Auto-generated constructor stub
 	}
 
 	public List<String> getRoutes() {

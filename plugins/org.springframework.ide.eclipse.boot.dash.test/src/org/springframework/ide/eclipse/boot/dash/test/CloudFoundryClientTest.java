@@ -78,6 +78,8 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultC
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultCloudFoundryClientFactoryV2;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ReactorUtils;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.IApplicationLogConsole;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.Randomized;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.RouteBinding;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
@@ -266,7 +268,8 @@ public class CloudFoundryClientTest {
 	public void testGetApplicationDetails() throws Exception {
 		String appName = appHarness.randomAppName();
 
-		try (CFPushArguments params = new CFPushArguments()) {
+		CFPushArguments params = new CFPushArguments();
+		{
 			params.setAppName(appName);
 			params.setApplicationData(getTestZip("testapp"));
 			params.setBuildpack("staticfile_buildpack");
@@ -350,8 +353,10 @@ public class CloudFoundryClientTest {
 			params.setAppName(appName);
 			params.setApplicationData(getTestZip("testapp"));
 			params.setBuildpack("staticfile_buildpack");
-			params.setRoutes(ImmutableList.of(appName+"."+CFAPPS_IO()));
-
+			params.setRoutes(ImmutableList.of(new RouteBinding()
+					.setHost(appName)
+					.setDomain(CFAPPS_IO())
+			));
 			push(params);
 		}
 
@@ -376,8 +381,8 @@ public class CloudFoundryClientTest {
 		params.setApplicationData(getTestZip("testapp"));
 		params.setBuildpack("staticfile_buildpack");
 
-		Set<String> routes = ImmutableSet.copyOf(Stream.of(hostNames)
-				.map((host) -> host + "." + CFAPPS_IO())
+		Set<RouteBinding> routes = ImmutableSet.copyOf(Stream.of(hostNames)
+				.map((host) -> new RouteBinding().setHost(host).setDomain(CFAPPS_IO()))
 				.collect(Collectors.toList())
 		);
 		params.setRoutes(routes);
@@ -405,8 +410,8 @@ public class CloudFoundryClientTest {
 		params.setApplicationData(getTestZip("testapp"));
 		params.setBuildpack("staticfile_buildpack");
 
-		Set<String> routes = ImmutableSet.copyOf(Stream.of(hostNames)
-				.map((host) -> host + "." + CFAPPS_IO())
+		Set<RouteBinding> routes = ImmutableSet.copyOf(Stream.of(hostNames)
+				.map((host) -> new RouteBinding().setHost(host).setDomain(CFAPPS_IO()))
 				.collect(Collectors.toList())
 		);
 		params.setRoutes(routes);
@@ -421,16 +426,16 @@ public class CloudFoundryClientTest {
 			assertEquals(routes, ImmutableSet.copyOf(app.getUris()));
 		}
 
-		doSetRoutesTest(appName, ImmutableSet.of(), params.getRandomRoute());
+		doSetRoutesTest(appName, ImmutableSet.of());
 
-		for (String route : routes) {
-			doSetRoutesTest(appName, ImmutableSet.of(route), params.getRandomRoute());
+		for (RouteBinding route : routes) {
+			doSetRoutesTest(appName, ImmutableSet.of(route));
 		}
 
 	}
 
-	private void doSetRoutesTest(String appName, ImmutableSet<String> routes, boolean randomRoute) throws Exception {
-		ReactorUtils.get(client.setRoutes(appName, routes, randomRoute));
+	private void doSetRoutesTest(String appName, ImmutableSet<RouteBinding> routes) throws Exception {
+		ReactorUtils.get(client.setRoutes(appName, routes));
 		CFApplicationDetail app = client.getApplication(appName);
 		assertEquals(routes, ImmutableSet.copyOf(app.getUris()));
 	}
@@ -450,9 +455,12 @@ public class CloudFoundryClientTest {
 		};
 
 		for (String hcType : HC_TYPES) {
-			try (CFPushArguments params = new CFPushArguments()) {
+			CFPushArguments params = new CFPushArguments(); {
 				params.setAppName(appName);
-				params.setRoutes(appName+"."+CFAPPS_IO());
+				params.setRoutes(ImmutableList.of(new RouteBinding()
+						.setHost(appName)
+						.setDomain(CFAPPS_IO())
+				));
 				params.setApplicationData(getTestZip("testapp"));
 				params.setBuildpack("staticfile_buildpack");
 				params.setHealthCheckType(hcType);
@@ -468,9 +476,12 @@ public class CloudFoundryClientTest {
 	public void testPushAndSetHealthcheckHttpEndpoint() throws Exception {
 		String appName = appHarness.randomAppName();
 
-		try (CFPushArguments params = new CFPushArguments()) {
+		CFPushArguments params = new CFPushArguments(); {
 			params.setAppName(appName);
-			params.setRoutes(appName+"."+CFAPPS_IO());
+			params.setRoutes(ImmutableList.of(new RouteBinding()
+					.setHost(appName)
+					.setDomain(CFAPPS_IO())
+			));
 			params.setApplicationData(getTestZip("testapp"));
 			params.setBuildpack("staticfile_buildpack");
 			params.setHealthCheckHttpEndpoint("/test.txt");
@@ -489,7 +500,10 @@ public class CloudFoundryClientTest {
 
 		CFPushArguments params = new CFPushArguments();
 		params.setAppName(appName);
-		params.setRoutes(appName+"."+CFAPPS_IO());
+		params.setRoutes(ImmutableList.of(new RouteBinding()
+				.setHost(appName)
+				.setDomain(CFAPPS_IO())
+		));
 		params.setApplicationData(getTestZip("testapp"));
 		params.setBuildpack("staticfile_buildpack");
 		params.setEnv(ImmutableMap.of(
@@ -893,16 +907,16 @@ public class CloudFoundryClientTest {
 
 	@Test
 	public void testRandomHost() throws Exception {
-		//It is now the responsibility of the client to interpret the 'random route' attribute and
-		// generate random host or port. This test checks if it does that.
 		String appName = appHarness.randomAppName();
 
 		CFPushArguments params = new CFPushArguments();
 		params.setAppName(appName);
-		params.setRoutes(CFAPPS_IO());
+		params.setRoutes(ImmutableList.of(new RouteBinding()
+				.setDomain(CFAPPS_IO())
+				.setHost(Randomized.random())
+		));
 		params.setApplicationData(getTestZip("testapp"));
 		params.setBuildpack("staticfile_buildpack");
-		params.setRandomRoute(true);
 		push(params);
 
 		CFApplicationDetail app = client.getApplication(appName);
@@ -993,9 +1007,13 @@ public class CloudFoundryClientTest {
 		File jarFile = BootJarPackagingTest.packageAsJar(project, ui);
 
 		String appName = appHarness.randomAppName();
-		try (CFPushArguments params = new CFPushArguments()) {
+		CFPushArguments params = new CFPushArguments();
+		{
 			params.setAppName(appName);
-			params.setRoutes(appName+"."+CFAPPS_IO());
+			params.setRoutes(ImmutableList.of(new RouteBinding()
+					.setHost(appName)
+					.setDomain(CFAPPS_IO())
+			));
 			params.setApplicationData(jarFile);
 			params.setNoStart(true);
 
@@ -1034,9 +1052,10 @@ public class CloudFoundryClientTest {
 		File jarFile = BootJarPackagingTest.packageAsJar(project, ui);
 
 		CancelationTokens cancelationTokens = new CancelationTokens();
-		try (CFPushArguments params = new CFPushArguments()) {
+		CFPushArguments params = new CFPushArguments();
+		{
 			params.setAppName(appName);
-			params.setRoutes(appName+"."+CFAPPS_IO());
+			params.setRoutes(ImmutableList.of(new RouteBinding().setHost(appName).setDomain(CFAPPS_IO())));
 			params.setApplicationData(jarFile);
 
 			long starting = System.currentTimeMillis();
@@ -1095,7 +1114,7 @@ public class CloudFoundryClientTest {
 	}
 
 	private void push(CFPushArguments _params) throws Exception {
-		try (CFPushArguments params = _params) {
+		CFPushArguments params = _params; {
 			client.push(params, CancelationTokens.NULL);
 		}
 	}

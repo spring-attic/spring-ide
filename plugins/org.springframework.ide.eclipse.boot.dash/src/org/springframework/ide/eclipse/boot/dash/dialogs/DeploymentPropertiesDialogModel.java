@@ -36,6 +36,8 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicati
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.AppNameAnnotation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.AppNameAnnotationModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlGraphDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.util.Log;
@@ -239,8 +241,8 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 		 */
 		abstract IFile getManifest();
 
-		CloudApplicationDeploymentProperties getDeploymentProperties() throws Exception {
-			List<CloudApplicationDeploymentProperties> propsList = new ApplicationManifestHandler(project, cloudData, getManifest()) {
+		DeploymentProperties getDeploymentProperties() throws Exception {
+			List<YamlGraphDeploymentProperties> propsList = new ApplicationManifestHandler(project, cloudData, getManifest()) {
 				@Override
 				protected InputStream getInputStream() throws Exception {
 					return new ByteArrayInputStream(getManifestContents().getBytes());
@@ -251,12 +253,12 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 			 * but we should allow for any manifest file selected for now. Hence
 			 * set the applicationName var to null in that case
 			 */
-			CloudApplicationDeploymentProperties deploymentProperties = null;
+			DeploymentProperties deploymentProperties = null;
 			String applicationName = deployedApp == null ? selectedAppName.getValue() : getDeployedAppName();
 			if (applicationName == null) {
 				deploymentProperties = propsList.get(0);
 			} else {
-				for (CloudApplicationDeploymentProperties p : propsList) {
+				for (YamlGraphDeploymentProperties p : propsList) {
 					if (applicationName.equals(p.getAppName())) {
 						deploymentProperties = p;
 						break;
@@ -717,7 +719,7 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 		};
 	}
 
-	public CloudApplicationDeploymentProperties getDeploymentProperties() throws Exception {
+	public DeploymentProperties getDeploymentProperties() throws Exception {
 		if (isCancelled) {
 			throw new OperationCanceledException();
 		}

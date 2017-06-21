@@ -35,9 +35,11 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.jface.text.Document;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFDomainType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
@@ -45,13 +47,26 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFDomain
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFRoute;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlGraphDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.Randomized;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.RouteAttributes;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.RouteBinding;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.RouteBuilder;
 import org.springframework.ide.eclipse.boot.util.Log;
+import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlASTProvider;
+import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlFileAST;
+import org.springframework.ide.eclipse.editor.support.yaml.path.YamlTraversal;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
+import org.yaml.snakeyaml.DumperOptions.LineBreak;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.nodes.MappingNode;
+import org.yaml.snakeyaml.nodes.Node;
 
 import com.google.common.collect.ImmutableList;
+
+import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 
 /**
  * Reads and creates manifest.yml content from a specific location relative to
@@ -119,10 +134,27 @@ public class ApplicationManifestHandler {
 	public static final String ROUTE_PROP = "route";
 
 	private final IProject project;
-
 	private final IFile manifestFile;
-
 	private final CloudData cloudData;
+
+	private final Yaml yaml = createYaml();
+	private final YamlASTProvider yamlParser = new YamlASTProvider(yaml);
+
+
+
+	public static DumperOptions createDumperOptions() {
+		DumperOptions options = new DumperOptions();
+		options.setExplicitStart(false);
+		options.setCanonical(false);
+		options.setPrettyFlow(true);
+		options.setDefaultFlowStyle(FlowStyle.BLOCK);
+		options.setLineBreak(LineBreak.getPlatformLineBreak());
+		return options;
+	}
+
+	public static Yaml createYaml() {
+		return new Yaml(createDumperOptions());
+	}
 
 	public ApplicationManifestHandler(IProject project, CloudData cloudData) {
 		this(project, cloudData, null);
@@ -222,20 +254,6 @@ public class ApplicationManifestHandler {
 		}
 	}
 
-//	protected String getStringValue(Map<?, ?> containingMap, String propertyName) {
-//
-//		if (containingMap == null) {
-//			return null;
-//		}
-//
-//		Object valObj = containingMap.get(propertyName);
-//
-//		if (valObj instanceof String) {
-//			return (String) valObj;
-//		}
-//		return null;
-//	}
-//
 	@SuppressWarnings("unchecked")
 	protected static <T> T getValue(Map<?, ?> containingMap, String propertyName, Class<T> type) {
 		if (containingMap == null) {
@@ -277,129 +295,68 @@ public class ApplicationManifestHandler {
 		return applications;
 	}
 
-	protected CloudApplicationDeploymentProperties getDeploymentProperties(Map<?, ?> appMap,
-			Map<Object, Object> allResults, IProgressMonitor monitor) throws Exception {
-
-		CloudApplicationDeploymentProperties properties = new CloudApplicationDeploymentProperties();
-
-		String appName = getValue(appMap, NAME_PROP, String.class);
-
-		properties.setAppName(appName);
-		properties.setProject(project);
-		properties.setManifestFile(manifestFile);
-
-		readMemory(appMap, allResults, properties);
-
-		readDiskQuota(appMap, allResults, properties);
-
-		readApplicationURL(appMap, allResults, properties);
-
-		readBuildpack(appMap, allResults, properties);
-
-		readEnvVars(appMap, allResults, properties);
-
-		readServices(appMap, allResults, properties);
-
-		readInstances(appMap, allResults, properties);
-
-		readTimeout(appMap, allResults, properties);
-
-		readHealthCheckType(appMap, allResults, properties);
-
-		readHealthCheckHttpEndpoint(appMap, allResults, properties);
-
-		readCommand(appMap, allResults, properties);
-
-		readStack(appMap, allResults, properties);
-
-		return properties;
-	}
-
-	public List<CloudApplicationDeploymentProperties> load(IProgressMonitor monitor) throws Exception {
+	public List<YamlGraphDeploymentProperties> load(IProgressMonitor monitor) throws Exception {
 		SubMonitor subMonitor = SubMonitor.convert(monitor);
 		subMonitor.beginTask("Loading manifest.yml", 6);
 
 		try {
-
-			Map<Object, Object> allResults = parseManifestFromFile();
-
-			if (allResults == null || allResults.isEmpty()) {
-				throw ExceptionUtil
-						.coreException("No content found in manifest.yml. Make sure the manifest is valid.");
-
-			}
-
-			List<Map<?, ?>> appMaps = getApplications(allResults);
-
-			List<CloudApplicationDeploymentProperties> properties = new ArrayList<>();
-
-			if (appMaps == null) {
-				CloudApplicationDeploymentProperties props = getDeploymentProperties(allResults, allResults, subMonitor);
-				if (props != null) {
-					properties.add(props);
-				}
-			} else {
-				for (Map<?, ?> app : appMaps) {
-					CloudApplicationDeploymentProperties props = getDeploymentProperties(app, allResults, subMonitor);
-					if (props != null) {
-						properties.add(props);
-					}
-				}
-			}
-
-			return properties;
-
+			YamlFileAST ast = yamlParser.getAST(new Document(IOUtil.toString(getInputStream())));
+			return YamlTraversal.EMPTY.thenAnyChild()
+				.thenValAt(APPLICATIONS_PROP)
+				.traverseAmbiguously(ast)
+				.map(appNode -> new YamlGraphDeploymentProperties(yaml, ast, appNode, cloudData))
+				.collect(Collectors.toList());
 		} finally {
 			subMonitor.done();
 		}
-
 	}
 
-	/**
-	 * Creates a new manifest.yml file. If one already exists, the existing one
-	 * will not be replaced.
-	 *
-	 * @return true if new file created with content. False otherwise
-	 * @throws Exception
-	 *             if error occurred during file creation or serialising
-	 *             manifest content
-	 */
-	public boolean create(IProgressMonitor monitor, CloudApplicationDeploymentProperties properties) throws Exception {
 
-		if (properties == null) {
-			return false;
-		}
-		File file = getManifestFile();
-		if (file != null) {
-			Log.warn(
-					"Manifest.yml file already found at: " + manifestFile.getFullPath() + ". New content will not be written.");
-			return false;
-		}
-
-		Map<Object, Object> deploymentInfoYaml = toYaml(properties, cloudData);
-		DumperOptions options = new DumperOptions();
-		options.setExplicitStart(true);
-		options.setCanonical(false);
-		options.setPrettyFlow(true);
-		options.setDefaultFlowStyle(FlowStyle.BLOCK);
-		Yaml yaml = new Yaml(options);
-		String manifestValue = yaml.dump(deploymentInfoYaml);
-
-		if (manifestValue == null) {
-			throw ExceptionUtil.coreException("Failed to generate manifesty.yml for: " + properties.getAppName()
-					+ " Unknown problem trying to serialise content of manifest into: " + deploymentInfoYaml);
-		}
-
-		createFile(project, manifestFile, manifestValue, monitor);
-		return true;
-	}
+//	/**
+//	 * Creates a new manifest.yml file. If one already exists, the existing one
+//	 * will not be replaced.
+//	 *
+//	 * @return true if new file created with content. False otherwise
+//	 * @throws Exception
+//	 *             if error occurred during file creation or serialising
+//	 *             manifest content
+//	 */
+//	public boolean create(IProgressMonitor monitor, CloudApplicationDeploymentProperties properties) throws Exception {
+//
+//		if (properties == null) {
+//			return false;
+//		}
+//		File file = getManifestFile();
+//		if (file != null) {
+//			Log.warn(
+//					"Manifest.yml file already found at: " + manifestFile.getFullPath() + ". New content will not be written.");
+//			return false;
+//		}
+//
+//		Map<Object, Object> deploymentInfoYaml = toYaml(properties, cloudData);
+//		DumperOptions options = new DumperOptions();
+//		options.setExplicitStart(true);
+//		options.setCanonical(false);
+//		options.setPrettyFlow(true);
+//		options.setDefaultFlowStyle(FlowStyle.BLOCK);
+//		Yaml yaml = new Yaml(options);
+//		String manifestValue = yaml.dump(deploymentInfoYaml);
+//
+//		if (manifestValue == null) {
+//			throw ExceptionUtil.coreException("Failed to generate manifesty.yml for: " + properties.getAppName()
+//					+ " Unknown problem trying to serialise content of manifest into: " + deploymentInfoYaml);
+//		}
+//
+//		createFile(project, manifestFile, manifestValue, monitor);
+//		return true;
+//	}
 
 	public static Map<Object, Object> toYaml(DeploymentProperties properties, CloudData cloudData) {
 		return toYaml(properties, cloudData, false);
 	}
 
 	@SuppressWarnings("unchecked")
-	public static Map<Object, Object> toYaml(DeploymentProperties properties, CloudData cloudData, boolean legacyHostDomain) {
+	public static Map<Object, Object> toYaml(DeploymentProperties properties, CloudData _cloudData, boolean legacyHostDomain) {
 		Map<Object, Object> deploymentInfoYaml = new LinkedHashMap<>();
 
 		Object applicationsObj = deploymentInfoYaml.get(APPLICATIONS_PROP);
@@ -459,22 +416,10 @@ public class ApplicationManifestHandler {
 		if (legacyHostDomain) {
 			Set<String> hosts = new LinkedHashSet<>();
 			Set<String> domains = new LinkedHashSet<>();
-			List<CFCloudDomain> cloudDomains = cloudData.getDomains();
-			extractHostsAndDomains(properties.getUris(), cloudDomains, hosts, domains);
-			for (String uri : properties.getUris()) {
-				try {
-					// Find the first valid URL
-					CFRoute route = CFRoute.builder().from(uri, cloudDomains).build();
-					if (route.getHost() != null) {
-						hosts.add(route.getHost());
-					}
-					if (route.getDomain() != null) {
-						domains.add(route.getDomain());
-					}
-				} catch (Exception e) {
-					// ignore
-				}
-			}
+			//TODO: the logic below is buggered in the sense that it maps arbitrary list of RouteBinding
+			// into a hosts + domains set. Its not always possible to do that without changing the set of
+			// routes. The code below simply disregards that possibility and just hopes for the best.
+			extractHostsAndDomains(properties.getUris(), hosts, domains);
 			if (hosts.isEmpty() && domains.isEmpty()) {
 				application.put(NO_ROUTE_PROP, true);
 			} else {
@@ -495,7 +440,7 @@ public class ApplicationManifestHandler {
 				}
 			}
 		} else {
-			Set<String> uris = properties.getUris();
+			Set<RouteBinding> uris = properties.getUris();
 			if (uris == null || uris.isEmpty()) {
 				application.put(NO_ROUTE_PROP, true);
 			} else {
@@ -506,17 +451,16 @@ public class ApplicationManifestHandler {
 				}).collect(Collectors.toList()));
 			}
 		}
-
 		return deploymentInfoYaml;
 	}
 
-	public static void extractHostsAndDomains(Collection<String> uris, List<CFCloudDomain> cloudDomains, Set<String> hostsSet, Set<String> domainsSet) {
-		for (String uri : uris) {
+	public static void extractHostsAndDomains(Collection<RouteBinding> uris, Set<String> hostsSet, Set<String> domainsSet) {
+		for (RouteBinding route : uris) {
 			try {
 				// Find the first valid URL
-				CFRoute route = CFRoute.builder().from(uri, cloudDomains).build();
-				if (route.getHost() != null) {
-					hostsSet.add(route.getHost());
+				Randomized<String> hostBinding = route.getHost();
+				if (hostBinding != null && !hostBinding.isRandom()) {
+					hostsSet.add(hostBinding.getValue());
 				}
 				if (route.getDomain() != null) {
 					domainsSet.add(route.getDomain());
@@ -677,178 +621,6 @@ public class ApplicationManifestHandler {
 		}
 	}
 
-	private boolean noRoute(Map<?, ?> application, Map<Object, Object> allResults) {
-		Boolean noRoute = getValue(application, NO_ROUTE_PROP, Boolean.class);
-		if (noRoute == null) {
-			noRoute = getValue(allResults, NO_ROUTE_PROP, Boolean.class);
-		}
-		return Boolean.TRUE.equals(noRoute);
-	}
-
-	/**
-	 *
-	 * @param application
-	 * @param allResults
-	 * @param properties
-	 * @param randomRoute true if random host should be generated
-	 * @return non-null list of URIs parsed from domains and hosts. May be empty
-	 */
-	@SuppressWarnings("unchecked")
-	private List<String> fromDomainsAndHosts(Map<?, ?> application, Map<Object, Object> allResults,
-			CloudApplicationDeploymentProperties properties, boolean randomRoute) {
-
-		HashSet<String> hostsSet = new LinkedHashSet<>();
-		HashSet<String> domainsSet = new LinkedHashSet<>();
-
-		/*
-		 * Gather domains from app node and root node from 'domain' and 'domains' attributes
-		 */
-		String domain = getValue(application, DOMAIN_PROP, String.class);
-		if (domain == null) {
-			domain = getValue(allResults, DOMAIN_PROP, String.class);
-		}
-		if (domain != null) {
-			domainsSet.add(domain);
-		}
-		List<String> domainList = (List<String>) getValue(allResults, DOMAINS_PROP, List.class);
-		if (domainList != null) {
-			domainsSet.addAll(domainList);
-		}
-		domainList = (List<String>) getValue(application, DOMAINS_PROP, List.class);
-		if (domainList != null) {
-			domainsSet.addAll(domainList);
-		}
-
-		/*
-		 * Gather domains from app node and root node from 'host' and 'hosts'
-		 * attributes. Account for ${random} in host's name
-		 */
-		String host = getValue(application, SUB_DOMAIN_PROP, String.class);
-		if (host == null) {
-			host = getValue(allResults, SUB_DOMAIN_PROP, String.class);
-		}
-		if (host != null) {
-			hostsSet.add(host);
-		}
-		List<String> hostList = (List<String>) getValue(allResults, SUB_DOMAINS_PROP, List.class);
-		if (hostList != null) {
-			hostsSet.addAll(hostList);
-		}
-		hostList = (List<String>) getValue(application, SUB_DOMAINS_PROP, List.class);
-		if (hostList != null) {
-			hostsSet.addAll(hostList);
-		}
-
-		/*
-		 * If no host names found check for "random-route: true" and
-		 * "no-hostname: true" otherwise take app name as the host name
-		 */
-		if (hostsSet.isEmpty()) {
-			if (randomRoute) {
-				//hostsSet.add(extractHost("${random}", 10));
-				if (domainsSet.isEmpty()) {
-					domainsSet.add(cloudData.getDefaultDomain());
-				}
-			} else {
-				Boolean noHostName = getValue(application, NO_HOSTNAME_PROP, Boolean.class);
-				if (noHostName == null) {
-					noHostName = getValue(allResults, NO_HOSTNAME_PROP, Boolean.class);
-				}
-				if (!Boolean.TRUE.equals(noHostName)) {
-					/*
-					 * Assumes name is set before URIs are processed
-					 */
-					hostsSet.add(properties.getAppName());
-				}
-			}
-		}
-
-		/*
-		 * Set a domain if they are still empty
-		 */
-		if (domainsSet.isEmpty()) {
-			domainsSet.add(cloudData.getDefaultDomain());
-		}
-
-		/*
-		 * Compose URIs for application based on hosts and domains
-		 */
-		List<String> uris = new ArrayList<>(hostsSet.isEmpty() ? 1 : hostsSet.size() * domainsSet.size());
-		for (String d : domainsSet) {
-			if (hostsSet.isEmpty()) {
-				uris.add(CFRoute.builder().domain(d).build().toUri());
-			} else {
-				for (String h : hostsSet) {
-					uris.add(CFRoute.builder().host(h).domain(d).build().toUri());
-				}
-			}
-		}
-
-		return uris;
-	}
-
-	protected void readApplicationURL(Map<?, ?> application, Map<Object, Object> allResults,
-			CloudApplicationDeploymentProperties properties) {
-		Boolean randomRoute = getValue(application, RANDOM_ROUTE_PROP, Boolean.class);
-		if (randomRoute == null) {
-			randomRoute = getValue(allResults, RANDOM_ROUTE_PROP, Boolean.class);
-		}
-        boolean useRandomRoute = Boolean.TRUE.equals(randomRoute);
-        properties.setRandomRoute(useRandomRoute);
-
-		/*
-		 * Check for "no-route: true". If set then uris list should be empty
-		 */
-		if (!noRoute(application, allResults)) {
-			// Manifest documentation states:
-			// "The routes attribute cannot be used in conjunction with the
-			// following
-			// attributes: host, hosts, domain, domains, and no-hostname.
-			// An error will result."
-			// If only routes are available, then only parse routes. Do NOT
-			// also create a default URI from domain and app name if routes are available.
-			// This appears to be consistent with cf CLI behaviour as well.
-			// Otherwise fall back to parsing from domains and hosts
-			List<String> uris = null;
-			if (hasRoutesProperty(application, allResults)) {
-				uris = fromRoutesProperty(application, allResults, properties);
-			} else {
-				uris = fromDomainsAndHosts(application, allResults, properties, useRandomRoute);
-			}
-			properties.setUris(uris);
-		}
-	}
-
-	private List<String> fromRoutesProperty(Map<?, ?> application, Map<Object, Object> allResults,
-			CloudApplicationDeploymentProperties properties) {
-		Set<String> uris = new LinkedHashSet<>();
-		List<CFCloudDomain> domains = cloudData.getDomains();
-		List<?> routes = getValue(application, ROUTES_PROP, List.class);
-		List<?> rootRoutes = getValue(allResults, ROUTES_PROP, List.class);
-		if (routes != null || rootRoutes != null) {
-			routes = routes == null ? Collections.emptyList() : routes;
-			rootRoutes = rootRoutes == null ? Collections.emptyList() : rootRoutes;
-
-			return ImmutableList.copyOf(Stream.concat(routes.stream(), rootRoutes.stream())
-				.filter(o -> o instanceof Map<?,?>)
-				.map(o -> (Map<?,?>) o)
-				.map(routeMap -> routeMap.get(ROUTE_PROP))
-				.filter(Objects::nonNull)
-				.filter(route -> route instanceof String)
-				.map(route -> {
-					String url = (String) route;
-					CFRoute rt = CFRoute.builder().from(url, domains).build();
-					return rt.toUri();
-				})
-				.collect(Collectors.toSet()));
-		}
-		return ImmutableList.copyOf(uris);
-	}
-
-	protected boolean hasRoutesProperty(Map<?, ?> application, Map<Object, Object> allResults) {
-		return hasValue(application, ROUTES_PROP) || hasValue(allResults, ROUTES_PROP);
-	}
-
 	public static boolean isStackValid(String stack, List<CFStack> stacks) {
 		for (CFStack cloudStack : stacks) {
 			if (cloudStack.getName().equals(stack)) {
@@ -856,17 +628,6 @@ public class ApplicationManifestHandler {
 			}
 		}
 		return false;
-	}
-
-	private String extractHost(String subdomain, int length) {
-		// Check for random word
-		int varIndex = subdomain.indexOf(RANDOM_VAR);
-		while (varIndex >= 0)  {
-			String randomWord = RandomStringUtils.randomAlphabetic(length);
-			subdomain = subdomain.replace(subdomain.substring(varIndex, RANDOM_VAR.length()), randomWord);
-			varIndex = subdomain.indexOf(RANDOM_VAR);
-		}
-		return subdomain;
 	}
 
 	protected void readMemory(Map<?, ?> application, Map<Object, Object> allResults,

@@ -55,10 +55,12 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicati
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ReactorUtils;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.CloudAppLogManager;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentPropertiesDialog;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlFileInput;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlGraphDeploymentProperties;
@@ -615,13 +617,13 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	 *             if user canceled operation while resolving deployment
 	 *             properties
 	 */
-	public CloudApplicationDeploymentProperties resolveDeploymentProperties(CloudAppDashElement cde, UserInteractions ui, IProgressMonitor monitor) throws Exception {
+	public DeploymentProperties resolveDeploymentProperties(CloudAppDashElement cde, UserInteractions ui, IProgressMonitor monitor) throws Exception {
 		IProject project = cde.getProject();
 		CFApplication app = cde.getSummaryData();
 
 		CloudData cloudData = buildOperationCloudData(monitor, project);
 
-		CloudApplicationDeploymentProperties deploymentProperties = CloudApplicationDeploymentProperties.getFor(project, cloudData, app);
+		DeploymentProperties deploymentProperties = CloudApplicationDeploymentProperties.getFor(project, cloudData, app);
 		CloudAppDashElement element = app == null ? null : getApplication(app.getName());
 		final IFile manifestFile = element == null ? null : element.getDeploymentManifestFile();
 		if (manifestFile != null) { // Manifest file deployment mode
@@ -703,15 +705,15 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 						 * Load deployment properties from YAML text content
 						 */
 						final byte[] yamlBytes = left.getContent();
-						List<CloudApplicationDeploymentProperties> props = new ApplicationManifestHandler(project,
+						List<YamlGraphDeploymentProperties> props = new ApplicationManifestHandler(project,
 								cloudData, manifestFile) {
 							@Override
 							protected InputStream getInputStream() throws Exception {
 								return new ByteArrayInputStream(yamlBytes);
 							}
 						}.load(monitor);
-						CloudApplicationDeploymentProperties found = null;
-						for (CloudApplicationDeploymentProperties p : props) {
+						YamlGraphDeploymentProperties found = null;
+						for (YamlGraphDeploymentProperties p : props) {
 							if (deploymentProperties.getAppName().equals(p.getAppName())) {
 								found = p;
 								break;
@@ -770,7 +772,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		return props;
 	}
 
-	public void addApplicationArchive(IProject project, CloudApplicationDeploymentProperties properties, CloudData cloudData,
+	public void addApplicationArchive(IProject project, DeploymentProperties properties, CloudData cloudData,
 			UserInteractions ui, IProgressMonitor monitor) throws Exception {
 		ICloudApplicationArchiver archiver = getArchiver(properties, cloudData, ui, monitor);
 		if (archiver != null) {
@@ -786,7 +788,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	}
 
 	protected ICloudApplicationArchiver getArchiver(
-			CloudApplicationDeploymentProperties deploymentProperties,
+			DeploymentProperties deploymentProperties,
 			CloudData cloudData,
 			UserInteractions ui,
 			IProgressMonitor mon
@@ -805,7 +807,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	}
 
 	protected CloudApplicationArchiverStrategy[] getArchiverStrategies(
-			CloudApplicationDeploymentProperties deploymentProperties,
+			DeploymentProperties deploymentProperties,
 			CloudData cloudData,
 			UserInteractions ui,
 			IProgressMonitor mon

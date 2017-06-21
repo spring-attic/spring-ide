@@ -21,8 +21,10 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.http.impl.client.RoutedRequest;
 import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.client.v2.applications.ApplicationEntity;
 import org.cloudfoundry.client.v2.applications.GetApplicationResponse;
@@ -90,6 +92,8 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshClientSu
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshHost;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CloudFoundryClientCache.CFClientProvider;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.IApplicationLogConsole;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.ParsedUri;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.Randomized;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.RouteBinding;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
@@ -787,7 +791,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		.then(getApplicationDetail(appName))
 		.then((appDetail) -> {
 			return Flux.merge(
-				setRoutes(appDetail, params.getRoutes(), params.getRandomRoute()),
+				setRoutes(appDetail, params.getRoutes()),
 				bindAndUnbindServices(appName, params.getServices()),
 				// This requires app restart
 				setEnvVars(appDetail, params.getEnv())
@@ -843,7 +847,6 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	public Mono<Void> setRoutes(ApplicationDetail appDetails, Collection<RouteBinding> desiredUrls) {
 		debug("setting routes for '"+appDetails.getName()+"': "+desiredUrls);
-		DomainsOracle domains = new DomainsOracle();
 
 		//Carefull! It is not safe map/unnmap multiple routes in parallel. Doing so causes some of the
 		// operations to fail, presumably because of some 'optimisitic locking' being used in the database
@@ -851,98 +854,73 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		//To avoid this problem we must execute all that map / unmap calls in sequence!
 		return ReactorUtils.sequence(
 				unmapUndesiredRoutes(appDetails.getName(), desiredUrls),
-				mapDesiredRoutes(appDetails, domains, desiredUrls, randomRoute)
+				mapDesiredRoutes(appDetails, desiredUrls)
 		);
 	}
 
-	public Mono<Void> setRoutes(String appName, Collection<String> desiredUrls, boolean randomRoute) {
+	public Mono<Void> setRoutes(String appName,  Collection<RouteBinding> desiredUrls) {
 		return getApplicationDetail(appName)
-		.then(appDetails -> setRoutes(appDetails, desiredUrls, randomRoute));
+		.then(appDetails -> setRoutes(appDetails, desiredUrls));
 	}
 
-	private Mono<Void> mapDesiredRoutes(ApplicationDetail appDetail, DomainsOracle domains, Collection<String> desiredUrls, boolean randomRoute) {
-		Set<String> currentUrls = ImmutableSet.copyOf(appDetail.getUrls());
-		String appName = appDetail.getName();
+	private Mono<Void> mapDesiredRoutes(ApplicationDetail appDetail, Collection<RouteBinding> desiredRoutes) {
+		Collection<ParsedUri> currentUrls = appDetail.getUrls().stream()
+				.map(url -> new ParsedUri(url))
+				.collect(Collectors.toSet());
+
+ 		String appName = appDetail.getName();
 
 		debug("currentUrls = "+currentUrls);
-		return Flux.fromIterable(desiredUrls)
-		.flatMap((url) -> {
-			if (currentUrls.contains(url)) {
-				debug("skipping: "+url);
+		return Flux.fromIterable(desiredRoutes)
+		.flatMap((route) -> {
+			if (route.isSatisfiedBy(currentUrls)) {
+				debug("skipping: "+route);
 				return Mono.empty();
 			} else {
-				debug("mapping: "+url);
-				return mapRoute(domains, appName, url, randomRoute);
+				debug("mapping: "+route);
+				return mapRoute(appName, route);
 			}
 		}, 1) //!!!IN SEQUENCE!!!
 		.then();
 	}
 
-	private Mono<Void> mapRoute(DomainsOracle domains, String appName, String desiredUrl, boolean randomRoute) {
-		debug("mapRoute: "+appName+" -> "+desiredUrl);
-		return toRoute(domains, desiredUrl)
-		.then((CFRoute route) -> mapRoute(domains, appName, route, randomRoute))
+	private Mono<Void> mapRoute(String appName, RouteBinding route)  {
+		// Let the client validate if any of these combinations are correct.
+		// However, only set these values only if they are present as not doing so causes NPE
+		MapRouteRequest.Builder builder = MapRouteRequest.builder()
+				.applicationName(appName);
+		if (StringUtil.hasText(route.getDomain())) {
+			builder = builder.domain(route.getDomain());
+		}
+		Randomized<String> host = route.getHost();
+		if (host!=null) {
+			if (host.isRandom()) {
+				builder = builder.host(RandomStringUtils.randomAlphabetic(8).toLowerCase());
+			} else {
+				builder = builder.host(host.getValue());
+			}
+		}
+		Randomized<Integer> port = route.getPort();
+		if (port!=null) {
+			if (port.isRandom()) {
+				builder = builder.randomPort(true);
+			} else {
+				builder = builder.port(port.getValue());
+			}
+		}
+		String path = route.getPath();
+		if (StringUtil.hasText(path)) {
+			builder = builder.path(path);
+		}
+		MapRouteRequest mapRouteReq = builder.build();
+		return log("operations.routes.map("+mapRouteReq+")",
+			_operations.routes().map(mapRouteReq)
+		)
 		.doOnError((e) -> {
 			Log.info("mapRoute FAILED!");
 			Log.log(e);
-		});
-	}
-
-	private Mono<Void> mapRoute(DomainsOracle domains, String appName, CFRoute route, boolean randomRoute)  {
-		// Let the client validate if any of these combinations are correct.
-		// However, only set these values only if they are present as not doing so causes NPE
-		Mono<MapRouteRequest.Builder> _builder = Mono.just(MapRouteRequest.builder()
-				.applicationName(appName)
-		);
-		if (StringUtil.hasText(route.getDomain())) {
-			_builder = _builder.map(builder -> builder.domain(route.getDomain()));
-		}
-		if (randomRoute) {
-			_builder = _builder.then((MapRouteRequest.Builder builder) ->
-				// Can only set random port to true if route is TCP route
-				domains.isTcp(route.getDomain()).map(isTcp -> {
-					if (isTcp) {
-						builder.randomPort(randomRoute);
-					} else {
-						if (route.getHost()==null) {
-							builder.host(appName+"-"+RandomStringUtils.randomAlphabetic(8).toLowerCase());
-						}
-					}
-					return builder;
-				})
-			);
-		}
-		_builder = _builder.map(builder -> {
-			if (StringUtil.hasText(route.getHost())) {
-				builder.host(route.getHost());
-			}
-			if (StringUtil.hasText(route.getPath())) {
-				builder.path(route.getPath());
-			}
-			if (route.getPort() != CFRoute.NO_PORT) {
-				builder.port(route.getPort());
-			}
-			return builder;
-		});
-		return _builder.then(builder -> {
-			MapRouteRequest mapRouteReq = builder.build();
-			return log("operations.routes.map("+mapRouteReq+")",
-				_operations.routes().map(mapRouteReq)
-			);
 		})
 		.then();
-	}
-
-	private Mono<CFRoute> toRoute(DomainsOracle domains, String desiredUrl) {
-		return domains.getDomainsMono().then((ds) -> {
-			try {
-				CFRoute route = CFRoute.builder().from(desiredUrl, ds).build();
-				route.validate();
-				return Mono.just(route);
-			} catch (Exception e) {
-				return Mono.error(e);
-			}
-		});
 	}
 
 //	private Set<String> getUrls(ApplicationDetail app) {

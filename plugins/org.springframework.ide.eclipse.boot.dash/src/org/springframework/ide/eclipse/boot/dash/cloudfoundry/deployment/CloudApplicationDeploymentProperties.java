@@ -28,14 +28,15 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicati
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFRoute;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.RouteAttributes;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.RouteBinding;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.RouteBuilder;
 
 public class CloudApplicationDeploymentProperties implements DeploymentProperties {
 
 	private List<String> boundServices;
 	private Map<String, String> environmentVariables;
 	private String buildpack;
-
 	private int instances;
 
 	/*
@@ -261,17 +262,19 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 		properties.setCommand(app == null ? null : app.getCommand());
 		properties.setStack(app == null ? null : app.getStack());
 
+		RouteBuilder routeBuilder = new RouteBuilder(cloudData.getDomains());
+		RouteAttributes routeAttributes;
 		if (app == null) {
-			CFRoute route = CFRoute.builder().host(project.getName()).domain(cloudData.getDefaultDomain()).build();
-			properties.setUris(Collections.singletonList(route.toUri()));
+			routeAttributes = new RouteAttributes(project.getName());
 		} else {
-			properties.setUris(app.getUris());
+			routeAttributes = new RouteAttributes(app);
 		}
+		properties.setUris(routeBuilder.buildRoutes(routeAttributes));
 		return properties;
 	}
 
 	public CFPushArguments toPushArguments(List<CFCloudDomain> cloudDomains) throws Exception {
-		Set<String> uris = getUris();
+		Set<RouteBinding> uris = getUris();
 		CFPushArguments args = new CFPushArguments();
 		args.setRoutes(uris);
 		args.setAppName(getAppName());
@@ -287,7 +290,6 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 		args.setInstances(getInstances());
 		args.setServices(getServices());
 		args.setApplicationData(getArchive());
-		args.setRandomRoute(getRandomRoute());
 		return args;
 	}
 

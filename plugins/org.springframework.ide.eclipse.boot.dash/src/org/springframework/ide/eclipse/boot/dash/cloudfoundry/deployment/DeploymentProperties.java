@@ -10,10 +10,15 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.RouteBinding;
 
 /**
@@ -54,12 +59,12 @@ public interface DeploymentProperties {
 
 	Set<RouteBinding> getUris();
 
-	/**
-	 * If the origin of these properties is parsing yml content (from file or
-	 * embedded editor buffer, then this method retrieves the raw text of the
-	 * yml content). If the properties where obtained some other way (e.g. by reading
-	 * app state from CF itself, it returns null).
-	 */
-	default String getYamlContent() { return null; }
+	CFPushArguments toPushArguments(List<CFCloudDomain> cloudDomains) throws Exception;
+
+	void setArchive(File archive);
+
+	IProject getProject();
+
+	IFile getManifestFile();
 
 }

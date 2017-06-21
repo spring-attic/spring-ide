@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes;
 
+import java.util.Collection;
+
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFRoute;
 
 public class RouteBinding {
@@ -23,38 +25,52 @@ public class RouteBinding {
 		return host;
 	}
 
-	public void setHost(String host) {
+	public RouteBinding setHost(String host) {
 		setHost(host==null ? null : Randomized.value(host));
+		return this;
 	}
-	public void setHost(Randomized<String> host) {
+	public RouteBinding setHost(Randomized<String> host) {
 		this.host = host;
+		return this;
 	}
 
 	public Randomized<Integer> getPort() {
 		return port;
 	}
-	public void setPort(Randomized<Integer> port) {
+	public RouteBinding setPort(Randomized<Integer> port) {
 		this.port = port;
+		return this;
 	}
-	public void setPort(Integer port) {
+	public RouteBinding setPort(Integer port) {
 		setPort(port == null ? null : Randomized.value(port));
+		return this;
 	}
 	public String getDomain() {
 		return domain;
 	}
-	public void setDomain(String domain) {
+	public RouteBinding setDomain(String domain) {
 		this.domain = domain;
+		return this;
 	}
 
 	public String getPath() {
 		return path;
 	}
 
-	public boolean isSatisfiedBy(CFRoute route) {
-		ParsedUri parsedUri = new ParsedUri(route.toUri());
+	public boolean isSatisfiedBy(Collection<ParsedUri> currentUrls) {
+		if (currentUrls!=null) {
+			for (ParsedUri url : currentUrls) {
+				if (isSatisfiedBy(url)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 
-		throw new Error("Not completed yet");
+	public boolean isSatisfiedBy(ParsedUri currentUrl) {
 
+		return false;
 	}
 
 	/**
