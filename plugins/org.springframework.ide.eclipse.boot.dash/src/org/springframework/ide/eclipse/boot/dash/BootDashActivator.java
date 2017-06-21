@@ -10,25 +10,37 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.eclipse.core.net.proxy.IProxyService;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.BootDashBuildpackHintProvider;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.BuildpackHintGenerator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultCloudFoundryClientFactoryV2;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultBootDashModelContext;
+import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestEditorActivator;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
-import javax.inject.Inject;
-
-import org.eclipse.core.net.proxy.IProxyService;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -53,6 +65,12 @@ public class BootDashActivator extends AbstractUIPlugin {
 	private static BootDashActivator plugin;
 
 	private BootDashViewModel model;
+
+	private final ValueListener<ClientRequests> clientsChangedListener = (exp, client) -> {
+		if (client instanceof DefaultClientRequestsV2) {
+			addRefreshTokenListener((DefaultClientRequestsV2) client);
+		}
+	};
 
 	/**
 	 * The constructor
@@ -139,10 +157,96 @@ public class BootDashActivator extends AbstractUIPlugin {
 					// RunTargetTypes.LATTICE
 			);
 			ManifestEditorActivator.getDefault().setBuildpackProvider(new BootDashBuildpackHintProvider(model, new BuildpackHintGenerator()));
+
+			model.getRunTargets().addListener(new ValueListener<ImmutableSet<RunTarget>>() {
+
+				@Override
+				public void gotValue(LiveExpression<ImmutableSet<RunTarget>> exp, ImmutableSet<RunTarget> value) {
+					// On target changes, add the client listener in each target so that when the client changes, a notification is sent
+					addClientChangeListeners(value);
+				}
+
+			});
+
 //			DebugSelectionListener debugSelectionListener = new DebugSelectionListener(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService());
 //			model.addDisposableChild(debugSelectionListener);
 		}
 		return model;
+	}
+
+
+	private void updateCloudTargetsInManifestEditor(ImmutableSet<RunTarget> value) {
+		Set<RunTarget> toUpdate = value == null ? ImmutableSet.of() : value;
+
+		List<Map<String, Object>> entries = getCfTargetLoginOptions(toUpdate);
+		Map<String, Object> result = null;
+
+		if (entries != null && entries.size() > 0) {
+			result = new HashMap<>();
+			result.put("cfClientParams", entries);
+		}
+
+		ManifestEditorActivator.getDefault().setCfTargetLoginOptions(result);
+	}
+
+	/**
+	 * Add a listener to be notified when the refresh token becomes available OR changes
+	 */
+	private void addRefreshTokenListener(DefaultClientRequestsV2 client) {
+		if (client != null && client.getRefreshTokens() != null && this.model != null
+				&& this.model.getRunTargets() != null) {
+			client.getRefreshTokens().doOnNext((token) ->
+			        // Although the refresh token change is for ONE client (i.e. one target)
+			        // compute cloud target information for ALL currently connected targets
+			        // as the manifest editor is updated with the full up-to-date list of connected
+			        // boot dash targets
+					updateCloudTargetsInManifestEditor(this.model.getRunTargets().getValue())
+				).subscribe();
+		}
+	}
+
+	private List<Map<String, Object>> getCfTargetLoginOptions(Collection<RunTarget> targets) {
+		List<Map<String, Object>> entries = new ArrayList<>();
+
+		for (RunTarget runTarget : targets) {
+			if (runTarget instanceof CloudFoundryRunTarget) {
+				collectTargetInfo((CloudFoundryRunTarget) runTarget, entries);
+			}
+		}
+
+		return entries;
+	}
+
+	private void addClientChangeListeners(ImmutableSet<RunTarget> targets) {
+		if (targets != null) {
+			for (RunTarget runTarget : targets) {
+				if (runTarget instanceof CloudFoundryRunTarget) {
+					((CloudFoundryRunTarget) runTarget).addConnectionStateListener(clientsChangedListener);
+				}
+			}
+		}
+	}
+
+	private void collectTargetInfo(CloudFoundryRunTarget cloudFoundryRunTarget, List<Map<String, Object>> entries) {
+		CloudFoundryTargetProperties properties = cloudFoundryRunTarget.getTargetProperties();
+		String target = properties.getUrl();
+		String org = properties.getOrganizationName();
+		String space = properties.getSpaceName();
+		boolean sslDisabled = properties.skipSslValidation();
+
+		if (cloudFoundryRunTarget.isConnected()) {
+			String token = cloudFoundryRunTarget.getClient().getRefreshToken();
+			if (token != null) {
+				Map<String, Object> entry = new HashMap<>();
+				entry.put("Target", target);
+				entry.put("OrgName", org);
+				entry.put("SpaceName", space);
+				entry.put("SSLDisabled", sslDisabled);
+				entry.put("RefreshToken", token);
+
+				entries.add(entry);
+			}
+		}
 	}
 
 	@Override

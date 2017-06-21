@@ -172,6 +172,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	private AbstractUaaTokenProvider _tokenProvider;
 	private ConnectionContext _connection;
 	private String refreshToken = null;
+	private Flux<String> refreshTokensFlux;
 
 	public DefaultClientRequestsV2(CloudFoundryClientCache clients, CFClientParams params) {
 		this.params = params;
@@ -180,7 +181,11 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		this._uaa = provider.uaaClient;
 		this._tokenProvider = (AbstractUaaTokenProvider) provider.tokenProvider;
 		this._connection = provider.connection;
-		_tokenProvider.getRefreshTokens(_connection).doOnNext((t) -> this.refreshToken = t).subscribe();
+		refreshTokensFlux = _tokenProvider.getRefreshTokens(_connection);
+		refreshTokensFlux.doOnNext((t) -> {
+			this.refreshToken = t;
+		}).subscribe();
+
 		debug(">>> creating cf operations");
 		this._operations = DefaultCloudFoundryOperations.builder()
 				.cloudFoundryClient(_client)
@@ -1378,6 +1383,10 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	@Override
 	public String getRefreshToken() {
 		return refreshToken;
+	}
+
+	public Flux<String>	getRefreshTokens() {
+		return refreshTokensFlux;
 	}
 
 }

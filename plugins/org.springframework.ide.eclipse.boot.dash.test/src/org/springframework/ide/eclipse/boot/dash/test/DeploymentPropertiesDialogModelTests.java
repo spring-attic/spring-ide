@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Pivotal, Inc.
+ * Copyright (c) 2016, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -80,7 +80,7 @@ import com.google.common.collect.ImmutableList;
  */
 public class DeploymentPropertiesDialogModelTests {
 
-	private static final int DISCARD_BUTTON_ID = 1;
+	private static final int DONT_SAVE_BUTTON_ID = 1;
 
 	private static final int SAVE_BUTTON_ID = 0;
 
@@ -623,7 +623,7 @@ public class DeploymentPropertiesDialogModelTests {
 
 		model.getFileDocument().getValue().set("some text");
 
-		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(DISCARD_BUTTON_ID);
+		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(DONT_SAVE_BUTTON_ID);
 
 		model.cancelPressed();
 
@@ -679,9 +679,13 @@ public class DeploymentPropertiesDialogModelTests {
 		model.setSelectedManifest(file);
 		model.setManifestType(ManifestType.FILE);
 
-		model.getFileDocument().getValue().set("some text");
+		int newMemory = 256;
+		String newText = "applications:\n" +
+				"- name: " + appNameFromFile + "\n" +
+				"  memory: " + newMemory + "\n";
+		model.getFileDocument().getValue().set(newText);
 
-		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(DISCARD_BUTTON_ID);
+		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(DONT_SAVE_BUTTON_ID);
 
 		model.okPressed();
 
@@ -691,7 +695,7 @@ public class DeploymentPropertiesDialogModelTests {
 		CloudApplicationDeploymentProperties deploymentProperties = model.getDeploymentProperties();
 		assertNotNull(deploymentProperties);
 		assertEquals(appNameFromFile, deploymentProperties.getAppName());
-		assertEquals(memory, deploymentProperties.getMemory());
+		assertEquals(newMemory, deploymentProperties.getMemory());
 
 		/*
 		 * Test document provider is not connected to the file input anymore
@@ -758,7 +762,7 @@ public class DeploymentPropertiesDialogModelTests {
 
 		model.getFileDocument().getValue().set("some text");
 
-		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(DISCARD_BUTTON_ID);
+		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(DONT_SAVE_BUTTON_ID);
 
 		model.setSelectedManifest(project);
 
@@ -831,14 +835,17 @@ public class DeploymentPropertiesDialogModelTests {
 		// Reconcile to pick the new app name (Simulate what happens in the editor)
 		reconciler.reconcile(model.getFileDocument().getValue(), model.getFileAppNameAnnotationModel().getValue(), new NullProgressMonitor());
 
-		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(DISCARD_BUTTON_ID);
+		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(DONT_SAVE_BUTTON_ID);
 
 		model.okPressed();
 
 		assertFalse(model.isCanceled());
 		assertEquals("", IOUtil.toString(file.getContents()));
-		assertFalse(model.getFileLabel().getValue().endsWith("*"));
+		assertTrue(model.getFileLabel().getValue().endsWith("*"));
 
+		// Input disconnect at this point - needs to be reset as well.
+		model.setSelectedManifest(null);
+		model.setSelectedManifest(file);
 		model.getFileDocument().getValue().set(newText);
 		assertTrue(model.getFileLabel().getValue().endsWith("*"));
 

@@ -1,6 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Editor
+Bundle-Name: %pluginName
+Bundle-Vendor: %providerName
 Bundle-SymbolicName: org.springframework.ide.eclipse.cloudfoundry.manifest.editor;singleton:=true
 Bundle-Version: 3.9.0.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestEditorActivator
@@ -17,7 +18,12 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources,
  org.springsource.ide.eclipse.commons.frameworks.core,
  org.springframework.core,
- org.yaml.snakeyaml
+ org.yaml.snakeyaml,
+ org.eclipse.lsp4e,
+ org.eclipse.lsp4j,
+ org.eclipse.lsp4j.jsonrpc,
+ org.eclipse.jdt.launching
 Bundle-ActivationPolicy: lazy
-Export-Package: org.springframework.ide.eclipse.cloudfoundry.manifest.editor
+Export-Package: org.springframework.ide.eclipse.cloudfoundry.manifest.editor,
+ org.springframework.ide.eclipse.cloudfoundry.manifest.editor.lsp
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
