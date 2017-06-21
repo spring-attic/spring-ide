@@ -24,6 +24,7 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudData;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
@@ -230,13 +231,13 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 		return boundServices;
 	}
 
-	public static CloudApplicationDeploymentProperties getFor(IProject project, Map<String, Object> cloudData, CFApplication app) {
+	public static CloudApplicationDeploymentProperties getFor(IProject project, CloudData cloudData, CFApplication app) {
 
 		CloudApplicationDeploymentProperties properties = new CloudApplicationDeploymentProperties();
 
 		properties.setAppName(app == null ? project.getName() : app.getName());
 		properties.setProject(project);
-		properties.setBuildpack(app == null ? ApplicationManifestHandler.getDefaultBuildpack(cloudData) : app.getBuildpackUrl());
+		properties.setBuildpack(app == null ? cloudData.getBuildpack() : app.getBuildpackUrl());
 
 		/*
 		 * TODO: Re-evaluate whether JAVA_OPTS need to be treated differently
@@ -261,9 +262,7 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 		properties.setStack(app == null ? null : app.getStack());
 
 		if (app == null) {
-			List<CFCloudDomain> domains = ApplicationManifestHandler.getCloudDomains(cloudData);
-
-			CFRoute route = CFRoute.builder().host(project.getName()).domain(domains.get(0).getName()).build();
+			CFRoute route = CFRoute.builder().host(project.getName()).domain(cloudData.getDefaultDomain()).build();
 			properties.setUris(Collections.singletonList(route.getRoute()));
 		} else {
 			properties.setUris(app.getUris());

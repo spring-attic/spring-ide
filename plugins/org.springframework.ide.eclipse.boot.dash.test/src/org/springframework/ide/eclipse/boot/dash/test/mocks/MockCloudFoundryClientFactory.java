@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.test.mocks;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.cloudfoundry.client.CloudFoundryClient;
@@ -30,6 +32,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientPar
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials.CFCredentialType;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFDomainType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFOrganization;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
@@ -37,9 +40,12 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshClientSupport;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFCloudDomainData;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFDomainStatus;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ReactorUtils;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.IApplicationLogConsole;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.ParsedUri;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.RouteBinding;
 import org.springframework.ide.eclipse.boot.dash.test.CfTestTargetParams;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
@@ -48,7 +54,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-import reactor.core.Cancellation;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -61,7 +67,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
 	private Map<String, CFOrganization> orgsByName = new LinkedHashMap<>();
 	private Map<String, MockCFSpace> spacesByName = new LinkedHashMap<>();
-	private Map<String, MockCFDomain> domainsByName = new LinkedHashMap<>();
+	private Map<String, CFCloudDomainData> domainsByName = new LinkedHashMap<>();
 	private Map<String, MockCFBuildpack> buildpacksByName = new LinkedHashMap<>();
 	private Map<String, MockCFStack> stacksByName = new LinkedHashMap<>();
 
@@ -113,8 +119,14 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		return new MockClient(params);
 	}
 
-	public MockCFDomain defDomain(String name) {
-		MockCFDomain it = new MockCFDomain(name);
+	public CFCloudDomain defDomain(String name) {
+		CFCloudDomainData it = new CFCloudDomainData(name);
+		domainsByName.put(name, it);
+		return it;
+	}
+
+	public CFCloudDomain defDomain(String name, CFDomainType type, CFDomainStatus status) {
+		CFCloudDomainData it = new CFCloudDomainData(name, type, status);
 		domainsByName.put(name, it);
 		return it;
 	}
@@ -156,6 +168,11 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
 	private class MockClient implements ClientRequests {
 
+		private int nextPort = 63000;
+		private synchronized int choosePort() {
+			return nextPort++;
+		}
+
 		private CFClientParams params;
 		private boolean connected = true;
 		private Boolean validCredentials = null;
@@ -184,7 +201,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		}
 
 		@Override
-		public Cancellation streamLogs(String appName, IApplicationLogConsole logConsole) throws Exception {
+		public Disposable streamLogs(String appName, IApplicationLogConsole logConsole) throws Exception {
 			checkConnection();
 			//TODO: This 'log streamer' is a total dummy for now. It doesn't stream any data and canceling it does nothing.
            return Flux.empty().subscribe();
@@ -380,7 +397,8 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 			MockCFSpace space = getSpace();
 			MockCFApplication app = new MockCFApplication(MockCloudFoundryClientFactory.this, space, args.getAppName());
 			app.setBuildpackUrlMaybe(args.getBuildpack());
-			app.setUris(args.getRoutes());
+			app.setRoutes(buildRoutes(args));
+
 			app.setCommandMaybe(args.getCommand());
 			app.setDiskQuotaMaybe(args.getDiskQuota());
 			app.setEnvMaybe(args.getEnv());
@@ -390,11 +408,79 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 			app.setTimeoutMaybe(args.getTimeout());
 			app.setHealthCheckTypeMaybe(args.getHealthCheckType());
 			app.setHealthCheckHttpEndpoint(args.getHealthCheckHttpEndpoint());
-			app.setBits(IOUtil.toBytes(new FileInputStream(args.getApplicationData().getName())));
+			app.setBits(IOUtil.toBytes(new FileInputStream(args.getApplicationDataAsFile())));
 			space.put(app);
 			space.getPushCount(app.getName()).increment();
 
 			app.start(cancelationToken);
+		}
+
+		private Collection<RouteBinding> buildRoutes(CFPushArguments args) {
+			List<String> desiredUris = args.getRoutes();
+			if (desiredUris!=null) {
+				return desiredUris.stream()
+						.map(uri -> buildRoute(uri, args))
+						.collect(Collectors.toList());
+			}
+			return ImmutableList.of();
+		}
+
+		private RouteBinding buildRoute(String _uri, CFPushArguments args) {
+			ParsedUri uri = new ParsedUri(_uri);
+			boolean randomRoute = args.getRandomRoute();
+			CFCloudDomainData bestDomain = domainsByName.values().stream()
+				.filter(domain -> domainCanBeUsedFor(domain, uri))
+				.max((d1, d2) -> Integer.compare(d1.getName().length(), d2.getName().length()))
+				.orElse(null);
+			if (bestDomain==null) {
+				throw new IllegalStateException("No domain matching the given uri '"+_uri+"' could be found");
+			}
+			RouteBinding route = new RouteBinding();
+			route.setDomain(bestDomain.getName());
+			route.setHost(bestDomain.splitHost(uri.getHostAndDomain()));
+			route.setPort(uri.getPort());
+			if (randomRoute) {
+				if (bestDomain.getType()==CFDomainType.TCP) {
+					if (route.getPort()==null) {
+						route.setPort(choosePort());
+					}
+				} else if (bestDomain.getType()==CFDomainType.HTTP) {
+					if (route.getHost()==null) {
+						route.setHost(chooseHost());
+					}
+				}
+			}
+			return route;
+		}
+
+		private String chooseHost() {
+			return RandomStringUtils.randomAlphabetic(8).toLowerCase();
+		}
+
+		private boolean domainCanBeUsedFor(CFCloudDomainData domainData, ParsedUri uri) {
+			String domain = domainData.getName();
+			String hostAndDomain = uri.getHostAndDomain();
+			String host;
+			if (!hostAndDomain.endsWith(domain)) {
+				return false;
+			}
+			if (domain.length()==hostAndDomain.length()) {
+				//The uri matches domain precisely
+				host = null;
+			} else if (hostAndDomain.charAt(hostAndDomain.length()-domain.length()-1)=='.') {
+				//THe uri matches as ${host}.${domain}
+				host = hostAndDomain.substring(0, hostAndDomain.length()-domain.length()-1);
+			} else {
+				 //Couldn't match this domain to uri
+				return false;
+			}
+			if (domainData.getType()==CFDomainType.TCP) {
+				return host==null; //TCP routes don't allow setting a host, only a port
+			} else if (domainData.getType()==CFDomainType.HTTP) {
+				return uri.getPort()==null; //HTTP routes don't allow setting a port only a host
+			} else {
+				throw new IllegalStateException("Unknown domain type: "+domainData.getType());
+			}
 		}
 
 		@Override

@@ -10,6 +10,22 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client;
 
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFDomainStatus;
+
 public interface CFCloudDomain {
 	String getName();
+	CFDomainType getType();
+	CFDomainStatus getStatus();
+
+	/**
+	 * If the given hostAndDomain is of the form ${host}.${domain} then
+	 * return the host part. Otherwise return null.
+	 */
+	default String splitHost(String hostAndDomain) {
+		String name = getName();
+		if (hostAndDomain.endsWith("."+name)) {
+			return hostAndDomain.substring(0, hostAndDomain.length()-name.length()-1);
+		}
+		return null;
+	}
 }

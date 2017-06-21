@@ -23,6 +23,7 @@ import org.springframework.ide.eclipse.beans.core.metadata.model.IBeanMetadata;
 import org.springframework.ide.eclipse.beans.core.metadata.model.IMethodMetadata;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.core.java.annotation.Annotation;
+import org.springframework.ide.eclipse.core.java.annotation.AnnotationMemberValuePair;
 import org.springframework.ide.eclipse.core.java.annotation.IAnnotationMetadata;
 import org.springframework.ide.eclipse.core.model.java.JavaModelSourceLocation;
 import org.springframework.stereotype.Controller;
@@ -40,6 +41,11 @@ public class RequestMappingAnnotationMetadataProvider implements IAnnotationBean
 
 	/** The RequesMapping annotation class */
 	private static final String REQUEST_MAPPING_CLASS = "org.springframework.web.bind.annotation.RequestMapping"; //$NON-NLS-1$
+	private static final String GET_REQUEST_MAPPING_CLASS = "org.springframework.web.bind.annotation.GetMapping"; //$NON-NLS-1$
+	private static final String POST_REQUEST_MAPPING_CLASS = "org.springframework.web.bind.annotation.PostMapping"; //$NON-NLS-1$
+	private static final String PUT_REQUEST_MAPPING_CLASS = "org.springframework.web.bind.annotation.PutMapping"; //$NON-NLS-1$
+	private static final String DELETE_REQUEST_MAPPING_CLASS = "org.springframework.web.bind.annotation.DeleteMapping"; //$NON-NLS-1$
+	private static final String PATCH_REQUEST_MAPPING_CLASS = "org.springframework.web.bind.annotation.PatchMapping"; //$NON-NLS-1$
 
 	private static final String[] controllerClasses = new String[] {
 			Controller.class.getName(),
@@ -58,6 +64,41 @@ public class RequestMappingAnnotationMetadataProvider implements IAnnotationBean
 				for (Map.Entry<IMethod, Annotation> entry : visitor.getMethodLevelAnnotations(REQUEST_MAPPING_CLASS).entrySet()) {
 					methodMetaData.add(new RequestMappingMethodAnnotationMetadata(REQUEST_MAPPING_CLASS, entry.getKey().getHandleIdentifier(),
 							entry.getValue().getMembers(), new JavaModelSourceLocation(entry.getKey())));
+				}
+
+				for (Map.Entry<IMethod, Annotation> entry : visitor.getMethodLevelAnnotations(GET_REQUEST_MAPPING_CLASS).entrySet()) {
+					Set<AnnotationMemberValuePair> members = entry.getValue().getMembers();
+					members.add(new AnnotationMemberValuePair("method", "RequestMethod.GET"));
+					methodMetaData.add(new RequestMappingMethodAnnotationMetadata(GET_REQUEST_MAPPING_CLASS, entry.getKey().getHandleIdentifier(),
+							members, new JavaModelSourceLocation(entry.getKey())));
+				}
+
+				for (Map.Entry<IMethod, Annotation> entry : visitor.getMethodLevelAnnotations(POST_REQUEST_MAPPING_CLASS).entrySet()) {
+					Set<AnnotationMemberValuePair> members = entry.getValue().getMembers();
+					members.add(new AnnotationMemberValuePair("method", "RequestMethod.POST"));
+					methodMetaData.add(new RequestMappingMethodAnnotationMetadata(POST_REQUEST_MAPPING_CLASS, entry.getKey().getHandleIdentifier(),
+							members, new JavaModelSourceLocation(entry.getKey())));
+				}
+
+				for (Map.Entry<IMethod, Annotation> entry : visitor.getMethodLevelAnnotations(PUT_REQUEST_MAPPING_CLASS).entrySet()) {
+					Set<AnnotationMemberValuePair> members = entry.getValue().getMembers();
+					members.add(new AnnotationMemberValuePair("method", "RequestMethod.PUT"));
+					methodMetaData.add(new RequestMappingMethodAnnotationMetadata(PUT_REQUEST_MAPPING_CLASS, entry.getKey().getHandleIdentifier(),
+							members, new JavaModelSourceLocation(entry.getKey())));
+				}
+
+				for (Map.Entry<IMethod, Annotation> entry : visitor.getMethodLevelAnnotations(DELETE_REQUEST_MAPPING_CLASS).entrySet()) {
+					Set<AnnotationMemberValuePair> members = entry.getValue().getMembers();
+					members.add(new AnnotationMemberValuePair("method", "RequestMethod.DELETE"));
+					methodMetaData.add(new RequestMappingMethodAnnotationMetadata(DELETE_REQUEST_MAPPING_CLASS, entry.getKey().getHandleIdentifier(),
+							members, new JavaModelSourceLocation(entry.getKey())));
+				}
+
+				for (Map.Entry<IMethod, Annotation> entry : visitor.getMethodLevelAnnotations(PATCH_REQUEST_MAPPING_CLASS).entrySet()) {
+					Set<AnnotationMemberValuePair> members = entry.getValue().getMembers();
+					members.add(new AnnotationMemberValuePair("method", "RequestMethod.PATCH"));
+					methodMetaData.add(new RequestMappingMethodAnnotationMetadata(PATCH_REQUEST_MAPPING_CLASS, entry.getKey().getHandleIdentifier(),
+							members, new JavaModelSourceLocation(entry.getKey())));
 				}
 
 				beanMetaDataSet.add(new RequestMappingAnnotationMetadata(bean,

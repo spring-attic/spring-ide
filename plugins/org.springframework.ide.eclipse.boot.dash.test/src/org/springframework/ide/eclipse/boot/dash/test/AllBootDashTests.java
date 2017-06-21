@@ -32,6 +32,7 @@ import org.springframework.ide.eclipse.boot.dash.test.yaml.Yaml2DeploymentProper
 	DeploymentProperties2YamlTest.class,
 	Yaml2DeploymentPropertiesTest.class,
 	AppNameReconcilerTest.class,
+	RouteBuilderTest.class,
 	CFRouteTests.class,
 
 	//Really short (less than 2 seconds per suite):

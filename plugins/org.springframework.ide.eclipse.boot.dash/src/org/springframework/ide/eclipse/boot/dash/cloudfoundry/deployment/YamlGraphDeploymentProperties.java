@@ -30,6 +30,7 @@ import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudData;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFRoute;
 import org.springframework.ide.eclipse.boot.util.Log;
@@ -50,6 +51,8 @@ import org.yaml.snakeyaml.reader.StreamReader;
 import org.yaml.snakeyaml.resolver.Resolver;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * Deployment properties based on YAML Graph. Instance of this class has ability
@@ -66,9 +69,9 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 	private Node root;
 	private SequenceNode applicationsValueNode;
 	private Yaml yaml;
-	private Map<String, Object> cloudData;
+	private CloudData cloudData;
 
-	public YamlGraphDeploymentProperties(String content, String appName, Map<String, Object> cloudData) {
+	public YamlGraphDeploymentProperties(String content, String appName, CloudData cloudData) {
 		super();
 		this.appNode = null;
 		this.applicationsValueNode = null;
@@ -103,6 +106,11 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public String getYamlContent() {
+		return content;
 	}
 
 	public static DumperOptions createDumperOptions() {
@@ -668,7 +676,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 	}
 
 	private void getLegacyDifferenceForUris(Collection<String> uris, MultiTextEdit me) {
-		List<CFCloudDomain> domains = ApplicationManifestHandler.getCloudDomains(cloudData);
+		List<CFCloudDomain> domains = cloudData.getDomains();
 
 		LinkedHashSet<String> otherHosts = new LinkedHashSet<>();
 		LinkedHashSet<String> otherDomains = new LinkedHashSet<>();
@@ -761,7 +769,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 			}
 
 			if (currentDomains.isEmpty() && !domains.isEmpty()) {
-				currentDomains.add(domains.get(0).getName());
+				currentDomains.add(cloudData.getDefaultDomain());
 			}
 		}
 
@@ -1239,23 +1247,32 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 		}
 	}
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public Set<String> getUris() {
+	public List<String> getRoutes() {
 		List<Map<?,?>> routes = getAbsoluteValue(ApplicationManifestHandler.ROUTES_PROP, List.class);
 		if (routes != null) {
 			return routes.stream()
 					.map(routeObj -> routeObj.get(ApplicationManifestHandler.ROUTE_PROP))
 					.filter(o -> o instanceof String)
 					.map(o -> (String) o)
-					.collect(Collectors.toSet());
+					.collect(Collectors.toList());
+		}
+		return null;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public Set<String> getUris() {
+
+		List<String> routes = getRoutes();
+		if (routes != null) {
+			return ImmutableSet.copyOf(routes);
 		} else {
 			Boolean noRoute = getAbsoluteValue(ApplicationManifestHandler.NO_ROUTE_PROP, Boolean.class);
 			if (Boolean.TRUE.equals(noRoute)) {
 				return Collections.emptySet();
 			}
 
-			List<CFCloudDomain> domains = ApplicationManifestHandler.getCloudDomains(cloudData);
+			List<CFCloudDomain> domains = cloudData.getDomains();
 			LinkedHashSet<String> hostsSet = new LinkedHashSet<>();
 			LinkedHashSet<String> domainsSet = new LinkedHashSet<>();
 
@@ -1297,7 +1314,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 				if (Boolean.TRUE.equals(randomRoute)) {
 					hostsSet.add(ApplicationManifestHandler.RANDOM_VAR);
 					domainsSet.clear();
-					domainsSet.add(domains.get(0).getName());
+					domainsSet.add(cloudData.getDefaultDomain());
 				} else {
 					Boolean noHostname = getAbsoluteValue(ApplicationManifestHandler.NO_HOSTNAME_PROP, Boolean.class);
 					if (!Boolean.TRUE.equals(noHostname)) {
@@ -1310,7 +1327,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 			 * Set a domain if they are still empty
 			 */
 			if (domainsSet.isEmpty()) {
-				domainsSet.add(domains.get(0).getName());
+				domainsSet.add(cloudData.getDefaultDomain());
 			}
 
 			/*
@@ -1420,6 +1437,56 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 				|| findValueNode(node, ApplicationManifestHandler.DOMAINS_PROP) != null
 				|| findValueNode(node, ApplicationManifestHandler.SUB_DOMAINS_PROP) != null
 				|| findValueNode(node, ApplicationManifestHandler.NO_HOSTNAME_PROP) != null;
+	}
+
+	public String getRawHost() {
+		return getAbsoluteValue(ApplicationManifestHandler.SUB_DOMAIN_PROP, String.class);
+	}
+	public List<String> getRawHosts() {
+		List<?> hostsList = getAbsoluteValue(ApplicationManifestHandler.SUB_DOMAINS_PROP, List.class);
+		if (hostsList != null) {
+			List<String> currentHosts = new ArrayList<>();
+			for (Object o : hostsList) {
+				if (o instanceof String) {
+					currentHosts.add((String) o);
+				}
+			}
+			return ImmutableList.copyOf(currentHosts);
+		}
+		return null;
+	}
+
+	public List<String> getRawDomains() {
+		List<?> hostsList = getAbsoluteValue(ApplicationManifestHandler.DOMAINS_PROP, List.class);
+		if (hostsList != null) {
+			List<String> currentHosts = new ArrayList<>();
+			for (Object o : hostsList) {
+				if (o instanceof String) {
+					currentHosts.add((String) o);
+				}
+			}
+			return ImmutableList.copyOf(currentHosts);
+		}
+		return null;
+	}
+
+	public boolean getRawNoRoute() {
+		Boolean v = getAbsoluteValue(ApplicationManifestHandler.NO_ROUTE_PROP, Boolean.class);
+		return v==null ? false : v;
+	}
+
+	public boolean getRawRandomRoute() {
+		Boolean v = getAbsoluteValue(ApplicationManifestHandler.RANDOM_ROUTE_PROP, Boolean.class);
+		return v==null ? false : v;
+	}
+
+	public String getRawDomain() {
+		return getAbsoluteValue(ApplicationManifestHandler.DOMAIN_PROP, String.class);
+	}
+
+	public boolean getRawNoHost() {
+		Boolean v = getAbsoluteValue(ApplicationManifestHandler.NO_HOSTNAME_PROP, Boolean.class);
+		return v==null ? false : v;
 	}
 
 }

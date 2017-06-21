@@ -20,10 +20,10 @@ import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 
 public abstract class AbstractBootDashModel extends AbstractDisposable implements BootDashModel {
 
-	private static final boolean DEBUG =
-			(""+Platform.getLocation()).contains("bamboo") ||
-			(""+Platform.getLocation()).contains("kdvolder")
-			;
+	private static final boolean DEBUG = false;
+//			(""+Platform.getLocation()).contains("bamboo") ||
+//			(""+Platform.getLocation()).contains("kdvolder")
+//			;
 	private final BootDashViewModel parent;
 	private final RunTarget target;
 

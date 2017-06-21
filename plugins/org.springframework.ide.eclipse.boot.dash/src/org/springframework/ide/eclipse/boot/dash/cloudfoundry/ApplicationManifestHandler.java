@@ -39,7 +39,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFDomainType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFDomainStatus;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFRoute;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentProperties;
@@ -120,38 +122,16 @@ public class ApplicationManifestHandler {
 
 	private final IFile manifestFile;
 
-	private final Map<String, Object> cloudData;
+	private final CloudData cloudData;
 
-	public ApplicationManifestHandler(IProject project, Map<String, Object> cloudData) {
+	public ApplicationManifestHandler(IProject project, CloudData cloudData) {
 		this(project, cloudData, null);
 	}
 
-	public ApplicationManifestHandler(IProject project, Map<String, Object> cloudData, IFile manifestFile) {
+	public ApplicationManifestHandler(IProject project, CloudData cloudData, IFile manifestFile) {
 		this.project = project;
 		this.manifestFile = manifestFile;
 		this.cloudData = cloudData;
-	}
-
-	@SuppressWarnings("unchecked")
-	public static List<CFCloudDomain> getCloudDomains(Map<String, Object> cloudData) {
-		Object obj = cloudData == null ? null : cloudData.get(DOMAINS_PROP);
-		return obj instanceof List ? (List<CFCloudDomain>) obj : Collections.<CFCloudDomain>emptyList();
-	}
-
-	@SuppressWarnings("unchecked")
-	public static List<CFStack> getCloudStacks(Map<String, Object> cloudData) {
-		Object obj = cloudData == null ? null : cloudData.get(STACK_PROP);
-		return obj instanceof List ? (List<CFStack>) obj : Collections.<CFStack>emptyList();
-	}
-
-	public static String getDefaultBuildpack(Map<String, Object> cloudData) {
-		return getDefaultValue(cloudData, BUILDPACK_PROP, String.class);
-	}
-
-	@SuppressWarnings("unchecked")
-	public static <T> T getDefaultValue(Map<String, Object> cloudData, String key, Class<T> type) {
-		Object obj = cloudData == null ? null : cloudData.get(key);
-		return obj != null && type.isAssignableFrom(obj.getClass()) ? (T) obj : null;
 	}
 
 	protected InputStream getInputStream() throws Exception {
@@ -414,12 +394,12 @@ public class ApplicationManifestHandler {
 		return true;
 	}
 
-	public static Map<Object, Object> toYaml(DeploymentProperties properties, Map<String, Object> cloudData) {
+	public static Map<Object, Object> toYaml(DeploymentProperties properties, CloudData cloudData) {
 		return toYaml(properties, cloudData, false);
 	}
 
 	@SuppressWarnings("unchecked")
-	public static Map<Object, Object> toYaml(DeploymentProperties properties, Map<String, Object> cloudData, boolean legacyHostDomain) {
+	public static Map<Object, Object> toYaml(DeploymentProperties properties, CloudData cloudData, boolean legacyHostDomain) {
 		Map<Object, Object> deploymentInfoYaml = new LinkedHashMap<>();
 
 		Object applicationsObj = deploymentInfoYaml.get(APPLICATIONS_PROP);
@@ -479,7 +459,7 @@ public class ApplicationManifestHandler {
 		if (legacyHostDomain) {
 			Set<String> hosts = new LinkedHashSet<>();
 			Set<String> domains = new LinkedHashSet<>();
-			List<CFCloudDomain> cloudDomains = getCloudDomains(cloudData);
+			List<CFCloudDomain> cloudDomains = cloudData.getDomains();
 			extractHostsAndDomains(properties.getUris(), cloudDomains, hosts, domains);
 			for (String uri : properties.getUris()) {
 				try {
@@ -692,7 +672,7 @@ public class ApplicationManifestHandler {
 		if (stack == null) {
 			stack = getValue(allResults, STACK_PROP, String.class);
 		}
-		if (stack != null && isStackValid(stack, getCloudStacks(cloudData))) {
+		if (stack != null && isStackValid(stack, cloudData.getStacks())) {
 			properties.setStack(stack);
 		}
 	}
@@ -716,7 +696,6 @@ public class ApplicationManifestHandler {
 	@SuppressWarnings("unchecked")
 	private List<String> fromDomainsAndHosts(Map<?, ?> application, Map<Object, Object> allResults,
 			CloudApplicationDeploymentProperties properties, boolean randomRoute) {
-		List<CFCloudDomain> domains = getCloudDomains(cloudData);
 
 		HashSet<String> hostsSet = new LinkedHashSet<>();
 		HashSet<String> domainsSet = new LinkedHashSet<>();
@@ -766,9 +745,10 @@ public class ApplicationManifestHandler {
 		 */
 		if (hostsSet.isEmpty()) {
 			if (randomRoute) {
-				hostsSet.add(extractHost("${random}", 10));
-				domainsSet.clear();
-				domainsSet.add(domains.get(0).getName());
+				//hostsSet.add(extractHost("${random}", 10));
+				if (domainsSet.isEmpty()) {
+					domainsSet.add(cloudData.getDefaultDomain());
+				}
 			} else {
 				Boolean noHostName = getValue(application, NO_HOSTNAME_PROP, Boolean.class);
 				if (noHostName == null) {
@@ -787,7 +767,7 @@ public class ApplicationManifestHandler {
 		 * Set a domain if they are still empty
 		 */
 		if (domainsSet.isEmpty()) {
-			domainsSet.add(domains.get(0).getName());
+			domainsSet.add(cloudData.getDefaultDomain());
 		}
 
 		/*
@@ -842,7 +822,7 @@ public class ApplicationManifestHandler {
 	private List<String> fromRoutesProperty(Map<?, ?> application, Map<Object, Object> allResults,
 			CloudApplicationDeploymentProperties properties) {
 		Set<String> uris = new LinkedHashSet<>();
-		List<CFCloudDomain> domains = getCloudDomains(cloudData);
+		List<CFCloudDomain> domains = cloudData.getDomains();
 		List<?> routes = getValue(application, ROUTES_PROP, List.class);
 		List<?> rootRoutes = getValue(allResults, ROUTES_PROP, List.class);
 		if (routes != null || rootRoutes != null) {
@@ -1014,4 +994,5 @@ public class ApplicationManifestHandler {
 		}
 		return memory + "M";
 	}
+
 }

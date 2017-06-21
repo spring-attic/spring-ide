@@ -19,7 +19,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushAr
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.IApplicationLogConsole;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 
-import reactor.core.Cancellation;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -56,7 +56,7 @@ public interface ClientRequests {
 	List<CFStack> getStacks() throws Exception;
 	void restartApplication(String appName, CancelationToken token) throws Exception;
 	void stopApplication(String appName) throws Exception;
-	Cancellation streamLogs(String appName, IApplicationLogConsole logConsole) throws Exception;
+	Disposable streamLogs(String appName, IApplicationLogConsole logConsole) throws Exception;
 	Flux<CFApplicationDetail> getApplicationDetails(List<CFApplication> appsToLookUp) throws Exception;
 	String getHealthCheck(UUID appGuid) throws Exception;
 	void setHealthCheck(UUID guid, String hcType) throws Exception;

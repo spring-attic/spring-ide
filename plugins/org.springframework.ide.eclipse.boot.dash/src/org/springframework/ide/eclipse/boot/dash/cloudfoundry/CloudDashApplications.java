@@ -39,8 +39,9 @@ import com.google.common.collect.ImmutableSet;
  */
 public class CloudDashApplications extends AbstractDisposable {
 
-	private static final boolean DEBUG = ("" + Platform.getLocation()).contains("bamboo")
-			|| ("" + Platform.getLocation()).contains("kdvolder");
+	private static final boolean DEBUG = false;
+//	("" + Platform.getLocation()).contains("bamboo")
+//			|| ("" + Platform.getLocation()).contains("kdvolder");
 
 	private static void debug(String string) {
 		if (DEBUG) {

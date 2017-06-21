@@ -17,6 +17,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudData;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudOperation;
 import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel.ManifestType;
@@ -55,7 +56,7 @@ public class SelectManifestOp extends CloudOperation {
 //		 */
 //		new RefreshApplications(model, Collections.singletonList(model.getAppCache().getApp(project))).run(monitor);
 
-		Map<String, Object> cloudData = model.buildOperationCloudData(monitor, project);
+		CloudData cloudData = model.buildOperationCloudData(monitor, project);
 
 		DeploymentPropertiesDialogModel dialogModel = new DeploymentPropertiesDialogModel(ui, cloudData, project, cde.getSummaryData());
 		dialogModel.setSelectedManifest(manifest);

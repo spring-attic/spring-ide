@@ -11,9 +11,6 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +41,6 @@ public class CFPushArguments implements AutoCloseable {
 	private Map<String, String> env = ImmutableMap.of();
 	private Integer instances;
 	private List<String> services = ImmutableList.of();
-	private ZipFile applicationData;
 	private File applicationDataAsFile;
 	private boolean noStart = false;
 	private boolean randomRoute = false;
@@ -119,22 +115,12 @@ public class CFPushArguments implements AutoCloseable {
 	public void setRandomRoute(boolean randomRoute) {
 		this.randomRoute = randomRoute;
 	}
-	public ZipFile getApplicationData() {
-		return applicationData;
-	}
 	public File getApplicationDataAsFile() {
 		return applicationDataAsFile;
 	}
-	@Override
-	public void close() throws Exception {
-		if (applicationData!=null) {
-			applicationData.close();
-		}
-	}
 	public void setApplicationData(File archive) throws Exception {
-		Assert.isLegal(applicationData==null, "Can only set this once");
+		Assert.isLegal(this.applicationDataAsFile==null, "Can only set this once");
 		this.applicationDataAsFile=archive;
-		this.applicationData = new ZipFile(archive);
 	}
 	public boolean isNoStart() {
 		return noStart;
@@ -174,6 +160,12 @@ public class CFPushArguments implements AutoCloseable {
 
 	public String getHealthCheckHttpEndpoint() {
 		return this.healthCheckHttpEndpoint;
+	}
+
+	@Override
+	public void close() throws Exception {
+		//This used to do something more useful, we kept it for now to avoid having to
+		// change a lot of code. But calling `close` is no longer needed and does nothing.
 	}
 
 }
