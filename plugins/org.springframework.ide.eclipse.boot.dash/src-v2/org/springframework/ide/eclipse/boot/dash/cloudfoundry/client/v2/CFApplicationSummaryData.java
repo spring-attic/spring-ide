@@ -79,12 +79,12 @@ public class CFApplicationSummaryData implements CFApplication {
 
 	@Override
 	public List<String> getServices() {
-		return extras.getServices().block();
+		return extras.getServices().block(DefaultClientRequestsV2.GET_SERVICES_TIMEOUT);
 	}
 
 	@Override
 	public String getBuildpackUrl() {
-		return extras.getBuildpack().block();
+		return extras.getBuildpack().block(DefaultClientRequestsV2.GET_SMALL_INFO_TIMEOUT);
 	}
 
 	@Override
@@ -104,32 +104,32 @@ public class CFApplicationSummaryData implements CFApplication {
 
 	@Override
 	public Integer getTimeout() {
-		return extras.getTimeout().block();
+		return extras.getTimeout().block(DefaultClientRequestsV2.GET_SMALL_INFO_TIMEOUT);
 	}
 
 	@Override
 	public String getHealthCheckType() {
-		return extras.getHealthCheckType().block();
+		return extras.getHealthCheckType().block(DefaultClientRequestsV2.GET_SMALL_INFO_TIMEOUT);
 	}
 
 	@Override
 	public String getCommand() {
-		return extras.getCommand().block();
+		return extras.getCommand().block(DefaultClientRequestsV2.GET_SMALL_INFO_TIMEOUT);
 	}
 
 	@Override
 	public String getStack() {
-		return extras.getStack().block();
+		return extras.getStack().block(DefaultClientRequestsV2.GET_SMALL_INFO_TIMEOUT);
 	}
 
 	@Override
 	public Map<String, String> getEnvAsMap() {
-		return extras.getEnv().block();
+		return extras.getEnv().block(DefaultClientRequestsV2.GET_SMALL_INFO_TIMEOUT);
 	}
 
 	@Override
 	public String getHealthCheckHttpEndpoint() {
-		return extras.getHealthCheckHttpEndpoint().block();
+		return extras.getHealthCheckHttpEndpoint().block(DefaultClientRequestsV2.GET_SMALL_INFO_TIMEOUT);
 	}
 
 }

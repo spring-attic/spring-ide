@@ -112,10 +112,11 @@ import reactor.core.publisher.Mono;
  */
 public class DefaultClientRequestsV2 implements ClientRequests {
 
-	private static final Duration APP_START_TIMEOUT = Duration.ofMillis(ApplicationRunningStateTracker.APP_START_TIMEOUT);
-	private static final Duration GET_SERVICES_TIMEOUT = Duration.ofSeconds(60);
-	private static final Duration GET_SPACES_TIMEOUT = Duration.ofSeconds(20);
-	private static final Duration GET_USERNAME_TIMEOUT = Duration.ofSeconds(5);
+	public static final Duration APP_START_TIMEOUT = Duration.ofMillis(ApplicationRunningStateTracker.APP_START_TIMEOUT);
+	public static final Duration GET_SERVICES_TIMEOUT = Duration.ofSeconds(60);
+	public static final Duration GET_SPACES_TIMEOUT = Duration.ofSeconds(20);
+	public static final Duration GET_USERNAME_TIMEOUT = Duration.ofSeconds(5);
+	public static final Duration GET_SMALL_INFO_TIMEOUT = Duration.ofSeconds(20);
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder") || (""+Platform.getLocation()).contains("bamboo");
 //	private static final boolean DEBUG_REACTOR = false;//(""+Platform.getLocation()).contains("kdvolder")
