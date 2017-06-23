@@ -9,12 +9,9 @@
             default-charset="UTF-8"
             id="org.springframework.ide.eclipse.manifest.yml"
             name="Cloudfoundry Manifest"
+            file-names="manifest.yml"
             priority="high">
       </content-type>
-      <file-association
-            content-type="org.springframework.ide.eclipse.manifest.yml"
-            file-names="manifest.yml">
-      </file-association>
    </extension>
    
    <extension
