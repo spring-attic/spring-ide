@@ -378,10 +378,7 @@ public class BootDashActions {
 		return toggleTargetConnectionAction;
 	}
 
-	/**
-	 * @return May be null as it may not be supported on all models.
-	 */
-	public IAction getUpdatePasswordAction() {
+	public UpdatePasswordAction getUpdatePasswordAction() {
 		return updatePasswordAction;
 	}
 

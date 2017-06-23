@@ -18,6 +18,7 @@ import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.util.template.Templates;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
+import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 /**
  * A RunTarget represents an 'platform/environment' where we can 'Run' BootApps.
@@ -27,7 +28,7 @@ import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
  *
  * @author Kris De Volder
  */
-public interface RunTarget extends IdAble, Nameable {
+public interface RunTarget extends IdAble, Nameable, Disposable {
 
 	public abstract RunTargetType getType();
 

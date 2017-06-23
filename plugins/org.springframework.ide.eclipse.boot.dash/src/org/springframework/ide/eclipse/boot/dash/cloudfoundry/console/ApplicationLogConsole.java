@@ -28,27 +28,27 @@ import org.eclipse.ui.console.MessageConsole;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.util.Log;
 
-import reactor.core.Cancellation;
+import reactor.core.Disposable;
 
 @SuppressWarnings("restriction")
 public class ApplicationLogConsole extends MessageConsole implements IPropertyChangeListener, IApplicationLogConsole {
 
 	private Map<LogType, IOConsoleOutputStream> activeStreams = new HashMap<>();
 
-	private Cancellation logStreamingToken;
+	private Disposable logStreamingToken;
 
 	public ApplicationLogConsole(String name, String type) {
 		super(name, type, BootDashActivator.getImageDescriptor("icons/cloud_obj.png"), true);
 	}
 
-	public synchronized void setLogStreamingToken(Cancellation logStreamingToken) {
+	public synchronized void setLogStreamingToken(Disposable logStreamingToken) {
 		if (this.logStreamingToken != null) {
 			this.logStreamingToken.dispose();
 		}
 		this.logStreamingToken = logStreamingToken;
 	}
 
-	public synchronized Cancellation getLogStreamingToken() {
+	public synchronized Disposable getLogStreamingToken() {
 		return this.logStreamingToken;
 	}
 

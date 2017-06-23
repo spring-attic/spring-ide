@@ -171,7 +171,7 @@ public class PasswordDialogModel implements OkButtonHandler {
 			refreshToken.setValue(null);
 			credentialsValidationResult.setValue(VALIDATION_IN_PROGRESS_MESSAGE);
 		})
-		.otherwise((e) -> Mono.just(ValidationResult.error(ExceptionUtil.getMessage(e))))
+		.onErrorResume((e) -> Mono.just(ValidationResult.error(ExceptionUtil.getMessage(e))))
 		.doOnNext((result) -> {
 			credentialsValidationResult.setValue(result);
 		});
@@ -203,7 +203,8 @@ public class PasswordDialogModel implements OkButtonHandler {
 					return Mono.just(ValidationResult.error("The credentials belong to a different user!"));
 				}
 				return Mono.just(ValidationResult.OK);
-			});
+			})
+			.doFinally(signal -> client.dispose());
 		});
 	}
 

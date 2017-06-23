@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -40,8 +43,21 @@ public class UpdatePasswordAction extends AbstractCloudDashModelAction {
 		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/update_password.gif"));
 	}
 
+	CompletableFuture<Void> lastRunCompletion = null;
+
+	/**
+	 * This is meant for test-code only, so that test can we wait for the action (part f which is executed in
+	 * a job) to complete.
+	 */
+	public void waitFor() throws InterruptedException, ExecutionException {
+		if (lastRunCompletion!=null) {
+			lastRunCompletion.get();
+		}
+	}
+
 	@Override
 	public void run() {
+		CompletableFuture<Void> lastRunCompletion = this.lastRunCompletion = new CompletableFuture<>();
 		try {
 			final CloudFoundryBootDashModel targetModel = (CloudFoundryBootDashModel) sectionSelection.getValue();
 			final CloudFoundryRunTarget runTarget = targetModel.getRunTarget();
@@ -87,6 +103,7 @@ public class UpdatePasswordAction extends AbstractCloudDashModelAction {
 							// launch refresh if disconnected it would just clear out children
 							targetModel.refresh(ui);
 						}
+						lastRunCompletion.complete(null);
 						return Status.OK_STATUS;
 					}
 				};

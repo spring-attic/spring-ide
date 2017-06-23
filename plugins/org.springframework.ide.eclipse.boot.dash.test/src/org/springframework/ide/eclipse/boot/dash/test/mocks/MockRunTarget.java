@@ -93,4 +93,8 @@ public class MockRunTarget extends AbstractRunTarget implements RunTargetWithPro
 		return requiresCredentials;
 	}
 
+	@Override
+	public void dispose() {
+	}
+
 }

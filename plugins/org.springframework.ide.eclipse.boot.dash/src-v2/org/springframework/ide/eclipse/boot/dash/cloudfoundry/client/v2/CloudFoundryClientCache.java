@@ -53,10 +53,10 @@ public class CloudFoundryClientCache {
 
 	public class CFClientProvider {
 
-		final ConnectionContext connection;
+		final DefaultConnectionContext connection;
 		final TokenProvider tokenProvider;
 
-		//Note the three client objects below are 'stateless' wrappers and it would be
+		//Note: the three client objects below are 'stateless' wrappers and it would be
 		// fine to recreate as needed instead of store them
 
 		final CloudFoundryClient client;

@@ -19,6 +19,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -70,6 +71,7 @@ import org.cloudfoundry.operations.services.UnbindServiceInstanceRequest;
 import org.cloudfoundry.operations.spaces.GetSpaceRequest;
 import org.cloudfoundry.operations.spaces.SpaceDetail;
 import org.cloudfoundry.reactor.ConnectionContext;
+import org.cloudfoundry.reactor.DefaultConnectionContext;
 import org.cloudfoundry.reactor.tokenprovider.AbstractUaaTokenProvider;
 import org.cloudfoundry.uaa.UaaClient;
 import org.cloudfoundry.util.PaginationUtils;
@@ -112,6 +114,8 @@ import reactor.core.publisher.Mono;
  */
 public class DefaultClientRequestsV2 implements ClientRequests {
 
+	private static AtomicLong instances = new AtomicLong(0);
+
 	public static final Duration APP_START_TIMEOUT = Duration.ofMillis(ApplicationRunningStateTracker.APP_START_TIMEOUT);
 	public static final Duration GET_SERVICES_TIMEOUT = Duration.ofSeconds(60);
 	public static final Duration GET_SPACES_TIMEOUT = Duration.ofSeconds(20);
@@ -141,27 +145,6 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 //	}
 
 
-// TODO: it would be good not to create another 'threadpool' and use something like the below code
-//  instead so that eclipse job scheduler is used for reactor 'tasks'. However... the code below
-//  may not be 100% correct.
-//	private static final Callable<? extends Consumer<Runnable>> SCHEDULER_GROUP = () -> {
-//		return (Runnable task) -> {
-//			Job job = new Job("CF Client background task") {
-//				@Override
-//				protected IStatus run(IProgressMonitor monitor) {
-//					if (task!=null) {
-//						task.run();
-//					}
-//					return Status.OK_STATUS;
-//				}
-//			};
-//			job.setRule(JobUtil.lightRule("reactor-job-rule"));
-//			job.setSystem(true);
-//			job.schedule();
-//		};
-//	};
-
-
 	private CFClientParams params;
 	private CloudFoundryClient _client ;
 	private UaaClient _uaa;
@@ -169,11 +152,11 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	private Mono<String> orgId;
 	private Mono<GetInfoResponse> info;
-	private Mono<String> spaceId;
 	private AbstractUaaTokenProvider _tokenProvider;
-	private ConnectionContext _connection;
+	private DefaultConnectionContext _connection;
 	private String refreshToken = null;
 	private Flux<String> refreshTokensFlux;
+	private Disposable refreshTokenListener;
 
 	public DefaultClientRequestsV2(CloudFoundryClientCache clients, CFClientParams params) {
 		this.params = params;
@@ -183,7 +166,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		this._tokenProvider = (AbstractUaaTokenProvider) provider.tokenProvider;
 		this._connection = provider.connection;
 		refreshTokensFlux = _tokenProvider.getRefreshTokens(_connection);
-		refreshTokensFlux.doOnNext((t) -> {
+		refreshTokenListener = refreshTokensFlux.doOnNext((t) -> {
 			this.refreshToken = t;
 		}).subscribe();
 
@@ -197,8 +180,8 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 				.build();
 		debug("<<< creating cf operations");
 		this.orgId = getOrgId();
-		this.spaceId = getSpaceId();
 		this.info = client_getInfo().cache();
+		debug("DefaultClientRequestsV2 created: "+instances.incrementAndGet());
 	}
 
 	private Mono<CloudFoundryOperations> client_createOperations(OrganizationSummary org) {
@@ -217,20 +200,6 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 			return Mono.error(new IOException("No organization targetted"));
 		} else {
 			return operations_getOrgId().cache();
-		}
-	}
-
-	private Mono<String> getSpaceId() {
-		String spaceName = params.getSpaceName();
-		if (spaceName==null) {
-			return Mono.error(new IOException("No space targetted"));
-		} else {
-			return _operations.spaces().get(GetSpaceRequest.builder()
-				.name(params.getSpaceName())
-				.build()
-			)
-			.map(SpaceDetail::getId)
-			.cache();
 		}
 	}
 
@@ -500,9 +469,15 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	@Override
-	public void logout() {
-		_operations = null;
-		_client = null;
+	public void dispose() {
+		synchronized (this) {
+			if (_client!=null) {
+				_client = null;
+				_connection = null;
+				_operations = null;
+				debug("DefaultClientRequestsV2.logout: "+instances.decrementAndGet());
+			}
+		}
 	}
 
 	public boolean isLoggedOut() {

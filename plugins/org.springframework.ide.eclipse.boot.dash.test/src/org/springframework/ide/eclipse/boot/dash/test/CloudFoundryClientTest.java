@@ -208,7 +208,7 @@ public class CloudFoundryClientTest {
 		appHarness.dispose(); //apps first because services still bound to apps can't be deleted!
 		services.dispose();
 		if (client!=null) {
-			client.logout();
+			client.close();
 		}
 		StsTestUtil.cleanUpProjects();
 		ReactorUtils.DUMP_STACK_ON_TIMEOUT = false;

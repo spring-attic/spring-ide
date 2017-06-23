@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-client-2.14.0.RELEASE.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-client-reactor-2.14.0.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-client-2.14.0.RELEASE.jar" sourcepath="/home/kdvolder/.m2/repository/org/cloudfoundry/cloudfoundry-client/2.14.0.RELEASE/cloudfoundry-client-2.14.0.RELEASE-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-client-reactor-2.14.0.RELEASE.jar" sourcepath="/home/kdvolder/.m2/repository/org/cloudfoundry/cloudfoundry-client-reactor/2.14.0.RELEASE/cloudfoundry-client-reactor-2.14.0.RELEASE-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-operations-2.14.0.RELEASE.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-util-2.14.0.RELEASE.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/commons-compress-1.14.jar"/>

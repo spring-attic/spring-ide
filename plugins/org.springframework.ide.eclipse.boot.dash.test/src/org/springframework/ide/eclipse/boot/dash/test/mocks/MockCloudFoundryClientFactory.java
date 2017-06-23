@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.RandomStringUtils;
@@ -59,6 +60,12 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
+
+	private static void debug(String string) {
+		System.out.println(string);
+	}
+
+	public final AtomicLong instances = new AtomicLong(0);
 
 	public static final String FAKE_REFRESH_TOKEN = "fakeRefreshToken";
 	public static final String FAKE_PASSWORD = CfTestTargetParams.fromEnv("CF_TEST_PASSWORD");
@@ -166,6 +173,15 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		}
 	}
 
+	private String validPassword = FAKE_PASSWORD;
+	/**
+	 * Change the current password this mock client will accept when trying to
+	 * use password-based authentication.
+	 */
+	public void setPassword(String newPassword) {
+		this.validPassword = newPassword;
+	}
+
 	private class MockClient implements ClientRequests {
 
 		private int nextPort = 63000;
@@ -176,10 +192,14 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		private CFClientParams params;
 		private boolean connected = true;
 		private Boolean validCredentials = null;
+
+
 		private final LiveVariable<String> refreshToken = new LiveVariable<>();
 
 		public MockClient(CFClientParams params) {
 			this.params = params;
+			instances.incrementAndGet();
+			debug("created Mock CF Client: "+instances.get());
 		}
 
 		private void notImplementedStub() {
@@ -228,8 +248,10 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		}
 
 		@Override
-		public void logout() {
+		public void dispose() {
 			connected = false;
+			instances.decrementAndGet();
+			debug("Mock CF Client disposed: "+instances.get());
 		}
 
 		@Override
@@ -352,7 +374,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 			CFCredentialType type = credentials.getType();
 			String secret = credentials.getSecret();
 			if (type==CFCredentialType.PASSWORD) {
-				if (!credentials.getSecret().equals(FAKE_PASSWORD)) {
+				if (!credentials.getSecret().equals(validPassword)) {
 					return false;
 				}
 			} else if (type==CFCredentialType.REFRESH_TOKEN) {
@@ -522,7 +544,6 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		public String getRefreshToken() {
 			return refreshToken.getValue();
 		}
-
 	}
 
 	public void defBuildpacks(String... names) {

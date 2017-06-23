@@ -42,6 +42,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshClientSupport;
+import org.springframework.ide.eclipse.boot.dash.livexp.OldValueDisposer;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractRunTarget;
@@ -74,6 +75,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 		this.targetProperties = targetProperties;
 		this.clientFactory = clientFactory;
 		this.cachedClient = new LiveVariable<>();
+		new OldValueDisposer(cachedClient);
 	}
 
 	public static final EnumSet<RunState> RUN_GOAL_STATES = EnumSet.of(INACTIVE, STARTING, RUNNING, DEBUGGING);
@@ -111,10 +113,12 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 		this.domains = null;
 		this.spaces = null;
 		this.stacks = null;
-		if (getClient() != null) {
-			getClient().logout();
-			cachedClient.setValue(null);
-		}
+		cachedClient.setValue(null);
+	}
+	@Override
+	public void dispose() {
+		disconnect();
+		cachedClient.dispose();
 	}
 
 	protected void persistBuildpacks(List<CFBuildpack> buildpacks) throws Exception {

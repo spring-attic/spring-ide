@@ -18,12 +18,12 @@ import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.IApplicationLogConsole;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
+import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
-import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-public interface ClientRequests {
+public interface ClientRequests extends Disposable {
 
 	/**
 	 * The actual Rest API version that cloud controller claims to be.
@@ -46,7 +46,6 @@ public interface ClientRequests {
 
 
 	void deleteApplication(String name) throws Exception;
-	void logout();
 
 	List<CFApplication> getApplicationsWithBasicInfo() throws Exception;
 	List<CFBuildpack> getBuildpacks() throws Exception;
@@ -56,7 +55,7 @@ public interface ClientRequests {
 	List<CFStack> getStacks() throws Exception;
 	void restartApplication(String appName, CancelationToken token) throws Exception;
 	void stopApplication(String appName) throws Exception;
-	Disposable streamLogs(String appName, IApplicationLogConsole logConsole) throws Exception;
+	reactor.core.Disposable streamLogs(String appName, IApplicationLogConsole logConsole) throws Exception;
 	Flux<CFApplicationDetail> getApplicationDetails(List<CFApplication> appsToLookUp) throws Exception;
 	String getHealthCheck(UUID appGuid) throws Exception;
 	void setHealthCheck(UUID guid, String hcType) throws Exception;

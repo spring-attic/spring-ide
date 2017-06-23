@@ -17,16 +17,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.contains;
 import static org.mockito.Matchers.same;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.*;
 import static org.springframework.ide.eclipse.boot.dash.test.BootDashModelTest.waitForJobsToComplete;
 import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.APP_DELETE_TIMEOUT;
 import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.APP_DEPLOY_TIMEOUT;
@@ -82,10 +75,12 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentia
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFDomainType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.HealthChecks;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFDomainStatus;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ReactorUtils;
 import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel.ManifestType;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
+import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.StoreCredentialsMode;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
@@ -109,6 +104,7 @@ import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.CustmomizeTargetLabelAction;
 import org.springframework.ide.eclipse.boot.dash.views.CustomizeTargetLabelDialogModel;
+import org.springframework.ide.eclipse.boot.dash.views.UpdatePasswordAction;
 import org.springframework.ide.eclipse.boot.test.AutobuildingEnablement;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.boot.test.util.TestBracketter;
@@ -1879,6 +1875,8 @@ public class CloudFoundryBootDashModelMockingTest {
 		space.defApp(appName);
 		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
 		waitForApps(model, appName);
+		assertEquals(1, clientFactory.instances.get());
+
 		harness.sectionSelection.setValue(model);
 		IAction disconnectAction = actions.getToggleTargetConnectionAction();
 		assertTrue(disconnectAction.isEnabled());
@@ -1886,6 +1884,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		waitForApps(model);
 		assertFalse(model.isConnected());
 		assertEquals(RefreshState.READY, model.getRefreshState());
+		assertEquals(0, clientFactory.instances.get());
 	}
 
 	@Test public void updateTargetPasswordInvalid() throws Exception {
@@ -2317,6 +2316,63 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertContains("1.1.1", msg);
 		assertContains("1.1.0", msg);
 	}
+
+	@Test public void clientDisposedWhenTargetRemoved() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		space.defApp("bonkers");
+		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
+		ACondition.waitFor("connected to target", 10_000, () -> {
+			assertTrue(model.isConnected());
+			assertEquals(RefreshState.READY, model.getRefreshState());
+		});
+		waitForApps(model, "bonkers");
+
+		assertEquals(1, clientFactory.instances.get());
+
+		harness.sectionSelection.setValue(model);
+		when(ui.confirmOperation(contains("Deleting"), any()))
+			.thenReturn(true);
+		actions.getRemoveRunTargetAction().run();
+
+		ACondition.waitFor("target removed", 10_000, () -> {
+			harness.model.getSectionModels().getValue().isEmpty();
+		});
+		assertEquals(0, clientFactory.instances.get());
+	}
+
+	@Test public void oldClientDisposedWhenClientCredentialsUpdated() throws Exception {
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		space.defApp("bonkers");
+		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
+		ACondition.waitFor("connected to target", 10_000, () -> {
+			assertTrue(model.isConnected());
+			assertEquals(RefreshState.READY, model.getRefreshState());
+		});
+		waitForApps(model, "bonkers");
+		assertEquals(1, clientFactory.instances.get());
+
+		clientFactory.setPassword("something-else");
+
+		harness.sectionSelection.setValue(model);
+		harness.answerPasswordPrompt(ui, (PasswordDialogModel passwordDialog) -> {
+			passwordDialog.getPasswordVar().setValue("something-else");
+			assertEquals(ValidationResult.OK, passwordDialog.validateCredentials().block());
+			passwordDialog.performOk();
+		});
+		harness.sectionSelection.setValue(model);
+		UpdatePasswordAction updatePW = actions.getUpdatePasswordAction();
+		updatePW.run();
+		updatePW.waitFor();
+
+		ACondition.waitFor("connected to target", 10_000, () -> {
+			assertTrue(model.isConnected());
+			assertEquals(RefreshState.READY, model.getRefreshState());
+		});
+		assertEquals(1, clientFactory.instances.get());
+	}
+
 
 	///////////////////////////////////////////////////////////////////////////////////////////////
 

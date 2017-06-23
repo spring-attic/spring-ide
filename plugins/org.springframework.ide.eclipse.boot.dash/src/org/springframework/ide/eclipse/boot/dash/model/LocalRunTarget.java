@@ -69,4 +69,8 @@ public class LocalRunTarget extends AbstractRunTarget {
 	public boolean canDeployAppsFrom() {
 		return true;
 	}
+
+	@Override
+	public void dispose() {
+	}
 }

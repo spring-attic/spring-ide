@@ -116,7 +116,7 @@ public class CloudFoundryBootDashModelIntegrationTest {
 	public void tearDown() throws Exception {
 		appHarness.deleteOwnedApps();
 		services.dispose();
-		client.logout();
+		client.close();
 		harness.dispose();
 	}
 

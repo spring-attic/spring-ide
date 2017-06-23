@@ -231,16 +231,20 @@ public class CloudFoundryTargetWizardModel {
 				"Connecting to the Cloud Foundry target. Please wait while the list of spaces is resolved...") {
 			protected List<CFSpace> runOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 				ClientRequests client = clientFactory.getClient(targetProperties);
-				List<CFSpace> spaces = client.getSpaces();
-				String t = client.getRefreshToken();
-				if (t!=null) {
-					refreshToken = t;
+				try {
+					List<CFSpace> spaces = client.getSpaces();
+					String t = client.getRefreshToken();
+					if (t!=null) {
+						refreshToken = t;
+					}
+					String effectiveUser = client.getUserName().block();
+					if (effectiveUser!=null) {
+						userName.setValue(effectiveUser);
+					}
+					return spaces;
+				} finally {
+					client.close();
 				}
-				String effectiveUser = client.getUserName().block();
-				if (effectiveUser!=null) {
-					userName.setValue(effectiveUser);
-				}
-				return spaces;
 			}
 		};
 
@@ -286,7 +290,7 @@ public class CloudFoundryTargetWizardModel {
 		} else {
 			//use credentials of a style that is consistent with the 'store mode'.
 			if (method.getValue()==LoginMethod.TEMPORARY_CODE && storeCredentials.getValue()==StoreCredentialsMode.STORE_PASSWORD) {
-				//The one token shouldn't be stored since its meaningless. Silently downgrade storemode to store
+				//The temporary token shouldn't be stored since its meaningless. Silently downgrade storemode:
 				storeCredentials.setValue(StoreCredentialsMode.STORE_NOTHING);
 			}
 			StoreCredentialsMode mode = storeCredentials.getValue();
