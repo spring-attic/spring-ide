@@ -28,6 +28,7 @@ import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHar
 import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.APP_DEPLOY_TIMEOUT;
 import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.APP_IS_VISIBLE_TIMEOUT;
 import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.SERVICE_DELETE_TIMEOUT;
+import static org.springframework.ide.eclipse.boot.dash.test.util.JobUtil.runInJob;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.createFile;
 
@@ -37,6 +38,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
@@ -59,7 +62,9 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientPar
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials.CFCredentialType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultCloudFoundryClientFactoryV2;
 import org.springframework.ide.eclipse.boot.dash.dialogs.StoreCredentialsMode;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
@@ -88,6 +93,7 @@ public class CloudFoundryBootDashModelIntegrationTest {
 
 	////////////////////////////////////////////////////////////
 	private CFClientParams clientParams = CfTestTargetParams.fromEnv();
+	private DefaultCloudFoundryClientFactoryV2 clientFactory = DefaultCloudFoundryClientFactoryV2.INSTANCE;
 	private DefaultClientRequestsV2 client = CloudFoundryClientTest.createClient(clientParams);
 
 	public CloudFoundryApplicationHarness appHarness = new CloudFoundryApplicationHarness(client);
@@ -130,6 +136,20 @@ public class CloudFoundryBootDashModelIntegrationTest {
 		assertEquals(CFCredentialType.PASSWORD, credentials.getType());
 		assertNotNull(credentials.getSecret());
 		assertEquals(1, harness.getCfRunTargetModels().size());
+	}
+
+	@Test public void refreshTokenStreamTerminatedOnDispose() throws Exception {
+		CFClientParams params = CfTestTargetParams.fromEnv();
+		ClientRequests client = clientFactory.getClient(params);
+
+		Future<List<String>> tokens = runInJob(() -> {
+			return client.getRefreshTokens().collect(Collectors.toList()).block();
+		});
+
+		client.getApplicationsWithBasicInfo(); // forces the client to authenticate
+		client.dispose();
+
+		assertEquals(1, tokens.get(2, TimeUnit.SECONDS).size());
 	}
 
 	@Test public void testCreateCfTargetAndStoreToken() throws Exception {

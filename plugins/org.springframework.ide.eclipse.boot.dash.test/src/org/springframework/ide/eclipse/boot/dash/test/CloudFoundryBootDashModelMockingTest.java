@@ -19,10 +19,20 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.contains;
 import static org.mockito.Matchers.same;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 import static org.springframework.ide.eclipse.boot.dash.test.BootDashModelTest.waitForJobsToComplete;
 import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.APP_DELETE_TIMEOUT;
 import static org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.APP_DEPLOY_TIMEOUT;
+import static org.springframework.ide.eclipse.boot.dash.test.util.JobUtil.runInJob;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withPackaging;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertContains;
@@ -33,15 +43,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.RandomStringUtils;
@@ -63,19 +75,19 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
+import org.springframework.ide.eclipse.boot.core.internal.MavenSpringBootProject;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetWizardModel.LoginMethod;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFAppState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials.CFCredentialType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFDomainType;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.HealthChecks;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFDomainStatus;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ReactorUtils;
 import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel.ManifestType;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
@@ -119,13 +131,9 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
-
-import org.springframework.ide.eclipse.boot.core.internal.MavenSpringBootProject;
 
 /**
  * @author Kris De Volder
@@ -187,6 +195,22 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertNotNull(credentials.getSecret());
 		assertEquals(1, harness.getCfRunTargetModels().size());
 	}
+
+	@Test public void refreshTokenStreamTerminatedOnDispose() throws Exception {
+		CFClientParams params = CfTestTargetParams.fromEnv();
+		clientFactory.defSpace(params.getOrgName(), params.getSpaceName());
+		ClientRequests client = clientFactory.getClient(params);
+
+		Future<List<String>> tokens = runInJob(() -> {
+			return client.getRefreshTokens().collect(Collectors.toList()).block(Duration.ofSeconds(10));
+		});
+
+		client.getApplicationsWithBasicInfo(); // forces the client to authenticate
+		client.dispose();
+
+		assertEquals(ImmutableList.of(MockCloudFoundryClientFactory.FAKE_REFRESH_TOKEN), tokens.get());
+	}
+
 
 	@Test
 	public void testCreateCfTargetSsoAndStoreRefreshToken() throws Exception {
@@ -2579,6 +2603,7 @@ public class CloudFoundryBootDashModelMockingTest {
 			}
 		};
 	}
+
 
 	///////////////////////////////////////////////////////////////////////////////////
 

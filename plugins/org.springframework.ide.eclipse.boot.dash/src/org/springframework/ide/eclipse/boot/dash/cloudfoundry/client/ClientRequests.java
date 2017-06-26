@@ -61,9 +61,6 @@ public interface ClientRequests extends Disposable {
 	void setHealthCheck(UUID guid, String hcType) throws Exception;
 	boolean applicationExists(String appName) throws Exception;
 
-	//Removed in V2
-	//void createApplication(CloudApplicationDeploymentProperties deploymentProperties) throws Exception;
-
 	//Added since v2:
 	void push(CFPushArguments args, CancelationToken cancelationToken) throws Exception;
 	Map<String, String> getApplicationEnvironment(String appName) throws Exception;
@@ -78,4 +75,10 @@ public interface ClientRequests extends Disposable {
 	 */
 	String getRefreshToken();
 	Mono<String> getUserName();
+
+	/**
+	 * The returned flux will provide the current token in its onNext immediately, if there is a current
+	 * token already. Subsequent onNext will be fired whenever the token changes.
+	 */
+	Flux<String> getRefreshTokens();
 }

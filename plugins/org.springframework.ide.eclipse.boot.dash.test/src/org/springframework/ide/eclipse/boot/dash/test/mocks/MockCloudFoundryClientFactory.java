@@ -48,6 +48,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.IApplicati
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.ParsedUri;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.RouteBinding;
 import org.springframework.ide.eclipse.boot.dash.test.CfTestTargetParams;
+import org.springframework.ide.eclipse.boot.dash.test.util.LiveExpToFlux;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -250,6 +251,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		@Override
 		public void dispose() {
 			connected = false;
+			refreshToken.dispose();
 			instances.decrementAndGet();
 			debug("Mock CF Client disposed: "+instances.get());
 		}
@@ -543,6 +545,11 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		@Override
 		public String getRefreshToken() {
 			return refreshToken.getValue();
+		}
+
+		@Override
+		public Flux<String> getRefreshTokens() {
+			return LiveExpToFlux.toFlux(refreshToken);
 		}
 	}
 

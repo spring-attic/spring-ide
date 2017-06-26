@@ -19,6 +19,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -68,9 +69,6 @@ import org.cloudfoundry.operations.services.GetServiceInstanceRequest;
 import org.cloudfoundry.operations.services.ServiceInstance;
 import org.cloudfoundry.operations.services.ServiceInstanceSummary;
 import org.cloudfoundry.operations.services.UnbindServiceInstanceRequest;
-import org.cloudfoundry.operations.spaces.GetSpaceRequest;
-import org.cloudfoundry.operations.spaces.SpaceDetail;
-import org.cloudfoundry.reactor.ConnectionContext;
 import org.cloudfoundry.reactor.DefaultConnectionContext;
 import org.cloudfoundry.reactor.tokenprovider.AbstractUaaTokenProvider;
 import org.cloudfoundry.uaa.UaaClient;
@@ -156,7 +154,8 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	private DefaultConnectionContext _connection;
 	private String refreshToken = null;
 	private Flux<String> refreshTokensFlux;
-	private Disposable refreshTokenListener;
+
+	private CompletableFuture<Boolean> _disposed = new CompletableFuture<>();
 
 	public DefaultClientRequestsV2(CloudFoundryClientCache clients, CFClientParams params) {
 		this.params = params;
@@ -165,8 +164,8 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		this._uaa = provider.uaaClient;
 		this._tokenProvider = (AbstractUaaTokenProvider) provider.tokenProvider;
 		this._connection = provider.connection;
-		refreshTokensFlux = _tokenProvider.getRefreshTokens(_connection);
-		refreshTokenListener = refreshTokensFlux.doOnNext((t) -> {
+		refreshTokensFlux = _tokenProvider.getRefreshTokens(_connection).takeUntilOther(Mono.fromFuture(_disposed));
+		refreshTokensFlux.doOnNext((t) -> {
 			this.refreshToken = t;
 		}).subscribe();
 
@@ -475,6 +474,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 				_client = null;
 				_connection = null;
 				_operations = null;
+				_disposed.complete(true);
 				debug("DefaultClientRequestsV2.logout: "+instances.decrementAndGet());
 			}
 		}
@@ -1299,16 +1299,6 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		);
 	}
 
-	private Mono<ListDomainsResponse> client_listDomains(Integer page) {
-		return log("client.domains.list(page="+page+")",
-			_client.domains().list(ListDomainsRequest.builder()
-				.page(page)
-				//						.owningOrganizationId(orgId)
-				.build()
-			)
-		);
-	}
-
 	private Mono<ListBuildpacksResponse> client_listBuildpacks(Integer page) {
 		return log("client.buildpacks.list(page="+page+")",
 			_client.buildpacks()
@@ -1361,6 +1351,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		return refreshToken;
 	}
 
+	@Override
 	public Flux<String>	getRefreshTokens() {
 		return refreshTokensFlux;
 	}
