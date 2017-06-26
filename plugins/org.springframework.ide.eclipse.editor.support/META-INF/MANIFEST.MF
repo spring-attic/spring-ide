@@ -1,9 +1,11 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Editor
+Bundle-Name: %pluginName
+Bundle-Vendor: %providerName
 Bundle-SymbolicName: org.springframework.ide.eclipse.editor.support
 Bundle-Version: 3.9.0.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.editor.support.EditorSupportActivator
+Bundle-Localization: plugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.text,
