@@ -21,7 +21,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YValueHint;
-import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 public class ManifestEditorActivator extends AbstractUIPlugin {
 
@@ -86,7 +86,7 @@ public class ManifestEditorActivator extends AbstractUIPlugin {
 	public void setCfTargetLoginOptions(Map<String, Object> cfTargetLoginOptions) {
 		try {
 			Bundle lsBundle = Platform.getBundle("org.springframework.tooling.cloudfoundry.manifest.ls");
-			if (lsBundle != null && lsBundle.getState() != Bundle.INSTALLED && System.getProperty("cf-manifest-lsp", "true").equals("true")) {
+			if (lsBundle != null && lsBundle.getState() != Bundle.INSTALLED) {
 				Class<?> lsClass = lsBundle.loadClass("org.springframework.tooling.cloudfoundry.manifest.ls.CloudFoundryManifestLanguageServer");
 				Method lsMethod = lsClass.getMethod("setCfTargetLoginOptions", Object.class);
 				lsMethod.invoke(null, cfTargetLoginOptions);
@@ -99,6 +99,6 @@ public class ManifestEditorActivator extends AbstractUIPlugin {
 	
 	public boolean isLanguageServerEnabled() {
 		Bundle lsBundle = Platform.getBundle("org.springframework.tooling.cloudfoundry.manifest.ls");
-		return lsBundle != null && lsBundle.getState() != Bundle.INSTALLED && System.getProperty("cf-manifest-lsp", "true").equals("true");
+		return lsBundle != null && lsBundle.getState() != Bundle.INSTALLED;
 	}
 }
