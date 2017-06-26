@@ -85,19 +85,31 @@ public class ProcessTracker implements Disposable {
 	}
 
 	private void debugTargetCreated(IDebugTarget source) {
-		listener.debugTargetCreated(this, source);
+		ProcessListener listener = this.listener;
+		if (listener!=null) {
+			listener.debugTargetCreated(this, source);
+		}
 	}
 
 	private void debugTargetTerminated(IDebugTarget source) {
-		listener.debugTargetTerminated(this, source);
+		ProcessListener listener = this.listener;
+		if (listener!=null) {
+			listener.debugTargetTerminated(this, source);
+		}
 	}
 
 	private void processCreated(IProcess process) {
-		listener.processCreated(this, process);
+		ProcessListener listener = this.listener;
+		if (listener!=null) {
+			listener.processCreated(this, process);
+		}
 	}
 
 	private void processTerminated(IProcess process) {
-		listener.processTerminated(this, process);
+		ProcessListener listener = this.listener;
+		if (listener!=null) {
+			listener.processTerminated(this, process);
+		}
 	}
 
 	/**
