@@ -504,6 +504,12 @@ public class CloudFoundryBootDashModelMockingTest {
 			waitForJobsToComplete();
 			assertTrue(target.isConnected()); //should auto connect.
 			verifyZeroInteractions(ui); //should not prompt for password (but used stored token).
+
+			clientFactory.changeRefrestToken("another-1");
+			clientFactory.changeRefrestToken("another-2");
+			ACondition.waitFor("changed stored token", 300, () -> {
+				assertEquals("another-2", getStoredToken(target));
+			});
 		}
 	}
 
@@ -2291,10 +2297,10 @@ public class CloudFoundryBootDashModelMockingTest {
 		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
 		String appName = "someApp";
 		space.defApp(appName);
-		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
-		waitForApps(model, appName);
+		CloudFoundryBootDashModel target =  harness.createCfTarget(targetParams);
+		waitForApps(target, appName);
 
-		harness.sectionSelection.setValue(model);
+		harness.sectionSelection.setValue(target);
 		IAction updatePassword = actions.getUpdatePasswordAction();
 		assertTrue(updatePassword.isEnabled());
 
@@ -2315,7 +2321,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		actions.getToggleTargetConnectionAction().run();
 
 		waitForJobsToComplete();
-		assertFalse(model.isConnected());
+		assertFalse(target.isConnected());
 
 		// Clear out any mocks on the ui object to get the right count below
 		reset(ui);
@@ -2323,16 +2329,22 @@ public class CloudFoundryBootDashModelMockingTest {
 		actions.getToggleTargetConnectionAction().run();
 		waitForJobsToComplete();
 
-		assertTrue(model.isConnected());
-		CFCredentials creds = model.getRunTarget().getTargetProperties().getCredentials();
+		assertTrue(target.isConnected());
+		CFCredentials creds = target.getRunTarget().getTargetProperties().getCredentials();
 		assertEquals(MockCloudFoundryClientFactory.FAKE_REFRESH_TOKEN, creds.getSecret());
 		assertEquals(CFCredentialType.REFRESH_TOKEN, creds.getType());
-		assertEquals(MockCloudFoundryClientFactory.FAKE_REFRESH_TOKEN, harness.getPrivateStore().get(harness.privateStoreKey(model)));
-		assertNull(harness.getCredentialsStore().getCredentials(harness.secureStoreKey(model)));
-		assertEquals(RefreshState.READY, model.getRefreshState());
-		assertNotNull(model.getApplication(appName));
+		assertEquals(MockCloudFoundryClientFactory.FAKE_REFRESH_TOKEN, harness.getPrivateStore().get(harness.privateStoreKey(target)));
+		assertNull(harness.getCredentialsStore().getCredentials(harness.secureStoreKey(target)));
+		assertEquals(RefreshState.READY, target.getRefreshState());
+		assertNotNull(target.getApplication(appName));
 
 		verifyNoMoreInteractions(ui);
+
+		clientFactory.changeRefrestToken("another-1");
+		clientFactory.changeRefrestToken("another-2");
+		ACondition.waitFor("changed stored token", 300, () -> {
+			assertEquals("another-2", getStoredToken(target));
+		});
 	}
 
 
