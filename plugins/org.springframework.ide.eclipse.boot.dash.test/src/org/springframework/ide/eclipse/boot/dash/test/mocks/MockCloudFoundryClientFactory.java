@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.test.mocks;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -66,7 +67,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		System.out.println(string);
 	}
 
-	public final AtomicLong instances = new AtomicLong(0);
+	private final Set<MockClient> instances = Collections.synchronizedSet(new HashSet<>());
 
 	public static final String FAKE_REFRESH_TOKEN = "fakeRefreshToken";
 	public static final String FAKE_PASSWORD = CfTestTargetParams.fromEnv("CF_TEST_PASSWORD");
@@ -199,8 +200,10 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
 		public MockClient(CFClientParams params) {
 			this.params = params;
-			instances.incrementAndGet();
-			debug("created Mock CF Client: "+instances.get());
+			instances.add(this);
+			debug("created Mock CF Client: "+instances.size());
+			refreshToken.addListener((e,v) -> debug("refreshToken <- "+v));
+			refreshToken.onDispose(d -> debug("refreshToken DISPOSED"));
 		}
 
 		private void notImplementedStub() {
@@ -252,8 +255,8 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 		public void dispose() {
 			connected = false;
 			refreshToken.dispose();
-			instances.decrementAndGet();
-			debug("Mock CF Client disposed: "+instances.get());
+			instances.remove(this);
+			debug("Mock CF Client disposed: "+instances.size());
 		}
 
 		@Override
@@ -613,6 +616,16 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
 	public void setSupportedApiVersion(String string) {
 		supportedApiVersion = new Version(string);
+	}
+
+	public int instanceCount() {
+		return instances.size();
+	}
+
+	public void changeRefrestToken(String newToken) {
+		for (MockClient client : instances) {
+			client.refreshToken.setValue(newToken);
+		}
 	}
 
 }

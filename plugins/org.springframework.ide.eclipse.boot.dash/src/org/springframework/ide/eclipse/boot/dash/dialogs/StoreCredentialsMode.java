@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.dialogs;
 
 import java.util.EnumSet;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;

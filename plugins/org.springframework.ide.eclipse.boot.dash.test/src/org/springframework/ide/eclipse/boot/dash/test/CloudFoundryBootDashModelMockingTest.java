@@ -51,6 +51,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -201,13 +202,15 @@ public class CloudFoundryBootDashModelMockingTest {
 		clientFactory.defSpace(params.getOrgName(), params.getSpaceName());
 		ClientRequests client = clientFactory.getClient(params);
 
+		CountDownLatch latch = new CountDownLatch(1);
 		Future<List<String>> tokens = runInJob(() -> {
-			return client.getRefreshTokens().collect(Collectors.toList()).block(Duration.ofSeconds(10));
+			return client.getRefreshTokens()
+					.doOnNext(token -> latch.countDown())
+					.collect(Collectors.toList()).block(Duration.ofSeconds(10));
 		});
-
 		client.getApplicationsWithBasicInfo(); // forces the client to authenticate
+		latch.await(); //To avoid race condition (job tends to be slow and might start asking tokens only after disposed client (and this yields a empty stream of tokens)
 		client.dispose();
-
 		assertEquals(ImmutableList.of(MockCloudFoundryClientFactory.FAKE_REFRESH_TOKEN), tokens.get());
 	}
 
@@ -245,11 +248,22 @@ public class CloudFoundryBootDashModelMockingTest {
 		}
 
 		{
-			IPropertyStore store = harness.getPrivateStore();
-			String key = harness.privateStoreKey(target);
-			String storedCred = store.get(key);
+			String storedCred = getStoredToken(target);
 			assertEquals(MockCloudFoundryClientFactory.FAKE_REFRESH_TOKEN, storedCred);
 		}
+
+		clientFactory.changeRefrestToken("another-1");
+		clientFactory.changeRefrestToken("another-2");
+		ACondition.waitFor("changed stored token", 300, () -> {
+			assertEquals("another-2", getStoredToken(target));
+		});
+	}
+
+	private String getStoredToken(CloudFoundryBootDashModel target) {
+		IPropertyStore store = harness.getPrivateStore();
+		String key = harness.privateStoreKey(target);
+		String storedCred = store.get(key);
+		return storedCred;
 	}
 
 	@Test
@@ -1899,7 +1913,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		space.defApp(appName);
 		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
 		waitForApps(model, appName);
-		assertEquals(1, clientFactory.instances.get());
+		assertEquals(1, clientFactory.instanceCount());
 
 		harness.sectionSelection.setValue(model);
 		IAction disconnectAction = actions.getToggleTargetConnectionAction();
@@ -1908,7 +1922,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		waitForApps(model);
 		assertFalse(model.isConnected());
 		assertEquals(RefreshState.READY, model.getRefreshState());
-		assertEquals(0, clientFactory.instances.get());
+		assertEquals(0, clientFactory.instanceCount());
 	}
 
 	@Test public void updateTargetPasswordInvalid() throws Exception {
@@ -2352,7 +2366,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		});
 		waitForApps(model, "bonkers");
 
-		assertEquals(1, clientFactory.instances.get());
+		assertEquals(1, clientFactory.instanceCount());
 
 		harness.sectionSelection.setValue(model);
 		when(ui.confirmOperation(contains("Deleting"), any()))
@@ -2362,7 +2376,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		ACondition.waitFor("target removed", 10_000, () -> {
 			harness.model.getSectionModels().getValue().isEmpty();
 		});
-		assertEquals(0, clientFactory.instances.get());
+		assertEquals(0, clientFactory.instanceCount());
 	}
 
 	@Test public void oldClientDisposedWhenClientCredentialsUpdated() throws Exception {
@@ -2375,7 +2389,7 @@ public class CloudFoundryBootDashModelMockingTest {
 			assertEquals(RefreshState.READY, model.getRefreshState());
 		});
 		waitForApps(model, "bonkers");
-		assertEquals(1, clientFactory.instances.get());
+		assertEquals(1, clientFactory.instanceCount());
 
 		clientFactory.setPassword("something-else");
 
@@ -2394,7 +2408,7 @@ public class CloudFoundryBootDashModelMockingTest {
 			assertTrue(model.isConnected());
 			assertEquals(RefreshState.READY, model.getRefreshState());
 		});
-		assertEquals(1, clientFactory.instances.get());
+		assertEquals(1, clientFactory.instanceCount());
 	}
 
 

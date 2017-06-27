@@ -46,8 +46,6 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import com.google.common.collect.ImmutableSet;
 
-import reactor.core.publisher.Flux;
-
 /**
  * Cloud Foundry Target properties that uses {@link LiveExpression} and
  * {@link Validator}.

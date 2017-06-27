@@ -29,6 +29,8 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
 import org.springframework.ide.eclipse.boot.util.Log;
 
+import reactor.core.scheduler.Schedulers;
+
 /**
  * Operation for connecting/disconnecting CF run target
  *
@@ -62,12 +64,17 @@ public class ConnectOperation extends CloudOperation {
 					model.getViewModel().updateTargetPropertiesInStore();
 					model.setBaseRefreshState(RefreshState.READY);
 					if (model.getRunTarget().getTargetProperties().getStoreCredentials()==StoreCredentialsMode.STORE_TOKEN) {
-						//TODO: This special case doesn't seem like it should be necessary. Instead, any interaction with
+								//TODO: This special case doesn't seem like it should be necessary. Instead, any interaction with
 						// client should publish refresh token as it changes and credentials should be updated in target
 						// properties automatically any time there is a change.
-						String refreshToken = model.getRunTarget().getClient().getRefreshToken();
-						Assert.isNotNull(refreshToken);
-						model.getRunTarget().getTargetProperties().setCredentials(CFCredentials.fromRefreshToken(refreshToken));
+						model.getRunTarget().getClient().getRefreshTokens().doOnNext(refreshToken -> {
+							try {
+								model.getRunTarget().getTargetProperties().setCredentials(CFCredentials.fromRefreshToken(refreshToken));
+							} catch (CannotAccessPropertyException e) {
+								Log.log(e);
+							}
+						})
+						.subscribe();
 					}
 
 				} catch (MissingPasswordException|CannotAccessPropertyException|AssertionFailedException e) {
