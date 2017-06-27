@@ -10,18 +10,21 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.editor.support.yaml;
 
+import java.lang.reflect.Constructor;
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.inject.Provider;
 
 import org.dadacoalition.yedit.editor.YEditSourceViewerConfiguration;
+import org.dadacoalition.yedit.template.YEditCompletionProcessor;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.ITextViewerExtension2;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
+import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
@@ -106,7 +109,7 @@ public abstract class AbstractYamlSourceViewerConfiguration extends YEditSourceV
 
 	@Override
 	public final IContentAssistant getContentAssistant(ISourceViewer viewer) {
-		IContentAssistant _a = super.getContentAssistant(viewer);
+		IContentAssistant _a = super_getContentAssistant(viewer);
 
 		if (_a instanceof ContentAssistant) {
 			ContentAssistant a = (ContentAssistant)_a;
@@ -127,6 +130,27 @@ public abstract class AbstractYamlSourceViewerConfiguration extends YEditSourceV
 			a.setSorter(CompletionFactory.SORTER);
 		}
 		return _a;
+	}
+
+	private IContentAssistant super_getContentAssistant(ISourceViewer sourceViewer) {
+		//Copied from superclass's getContentAssistant... then modifed to make ContentAssistant
+		// asynchronous.
+		ContentAssistant ca;
+		try {
+			//Use reflection to call the constructor because it only exists in Eclipse 4.7.
+			Constructor<ContentAssistant> constructor = ContentAssistant.class.getConstructor(boolean.class);
+			ca = constructor.newInstance(true);
+		} catch (Exception e) {
+			ca = new ContentAssistant();
+		}
+
+		IContentAssistProcessor cap = new YEditCompletionProcessor();
+		ca.setContentAssistProcessor(cap, IDocument.DEFAULT_CONTENT_TYPE);
+		ca.setInformationControlCreator(getInformationControlCreator(sourceViewer));
+
+		ca.enableAutoInsert(true);
+
+		return ca;
 	}
 
 	@Override
