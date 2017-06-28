@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.util;
 
+import org.springsource.ide.eclipse.commons.core.util.StringUtil;
+
 /**
  * Utility methods
  *
@@ -37,6 +39,22 @@ public class Utils {
 			}
 		}
 		return null;
+	}
+
+	public static String pathJoin(String p1, String p2) {
+		if (!StringUtil.hasText(p1)) {
+			return p2;
+		}
+		if (!StringUtil.hasText(p2)) {
+			return p1;
+		}
+		while (p1.endsWith("/")) {
+			p1 = p1.substring(0, p1.length()-1);
+		}
+		while (p2.startsWith("/")) {
+			p2 = p2.substring(1);
+		}
+		return p1+"/"+p2;
 	}
 
 }

@@ -47,7 +47,10 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFDomain
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.IApplicationLogConsole;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.ParsedUri;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.Randomized;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.RouteAttributes;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.RouteBinding;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.RouteBuilder;
 import org.springframework.ide.eclipse.boot.dash.test.CfTestTargetParams;
 import org.springframework.ide.eclipse.boot.dash.test.util.LiveExpToFlux;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
@@ -465,6 +468,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 			RouteBinding route = new RouteBinding();
 			route.setDomain(bestDomain.getName());
 			route.setHost(bestDomain.splitHost(uri.getHostAndDomain()));
+			route.setPath(uri.getPath());
 			route.setPort(uri.getPort());
 			if (randomRoute) {
 				if (bestDomain.getType()==CFDomainType.TCP) {

@@ -57,6 +57,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicati
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.RemoteDevClientStartOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.SetHealthCheckOperation;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.ParsedUri;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
@@ -68,8 +69,10 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springframework.ide.eclipse.boot.dash.util.LogSink;
+import org.springframework.ide.eclipse.boot.dash.util.Utils;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springframework.ide.eclipse.boot.util.Log;
+import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
@@ -395,8 +398,27 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 		if (app != null) {
 			List<String> uris = app.getUris();
 			if (uris != null) {
+				for (String _uri : uris) {
+					if (StringUtil.hasText(_uri)) {
+						ParsedUri uri = new ParsedUri(_uri);
+						return uri.getHostAndDomain();
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public String getUrl() {
+		CFApplication app = getSummaryData();
+		if (app != null) {
+			List<String> uris = app.getUris();
+			if (uris != null) {
 				for (String uri : uris) {
-					return uri;
+					if (StringUtil.hasText(uri)) {
+						return Utils.pathJoin("http://"+uri, getDefaultRequestMappingPath());
+					}
 				}
 			}
 		}
