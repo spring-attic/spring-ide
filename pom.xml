@@ -542,7 +542,8 @@
 				<repository>
 					<id>mylyn</id>
 					<layout>p2</layout>
-					<url>http://download.eclipse.org/mylyn/releases/latest</url>
+					<url>http://download.eclipse.org/mylyn/snapshots/weekly</url>
+					<!-- <url>http://download.eclipse.org/mylyn/releases/latest</url>  -->
 				</repository>
 				<repository>
 					<id>swtbot</id>
