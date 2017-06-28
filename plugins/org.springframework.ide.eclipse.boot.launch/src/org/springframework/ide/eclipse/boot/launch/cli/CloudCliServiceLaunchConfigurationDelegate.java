@@ -26,8 +26,13 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.RuntimeProcess;
+import org.eclipse.jface.dialogs.MessageDialogWithToggle;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.osgi.framework.Version;
 import org.osgi.framework.VersionRange;
+import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
 import org.springframework.ide.eclipse.boot.core.cli.install.CloudCliInstall;
 import org.springframework.ide.eclipse.boot.core.cli.install.IBootInstall;
@@ -36,6 +41,7 @@ import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport;
 import org.springframework.ide.eclipse.boot.launch.process.BootProcessFactory;
 import org.springframework.ide.eclipse.boot.launch.util.PortFinder;
 import org.springframework.ide.eclipse.boot.util.Log;
+import org.springsource.ide.eclipse.commons.core.util.ProcessUtils;
 
 /**
  * Spring Cloud CLI service launch configuration
@@ -50,6 +56,10 @@ public class CloudCliServiceLaunchConfigurationDelegate extends BootCliLaunchCon
 	public final static String TYPE_ID = "org.springframework.ide.eclipse.boot.launch.cloud.cli.service";
 
 	public final static String ATTR_CLOUD_SERVICE_ID = "local-cloud-service-id";
+
+	private final static String PREF_DONT_SHOW_PLATFORM_WARNING = "org.springframework.ide.eclipse.boot.launch.cloud.cli.NotSupportedPlatform";
+	private final static String PREF_DONT_SHOW_JRE_WARNING = "org.springframework.ide.eclipse.boot.launch.cloud.cli.JRE";
+	private final static String PREF_DONT_SHOW_JDK_WARNING = "org.springframework.ide.eclipse.boot.launch.cloud.cli.JDK";
 
 	private List<String> getCloudCliServiceLifeCycleVmArguments(ILaunchConfiguration configuration, int jmxPort) {
 		List<String> vmArgs = new ArrayList<>();
@@ -88,7 +98,11 @@ public class CloudCliServiceLaunchConfigurationDelegate extends BootCliLaunchCon
 					vmArgs.add("-Dspring.output.ansi.enabled=always");
 				}
 
-				if (canUseLifeCycle(cloudCliVersion)) {
+				if (CloudCliServiceLaunchConfigurationDelegate.SPRING_CLOUD_CLI_SINGLE_PROCESS_VERSION_RANGE.includes(cloudCliVersion)) {
+					if (!vmArgs.isEmpty()) {
+						args.add("--spring.cloud.launcher.deployables." + serviceId + ".properties.spring.cloud.deployer.local.javaOpts=" + String.join(",", vmArgs));
+					}
+				} else if (CloudCliInstall.CLOUD_CLI_JAVA_OPTS_SUPPORTING_VERSIONS.includes(cloudCliVersion)) {
 					int jmxPort = getJmxPort(configuration);
 					// Set the JMX port for launch
 					launch.setAttribute(BootLaunchConfigurationDelegate.JMX_PORT, String.valueOf(jmxPort));
@@ -96,10 +110,6 @@ public class CloudCliServiceLaunchConfigurationDelegate extends BootCliLaunchCon
 					// Set the JMX port connection jvm args for the service
 					if (!vmArgs.isEmpty()) {
 						args.add("--spring.cloud.launcher.deployables." + serviceId + ".properties.JAVA_OPTS=" + String.join(",", vmArgs));
-					}
-				} else {
-					if (!vmArgs.isEmpty()) {
-						args.add("--spring.cloud.launcher.deployables." + serviceId + ".properties.spring.cloud.deployer.local.javaOpts=" + String.join(",", vmArgs));
 					}
 				}
 				return args.toArray(new String[args.size()]);
@@ -160,9 +170,40 @@ public class CloudCliServiceLaunchConfigurationDelegate extends BootCliLaunchCon
 		return conf!=null && canUseLifeCycle(conf);
 	}
 
+	public static boolean isSingleProcessServiceLaunch(ILaunch launch) {
+		if (launch.getAttribute(BootLaunchConfigurationDelegate.PROCESS_ID) != null) {
+			return isSingleProcessServiceConfig(launch.getLaunchConfiguration());
+		}
+		return false;
+	}
+
+	public static boolean isSingleProcessServiceConfig(ILaunchConfiguration conf) {
+		try {
+			if (isCloudCliService(conf)) {
+				IBootInstall bootInstall = BootInstallManager.getInstance().getDefaultInstall();
+				if (bootInstall != null) {
+					Version cloudCliVersion = bootInstall.getExtension(CloudCliInstall.class) == null ? null : bootInstall.getExtension(CloudCliInstall.class).getVersion();
+					return SPRING_CLOUD_CLI_SINGLE_PROCESS_VERSION_RANGE.includes(cloudCliVersion);
+				}
+			}
+		} catch (Exception e) {
+			// ignore
+		}
+		return false;
+	}
+
+	public static boolean isCloudCliService(ILaunchConfiguration conf) {
+		try {
+			return TYPE_ID.equals(conf.getType().getIdentifier());
+		} catch (CoreException e) {
+			// Ignore
+		}
+		return false;
+	}
+
 	public static boolean canUseLifeCycle(ILaunchConfiguration conf) {
 		try {
-			if (!TYPE_ID.equals(conf.getType().getIdentifier())) {
+			if (!isCloudCliService(conf)) {
 				return false;
 			}
 			IBootInstall bootInstall = BootInstallManager.getInstance().getDefaultInstall();
@@ -174,7 +215,7 @@ public class CloudCliServiceLaunchConfigurationDelegate extends BootCliLaunchCon
 			if (!canUseLifeCycle(cloudCliVersion)) {
 				return false;
 			}
-			return BootLaunchConfigurationDelegate.getEnableLifeCycle(conf);
+			return SPRING_CLOUD_CLI_SINGLE_PROCESS_VERSION_RANGE.includes(cloudCliVersion) || BootLaunchConfigurationDelegate.getEnableLifeCycle(conf);
 		} catch (Exception e) {
 			// Ignore
 		}
@@ -199,7 +240,33 @@ public class CloudCliServiceLaunchConfigurationDelegate extends BootCliLaunchCon
 				IBootInstall bootInstall = BootInstallManager.getInstance().getDefaultInstall();
 				if (bootInstall != null) {
 					Version cloudCliVersion = bootInstall.getExtension(CloudCliInstall.class) == null ? null : bootInstall.getExtension(CloudCliInstall.class).getVersion();
-					if (canUseLifeCycle(cloudCliVersion)) {
+					if (CloudCliServiceLaunchConfigurationDelegate.isSingleProcessServiceConfig(launch.getLaunchConfiguration())) {
+						final IPreferenceStore store = BootActivator.getDefault().getPreferenceStore();
+						try {
+							if (ProcessUtils.isLatestJdkForTools()) {
+								launch.setAttribute(BootLaunchConfigurationDelegate.PROCESS_ID, String.valueOf(ProcessUtils.getProcessID(process)));
+							} else {
+								PlatformUI.getWorkbench().getDisplay().asyncExec(() -> MessageDialogWithToggle.openWarning(
+										Display.getCurrent().getActiveShell(), "Cloud CLI Service Info Limitation",
+										"Cloud service process life-cycle data is limited and port data is unavailable because of old JDK version. Point Default Installed JRE to the latest JDK and restart the service for complete process life-cycle and port data",
+										"Don't show this message again",
+										store.getBoolean(PREF_DONT_SHOW_JDK_WARNING), store, PREF_DONT_SHOW_JDK_WARNING));
+							}
+						} catch (NoClassDefFoundError e) {
+							PlatformUI.getWorkbench().getDisplay().asyncExec(() -> MessageDialogWithToggle.openWarning(
+									Display.getCurrent().getActiveShell(), "Cloud CLI Service Info Limitation",
+									"Cloud service process life-cycle data is limited and port data is unavailable because Default Installed JRE is pointing to JRE. Point it to a JDK and restart the service for complete process life-cycle and port data",
+									"Don't show this message again",
+									store.getBoolean(PREF_DONT_SHOW_JRE_WARNING), store, PREF_DONT_SHOW_JRE_WARNING));
+						} catch (UnsupportedOperationException e) {
+							PlatformUI.getWorkbench().getDisplay().asyncExec(() -> MessageDialogWithToggle.openWarning(
+									Display.getCurrent().getActiveShell(), "Cloud CLI Service Info Limitation",
+									"Cloud service process life-cycle data is limited and port data is unavailable on the current platform.",
+									"Don't show this message again",
+									store.getBoolean(PREF_DONT_SHOW_PLATFORM_WARNING), store, PREF_DONT_SHOW_PLATFORM_WARNING));
+						}
+						return new RuntimeProcess(launch, process, label, attributes);
+					} else if (canUseLifeCycle(cloudCliVersion)) {
 						return super.newProcess(launch, process, label, attributes);
 					}
 				}

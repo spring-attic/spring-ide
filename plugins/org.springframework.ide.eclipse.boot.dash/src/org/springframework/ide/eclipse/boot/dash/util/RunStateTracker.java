@@ -18,8 +18,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.inject.Provider;
-
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugPlugin;
@@ -36,6 +34,7 @@ import org.springframework.ide.eclipse.boot.util.ProcessTracker;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
+import org.springsource.ide.eclipse.commons.core.util.ProcessUtils;
 
 /**
  * Generalization of OwnerRunStateTracker. An instance of this class tracks active processes
@@ -156,8 +155,16 @@ public abstract class RunStateTracker<T> extends ProcessListenerAdapter implemen
 	protected ReadyStateMonitor createReadyStateTracker(ILaunch l) {
 		try {
 			if (BootLaunchConfigurationDelegate.canUseLifeCycle(l) || CloudCliServiceLaunchConfigurationDelegate.canUseLifeCycle(l)) {
-				Provider<Integer> jmxPort = () -> BootLaunchConfigurationDelegate.getJMXPortAsInt(l);
-				return new SpringApplicationReadyStateMonitor(jmxPort);
+				int jmxPort = BootLaunchConfigurationDelegate.getJMXPortAsInt(l);
+				if (jmxPort != -1) {
+					return new SpringApplicationReadyStateMonitor(jmxPort);
+				}
+			} else if (CloudCliServiceLaunchConfigurationDelegate.isSingleProcessServiceLaunch(l)) {
+				String pid = l.getAttribute(BootLaunchConfigurationDelegate.PROCESS_ID);
+				String serviceId = l.getLaunchConfiguration().getAttribute(CloudCliServiceLaunchConfigurationDelegate.ATTR_CLOUD_SERVICE_ID, (String) null);
+				if (pid != null && !pid.isEmpty() && serviceId != null) {
+					return new CloudCliServiceReadyStateMonitor(() -> ProcessUtils.createJMXConnector(pid), serviceId);
+				}
 			}
 		} catch (Exception e) {
 			Log.log(e);

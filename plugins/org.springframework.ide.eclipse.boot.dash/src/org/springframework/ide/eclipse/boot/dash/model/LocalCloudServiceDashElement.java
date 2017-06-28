@@ -13,10 +13,17 @@ package org.springframework.ide.eclipse.boot.dash.model;
 import static org.springframework.ide.eclipse.boot.dash.model.RunState.INACTIVE;
 import static org.springframework.ide.eclipse.boot.dash.model.RunState.RUNNING;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
+
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
+import javax.management.remote.JMXConnector;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -29,8 +36,14 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
+import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.cli.CloudCliServiceLaunchConfigurationDelegate;
+import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
 import org.springframework.ide.eclipse.boot.util.Log;
+import org.springframework.ide.eclipse.boot.util.RetryUtil;
+import org.springsource.ide.eclipse.commons.core.util.ProcessUtils;
+import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -140,4 +153,85 @@ public class LocalCloudServiceDashElement extends AbstractLaunchConfigurationsDa
 		return LOCAL_CLOUD_SERVICE_RUN_GOAL_STATES;
 	}
 
+	protected LiveExpression<Integer> createPortExpression(final LiveExpression<RunState> runState) {
+		if (CloudCliServiceLaunchConfigurationDelegate.isSingleProcessServiceConfig(getActiveConfig())) {
+			AsyncLiveExpression<Integer> exp = new AsyncLiveExpression<Integer>(-1, "Refreshing port info for "+getName()) {
+				{
+					//Doesn't really depend on runState, but should be recomputed when runState changes.
+					dependsOn(runState);
+				}
+				@Override
+				protected Integer compute() {
+					return computeLivePort();
+				}
+				@Override
+				public String toString() {
+					return "LivePortExp for " + getName();
+				}
+			};
+			addDisposableChild(exp);
+			return exp;
+		}
+		return super.createPortExpression(runState);
+	}
+
+	private int computeLivePort() {
+		ILaunchConfiguration conf = getActiveConfig();
+		if (conf != null && READY_STATES.contains(getRunState())) {
+			for (ILaunch l : BootLaunchUtils.getLaunches(conf)) {
+				if (!l.isTerminated()) {
+					String pid = l.getAttribute(BootLaunchConfigurationDelegate.PROCESS_ID);
+					if (pid != null && !pid.isEmpty()) {
+						JMXConnector jmxConnector = ProcessUtils.createJMXConnector(pid);
+						try {
+							MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
+							// Just because lifecycle bean is ready does not mean that the port property has
+							// already been set.
+							// To avoid race condition we should wait here until the port is set (some apps
+							// aren't web apps and
+							// may never get a port set, so we shouldn't wait indefinitely!)
+							return RetryUtil.retry(100, 1000, () -> {
+								String port = getPortViaTomcatBean(connection);
+								if (port == null) {
+									throw new IllegalStateException("port not (yet) set");
+								}
+								return Integer.valueOf(port);
+							});
+						} catch (Exception e) {
+							// most likely this just means the app isn't running so ignore
+						} finally {
+							if (jmxConnector != null) {
+								try {
+									jmxConnector.close();
+								} catch (IOException e) {
+									Log.log(e);
+								}
+							}
+						}
+					}
+
+				}
+			}
+		}
+		return -1;
+	}
+
+	private String getPortViaTomcatBean(MBeanServerConnection connection) throws Exception {
+		try {
+			Set<ObjectName> queryNames = connection.queryNames(null, null);
+
+			for (ObjectName objectName : queryNames) {
+				if (objectName.toString().startsWith("Tomcat") && objectName.toString().contains("type=Connector")) {
+					Object result = connection.getAttribute(objectName, "localPort");
+					if (result != null) {
+						return result.toString();
+					}
+				}
+			}
+		}
+		catch (InstanceNotFoundException e) {
+		}
+
+		return null;
+	}
 }

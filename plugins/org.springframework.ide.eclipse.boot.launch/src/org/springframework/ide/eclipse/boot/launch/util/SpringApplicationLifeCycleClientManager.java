@@ -10,9 +10,12 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch.util;
 
+import java.io.IOException;
+
 import javax.inject.Provider;
 import javax.management.remote.JMXConnector;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.debug.core.ILaunch;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 
@@ -23,31 +26,38 @@ import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelega
  */
 public class SpringApplicationLifeCycleClientManager {
 
-	private Provider<Integer> jmxPort;
+	private Provider<JMXConnector> connectionProvider;
 	private JMXConnector connector;
 	private SpringApplicationLifecycleClient client;
 
-	public SpringApplicationLifeCycleClientManager(Provider<Integer> jmxPort) {
-		this.jmxPort = jmxPort;
+	public SpringApplicationLifeCycleClientManager(Provider<JMXConnector> connectionProvider) {
+		Assert.isNotNull(connectionProvider);
+		this.connectionProvider = connectionProvider;
 	}
 
 	/**
 	 * Convenenience method, use ILaunch as the jmxPort provider.
 	 */
 	public SpringApplicationLifeCycleClientManager(ILaunch l) {
-		this(() -> BootLaunchConfigurationDelegate.getJMXPortAsInt(l));
+		this(() -> createJMXConnection(BootLaunchConfigurationDelegate.getJMXPortAsInt(l)));
 	}
 
+	private static JMXConnector createJMXConnection(int port) {
+		if (port <=0) {
+			throw new IllegalStateException("JMX port not specified");
+		}
+		try {
+			return JMXClient.createLocalJmxConnector(port);
+		} catch (IOException e) {
+			return null;
+		}
+	}
 
 	/**
 	 * Convenenience method, use a given fixed port.
 	 */
 	public SpringApplicationLifeCycleClientManager(int resolvedPort) {
-		this(fixedPort(resolvedPort));
-	}
-
-	private static Provider<Integer> fixedPort(int resolvedPort) {
-		return () -> resolvedPort;
+		this(() -> createJMXConnection(resolvedPort));
 	}
 
 	/**
@@ -73,11 +83,7 @@ public class SpringApplicationLifeCycleClientManager {
 	public SpringApplicationLifecycleClient getLifeCycleClient() {
 		try {
 			if (client==null) {
-				Integer resolvedPort = jmxPort.get();
-				if (resolvedPort==null || resolvedPort <=0) {
-					throw new IllegalStateException("JMX port not specified");
-				}
-				connector = JMXClient.createLocalJmxConnector(resolvedPort);
+				connector = connectionProvider.get();
 				client = new SpringApplicationLifecycleClient(
 						connector.getMBeanServerConnection(),
 						SpringApplicationLifecycleClient.DEFAULT_OBJECT_NAME
