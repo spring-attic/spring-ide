@@ -181,7 +181,7 @@ public class BootDashActivator extends AbstractUIPlugin {
 		List<Map<String, Object>> entries = getCfTargetLoginOptions(toUpdate);
 		Map<String, Object> result = null;
 
-		if (entries != null && entries.size() > 0) {
+		if (entries != null) {
 			result = new HashMap<>();
 			result.put("cfClientParams", entries);
 		}
@@ -202,6 +202,9 @@ public class BootDashActivator extends AbstractUIPlugin {
 			        // boot dash targets
 					updateCloudTargetsInManifestEditor(this.model.getRunTargets().getValue())
 				).subscribe();
+			client.getRefreshTokens().doOnComplete(() ->
+				updateCloudTargetsInManifestEditor(this.model.getRunTargets().getValue())
+			).subscribe();
 		}
 	}
 
