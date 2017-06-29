@@ -254,7 +254,7 @@ public class CloudCliServiceLaunchConfigurationDelegate extends BootCliLaunchCon
 									PlatformUI.getWorkbench().getDisplay().asyncExec(() -> {
 										MessageDialogWithToggle dialog = MessageDialogWithToggle.openWarning(
 											Display.getCurrent().getActiveShell(), "Cloud CLI Service Info Limitation",
-											"Cloud service process life-cycle data is limited and port data is unavailable because of old JDK version. Point Default Installed JRE to the latest JDK and restart the service for complete process life-cycle and port data",
+											"Cloud service process life-cycle data is limited and port data is unavailable because STS runnning on an old JDK version. Point STS to the latest JDK and restart it to have complete service process life-cycle and port data",
 											"Don't show this message again",
 											false, null, null);
 										store.setValue(PREF_DONT_SHOW_JDK_WARNING, dialog.getToggleState());
@@ -267,7 +267,7 @@ public class CloudCliServiceLaunchConfigurationDelegate extends BootCliLaunchCon
 								PlatformUI.getWorkbench().getDisplay().asyncExec(() -> {
 									MessageDialogWithToggle dialog = MessageDialogWithToggle.openWarning(
 										Display.getCurrent().getActiveShell(), "Cloud CLI Service Info Limitation",
-										"Cloud service process life-cycle data is limited and port data is unavailable because Default Installed JRE is pointing to JRE. Point it to a JDK and restart the service for complete process life-cycle and port data",
+										"Cloud service process life-cycle data is limited and port data is unavailable because STS is running on a JRE. Point it to a JDK and restart STS for complete service process life-cycle and port data",
 										"Don't show this message again",
 										false, null, null);
 									store.setValue(PREF_DONT_SHOW_JRE_WARNING, dialog.getToggleState());
