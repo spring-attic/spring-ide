@@ -246,24 +246,39 @@ public class CloudCliServiceLaunchConfigurationDelegate extends BootCliLaunchCon
 							if (ProcessUtils.isLatestJdkForTools()) {
 								launch.setAttribute(BootLaunchConfigurationDelegate.PROCESS_ID, String.valueOf(ProcessUtils.getProcessID(process)));
 							} else {
-								PlatformUI.getWorkbench().getDisplay().asyncExec(() -> MessageDialogWithToggle.openWarning(
-										Display.getCurrent().getActiveShell(), "Cloud CLI Service Info Limitation",
-										"Cloud service process life-cycle data is limited and port data is unavailable because of old JDK version. Point Default Installed JRE to the latest JDK and restart the service for complete process life-cycle and port data",
-										"Don't show this message again",
-										store.getBoolean(PREF_DONT_SHOW_JDK_WARNING), store, PREF_DONT_SHOW_JDK_WARNING));
+								if (!store.getBoolean(PREF_DONT_SHOW_JDK_WARNING)) {
+									PlatformUI.getWorkbench().getDisplay().asyncExec(() -> {
+										MessageDialogWithToggle dialog = MessageDialogWithToggle.openWarning(
+											Display.getCurrent().getActiveShell(), "Cloud CLI Service Info Limitation",
+											"Cloud service process life-cycle data is limited and port data is unavailable because of old JDK version. Point Default Installed JRE to the latest JDK and restart the service for complete process life-cycle and port data",
+											"Don't show this message again",
+											false, null, null);
+										store.setValue(PREF_DONT_SHOW_JDK_WARNING, dialog.getToggleState());
+									});
+								}
 							}
 						} catch (NoClassDefFoundError e) {
-							PlatformUI.getWorkbench().getDisplay().asyncExec(() -> MessageDialogWithToggle.openWarning(
-									Display.getCurrent().getActiveShell(), "Cloud CLI Service Info Limitation",
-									"Cloud service process life-cycle data is limited and port data is unavailable because Default Installed JRE is pointing to JRE. Point it to a JDK and restart the service for complete process life-cycle and port data",
-									"Don't show this message again",
-									store.getBoolean(PREF_DONT_SHOW_JRE_WARNING), store, PREF_DONT_SHOW_JRE_WARNING));
+							if (!store.getBoolean(PREF_DONT_SHOW_JRE_WARNING)) {
+								PlatformUI.getWorkbench().getDisplay().asyncExec(() -> {
+									MessageDialogWithToggle dialog = MessageDialogWithToggle.openWarning(
+										Display.getCurrent().getActiveShell(), "Cloud CLI Service Info Limitation",
+										"Cloud service process life-cycle data is limited and port data is unavailable because Default Installed JRE is pointing to JRE. Point it to a JDK and restart the service for complete process life-cycle and port data",
+										"Don't show this message again",
+										false, null, null);
+									store.setValue(PREF_DONT_SHOW_JRE_WARNING, dialog.getToggleState());
+								});
+							}
 						} catch (UnsupportedOperationException e) {
-							PlatformUI.getWorkbench().getDisplay().asyncExec(() -> MessageDialogWithToggle.openWarning(
-									Display.getCurrent().getActiveShell(), "Cloud CLI Service Info Limitation",
-									"Cloud service process life-cycle data is limited and port data is unavailable on the current platform.",
-									"Don't show this message again",
-									store.getBoolean(PREF_DONT_SHOW_PLATFORM_WARNING), store, PREF_DONT_SHOW_PLATFORM_WARNING));
+							if (!store.getBoolean(PREF_DONT_SHOW_PLATFORM_WARNING)) {
+								PlatformUI.getWorkbench().getDisplay().asyncExec(() -> {
+									MessageDialogWithToggle dialog = MessageDialogWithToggle.openWarning(
+										Display.getCurrent().getActiveShell(), "Cloud CLI Service Info Limitation",
+										"Cloud service process life-cycle data is limited and port data is unavailable on the current platform.",
+										"Don't show this message again",
+										false, null, null);
+									store.setValue(PREF_DONT_SHOW_PLATFORM_WARNING, dialog.getToggleState());
+								});
+							}
 						}
 						return new RuntimeProcess(launch, process, label, attributes);
 					} else if (canUseLifeCycle(cloudCliVersion)) {
