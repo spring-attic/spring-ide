@@ -16,12 +16,14 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.model.LaunchConfigurationDelegate;
@@ -77,14 +79,31 @@ public class BootCliLaunchConfigurationDelegate extends LaunchConfigurationDeleg
 	 * @throws Exception
 	 */
 	protected String[] getEnv(IBootInstall install, ILaunch launch, ILaunchConfiguration conf) throws Exception {
-		List<String> env = new ArrayList<>(2);
+		Map<String, String> map = DebugPlugin.getDefault().getLaunchManager().getNativeEnvironment();
 		IVMInstall vmInstall = verifyVMInstall(conf);
-		env.add("JAVA_HOME=" + vmInstall.getInstallLocation());
+		map.put("JAVA_HOME", vmInstall.getInstallLocation().toString());
 		try {
-			env.add("SPRING_HOME=" + install.getHome());
+			map.put("SPRING_HOME", install.getHome().toString());
 		} catch (Exception e) {
 			Log.log(e);
 		}
+		List<String> env = new ArrayList<>(map.size());
+		String var = null;
+		for(Iterator<String> iter = map.keySet().iterator(); iter.hasNext();) {
+			var = iter.next();
+			String value = map.get(var);
+			if (value == null) {
+				value = ""; //$NON-NLS-1$
+			}
+			if (var.equalsIgnoreCase("path")) { //$NON-NLS-1$
+//				if(value.indexOf(jrestr) == -1) {
+//					value = jrestr+';'+value;
+//				}
+				continue;
+			}
+			env.add(var+"="+value); //$NON-NLS-1$
+		}
+
 		return env.toArray(new String[env.size()]);
 	}
 
