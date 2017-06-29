@@ -2423,6 +2423,58 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertEquals(1, clientFactory.instanceCount());
 	}
 
+	@Test public void openAppWithPathInBrowser() throws Exception {
+		final String appName = "to-deploy";
+		final String appPath = "/the-path";
+		String projectName = "to-deploy";
+		final String host = "foo-host";
+
+		CFClientParams targetParams = CfTestTargetParams.fromEnv();
+		clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
+		final IProject project = projects.createBootProject(projectName, withStarters("actuator", "web"));
+		harness.createCfTarget(targetParams);
+		final CloudFoundryBootDashModel target = harness.getCfTargetModel();
+		IFile manifest = createFile(project, "manifest.yml",
+				"applications:\n" +
+				"- name: "+appName+"\n" +
+				"  routes:\n" +
+				"  - route: "+host+".cfmockapps.io"+appPath
+		);
+		harness.answerDeploymentPrompt(ui, manifest);
+		target.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		waitForApps(target, appName);
+
+		CloudAppDashElement app = target.getApplication(appName);
+		ACondition.waitFor("uri update", 5_000, () -> {
+			assertEquals("foo-host.cfmockapps.io", app.getLiveHost());
+			assertEquals("http://foo-host.cfmockapps.io/the-path", app.getUrl());
+		});
+
+		app.setDefaultRequestMappingPath("/hello");
+		ACondition.waitFor("uri update", 5_000, () -> {
+			assertEquals("foo-host.cfmockapps.io", app.getLiveHost());
+			assertEquals("http://foo-host.cfmockapps.io/the-path/hello", app.getUrl());
+		});
+
+		app.setDefaultRequestMappingPath("/");
+		ACondition.waitFor("uri update", 5_000, () -> {
+			assertEquals("foo-host.cfmockapps.io", app.getLiveHost());
+			assertEquals("http://foo-host.cfmockapps.io/the-path/", app.getUrl());
+		});
+
+		app.setDefaultRequestMappingPath("hello");
+		ACondition.waitFor("uri update", 5_000, () -> {
+			assertEquals("foo-host.cfmockapps.io", app.getLiveHost());
+			assertEquals("http://foo-host.cfmockapps.io/the-path/hello", app.getUrl());
+		});
+
+		app.setDefaultRequestMappingPath("");
+		ACondition.waitFor("uri update", 5_000, () -> {
+			assertEquals("foo-host.cfmockapps.io", app.getLiveHost());
+			assertEquals("http://foo-host.cfmockapps.io/the-path", app.getUrl());
+		});
+
+	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////////
 
