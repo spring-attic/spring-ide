@@ -246,6 +246,7 @@ public class CloudCliServiceLaunchConfigurationDelegate extends BootCliLaunchCon
 							if (ProcessUtils.isLatestJdkForTools()) {
 								launch.setAttribute(BootLaunchConfigurationDelegate.PROCESS_ID, String.valueOf(ProcessUtils.getProcessID(process)));
 							} else {
+								Log.warn("Old JDK version. Need latest JDK to make JMX connection to process using its PID");
 								if (!store.getBoolean(PREF_DONT_SHOW_JDK_WARNING)) {
 									PlatformUI.getWorkbench().getDisplay().asyncExec(() -> {
 										MessageDialogWithToggle dialog = MessageDialogWithToggle.openWarning(
@@ -258,6 +259,7 @@ public class CloudCliServiceLaunchConfigurationDelegate extends BootCliLaunchCon
 								}
 							}
 						} catch (NoClassDefFoundError e) {
+							Log.warn(e);
 							if (!store.getBoolean(PREF_DONT_SHOW_JRE_WARNING)) {
 								PlatformUI.getWorkbench().getDisplay().asyncExec(() -> {
 									MessageDialogWithToggle dialog = MessageDialogWithToggle.openWarning(
@@ -269,6 +271,7 @@ public class CloudCliServiceLaunchConfigurationDelegate extends BootCliLaunchCon
 								});
 							}
 						} catch (UnsupportedOperationException e) {
+							Log.warn(e);
 							if (!store.getBoolean(PREF_DONT_SHOW_PLATFORM_WARNING)) {
 								PlatformUI.getWorkbench().getDisplay().asyncExec(() -> {
 									MessageDialogWithToggle dialog = MessageDialogWithToggle.openWarning(
