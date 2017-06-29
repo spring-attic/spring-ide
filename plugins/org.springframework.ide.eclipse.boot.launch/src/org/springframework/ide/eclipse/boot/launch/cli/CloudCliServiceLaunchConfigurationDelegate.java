@@ -244,7 +244,10 @@ public class CloudCliServiceLaunchConfigurationDelegate extends BootCliLaunchCon
 						final IPreferenceStore store = BootActivator.getDefault().getPreferenceStore();
 						try {
 							if (ProcessUtils.isLatestJdkForTools()) {
-								launch.setAttribute(BootLaunchConfigurationDelegate.PROCESS_ID, String.valueOf(ProcessUtils.getProcessID(process)));
+								long processID = ProcessUtils.getProcessID(process);
+								if (processID >= 0) {
+									launch.setAttribute(BootLaunchConfigurationDelegate.PROCESS_ID, String.valueOf(processID));
+								}
 							} else {
 								Log.warn("Old JDK version. Need latest JDK to make JMX connection to process using its PID");
 								if (!store.getBoolean(PREF_DONT_SHOW_JDK_WARNING)) {
