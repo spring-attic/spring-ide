@@ -40,6 +40,7 @@ import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestEdit
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 /**
@@ -60,6 +61,12 @@ public class BootDashActivator extends AbstractUIPlugin {
 	public static final String CHECK_ICON = "check";
 	public static final String CHECK_GREYSCALE_ICON = "check-greyscale";
 
+	private static final Map<String, String> LS_DIAGNOSTIC_MESSAGES = ImmutableMap.of(
+		"noTargetsFound", "No Cloud Foundry targets found: Connect CF Target(s) in Boot Dashboard or login via CF CLI",
+		"unauthorised", "Permission denied: Verify credentials to CF Target from Boot Dashboard or CF CLI are correct",
+		"noNetworkConnection", "No connection to Cloud Foundry: Connect CF Target via Boot Dashboard or login via CF CLI or verify network connections",
+		"noOrgSpace", "No org/space selected: Connect CF Target in Boot Dashboard or login via CF CLI"
+	);
 
 	// The shared instance
 	private static BootDashActivator plugin;
@@ -183,7 +190,11 @@ public class BootDashActivator extends AbstractUIPlugin {
 
 		if (entries != null) {
 			result = new HashMap<>();
-			result.put("cfClientParams", entries);
+			Map<String, Object> clientParamsData = ImmutableMap.of(
+				"parameters", entries,
+				"messages", LS_DIAGNOSTIC_MESSAGES
+			);
+			result.put("cfClientParams", clientParamsData);
 		}
 
 		ManifestEditorActivator.getDefault().setCfTargetLoginOptions(result);
