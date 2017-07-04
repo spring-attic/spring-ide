@@ -56,7 +56,7 @@ public class ManifestYamlEditor extends AbstractYamlEditor {
 			for (LanguageServerDefinition serverDefinition : LanguageServersRegistry.getInstance().findProviderFor(contentType)) {
 				if (serverDefinition != null) {
 					try {
-						ProjectSpecificLanguageServerWrapper lsWrapperForConnection = LanguageServiceAccessor.getLSWrapperForConnection(project, contentType, serverDefinition);
+						ProjectSpecificLanguageServerWrapper lsWrapperForConnection = LanguageServiceAccessor.getLSWrapperForConnection(project, serverDefinition);
 						if (lsWrapperForConnection != null) {
 							IPath fileLocation = file.getLocation();
 							if (fileLocation != null) {
