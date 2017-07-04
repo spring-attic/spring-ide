@@ -39,7 +39,7 @@ public abstract class AbstractPollingAppReadyStateMonitor implements ReadyStateM
 	private Job job;
 	private LiveVariable<Boolean> ready = new LiveVariable<>(false);
 
-	public AbstractPollingAppReadyStateMonitor() {
+	final public void startPolling() {
 		initPollingJob();
 	}
 

@@ -50,7 +50,9 @@ public class SpringApplicationReadyStateMonitor extends AbstractPollingAppReadyS
 		} catch (Exception e) {
 			//Something went wrong asking client for ready state.
 			// most likely process died.
-			clientManager.disposeClient();
+			if (clientManager != null) {
+				clientManager.disposeClient();
+			}
 		}
 		return false;
 	}

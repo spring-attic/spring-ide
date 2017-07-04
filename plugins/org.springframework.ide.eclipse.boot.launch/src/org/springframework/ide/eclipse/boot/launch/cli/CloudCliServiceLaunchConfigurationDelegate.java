@@ -247,6 +247,9 @@ public class CloudCliServiceLaunchConfigurationDelegate extends BootCliLaunchCon
 								long processID = ProcessUtils.getProcessID(process);
 								if (processID >= 0) {
 									launch.setAttribute(BootLaunchConfigurationDelegate.PROCESS_ID, String.valueOf(processID));
+								} else {
+									Log.warn("No PID available for cloud service '" + launch.getLaunchConfiguration()
+											.getAttribute(ATTR_CLOUD_SERVICE_ID, "Unknown Service") + "'");
 								}
 							} else {
 								Log.warn("Old JDK version. Need latest JDK to make JMX connection to process using its PID");

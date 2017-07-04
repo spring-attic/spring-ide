@@ -157,13 +157,17 @@ public abstract class RunStateTracker<T> extends ProcessListenerAdapter implemen
 			if (BootLaunchConfigurationDelegate.canUseLifeCycle(l) || CloudCliServiceLaunchConfigurationDelegate.canUseLifeCycle(l)) {
 				int jmxPort = BootLaunchConfigurationDelegate.getJMXPortAsInt(l);
 				if (jmxPort != -1) {
-					return new SpringApplicationReadyStateMonitor(jmxPort);
+					SpringApplicationReadyStateMonitor readyStateMonitor = new SpringApplicationReadyStateMonitor(jmxPort);
+					readyStateMonitor.startPolling();
+					return readyStateMonitor;
 				}
 			} else if (CloudCliServiceLaunchConfigurationDelegate.isSingleProcessServiceLaunch(l)) {
 				String pid = l.getAttribute(BootLaunchConfigurationDelegate.PROCESS_ID);
 				String serviceId = l.getLaunchConfiguration().getAttribute(CloudCliServiceLaunchConfigurationDelegate.ATTR_CLOUD_SERVICE_ID, (String) null);
 				if (pid != null && !pid.isEmpty() && serviceId != null) {
-					return new CloudCliServiceReadyStateMonitor(() -> ProcessUtils.createJMXConnector(pid), serviceId);
+					CloudCliServiceReadyStateMonitor readyStateMonitor = new CloudCliServiceReadyStateMonitor(() -> ProcessUtils.createJMXConnector(pid), serviceId);
+					readyStateMonitor.startPolling();
+					return readyStateMonitor;
 				}
 			}
 		} catch (Exception e) {
