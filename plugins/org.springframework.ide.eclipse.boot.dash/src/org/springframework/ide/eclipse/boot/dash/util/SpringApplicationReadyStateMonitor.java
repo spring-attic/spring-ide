@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.util;
 
+import org.eclipse.debug.core.ILaunch;
 import org.springframework.ide.eclipse.boot.launch.util.SpringApplicationLifeCycleClientManager;
 import org.springframework.ide.eclipse.boot.launch.util.SpringApplicationLifecycleClient;
 
@@ -29,9 +30,9 @@ public class SpringApplicationReadyStateMonitor extends AbstractPollingAppReadyS
 
 	private SpringApplicationLifeCycleClientManager clientManager;
 
-	public SpringApplicationReadyStateMonitor(int jmxPort) {
+	public SpringApplicationReadyStateMonitor(ILaunch launch) {
 		super();
-		clientManager = new SpringApplicationLifeCycleClientManager(jmxPort);
+		clientManager = new SpringApplicationLifeCycleClientManager(launch);
 	}
 
 	public void dispose() {

@@ -34,6 +34,7 @@ import org.springframework.ide.eclipse.boot.util.ProcessTracker;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.core.util.ProcessUtils;
 
 /**
@@ -138,6 +139,8 @@ public abstract class RunStateTracker<T> extends ProcessListenerAdapter implemen
 		if (tracker==null) {
 			readyStateTrackers.put(l, tracker = createReadyStateTracker(l));
 			tracker.getReady().addListener(readyStateListener);
+//		} else {
+//			debug("getReadyState["+l+"] "+BootLaunchUtils.getProject(l)+" FROM CACHE");
 		}
 		return tracker.getReady();
 	}
@@ -152,16 +155,15 @@ public abstract class RunStateTracker<T> extends ProcessListenerAdapter implemen
 	};
 	private boolean updateInProgress;
 
-	protected ReadyStateMonitor createReadyStateTracker(ILaunch l) {
+	protected final ReadyStateMonitor createReadyStateTracker(ILaunch l) {
 		try {
-			if (BootLaunchConfigurationDelegate.canUseLifeCycle(l) || CloudCliServiceLaunchConfigurationDelegate.canUseLifeCycle(l)) {
-				int jmxPort = BootLaunchConfigurationDelegate.getJMXPortAsInt(l);
-				if (jmxPort != -1) {
-					SpringApplicationReadyStateMonitor readyStateMonitor = new SpringApplicationReadyStateMonitor(jmxPort);
-					readyStateMonitor.startPolling();
-					return readyStateMonitor;
-				}
-			} else if (CloudCliServiceLaunchConfigurationDelegate.isSingleProcessServiceLaunch(l)) {
+			Boolean canUseLifeCycle=null, cliCanUseLifeCycle=null, isSingleProcessServiceLaunch = null;
+			if ((canUseLifeCycle = BootLaunchConfigurationDelegate.canUseLifeCycle(l)) || (cliCanUseLifeCycle = CloudCliServiceLaunchConfigurationDelegate.canUseLifeCycle(l))) {
+				SpringApplicationReadyStateMonitor readyStateMonitor = new SpringApplicationReadyStateMonitor(l);
+				readyStateMonitor.startPolling();
+				debug("createReadyStateTracker"+"["+l+"] "+BootLaunchUtils.getProject(l)+" OK!");
+				return readyStateMonitor;
+			} else if (isSingleProcessServiceLaunch  = CloudCliServiceLaunchConfigurationDelegate.isSingleProcessServiceLaunch(l)) {
 				String pid = l.getAttribute(BootLaunchConfigurationDelegate.PROCESS_ID);
 				String serviceId = l.getLaunchConfiguration().getAttribute(CloudCliServiceLaunchConfigurationDelegate.ATTR_CLOUD_SERVICE_ID, (String) null);
 				if (pid != null && !pid.isEmpty() && serviceId != null) {
@@ -170,7 +172,10 @@ public abstract class RunStateTracker<T> extends ProcessListenerAdapter implemen
 					return readyStateMonitor;
 				}
 			}
+			debug("createReadyStateTracker"+"["+l+"] "+BootLaunchUtils.getProject(l)+" NOT APPLICABLE");
+			debug("  canUseLifeCycle="+canUseLifeCycle+"\n  cliCanUseLifeCycle="+cliCanUseLifeCycle+"\n  isSingleProcessServiceLaunch="+isSingleProcessServiceLaunch);
 		} catch (Exception e) {
+			debug("createReadyStateTracker"+"["+l+"] "+BootLaunchUtils.getProject(l)+" FAILED: "+ExceptionUtil.getMessage(e));
 			Log.log(e);
 		}
 		return DummyReadyStateMonitor.create();
