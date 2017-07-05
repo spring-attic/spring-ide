@@ -107,6 +107,8 @@ public class BootDashActivator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		// Initialize config for manifest YAML LS
+		updateCloudTargetsInManifestEditor(getModel().getRunTargets().getValues());
 	}
 
 	/*

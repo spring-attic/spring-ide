@@ -17,8 +17,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.lsp4e.LanguageServersRegistry;
 import org.eclipse.lsp4e.LanguageServersRegistry.LanguageServerDefinition;
 import org.eclipse.lsp4e.LanguageServiceAccessor;
@@ -52,20 +50,19 @@ public class ManifestYamlEditor extends AbstractYamlEditor {
 			IFile file = fileInput.getFile();
 			IProject project = file.getProject();
 		
-			IContentType contentType = Platform.getContentTypeManager().getContentType("org.springframework.ide.eclipse.manifest.yml");
-			for (LanguageServerDefinition serverDefinition : LanguageServersRegistry.getInstance().findProviderFor(contentType)) {
-				if (serverDefinition != null) {
-					try {
-						ProjectSpecificLanguageServerWrapper lsWrapperForConnection = LanguageServiceAccessor.getLSWrapperForConnection(project, serverDefinition);
-						if (lsWrapperForConnection != null) {
-							IPath fileLocation = file.getLocation();
-							if (fileLocation != null) {
-								lsWrapperForConnection.connect(fileLocation, null);
-							}
+			String languageServerId = "org.eclipse.languageserver.languages.cloudfoundrymanifest";
+			LanguageServerDefinition serverDefinition = LanguageServersRegistry.getInstance().getDefinition(languageServerId);
+			if (serverDefinition != null) {
+				try {
+					ProjectSpecificLanguageServerWrapper lsWrapperForConnection = LanguageServiceAccessor.getLSWrapperForConnection(project, serverDefinition);
+					if (lsWrapperForConnection != null) {
+						IPath fileLocation = file.getLocation();
+						if (fileLocation != null) {
+							lsWrapperForConnection.connect(fileLocation, null);
 						}
-					} catch (IOException e) {
-						e.printStackTrace();
 					}
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
 			}
 		}
