@@ -21,7 +21,10 @@ import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import javax.management.remote.JMXConnector;
 
+import org.eclipse.debug.core.ILaunch;
+import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.util.SpringApplicationLifecycleClient;
+import org.springsource.ide.eclipse.commons.core.util.ProcessUtils;
 
 /**
  * Spring Cloud CLI 1.3.X Service ready state monitor implementation. Based on
@@ -42,6 +45,23 @@ public class CloudCliServiceReadyStateMonitor extends AbstractPollingAppReadySta
 		this.objectName = SpringApplicationLifecycleClient.toObjectName("launcher." + serviceId + ":type=RestartEndpoint,name=restartEndpoint");
 	}
 
+	public CloudCliServiceReadyStateMonitor(ILaunch launch, String id) {
+		this(() -> createConnector(launch), id);
+	}
+
+	private static JMXConnector createConnector(ILaunch l) {
+		String pid = l.getAttribute(BootLaunchConfigurationDelegate.PROCESS_ID);
+		if (pid == null) {
+			return null;
+		} else {
+			if (Long.valueOf(pid) < 0) {
+				throw new IllegalStateException("Invalid PID");
+			} else {
+				return ProcessUtils.createJMXConnector(pid);
+			}
+		}
+	}
+
 	@Override
 	public void dispose() {
 		if (connector != null) {
@@ -59,7 +79,13 @@ public class CloudCliServiceReadyStateMonitor extends AbstractPollingAppReadySta
 	protected boolean checkReady() {
 		try {
 			if (connector == null) {
-				connector = jmxConnectionProvider.get();
+				try {
+					connector = jmxConnectionProvider.get();
+				} catch (IllegalStateException e) {
+					// Invalid PID exception. Means that attempt to calculate PID has failed, hence fall back to no JMX connection case -> show ready state as ready
+					e.printStackTrace();
+					return true;
+				}
 			}
 			if (connector != null) {
 				MBeanServerConnection connection = connector.getMBeanServerConnection();

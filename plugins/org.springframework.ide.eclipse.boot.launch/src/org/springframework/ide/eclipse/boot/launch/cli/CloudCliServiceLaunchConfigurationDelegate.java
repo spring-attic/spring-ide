@@ -170,13 +170,6 @@ public class CloudCliServiceLaunchConfigurationDelegate extends BootCliLaunchCon
 		return conf!=null && canUseLifeCycle(conf);
 	}
 
-	public static boolean isSingleProcessServiceLaunch(ILaunch launch) {
-		if (launch.getAttribute(BootLaunchConfigurationDelegate.PROCESS_ID) != null) {
-			return isSingleProcessServiceConfig(launch.getLaunchConfiguration());
-		}
-		return false;
-	}
-
 	public static boolean isSingleProcessServiceConfig(ILaunchConfiguration conf) {
 		try {
 			if (isCloudCliService(conf)) {
@@ -242,15 +235,11 @@ public class CloudCliServiceLaunchConfigurationDelegate extends BootCliLaunchCon
 					Version cloudCliVersion = bootInstall.getExtension(CloudCliInstall.class) == null ? null : bootInstall.getExtension(CloudCliInstall.class).getVersion();
 					if (CloudCliServiceLaunchConfigurationDelegate.isSingleProcessServiceConfig(launch.getLaunchConfiguration())) {
 						final IPreferenceStore store = BootActivator.getDefault().getPreferenceStore();
+						// Set invalid PID initially thus if PID is failed to be calculated then set PID launch attribute to invalid PID to fallback to default non-JMX process tracking
+						long pid = -1;
 						try {
 							if (ProcessUtils.isLatestJdkForTools()) {
-								long processID = ProcessUtils.getProcessID(process);
-								if (processID >= 0) {
-									launch.setAttribute(BootLaunchConfigurationDelegate.PROCESS_ID, String.valueOf(processID));
-								} else {
-									Log.warn("No PID available for cloud service '" + launch.getLaunchConfiguration()
-											.getAttribute(ATTR_CLOUD_SERVICE_ID, "Unknown Service") + "'");
-								}
+								pid = ProcessUtils.getProcessID(process);
 							} else {
 								Log.warn("Old JDK version. Need latest JDK to make JMX connection to process using its PID");
 								if (!store.getBoolean(PREF_DONT_SHOW_JDK_WARNING)) {
@@ -289,6 +278,7 @@ public class CloudCliServiceLaunchConfigurationDelegate extends BootCliLaunchCon
 								});
 							}
 						}
+						launch.setAttribute(BootLaunchConfigurationDelegate.PROCESS_ID, String.valueOf(pid));
 						return new RuntimeProcess(launch, process, label, attributes);
 					} else if (canUseLifeCycle(cloudCliVersion)) {
 						return super.newProcess(launch, process, label, attributes);

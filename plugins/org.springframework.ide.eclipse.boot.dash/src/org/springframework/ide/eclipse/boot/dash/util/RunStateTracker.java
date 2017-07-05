@@ -163,11 +163,10 @@ public abstract class RunStateTracker<T> extends ProcessListenerAdapter implemen
 				readyStateMonitor.startPolling();
 				debug("createReadyStateTracker"+"["+l+"] "+BootLaunchUtils.getProject(l)+" OK!");
 				return readyStateMonitor;
-			} else if (isSingleProcessServiceLaunch  = CloudCliServiceLaunchConfigurationDelegate.isSingleProcessServiceLaunch(l)) {
-				String pid = l.getAttribute(BootLaunchConfigurationDelegate.PROCESS_ID);
+			} else if (isSingleProcessServiceLaunch  = CloudCliServiceLaunchConfigurationDelegate.isSingleProcessServiceConfig(l.getLaunchConfiguration())) {
 				String serviceId = l.getLaunchConfiguration().getAttribute(CloudCliServiceLaunchConfigurationDelegate.ATTR_CLOUD_SERVICE_ID, (String) null);
-				if (pid != null && !pid.isEmpty() && serviceId != null) {
-					CloudCliServiceReadyStateMonitor readyStateMonitor = new CloudCliServiceReadyStateMonitor(() -> ProcessUtils.createJMXConnector(pid), serviceId);
+				if (serviceId != null) {
+					CloudCliServiceReadyStateMonitor readyStateMonitor = new CloudCliServiceReadyStateMonitor(l, serviceId);
 					readyStateMonitor.startPolling();
 					return readyStateMonitor;
 				}
