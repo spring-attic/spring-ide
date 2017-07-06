@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2016 Pivotal, Inc.
+ * Copyright (c) 2015, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,7 @@ import org.springframework.ide.eclipse.boot.dash.model.AbstractLaunchConfigurati
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
+import org.springframework.ide.eclipse.boot.dash.model.LocalCloudServiceDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
@@ -63,7 +64,7 @@ public class ExposeAppAction extends RunStateAction {
 
 	@Override
 	protected boolean appliesToElement(BootDashElement bootDashElement) {
-		return bootDashElement.getTarget().getType().equals(RunTargetTypes.LOCAL);
+		return bootDashElement.getTarget().getType().equals(RunTargetTypes.LOCAL) && !(bootDashElement instanceof LocalCloudServiceDashElement);
 	}
 
 	@Override

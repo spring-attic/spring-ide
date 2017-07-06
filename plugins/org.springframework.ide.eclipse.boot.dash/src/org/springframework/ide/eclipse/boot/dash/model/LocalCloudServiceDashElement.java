@@ -149,6 +149,11 @@ public class LocalCloudServiceDashElement extends AbstractLaunchConfigurationsDa
 	}
 
 	@Override
+	public boolean canDuplicate() {
+		return false;
+	}
+
+	@Override
 	public EnumSet<RunState> supportedGoalStates() {
 		return LOCAL_CLOUD_SERVICE_RUN_GOAL_STATES;
 	}
