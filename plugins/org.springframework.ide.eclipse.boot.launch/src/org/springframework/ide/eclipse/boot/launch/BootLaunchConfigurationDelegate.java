@@ -185,9 +185,11 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 				CURRENT_LAUNCH.get().setAttribute(JMX_PORT, ""+port);
 			}
 			// Fast startup VM args
-			String fastStartupArgs = BootActivator.getDefault().getPreferenceStore().getString(BootPreferences.PREF_BOOT_FAST_STARTUP_JVM_ARGS).trim();
+			String fastStartupArgs = BootActivator.getDefault().getPreferenceStore().getString(BootPreferences.PREF_BOOT_FAST_STARTUP_JVM_ARGS);
 			boolean fastStartup = getFastStartup(conf) && fastStartupArgs != null && !fastStartupArgs.isEmpty();
-			if (fastStartup) {
+			if (fastStartup && !fastStartupArgs.trim().isEmpty()) {
+				// Add space to separate fast startup args from the preceding arguments
+				vmArgs.append(' ');
 				vmArgs.append(fastStartupArgs);
 			}
 			return vmArgs.toString();

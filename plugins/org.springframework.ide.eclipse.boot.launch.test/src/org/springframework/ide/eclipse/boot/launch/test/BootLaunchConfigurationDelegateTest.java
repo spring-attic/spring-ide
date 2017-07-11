@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.internal.core.IInternalDebugCoreConstants;
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.BootPreferences;
@@ -44,6 +45,8 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		//when project has errors upon launching it.
 		InstanceScope.INSTANCE.getNode(DebugPlugin.getUniqueIdentifier())
 			.putBoolean(IInternalDebugCoreConstants.PREF_ENABLE_STATUS_HANDLERS, false);
+		BootActivator.getDefault().getPreferenceStore().setToDefault(BootPreferences.PREF_BOOT_FAST_STARTUP_JVM_ARGS);
+		BootActivator.getDefault().getPreferenceStore().setToDefault(BootPreferences.PREF_BOOT_FAST_STARTUP_DEFAULT);
 	}
 
 	public void testGetSetProperties() throws Exception {
@@ -390,6 +393,84 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		assertElements(actual, expect);
 	}
 
+	public void testFastStartupNoVmArgs() throws Exception {
+		createLaunchReadyProject(TEST_PROJECT);
+		ILaunchConfigurationWorkingCopy wc = createBaseWorkingCopy();
+		BootLaunchConfigurationDelegate.setFastStartup(wc, true);
+		
+		// Disable life-cycle vm args just to test VM args for fast startup
+		BootLaunchConfigurationDelegate.setEnableLifeCycle(wc, false);
+		BootLaunchConfigurationDelegate.setEnableLiveBeanSupport(wc, false);
+		BootLaunchConfigurationDelegate.setEnableJMX(wc, false);
 
+		String fastStartupArgs = BootActivator.getDefault().getPreferenceStore().getDefaultString(BootPreferences.PREF_BOOT_FAST_STARTUP_JVM_ARGS);
+		assertTrue(!fastStartupArgs.trim().isEmpty());
+		String vmArgs = new BootLaunchConfigurationDelegate().getVMArguments(wc);
+		assertTrue(vmArgs.endsWith(" " + fastStartupArgs));
 
+		// Enable life-cycle vm args to properly launch the app and track process properly 
+		BootLaunchConfigurationDelegate.setEnableLifeCycle(wc, true);
+		BootLaunchConfigurationDelegate.setEnableLiveBeanSupport(wc, true);
+		BootLaunchConfigurationDelegate.setEnableJMX(wc, true);
+		LaunchResult result = LaunchUtil.synchLaunch(wc);
+
+		assertContains(":: Spring Boot ::", result.out);
+		assertOk(result);
+	}
+
+	public void testFastStartupCustomVmArgs() throws Exception {
+		createLaunchReadyProject(TEST_PROJECT);
+		ILaunchConfigurationWorkingCopy wc = createBaseWorkingCopy();
+		BootLaunchConfigurationDelegate.setFastStartup(wc, true);
+		
+		// Disable life-cycle vm args just to test VM args for fast startup
+		BootLaunchConfigurationDelegate.setEnableLifeCycle(wc, false);
+		BootLaunchConfigurationDelegate.setEnableLiveBeanSupport(wc, false);
+		BootLaunchConfigurationDelegate.setEnableJMX(wc, false);
+		
+		wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, "-Xmx1024M");
+
+		String fastStartupArgs = BootActivator.getDefault().getPreferenceStore().getDefaultString(BootPreferences.PREF_BOOT_FAST_STARTUP_JVM_ARGS);
+		assertTrue(!fastStartupArgs.trim().isEmpty());
+		String vmArgs = new BootLaunchConfigurationDelegate().getVMArguments(wc);
+		assertTrue(vmArgs.endsWith(" " + fastStartupArgs));
+
+		// Enable life-cycle vm args to properly launch the app and track process properly 
+		BootLaunchConfigurationDelegate.setEnableLifeCycle(wc, true);
+		BootLaunchConfigurationDelegate.setEnableLiveBeanSupport(wc, true);
+		BootLaunchConfigurationDelegate.setEnableJMX(wc, true);
+		LaunchResult result = LaunchUtil.synchLaunch(wc);
+
+		assertContains(":: Spring Boot ::", result.out);
+		assertOk(result);
+	}
+	
+	public void testEmptyFastStartupVmArgs() throws Exception {
+		createLaunchReadyProject(TEST_PROJECT);
+		ILaunchConfigurationWorkingCopy wc = createBaseWorkingCopy();
+		BootLaunchConfigurationDelegate.setFastStartup(wc, true);
+		
+		// Disable life-cycle vm args just to test VM args for fast startup
+		BootLaunchConfigurationDelegate.setEnableLifeCycle(wc, false);
+		BootLaunchConfigurationDelegate.setEnableLiveBeanSupport(wc, false);
+		BootLaunchConfigurationDelegate.setEnableJMX(wc, false);
+		
+		String vmArgs = "-Xmx1024M";
+		wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, vmArgs);
+
+		BootActivator.getDefault().getPreferenceStore().setValue(BootPreferences.PREF_BOOT_FAST_STARTUP_JVM_ARGS, "   \t  ");
+		String fastStartupArgs = BootActivator.getDefault().getPreferenceStore().getString(BootPreferences.PREF_BOOT_FAST_STARTUP_JVM_ARGS);
+		assertTrue(!fastStartupArgs.isEmpty() && fastStartupArgs.trim().isEmpty());
+		String actualArgs = new BootLaunchConfigurationDelegate().getVMArguments(wc);
+		assertEquals(vmArgs, actualArgs);
+
+		// Enable life-cycle vm args to properly launch the app and track process properly 
+		BootLaunchConfigurationDelegate.setEnableLifeCycle(wc, true);
+		BootLaunchConfigurationDelegate.setEnableLiveBeanSupport(wc, true);
+		BootLaunchConfigurationDelegate.setEnableJMX(wc, true);
+		LaunchResult result = LaunchUtil.synchLaunch(wc);
+
+		assertContains(":: Spring Boot ::", result.out);
+		assertOk(result);
+	}
 }
