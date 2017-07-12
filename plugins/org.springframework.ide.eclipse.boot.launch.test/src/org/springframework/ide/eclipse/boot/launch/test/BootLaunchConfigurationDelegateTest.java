@@ -406,15 +406,9 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		String fastStartupArgs = BootActivator.getDefault().getPreferenceStore().getDefaultString(BootPreferences.PREF_BOOT_FAST_STARTUP_JVM_ARGS);
 		assertTrue(!fastStartupArgs.trim().isEmpty());
 		String vmArgs = new BootLaunchConfigurationDelegate().getVMArguments(wc);
-		assertTrue(vmArgs.endsWith(" " + fastStartupArgs));
+		assertTrue(vmArgs.endsWith("\n" + fastStartupArgs));
 
-		// Enable life-cycle vm args to properly launch the app and track process properly 
-		BootLaunchConfigurationDelegate.setEnableLifeCycle(wc, true);
-		BootLaunchConfigurationDelegate.setEnableLiveBeanSupport(wc, true);
-		BootLaunchConfigurationDelegate.setEnableJMX(wc, true);
 		LaunchResult result = LaunchUtil.synchLaunch(wc);
-
-		assertContains(":: Spring Boot ::", result.out);
 		assertOk(result);
 	}
 
@@ -433,15 +427,13 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		String fastStartupArgs = BootActivator.getDefault().getPreferenceStore().getDefaultString(BootPreferences.PREF_BOOT_FAST_STARTUP_JVM_ARGS);
 		assertTrue(!fastStartupArgs.trim().isEmpty());
 		String vmArgs = new BootLaunchConfigurationDelegate().getVMArguments(wc);
-		assertTrue(vmArgs.endsWith(" " + fastStartupArgs));
+		assertTrue(vmArgs.endsWith("\n" + fastStartupArgs));
 
-		// Enable life-cycle vm args to properly launch the app and track process properly 
+		// Also try live beans/JMX arguments 
 		BootLaunchConfigurationDelegate.setEnableLifeCycle(wc, true);
 		BootLaunchConfigurationDelegate.setEnableLiveBeanSupport(wc, true);
 		BootLaunchConfigurationDelegate.setEnableJMX(wc, true);
 		LaunchResult result = LaunchUtil.synchLaunch(wc);
-
-		assertContains(":: Spring Boot ::", result.out);
 		assertOk(result);
 	}
 	
@@ -464,13 +456,7 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		String actualArgs = new BootLaunchConfigurationDelegate().getVMArguments(wc);
 		assertEquals(vmArgs, actualArgs);
 
-		// Enable life-cycle vm args to properly launch the app and track process properly 
-		BootLaunchConfigurationDelegate.setEnableLifeCycle(wc, true);
-		BootLaunchConfigurationDelegate.setEnableLiveBeanSupport(wc, true);
-		BootLaunchConfigurationDelegate.setEnableJMX(wc, true);
 		LaunchResult result = LaunchUtil.synchLaunch(wc);
-
-		assertContains(":: Spring Boot ::", result.out);
 		assertOk(result);
 	}
 }

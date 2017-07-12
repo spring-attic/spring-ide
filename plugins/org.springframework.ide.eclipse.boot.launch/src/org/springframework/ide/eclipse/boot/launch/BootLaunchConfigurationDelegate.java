@@ -189,7 +189,7 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 			boolean fastStartup = getFastStartup(conf) && fastStartupArgs != null && !fastStartupArgs.isEmpty();
 			if (fastStartup && !fastStartupArgs.trim().isEmpty()) {
 				// Add space to separate fast startup args from the preceding arguments
-				vmArgs.append(' ');
+				vmArgs.append('\n');
 				vmArgs.append(fastStartupArgs);
 			}
 			return vmArgs.toString();
