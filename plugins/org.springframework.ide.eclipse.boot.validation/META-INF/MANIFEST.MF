@@ -13,7 +13,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui.workbench,
  org.eclipse.ui.ide,
  org.eclipse.jdt.ui,
- com.google.guava,
  org.springsource.ide.eclipse.commons.core,
  org.springframework.ide.eclipse.editor.support,
  org.eclipse.jface,
@@ -21,3 +20,4 @@ Require-Bundle: org.eclipse.core.runtime,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.boot.validation.framework
+Import-Package: com.google.common.collect;version="15.0.0"

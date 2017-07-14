@@ -11,7 +11,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.text,
  org.eclipse.jface.text,
  org.yaml.snakeyaml,
- com.google.guava,
  org.eclipse.core.resources,
  org.eclipse.ui.ide,
  org.eclipse.jdt.ui,
@@ -40,5 +39,7 @@ Export-Package: org.springframework.ide.eclipse.editor.support,
  org.springframework.ide.eclipse.editor.support.yaml.schema,
  org.springframework.ide.eclipse.editor.support.yaml.schema.constraints,
  org.springframework.ide.eclipse.editor.support.yaml.structure
-Import-Package: org.springframework.util
+Import-Package: com.google.common.base;version="15.0.0",
+ com.google.common.collect;version="15.0.0",
+ org.springframework.util
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
