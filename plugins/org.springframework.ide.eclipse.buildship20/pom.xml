@@ -35,6 +35,16 @@
 				</repository>
 			</repositories>
 		</profile>
+		<profile>
+			<id>e47</id>
+			<repositories>
+				<repository>
+					<id>buildship2</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/buildship/updates/e47/releases/2.x/</url>
+				</repository>
+			</repositories>
+		</profile>
 	</profiles>
 
 	<build>
