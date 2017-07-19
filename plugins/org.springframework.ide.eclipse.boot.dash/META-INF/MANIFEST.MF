@@ -24,6 +24,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.debug.ui,
  org.eclipse.ui.forms,
  org.json,
+ com.google.guava;bundle-version="15.0.0",
  org.eclipse.equinox.security,
  org.eclipse.ui.views.properties.tabbed,
  org.eclipse.wst.server.core,
@@ -67,7 +68,4 @@ Export-Package: org.springframework.ide.eclipse.boot.dash,
  org.springframework.ide.eclipse.boot.dash.util,
  org.springframework.ide.eclipse.boot.dash.views,
  org.springframework.ide.eclipse.boot.dash.views.sections
-Import-Package: com.google.common.base;version="15.0.0",
- com.google.common.cache;version="15.0.0",
- com.google.common.collect;version="15.0.0",
- org.yaml.snakeyaml
+Import-Package: org.yaml.snakeyaml

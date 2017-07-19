@@ -21,6 +21,7 @@ Require-Bundle: org.eclipse.ui,
  org.springsource.ide.eclipse.commons.core,
  org.eclipse.ui.console,
  org.eclipse.m2e.jdt,
+ com.google.guava,
  org.springframework.ide.eclipse.editor.support,
  org.eclipse.jdt.debug
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -34,5 +35,3 @@ Export-Package: org.springframework.ide.eclipse.boot.launch,
  org.springframework.ide.eclipse.boot.launch.properties,
  org.springframework.ide.eclipse.boot.launch.util
 Bundle-Activator: org.springframework.ide.eclipse.boot.launch.BootLaunchActivator
-Import-Package: com.google.common.base;version="15.0.0",
- com.google.common.collect;version="15.0.0"

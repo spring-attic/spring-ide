@@ -10,6 +10,7 @@ Require-Bundle: org.eclipse.ui,
  org.json;bundle-version="1.0.0",
  org.springsource.ide.eclipse.commons.browser;bundle-version="[3.5.0,4.0.0)";resolution:=optional,
  org.eclipse.core.resources,
+ com.google.guava,
  org.eclipse.jdt.ui,
  org.eclipse.jdt.core,
  org.springsource.ide.eclipse.commons.frameworks.core,
@@ -44,5 +45,3 @@ Export-Package: org.springframework.ide.eclipse.boot.wizard,
  org.springframework.ide.eclipse.boot.wizard.guides.ext,
  org.springframework.ide.eclipse.boot.wizard.importing
 Bundle-Vendor: Pivotal Inc.
-Import-Package: com.google.common.base;version="15.0.0",
- com.google.common.collect;version="15.0.0"
