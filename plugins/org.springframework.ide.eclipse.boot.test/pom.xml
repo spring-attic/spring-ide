@@ -75,7 +75,7 @@
 				<repository>
 					<id>buildship2</id>
 					<layout>p2</layout>
-					<url>http://download.eclipse.org/buildship/updates/e46/releases/2.x/</url>
+					<url>http://download.eclipse.org/buildship/updates/e46/snapshots/2.x</url>
 				</repository>
 			</repositories>
 		</profile>
