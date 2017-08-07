@@ -34,8 +34,11 @@ public class StsPerspective implements IPerspectiveFactory {
 	
 	public void createInitialLayout(IPageLayout layout) {
 		
-		if (Platform.getBundle(SpringUIPlugin.ECLEMMA_UI_BUNDLE_ID) != null) {
-			layout.addActionSet(SpringUIPlugin.ECLEMMA_COVERAGE_ACTION_SET);
+		if (Platform.getBundle(SpringUIPlugin.ECLEMMA_UI_BUNDLE_ID_POST_ECLIPSE) != null) {
+			layout.addActionSet(SpringUIPlugin.ECLEMMA_COVERAGE_ACTION_SET_POST_ECLIPSE);
+		}
+		else if (Platform.getBundle(SpringUIPlugin.ECLEMMA_UI_BUNDLE_ID_PRE_ECLIPSE) != null) {
+			layout.addActionSet(SpringUIPlugin.ECLEMMA_COVERAGE_ACTION_SET_PRE_ECLIPSE);
 		}
 		
 		String editorArea = layout.getEditorArea();
