@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2016 Spring IDE Developers
+ * Copyright (c) 2005, 2017 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,8 +57,11 @@ public class SpringUIPlugin extends AbstractUIPlugin {
 	public static final String SPRING_EXPLORER_CONTENT_PROVIDER_ID = PLUGIN_ID
 			+ ".navigator.springExplorerContent";
 	
-	public static final String ECLEMMA_COVERAGE_ACTION_SET = "com.mountainminds.eclemma.ui.CoverageActionSet";
-	public static final String ECLEMMA_UI_BUNDLE_ID = "com.mountainminds.eclemma.ui";
+	public static final String ECLEMMA_COVERAGE_ACTION_SET_PRE_ECLIPSE = "com.mountainminds.eclemma.ui.CoverageActionSet";
+	public static final String ECLEMMA_UI_BUNDLE_ID_PRE_ECLIPSE = "com.mountainminds.eclemma.ui";
+
+	public static final String ECLEMMA_COVERAGE_ACTION_SET_POST_ECLIPSE = "org.eclipse.eclemma.ui.CoverageActionSet";
+	public static final String ECLEMMA_UI_BUNDLE_ID_POST_ECLIPSE = "org.eclipse.eclemma.ui";
 
 	private static final String SPRING_PERSPECTIVE_ID = "com.springsource.sts.ide.perspective";
 	
@@ -105,40 +108,46 @@ public class SpringUIPlugin extends AbstractUIPlugin {
 		addEclemmaActionSetToSpringPerspective();
 	}
 	
-	/*
+	/**
 	 * Add Eclemma action set to Spring perspective is Eclemma UI plugin is vailable 
 	 */
 	private void addEclemmaActionSetToSpringPerspective() {
-		if (Platform.getBundle(ECLEMMA_UI_BUNDLE_ID) != null) {
-			/*
-			 * This can be called on and off the UI thread. Should be on the UI thread for the below to execute.
-			 * If not invoked on the UI thread then active workbench windows would be null.
-			 */
-			getWorkbench().getDisplay().asyncExec(new Runnable() {
-				@Override
-				public void run() {
-					final IWorkbenchWindow activeWorkbenchWindow = getWorkbench().getActiveWorkbenchWindow();
-					IWorkbenchPage activePage = activeWorkbenchWindow.getActivePage();
-					if (SPRING_PERSPECTIVE_ID.equals(activePage.getPerspective().getId())) {
-						activePage.showActionSet(ECLEMMA_COVERAGE_ACTION_SET);
-					} else {
-						activeWorkbenchWindow.addPerspectiveListener(new PerspectiveAdapter() {
-							@Override
-							public void perspectiveActivated(IWorkbenchPage page, IPerspectiveDescriptor perspectiveDescriptor) {
-								super.perspectiveActivated(page, perspectiveDescriptor);
-								if (SPRING_PERSPECTIVE_ID.equals(perspectiveDescriptor.getId())) {
-									page.showActionSet(ECLEMMA_COVERAGE_ACTION_SET);
-									/*
-									 * Yes, this listener can be removed while listener body is being executed :-)
-									 */
-									activeWorkbenchWindow.removePerspectiveListener(this);
-						        }
-							}
-						});
-					}
-				}
-			});
+		if (Platform.getBundle(ECLEMMA_UI_BUNDLE_ID_POST_ECLIPSE) != null) {
+			addEclemmaActionSetToSpringPerspective(ECLEMMA_COVERAGE_ACTION_SET_POST_ECLIPSE);
 		}
+		else if (Platform.getBundle(ECLEMMA_UI_BUNDLE_ID_PRE_ECLIPSE) != null) {
+			addEclemmaActionSetToSpringPerspective(ECLEMMA_COVERAGE_ACTION_SET_PRE_ECLIPSE);
+		}
+	}
+
+	/**
+	 * Add Eclemma action set to Spring perspective is Eclemma UI plugin is vailable 
+	 */
+	private void addEclemmaActionSetToSpringPerspective(final String actionSetID) {
+		getWorkbench().getDisplay().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				final IWorkbenchWindow activeWorkbenchWindow = getWorkbench().getActiveWorkbenchWindow();
+				IWorkbenchPage activePage = activeWorkbenchWindow.getActivePage();
+				if (SPRING_PERSPECTIVE_ID.equals(activePage.getPerspective().getId())) {
+					activePage.showActionSet(actionSetID);
+				} else {
+					activeWorkbenchWindow.addPerspectiveListener(new PerspectiveAdapter() {
+						@Override
+						public void perspectiveActivated(IWorkbenchPage page, IPerspectiveDescriptor perspectiveDescriptor) {
+							super.perspectiveActivated(page, perspectiveDescriptor);
+							if (SPRING_PERSPECTIVE_ID.equals(perspectiveDescriptor.getId())) {
+								page.showActionSet(actionSetID);
+								/*
+								 * Yes, this listener can be removed while listener body is being executed :-)
+								 */
+								activeWorkbenchWindow.removePerspectiveListener(this);
+							}
+						}
+					});
+				}
+			}
+		});
 	}
 
 	public static ImageDescriptorRegistry getImageDescriptorRegistry() {
