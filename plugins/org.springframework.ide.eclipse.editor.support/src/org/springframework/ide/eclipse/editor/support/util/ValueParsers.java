@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.editor.support.util;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * Constants and static methods to create generally useful value parsers.
@@ -21,7 +21,7 @@ import org.springframework.util.StringUtils;
 public class ValueParsers {
 
 	public static final ValueParser NE_STRING = (s) -> {
-		if (StringUtils.hasText(s)) {
+		if (!StringUtils.isBlank(s)) {
 			return s;
 		} else {
 			throw new ValueParseException("String should not be empty");

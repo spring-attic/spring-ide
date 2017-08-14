@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2016 Pivotal, Inc.
+ * Copyright (c) 2015, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.IDocument;
 import org.springframework.ide.eclipse.editor.support.reconcile.DuplicateFilterProblemCollector;
@@ -39,7 +40,6 @@ import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypedProperty;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YamlSchema;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.constraints.Constraint;
-import org.springframework.util.StringUtils;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.yaml.snakeyaml.nodes.MappingNode;
@@ -256,7 +256,7 @@ public class SchemaBasedYamlASTReconciler implements YamlASTReconciler {
 
 	private void valueParseError(YType type, Node node, String parseErrorMsg) {
 		String msg= "Couldn't parse as '"+describe(type)+"'";
-		if (StringUtils.hasText(parseErrorMsg)) {
+		if (!StringUtils.isBlank(parseErrorMsg)) {
 			msg += " ("+parseErrorMsg+")";
 		}
 		problem(node, msg);
@@ -329,7 +329,7 @@ public class SchemaBasedYamlASTReconciler implements YamlASTReconciler {
 		if (typeUtil.isSequencable(type)) {
 			expectedNodeTypes.add("Sequence");
 		}
-		return StringUtils.collectionToDelimitedString(expectedNodeTypes, " or ");
+		return StringUtils.join(expectedNodeTypes, " or ");
 	}
 
 	private void problem(Node node, String msg) {
