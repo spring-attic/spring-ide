@@ -16,7 +16,6 @@ import java.util.Collection;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.lsp4e.operations.completion.LSCompletionProposal;
 import org.eclipse.lsp4e.operations.completion.LSContentAssistProcessor;
 import org.springframework.ide.eclipse.editor.support.completions.ICompletionEngine;
 
@@ -36,12 +35,7 @@ public class LSBasedCompletionEngine implements ICompletionEngine {
 
 	@Override
 	public Collection<ICompletionProposal> getCompletions(IDocument document, int offset) throws Exception {
-		ICompletionProposal[] proposals = lsContentAssistProcessor.computeCompletionProposals(viewer, offset);
-		for (int i = 0; i < proposals.length; i++) {
-			LSCompletionProposal proposal = (LSCompletionProposal) proposals[i];
-			proposals[i] = new LSBasedSmartCompletionProposal(proposal);
-		}
-		return Arrays.asList(proposals);
+		return Arrays.asList(lsContentAssistProcessor.computeCompletionProposals(viewer, offset));
 	}
 
 }
