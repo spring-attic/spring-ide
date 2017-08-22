@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.ui.part.EditorActionBarContributor;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.CachingValueProvider;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
 import org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity;
@@ -3523,6 +3524,28 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		assertLinkTargets(editor, "indent-output",
 				"com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT"
 		);
+	}
+	
+	public void testIgnoreTypeErrorsForValuesContainingMavenResourcesPlaceholders_workaround() throws Exception {
+		//See: https://www.pivotaltracker.com/story/show/150005676
+		defaultTestData();
+		YamlEditor editor = new YamlEditor(
+				"server:\n" + 
+				"  port: \"@application-port@\"\n" +
+				"bogus: bad" //token error to ensure reconciler is really working
+		);
+		assertProblems(editor,  "bogus|Unknown property");
+	}
+
+	public void IGNORED_testIgnoreTypeErrorsForValuesContainingMavenResourcesPlaceholders_direct() throws Exception {
+		//See: https://www.pivotaltracker.com/story/show/150005676
+		defaultTestData();
+		YamlEditor editor = new YamlEditor(
+				"server:\n" + 
+				"  port: @application-port@\n" +
+				"bogus: bad" //token error to ensure reconciler is really working
+		);
+		assertProblems(editor,  "bogus|Unknown property");
 	}
 
 	///////////////// cruft ////////////////////////////////////////////////////////

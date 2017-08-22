@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.boot.configurationmetadata.Deprecation;
@@ -62,6 +63,8 @@ public class ApplicationYamlASTReconciler implements YamlASTReconciler {
 		this.nav = nav;
 	}
 
+	private static final Pattern PLACE_HOLDER = Pattern.compile("(\\$\\{\\S+\\})|(\\@\\S+\\@)");
+	
 	@Override
 	public void reconcile(YamlFileAST ast, IProgressMonitor mon) {
 		reconcile(ast, nav, mon);
@@ -273,7 +276,7 @@ public class ApplicationYamlASTReconciler implements YamlASTReconciler {
 
 	private void reconcile(ScalarNode scalar, Type type) {
 		String stringValue = scalar.getValue();
-		if (!stringValue.contains("${")) { //don't check anything with ${} expressions in it as we
+		if (!hasPlaceHolder(stringValue)) { //don't check anything with ${} expressions in it as we
 											// don't know its actual value
 			ValueParser valueParser = typeUtil.getValueParser(type);
 			if (valueParser!=null) {
@@ -288,6 +291,10 @@ public class ApplicationYamlASTReconciler implements YamlASTReconciler {
 				}
 			}
 		}
+	}
+
+	private boolean hasPlaceHolder(String stringValue) {
+		return PLACE_HOLDER.matcher(stringValue).find();
 	}
 
 	private void expectTypeFoundMapping(Type type, MappingNode node) {
