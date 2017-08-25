@@ -13,6 +13,10 @@ package org.springframework.ide.eclipse.editor.support.yaml.path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeRef;
@@ -21,6 +25,8 @@ import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeRef.SeqRef;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeRef.TupleValueRef;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPathSegment.YamlPathSegmentType;
+
+import com.google.common.collect.ImmutableList;
 
 import reactor.core.publisher.Flux;
 
@@ -75,11 +81,34 @@ public class YamlPath extends AbstractYamlTraversal {
 	 * by spliting the name at each dot.
 	 */
 	public static YamlPath fromProperty(String propName) {
-		ArrayList<YamlPathSegment> segments = new ArrayList<>();
-		for (String s : propName.split("\\.")) {
-			segments.add(YamlPathSegment.valueAt(s));
+		ImmutableList.Builder<YamlPathSegment> segments = ImmutableList.builder();
+		String delim = ".[]";
+		StringTokenizer tokens = new StringTokenizer(propName, delim, true);
+		try {
+			while (tokens.hasMoreTokens()) {
+				String token = tokens.nextToken(delim);
+				if (token.equals(".") || token.equals("]")) {
+					//Skip it silently
+				} else if (token.equals("[")) {
+					String bracketed = tokens.nextToken("]");
+					if (bracketed.equals("]")) {
+						//empty string between []? Makes no sense, so ignore that.
+					} else {
+						try {
+							int index = Integer.parseInt(bracketed);
+							segments.add(YamlPathSegment.valueAt(index));
+						} catch (NumberFormatException e) {
+							segments.add(YamlPathSegment.valueAt(bracketed));
+						}
+					}
+				} else {
+					segments.add(YamlPathSegment.valueAt(token));
+				}
+			}
+		} catch (NoSuchElementException e) {
+			//Ran out of tokens.
 		}
-		return new YamlPath(segments);
+		return new YamlPath(segments.build());
 	}
 
 	/**

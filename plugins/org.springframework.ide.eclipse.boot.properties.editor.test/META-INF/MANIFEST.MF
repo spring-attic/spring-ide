@@ -32,7 +32,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.filebuffers;bundle-version="3.5.500",
  com.google.guava,
  org.eclipse.m2e.jdt,
- org.springsource.ide.eclipse.commons.core
+ org.springsource.ide.eclipse.commons.core,
+ org.eclipse.ltk.core.refactoring
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.boot.properties.editor.test

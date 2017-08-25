@@ -121,5 +121,9 @@
    <provider
          class="org.springframework.ide.eclipse.boot.launch.properties.editor.launch.SpringBootPropertyNameContentProposalProvider$Factory">
    </provider>
-</extension>     
+</extension>
+<extension
+      point="org.eclipse.ui.commands">
+</extension>
+
 </plugin>

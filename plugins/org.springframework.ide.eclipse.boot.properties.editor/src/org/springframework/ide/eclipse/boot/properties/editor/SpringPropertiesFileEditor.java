@@ -51,8 +51,8 @@ public class SpringPropertiesFileEditor extends PropertiesFileEditor implements 
 		setSourceViewerConfiguration(fSourceViewerConf = new SpringPropertiesFileSourceViewerConfiguration(textTools.getColorManager(), store, this, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING));
 		SpringPropertiesEditorPlugin.getIndexManager().addListener(this);
 		SpringPropertiesEditorPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
+		setEditorContextMenuId("#BootPropertiesEditorContext");
 	}
-
 
 	@Override
 	public void dispose() {

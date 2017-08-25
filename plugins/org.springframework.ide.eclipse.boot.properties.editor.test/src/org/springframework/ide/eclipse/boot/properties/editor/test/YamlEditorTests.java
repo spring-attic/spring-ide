@@ -3539,6 +3539,7 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 
 	public void IGNORED_testIgnoreTypeErrorsForValuesContainingMavenResourcesPlaceholders_direct() throws Exception {
 		//See: https://www.pivotaltracker.com/story/show/150005676
+		//Not implemented, this test fails. The choice not to implement this was deliberate!
 		defaultTestData();
 		YamlEditor editor = new YamlEditor(
 				"server:\n" + 
