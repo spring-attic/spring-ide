@@ -84,6 +84,12 @@ public class CloudCliInstall implements IBootInstallExtension {
 			BootCliCommand cmd = createCommand();
 			if (cmd.execute(CloudCliInstall.LIST_SERVICES_COMMAND) == 0 && !isCommandOutputErroneous(cmd.getOutput())) {
 				String[] outputLines = cmd.getOutput().split("\n");
+				if (outputLines.length > 1) {
+					Log.warn("List services command output has more than one line:\n " + cmd.getOutput());
+				}
+				if (outputLines[outputLines.length - 1].contains(null) || outputLines[outputLines.length - 1].contains("")) {
+					Log.error("List services command output is not parsed correctly: " + cmd.getOutput());
+				}
 				return outputLines[outputLines.length - 1].split("\\s+");
 			}
 		} catch (Throwable t) {
