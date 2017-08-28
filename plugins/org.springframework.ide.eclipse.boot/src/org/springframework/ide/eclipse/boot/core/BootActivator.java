@@ -14,8 +14,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.springframework.ide.eclipse.boot.util.Log;
@@ -45,6 +47,7 @@ public class BootActivator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		JDK9CompatibilityCheck.initialize();
 	}
 
 	/*
