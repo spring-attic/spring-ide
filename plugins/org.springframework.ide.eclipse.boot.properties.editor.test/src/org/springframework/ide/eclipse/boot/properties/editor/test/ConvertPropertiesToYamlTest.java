@@ -82,6 +82,18 @@ public class ConvertPropertiesToYamlTest {
 		);
 	}
 	
+	@Test public void almostHasComments() throws Exception {
+		do_conversionTest(
+			"my.hello=Good morning!\n" + 
+			"my.goodbye=See ya # later\n"
+			, // ==>
+			"my:\n" +
+			"  goodbye: 'See ya # later'\n" +
+			"  hello: Good morning!\n"
+		);
+	}
+
+	
 	@Test public void conversionWithListItems() throws Exception {
 		do_conversionTest(
 				"some.thing[0].a=first-a\n" + 
@@ -226,6 +238,7 @@ public class ConvertPropertiesToYamlTest {
 				}
 		);
 	}
+	
 
 	/* 
 junit.framework.AssertionFailedError: Not found: Blah

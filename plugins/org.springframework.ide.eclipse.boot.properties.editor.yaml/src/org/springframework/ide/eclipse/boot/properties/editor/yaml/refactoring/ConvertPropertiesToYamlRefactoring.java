@@ -12,7 +12,6 @@ package org.springframework.ide.eclipse.boot.properties.editor.yaml.refactoring;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Properties;
@@ -42,7 +41,7 @@ public class ConvertPropertiesToYamlRefactoring extends Refactoring {
 
 	private static final String YAML_EXT = ".yml";
 	private static final String PROPERTIES_EXT = ".properties";
-	private static final Pattern COMMENT = Pattern.compile("\\s*(\\#|\\!)");
+	private static final Pattern COMMENT = Pattern.compile("(?m)^\\s*(\\#|\\!)");
 	
 	private final IFile propsFile;
 	private IFile yamlFile;
