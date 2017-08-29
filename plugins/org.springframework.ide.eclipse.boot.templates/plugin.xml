@@ -3,7 +3,7 @@
 <plugin>
 	<extension
          point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
-         id="swtBuilderCompletionProposalComputer">
+         id="org.springframework.ide.eclipse.boot.templates.BootTemplateCompletionProposalComputer">
       <javaCompletionProposalComputer
             class="org.springframework.ide.eclipse.boot.templates.BootTemplateCompletionProposalComputer"
             activate="true"
