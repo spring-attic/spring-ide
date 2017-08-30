@@ -87,6 +87,10 @@ public class CloudCliInstall implements IBootInstallExtension {
 				if (outputLines.length > 1) {
 					Log.warn("List services command output has more than one line:\n " + cmd.getOutput());
 				}
+				if (outputLines[outputLines.length - 1] == null) {
+					Log.error("Cannot find list of services in the out put\n" + cmd.getOutput());
+					return new String[0];
+				}
 				if (outputLines[outputLines.length - 1].contains(null) || outputLines[outputLines.length - 1].contains("")) {
 					Log.error("List services command output is not parsed correctly: " + cmd.getOutput());
 				}
