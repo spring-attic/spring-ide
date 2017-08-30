@@ -236,6 +236,17 @@ ResponseEntity&lt;PagedResources&lt;?&gt;&gt; result = ${restTemplate:var(org.sp
 	&lt;/pluginRepositories&gt;
 </template>
 <template autoinsert="true" 
+	id="org.springframework.ide.eclipse.boot.templates.RequestMapping" 
+	name="RequestMapping method"
+	context="boot-members" 
+	description="RequestMapping method" 
+	enabled="true"
+	>${x:import(org.springframework.web.bind.annotation.RequestMapping, org.springframework.web.bind.annotation.RequestMethod, org.springframework.web.bind.annotation.RequestParam)}@RequestMapping(value="${path}", method=RequestMethod.${GET})
+public ${SomeData} ${requestMethodName}(@RequestParam ${String} ${param}) {
+	return new ${SomeData}(${cursor});
+}
+</template>
+<template autoinsert="true" 
 	id="org.springframework.ide.eclipse.boot.templates.GetMapping" 
 	name="GetMapping method"
 	context="boot-members" 

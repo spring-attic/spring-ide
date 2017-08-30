@@ -172,49 +172,7 @@ public ${void} ${handleException}(${Exception} ${exception}) {
 }
         </pattern>
      </template>
-     <template
-           autoinsert="true"
-           contextTypeId="java-members"
-           description="GET HTTP method"
-           id="com.springsource.sts.quickfix.getHandler"
-           name="GET method">
-        <pattern>
-           ${x:import(org.springframework.web.bind.annotation.RequestMapping, org.springframework.web.bind.annotation.RequestMethod)}@RequestMapping(value=&quot;${cursor}${path}&quot;, method = RequestMethod.GET)
-public ${String} ${get}(${Object} ${model}) {
-	// TODO Auto generated method stub
-	return null;
-}
-        </pattern>
-     </template>
-     <template
-           autoinsert="true"
-           contextTypeId="java-members"
-           description="POST HTTP method"
-           id="com.springsource.sts.quickfix.postHandler"
-           name="POST method">
-        <pattern>
-           ${x:import(org.springframework.web.bind.annotation.RequestMapping, org.springframework.web.bind.annotation.RequestMethod, org.springframework.validation.BindingResult)}@RequestMapping(value=&quot;${cursor}${path}&quot;, method = RequestMethod.POST)
-public ${String} ${post}(${Object} ${formObject}, ${BindingResult} ${bindingResult}) {
-	// TODO Auto generated method stub
-	return null;
-}
-        </pattern>
-     </template>
-     <template
-           autoinsert="true"
-           contextTypeId="java-members"
-           description="PUT HTTP method"
-           id="com.springsource.sts.quickfix.putHandler"
-           name="PUT method">
-        <pattern>
-           ${x:import(org.springframework.web.bind.annotation.RequestMapping, org.springframework.web.bind.annotation.RequestMethod, org.springframework.validation.BindingResult)}@RequestMapping(value=&quot;${cursor}${path}&quot;, method = RequestMethod.PUT)
-public ${String} ${post}(${Object} ${formObject}, ${BindingResult} ${bindingResult}) {
-	// TODO Auto generated method stub
-	return null;
-}
-        </pattern>
-     </template>
-     <template
+    <template
            autoinsert="true"
            contextTypeId="xml_tag"
            description="DispatcherServlet declaration"
