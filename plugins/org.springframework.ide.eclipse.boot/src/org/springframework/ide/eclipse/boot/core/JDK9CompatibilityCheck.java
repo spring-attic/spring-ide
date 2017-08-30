@@ -10,29 +10,20 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.core;
 
-import java.time.Duration;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import org.eclipse.core.runtime.ILogListener;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
-import org.osgi.framework.Version;
-import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager;
-import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager.ClasspathListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 /**
- * Checks for Boot projects in the workspace that have version < 1.5.x. These versions
- * are not compatible with JDK9 and will cause problems if STS is running with a JDK 9 
- * runtime (irrespective of what JRE is configured in the project/workspace).
+ * Listen to the error log for errors that are indicative of JDK9 comaptibility issues. Show a warning to
+ * the user if such messages are received.
  * 
  * See: https://www.pivotaltracker.com/story/show/146914165
  * 
@@ -40,12 +31,11 @@ import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
  */
 public class JDK9CompatibilityCheck {
 
-	
 	public static void initialize() {
 		String version = System.getProperty("java.version");
+		//Unless IDE is running in java 9, there's no point in any of these checks!
 		if (isJava9(version)) {
-			//To avoid kicking of heavy activity and classloading during early startup...
-			//... postpone initializing the checker into a job to execute a while later.
+			//Schedule a job to avoid directly triggering lots of classloading during bundle activation.
 			Job job = new Job("Start JDK9 Compatibility Check") {
 				
 				@Override
@@ -54,7 +44,7 @@ public class JDK9CompatibilityCheck {
 					return Status.OK_STATUS;
 				}
 			};
-			job.schedule(Duration.ofSeconds(40).toMillis());
+			job.schedule();
 		}
 	}
 
@@ -68,66 +58,67 @@ public class JDK9CompatibilityCheck {
 		}
 	}
 	
-	private static class Checker implements ClasspathListener {
+	private static class Checker implements ILogListener {
 		
-		Version REQUIRED = new Version("1.5");
-		Pattern BOOT_JAR = Pattern.compile("spring-boot-(\\d+\\.\\d+\\.\\d).*\\.jar");
-		
-		private Disposable disposable;
+		private Disposable disposable = null;
 
 		public Checker() {
-			disposable = new ClasspathListenerManager(this, true);
+			Platform.addLogListener(this);
+			disposable = () -> Platform.removeLogListener(this);
 		}
 
 		@Override
-		public void classpathChanged(IJavaProject jp) {
-			try {
-				String versionStr = getBootVersion(jp);
-				if (versionStr!=null) {
-					Version version = new Version(versionStr);
-					if (version.compareTo(REQUIRED)<0) {
-						showWarning(jp, versionStr);
-					}
-				}
-			} catch (Exception e) {
-				// Silently ignore... nothing we do in here is very critical.
+		public void logging(IStatus status, String plugin) {
+			String indicator = getProblemIndicator(status, plugin);
+			if (indicator!=null) {
+				showWarning(indicator);
 			}
 		}
 
-		private synchronized void showWarning(IJavaProject jp, String bootVersion) {
+		private String getProblemIndicator(IStatus status, String plugin) {
+			if (status.getSeverity()==Status.ERROR) {
+				Throwable e = status.getException();
+				if (e!=null) {
+					String m= ExceptionUtil.getMessage(e);
+					if (m.equals("NoClassDefFoundError: Could not initialize class org.codehaus.plexus.archiver.jar.JarArchiver")) {
+						return m;
+					}
+				}
+			}
+			return null;
+		}
+
+		private synchronized void showWarning(String indicativeErrorMessage) {
+			String title = "JDK 9 Compatibility Issue Detected";
+			String message = "STS is currently running with a JDK 9 (java.version="+System.getProperty("java.version")+").\n" + 
+			"\n" +
+			"An error was logged in the error log which is indicative of an incompatibility of the `plexus-archiver` maven plugin "+
+			"with JDK 9.\n" +
+			"\n" +
+			"The error message was: '"+indicativeErrorMessage+"'\n"+
+			"\n" +
+			"Note that Boot projects with version < 2.0 use an older `plexus-archiver` plugin. They will not build properly "+ 
+			"and may even cause STS itself to behave erratically (producing a continual stream of workspace build errors)\n" + 
+			"\n" +
+			"Recommended action is to run STS with a JDK 8 by changing your `STS.ini` file.\n" +
+			"Alternatively, make sure none of your workspace projects use an outdated `plexus-archiver`. For boot projects, that means "+
+			"updating to Spring Boot version 2.0 or later.\n" +
+			"\n" +
+			"See https://bugs.eclipse.org/bugs/show_bug.cgi?id=516887 for some additional details.\n";
+			showWarning(title, message);
+		}
+
+		private synchronized void showWarning(String title, String message) {
 			//Use the disposable to ensure we only show the warning at most once (per session)
 			if (disposable!=null) {
 				disposable.dispose();
 				disposable = null;
+				Display.getDefault().asyncExec(() -> {
+					MessageDialog.openWarning(null, title,
+							message
+					);
+				});
 			}
-			Display.getDefault().asyncExec(() -> {
-				MessageDialog.openWarning(null, "JDK 9 Compatibility Issue Detected",
-						"STS is currently running with a JDK 9 (java.version="+System.getProperty("java.version")+").\n" + 
-						"\n" +
-						"Project '"+jp.getElementName()+"' uses Spring Boot version '"+bootVersion+"'.\n" +
-						"\n" +
-						"Boot projects with version < 1.5 are not compatible with this setup. They will not build properly "+ 
-						"and may even cause STS itself to behave unpredictably\n" + 
-						"\n" +
-						"Recommended actions:\n" + 
-						"- either upgrade your projects to a later version ...\n" +
-						"- or run STS with a JDK 8 by changing your `STS.ini` file\n"
-				);
-			});
-		}
-
-		private String getBootVersion(IJavaProject jp) throws JavaModelException {
-			for (IClasspathEntry entry : jp.getResolvedClasspath(true)) {
-				if (entry.getEntryKind() == IClasspathEntry.CPE_LIBRARY && entry.getContentKind()==IPackageFragmentRoot.K_BINARY) {
-					String jarName = entry.getPath().lastSegment();
-					Matcher matcher = BOOT_JAR.matcher(jarName);
-					if (matcher.matches()) {
-						String versionString = jarName.substring(matcher.start(1), matcher.end(1));
-						return versionString;
-					}
-				}
-			};
-			return null;
 		}
 	}
 
