@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
@@ -52,6 +53,10 @@ import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathL
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ProjectChangeListenerManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ProjectChangeListenerManager.ProjectChangeListener;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -117,6 +122,19 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 		}
 	};
 
+	private LiveSetVariable<ButtonModel> buttons = new LiveSetVariable<>();
+	{
+		new LiveVariable<ButtonModel>(new BootDashHyperlink("Enable local cloud services") {
+			{
+				buttons.add(this);
+			}
+			public void perform() throws Exception {
+				MessageDialog.openInformation(null, "Clicked!", "You clicked me!");
+				buttons.remove(this);
+			};
+		});
+	}
+
 	public class WorkspaceListener implements ProjectChangeListener, ClasspathListener {
 
 		@Override
@@ -145,7 +163,6 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 		// Listen to M2E JDT plugin active event to refresh local boot project dash elements.
 		addMavenInitializationIssueEventHandling();
 	}
-
 	/**
 	 * Refresh boot project dash elements once m2e JDT plugin is fully
 	 * initialized. Boot project checks may not succeed in some cases if m2e JDT
@@ -176,7 +193,10 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 		if (allElements==null) {
 			this.applications = new LiveSetVariable<>(AsyncMode.SYNC);
 			this.cloudCliservices = new LiveSetVariable<>(AsyncMode.SYNC);
-			this.allElements = LiveSets.union(this.applications, this.cloudCliservices);
+			this.allElements = LiveSets.union(
+					this.applications,
+					this.cloudCliservices
+			);
 			WorkspaceListener workspaceListener = new WorkspaceListener();
 			this.openCloseListenerManager = new ProjectChangeListenerManager(workspace, workspaceListener);
 			this.classpathListenerManager = new ClasspathListenerManager(workspaceListener);
@@ -271,6 +291,11 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 	public synchronized ObservableSet<BootDashElement> getElements() {
 		init();
 		return allElements;
+	}
+
+	@Override
+	public ObservableSet<ButtonModel> getButtons() {
+		return buttons;
 	}
 
 	/**

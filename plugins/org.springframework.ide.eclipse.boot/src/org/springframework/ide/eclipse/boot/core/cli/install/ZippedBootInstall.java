@@ -14,11 +14,8 @@ import java.io.File;
 import java.net.URL;
 
 import org.apache.commons.io.FileUtils;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.core.ZipFileUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager;
@@ -130,27 +127,6 @@ public class ZippedBootInstall extends BootInstall {
 		}
 	}
 	
-	private class InstallBootCliExtensionJob extends Job {
-		
-		private Class<? extends IBootInstallExtension> extensionType;
-		
-		InstallBootCliExtensionJob(String name, Class<? extends IBootInstallExtension> extensionType) {
-			super(name);
-			this.extensionType = extensionType;
-		}
-
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			try {
-				installExtension(extensionType);
-				return Status.OK_STATUS;
-			} catch (Exception e) {
-				return ExceptionUtil.status(e);
-			}
-		}
-		
-	}
-
 	private DownloadableItem zip;
 	private File home; //Will be set once the install is unzipped and ready for use.
 
@@ -201,27 +177,11 @@ public class ZippedBootInstall extends BootInstall {
 	
 	synchronized private CloudCliInstall initCloudCliInstall() {
 		if (super.getCloudCliInstall() == null) {
-			InstallBootCliExtensionJob installCloudCliJob = new InstallBootCliExtensionJob("Auto install Spring Cloud CLI", CloudCliInstall.class);
-			installCloudCliJob.schedule();
-			long waitTime = 200L;
-			for (long waited = 0L; installCloudCliJob.getState() != Job.NONE && waited < 30000L; waited+=waitTime) {
-				try {
-					Thread.sleep(waitTime);
-				} catch (InterruptedException e) {
-					// ignore
-				}
-			}
-			if (installCloudCliJob.getState() != Job.NONE) {
-				Log.error("Timed out waiting for Spring Cloud CLI to be installed");
-			}
-		}
-		if (super.getCloudCliInstall() == null) {
 			return null;
 		} else {
 			return new CachingCloudCliInstall(this);
 		}
 	}
-
 	
 	@Override
 	protected CloudCliInstall getCloudCliInstall() {

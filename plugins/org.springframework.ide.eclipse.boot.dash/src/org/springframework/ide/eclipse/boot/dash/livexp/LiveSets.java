@@ -20,48 +20,19 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Sets;
 
+import static org.springsource.ide.eclipse.commons.livexp.core.LiveSets.EMPTY_SET;
+
 /**
  * @author Kris De Volder
  */
 public class LiveSets {
 
-	@SuppressWarnings("rawtypes")
-	private static final ObservableSet EMPTY_SET = (ObservableSet) ObservableSet.constant(ImmutableSet.of());
-
-	@SuppressWarnings("unchecked")
 	public static <T> ObservableSet<T> emptySet(Class<T> t) {
-		return EMPTY_SET;
+		return org.springsource.ide.eclipse.commons.livexp.core.LiveSets.emptySet(t);
 	}
 
-	@SuppressWarnings("unchecked")
 	public static <R, A extends R, B extends R> ObservableSet<R> union(ObservableSet<A> e1, ObservableSet<B> e2) {
-		if (e1==EMPTY_SET) {
-			return (ObservableSet<R>) e2;
-		} else if (e2==EMPTY_SET) {
-			return (ObservableSet<R>) e1;
-		} else {
-			return new LiveUnion<>(e1, e2);
-		}
-	}
-
-	//////////////////////////////////////////////////////////////////////
-
-	private static class LiveUnion<T, A extends T, B extends T> extends ObservableSet<T> {
-
-		private ObservableSet<A> e1;
-		private ObservableSet<B> e2;
-
-		public LiveUnion(ObservableSet<A> e1, ObservableSet<B> e2) {
-			this.e1 = e1;
-			this.e2 = e2;
-			this.dependsOn(e1);
-			this.dependsOn(e2);
-		}
-
-		@Override
-		protected ImmutableSet<T> compute() {
-			return ImmutableSet.copyOf(Sets.union(e1.getValue(), e2.getValue()));
-		}
+		return org.springsource.ide.eclipse.commons.livexp.core.LiveSets.union(e1, e2);
 	}
 
 	public static <S,T> ObservableSet<T> filter(final ObservableSet<S> source, final Class<T> retainType) {

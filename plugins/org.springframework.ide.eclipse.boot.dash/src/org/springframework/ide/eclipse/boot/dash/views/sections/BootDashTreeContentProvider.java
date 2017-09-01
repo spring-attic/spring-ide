@@ -10,12 +10,17 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views.sections;
 
+import java.util.ArrayList;
+
 import org.apache.commons.lang3.ArrayUtils;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
+import org.springframework.ide.eclipse.boot.dash.model.ButtonModel;
+
+import com.google.common.collect.ImmutableSet;
 
 /**
  * @author Kris De Volder
@@ -40,7 +45,17 @@ public class BootDashTreeContentProvider implements ITreeContentProvider {
 		if (e instanceof BootDashViewModel) {
 			return ((BootDashViewModel) e).getSectionModels().getValue().toArray();
 		} else if (e instanceof BootDashModel) {
-			return ((BootDashModel) e).getElements().getValues().toArray();
+			BootDashModel model = ((BootDashModel) e);
+			ImmutableSet<BootDashElement> bdes = model.getElements().getValue();
+			ImmutableSet<ButtonModel> buttons = model.getButtons().getValue();
+			if (buttons.isEmpty()) {
+				//common special case, avoid extra intermediate collection creation
+				return bdes.toArray();
+			}
+			ArrayList<Object> merged = new ArrayList<>(bdes.size()+buttons.size());
+			merged.addAll(buttons);
+			merged.addAll(bdes);
+			return merged.toArray();
 		} else if (e instanceof BootDashElement) {
 			return ((BootDashElement)e).getChildren().getValues().toArray();
 		}

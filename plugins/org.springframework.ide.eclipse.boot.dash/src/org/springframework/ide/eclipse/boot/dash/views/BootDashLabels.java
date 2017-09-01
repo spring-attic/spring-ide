@@ -34,6 +34,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractLaunchConfigurationsDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.ButtonModel;
 import org.springframework.ide.eclipse.boot.dash.model.LocalCloudServiceDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
@@ -42,6 +43,7 @@ import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKLaunchTracker;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
+import org.springsource.ide.eclipse.commons.livexp.ui.Ilabelable;
 import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 
 import com.google.common.collect.ImmutableSet;
@@ -140,6 +142,8 @@ public class BootDashLabels implements Disposable {
 			return getStyledText((BootDashElement)element, column);
 		} else if (element instanceof BootDashModel) {
 			return getStyledText((BootDashModel)element, column);
+		} else if (element instanceof ButtonModel) {
+			return getStyledText((ButtonModel)element);
 		}
 		return new StyledString(""+element);
 	}
@@ -248,6 +252,10 @@ public class BootDashLabels implements Disposable {
 			}
 		}
 		return stylers==null?new StyledString("null"):new StyledString("null", stylers.red());
+	}
+
+	public StyledString getStyledText(ButtonModel element) {
+		return new StyledString(element.getLabel(), stylers.hyperlink());
 	}
 
 	/**

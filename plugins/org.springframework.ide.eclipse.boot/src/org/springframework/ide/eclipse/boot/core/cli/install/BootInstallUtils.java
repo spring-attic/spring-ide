@@ -22,12 +22,12 @@ import com.google.common.collect.ImmutableMap.Builder;
 
 /**
  * Utility methods for Spring Boot CLI installation
- * 
+ *
  * @author Alex Boyko
  *
  */
 public class BootInstallUtils {
-	
+
 	/**
 	 * Extension type class to maven coordinates prefix (excludes version) map
 	 */
@@ -35,7 +35,7 @@ public class BootInstallUtils {
 	static {
 		EXTENSION_TO_MAVEN_PREFIX_MAP.put(CloudCliInstall.class, "org.springframework.cloud:spring-cloud-cli:");
 	}
-	
+
 	/**
 	 * Extension type class to extension full name map
 	 */
@@ -47,11 +47,11 @@ public class BootInstallUtils {
 	}
 
 	/**
-	 * Calculates the latest Spring Cloud CLI version provided the Boot CLI version 
+	 * Calculates the latest compatible Spring Cloud CLI version provided the Boot CLI version
 	 * @param bootVersion Spring Boot CLI version
-	 * @return latest compatible version of Cloud CLI 
+	 * @return latest compatible version of Cloud CLI
 	 */
-	public static Version getLatestCloudCliVersion(Version bootVersion) {
+	public static Version getCloudCliVersion(Version bootVersion) {
 		if (bootVersion == null) {
 			throw new IllegalArgumentException();
 		}
@@ -78,6 +78,6 @@ public class BootInstallUtils {
 		} else {
 			return null;
 		}
-	}	
+	}
 
 }

@@ -3,7 +3,10 @@ package org.springframework.ide.eclipse.boot.dash.model;
 import java.util.Comparator;
 
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
+
+import com.google.common.collect.ImmutableSet;
 
 public interface BootDashModel {
 
@@ -95,4 +98,6 @@ public interface BootDashModel {
 	boolean hasCustomNameTemplate();
 
 	String getDisplayName();
+
+	ObservableSet<ButtonModel> getButtons();
 }

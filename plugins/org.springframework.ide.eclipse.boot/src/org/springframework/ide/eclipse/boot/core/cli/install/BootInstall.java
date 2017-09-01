@@ -279,7 +279,7 @@ public abstract class BootInstall implements IBootInstall {
 
 	private Version getLatestVersion(Class<? extends IBootInstallExtension> extension) {
 		if (CloudCliInstall.class.isAssignableFrom(extension)) {
-			return BootInstallUtils.getLatestCloudCliVersion(Version.valueOf(getVersion()));
+			return BootInstallUtils.getCloudCliVersion(Version.valueOf(getVersion()));
 		}
 		return null;
 	}

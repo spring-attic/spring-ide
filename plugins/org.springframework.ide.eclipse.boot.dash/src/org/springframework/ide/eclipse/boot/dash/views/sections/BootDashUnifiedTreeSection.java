@@ -53,11 +53,14 @@ import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeItem;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.livexp.ElementwiseListener;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
@@ -67,6 +70,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ModelStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
+import org.springframework.ide.eclipse.boot.dash.model.ButtonModel;
 import org.springframework.ide.eclipse.boot.dash.model.ModifiableModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
@@ -75,6 +79,7 @@ import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashAction;
 import org.springframework.ide.eclipse.boot.dash.views.AddRunTargetAction;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.RunStateAction;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
@@ -144,6 +149,12 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 						return comparator.compare(bde1, bde2);
 					}
 				}
+			} else if (e1 instanceof ButtonModel && e2 instanceof ButtonModel) {
+				return ((ButtonModel)e1).getLabel().compareTo(((ButtonModel)e2).getLabel());
+			} else if (e1 instanceof ButtonModel) {
+				return -1;
+			} else if (e2 instanceof ButtonModel) {
+				return +1;
 			}
 			return super.compare(viewer, e1, e2);
 		}
@@ -204,8 +215,11 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		}
 	};
 
-	private final ValueListener<ImmutableSet<BootDashElement>> ELEMENTS_SET_LISTENER = new UIValueListener<ImmutableSet<BootDashElement>>() {
-		protected void uiGotValue(LiveExpression<ImmutableSet<BootDashElement>> exp, ImmutableSet<BootDashElement> value) {
+	@SuppressWarnings({"rawtypes", "unchecked"}) //Raw types, because the types are getting in the way.
+		//This is fine because we don't really care about the values here, so we don't really care about
+		//their types either.
+	private final ValueListener ELEMENTS_SET_LISTENER = new UIValueListener() {
+		protected void uiGotValue(LiveExpression exp, Object value) {
 			if (tv != null && !tv.getControl().isDisposed()) {
 				//TODO: refreshing the whole table is overkill, but is a bit tricky to figure out which BDM
 				// this set of elements belong to. If we did know then we could just refresh the node representing its section
@@ -222,13 +236,16 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 	/**
 	 * Listener which adds element set listener to each section model.
 	 */
+	@SuppressWarnings("unchecked")
 	final private ValueListener<ImmutableSet<BootDashModel>> ELEMENTS_SET_LISTENER_ADAPTER = new ElementwiseListener<BootDashModel>() {
 		protected void added(LiveExpression<ImmutableSet<BootDashModel>> exp, BootDashModel e) {
-			e.getElements().addListener(ELEMENTS_SET_LISTENER);
+			e.getElements().addListener((ValueListener<ImmutableSet<BootDashElement>>) ELEMENTS_SET_LISTENER);
+			e.getButtons().addListener((ValueListener<ImmutableSet<ButtonModel>>) ELEMENTS_SET_LISTENER);
 			e.addModelStateListener(MODEL_STATE_LISTENER);
 		}
 		protected void removed(LiveExpression<ImmutableSet<BootDashModel>> exp, BootDashModel e) {
-			e.getElements().removeListener(ELEMENTS_SET_LISTENER);
+			e.getElements().removeListener((ValueListener<ImmutableSet<BootDashElement>>) ELEMENTS_SET_LISTENER);
+			e.getButtons().removeListener((ValueListener<ImmutableSet<ButtonModel>>) ELEMENTS_SET_LISTENER);
 			e.removeModelStateListener(MODEL_STATE_LISTENER);
 		}
 	};
@@ -330,6 +347,37 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 						}
 					}
 				}
+			}
+		});
+		tv.getTree().addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseUp(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mouseDown(MouseEvent evt) {
+				Point point = new Point(evt.x, evt.y);
+				ViewerCell cell = tv.getCell(point);
+				if (cell!=null) {
+					Object element = cell.getElement();
+					if (element instanceof ButtonModel) {
+						ButtonModel button = (ButtonModel) element;
+						try {
+							button.perform();
+						} catch (Exception e) {
+							Log.log(e);
+						}
+					}
+				}
+			}
+
+			@Override
+			public void mouseDoubleClick(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+
 			}
 		});
 
