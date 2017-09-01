@@ -31,8 +31,6 @@ public class CloudCliInstall implements IBootInstallExtension {
 	
 	private static final Pattern VERSION_PATTERN = Pattern.compile("^Spring Cloud CLI v(\\d+\\.\\d+\\.\\d+\\.[\\w-]+)$");
 
-	private static final Pattern CLOUD_CLI_CMD_ERROR_PATTERN = Pattern.compile("^\\s*Exception in thread ");
-	
 	private IBootInstall bootInstall;
 
 	/**
@@ -87,14 +85,12 @@ public class CloudCliInstall implements IBootInstallExtension {
 				if (outputLines.length > 1) {
 					Log.warn("List services command output has more than one line:\n " + cmd.getOutput());
 				}
-				if (outputLines[outputLines.length - 1] == null) {
-					Log.error("Cannot find list of services in the out put\n" + cmd.getOutput());
+				if (outputLines[outputLines.length - 1] == null || outputLines[outputLines.length - 1].trim().isEmpty()) {
+					Log.warn("Cannot find list of services in the out put\n" + cmd.getOutput());
 					return new String[0];
+				} else {
+					return outputLines[outputLines.length - 1].split("\\s+");
 				}
-				if (outputLines[outputLines.length - 1].contains(null) || outputLines[outputLines.length - 1].contains("")) {
-					Log.error("List services command output is not parsed correctly: " + cmd.getOutput());
-				}
-				return outputLines[outputLines.length - 1].split("\\s+");
 			}
 		} catch (Throwable t) {
 			Log.log(t);
@@ -124,7 +120,7 @@ public class CloudCliInstall implements IBootInstallExtension {
 	}
 
 	private static boolean isCommandOutputErroneous(String output) {
-		return CLOUD_CLI_CMD_ERROR_PATTERN.matcher(output).find();
+		return output.contains("Exception");
 	}
 
 }
