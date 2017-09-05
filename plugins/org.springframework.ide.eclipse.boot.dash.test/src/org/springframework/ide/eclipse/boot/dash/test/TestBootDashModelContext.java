@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.core.BootPreferences;
+import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.InMemoryPropertyStore;
@@ -106,6 +107,12 @@ public class TestBootDashModelContext implements BootDashModelContext {
 	@Override
 	public IPropertyStore getPrivatePropertyStore() {
 		return privateProperties;
+	}
+
+	@Override
+	public BootInstallManager getBootInstallManager() {
+		//TODO: consider using some kind of mock instead of the real thing.
+		return BootInstallManager.getInstance();
 	}
 
 }

@@ -12,8 +12,6 @@ package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -21,21 +19,12 @@ import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
-import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
-import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager.BootInstallListener;
-import org.springframework.ide.eclipse.boot.core.cli.install.CloudCliInstall;
-import org.springframework.ide.eclipse.boot.core.cli.install.IBootInstall;
 import org.springframework.ide.eclipse.boot.dash.devtools.DevtoolsPortRefresher;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
@@ -53,10 +42,6 @@ import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathL
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ProjectChangeListenerManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ProjectChangeListenerManager.ProjectChangeListener;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -82,7 +67,6 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 	final LaunchConfigurationTracker launchConfTracker = new LaunchConfigurationTracker(BootLaunchConfigurationDelegate.TYPE_ID);
 
 	private LiveSetVariable<BootProjectDashElement> applications; //lazy created
-	private LiveSetVariable<LocalCloudServiceDashElement> cloudCliservices;
 	private ObservableSet<BootDashElement> allElements;
 
 	private BootDashModelConsoleManager consoleManager;
@@ -91,49 +75,13 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 	private LiveExpression<Pattern> projectExclusion;
 	private ValueListener<Pattern> projectExclusionListener;
 
-	private BootInstallListener bootInstallListener;
 	private IPropertyStore modelStore;
 
+	private LocalServicesModel localServices;
+
 	private LiveVariable<RefreshState> bootAppsRefreshState = new LiveVariable<>(RefreshState.READY);
-	private LiveVariable<RefreshState> cloudCliServicesRefreshState = new LiveVariable<>(RefreshState.READY);
 
-	private LiveExpression<Boolean> hideCloudCliServices = new LiveExpression<Boolean>() {
-		{
-			dependsOn(getViewModel().getToggleFilters().getSelectedFilters());
-		}
-
-		@Override
-		protected Boolean compute() {
-			return getViewModel().getToggleFilters().getSelectedFilters()
-					.contains(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES);
-		}
-	};
-
-	private LiveExpression<RefreshState> refreshState = new LiveExpression<RefreshState>() {
-		{
-			dependsOn(bootAppsRefreshState);
-			dependsOn(cloudCliServicesRefreshState);
-			addListener((e,v) -> notifyModelStateChanged());
-		}
-
-		@Override
-		protected RefreshState compute() {
-			return RefreshState.merge(bootAppsRefreshState.getValue(), cloudCliServicesRefreshState.getValue());
-		}
-	};
-
-	private LiveSetVariable<ButtonModel> buttons = new LiveSetVariable<>();
-	{
-		new LiveVariable<ButtonModel>(new BootDashHyperlink("Enable local cloud services") {
-			{
-				buttons.add(this);
-			}
-			public void perform() throws Exception {
-				MessageDialog.openInformation(null, "Clicked!", "You clicked me!");
-				buttons.remove(this);
-			};
-		});
-	}
+	private LiveExpression<RefreshState> refreshState;
 
 	public class WorkspaceListener implements ProjectChangeListener, ClasspathListener {
 
@@ -151,6 +99,19 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 	public LocalBootDashModel(BootDashModelContext context, BootDashViewModel parent) {
 		super(RunTargets.LOCAL, parent);
 		this.workspace = context.getWorkspace();
+		this.localServices = new LocalServicesModel(getViewModel(), this, context.getBootInstallManager().getDefaultInstallExp());
+		this.refreshState = new LiveExpression<RefreshState>() {
+			{
+				dependsOn(bootAppsRefreshState);
+				dependsOn(localServices.getRefreshState());
+				addListener((e,v) -> notifyModelStateChanged());
+			}
+
+			@Override
+			protected RefreshState compute() {
+				return RefreshState.merge(bootAppsRefreshState.getValue(), localServices.getRefreshState().getValue());
+			}
+		};
 		this.launchConfElementFactory = new LaunchConfDashElementFactory(this, context.getLaunchManager());
 		this.projectElementFactory = new BootProjectDashElementFactory(this, context.getProjectProperties(), launchConfElementFactory);
 		this.consoleManager = new LocalElementConsoleManager();
@@ -192,10 +153,9 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 	void init() {
 		if (allElements==null) {
 			this.applications = new LiveSetVariable<>(AsyncMode.SYNC);
-			this.cloudCliservices = new LiveSetVariable<>(AsyncMode.SYNC);
 			this.allElements = LiveSets.union(
 					this.applications,
-					this.cloudCliservices
+					this.localServices.getCloudCliServices()
 			);
 			WorkspaceListener workspaceListener = new WorkspaceListener();
 			this.openCloseListenerManager = new ProjectChangeListenerManager(workspace, workspaceListener);
@@ -207,21 +167,6 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 			});
 
 			refresh(null);
-
-			bootInstallListener = new BootInstallListener() {
-				@Override
-				public void defaultInstallChanged() {
-					refreshLocalCloudServices();
-				}
-			};
-			try {
-				BootInstallManager.getInstance().addBootInstallListener(bootInstallListener);
-			} catch (Exception e) {
-				Log.log(e);
-			}
-
-			// Listen to changes in "Hide Local Cloud Services" filter toggle
-			hideCloudCliServices.addListener((e, v) -> refreshLocalCloudServices());
 
 			this.devtoolsPortRefresher = new DevtoolsPortRefresher(this, projectElementFactory);
 		}
@@ -255,23 +200,14 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 			projectExclusion.removeListener(projectExclusionListener);
 			projectExclusionListener=null;
 		}
-		if (bootInstallListener != null) {
-			try {
-				BootInstallManager.getInstance().removeBootInstallListener(bootInstallListener);
-			} catch (Exception e) {
-				Log.log(e);
-			}
-		}
-		if (cloudCliservices != null) {
-			cloudCliservices.getValue().forEach(bde -> bde.dispose());
-			cloudCliservices.dispose();
-			cloudCliservices = null;
+		if (localServices!=null) {
+			localServices.dispose();
+			localServices = null;
 		}
 		if (allElements != null) {
 			allElements.dispose();
 			allElements = null;
 		}
-		hideCloudCliServices.dispose();
 		launchConfTracker.dispose();
 		launchConfRunStateTracker.dispose();
 	}
@@ -295,7 +231,7 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 
 	@Override
 	public ObservableSet<ButtonModel> getButtons() {
-		return buttons;
+		return localServices.getButtons();
 	}
 
 	/**
@@ -303,48 +239,7 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 	 */
 	public void refresh(UserInteractions ui) {
 		updateElementsFromWorkspace();
-		refreshLocalCloudServices();
-	}
-
-	private List<LocalCloudServiceDashElement> fetchLocalServices() {
-		try {
-			IBootInstall bootInstall = BootInstallManager.getInstance().getDefaultInstall();
-			if (bootInstall != null) {
-				CloudCliInstall cloudCliInstall = bootInstall.getExtension(CloudCliInstall.class);
-				if (cloudCliInstall != null) {
-					Version cloudCliVersion = cloudCliInstall.getVersion();
-					if (cloudCliVersion != null
-							&& CloudCliInstall.CLOUD_CLI_JAVA_OPTS_SUPPORTING_VERSIONS.includes(cloudCliVersion)) {
-						return Arrays.stream(cloudCliInstall.getCloudServices()).map(serviceId -> new LocalCloudServiceDashElement(this, serviceId)).collect(Collectors.toList());
-					}
-				}
-			}
-		} catch (Exception e) {
-			Log.log(e);
-		}
-		return Collections.emptyList();
-	}
-
-	private void refreshLocalCloudServices() {
-		if (hideCloudCliServices.getValue()) {
-			cloudCliservices.getValue().forEach(bde -> bde.dispose());
-			cloudCliservices.replaceAll(Collections.emptySet());
-		} else {
-			new Job("Loading local cloud services") {
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					try {
-						cloudCliServicesRefreshState.setValue(RefreshState.loading("Fetching Local Cloud Sevices..."));
-						List<LocalCloudServiceDashElement> newCloudCliservices = fetchLocalServices();
-						cloudCliservices.getValue().forEach(bde -> bde.dispose());
-						cloudCliservices.replaceAll(newCloudCliservices);
-						return Status.OK_STATUS;
-					} finally {
-						cloudCliServicesRefreshState.setValue(RefreshState.READY);
-					}
-				}
-			}.schedule();
-		}
+		localServices.refresh();
 	}
 
 	@Override

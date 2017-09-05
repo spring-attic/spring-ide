@@ -152,9 +152,10 @@ public class ToggleFiltersModelTest {
 
 		FilterChoice nonWorkspace = getFilter(model, HIDE_NON_WORKSPACE_ELEMENTS);
 		FilterChoice solitaryConf = getFilter(model, HIDE_SOLITARY_CONF);
+		FilterChoice localService = getFilter(model, HIDE_LOCAL_SERVICES);
 
 		//initially the defaults should be set.
-		assertEquals(ImmutableSet.of(solitaryConf), model.getSelectedFilters().getValues());
+		assertEquals(ImmutableSet.of(solitaryConf, localService), model.getSelectedFilters().getValues());
 
 		model.getSelectedFilters().remove(solitaryConf);
 		model.getSelectedFilters().add(nonWorkspace);

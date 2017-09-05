@@ -31,6 +31,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 import org.junit.Assert;
 import org.springframework.ide.eclipse.boot.core.BootPreferences;
+import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.InMemoryPropertyStore;
@@ -145,6 +146,12 @@ public class BootDashViewModelHarness {
 		@Override
 		public IPropertyStore getPrivatePropertyStore() {
 			return privateProperties;
+		}
+
+		@Override
+		public BootInstallManager getBootInstallManager() {
+			// TODO Consider using dome kind of 'mock' instead of the real thing.
+			return BootInstallManager.getInstance();
 		}
 	}
 

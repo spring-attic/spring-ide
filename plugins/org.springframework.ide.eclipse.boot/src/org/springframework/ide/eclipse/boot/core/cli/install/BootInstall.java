@@ -30,15 +30,15 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import com.google.common.collect.ImmutableList;
 
 public abstract class BootInstall implements IBootInstall {
-	
+
 	static final String CLOUD_CLI_LIB_PREFIX = "spring-cloud-cli";
-	
+
 	private static final File[] NO_FILES = new File[0];
 
 	protected final String uriString;
-	
+
 	/**
-	 * Creates a BootInstall pointing to given url and a optional 
+	 * Creates a BootInstall pointing to given url and a optional
 	 * name. If the name is null or empty then a name will be
 	 * generated automatically as needed.
 	 */
@@ -49,7 +49,7 @@ public abstract class BootInstall implements IBootInstall {
 		}
 		this.uriString = urlString;
 	}
-	
+
 	static final FilenameFilter JAR_FILE_FILTER = new FilenameFilter() {
 		@Override
 		public boolean accept(File dir, String name) {
@@ -60,14 +60,16 @@ public abstract class BootInstall implements IBootInstall {
 	private static final String UNKNOWN_VERSION = "Unknown";
 
 	File[] bootLibJars; //Set once we determined the location of the spring-boot jar(s) for this install.
-	
+
 	private String name;
-	
+
+	@Override
 	public abstract File getHome() throws Exception;
 
+	@Override
 	public File[] getBootLibJars() throws Exception {
 		//Example: .../installs/spring-boot-cli-0.5.0.M6-bin/spring-0.5.0.M6/lib/spring-boot-cli-0.5.0.M6.jar
-		
+
 		if (bootLibJars==null) {
 			File home = getHome(); //Example: .../installs/spring-boot-cli-0.5.0.M6-bin/spring-0.5.0.M6/
 			//Expect to find spring-boot-cli-<version> in lib folder.
@@ -76,7 +78,7 @@ public abstract class BootInstall implements IBootInstall {
 				bootLibJars = NO_FILES;
 			}
 		}
-		
+
 		return bootLibJars;
 	}
 
@@ -121,15 +123,16 @@ public abstract class BootInstall implements IBootInstall {
 	public String getUrl() {
 		return uriString;
 	}
-	
+
 	/**
 	 * Create a name from the uri. Let the name be 'short' but reflect interesting bits such
 	 * as the uri scheme (if not file) and the last segment of the path including extension.
 	 * <p>
 	 * That way it is possible to see if a distro is:
 	 *   remote <-> local
-	 *   zip <-> folder 
+	 *   zip <-> folder
 	 */
+	@Override
 	public String getName() {
 		if (name==null) {
 			name = defaultName();
@@ -167,7 +170,7 @@ public abstract class BootInstall implements IBootInstall {
 	/**
 	 * Try to determine the version of this installation based on what is known about it.
 	 * Note that if a install is not downloaded yet we basically only have access to
-	 * the Url String because it would be udesirable to download the entire zip just 
+	 * the Url String because it would be udesirable to download the entire zip just
 	 * to check the version.
 	 */
 	@Override
@@ -178,7 +181,7 @@ public abstract class BootInstall implements IBootInstall {
 			if (lastSegment.toLowerCase().endsWith(".zip")) {
 				//Expect format: <artifact-id>-<version>-<classifier>.zip
 				int end = lastSegment.length()-4; //4 = '.zip'.length
-				end = lastSegment.lastIndexOf('-', end); 
+				end = lastSegment.lastIndexOf('-', end);
 				//end is now at start of -<classifier>
 				if (end>=0) {
 					int start = lastSegment.lastIndexOf('-', end-1);
@@ -193,7 +196,7 @@ public abstract class BootInstall implements IBootInstall {
 		}
 		return UNKNOWN_VERSION;
 	}
-	
+
 	@Override
 	public IStatus validate() {
 		try {
@@ -227,7 +230,7 @@ public abstract class BootInstall implements IBootInstall {
 	 * should return true. False should only be returned in the case
 	 * where the content is known to be local or already cached.
 	 * <p>
-	 * In the case of uncertainty the method should conservatively return true (assuming the worst case, 
+	 * In the case of uncertainty the method should conservatively return true (assuming the worst case,
 	 * scenario where a dowload will be required.
 	 * <p>
 	 * This method is used to determine whether it is safe to call methods that require
@@ -239,7 +242,7 @@ public abstract class BootInstall implements IBootInstall {
 		boolean isCertainlyLocal = url!=null && url.startsWith("file:");
 		return !isCertainlyLocal;
 	}
-	
+
 	@Override
 	public ImmutableList<Class<? extends IBootInstallExtension>> supportedExtensions() {
 		com.google.common.collect.ImmutableList.Builder<Class<? extends IBootInstallExtension>> builder = ImmutableList
@@ -263,7 +266,7 @@ public abstract class BootInstall implements IBootInstall {
 			}
 		}
 	}
-	
+
 	@Override
 	public void uninstallExtension(IBootInstallExtension extension) throws Exception {
 		String mavenPrefix = BootInstallUtils.EXTENSION_TO_MAVEN_PREFIX_MAP.get(extension.getClass());
@@ -283,10 +286,15 @@ public abstract class BootInstall implements IBootInstall {
 		}
 		return null;
 	}
-	
+
 	protected CloudCliInstall getCloudCliInstall() {
 		File[] springCloudJars = findExtensionJars(CLOUD_CLI_LIB_PREFIX);
 		return springCloudJars == null || springCloudJars.length == 0 ? null : new CloudCliInstall(this);
+	}
+
+	@Override
+	public void refreshExtensions() {
+		//Nothing to do because this implemented doesn't cache info about extensions.
 	}
 
 	@SuppressWarnings("unchecked")
@@ -297,9 +305,9 @@ public abstract class BootInstall implements IBootInstall {
 		}
 		return null;
 	}
-	
+
 	/**
-	 * Finds Spring Boot CLI extension JAR lib files 
+	 * Finds Spring Boot CLI extension JAR lib files
 	 * @param prefix prefix of the lib file
 	 * @return matching JAR lib files
 	 */
@@ -316,5 +324,5 @@ public abstract class BootInstall implements IBootInstall {
 		}
 		return jars.toArray(new File[jars.size()]);
 	}
-	
+
 }

@@ -17,7 +17,7 @@ import org.eclipse.core.runtime.IStatus;
 
 /**
  * Common interface for anything that represents an installation of spring boot.
- * 
+ *
  * @author Kris De Volder
  */
 public interface IBootInstall {
@@ -28,37 +28,42 @@ public interface IBootInstall {
 	String getName();
 	IStatus validate();
 	String getVersion();
-	
+
 	/**
 	 * Gets a specific Boot CLI extension
 	 * @param extension the extension to get
 	 * @return the extension or <code>null</code> if extension isn't installed
 	 */
 	<T extends IBootInstallExtension> T getExtension(Class<T> extension);
-	
+
 	/**
 	 * Returns supported extensions
 	 * @return
 	 */
 	Collection<Class<? extends IBootInstallExtension>> supportedExtensions();
-	
+
 	/**
 	 * Install extension into Spring Boot CLI
-	 * @param extension class identifier of the extension 
+	 * @param extension class identifier of the extension
 	 * @return runnable that installs the extension
 	 */
 	void installExtension(Class<? extends IBootInstallExtension> extension)  throws Exception;
-	
+
 	/**
 	 * Removes extension from Spring Boot CLI
 	 * @param extension extension
 	 * @return runnable that removes the extension
 	 */
 	void uninstallExtension(IBootInstallExtension extension)  throws Exception;
-	
+
 	/**
 	 * For installs that are zipped or non-local this deletes the cached info (i.e. unzipped and locally downloaded copy
 	 * of the data. For locally configured installations this does nothing.
 	 */
-	void clearCache();	
+	void clearCache();
+
+	/**
+	 * Refresh any cached information about installed extensions (or do nothing if there isn't any cached information).
+	 */
+	void refreshExtensions();
 }

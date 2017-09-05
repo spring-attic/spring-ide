@@ -31,14 +31,14 @@ import com.google.common.base.Suppliers;
  * A Boot Installation that is located in a zip file. It must be unzipped locally
  * before it can be used.
  * <p>
- * This class takes care of downloading and unzipping it automatically to to
+ * This class takes care of downloading and unzipping it automatically to a
  * cache directory located in the workspace.
  *
  * @author Kris De Volder
  */
 public class ZippedBootInstall extends BootInstall {
-	
-	private Supplier<CloudCliInstall> cloudCliInstallSupplier = Suppliers.memoize(this::initCloudCliInstall);
+
+	private Supplier<CloudCliInstall> cloudCliInstall;
 
 	/**
 	 * TODO: DownloadableZipItem should probably be moved to commons
@@ -96,10 +96,12 @@ public class ZippedBootInstall extends BootInstall {
 		 * <p>
 		 * The returned file will point to the location where the zipfile was expanded to.
 		 */
+		@Override
 		public File getFile() throws Exception {
 			try {
 				final File[] fileBox = new File[1];
 				downloader.doWithDownload(this, new DownloadRequestor() {
+					@Override
 					public void exec(File zipFile) throws Exception {
 						File unzipDir = getUnzipDir();
 						unzip(zipFile, unzipDir);
@@ -126,12 +128,13 @@ public class ZippedBootInstall extends BootInstall {
 			}
 		}
 	}
-	
+
 	private DownloadableItem zip;
 	private File home; //Will be set once the install is unzipped and ready for use.
 
 	public ZippedBootInstall(DownloadManager downloader, String uri, String name) throws Exception {
 		super(uri, name);
+		refreshExtensions();
 		this.zip = new DownloadableZipItem(new URL(uri), downloader);
 	}
 
@@ -174,18 +177,26 @@ public class ZippedBootInstall extends BootInstall {
 			zip.clearCache();
 		}
 	}
-	
+
 	synchronized private CloudCliInstall initCloudCliInstall() {
+		if (super.getCloudCliInstall() == null) {
+			new AutoCloudCliInstaller(this).performInstall();
+		}
 		if (super.getCloudCliInstall() == null) {
 			return null;
 		} else {
 			return new CachingCloudCliInstall(this);
 		}
 	}
-	
+
 	@Override
 	protected CloudCliInstall getCloudCliInstall() {
-		return cloudCliInstallSupplier.get();
+		return cloudCliInstall.get();
+	}
+
+	@Override
+	public void refreshExtensions() {
+		cloudCliInstall = Suppliers.memoize(this::initCloudCliInstall);
 	}
 
 }

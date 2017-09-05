@@ -18,11 +18,11 @@ import org.springframework.ide.eclipse.boot.util.Log;
 /**
  * Sprint Boot Installation that is found in a local
  * directory manually installed by the user.
- * 
+ *
  * @author Kris De Volder
  */
 public class LocalBootInstall extends BootInstall {
-	
+
 	private File home;
 	private String version; //cache to avoid rescanning contents.
 
@@ -61,17 +61,17 @@ public class LocalBootInstall extends BootInstall {
 		}
 		return version;
 	}
-	
+
 	@Override
 	public void clearCache() {
 		//nothing to do since this doesn't need caching as its already local and unzipped
 	}
-	
+
 	@Override
 	protected boolean mayRequireDownload() {
 		return false;
 	}
-	
+
 	/**
 	 * Extract the version of the JAR from its file name
 	 * @param fileName JAR file name
@@ -86,7 +86,7 @@ public class LocalBootInstall extends BootInstall {
 				version = fileName.substring(start+1, end);
 			}
 		}
-		return version; 
+		return version;
 	}
 
 }

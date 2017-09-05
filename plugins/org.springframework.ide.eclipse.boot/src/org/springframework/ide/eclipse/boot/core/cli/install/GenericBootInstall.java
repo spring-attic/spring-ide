@@ -18,7 +18,7 @@ import org.springframework.ide.eclipse.boot.core.BootActivator;
 
 /**
  * A 'Generic' representation of a boot install. Can be used to represent a
- * Boot install for which BootInstallFactory can not determine the appropriate 
+ * Boot install for which BootInstallFactory can not determine the appropriate
  * type. This may be because the install is in fact not valid.
  * <p>
  * We still have to be able to represent it because users may enter invalid data
@@ -38,7 +38,7 @@ public class GenericBootInstall extends BootInstall {
 	public File getHome() throws Exception {
 		return null;
 	}
-	
+
 	@Override
 	public IStatus validate() {
 		if (errorMessage==null) {
@@ -46,7 +46,7 @@ public class GenericBootInstall extends BootInstall {
 		} else {
 			return new Status(IStatus.ERROR, BootActivator.PLUGIN_ID, errorMessage);
 		}
-		
+
 	}
 
 	@Override
@@ -54,5 +54,11 @@ public class GenericBootInstall extends BootInstall {
 		//Nothing to do since this install is something likely bogus it does not
 		// exist or at least it can't be determined to be real install
 	}
-	
+
+
+	@Override
+	public void refreshExtensions() {
+		//Nothing to do
+	}
+
 }

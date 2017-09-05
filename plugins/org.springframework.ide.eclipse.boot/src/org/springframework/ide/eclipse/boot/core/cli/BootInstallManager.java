@@ -18,7 +18,6 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.ListenerList;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.osgi.service.prefs.BackingStoreException;
@@ -30,6 +29,9 @@ import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.core.preferences.StsProperties;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.ArrayEncoder;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 /**
@@ -47,11 +49,6 @@ public class BootInstallManager implements IBootInstallFactory {
 
 	private static final String DEFAULT_BOOT_INSTALL = "default.install";
 
-	//TODO: should use preferences to store boot installation and
-	// we should provide UI for the user to configure different installs etc.
-	//For now a trivial install manager only knows about one Spring boot instal
-	// and its location is injected via 'STSProperties'.
-
 	private static BootInstallManager instance;
 
 	private static File determineCacheDir() {
@@ -59,18 +56,21 @@ public class BootInstallManager implements IBootInstallFactory {
 		return stateLocation.append("installs").toFile();
 	}
 
-	public static synchronized BootInstallManager getInstance() throws Exception {
-		if (instance==null) {
-			instance = new BootInstallManager();
+	public static synchronized BootInstallManager getInstance() {
+		try {
+			if (instance==null) {
+				instance = new BootInstallManager();
+			}
+			return instance;
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
 		}
-		return instance;
 	}
 
 	private DownloadManager downloader;
 
 	private List<IBootInstall> installs = null;
-	private IBootInstall defaultInstall;
-	private ListenerList installListeners = new ListenerList();
+	private LiveVariable<IBootInstall> _defaultInstall = new LiveVariable<>();
 
 	private BootInstallManager() throws Exception {
 		downloader = new DownloadManager(null, determineCacheDir());
@@ -145,6 +145,7 @@ public class BootInstallManager implements IBootInstallFactory {
 		return ArrayEncoder.encode(new String[] { install.getUrl(), install.getName() });
 	}
 
+	@Override
 	public IBootInstall newInstall(String url, String name) {
 		try {
 			URI uri = new URI(url);
@@ -170,19 +171,14 @@ public class BootInstallManager implements IBootInstallFactory {
 	}
 
 	public synchronized IBootInstall getDefaultInstall() throws Exception {
-		return defaultInstall;
+		return _defaultInstall.getValue();
 	}
 
 	public void setDefaultInstall(IBootInstall defaultInstall) {
 		if (!installs.contains(defaultInstall)) {
 			installs.add(defaultInstall);
 		}
-		if ((this.defaultInstall != defaultInstall) || (this.defaultInstall != null && !this.defaultInstall.equals(defaultInstall))) {
-			this.defaultInstall = defaultInstall;
-			for (Object listener : installListeners.getListeners()) {
-				((BootInstallListener)listener).defaultInstallChanged();
-			}
-		}
+		this._defaultInstall.setValue(defaultInstall);
 	}
 
 	public void setInstalls(Collection<IBootInstall> newInstalls) {
@@ -197,12 +193,12 @@ public class BootInstallManager implements IBootInstallFactory {
 		return downloader;
 	}
 
-	public void addBootInstallListener(BootInstallListener listener) {
-		installListeners.add(listener);
+	public Disposable addBootInstallListener(BootInstallListener listener) {
+		return _defaultInstall.onChange((e, v) -> listener.defaultInstallChanged());
 	}
 
-	public void removeBootInstallListener(BootInstallListener listener) {
-		installListeners.remove(listener);
+	public synchronized LiveExpression<IBootInstall> getDefaultInstallExp() {
+		return _defaultInstall;
 	}
 
 }

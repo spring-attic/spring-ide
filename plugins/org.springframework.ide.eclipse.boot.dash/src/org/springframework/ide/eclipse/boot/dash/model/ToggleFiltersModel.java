@@ -69,7 +69,7 @@ public class ToggleFiltersModel {
 	public static final FilterChoice FILTER_CHOICE_HIDE_SOLITARY_CONFS = new FilterChoice("hide.solitary-launch-config",
 			"Hide solitary launch configs", HIDE_SOLITARY_CONFS, true);
 	public static final FilterChoice FILTER_CHOICE_HIDE_LOCAL_SERVICES = new FilterChoice("hide.local-cloud-services",
-			"Hide local cloud services", HIDE_LOCAL_SERVICES);
+			"Hide local cloud services", HIDE_LOCAL_SERVICES, true);
 
 	private static final String STORE_ID = "toggle-filters";
 	private static final FilterChoice[] FILTERS = {

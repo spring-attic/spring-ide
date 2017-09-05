@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.core.BootPreferences;
+import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
@@ -40,6 +41,8 @@ public class DefaultBootDashModelContext implements BootDashModelContext {
 	private IPropertyStore viewProperties = PropertyStoreFactory.backedBy(BootDashActivator.getDefault().getPreferenceStore());
 
 	private IPropertyStore privateProperties = PropertyStoreFactory.createPrivateStore(BootDashActivator.getDefault().getStateLocation().append("private.properties"));
+
+	private BootInstallManager bootInstalls = BootInstallManager.getInstance();
 
 	@Override
 	public IWorkspace getWorkspace() {
@@ -89,6 +92,11 @@ public class DefaultBootDashModelContext implements BootDashModelContext {
 	@Override
 	public IPropertyStore getPrivatePropertyStore() {
 		return privateProperties;
+	}
+
+	@Override
+	public BootInstallManager getBootInstallManager() {
+		return bootInstalls;
 	}
 
 }
