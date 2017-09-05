@@ -10,9 +10,15 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.util;
 
+import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+
 /**
- * Like {@link Runnable} but allows throwing exceptions.
+ * Like {@link Runnable} called in a 'ui' context, it also
+ * allows throwing Exceptions (for the convenience of implementors).
+ * <p>
+ * It is the responsibility of callers to deal with the exceptions
+ * (e.g. by logging problems or showing an error popup).
  */
 public interface Performable {
-	void perform() throws Exception;
+	void perform(UserInteractions ui) throws Exception;
 }

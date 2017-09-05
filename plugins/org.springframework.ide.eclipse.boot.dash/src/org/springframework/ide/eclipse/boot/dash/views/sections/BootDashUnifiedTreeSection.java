@@ -53,6 +53,7 @@ import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.graphics.Point;
@@ -160,8 +161,8 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		}
 	}
 
-	final private ValueListener<Filter<BootDashElement>> FILTER_LISTENER = new ValueListener<Filter<BootDashElement>>() {
-		public void gotValue(LiveExpression<Filter<BootDashElement>> exp, Filter<BootDashElement> value) {
+	final private ValueListener<Filter<BootDashElement>> FILTER_LISTENER = new UIValueListener<Filter<BootDashElement>>() {
+		public void uiGotValue(LiveExpression<Filter<BootDashElement>> exp, Filter<BootDashElement> value) {
 			tv.refresh();
 			final Tree t = tv.getTree();
 			t.getDisplay().asyncExec(new Runnable() {
@@ -349,14 +350,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 				}
 			}
 		});
-		tv.getTree().addMouseListener(new MouseListener() {
-
-			@Override
-			public void mouseUp(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-
-			}
-
+		tv.getTree().addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseDown(MouseEvent evt) {
 				Point point = new Point(evt.x, evt.y);
@@ -365,20 +359,22 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 					Object element = cell.getElement();
 					if (element instanceof ButtonModel) {
 						ButtonModel button = (ButtonModel) element;
-						try {
-							button.perform();
-						} catch (Exception e) {
-							Log.log(e);
-						}
+						Job job = new Job(button.getLabel()) {
+							@Override
+							protected IStatus run(IProgressMonitor monitor) {
+								try {
+									button.perform(ui);
+								} catch (Exception e) {
+									Log.log(e);
+								}
+								return Status.OK_STATUS;
+							}
+						};
+						job.schedule();
 					}
 				}
 			}
 
-			@Override
-			public void mouseDoubleClick(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-
-			}
 		});
 
 		model.getRunTargets().addListener(RUN_TARGET_LISTENER);

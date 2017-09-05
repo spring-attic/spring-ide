@@ -287,6 +287,19 @@ public abstract class BootInstall implements IBootInstall {
 		return null;
 	}
 
+	@Override
+	public AutoInstallDescription checkAutoInstallable(Class<? extends IBootInstallExtension> extension) {
+		if (CloudCliInstall.class.isAssignableFrom(extension)) {
+			Version bootVersion = Version.valueOf(getVersion());
+			Version cliVersion = BootInstallUtils.getCloudCliVersion(bootVersion);
+			if (cliVersion!=null) {
+				return AutoInstallDescription.describe("Spring Cloud CLI version "+cliVersion+" will be installed into "+getName()+".");
+			}
+			return AutoInstallDescription.impossible("Couldn't determine a compatible Spring Cloud CLI version for "+getName()+".");
+		}
+		return AutoInstallDescription.impossible("Auto installation of "+extension.getSimpleName()+" is not supported");
+	}
+
 	protected CloudCliInstall getCloudCliInstall() {
 		File[] springCloudJars = findExtensionJars(CLOUD_CLI_LIB_PREFIX);
 		return springCloudJars == null || springCloudJars.length == 0 ? null : new CloudCliInstall(this);

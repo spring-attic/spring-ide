@@ -29,6 +29,7 @@ import org.springframework.ide.eclipse.boot.dash.devtools.DevtoolsPortRefresher;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
 import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
+import org.springframework.ide.eclipse.boot.dash.model.local.LocalServicesModel;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchConfRunStateTracker;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchConfigurationTracker;

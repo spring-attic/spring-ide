@@ -57,6 +57,12 @@ public interface IBootInstall {
 	void uninstallExtension(IBootInstallExtension extension)  throws Exception;
 
 	/**
+	 * Checks this BootInstall, verifying whether given extension is auto-installable. See
+	 * {@link AutoInstallDescription} for more details about the expected result.
+	 */
+	AutoInstallDescription checkAutoInstallable(Class<? extends IBootInstallExtension> extension);
+
+	/**
 	 * For installs that are zipped or non-local this deletes the cached info (i.e. unzipped and locally downloaded copy
 	 * of the data. For locally configured installations this does nothing.
 	 */

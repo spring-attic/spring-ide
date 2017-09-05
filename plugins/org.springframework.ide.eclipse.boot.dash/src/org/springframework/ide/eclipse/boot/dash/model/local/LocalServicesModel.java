@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.model;
+package org.springframework.ide.eclipse.boot.dash.model.local;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,7 +22,16 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.core.cli.install.CloudCliInstall;
 import org.springframework.ide.eclipse.boot.core.cli.install.IBootInstall;
+import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashHyperlink;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
+import org.springframework.ide.eclipse.boot.dash.model.ButtonModel;
+import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.LocalCloudServiceDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
+import org.springframework.ide.eclipse.boot.dash.model.ToggleFiltersModel;
 import org.springframework.ide.eclipse.boot.dash.model.ToggleFiltersModel.FilterChoice;
+import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -46,8 +55,12 @@ public class LocalServicesModel extends AbstractDisposable {
 	private LiveSetVariable<ButtonModel> buttons = new LiveSetVariable<>();
 
 	BootDashHyperlink enableCloudServicesButton = new BootDashHyperlink("Enable local cloud services") {
-		public void perform() throws Exception {
 
+		public void doPerform(UserInteractions ui) throws Exception {
+			IBootInstall bootInstall = defaultBootInstall.getValue();
+			if (bootInstall!=null && bootInstall.getExtension(CloudCliInstall.class) == null) {
+				new AutoCloudCliInstaller(bootInstall).performInstall(ui);
+			}
 			viewerFilters.remove(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES);
 		}
 	};

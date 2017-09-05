@@ -180,9 +180,6 @@ public class ZippedBootInstall extends BootInstall {
 
 	synchronized private CloudCliInstall initCloudCliInstall() {
 		if (super.getCloudCliInstall() == null) {
-			new AutoCloudCliInstaller(this).performInstall();
-		}
-		if (super.getCloudCliInstall() == null) {
 			return null;
 		} else {
 			return new CachingCloudCliInstall(this);

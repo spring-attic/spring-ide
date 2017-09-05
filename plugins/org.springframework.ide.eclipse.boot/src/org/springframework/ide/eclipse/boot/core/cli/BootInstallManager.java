@@ -197,7 +197,7 @@ public class BootInstallManager implements IBootInstallFactory {
 		return _defaultInstall.onChange((e, v) -> listener.defaultInstallChanged());
 	}
 
-	public synchronized LiveExpression<IBootInstall> getDefaultInstallExp() {
+	public LiveExpression<IBootInstall> getDefaultInstallExp() {
 		return _defaultInstall;
 	}
 
