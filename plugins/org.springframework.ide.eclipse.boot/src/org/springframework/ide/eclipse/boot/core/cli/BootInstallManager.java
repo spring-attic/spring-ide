@@ -51,7 +51,7 @@ public class BootInstallManager implements IBootInstallFactory {
 
 	private static BootInstallManager instance;
 
-	private static File determineCacheDir() {
+	public static File determineCacheDir() {
 		IPath stateLocation = BootActivator.getDefault().getStateLocation();
 		return stateLocation.append("installs").toFile();
 	}
@@ -59,7 +59,7 @@ public class BootInstallManager implements IBootInstallFactory {
 	public static synchronized BootInstallManager getInstance() {
 		try {
 			if (instance==null) {
-				instance = new BootInstallManager();
+				instance = new BootInstallManager(determineCacheDir());
 			}
 			return instance;
 		} catch (Exception e) {
@@ -72,8 +72,8 @@ public class BootInstallManager implements IBootInstallFactory {
 	private List<IBootInstall> installs = null;
 	private LiveVariable<IBootInstall> _defaultInstall = new LiveVariable<>();
 
-	private BootInstallManager() throws Exception {
-		downloader = new DownloadManager(null, determineCacheDir());
+	public BootInstallManager(File cacheDir) throws Exception {
+		downloader = new DownloadManager(null, cacheDir);
 		installs = new ArrayList<>();
 		read();
 		if (installs.isEmpty()) {

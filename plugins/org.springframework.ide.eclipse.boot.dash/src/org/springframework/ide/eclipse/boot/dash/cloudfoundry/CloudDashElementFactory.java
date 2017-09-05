@@ -11,8 +11,8 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
-import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
+import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
 
 public class CloudDashElementFactory {
 

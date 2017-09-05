@@ -16,6 +16,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -79,6 +80,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.LaunchConfDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.LocalCloudServiceDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
+import org.springframework.ide.eclipse.boot.dash.model.ToggleFiltersModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
@@ -125,6 +127,12 @@ public class BootDashModelTest {
 
 	@Rule
 	public DumpBootProcessOutput processOutput = new DumpBootProcessOutput();
+
+
+	public void testAutoInstallSpringCLI() throws Exception {
+		assertTrue(model.getViewModel().getToggleFilters().getSelectedFilters().contains(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES));
+		fail("This test is a work in progress");
+	}
 
 	/**
 	 * Test that newly created spring boot project gets added to the model.

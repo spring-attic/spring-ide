@@ -8,9 +8,9 @@
  * Contributors:
  *    Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.metadata;
+package org.springframework.ide.eclipse.boot.pstore;
 
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.ArrayEncoder;
 
@@ -73,7 +73,7 @@ public class PropertyStoreApi {
 			try {
 				return Boolean.parseBoolean(string);
 			} catch (Exception e) {
-				BootDashActivator.log(e);
+				Log.log(e);
 			}
 		}
 		return dflt;

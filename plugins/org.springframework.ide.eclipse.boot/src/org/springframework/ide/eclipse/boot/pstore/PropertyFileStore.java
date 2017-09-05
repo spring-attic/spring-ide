@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.metadata;
+package org.springframework.ide.eclipse.boot.pstore;
 
 import java.io.File;
 import java.io.FileInputStream;

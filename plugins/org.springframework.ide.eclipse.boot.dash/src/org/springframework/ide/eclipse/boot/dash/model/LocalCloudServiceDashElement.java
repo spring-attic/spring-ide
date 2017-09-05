@@ -33,12 +33,12 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
-import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
-import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.cli.CloudCliServiceLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
+import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
+import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.boot.util.RetryUtil;
 import org.springsource.ide.eclipse.commons.core.util.ProcessUtils;
@@ -135,7 +135,7 @@ public class LocalCloudServiceDashElement extends AbstractLaunchConfigurationsDa
 
 	@Override
 	protected IPropertyStore createPropertyStore() {
-		return PropertyStoreFactory.createSubStore("S-"+delegate, getBootDashModel().getModelStore());
+		return PropertyStores.createSubStore("S-"+delegate, getBootDashModel().getModelStore());
 	}
 
 	@Override

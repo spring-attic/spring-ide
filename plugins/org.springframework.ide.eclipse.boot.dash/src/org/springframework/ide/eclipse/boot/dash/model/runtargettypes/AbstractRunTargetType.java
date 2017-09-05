@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model.runtargettypes;
 
-import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
-import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
-import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
+import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
+import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
+import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
 
 /**
  * @author Kris De Volder
@@ -31,7 +31,7 @@ public abstract class AbstractRunTargetType implements RunTargetType {
 		// However this requires a bunch of refactoring to get rid of the global constants related to the
 		// 'LOCAL' runtarget and type.
 		if (context!=null) {
-			this.propertyStore = PropertyStoreFactory.createSubStore(name, context.getViewProperties());
+			this.propertyStore = PropertyStores.createSubStore(name, context.getViewProperties());
 		}
 	}
 

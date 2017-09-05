@@ -46,6 +46,7 @@ Export-Package: org.springframework.ide.eclipse.boot.core,
  org.springframework.ide.eclipse.boot.core.cli.install,
  org.springframework.ide.eclipse.boot.core.initializr,
  org.springframework.ide.eclipse.boot.core.internal,
+ org.springframework.ide.eclipse.boot.pstore,
  org.springframework.ide.eclipse.boot.ui,
  org.springframework.ide.eclipse.boot.util
 Import-Package: org.apache.commons.lang;version="2.6.0",

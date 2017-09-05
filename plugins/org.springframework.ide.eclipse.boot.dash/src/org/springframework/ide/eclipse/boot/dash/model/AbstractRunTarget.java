@@ -10,14 +10,14 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
-import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
-import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
-import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.util.template.Template;
 import org.springframework.ide.eclipse.boot.dash.util.template.TemplateEnv;
 import org.springframework.ide.eclipse.boot.dash.util.template.Templates;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
+import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
+import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
+import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
 
 public abstract class AbstractRunTarget implements RunTarget, TemplateEnv {
 
@@ -34,7 +34,7 @@ public abstract class AbstractRunTarget implements RunTarget, TemplateEnv {
 		this.type = type;
 		IPropertyStore typeStore = type.getPropertyStore();
 		if (typeStore!=null) {
-			propertyStore = PropertyStoreFactory.createSubStore(id, typeStore);
+			propertyStore = PropertyStores.createSubStore(id, typeStore);
 		}
 	}
 

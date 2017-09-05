@@ -39,8 +39,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.hamcrest.Matcher;
 import org.junit.Test;
-import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
-import org.springframework.ide.eclipse.boot.dash.metadata.InMemoryPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractLaunchConfigurationsDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -51,6 +49,8 @@ import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKLaunchTracker;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKTunnel;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.Mocks;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchConfRunStateTracker;
+import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
+import org.springframework.ide.eclipse.boot.pstore.InMemoryPropertyStore;
 
 import com.google.common.collect.ImmutableSet;
 

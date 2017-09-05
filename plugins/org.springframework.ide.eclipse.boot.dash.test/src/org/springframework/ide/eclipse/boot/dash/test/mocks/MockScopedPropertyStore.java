@@ -13,7 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.test.mocks;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
+import org.springframework.ide.eclipse.boot.pstore.IScopedPropertyStore;
 
 /**
  * A memory-backed {@link IScopedPropertyStore} suitable for testing.

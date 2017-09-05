@@ -37,9 +37,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.launching.SocketUtil;
 import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.boot.dash.livexp.PollingLiveExp;
-import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
-import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
-import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.ActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.JMXActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
@@ -55,6 +52,9 @@ import org.springframework.ide.eclipse.boot.launch.cli.CloudCliServiceLaunchConf
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
 import org.springframework.ide.eclipse.boot.launch.util.SpringApplicationLifeCycleClientManager;
 import org.springframework.ide.eclipse.boot.launch.util.SpringApplicationLifecycleClient;
+import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
+import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
+import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.boot.util.RetryUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.maintype.MainTypeFinder;
@@ -345,7 +345,7 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 	public PropertyStoreApi getPersistentProperties() {
 		if (persistentProperties==null) {
 			IPropertyStore backingStore = createPropertyStore();
-			this.persistentProperties = PropertyStoreFactory.createApi(backingStore);
+			this.persistentProperties = PropertyStores.createApi(backingStore);
 		}
 		return persistentProperties;
 	}

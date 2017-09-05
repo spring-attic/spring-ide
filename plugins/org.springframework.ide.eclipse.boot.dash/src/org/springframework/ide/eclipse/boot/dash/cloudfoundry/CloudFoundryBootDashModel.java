@@ -78,8 +78,6 @@ import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel.Result;
 import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
-import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
-import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.AsyncDeletable;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -93,6 +91,8 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
+import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
+import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
@@ -281,8 +281,8 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	public CloudFoundryBootDashModel(CloudFoundryRunTarget target, BootDashModelContext context, BootDashViewModel parent) {
 		super(target, parent);
 		RunTargetType type = target.getType();
-		IPropertyStore typeStore = PropertyStoreFactory.createForScope(type, context.getRunTargetProperties());
-		this.modelStore = PropertyStoreFactory.createSubStore(target.getId(), typeStore);
+		IPropertyStore typeStore = PropertyStores.createForScope(type, context.getRunTargetProperties());
+		this.modelStore = PropertyStores.createSubStore(target.getId(), typeStore);
 		this.elementFactory = new CloudDashElementFactory(context, modelStore, this);
 		this.consoleManager = new CloudAppLogManager(target);
 		this.debugTargetDisconnector = DevtoolsUtil.createDebugTargetDisconnector(this);

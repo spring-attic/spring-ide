@@ -14,9 +14,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
-import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
-import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
-import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
+import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
+import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
+import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -81,7 +81,7 @@ public class ToggleFiltersModel {
 	private final PropertyStoreApi persistentProperties;
 
 	public ToggleFiltersModel(BootDashModelContext context) {
-		this(PropertyStoreFactory.createSubStore(STORE_ID, context.getViewProperties()));
+		this(PropertyStores.createSubStore(STORE_ID, context.getViewProperties()));
 	}
 
 	public ToggleFiltersModel(IPropertyStore propertyStore) {

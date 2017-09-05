@@ -16,15 +16,15 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
-import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
-import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreApi;
-import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.AsyncDeletable;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.WrappingBootDashElement;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
+import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
+import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
+import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
 
 import reactor.core.publisher.Mono;
 
@@ -40,8 +40,8 @@ public class CloudServiceInstanceDashElement extends CloudDashElement<String> im
 	public CloudServiceInstanceDashElement(AbstractBootDashModel parent, CFServiceInstance service, IPropertyStore modelStore) {
 		super(parent, service.getName()+"@"+parent.getRunTarget().getId());
 		this.service = service;
-		IPropertyStore backingStore = PropertyStoreFactory.createSubStore("S"+getName(), modelStore);
-		this.persistentProperties = PropertyStoreFactory.createApi(backingStore);
+		IPropertyStore backingStore = PropertyStores.createSubStore("S"+getName(), modelStore);
+		this.persistentProperties = PropertyStores.createApi(backingStore);
 	}
 
 	@Override

@@ -22,14 +22,14 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
-import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
-import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
-import org.springframework.ide.eclipse.boot.dash.metadata.InMemoryPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockSecuredCredentialStore;
+import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
+import org.springframework.ide.eclipse.boot.pstore.IScopedPropertyStore;
+import org.springframework.ide.eclipse.boot.pstore.InMemoryPropertyStore;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
@@ -45,6 +45,7 @@ public class TestBootDashModelContext implements BootDashModelContext {
 	private LiveVariable<Pattern> bootProjectExclusion = new LiveVariable<>(BootPreferences.DEFAULT_BOOT_PROJECT_EXCLUDE);
 	private IPropertyStore viewProperties = new InMemoryPropertyStore();
 	private IPropertyStore privateProperties = new InMemoryPropertyStore();
+	private BootInstallManager bootInstalls;
 
 	public TestBootDashModelContext(IWorkspace workspace, ILaunchManager launchMamager) {
 		try {
@@ -53,6 +54,7 @@ public class TestBootDashModelContext implements BootDashModelContext {
 			stateLoc = StsTestUtil.createTempDirectory("plugin-state", null);
 			this.projectProperties = new MockScopedPropertyStore<>();
 			this.runTargetProperties = new MockScopedPropertyStore<>();
+			this.bootInstalls = BootInstallManager.getInstance(); //TODO: don't use the real thing here.
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -111,8 +113,7 @@ public class TestBootDashModelContext implements BootDashModelContext {
 
 	@Override
 	public BootInstallManager getBootInstallManager() {
-		//TODO: consider using some kind of mock instead of the real thing.
-		return BootInstallManager.getInstance();
+		return bootInstalls;
 	}
 
 }

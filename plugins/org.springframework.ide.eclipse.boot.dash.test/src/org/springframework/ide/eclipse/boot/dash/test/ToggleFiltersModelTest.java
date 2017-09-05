@@ -23,12 +23,12 @@ import static org.mockito.Mockito.when;
 
 import org.eclipse.core.resources.IProject;
 import org.junit.Test;
-import org.springframework.ide.eclipse.boot.dash.metadata.InMemoryPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.LaunchConfDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.ToggleFiltersModel;
 import org.springframework.ide.eclipse.boot.dash.model.ToggleFiltersModel.FilterChoice;
+import org.springframework.ide.eclipse.boot.pstore.InMemoryPropertyStore;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 
 import com.google.common.collect.ImmutableSet;

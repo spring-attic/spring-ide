@@ -27,8 +27,6 @@ import org.osgi.framework.BundleListener;
 import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
 import org.springframework.ide.eclipse.boot.dash.devtools.DevtoolsPortRefresher;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
-import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
-import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.local.LocalServicesModel;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchConfRunStateTracker;
@@ -37,6 +35,8 @@ import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManag
 import org.springframework.ide.eclipse.boot.dash.views.BootDashTreeView;
 import org.springframework.ide.eclipse.boot.dash.views.LocalElementConsoleManager;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
+import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
+import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager.ClasspathListener;
@@ -119,8 +119,8 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 		this.projectExclusion = context.getBootProjectExclusion();
 
 		RunTargetType type = getRunTarget().getType();
-		IPropertyStore typeStore = PropertyStoreFactory.createForScope(type, context.getRunTargetProperties());
-		this.modelStore = PropertyStoreFactory.createSubStore(getRunTarget().getId(), typeStore);
+		IPropertyStore typeStore = PropertyStores.createForScope(type, context.getRunTargetProperties());
+		this.modelStore = PropertyStores.createSubStore(getRunTarget().getId(), typeStore);
 
 		// Listen to M2E JDT plugin active event to refresh local boot project dash elements.
 		addMavenInitializationIssueEventHandling();

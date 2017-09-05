@@ -17,13 +17,13 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
-import org.springframework.ide.eclipse.boot.dash.metadata.IPropertyStore;
-import org.springframework.ide.eclipse.boot.dash.metadata.IScopedPropertyStore;
-import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.util.CollectionUtils;
 import org.springframework.ide.eclipse.boot.dash.util.DebugUtil;
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
+import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
+import org.springframework.ide.eclipse.boot.pstore.IScopedPropertyStore;
+import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager.ClasspathListener;
@@ -107,7 +107,7 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 
 	@Override
 	protected IPropertyStore createPropertyStore() {
-		return PropertyStoreFactory.createForScope(delegate, projectProperties);
+		return PropertyStores.createForScope(delegate, projectProperties);
 	}
 
 	@Override
