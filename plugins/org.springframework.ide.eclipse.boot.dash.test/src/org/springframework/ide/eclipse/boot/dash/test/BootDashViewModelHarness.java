@@ -37,6 +37,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.ButtonModel;
 import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargets;
@@ -58,9 +59,11 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 import com.google.common.collect.ImmutableSet;
 
+import junit.framework.AssertionFailedError;
+
 public class BootDashViewModelHarness {
 
-	public final BootDashModelContext context;
+	public TestBootDashModelContext context;
 	public BootDashViewModel model;
 	private RunTargetType[] types;
 	public final MockMultiSelection<BootDashElement> selection = new MockMultiSelection<>(BootDashElement.class);
@@ -69,7 +72,7 @@ public class BootDashViewModelHarness {
 	/**
 	 * This is private now. Use the Builder instead for a convenient way to create a harness with some targets in it.
 	 */
-	public BootDashViewModelHarness(BootDashModelContext context, RunTargetType... types) throws Exception {
+	public BootDashViewModelHarness(TestBootDashModelContext context, RunTargetType... types) throws Exception {
 		this.types = types;
 		this.context = context;
 		this.model = new BootDashViewModel(context, types);
@@ -79,81 +82,81 @@ public class BootDashViewModelHarness {
 	 * Dipose model and reinitialze it reusing the same stores (for testing functionality
 	 * around persisting stuff)
 	 */
-	public void reload() {
+	public void reload() throws Exception {
 		dispose();
+		context = context.reload();
 		this.model = new BootDashViewModel(context, types);
 	}
 
-	public static class MockContext implements BootDashModelContext {
-
-		private IPropertyStore viewProperties = new InMemoryPropertyStore();
-		private IPropertyStore privateProperties = new InMemoryPropertyStore();
-
-		private IScopedPropertyStore<IProject> projectProperties = new MockScopedPropertyStore<>();
-		private IScopedPropertyStore<RunTargetType> runtargetProperties = new MockScopedPropertyStore<>();
-		private SecuredCredentialsStore secureStore = new MockSecuredCredentialStore();
-		private File stateLocation;
-		private LiveVariable<Pattern> bootProjectExclusion = new LiveVariable<>(BootPreferences.DEFAULT_BOOT_PROJECT_EXCLUDE);
-
-		public MockContext() throws Exception {
-			stateLocation = StsTestUtil.createTempDirectory();
-		}
-
-		@Override
-		public IWorkspace getWorkspace() {
-			return ResourcesPlugin.getWorkspace();
-		}
-
-		@Override
-		public ILaunchManager getLaunchManager() {
-			return DebugPlugin.getDefault().getLaunchManager();
-		}
-
-		@Override
-		public IPath getStateLocation() {
-			return new Path(stateLocation.toString());
-		}
-
-		@Override
-		public IScopedPropertyStore<IProject> getProjectProperties() {
-			return projectProperties;
-		}
-
-		@Override
-		public IScopedPropertyStore<RunTargetType> getRunTargetProperties() {
-			return runtargetProperties;
-		}
-
-		@Override
-		public SecuredCredentialsStore getSecuredCredentialsStore() {
-			return secureStore;
-		}
-
-		@Override
-		public void log(Exception e) {
-		}
-
-		@Override
-		public LiveExpression<Pattern> getBootProjectExclusion() {
-			return bootProjectExclusion;
-		}
-
-		@Override
-		public IPropertyStore getViewProperties() {
-			return viewProperties;
-		}
-
-		@Override
-		public IPropertyStore getPrivatePropertyStore() {
-			return privateProperties;
-		}
-
-		@Override
-		public BootInstallManager getBootInstallManager() {
-			// TODO Consider using dome kind of 'mock' instead of the real thing.
-			return BootInstallManager.getInstance();
-		}
-	}
+//	public static class MockContext implements BootDashModelContext {
+//
+//		private IPropertyStore viewProperties = new InMemoryPropertyStore();
+//		private IPropertyStore privateProperties = new InMemoryPropertyStore();
+//
+//		private IScopedPropertyStore<IProject> projectProperties = new MockScopedPropertyStore<>();
+//		private IScopedPropertyStore<RunTargetType> runtargetProperties = new MockScopedPropertyStore<>();
+//		private SecuredCredentialsStore secureStore = new MockSecuredCredentialStore();
+//		private File stateLocation;
+//		private LiveVariable<Pattern> bootProjectExclusion = new LiveVariable<>(BootPreferences.DEFAULT_BOOT_PROJECT_EXCLUDE);
+//
+//		public MockContext() throws Exception {
+//			stateLocation = StsTestUtil.createTempDirectory();
+//		}
+//
+//		@Override
+//		public IWorkspace getWorkspace() {
+//			return ResourcesPlugin.getWorkspace();
+//		}
+//
+//		@Override
+//		public ILaunchManager getLaunchManager() {
+//			return DebugPlugin.getDefault().getLaunchManager();
+//		}
+//
+//		@Override
+//		public IPath getStateLocation() {
+//			return new Path(stateLocation.toString());
+//		}
+//
+//		@Override
+//		public IScopedPropertyStore<IProject> getProjectProperties() {
+//			return projectProperties;
+//		}
+//
+//		@Override
+//		public IScopedPropertyStore<RunTargetType> getRunTargetProperties() {
+//			return runtargetProperties;
+//		}
+//
+//		@Override
+//		public SecuredCredentialsStore getSecuredCredentialsStore() {
+//			return secureStore;
+//		}
+//
+//		@Override
+//		public void log(Exception e) {
+//		}
+//
+//		@Override
+//		public LiveExpression<Pattern> getBootProjectExclusion() {
+//			return bootProjectExclusion;
+//		}
+//
+//		@Override
+//		public IPropertyStore getViewProperties() {
+//			return viewProperties;
+//		}
+//
+//		@Override
+//		public IPropertyStore getPrivatePropertyStore() {
+//			return privateProperties;
+//		}
+//
+//		@Override
+//		public BootInstallManager getBootInstallManager() {
+//			return bootI
+//		}
+//	}
 
 	public BootDashModel getRunTargetModel(RunTargetType type) {
 		List<BootDashModel> models = getRunTargetModels(type);
@@ -241,6 +244,26 @@ public class BootDashViewModelHarness {
 			labels.dispose();
 			stylers.dispose();
 		}
+	}
+
+	public ButtonModel assertButton(BootDashModel model, String expectedLabel) {
+		StringBuilder labels = new StringBuilder();
+		for (ButtonModel button : model.getButtons().getValues()) {
+			labels.append(button.getLabel()+"\n");
+			if (expectedLabel.equals(button.getLabel())) {
+				return button;
+			}
+		}
+		throw new AssertionFailedError("Label not found: "+expectedLabel+"\nActual labels are:\n"+labels);
+	}
+
+	public ButtonModel getButton(BootDashModel model, String label) {
+		for (ButtonModel button : model.getButtons().getValues()) {
+			if (label.equals(button.getLabel())) {
+				return button;
+			}
+		}
+		return null;
 	}
 
 }

@@ -103,13 +103,13 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 	 */
 	public static final long CONNECT_TARGET_TIMEOUT = 30_000;
 
-	public static CloudFoundryTestHarness create(BootDashModelContext context) throws Exception {
+	public static CloudFoundryTestHarness create(TestBootDashModelContext context) throws Exception {
 		CloudFoundryClientFactory clientFactory = DefaultCloudFoundryClientFactoryV2.INSTANCE;
 		return create(context, clientFactory);
 	}
 
 	protected static CloudFoundryTestHarness create(
-			BootDashModelContext context,
+			TestBootDashModelContext context,
 			CloudFoundryClientFactory clientFactory
 	) throws Exception {
 		CloudFoundryRunTargetType cfTargetType = new CloudFoundryRunTargetType(context, clientFactory);
@@ -172,7 +172,7 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 	private CloudFoundryClientFactory clientFactory;
 	public final CloudFoundryRunTargetType cfTargetType;
 
-	private CloudFoundryTestHarness(BootDashModelContext context, CloudFoundryClientFactory clientFactory, CloudFoundryRunTargetType cfTargetType) throws Exception {
+	private CloudFoundryTestHarness(TestBootDashModelContext context, CloudFoundryClientFactory clientFactory, CloudFoundryRunTargetType cfTargetType) throws Exception {
 		super(context, RunTargetTypes.LOCAL, cfTargetType);
 		Assert.isNotNull(clientFactory, "clientFactory");
 		this.clientFactory = clientFactory;

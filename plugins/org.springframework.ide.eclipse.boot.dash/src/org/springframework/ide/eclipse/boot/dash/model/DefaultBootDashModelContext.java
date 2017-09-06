@@ -21,6 +21,7 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
 import org.springframework.ide.eclipse.boot.pstore.IScopedPropertyStore;
@@ -34,9 +35,9 @@ public class DefaultBootDashModelContext implements BootDashModelContext {
 
 	private IScopedPropertyStore<IProject> projectProperties = PropertyStores.createForProjects();
 
-	private IScopedPropertyStore<RunTargetType> runTargetProperties = PropertyStores.createForRunTargets();
+	private IScopedPropertyStore<RunTargetType> runTargetProperties = PropertyStoreFactory.createForRunTargets();
 
-	private SecuredCredentialsStore securedStore = PropertyStores.createSecuredCredentialsStore();
+	private SecuredCredentialsStore securedStore = PropertyStoreFactory.createSecuredCredentialsStore();
 
 	private IPropertyStore viewProperties = PropertyStores.backedBy(BootDashActivator.getDefault().getPreferenceStore());
 

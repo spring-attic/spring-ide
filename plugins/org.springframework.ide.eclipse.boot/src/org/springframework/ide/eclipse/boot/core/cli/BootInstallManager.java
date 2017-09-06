@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.osgi.service.prefs.BackingStoreException;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.cli.install.GenericBootInstall;
@@ -33,6 +34,9 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
+import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
+import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
+import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
 
 /**
  * Manages the boot installations that are configured in this workspace.
@@ -59,7 +63,8 @@ public class BootInstallManager implements IBootInstallFactory {
 	public static synchronized BootInstallManager getInstance() {
 		try {
 			if (instance==null) {
-				instance = new BootInstallManager(determineCacheDir());
+				IPreferenceStore prefsStore = BootActivator.getDefault().getPreferenceStore();
+				instance = new BootInstallManager(determineCacheDir(), PropertyStores.backedBy(prefsStore));
 			}
 			return instance;
 		} catch (Exception e) {
@@ -69,10 +74,13 @@ public class BootInstallManager implements IBootInstallFactory {
 
 	private DownloadManager downloader;
 
+	private PropertyStoreApi prefs;
 	private List<IBootInstall> installs = null;
 	private LiveVariable<IBootInstall> _defaultInstall = new LiveVariable<>();
 
-	public BootInstallManager(File cacheDir) throws Exception {
+
+	public BootInstallManager(File cacheDir, IPropertyStore propStore) throws Exception {
+		prefs = new PropertyStoreApi(propStore);
 		downloader = new DownloadManager(null, cacheDir);
 		installs = new ArrayList<>();
 		read();

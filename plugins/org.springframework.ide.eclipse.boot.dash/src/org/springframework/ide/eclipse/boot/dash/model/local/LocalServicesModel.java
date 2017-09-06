@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.osgi.framework.Version;
@@ -55,13 +56,16 @@ public class LocalServicesModel extends AbstractDisposable {
 	private LiveSetVariable<ButtonModel> buttons = new LiveSetVariable<>();
 
 	BootDashHyperlink enableCloudServicesButton = new BootDashHyperlink("Enable local cloud services") {
-
 		public void doPerform(UserInteractions ui) throws Exception {
 			IBootInstall bootInstall = defaultBootInstall.getValue();
-			if (bootInstall!=null && bootInstall.getExtension(CloudCliInstall.class) == null) {
-				new AutoCloudCliInstaller(bootInstall).performInstall(ui);
+			if (bootInstall!=null) {
+				if (bootInstall.getExtension(CloudCliInstall.class) == null) {
+					new AutoCloudCliInstaller(bootInstall).performInstall(ui);
+				}
+				if (bootInstall.getExtension(CloudCliInstall.class)!=null) {
+					viewerFilters.remove(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES);
+				}
 			}
-			viewerFilters.remove(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES);
 		}
 	};
 

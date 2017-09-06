@@ -33,6 +33,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.junit.After;
 import org.junit.Before;
@@ -73,13 +74,16 @@ import com.google.common.collect.ImmutableSet;
  */
 public class BootDashViewModelTest {
 
-	private BootDashModelContext context;
+	private TestBootDashModelContext context;
 	private BootDashViewModelHarness harness = null;
 	private BootProjectTestHarness projects = new BootProjectTestHarness(ResourcesPlugin.getWorkspace());
 
 	@Before
 	public void setup() throws Exception {
-		context = new BootDashViewModelHarness.MockContext();
+		context =  new TestBootDashModelContext(
+				ResourcesPlugin.getWorkspace(),
+				DebugPlugin.getDefault().getLaunchManager()
+		);
 		StsTestUtil.cleanUpProjects();
 	}
 

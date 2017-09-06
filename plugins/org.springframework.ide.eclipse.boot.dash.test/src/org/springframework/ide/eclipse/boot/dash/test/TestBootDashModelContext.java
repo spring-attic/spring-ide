@@ -32,11 +32,13 @@ import org.springframework.ide.eclipse.boot.pstore.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.pstore.InMemoryPropertyStore;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 public class TestBootDashModelContext implements BootDashModelContext {
 
 	private File stateLoc;
+	private File installLoc;
 	private ILaunchManager launchManager;
 	private IWorkspace workspace;
 	SecuredCredentialsStore secureStore = new MockSecuredCredentialStore();
@@ -45,6 +47,7 @@ public class TestBootDashModelContext implements BootDashModelContext {
 	private LiveVariable<Pattern> bootProjectExclusion = new LiveVariable<>(BootPreferences.DEFAULT_BOOT_PROJECT_EXCLUDE);
 	private IPropertyStore viewProperties = new InMemoryPropertyStore();
 	private IPropertyStore privateProperties = new InMemoryPropertyStore();
+	private IPropertyStore installProperties = new InMemoryPropertyStore();
 	private BootInstallManager bootInstalls;
 
 	public TestBootDashModelContext(IWorkspace workspace, ILaunchManager launchMamager) {
@@ -52,11 +55,12 @@ public class TestBootDashModelContext implements BootDashModelContext {
 			this.workspace = workspace;
 			this.launchManager = launchMamager;
 			stateLoc = StsTestUtil.createTempDirectory("plugin-state", null);
+			installLoc = StsTestUtil.createTempDirectory("boot-installs", null);
 			this.projectProperties = new MockScopedPropertyStore<>();
 			this.runTargetProperties = new MockScopedPropertyStore<>();
-			this.bootInstalls = BootInstallManager.getInstance(); //TODO: don't use the real thing here.
-		} catch (IOException e) {
-			throw new RuntimeException(e);
+			reload();
+		} catch (Exception e) {
+			throw ExceptionUtil.unchecked(e);
 		}
 	}
 
@@ -114,6 +118,15 @@ public class TestBootDashModelContext implements BootDashModelContext {
 	@Override
 	public BootInstallManager getBootInstallManager() {
 		return bootInstalls;
+	}
+
+	/**
+	 * Simulates reloading
+	 * @return
+	 */
+	public TestBootDashModelContext reload() throws Exception {
+		this.bootInstalls = new BootInstallManager(installLoc, installProperties);
+		return this;
 	}
 
 }
