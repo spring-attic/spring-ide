@@ -76,7 +76,7 @@ public class SshDebugLaunchConfigurationDelegate extends AbstractBootLaunchConfi
 	@Override
 	public void launch(ILaunchConfiguration conf, String mode, ILaunch launch, IProgressMonitor mon)
 			throws CoreException {
-		conf = configureSourcePathProvider(conf);
+		conf = configureClassPathProviders(conf);
 		Assert.isTrue(ILaunchManager.DEBUG_MODE.equals(mode));
 		BootDashViewModel context = getContext();
 		mon.beginTask("Establish SSH Debug Connection to "+getAppName(conf)+" on "+getRunTarget(conf, context), 4);

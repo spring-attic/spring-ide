@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -53,6 +54,7 @@ public abstract class AbstractBootLaunchConfigurationDelegate extends JavaLaunch
 	public static final boolean DEFAULT_ENABLE_DEBUG_OUTPUT = false;
 
 	private static final String BOOT_MAVEN_SOURCE_PATH_PROVIDER = "org.springframework.ide.eclipse.boot.launch.BootMavenSourcePathProvider";
+	private static final String BOOT_MAVEN_CLASS_PATH_PROVIDER = "org.springframework.ide.eclipse.boot.launch.BootMavenClassPathProvider";
 
 	/**
 	 * Spring boot properties are stored as launch confiuration properties with
@@ -121,24 +123,6 @@ public abstract class AbstractBootLaunchConfigurationDelegate extends JavaLaunch
 			} else if (!value.equals(other.value))
 				return false;
 			return true;
-		}
-	}
-
-	@Override
-	public String[] getClasspath(ILaunchConfiguration conf) throws CoreException {
-		try {
-			//Must do exactly what a Java Launch config would do. It is not enough to simply
-			// call super. Me must also pass a launch config exactly like the JDT one, including
-			// its type and some 'magic' attributes added for m2e
-			ILaunchConfigurationWorkingCopy wc = copyAs(conf, JAVA_LAUNCH_CONFIG_TYPE_ID);
-			enableMavenClasspathProvider(wc);
-			return super.getClasspath(wc);
-		} catch (Exception e) {
-			//In case the hacky stuff above fails, do something that mostly works, even if
-			// it does gets a classpath polluted with test dependencies.
-			// See https://issuetracker.springsource.com/browse/STS-4085
-			BootActivator.log(e);
-			return super.getClasspath(conf);
 		}
 	}
 
@@ -326,22 +310,6 @@ public abstract class AbstractBootLaunchConfigurationDelegate extends JavaLaunch
 		}
 	}
 
-	/**
-	 * Copy a given launch config into a 'clone' that has all the same attributes but
-	 * a different type id.
-	 * @throws CoreException
-	 */
-	private static ILaunchConfigurationWorkingCopy copyAs(ILaunchConfiguration conf,
-			String newType) throws CoreException {
-		ILaunchManager launchManager = getLaunchMan();
-		ILaunchConfigurationType launchConfigurationType = launchManager
-				.getLaunchConfigurationType(newType);
-		ILaunchConfigurationWorkingCopy wc = launchConfigurationType.newInstance(null,
-				launchManager.generateLaunchConfigurationName(conf.getName()));
-		wc.setAttributes(conf.getAttributes());
-		return wc;
-	}
-
 	public static ILaunchManager getLaunchMan() {
 		return DebugPlugin.getDefault().getLaunchManager();
 	}
@@ -349,7 +317,7 @@ public abstract class AbstractBootLaunchConfigurationDelegate extends JavaLaunch
 	@Override
 	public void launch(ILaunchConfiguration conf, String mode, final ILaunch launch, IProgressMonitor monitor)
 			throws CoreException {
-		conf = configureSourcePathProvider(conf);
+		conf = configureClassPathProviders(conf);
 		if (ILaunchManager.DEBUG_MODE.equals(mode) && isIgnoreSilentExitException(conf)) {
 			final IgnoreExceptionOfType breakpointListener = new IgnoreExceptionOfType(launch, SILENT_EXIT_EXCEPTION);
 			new ProcessTracker(new ProcessListenerAdapter() {
@@ -365,25 +333,41 @@ public abstract class AbstractBootLaunchConfigurationDelegate extends JavaLaunch
 		super.launch(conf, mode, launch, monitor);
 	}
 
-	protected ILaunchConfiguration configureSourcePathProvider(ILaunchConfiguration conf) throws CoreException {
+	protected ILaunchConfiguration configureClassPathProviders(ILaunchConfiguration conf) throws CoreException {
 		IProject project = BootLaunchConfigurationDelegate.getProject(conf);
 		if (project.hasNature(SpringBootCore.M2E_NATURE)) {
-			conf = setAttribute(conf, IJavaLaunchConfigurationConstants.ATTR_SOURCE_PATH_PROVIDER, BOOT_MAVEN_SOURCE_PATH_PROVIDER);
+			conf = modify(conf, (ILaunchConfigurationWorkingCopy wc) -> {
+				enableClasspathProviders(wc);
+			});
 		}
 		return conf;
 	}
 
-	private ILaunchConfiguration setAttribute(ILaunchConfiguration conf, String a, String v) {
+	public static void enableClasspathProviders(ILaunchConfigurationWorkingCopy wc) {
+		setAttribute(wc, IJavaLaunchConfigurationConstants.ATTR_SOURCE_PATH_PROVIDER, BOOT_MAVEN_SOURCE_PATH_PROVIDER);
+		setAttribute(wc, IJavaLaunchConfigurationConstants.ATTR_CLASSPATH_PROVIDER, BOOT_MAVEN_CLASS_PATH_PROVIDER);
+	}
+
+	private ILaunchConfiguration modify(ILaunchConfiguration conf, Consumer<ILaunchConfigurationWorkingCopy> mutator) throws CoreException {
+		ILaunchConfigurationWorkingCopy wc = conf.getWorkingCopy();
 		try {
-			if (!Objects.equals(v, conf.getAttribute(a, (String)null))) {
-				ILaunchConfigurationWorkingCopy wc = conf.getWorkingCopy();
-				wc.setAttribute(a, v);
-				conf = wc.doSave();
+			mutator.accept(wc);
+		} finally {
+			if (wc.isDirty()) {
+				 conf = wc.doSave();
 			}
-		} catch (Exception e) {
-			BootActivator.log(e);
 		}
 		return conf;
+	}
+
+	private static void setAttribute(ILaunchConfigurationWorkingCopy wc, String a, String v) {
+		try {
+			if (!Objects.equals(v, wc.getAttribute(a, (String)null))) {
+				wc.setAttribute(a, v);
+			}
+		} catch (CoreException e) {
+			Log.log(e);
+		}
 	}
 
 	public static boolean isIgnoreSilentExitException(ILaunchConfiguration conf) {

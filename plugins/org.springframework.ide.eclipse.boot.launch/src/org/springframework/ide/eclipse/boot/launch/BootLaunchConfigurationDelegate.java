@@ -290,6 +290,7 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 			String mainType
 	) {
 		setProcessFactory(wc, BootProcessFactory.class);
+		enableClasspathProviders(wc);
 		setProject(wc, project);
 		if (mainType!=null) {
 			setMainType(wc, mainType);

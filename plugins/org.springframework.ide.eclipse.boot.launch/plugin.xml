@@ -173,9 +173,12 @@
 </extension>
 
    <extension point="org.eclipse.jdt.launching.classpathProviders">
-      <classpathProvider 
+      <classpathProvider
           id="org.springframework.ide.eclipse.boot.launch.BootMavenSourcePathProvider"
           class="org.springframework.ide.eclipse.boot.launch.BootMavenSourcePathProvider"/>
+      <classpathProvider
+          id="org.springframework.ide.eclipse.boot.launch.BootMavenClassPathProvider"
+          class="org.springframework.ide.eclipse.boot.launch.BootMavenClassPathProvider"/>
    </extension>
 
  
