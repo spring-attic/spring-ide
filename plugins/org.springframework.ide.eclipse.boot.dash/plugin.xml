@@ -13,7 +13,7 @@
       </view> -->
       <view
             name="Boot Dashboard"
-            icon="platform:/plugin/org.springframework.ide.eclipse.boot/resources/icons/boot-icon.png"
+            icon="$nl$/icons/boot-icon.png"
             category="org.springframework.ide.eclipse.ui.views"
             class="org.springframework.ide.eclipse.boot.dash.views.BootDashTreeView"
             id="org.springframework.ide.eclipse.boot.dash.views.BootDashView">
@@ -144,7 +144,7 @@
                label="Boot Dashboard">
             <command
                   commandId="org.springframework.ide.eclipse.boot.dash.ShowBootDashboard"
-                  icon="platform:/plugin/org.springframework.ide.eclipse.boot/resources/icons/boot-icon.png"
+                  icon="$nl$/icons/boot-icon.png"
                   label="Boot Dashboard"
                   style="push"
                   tooltip="Boot Dashboard">
