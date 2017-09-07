@@ -163,7 +163,7 @@ public class ToggleFiltersModelTest {
 		//Simulate model reload (i.e. just instantiate it with the same property store).
 		model = new ToggleFiltersModel(propertyStore);
 
-		assertEquals(ImmutableSet.of(nonWorkspace), model.getSelectedFilters().getValues());
+		assertEquals(ImmutableSet.of(nonWorkspace, localService), model.getSelectedFilters().getValues());
 	}
 
 	private Filter<BootDashElement> getFilter(String withLabel) {
