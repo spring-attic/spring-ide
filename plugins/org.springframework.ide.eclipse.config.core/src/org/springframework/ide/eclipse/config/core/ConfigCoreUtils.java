@@ -192,7 +192,7 @@ public class ConfigCoreUtils {
 					StringReader reader = new StringReader(html);
 					TextPresentation text = new TextPresentation();
 					parser = new HTML2TextReader(reader, text);
-                    String parserVal = parser.getString();
+					String parserVal = parser.getString();
 					if (parserVal != null) {
 						return parserVal.trim();
 					}
