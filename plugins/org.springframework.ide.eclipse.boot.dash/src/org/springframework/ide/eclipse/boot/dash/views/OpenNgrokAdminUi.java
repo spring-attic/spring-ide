@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Pivotal, Inc.
+ * Copyright (c) 2016, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,8 +28,8 @@ public class OpenNgrokAdminUi extends AbstractBootDashElementsAction {
 		super(model, selection, ui);
 		this.setText("Open Ngrok Admin UI");
 		this.setToolTipText("Opens Ngrok Admin UI for this app in a Web Browser");
-		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/open_browser.gif")); //TODO: different icon?
-		this.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/open_browser_disabled.gif"));
+		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/open_browser.png")); //TODO: different icon?
+		this.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/open_browser_disabled.png"));
 	}
 
 	@Override

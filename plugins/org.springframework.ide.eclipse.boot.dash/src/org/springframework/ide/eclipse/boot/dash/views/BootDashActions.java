@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2016 Pivotal, Inc.
+ * Copyright (c) 2015, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -149,8 +149,8 @@ public class BootDashActions {
 		};
 		stopAction.setText("Stop");
 		stopAction.setToolTipText("Stop the process(es) associated with the selected elements");
-		stopAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/stop.gif"));
-		stopAction.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/stop_disabled.gif"));
+		stopAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/stop.png"));
+		stopAction.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/stop_disabled.png"));
 
 		runStateActions = new RunStateAction[] { restartAction, rebugAction, stopAction };
 
@@ -193,8 +193,8 @@ public class BootDashActions {
 		exposeRunAppAction = new ExposeAppAction(model, elementsSelection, ui, RunState.RUNNING, NGROKInstallManager.getInstance());
 		exposeRunAppAction.setText("(Re)start and Expose via ngrok");
 		exposeRunAppAction.setToolTipText("Start or restart the process associated with the selected elements and expose it to the outside world via an ngrok tunnel");
-		exposeRunAppAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart.gif"));
-		exposeRunAppAction.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart_disabled.gif"));
+		exposeRunAppAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart.pnf"));
+		exposeRunAppAction.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart_disabled.png"));
 
 		exposeDebugAppAction = new ExposeAppAction(model, elementsSelection, ui, RunState.DEBUGGING, NGROKInstallManager.getInstance());
 		exposeDebugAppAction.setText("(Re)debug and Expose via ngrok");
@@ -229,8 +229,8 @@ public class BootDashActions {
 			super(model, selection, ui, goalState);
 			setText("(Re)start");
 			setToolTipText("Start or restart the process associated with the selected elements");
-			setImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart.gif"));
-			setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart_disabled.gif"));
+			setImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart.png"));
+			setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart_disabled.png"));
 		}
 	}
 

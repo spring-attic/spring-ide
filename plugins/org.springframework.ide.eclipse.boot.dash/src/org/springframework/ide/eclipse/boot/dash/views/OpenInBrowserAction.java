@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2016 Pivotal Software, Inc.
+ * Copyright (c) 2015, 2017 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,8 +22,8 @@ public class OpenInBrowserAction extends AbstractBootDashElementsAction {
 		super(model, selection, ui);
 		this.setText("Open Web Browser");
 		this.setToolTipText("Open a Web Browser on the default URL");
-		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/open_browser.gif"));
-		this.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/open_browser_disabled.gif"));
+		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/open_browser.png"));
+		this.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/open_browser_disabled.png"));
 	}
 
 	@Override

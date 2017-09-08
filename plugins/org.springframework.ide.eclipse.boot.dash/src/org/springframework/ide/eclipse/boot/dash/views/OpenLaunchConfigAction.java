@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2016 Pivotal Software, Inc.
+ * Copyright (c) 2015, 2017 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,8 +31,8 @@ public class OpenLaunchConfigAction extends AbstractBootDashElementsAction {
 		super(model, selection, ui);
 		this.setText("Open Config");
 		this.setToolTipText("Open the launch configuration associated with the selected element, if one exists, or create one if it doesn't.");
-		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/write_obj.gif"));
-		this.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/write_obj_disabled.gif"));
+		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/write_obj.png"));
+		this.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/write_obj_disabled.png"));
 	}
 
 	@Override
