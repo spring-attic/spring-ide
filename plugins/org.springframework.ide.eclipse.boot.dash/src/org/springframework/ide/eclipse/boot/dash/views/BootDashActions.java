@@ -193,7 +193,7 @@ public class BootDashActions {
 		exposeRunAppAction = new ExposeAppAction(model, elementsSelection, ui, RunState.RUNNING, NGROKInstallManager.getInstance());
 		exposeRunAppAction.setText("(Re)start and Expose via ngrok");
 		exposeRunAppAction.setToolTipText("Start or restart the process associated with the selected elements and expose it to the outside world via an ngrok tunnel");
-		exposeRunAppAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart.pnf"));
+		exposeRunAppAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart.png"));
 		exposeRunAppAction.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart_disabled.png"));
 
 		exposeDebugAppAction = new ExposeAppAction(model, elementsSelection, ui, RunState.DEBUGGING, NGROKInstallManager.getInstance());
