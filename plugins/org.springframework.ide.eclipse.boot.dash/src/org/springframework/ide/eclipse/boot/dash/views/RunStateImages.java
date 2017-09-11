@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,6 +24,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.widgets.Display;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 
 /**
@@ -31,7 +32,7 @@ import org.springframework.ide.eclipse.boot.dash.model.RunState;
  */
 public class RunStateImages {
 
-	private Map<Object, Image[]> animations = new HashMap<Object, Image[]>();
+	private Map<Object, Image[]> animations = new HashMap<>();
 
 	public synchronized Image[] getAnimation(RunState state) throws Exception {
 		Image[] anim = animations.get(state);
@@ -47,7 +48,6 @@ public class RunStateImages {
 		InputStream input = null;
 		ClassLoader cl = this.getClass().getClassLoader();
 
-
 		// For a png there might be animation frames to load (ImageLoader cannot
 		// pull out frames for an animated png)
 		// Given an input url of the form "foo.png" this will search
@@ -56,15 +56,14 @@ public class RunStateImages {
 		String prefix = urlString.substring(0, dot);
 		String suffix = urlString.substring(dot+1);
 
-		List<Image> images = new ArrayList<Image>();
+		List<Image> images = new ArrayList<>();
 		int count = 1;
-		while ((input = cl.getResourceAsStream(prefix+"_"+Integer.toString(count++)+"."+suffix))!=null) {
-			ImageData[] data = loader.load(input);
-			for (ImageData idata: data) {
-				images.add(new Image(Display.getDefault(),idata));
-			}
+		ImageDescriptor descriptor = null;
+		while ((descriptor = BootDashActivator.getImageDescriptor(prefix+"_"+Integer.toString(count++)+"."+suffix)) != null) {
+			images.add(descriptor.createImage());
 		}
-		if (images.size()!=0) {
+
+		if (images.size() != 0) {
 			// Animation frames were found, return them
 			return images.toArray(new Image[images.size()]);
 		}
