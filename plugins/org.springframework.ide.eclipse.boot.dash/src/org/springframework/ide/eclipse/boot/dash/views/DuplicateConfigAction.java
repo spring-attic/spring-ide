@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Pivotal Software, Inc.
+ * Copyright (c) 2016, 2017 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,7 +24,7 @@ public class DuplicateConfigAction extends AbstractBootDashElementsAction {
 
 	public DuplicateConfigAction(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		super(model, selection, ui);
-		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/copy.gif"));
+		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/copy.png"));
 		this.setText("Duplicate Config");
 		this.setToolTipText("Make a copy of this element's LaunchConfiguration");
 	}

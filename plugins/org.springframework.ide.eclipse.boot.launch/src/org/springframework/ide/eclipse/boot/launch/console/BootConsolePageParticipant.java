@@ -110,8 +110,8 @@ public class BootConsolePageParticipant implements IConsolePageParticipant {
 		if (isDevtoolsClient(this.console) || isBootApp(this.console)) {
 			terminateAction = new TerminateProcessAction();
 			try {
-				terminateAction.setImageDescriptor(BootUIImages.descriptor("icons/stop.gif"));
-				terminateAction.setDisabledImageDescriptor(BootUIImages.descriptor("icons/stop_disabled.gif"));
+				terminateAction.setImageDescriptor(BootUIImages.descriptor("icons/stop.png"));
+				terminateAction.setDisabledImageDescriptor(BootUIImages.descriptor("icons/stop_disabled.png"));
 			} catch (Exception e) {
 				BootActivator.log(e);
 			}

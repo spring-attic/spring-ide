@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,6 +40,7 @@ public enum RunState {
 		String state = toString().toLowerCase();
 		if (state.contains("inactive") ||
 			state.contains("starting") ||
+			state.contains("debugging") ||
 			state.contains("running")) {
 			iconSuffix = "png";
 		}

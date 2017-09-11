@@ -1,12 +1,12 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
+ *  Copyright (c) 2012, 2017 Pivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
  *  http://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ *      Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.config.core;
 
@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.internal.text.html.HTML2TextReader;
+import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.wst.xml.core.internal.contentmodel.util.NamespaceTable;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.osgi.framework.Version;
@@ -185,9 +186,22 @@ public class ConfigCoreUtils {
 	public static String stripTags(String html) {
 		if (html != null) {
 			try {
-				StringReader reader = new StringReader(html);
-				HTML2TextReader parser = new HTML2TextReader(reader, null);
-				return parser.getString().trim();
+				HTML2TextReader parser = null;
+
+				try {
+					StringReader reader = new StringReader(html);
+					TextPresentation text = new TextPresentation();
+					parser = new HTML2TextReader(reader, text);
+					String parserVal = parser.getString();
+					if (parserVal != null) {
+						return parserVal.trim();
+					}
+				}
+				finally {
+					if (parser != null) {
+						parser.close();
+					}
+				}
 			}
 			catch (IOException e) {
 				StatusHandler.log(new Status(IStatus.ERROR, ConfigCorePlugin.PLUGIN_ID,
