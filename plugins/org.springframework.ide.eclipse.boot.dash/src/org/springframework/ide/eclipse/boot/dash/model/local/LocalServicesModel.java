@@ -74,9 +74,6 @@ public class LocalServicesModel extends AbstractDisposable {
 
 	public LocalServicesModel(BootDashViewModel viewModel, LocalBootDashModel bootDashModel, LiveExpression<IBootInstall> defaultBootInstall) {
 		this.defaultBootInstall = defaultBootInstall;
-		defaultBootInstall.onChange(this, (e, v) -> {
-			System.out.println("defaultBootInstall = "+v);
-		});
 		this.viewerFilters = viewModel.getToggleFilters().getSelectedFilters();
 		this.bootDashModel = bootDashModel;
 
@@ -94,7 +91,6 @@ public class LocalServicesModel extends AbstractDisposable {
 			bootInstall==null ? null : bootInstall.getExtensionExp(CloudCliInstall.class)
 		);
 		cloudCliInstall.onChange(this, (e, v) -> {
-			System.out.println("cloudCliInstall = "+cloudCliInstall.getValue());
 			if (cloudCliInstall.getValue()!=null) {
 				buttons.remove(enableCloudServicesButton);
 			} else {
@@ -102,7 +98,19 @@ public class LocalServicesModel extends AbstractDisposable {
 			}
 			refresh();
 		});
-		hideCloudCliServices.onChange(this, (e, v) -> refresh());
+		hideCloudCliServices.onChange(this, (e, v) -> {
+			if (!hideCloudCliServices.getValue() && cloudCliInstall.getValue()==null) {
+				IBootInstall bootInstall = defaultBootInstall.getValue();
+				UserInteractions ui = viewModel.getContext().getUi();
+				if (bootInstall!=null) {
+					new AutoCloudCliInstaller(bootInstall).performInstall(ui);
+					//Note: triggering refresh in this case should not be necessary because it should be triggered
+					// as needed by the change to cloudCliInstall
+				}
+			} else {
+				refresh();
+			}
+		});
 	}
 
 	@Override

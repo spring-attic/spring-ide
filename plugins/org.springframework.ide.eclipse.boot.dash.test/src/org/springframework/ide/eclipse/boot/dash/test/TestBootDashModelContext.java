@@ -11,12 +11,12 @@
 package org.springframework.ide.eclipse.boot.dash.test;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchManager;
@@ -24,6 +24,7 @@ import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
+import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockSecuredCredentialStore;
@@ -49,9 +50,12 @@ public class TestBootDashModelContext implements BootDashModelContext {
 	private IPropertyStore privateProperties = new InMemoryPropertyStore();
 	private IPropertyStore installProperties = new InMemoryPropertyStore();
 	private BootInstallManager bootInstalls;
+	private UserInteractions ui;
 
-	public TestBootDashModelContext(IWorkspace workspace, ILaunchManager launchMamager) {
+	public TestBootDashModelContext(IWorkspace workspace, ILaunchManager launchMamager, UserInteractions ui) {
+		Assert.isNotNull(ui);
 		try {
+			this.ui = ui;
 			this.workspace = workspace;
 			this.launchManager = launchMamager;
 			stateLoc = StsTestUtil.createTempDirectory("plugin-state", null);
@@ -127,6 +131,11 @@ public class TestBootDashModelContext implements BootDashModelContext {
 	public TestBootDashModelContext reload() throws Exception {
 		this.bootInstalls = new BootInstallManager(installLoc, installProperties);
 		return this;
+	}
+
+	@Override
+	public UserInteractions getUi() {
+		return ui;
 	}
 
 }

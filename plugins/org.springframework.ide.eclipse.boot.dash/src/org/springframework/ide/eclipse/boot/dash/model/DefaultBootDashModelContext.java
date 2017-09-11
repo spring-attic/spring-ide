@@ -18,11 +18,15 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions;
 import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
 import org.springframework.ide.eclipse.boot.pstore.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
@@ -44,6 +48,17 @@ public class DefaultBootDashModelContext implements BootDashModelContext {
 	private IPropertyStore privateProperties = PropertyStores.createPrivateStore(BootDashActivator.getDefault().getStateLocation().append("private.properties"));
 
 	private BootInstallManager bootInstalls = BootInstallManager.getInstance();
+
+	private UserInteractions ui = new DefaultUserInteractions(() -> {
+		IWorkbench wb = PlatformUI.getWorkbench();
+		if (wb!=null) {
+			IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
+			if (win!=null) {
+				return win.getShell();
+			}
+		}
+		return null;
+	});
 
 	@Override
 	public IWorkspace getWorkspace() {
@@ -98,6 +113,11 @@ public class DefaultBootDashModelContext implements BootDashModelContext {
 	@Override
 	public BootInstallManager getBootInstallManager() {
 		return bootInstalls;
+	}
+
+	@Override
+	public UserInteractions getUi() {
+		return ui;
 	}
 
 }

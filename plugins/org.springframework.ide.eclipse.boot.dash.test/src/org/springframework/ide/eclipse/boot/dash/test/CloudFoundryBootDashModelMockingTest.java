@@ -163,14 +163,15 @@ public class CloudFoundryBootDashModelMockingTest {
 	@Before
 	public void setup() throws Exception {
 		StsTestUtil.deleteAllProjects();
+		this.ui = mock(UserInteractions.class);
 		this.context = new TestBootDashModelContext(
 				ResourcesPlugin.getWorkspace(),
-				DebugPlugin.getDefault().getLaunchManager()
+				DebugPlugin.getDefault().getLaunchManager(),
+				ui
 		);
 		this.clientFactory = new MockCloudFoundryClientFactory();
 		this.harness = CloudFoundryTestHarness.create(context, clientFactory);
 		this.projects = new BootProjectTestHarness(context.getWorkspace());
-		this.ui = mock(UserInteractions.class);
 		this.actions = new BootDashActions(harness.model, harness.selection.forReading(), harness.sectionSelection, ui);
 	}
 

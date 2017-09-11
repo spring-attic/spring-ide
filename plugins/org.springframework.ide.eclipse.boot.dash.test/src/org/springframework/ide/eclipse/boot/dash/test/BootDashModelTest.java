@@ -91,6 +91,7 @@ import org.springframework.ide.eclipse.boot.dash.model.LaunchConfDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.LocalCloudServiceDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.ToggleFiltersModel;
+import org.springframework.ide.eclipse.boot.dash.model.ToggleFiltersModel.FilterChoice;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
@@ -108,6 +109,7 @@ import org.springframework.ide.eclipse.boot.ui.EnableDisableBootDevtools;
 import org.springsource.ide.eclipse.commons.core.ZipFileUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.maintype.MainTypeFinder;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
@@ -190,6 +192,23 @@ public class BootDashModelTest {
 		assertTrue(model.getViewModel().getToggleFilters().getSelectedFilters().contains(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES));
 
 		assertServiceElements(/*NONE*/);
+		verify(ui).confirmOperation(anyString(), anyString());
+		verifyNoMoreInteractions(ui);
+	}
+
+	@Test public void testAutoInstallSpringCloudCLITriggeredByFilterChange() throws Exception {
+		LiveSetVariable<FilterChoice> selectedFilters = model.getViewModel().getToggleFilters().getSelectedFilters();
+		assertTrue(selectedFilters.contains(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES));
+		harness.assertButton(model, ENABLE_CLOUD_CLI_BUTTON);
+
+		when(ui.confirmOperation(contains("Confirm Installation of Spring Cloud CLI"), contains("will be installed into"))).thenReturn(true);
+		selectedFilters.remove(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES);
+
+		ACondition.waitFor("Local services to appear", MAVEN_BUILD_TIMEOUT, () -> {
+			assertServiceElements("dataflow", "zipkin", "eureka", "kafka", "h2", "configserver", "hystrixdashboard");
+		});
+		assertNull(harness.getButton(model, ENABLE_CLOUD_CLI_BUTTON));
+
 		verify(ui).confirmOperation(anyString(), anyString());
 		verifyNoMoreInteractions(ui);
 	}
@@ -1377,15 +1396,16 @@ public class BootDashModelTest {
 		suspendOnUncaughtException(false);
 
 		StsTestUtil.deleteAllProjects();
+		this.ui = mock(UserInteractions.class);
 		this.context = new TestBootDashModelContext(
 				ResourcesPlugin.getWorkspace(),
-				DebugPlugin.getDefault().getLaunchManager()
+				DebugPlugin.getDefault().getLaunchManager(),
+				ui
 		);
 		this.harness = new BootDashViewModelHarness(context, RunTargetTypes.LOCAL);
 		this.model = harness.getRunTargetModel(RunTargetTypes.LOCAL);
 		this.projects = new BootProjectTestHarness(context.getWorkspace());
 		StsTestUtil.setAutoBuilding(false);
-		this.ui = mock(UserInteractions.class);
 
 	}
 

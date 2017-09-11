@@ -77,12 +77,15 @@ public class BootDashViewModelTest {
 	private TestBootDashModelContext context;
 	private BootDashViewModelHarness harness = null;
 	private BootProjectTestHarness projects = new BootProjectTestHarness(ResourcesPlugin.getWorkspace());
+	private UserInteractions ui;
 
 	@Before
 	public void setup() throws Exception {
+		this.ui = mock(UserInteractions.class);
 		context =  new TestBootDashModelContext(
 				ResourcesPlugin.getWorkspace(),
-				DebugPlugin.getDefault().getLaunchManager()
+				DebugPlugin.getDefault().getLaunchManager(),
+				ui
 		);
 		StsTestUtil.cleanUpProjects();
 	}

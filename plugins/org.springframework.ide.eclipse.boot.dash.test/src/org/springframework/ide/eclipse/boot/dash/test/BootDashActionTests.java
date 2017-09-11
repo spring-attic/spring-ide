@@ -616,13 +616,14 @@ public class BootDashActionTests {
 	@Before
 	public void setup() throws Exception {
 		StsTestUtil.deleteAllProjects();
+		this.ui = mock(UserInteractions.class);
 		this.context = new TestBootDashModelContext(
 				ResourcesPlugin.getWorkspace(),
-				DebugPlugin.getDefault().getLaunchManager()
+				DebugPlugin.getDefault().getLaunchManager(),
+				ui
 		);
 		this.harness = new BootDashViewModelHarness(context, RunTargetTypes.LOCAL);
 		this.projects = new BootProjectTestHarness(context.getWorkspace());
-		this.ui = mock(UserInteractions.class);
 		this.actions = new BootDashActions(harness.model, harness.selection.forReading(), ui);
 	}
 

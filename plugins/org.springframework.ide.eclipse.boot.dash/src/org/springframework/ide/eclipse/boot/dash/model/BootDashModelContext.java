@@ -70,4 +70,6 @@ public interface BootDashModelContext {
 
 	BootInstallManager getBootInstallManager();
 
+	UserInteractions getUi();
+
 }
