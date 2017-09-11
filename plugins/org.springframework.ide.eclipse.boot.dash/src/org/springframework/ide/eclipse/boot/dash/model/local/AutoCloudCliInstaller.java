@@ -53,7 +53,6 @@ public class AutoCloudCliInstaller {
 			if (installCloudCliJob.getState() != Job.NONE) {
 				Log.error("Timed out waiting for Spring Cloud CLI to be installed");
 			}
-			bootInstall.refreshExtensions();
 		}
 	}
 

@@ -55,10 +55,4 @@ public class GenericBootInstall extends BootInstall {
 		// exist or at least it can't be determined to be real install
 	}
 
-
-	@Override
-	public void refreshExtensions() {
-		//Nothing to do
-	}
-
 }

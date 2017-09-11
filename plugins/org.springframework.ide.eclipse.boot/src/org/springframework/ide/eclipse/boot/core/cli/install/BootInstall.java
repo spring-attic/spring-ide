@@ -15,6 +15,7 @@ import java.io.FilenameFilter;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IStatus;
@@ -25,8 +26,11 @@ import org.osgi.framework.VersionRange;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.cli.BootCliCommand;
 import org.springframework.ide.eclipse.boot.util.Log;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
 
 public abstract class BootInstall implements IBootInstall {
@@ -63,6 +67,8 @@ public abstract class BootInstall implements IBootInstall {
 
 	private String name;
 
+	private Cache<String, LiveExpression<IBootInstallExtension>> extensionExps = CacheBuilder.newBuilder().build();
+
 	@Override
 	public abstract File getHome() throws Exception;
 
@@ -91,32 +97,6 @@ public abstract class BootInstall implements IBootInstall {
 			}
 		}
 		return NO_FILES;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result
-				+ ((uriString == null) ? 0 : uriString.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		BootInstall other = (BootInstall) obj;
-		if (uriString == null) {
-			if (other.uriString != null)
-				return false;
-		} else if (!uriString.equals(other.uriString))
-			return false;
-		return true;
 	}
 
 	@Override
@@ -237,7 +217,8 @@ public abstract class BootInstall implements IBootInstall {
 	 * the content of the install without triggering a lenghty download operation in the
 	 * UI thread.
 	 */
-	protected boolean mayRequireDownload() {
+	@Override
+	public boolean mayRequireDownload() {
 		String url = getUrl();
 		boolean isCertainlyLocal = url!=null && url.startsWith("file:");
 		return !isCertainlyLocal;
@@ -265,11 +246,13 @@ public abstract class BootInstall implements IBootInstall {
 				throw ExceptionUtil.coreException("Failed to execute extension install command");
 			}
 		}
+		refreshExtension(extensionType);
 	}
 
 	@Override
 	public void uninstallExtension(IBootInstallExtension extension) throws Exception {
-		String mavenPrefix = BootInstallUtils.EXTENSION_TO_MAVEN_PREFIX_MAP.get(extension.getClass());
+		Class<? extends IBootInstallExtension> extensionType = extension.getClass();
+		String mavenPrefix = BootInstallUtils.EXTENSION_TO_MAVEN_PREFIX_MAP.get(extensionType);
 		Version version = extension.getVersion();
 		if (mavenPrefix != null && version != null) {
 			BootCliCommand cmd = new BootCliCommand(getHome());
@@ -278,6 +261,7 @@ public abstract class BootInstall implements IBootInstall {
 				throw ExceptionUtil.coreException("Failed to execute extension uninstall command");
 			}
 		}
+		refreshExtension(extensionType);
 	}
 
 	private Version getLatestVersion(Class<? extends IBootInstallExtension> extension) {
@@ -290,6 +274,10 @@ public abstract class BootInstall implements IBootInstall {
 	@Override
 	public AutoInstallDescription checkAutoInstallable(Class<? extends IBootInstallExtension> extension) {
 		if (CloudCliInstall.class.isAssignableFrom(extension)) {
+			IBootInstallExtension existing = getExtension(extension);
+			if (existing != null) {
+				return AutoInstallDescription.impossible("Spring Cloud CLI version "+existing.getVersion()+" is already installed.");
+			}
 			Version bootVersion = Version.valueOf(getVersion());
 			Version cliVersion = BootInstallUtils.getCloudCliVersion(bootVersion);
 			if (cliVersion!=null) {
@@ -306,8 +294,11 @@ public abstract class BootInstall implements IBootInstall {
 	}
 
 	@Override
-	public void refreshExtensions() {
-		//Nothing to do because this implemented doesn't cache info about extensions.
+	public void refreshExtension(Class<? extends IBootInstallExtension> extensionType) {
+		LiveExpression<IBootInstallExtension> extension = extensionExps.asMap().get(extensionType.getName());
+		if (extension!=null) {
+			extension.refresh();
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -317,6 +308,30 @@ public abstract class BootInstall implements IBootInstall {
 			return (T) getCloudCliInstall();
 		}
 		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T extends IBootInstallExtension> LiveExpression<T> getExtensionExp(Class<T> extension) {
+		try {
+			LiveExpression<IBootInstallExtension> exp = extensionExps.get(extension.getName(), () -> {
+				LiveExpression<IBootInstallExtension> newExp = new LiveExpression<IBootInstallExtension>(null) {
+					@Override
+					protected IBootInstallExtension compute() {
+						if (mayRequireDownload()) {
+							//Don't force a download. We can be pretty sure no extensions will be installed on a fresh download.
+							return null;
+						}
+						return getExtension(extension);
+					}
+				};
+				newExp.refresh();
+				return newExp;
+			});
+			return (LiveExpression<T>) exp;
+		} catch (ExecutionException e) {
+			throw new IllegalStateException("This shouldn't be possible");
+		}
 	}
 
 	/**

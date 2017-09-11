@@ -138,7 +138,7 @@ public class BootDashModelTest {
 	@Rule
 	public TestBracketter testBracketer = new TestBracketter();
 
-	static final String ENABLE_CLOUD_CLI_BUTTON = "Enable local cloud services";
+	static final String ENABLE_CLOUD_CLI_BUTTON = "Install local cloud services";
 
 	@Rule
 	public DumpBootProcessOutput processOutput = new DumpBootProcessOutput();
@@ -154,11 +154,11 @@ public class BootDashModelTest {
 
 		button.perform(ui);
 		assertFalse(model.getViewModel().getToggleFilters().getSelectedFilters().contains(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES));
-		assertNull(harness.getButton(model, ENABLE_CLOUD_CLI_BUTTON));
-
 		ACondition.waitFor("Local services to appear", MAVEN_BUILD_TIMEOUT, () -> {
 			assertServiceElements("dataflow", "zipkin", "eureka", "kafka", "h2", "configserver", "hystrixdashboard");
 		});
+		assertNull(harness.getButton(model, ENABLE_CLOUD_CLI_BUTTON));
+
 		verify(ui).confirmOperation(anyString(), anyString());
 		verifyNoMoreInteractions(ui);
 		reset(ui);
@@ -171,11 +171,11 @@ public class BootDashModelTest {
 				//If very fast... then this test will fail! To avoid the race condition we must somehow add a mechanic in the harness to
 				//to be able to hold-up the stuff that resolves local services until we explicitly allow it to proceed.
 		assertFalse(model.getViewModel().getToggleFilters().getSelectedFilters().contains(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES));
-		assertNull(harness.getButton(model, ENABLE_CLOUD_CLI_BUTTON));
 
 		ACondition.waitFor("Local services to appear", MAVEN_BUILD_TIMEOUT, () -> {
 			assertServiceElements("dataflow", "zipkin", "eureka", "kafka", "h2", "configserver", "hystrixdashboard");
 		});
+		assertNull(harness.getButton(model, ENABLE_CLOUD_CLI_BUTTON));
 		verifyZeroInteractions(ui); //Since cloud cli already installed we should not be prompted whether we want to install it.
 	}
 
@@ -211,11 +211,12 @@ public class BootDashModelTest {
 		ButtonModel button = harness.assertButton(model, ENABLE_CLOUD_CLI_BUTTON);
 		button.perform(ui);
 		assertFalse(model.getViewModel().getToggleFilters().getSelectedFilters().contains(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES));
-		assertNull(harness.getButton(model, ENABLE_CLOUD_CLI_BUTTON));
 
 		ACondition.waitFor("Local services to appear", MAVEN_BUILD_TIMEOUT, () -> {
 			assertServiceElements("dataflow", "zipkin", "eureka", "kafka", "h2", "configserver", "hystrixdashboard");
 		});
+		assertNull(harness.getButton(model, ENABLE_CLOUD_CLI_BUTTON));
+
 		verify(ui).confirmOperation(anyString(), anyString());
 		verifyNoMoreInteractions(ui);
 	}

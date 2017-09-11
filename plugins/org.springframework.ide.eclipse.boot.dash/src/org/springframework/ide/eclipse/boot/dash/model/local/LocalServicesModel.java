@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.osgi.framework.Version;
@@ -55,7 +54,7 @@ public class LocalServicesModel extends AbstractDisposable {
 
 	private LiveSetVariable<ButtonModel> buttons = new LiveSetVariable<>();
 
-	BootDashHyperlink enableCloudServicesButton = new BootDashHyperlink("Enable local cloud services") {
+	BootDashHyperlink enableCloudServicesButton = new BootDashHyperlink("Install local cloud services") {
 		public void doPerform(UserInteractions ui) throws Exception {
 			IBootInstall bootInstall = defaultBootInstall.getValue();
 			if (bootInstall!=null) {
@@ -71,9 +70,13 @@ public class LocalServicesModel extends AbstractDisposable {
 
 	private LiveSetVariable<FilterChoice> viewerFilters;
 	private LiveExpression<IBootInstall> defaultBootInstall;
+	private LiveExpression<CloudCliInstall> cloudCliInstall;
 
 	public LocalServicesModel(BootDashViewModel viewModel, LocalBootDashModel bootDashModel, LiveExpression<IBootInstall> defaultBootInstall) {
 		this.defaultBootInstall = defaultBootInstall;
+		defaultBootInstall.onChange(this, (e, v) -> {
+			System.out.println("defaultBootInstall = "+v);
+		});
 		this.viewerFilters = viewModel.getToggleFilters().getSelectedFilters();
 		this.bootDashModel = bootDashModel;
 
@@ -87,15 +90,19 @@ public class LocalServicesModel extends AbstractDisposable {
 				return viewerFilters.contains(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES);
 			}
 		});
-		defaultBootInstall.onChange(this, (e, v) -> this.refresh());
-		hideCloudCliServices.onChange(this, (e, v) -> {
-			if (hideCloudCliServices.getValue()) {
-				buttons.add(enableCloudServicesButton);
-			} else {
+		cloudCliInstall = defaultBootInstall.then(bootInstall ->
+			bootInstall==null ? null : bootInstall.getExtensionExp(CloudCliInstall.class)
+		);
+		cloudCliInstall.onChange(this, (e, v) -> {
+			System.out.println("cloudCliInstall = "+cloudCliInstall.getValue());
+			if (cloudCliInstall.getValue()!=null) {
 				buttons.remove(enableCloudServicesButton);
+			} else {
+				buttons.add(enableCloudServicesButton);
 			}
 			refresh();
 		});
+		hideCloudCliServices.onChange(this, (e, v) -> refresh());
 	}
 
 	@Override
@@ -131,10 +138,10 @@ public class LocalServicesModel extends AbstractDisposable {
 	}
 
 	private List<LocalCloudServiceDashElement> fetchLocalServices() {
-		try {
-			IBootInstall bootInstall = defaultBootInstall.getValue();
-			if (bootInstall != null) {
-				CloudCliInstall cloudCliInstall = bootInstall.getExtension(CloudCliInstall.class);
+		IBootInstall bootInstall = defaultBootInstall.getValue();
+		if (bootInstall!=null) {
+			try {
+				CloudCliInstall cloudCliInstall =  bootInstall.getExtension(CloudCliInstall.class);
 				if (cloudCliInstall != null) {
 					Version cloudCliVersion = cloudCliInstall.getVersion();
 					if (cloudCliVersion != null
@@ -142,9 +149,9 @@ public class LocalServicesModel extends AbstractDisposable {
 						return Arrays.stream(cloudCliInstall.getCloudServices()).map(serviceId -> new LocalCloudServiceDashElement(bootDashModel, serviceId)).collect(Collectors.toList());
 					}
 				}
+			} catch (Exception e) {
+				Log.log(e);
 			}
-		} catch (Exception e) {
-			Log.log(e);
 		}
 		return Collections.emptyList();
 	}

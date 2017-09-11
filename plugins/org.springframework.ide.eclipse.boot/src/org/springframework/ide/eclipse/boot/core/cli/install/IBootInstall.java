@@ -14,6 +14,7 @@ import java.io.File;
 import java.util.Collection;
 
 import org.eclipse.core.runtime.IStatus;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 /**
  * Common interface for anything that represents an installation of spring boot.
@@ -22,7 +23,7 @@ import org.eclipse.core.runtime.IStatus;
  */
 public interface IBootInstall {
 
-	String getUrl(); //Url identifying this installation. Two installs are considered the same if their urls are the same.
+	String getUrl(); //Url identifying this installation.
 	File getHome() throws Exception;
 	File[] getBootLibJars() throws Exception;
 	String getName();
@@ -35,6 +36,12 @@ public interface IBootInstall {
 	 * @return the extension or <code>null</code> if extension isn't installed
 	 */
 	<T extends IBootInstallExtension> T getExtension(Class<T> extension);
+
+	/**
+	 * Get a liveExp that watches changes of a given extension.
+	 */
+	<T extends IBootInstallExtension> LiveExpression<T> getExtensionExp(Class<T> extension);
+
 
 	/**
 	 * Returns supported extensions
@@ -69,7 +76,9 @@ public interface IBootInstall {
 	void clearCache();
 
 	/**
-	 * Refresh any cached information about installed extensions (or do nothing if there isn't any cached information).
+	 * Refresh any cached information about a given installed extension (or do nothing if there isn't any cached information).
 	 */
-	void refreshExtensions();
+	void refreshExtension(Class<? extends IBootInstallExtension> extension);
+
+	boolean mayRequireDownload();
 }

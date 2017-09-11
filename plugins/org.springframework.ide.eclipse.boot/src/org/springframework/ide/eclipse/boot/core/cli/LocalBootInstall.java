@@ -68,7 +68,7 @@ public class LocalBootInstall extends BootInstall {
 	}
 
 	@Override
-	protected boolean mayRequireDownload() {
+	public boolean mayRequireDownload() {
 		return false;
 	}
 

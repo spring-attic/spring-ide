@@ -45,6 +45,7 @@ public class BootInstallPreferencePage extends PreferencePage implements IWorkbe
 		super("Spring Boot Installations");
 	}
 
+	@Override
 	public void init(IWorkbench workbench) {
 		try {
 			installManager = BootInstallManager.getInstance();
@@ -68,13 +69,14 @@ public class BootInstallPreferencePage extends PreferencePage implements IWorkbe
 	public boolean performOk() {
 		final boolean[] canceled = new boolean[] { false };
 		BusyIndicator.showWhile(null, new Runnable() {
+			@Override
 			public void run() {
 				Set<IBootInstall> newInstalls = new LinkedHashSet<IBootInstall>();
 				IBootInstall defaultVM = getCurrentDefaultVM();
 				IBootInstall[] vms = fJREBlock.getJREs();
 				for (IBootInstall vm : vms) {
 					try {
-						newInstalls.add(installManager.newInstall(vm.getUrl(), vm.getName()));
+						newInstalls.add(vm);
 					} catch (Exception e) {
 						BootActivator.log(e);
 					}
@@ -124,6 +126,7 @@ public class BootInstallPreferencePage extends PreferencePage implements IWorkbe
 		fJREBlock.createControl(ancestor);
 		fJREBlock.addSelectionChangedListener(new ISelectionChangedListener() {
 
+			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				isValid();
 			}
@@ -138,6 +141,7 @@ public class BootInstallPreferencePage extends PreferencePage implements IWorkbe
 				"com.springsource.sts.boot.ui.dialogsettings");
 
 		fJREBlock.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				setValid(false);
 

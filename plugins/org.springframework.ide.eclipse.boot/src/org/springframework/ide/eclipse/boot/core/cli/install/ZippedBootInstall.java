@@ -134,7 +134,7 @@ public class ZippedBootInstall extends BootInstall {
 
 	public ZippedBootInstall(DownloadManager downloader, String uri, String name) throws Exception {
 		super(uri, name);
-		refreshExtensions();
+		cloudCliInstall = Suppliers.memoize(this::initCloudCliInstall);
 		this.zip = new DownloadableZipItem(new URL(uri), downloader);
 	}
 
@@ -161,7 +161,7 @@ public class ZippedBootInstall extends BootInstall {
 	}
 
 	@Override
-	protected boolean mayRequireDownload() {
+	public boolean mayRequireDownload() {
 		//We can do better than just looking at the url (as the super method does).
 		//We can see whether or not the zip file was dowloaded already or not.
 		if (zip!=null) {
@@ -192,8 +192,11 @@ public class ZippedBootInstall extends BootInstall {
 	}
 
 	@Override
-	public void refreshExtensions() {
-		cloudCliInstall = Suppliers.memoize(this::initCloudCliInstall);
+	public void refreshExtension(Class<? extends IBootInstallExtension> extensionType) {
+		if (extensionType==CloudCliInstall.class) {
+			cloudCliInstall = Suppliers.memoize(this::initCloudCliInstall);
+		}
+		super.refreshExtension(extensionType);
 	}
 
 }
