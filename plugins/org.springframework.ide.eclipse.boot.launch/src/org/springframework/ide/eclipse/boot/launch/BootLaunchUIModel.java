@@ -15,12 +15,19 @@ import static org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConf
 import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.ANSI_CONSOLE_OUTPUT;
 import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.DEFAULT_HIDE_FROM_BOOT_DASH;
 import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.FAST_STARTUP;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
+
 import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.*;
 
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.BootPreferences;
+import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.launch.livebean.EnableJmxFeaturesModel;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
@@ -78,7 +85,28 @@ public class BootLaunchUIModel {
 		ansiConsoleOutput = CheckboxLaunchTabModel.create(ANSI_CONSOLE_OUTPUT, BootLaunchConfigurationDelegate.supportsAnsiConsoleOutput());
 		fastStartup = CheckboxLaunchTabModel.create(FAST_STARTUP, BootActivator.getDefault().getPreferenceStore()
 				.getBoolean(BootPreferences.PREF_BOOT_FAST_STARTUP_DEFAULT));
-		useThinWrapper = CheckboxLaunchTabModel.create(USE_THIN_WRAPPER, DEFAULT_USE_THIN_WRAPPER);
+		Validator thinWrapperValidator = new Validator() {
+			@Override
+			protected ValidationResult compute() {
+				IProject p = project.selection.getValue();
+				if (p!=null && p.isAccessible() && useThinWrapper!=null) {
+					Boolean useThinWrapperValue = useThinWrapper.selection.getValue();
+					if (useThinWrapperValue!=null && useThinWrapperValue) {
+						try {
+							if (!p.hasNature(SpringBootCore.M2E_NATURE)) {
+								return ValidationResult.error("Thin launcher support only works for Maven projects");
+							}
+						} catch (CoreException e) {
+							Log.log(e);
+						}
+					}
+				}
+				return ValidationResult.OK;
+			}
+		};
+		useThinWrapper = CheckboxLaunchTabModel.create(USE_THIN_WRAPPER, DEFAULT_USE_THIN_WRAPPER, thinWrapperValidator);
+		thinWrapperValidator.dependsOn(useThinWrapper.selection);
+		thinWrapperValidator.dependsOn(project.selection);
 	}
 
 }

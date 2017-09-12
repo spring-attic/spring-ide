@@ -26,16 +26,20 @@ import org.springsource.ide.eclipse.commons.livexp.core.Validator;
  */
 public class CheckboxLaunchTabModel extends LaunchTabSelectionModel<Boolean> {
 
+	public static CheckboxLaunchTabModel create(String attributeName, boolean defaultValue, LiveExpression<ValidationResult> validator) {
+		LiveVariable<Boolean> enable = new LiveVariable<>();
+		return new CheckboxLaunchTabModel(attributeName, defaultValue, enable, validator);
+	}
+
 	public static CheckboxLaunchTabModel create(String attributeName, boolean defaultValue) {
-		LiveVariable<Boolean> enable = new LiveVariable<Boolean>();
+		LiveVariable<Boolean> enable = new LiveVariable<>();
 		return new CheckboxLaunchTabModel(attributeName, defaultValue, enable, Validator.OK);
 	}
 
 	private String attributeName;
 	private boolean defaultValue;
 
-	protected CheckboxLaunchTabModel(String attributeName, boolean defaultValue, LiveVariable<Boolean> selection,
-			LiveExpression<ValidationResult> validator) {
+	protected CheckboxLaunchTabModel(String attributeName, boolean defaultValue, LiveVariable<Boolean> selection, LiveExpression<ValidationResult> validator) {
 		super(selection, validator);
 		this.attributeName = attributeName;
 		this.defaultValue = defaultValue;
