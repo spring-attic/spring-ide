@@ -17,15 +17,16 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.swt.graphics.Image;
+import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.ide.eclipse.boot.launch.livebean.EnableJmxSection;
 import org.springframework.ide.eclipse.boot.launch.profiles.ProfileHistory;
 import org.springframework.ide.eclipse.boot.launch.profiles.ProfileLaunchTabSection;
 import org.springframework.ide.eclipse.boot.launch.properties.PropertiesTableSection;
-import org.springframework.ide.eclipse.boot.launch.util.CheckboxSection;
 import org.springframework.ide.eclipse.boot.launch.util.DelegatingLaunchConfigurationTabSection;
 import org.springframework.ide.eclipse.boot.launch.util.GroupLaunchTabSection;
 import org.springframework.ide.eclipse.boot.launch.util.LaunchConfigurationTabWithSections;
 import org.springframework.ide.eclipse.boot.ui.BootUIImages;
+import org.springsource.ide.eclipse.commons.livexp.ui.CheckboxSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.HLineSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
@@ -59,6 +60,9 @@ public class BootMainTab extends LaunchConfigurationTabWithSections implements I
 		 */
 		if (BootLaunchConfigurationDelegate.supportsAnsiConsoleOutput()) {
 			jvmArgsSections.add(new DelegatingLaunchConfigurationTabSection(this, model.ansiConsoleOutput, new CheckboxSection(this, model.ansiConsoleOutput, "ANSI console output")));
+		}
+		if (BootPreferences.getInstance().getThinWrapper()!=null) {
+			jvmArgsSections.add(new UseThinWrapperSection(this, model.useThinWrapper));
 		}
 
 		return Arrays.asList(new IPageSection[] {

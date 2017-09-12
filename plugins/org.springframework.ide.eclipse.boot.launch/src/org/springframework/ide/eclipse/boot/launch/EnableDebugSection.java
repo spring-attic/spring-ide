@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch;
 
-import org.springframework.ide.eclipse.boot.launch.util.CheckboxSection;
 import org.springframework.ide.eclipse.boot.launch.util.DelegatingLaunchConfigurationTabSection;
+import org.springsource.ide.eclipse.commons.livexp.ui.CheckboxSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 
 /**

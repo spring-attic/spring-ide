@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Pivotal, Inc.
+ * Copyright (c) 2015 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,10 +17,10 @@ import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 /**
  * @author Kris De Volder
  */
-public class HideFromBootDashSection extends DelegatingLaunchConfigurationTabSection {
+public class UseThinWrapperSection extends DelegatingLaunchConfigurationTabSection {
 
-	public HideFromBootDashSection(IPageWithSections owner, LaunchTabSelectionModel<Boolean> model) {
-		super(owner, model, new CheckboxSection(owner, model, "Hide from Boot Dash").grabHor(true));
+	public UseThinWrapperSection(IPageWithSections owner, LaunchTabSelectionModel<Boolean> model) {
+		super(owner, model, new CheckboxSection(owner, model, "Use Thin Wrapper"));
 	}
 
 }

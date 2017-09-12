@@ -18,7 +18,9 @@ Require-Bundle: org.eclipse.ui,
  org.springsource.ide.eclipse.commons.frameworks.core,
  org.springframework.ide.eclipse.boot.test,
  org.springsource.ide.eclipse.commons.frameworks.test.util,
- org.springframework.ide.eclipse.boot.launch.livebean;bundle-version="3.9.0"
+ org.springframework.ide.eclipse.boot.launch.livebean;bundle-version="3.9.0",
+ org.apache.commons.io,
+ org.apache.commons.lang3
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: GoPivotal Inc.

@@ -40,7 +40,7 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
  */
 public class BootLaunchTestCase extends StsTestCase {
 
-	private BootProjectTestHarness projects = new BootProjectTestHarness(ResourcesPlugin.getWorkspace());
+	protected BootProjectTestHarness projects = new BootProjectTestHarness(ResourcesPlugin.getWorkspace());
 
 	/**
 	 * Create an empty project no nature, no nothing

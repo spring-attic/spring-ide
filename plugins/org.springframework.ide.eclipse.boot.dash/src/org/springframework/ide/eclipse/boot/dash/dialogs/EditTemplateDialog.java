@@ -14,8 +14,8 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.widgets.Shell;
-import org.springframework.ide.eclipse.boot.launch.util.CheckboxSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.ButtonSection;
+import org.springsource.ide.eclipse.commons.livexp.ui.CheckboxSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.DialogWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.StringFieldSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;

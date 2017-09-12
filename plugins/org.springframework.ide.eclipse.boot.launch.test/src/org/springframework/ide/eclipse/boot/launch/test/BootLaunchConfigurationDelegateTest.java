@@ -10,9 +10,12 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch.test;
 
+import java.io.File;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -28,6 +31,11 @@ import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelega
 import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport;
 import org.springframework.ide.eclipse.boot.test.util.LaunchResult;
 import org.springframework.ide.eclipse.boot.test.util.LaunchUtil;
+import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
+
+import org.apache.commons.lang3.StringUtils;
+
+import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.*;
 
 /**
  * @author Kris De Volder
@@ -285,6 +293,63 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		assertContains("foo='special foo'", result.out);
 		assertOk(result);
 	}
+	
+	public void testLaunchWithThinWrapper() throws Exception {
+		URL thinWrapperUrl = new URL("http://repo1.maven.org/maven2/org/springframework/boot/experimental/spring-boot-thin-wrapper/1.0.6.RELEASE/spring-boot-thin-wrapper-1.0.6.RELEASE.jar");
+		File thinWrapper = File.createTempFile("thin-wrapper", ".jar");
+		try {
+			FileUtils.copyURLToFile(thinWrapperUrl, thinWrapper);
+			BootPreferences.getInstance().setThinWrapper(thinWrapper);
+			
+			doThinWrapperLaunchTest(thinWrapper, "MAVEN");
+			//Not working: doThinWrapperLaunchTest(thinWrapper, "GRADLE-Buildship 2.x");
+
+		} finally {
+			FileUtils.deleteQuietly(thinWrapper);
+			BootPreferences.getInstance().setThinWrapper(null);
+		}
+	}
+	
+	private void doThinWrapperLaunchTest(File thinWrapper, String importStrategy) throws Exception {
+		boolean reallyDoThinLaunch = true;
+		String buildType = importStrategy.split("\\-")[0].toLowerCase();
+		IProject project = projects.createBootProject("thinly-wrapped-"+buildType, withImportStrategy(importStrategy));
+		ILaunchConfigurationWorkingCopy wc = createBaseWorkingCopy(project.getName(), "com.example.demo.ThinlyWrapped"+ StringUtils.capitalize(buildType) +"Application");
+		
+		createFile(project, "src/main/java/com/example/demo/ShowMessage.java", 
+				"package com.example.demo;\n" + 
+				"\n" + 
+				"import org.springframework.boot.CommandLineRunner;\n" + 
+				"import org.springframework.stereotype.Component;\n" + 
+				"\n" + 
+				"@Component\n" + 
+				"public class ShowMessage implements CommandLineRunner {\n" + 
+				"\n" + 
+				"	@Override\n" + 
+				"	public void run(String... arg0) throws Exception {\n" + 
+				"		System.out.println(\"We have liftoff!\");\n" + 
+				"	}\n" + 
+				"\n" + 
+				"}\n"
+		);
+		StsTestUtil.assertNoErrors(project); // compile project (and check for errors)
+		if (buildType.equals("maven")) {
+			//In gradle its different location, but doens't really matter, this just a 'sanity' check to
+			// see if class got compiled. If not, something else will fail later.
+			assertTrue(project.getFile("target/classes/com/example/demo/ShowMessage.class").exists());
+		}
+		
+		if (reallyDoThinLaunch) {
+			BootLaunchConfigurationDelegate.setUseThinWrapper(wc, true);
+			String[] classpath = getClasspath(new BootLaunchConfigurationDelegate(), wc);
+			assertTrue(classpath.length==1);
+			assertEquals(thinWrapper.getAbsolutePath(), classpath[0]);
+		}
+
+		LaunchResult result = LaunchUtil.synchLaunch(wc);
+		System.out.println(result);
+		assertContains("We have liftoff!", result.out);
+	}
 
 	public void testRuntimeClasspathNoTestStuff() throws Exception {
 		createLaunchReadyProject(TEST_PROJECT);
@@ -374,8 +439,12 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 	}
 
 	private ILaunchConfigurationWorkingCopy createBaseWorkingCopy() throws Exception {
+		return createBaseWorkingCopy(TEST_PROJECT, TEST_MAIN_CLASS);
+	}
+
+	private ILaunchConfigurationWorkingCopy createBaseWorkingCopy(String testProjectName, String testMainClass) throws Exception {
 		ILaunchConfigurationWorkingCopy wc = createWorkingCopy();
-		BootLaunchConfigurationDelegate.setDefaults(wc, getProject(TEST_PROJECT), TEST_MAIN_CLASS);
+		BootLaunchConfigurationDelegate.setDefaults(wc, getProject(testProjectName), testMainClass);
 
 		//Explictly set all options in the config to 'disabled' irrespective of
 		// their default values (tests will be more robust w.r.t changing of the defaults).

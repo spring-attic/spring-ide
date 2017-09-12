@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.core;
 
+import java.io.File;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
@@ -19,6 +20,7 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChange
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.springframework.ide.eclipse.boot.util.Log;
+import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 import reactor.core.publisher.Flux;
@@ -30,11 +32,12 @@ import reactor.core.publisher.Mono;
 public class BootPreferences implements IPreferenceChangeListener {
 
 	public static final String PREF_BOOT_PROJECT_EXCLUDE = "org.springframework.ide.eclipse.boot.project.exclude";
+	public static final String PREF_BOOT_THIN_WRAPPER = "org.springframework.ide.eclipse.boot.thin.wrapper";
 	public static final Pattern DEFAULT_BOOT_PROJECT_EXCLUDE = Pattern.compile("^$");
 	public static final String PREF_IGNORE_SILENT_EXIT = "org.springframework.ide.eclipse.boot.ignore.silent.exit";
 	public static final boolean DEFAULT_PREF_IGNORE_SILENT_EXIT = true;
 	public static final String PREF_INITIALIZR_URL = "org.springframework.ide.eclipse.boot.wizard.initializr.url";
-	
+
 	public static final String PREF_BOOT_FAST_STARTUP_DEFAULT = "org.springframework.ide.eclipse.boot.DefaultFastStartup";
 	public static final String PREF_BOOT_FAST_STARTUP_REMIND_MESSAGE = "org.springframework.ide.eclipse.boot.FastStartupRemindMessage";
 	public static final String PREF_BOOT_FAST_STARTUP_JVM_ARGS = "org.springframework.ide.eclipse.boot.FastStartupJvmArgs";
@@ -85,6 +88,24 @@ public class BootPreferences implements IPreferenceChangeListener {
 			return DEFAULT_PREF_IGNORE_SILENT_EXIT;
 		}
 	}
+
+	public File getThinWrapper() {
+		String path = prefs.get(PREF_BOOT_THIN_WRAPPER, null);
+		if (StringUtil.hasText(path)) {
+			return new File(path);
+		}
+		return null;
+	}
+
+
+	public void setThinWrapper(File thinWrapper) {
+		if (thinWrapper!=null) {
+			prefs.put(PREF_BOOT_THIN_WRAPPER, thinWrapper.getAbsolutePath());
+		} else {
+			prefs.remove(PREF_BOOT_THIN_WRAPPER);
+		}
+	}
+
 
 	public Pattern getProjectExclusion() {
 		return projectExclude.getValue();
@@ -187,5 +208,4 @@ public class BootPreferences implements IPreferenceChangeListener {
 		return clean(stringList.split("\n"))
 		.toStream().toArray((sz) -> new String[sz]);
 	}
-
 }

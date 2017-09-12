@@ -14,13 +14,20 @@ import static org.eclipse.debug.core.DebugPlugin.ATTR_PROCESS_FACTORY_ID;
 import static org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS;
 import static org.springsource.ide.eclipse.commons.core.util.StringUtil.hasText;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.jar.Manifest;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
@@ -32,10 +39,13 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
+import org.eclipse.jdt.launching.JavaRuntime;
 import org.osgi.framework.Bundle;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
+import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport;
 import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport.Feature;
 import org.springframework.ide.eclipse.boot.launch.process.BootProcessFactory;
@@ -114,6 +124,9 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 	private static final String TERMINATION_TIMEOUT = "spring.boot.lifecycle.termination.timeout";
 	public static final long DEFAULT_TERMINATION_TIMEOUT = 15000; // 15 seconds
 
+	public static final String USE_THIN_WRAPPER = "spring.boot.thinwrapper.enable";
+	public static final boolean DEFAULT_USE_THIN_WRAPPER = false;
+
 	private ProfileHistory profileHistory = new ProfileHistory();
 
 	/**
@@ -149,6 +162,13 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 			return super.getProgramArguments(conf);
 		}
 		ArrayList<String> args = new ArrayList<>();
+		if (useThinWrapper(conf)) {
+			String realMain = super.getMainTypeName(conf);
+			//--thin.main=com.example.SampleApplication
+			// --thin.archive=target/classes - the first one is the main class of the boot app, as already configured in the boot launch config, the second one points to the compiled classes (the entry that was on the regular classpath before without the maven dependencies)
+			args.add("--thin.main="+realMain);
+			args.add("--thin.archive="+getThinArchive(conf));
+		}
 		if (debugOutput) {
 			args.add("--debug");
 		}
@@ -161,6 +181,26 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		addPropertiesArguments(args, props);
 		args.addAll(Arrays.asList(DebugPlugin.parseArguments(super.getProgramArguments(conf))));
 		return DebugPlugin.renderArguments(args.toArray(new String[args.size()]), null);
+	}
+
+	private String getThinArchive(ILaunchConfiguration conf) throws CoreException {
+		IRuntimeClasspathEntry[] entries = {
+			JavaRuntime.newProjectRuntimeClasspathEntry(getJavaProject(conf))
+		};
+		IRuntimeClasspathEntry[] realClasspath = JavaRuntime.resolveRuntimeClasspath(entries, conf);
+		StringBuilder classpathString = new StringBuilder();
+		boolean first = true;
+		for (IRuntimeClasspathEntry entry : realClasspath) {
+			if (!first) {
+				classpathString.append(File.pathSeparatorChar);
+			}
+			classpathString.append(entry.getLocation());
+			first = false;
+		}
+		if (first) {
+			throw new IllegalStateException("Could not determine the 'thin archive' location");
+		}
+		return classpathString.toString();
 	}
 
 	@Override
@@ -288,10 +328,12 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 	public static void setDefaults(ILaunchConfigurationWorkingCopy wc,
 			IProject project,
 			String mainType
-	) {
+	) throws CoreException {
 		setProcessFactory(wc, BootProcessFactory.class);
-		enableClasspathProviders(wc);
 		setProject(wc, project);
+		if (project!=null && project.hasNature(SpringBootCore.M2E_NATURE)) {
+			enableClasspathProviders(wc);
+		}
 		if (mainType!=null) {
 			setMainType(wc, mainType);
 		}
@@ -499,6 +541,64 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 
 	public static void setEnableAnsiConsoleOutput(ILaunchConfigurationWorkingCopy wc, boolean enable) {
 		wc.setAttribute(ANSI_CONSOLE_OUTPUT, enable);
+	}
+
+	@Override
+	public String[] getClasspath(ILaunchConfiguration conf) throws CoreException {
+		if (useThinWrapper(conf)) {
+			File thinWrapper = BootPreferences.getInstance().getThinWrapper();
+			Assert.isLegal(thinWrapper!=null, "'Use thin wrapper' option is selected, but thin wrapper is not defined");
+			Assert.isLegal(thinWrapper.isFile(), "'Use thin wrapper' option is selected, but thin wrapper ("+thinWrapper+") is not an existing file");
+			return new String[] {
+					thinWrapper.getAbsolutePath()
+			};
+		}
+		return super.getClasspath(conf);
+	}
+
+	@Override
+	public String getMainTypeName(ILaunchConfiguration conf) throws CoreException {
+		try {
+			if (useThinWrapper(conf)) {
+				return getThinWrapperMain(conf);
+			}
+		} catch (Exception e) {
+			Log.log(e);
+		}
+		return super.getMainTypeName(conf);
+	}
+
+	protected String getThinWrapperMain(ILaunchConfiguration conf) throws Exception {
+		File thinWrapper = BootPreferences.getInstance().getThinWrapper();
+		try (ZipInputStream zipStream = new ZipInputStream(new FileInputStream(thinWrapper))) {
+			ZipEntry zipEntry;
+			while (null!=(zipEntry = zipStream.getNextEntry())) {
+				String name = zipEntry.getName();
+				if (name.equals("META-INF/MANIFEST.MF")) {
+					Manifest manifest = new Manifest(zipStream);
+					String mainClass = manifest.getMainAttributes().getValue("Main-Class");
+					if (mainClass!=null) {
+						return mainClass;
+					} else {
+						throw new IllegalArgumentException("Thin wrapper '"+thinWrapper+"' doesn't have a 'Main-Class' attribute in its jar manifest");
+					}
+				}
+			}
+			throw new IllegalArgumentException("No META-INF/MANIFEST.MF found in '"+thinWrapper+"'. Is it a proper 'thin boot wrapper' jar?");
+		}
+	}
+
+	public static boolean useThinWrapper(ILaunchConfiguration conf) {
+		try {
+			return BootPreferences.getInstance().getThinWrapper()!=null && conf.getAttribute(USE_THIN_WRAPPER, DEFAULT_USE_THIN_WRAPPER);
+		} catch (CoreException e) {
+			Log.log(e);
+		}
+		return DEFAULT_USE_THIN_WRAPPER;
+	}
+
+	public static void setUseThinWrapper(ILaunchConfigurationWorkingCopy wc, boolean b) {
+		wc.setAttribute(USE_THIN_WRAPPER, b);
 	}
 
 }
