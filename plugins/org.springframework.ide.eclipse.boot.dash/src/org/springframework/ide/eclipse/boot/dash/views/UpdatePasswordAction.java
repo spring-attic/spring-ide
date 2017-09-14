@@ -40,7 +40,7 @@ public class UpdatePasswordAction extends AbstractCloudDashModelAction {
 		super(sectionSelection, ui);
 		this.setText("Update Password");
 		this.setToolTipText("Update password locally for the selected target.");
-		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/update_password.gif"));
+		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/update_password.png"));
 	}
 
 	CompletableFuture<Void> lastRunCompletion = null;
