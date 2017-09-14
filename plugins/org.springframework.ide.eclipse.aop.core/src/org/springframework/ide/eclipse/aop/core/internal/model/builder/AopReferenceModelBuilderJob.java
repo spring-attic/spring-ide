@@ -570,14 +570,16 @@ public class AopReferenceModelBuilderJob extends Job {
 				String msg = Activator.getFormattedMessage(
 						"AopReferenceModelBuilder.classDependencyError", t.getMessage(), info, bean);
 				AopLog.log(AopLog.BUILDER, msg);
-				AopReferenceModelMarkerUtils.createProblemMarker(file, msg, IMarker.SEVERITY_ERROR, bean
-						.getElementStartLine(), AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, file);
+				
+				// to do not create error or warning markers for this case, since it can happen in an perfectly fine scenario
+				// where the library (spring security, for example) contains a bean that gets activated in real life only if a certain
+				// other third-party lib is on the classpath or available.
 			}
 			else if (t instanceof IllegalArgumentException) {
 				AopLog.log(AopLog.BUILDER, Activator.getFormattedMessage(
 						"AopReferenceModelBuilder.pointcutIsMalformedOnBean", info, bean));
 				AopReferenceModelMarkerUtils.createProblemMarker(info.getResource(), Activator.getFormattedMessage(
-						"AopReferenceModelBuilder.pointcutIsMalformed", t.getMessage()), IMarker.SEVERITY_ERROR, info
+						"AopReferenceModelBuilder.pointcutIsMalformed", t.getMessage()), IMarker.SEVERITY_WARNING, info
 						.getAspectStartLineNumber(), AopReferenceModelMarkerUtils.AOP_PROBLEM_MARKER, info
 						.getResource());
 			}
