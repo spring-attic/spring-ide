@@ -26,23 +26,25 @@ import javax.management.remote.JMXServiceURL;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 /**
- * A JMX client for interacting with specific mbean.
+ * A JMX client for interacting with mbeans.
  *
  * @author Stephane Nicoll
  * @author Kris De Volder
  */
 public class JMXClient implements Disposable {
 
+	private static final Object[] NO_PARAMS = new Object[0];
+	private static final String[] NO_SIGNATURES = new String[0];
+
 	private JMXConnector connector;
 	private MBeanServerConnection connection;
-	private ObjectName objectName;
 
-	public JMXClient(int port, String objectName) throws IOException {
-		this(createLocalJmxConnector(port), objectName);
+	public JMXClient(int port) throws IOException {
+		this(createLocalJmxConnector(port));
 	}
 
-	private JMXClient(JMXConnector connector, String objectName) throws IOException {
-		this(connector, connector.getMBeanServerConnection(), objectName);
+	private JMXClient(JMXConnector connector) throws IOException {
+		this(connector, connector.getMBeanServerConnection());
 	}
 
 	@Override
@@ -54,15 +56,14 @@ public class JMXClient implements Disposable {
 		}
 	}
 
-	private JMXClient(JMXConnector connector, MBeanServerConnection connection, String objectName) {
+	private JMXClient(JMXConnector connector, MBeanServerConnection connection) {
 		this.connector = connector;
 		this.connection = connection;
-		this.objectName = toObjectName(objectName);
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T getAttribute(Class<T> klass, String attributeName) throws AttributeNotFoundException, InstanceNotFoundException, MBeanException, ReflectionException, IOException {
-		Object value = getAttribute(attributeName);
+	public <T> T getAttribute(Class<T> klass, String objectName, String attributeName) throws AttributeNotFoundException, InstanceNotFoundException, MBeanException, ReflectionException, IOException {
+		Object value = getAttribute(objectName, attributeName);
 		if (value==null || klass.isInstance(value)) {
 			return (T)value;
 		} else {
@@ -70,9 +71,14 @@ public class JMXClient implements Disposable {
 		}
 	}
 
-	public Object getAttribute(String attributeName) throws AttributeNotFoundException, InstanceNotFoundException, MBeanException, ReflectionException, IOException {
-		return this.connection.getAttribute(objectName, attributeName);
+	public Object getAttribute(String objectName, String attributeName) throws AttributeNotFoundException, InstanceNotFoundException, MBeanException, ReflectionException, IOException {
+		return this.connection.getAttribute(toObjectName(objectName), attributeName);
 	}
+
+	public Object callOperation(String objectName, String operationName) throws InstanceNotFoundException, MBeanException, ReflectionException, IOException {
+		return this.connection.invoke(toObjectName(objectName), operationName, NO_PARAMS, NO_SIGNATURES);
+	}
+
 
 	private ObjectName toObjectName(String name) {
 		try {

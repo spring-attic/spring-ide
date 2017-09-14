@@ -13,9 +13,10 @@ package org.springframework.ide.eclipse.boot.dash.model.requestmappings;
 import java.util.Set;
 
 import javax.inject.Provider;
+import javax.management.InstanceNotFoundException;
 
 import org.springframework.ide.eclipse.boot.launch.util.JMXClient;
-import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableSet;
@@ -28,9 +29,21 @@ import com.google.common.collect.ImmutableSet;
  */
 public class JMXActuatorClient extends ActuatorClient {
 
-	private static final String OBJECT_NAME = "org.springframework.boot:type=Endpoint,name=requestMappingEndpoint";
-	private static final String ATTRIBUTE_NAME = "Data";
 	private final Provider<Integer> portProvider;
+
+	static class OperationInfo {
+		final String objectName;
+		final String operationName;
+		public OperationInfo(String objectName, String operationName) {
+			this.objectName = objectName;
+			this.operationName = operationName;
+		}
+	}
+
+	private static final OperationInfo[] OPERATIONS = {
+			new OperationInfo("org.springframework.boot:type=Endpoint,name=Mappings", "mappings"), //Boot 2.x
+			new OperationInfo("org.springframework.boot:type=Endpoint,name=requestMappingEndpoint", "getData") //Boot 1.x
+	};
 
 	private JMXClient client = null;
 	private Integer port = null;
@@ -45,14 +58,19 @@ public class JMXActuatorClient extends ActuatorClient {
 		try {
 			JMXClient client = getClient();
 			if (client!=null) {
-				Object obj = client.getAttribute(ATTRIBUTE_NAME);
-				if (obj!=null) {
-					//TODO: Can we avoid conversion to string only to parse it again later?
-					return new ObjectMapper().writeValueAsString(obj);
+				for (OperationInfo op : OPERATIONS) {
+					try {
+						Object obj = client.callOperation(op.objectName, op.operationName);
+						if (obj!=null) {
+							return new ObjectMapper().writeValueAsString(obj);
+						}
+					} catch (InstanceNotFoundException e) {
+						//Ignore and try other mbean
+					}
 				}
 			}
 		} catch (Exception e) {
-			disposeClient();
+			disposeClient(); //Client may be in broken state, do not reuse.
 			if (!isExpectedException(e)) {
 				throw e;
 			}
@@ -77,7 +95,7 @@ public class JMXActuatorClient extends ActuatorClient {
 		if (!currentPort.equals(port) || client==null) {
 			disposeClient();
 			port = currentPort;
-			client = new JMXClient(currentPort, OBJECT_NAME);
+			client = new JMXClient(currentPort);
 		}
 		return client;
 	}
