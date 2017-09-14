@@ -959,10 +959,13 @@ public class BootDashModelTest {
 		}
 	}
 
-	@Test public void testRequestMappings() throws Exception {
+	@Test public void testRequestMappings_1_x() throws Exception {
+		//Note: Eventually, initializer will no longer offer versions in the required range.
+		// When that happens this test will fail and it will be reasonable to just delete it then.
+		// Just having the 2_x version of this test should then be adequate
 		String projectName = "actuated-project";
 		IProject project = createBootProject(projectName,
-				bootVersionAtLeast("1.3.0"), //required for us to be able to determine the actuator port
+				bootVersionAtLeast("[1.3.0,2.0)"),   //1.3 is required for us to be able to determine the actuator port
 				withStarters("web", "actuator"),     //required to actually *have* an actuator
 				setPackage("com.example.demo")
 		);
@@ -1030,6 +1033,91 @@ public class BootDashModelTest {
 			assertFalse(rm.isUserDefined());
 
 			rm = assertRequestMappingWithPath(mappings, "/mappings.json");  //Since we are using this, it should be there.
+			assertNotNull(rm.getMethod());
+			assertNotNull(rm.getType());
+			assertFalse(rm.isUserDefined());
+
+			//Case 1 example (path represented directly in the json key).
+			rm = assertRequestMappingWithPath(mappings, "/**/favicon.ico");
+			assertFalse(rm.isUserDefined());
+
+		} finally {
+			element.stopAsync(ui);
+			waitForState(element, RunState.INACTIVE);
+		}
+	}
+
+	@Test public void testRequestMappings_2_x() throws Exception {
+		String projectName = "actuated-project";
+		IProject project = createBootProject(projectName,
+				bootVersionAtLeast("2.0"), //Ensure we test with 2.0, actuator endpoints are changed in 2.0!
+				withStarters("web", "actuator"),     //required to actually *have* an actuator
+				setPackage("com.example.demo")
+		);
+		createFile(project, "src/main/java/com/example/demo/HelloController.java",
+				"package com.example.demo;\n" +
+				"\n" +
+				"import org.springframework.web.bind.annotation.RequestMapping;\n" +
+				"import org.springframework.web.bind.annotation.RestController;\n" +
+				"\n" +
+				"@RestController\n" +
+				"public class HelloController {\n" +
+				"\n" +
+				"	@RequestMapping(\"/hello\")\n" +
+				"	public String hello() {\n" +
+				"		return \"Hello, World!\";\n" +
+				"	}\n" +
+				"\n" +
+				"}\n"
+		);
+		StsTestUtil.assertNoErrors(project);
+		final BootDashElement element = getElement(projectName);
+		try {
+			waitForState(element, RunState.INACTIVE);
+			assertNull(element.getLiveRequestMappings()); // unknown since can only be determined when app is running
+
+			element.restart(RunState.RUNNING, ui);
+			waitForState(element, RunState.RUNNING);
+			new ACondition("Wait for request mappings", MODEL_UPDATE_TIMEOUT) {
+				public boolean test() throws Exception {
+					List<RequestMapping> mappings = element.getLiveRequestMappings();
+					assertNotNull(mappings); //Why is the test sometimes failing here?
+					assertTrue(!mappings.isEmpty()); //Even though this is an 'empty' app should have some mappings,
+					                                 // for example an 'error' page.
+					return true;
+				}
+			};
+
+			List<RequestMapping> mappings = element.getLiveRequestMappings();
+			System.out.println(">>> Found RequestMappings");
+			for (RequestMapping m : mappings) {
+				System.out.println(m.getPath());
+				assertNotNull(m.getPath());
+			}
+			System.out.println("<<< Found RequestMappings");
+
+			RequestMapping rm;
+			//Case 2 examples (path extracted from 'pseudo' json in the key)
+			rm = assertRequestMappingWithPath(mappings, "/hello"); //We defined it so should be there
+			assertEquals("com.example.demo.HelloController", rm.getFullyQualifiedClassName());
+			assertEquals("hello", rm.getMethodName());
+			assertEquals("com.example.demo.HelloController", rm.getType().getFullyQualifiedName());
+
+			IMethod method = rm.getMethod();
+			assertEquals(rm.getType(), method.getDeclaringType());
+			assertEquals("hello", method.getElementName());
+
+			assertTrue(rm.isUserDefined());
+
+			rm = assertRequestMappingWithPath(mappings, "/error"); //Even empty apps should have a 'error' mapping
+			assertFalse(rm.isUserDefined());
+
+			rm = assertRequestMappingWithPath(mappings, "/application/status");
+			assertNotNull(rm.getMethod());
+			assertNotNull(rm.getType());
+			assertFalse(rm.isUserDefined());
+
+			rm = assertRequestMappingWithPath(mappings, "/application/info");
 			assertNotNull(rm.getMethod());
 			assertNotNull(rm.getType());
 			assertFalse(rm.isUserDefined());
