@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.test.util;
 
+import java.time.Duration;
+
+import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchesListener;
@@ -37,17 +40,23 @@ class LaunchTerminationListener implements ILaunchesListener, ILaunchesListener2
 		return launch.isTerminated();
 	}
 
-	public synchronized void waitForProcessTermination() {
-		//TODO: need a timeout limit?
+	public synchronized void waitForProcessTermination(Duration timeout) {
+		long start = System.currentTimeMillis();
+		long end = start+timeout.toMillis();
 		while (!isTerminated()) {
+			if (System.currentTimeMillis()>end) {
+				try {
+					//The process may be stuck, try to kill it forcibly to avoid stuck tests
+					launch.terminate();
+				} catch (DebugException e) {
+				}
+			}
 			try {
-				wait();
+				wait(Math.max(500, end - System.currentTimeMillis()));
 			} catch (InterruptedException e) {
 			}
 		}
 	}
-
-
 
 	public void launchesRemoved(ILaunch[] launches) {
 		notifyMaybe(launches);
@@ -75,8 +84,8 @@ class LaunchTerminationListener implements ILaunchesListener, ILaunchesListener2
 		notifyMaybe(launches);
 	}
 
-	public IProcess waitForProcess() {
-		waitForProcessTermination();
+	public IProcess waitForProcess(Duration timeout) {
+		waitForProcessTermination(timeout);
 		return LaunchUtil.findProcess(launch);
 	}
 

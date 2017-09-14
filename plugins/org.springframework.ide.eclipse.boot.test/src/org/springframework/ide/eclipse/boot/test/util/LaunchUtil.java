@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.test.util;
 
+import java.time.Duration;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -31,13 +33,17 @@ import org.eclipse.debug.core.model.IStreamsProxy;
 public class LaunchUtil {
 
 	public static LaunchResult synchLaunch(ILaunchConfiguration launchConf) throws CoreException {
+		return synchLaunch(launchConf, Duration.ofMinutes(2));
+	}
+
+	public static LaunchResult synchLaunch(ILaunchConfiguration launchConf, Duration timeout) throws CoreException {
 		ILaunch l = launchConf.launch("run", new NullProgressMonitor(), false, true);
 		IProcess process = findProcess(l);
 		IStreamsProxy streams = process.getStreamsProxy();
 
 		StringBuilder out = capture(streams.getOutputStreamMonitor());
 		StringBuilder err = capture(streams.getErrorStreamMonitor());
-		IProcess p = synchLaunch(l);
+		IProcess p = synchLaunch(l, timeout);
 		return new LaunchResult(p.getExitValue(), out.toString(), err.toString());
 	}
 
@@ -54,14 +60,14 @@ public class LaunchUtil {
 		return out;
 	}
 
-	private static IProcess synchLaunch(ILaunch launch) {
+	private static IProcess synchLaunch(ILaunch launch, Duration timeout) {
 		DebugPlugin mgr = DebugPlugin.getDefault();
 		LaunchTerminationListener listener = null;
 		try {
 			//DebugUITools.launch(launchConf, "run");
 			listener = new LaunchTerminationListener(launch);
 			mgr.getLaunchManager().addLaunchListener(listener);
-			return listener.waitForProcess();
+			return listener.waitForProcess(timeout);
 		} finally {
 			if (listener!=null) {
 				mgr.getLaunchManager().removeLaunchListener(listener);
