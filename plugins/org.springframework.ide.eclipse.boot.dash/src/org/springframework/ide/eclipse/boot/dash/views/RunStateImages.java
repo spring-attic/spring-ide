@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,9 +20,6 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.DecorationOverlayIcon;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.ImageData;
-import org.eclipse.swt.graphics.ImageLoader;
-import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 
@@ -44,10 +40,6 @@ public class RunStateImages {
 	}
 
 	private Image[] createAnimation(String urlString) throws Exception {
-		ImageLoader loader = new ImageLoader();
-		InputStream input = null;
-		ClassLoader cl = this.getClass().getClassLoader();
-
 		// For a png there might be animation frames to load (ImageLoader cannot
 		// pull out frames for an animated png)
 		// Given an input url of the form "foo.png" this will search
@@ -67,20 +59,24 @@ public class RunStateImages {
 			// Animation frames were found, return them
 			return images.toArray(new Image[images.size()]);
 		}
-
-		// Just load it in the regular way, this route does cope
-		// with animated gifs
-		input = cl.getResourceAsStream(urlString);
-		try {
-			ImageData[] data = loader.load(input);
-			Image[] imgs = new Image[data.length];
-			for (int i = 0; i < imgs.length; i++) {
-				imgs[i] = new Image(Display.getDefault(), data[i]);
-			}
-			return imgs;
-		} finally {
-			input.close();
+		else {
+			ImageDescriptor imageDescriptor = BootDashActivator.getImageDescriptor(urlString);
+			Image image = imageDescriptor.createImage();
+			return new Image[] {image};
 		}
+
+
+//		input = cl.getResourceAsStream(urlString);
+//		try {
+//			ImageData[] data = loader.load(input);
+//			Image[] imgs = new Image[data.length];
+//			for (int i = 0; i < imgs.length; i++) {
+//				imgs[i] = new Image(Display.getDefault(), data[i]);
+//			}
+//			return imgs;
+//		} finally {
+//			input.close();
+//		}
 	}
 
 	public synchronized Image[] getDecoratedImages(final RunState state, final ImageDescriptor descriptor, final int position) throws Exception {

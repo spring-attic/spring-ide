@@ -30,8 +30,8 @@ public class ReconnectCloudConsoleAction extends AbstractCloudAppDashElementsAct
 		super(selection, ui);
 		this.setText("Reconnect Console");
 		this.setToolTipText("Reconnect Console");
-		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/open_console.gif"));
-		this.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/open_console_disabled.gif"));
+		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/open_console.png"));
+		this.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/open_console_disabled.png"));
 	}
 
 	@Override

@@ -29,7 +29,8 @@ public class RemoveRunTargetAction extends AbstractBootDashModelAction {
 		this.viewModel = viewModel;
 		this.setText("Remove Target");
 		this.setToolTipText("Remove the connection to the target and its dashboard section.");
-		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/remove_target.gif"));
+		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/remove_target.png"));
+		this.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/remove_target_disabled.png"));
 	}
 
 
