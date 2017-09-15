@@ -564,10 +564,15 @@
 					<layout>p2</layout>
 					<url>http://download.eclipse.org/cft/1.1.0.RC2/</url>
 				</repository>
+				<!--				<repository>
+									<id>lsp4e-snapshots</id>
+									<layout>p2</layout>
+									<url>http://download.eclipse.org/lsp4e/snapshots/</url>
+								</repository> -->
 				<repository>
-					<id>lsp4e</id>
+					<id>lsp4e-releases</id>
 					<layout>p2</layout>
-					<url>http://download.eclipse.org/lsp4e/snapshots/</url>
+					<url>https://projects.eclipse.org/projects/technology.lsp4e/releases/0.3.0</url>
 				</repository>
 				<repository>
 					<id>eclipse-integration-commons</id>
@@ -623,10 +628,15 @@
 		  			<layout>p2</layout>
 		  			<url>http://download.eclipse.org/buildship/updates/e46/releases/1.0/</url>
 				</repository>
+				<!--				<repository>
+									<id>lsp4e-snapshots</id>
+									<layout>p2</layout>
+									<url>http://download.eclipse.org/lsp4e/snapshots/</url>
+								</repository> -->
 				<repository>
-					<id>lsp4e</id>
+					<id>lsp4e-releases</id>
 					<layout>p2</layout>
-					<url>http://download.eclipse.org/lsp4e/snapshots/</url>
+					<url>https://projects.eclipse.org/projects/technology.lsp4e/releases/0.3.0</url>
 				</repository>
 				<repository>
 					<id>eclipse-integration-commons</id>
