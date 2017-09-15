@@ -16,7 +16,6 @@ import static org.springsource.ide.eclipse.commons.core.util.StringUtil.hasText;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -541,6 +540,18 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 
 	public static void setEnableAnsiConsoleOutput(ILaunchConfigurationWorkingCopy wc, boolean enable) {
 		wc.setAttribute(ANSI_CONSOLE_OUTPUT, enable);
+	}
+
+	@Override
+	public String[][] getClasspathAndModulepath(ILaunchConfiguration conf) throws CoreException {
+		//with Java 9 Beta installed we need this method, because getClasspath is no longer called.
+		if (useThinWrapper(conf)) {
+			return new String[][] {
+				getClasspath(conf),
+				new String[] {}
+			};
+ 		};
+		return super.getClasspathAndModulepath(conf);
 	}
 
 	@Override
