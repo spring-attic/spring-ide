@@ -19,8 +19,10 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.contains;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -74,11 +76,14 @@ import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
+import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.core.IMavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.MavenId;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
+import org.springframework.ide.eclipse.boot.core.cli.BootCliCommand;
 import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
+import org.springframework.ide.eclipse.boot.core.cli.install.CloudCliInstall;
 import org.springframework.ide.eclipse.boot.core.cli.install.IBootInstall;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudServiceInstanceDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -274,6 +279,30 @@ public class BootDashModelTest {
 		bootInstallMgr.setDefaultInstall(customInstall); //Note: implictly adds the default install if its not there yet,
 		FileUtils.deleteQuietly(customZip);
 		return customInstall;
+	}
+
+	@Test public void testInvalidCloudCliInstall() throws Exception {
+		String error = "com.google.common.util.concurrent.UncheckedExecutionException: java.lang.NullPointerException\n" +
+				"	at com.google.common.cache.LocalCache$Segment.get(LocalCache.java:2199)\n" +
+				"	at com.google.common.cache.LocalCache.get(LocalCache.java:3932)\n" +
+				"	at com.google.common.cache.LocalCache.getOrLoad(LocalCache.java:3936)";
+		model.getViewModel().getToggleFilters().getSelectedFilters().remove(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES);
+
+		BootCliCommand mockCommand = mock(BootCliCommand.class);
+		doReturn(error).when(mockCommand).getOutput();
+		doReturn(0).when(mockCommand).execute(CloudCliInstall.LIST_SERVICES_COMMAND);
+
+		IBootInstall defaultInstall = spy(context.getBootInstallManager().getDefaultInstall());
+		CloudCliInstall mockCloudCliInstall = spy(new CloudCliInstall(defaultInstall));
+		doReturn(new Version("1.5.1")).when(mockCloudCliInstall).getVersion();
+		doReturn(mockCommand).when(mockCloudCliInstall).createCommand();
+		doReturn(mockCloudCliInstall).when(defaultInstall).getExtension(CloudCliInstall.class);
+
+		assertEquals(0, mockCloudCliInstall.getCloudServices().length);
+
+		context.getBootInstallManager().setDefaultInstall(defaultInstall);
+
+		assertServiceElements();
 	}
 
 	/**
