@@ -22,7 +22,7 @@ public class OpenGSWizardButtonProvider extends IEclipseToBrowserFunction.Extens
 	private static final String LF = "\n";
 
 	private String getGuideA(String name) {
-		return "<a class=\"ide_widget btn btn-black uppercase\" href=\"\" onclick=\"ide.call('org.springframework.openGuideWizard','"
+		return "<a class=\"ide_widget btn btn-black uppercase\" href=\"\" onclick=\"return ide.call('org.springframework.openGuideWizard','"
 				+ name + "')\">Import " + name + "</a>";
 	}
 

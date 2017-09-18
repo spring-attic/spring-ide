@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Spring IDE Developers
+ * Copyright (c) 2012, 2017 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -101,9 +101,10 @@ public class EntityPropertyCompletionProposals extends JavaCompletionProposalCom
 		
 		int offset = javaContext.getCoreContext().getOffset();
 		int positionInMethodName = offset - element.getNameRange().getOffset();
+		int replacementLength = element.getNameRange().getLength() - positionInMethodName;
 		String elementName = element.getElementName();
 
-		return computeCompletionProposals(javaContext, information, positionInMethodName, elementName);
+		return computeCompletionProposals(javaContext, information, positionInMethodName, replacementLength, elementName);
 	}
 
 	private List<ICompletionProposal> computeCompletionProposals(IType type,
@@ -127,12 +128,12 @@ public class EntityPropertyCompletionProposals extends JavaCompletionProposalCom
 		int offset = javaContext.getCoreContext().getOffset();
 		int positionInMethodName = offset - javaContext.getCoreContext().getTokenStart();
 
-		return computeCompletionProposals(javaContext, information, positionInMethodName, elementName);
+		return computeCompletionProposals(javaContext, information, positionInMethodName, 0, elementName);
 	}
 
 	private List<ICompletionProposal> computeCompletionProposals(
 			JavaContentAssistInvocationContext javaContext,
-			RepositoryInformation information, int positionInMethodName,
+			RepositoryInformation information, int positionInMethodName, int replacementLength,
 			String elementName) throws JavaModelException {
 
 		IJavaProject project = javaContext.getProject();
@@ -164,12 +165,12 @@ public class EntityPropertyCompletionProposals extends JavaCompletionProposalCom
 		}
 
 		List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
-		proposals.addAll(getProposalsFor(type, part, offset));
-		proposals.addAll(keywordProposalsProvider.getProposalsFor(type, offset, part));
+		proposals.addAll(getProposalsFor(type, part, offset, replacementLength));
+		proposals.addAll(keywordProposalsProvider.getProposalsFor(type, offset, replacementLength, part));
 		return proposals;
 	}
 
-	private static List<ICompletionProposal> getProposalsFor(IType type, QueryMethodPart part, int offset)
+	private static List<ICompletionProposal> getProposalsFor(IType type, QueryMethodPart part, int offset, int replacementLength)
 			throws JavaModelException {
 
 		if (isJdkType(type)) {
@@ -180,7 +181,7 @@ public class EntityPropertyCompletionProposals extends JavaCompletionProposalCom
 
 		for (IField field : type.getFields()) {
 			if (part.isProposalCandidate(field)) {
-				result.add(new EntityFieldNameCompletionProposal(field, offset, part.getSeed()));
+				result.add(new EntityFieldNameCompletionProposal(field, offset, replacementLength, part.getSeed()));
 			}
 		}
 
@@ -193,9 +194,8 @@ public class EntityPropertyCompletionProposals extends JavaCompletionProposalCom
 	 * @author Oliver Gierke
 	 */
 	private static class KeyWordCompletionProposal extends JavaCompletionProposal {
-		public KeyWordCompletionProposal(String keyword, int offset, String seed) {
-			super(getReplacement(keyword, seed), offset, offset + keyword.length(), KEYWORD, StringUtils.capitalize(keyword),
-					450);
+		public KeyWordCompletionProposal(String keyword, int offset, int replacementLength, String seed) {
+			super(getReplacement(keyword, seed), offset, replacementLength, KEYWORD, StringUtils.capitalize(keyword), 450);
 		}
 	}
 
@@ -219,7 +219,7 @@ public class EntityPropertyCompletionProposals extends JavaCompletionProposalCom
 			this.provider = provider;
 		}
 
-		public List<ICompletionProposal> getProposalsFor(IType type, int offset, QueryMethodPart part) {
+		public List<ICompletionProposal> getProposalsFor(IType type, int offset, int replacementLength, QueryMethodPart part) {
 
 			if (part.isRoot()) {
 				return Collections.emptyList();
@@ -230,7 +230,7 @@ public class EntityPropertyCompletionProposals extends JavaCompletionProposalCom
 
 			for (String keyword : provider.getKeywordsForPropertyOf(type, seed)) {
 				if (!part.isKeywordComplete()) {
-					proposals.add(new KeyWordCompletionProposal(keyword, offset, seed));
+					proposals.add(new KeyWordCompletionProposal(keyword, offset, replacementLength, seed));
 				}
 			}
 
@@ -238,7 +238,7 @@ public class EntityPropertyCompletionProposals extends JavaCompletionProposalCom
 
 			for (String concatenator : Arrays.asList("And", "Or")) {
 				if (part.isKeywordComplete() || !StringUtils.hasText(seed) || concatenator.startsWith(seed)) {
-					proposals.add(new KeyWordCompletionProposal(concatenator, offset, seed));
+					proposals.add(new KeyWordCompletionProposal(concatenator, offset, replacementLength, seed));
 				}
 			}
 
@@ -271,8 +271,8 @@ public class EntityPropertyCompletionProposals extends JavaCompletionProposalCom
 		
 		private String fieldName;
 		
-		public EntityFieldNameCompletionProposal(IField field, int offset, String seed) {
-			super(getReplacement(field.getElementName(), seed), offset, offset + (seed == null ? 0 : seed.length()),
+		public EntityFieldNameCompletionProposal(IField field, int offset, int replacementLength, String seed) {
+			super(getReplacement(field.getElementName(), seed), offset, replacementLength,
 					getFieldImage(field), field.getElementName(), 500);
 			this.fieldName = field.getElementName();
 		}
