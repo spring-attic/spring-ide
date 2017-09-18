@@ -313,46 +313,51 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 	}
 	
 	private void doThinWrapperLaunchTest(File thinWrapper, String importStrategy) throws Exception {
-		boolean reallyDoThinLaunch = true;
-		Timewatch.monitor("Thin launch with "+importStrategy, Duration.ofMinutes(2), () -> {
-			String buildType = importStrategy.split("\\-")[0].toLowerCase();
-			IProject project = projects.createBootProject("thinly-wrapped-"+buildType, withImportStrategy(importStrategy));
-			ILaunchConfigurationWorkingCopy wc = createBaseWorkingCopy(project.getName(), "com.example.demo.ThinlyWrapped"+ StringUtils.capitalize(buildType) +"Application");
-			
-			createFile(project, "src/main/java/com/example/demo/ShowMessage.java", 
-					"package com.example.demo;\n" + 
-					"\n" + 
-					"import org.springframework.boot.CommandLineRunner;\n" + 
-					"import org.springframework.stereotype.Component;\n" + 
-					"\n" + 
-					"@Component\n" + 
-					"public class ShowMessage implements CommandLineRunner {\n" + 
-					"\n" + 
-					"	@Override\n" + 
-					"	public void run(String... arg0) throws Exception {\n" + 
-					"		System.out.println(\"We have liftoff!\");\n" + 
-					"	}\n" + 
-					"\n" + 
-					"}\n"
-			);
-			StsTestUtil.assertNoErrors(project); // compile project (and check for errors)
-			if (buildType.equals("maven")) {
-				//In gradle its different location, but doens't really matter, this just a 'sanity' check to
-				// see if class got compiled. If not, something else will fail later.
-				assertTrue(project.getFile("target/classes/com/example/demo/ShowMessage.class").exists());
-			}
-			
-			if (reallyDoThinLaunch) {
-				BootLaunchConfigurationDelegate.setUseThinWrapper(wc, true);
-				String[] classpath = getClasspath(new BootLaunchConfigurationDelegate(), wc);
-				assertTrue(classpath.length==1);
-				assertEquals(thinWrapper.getAbsolutePath(), classpath[0]);
-			}
-
-			LaunchResult result = LaunchUtil.synchLaunch(wc);
-			System.out.println(result);
-			assertContains("We have liftoff!", result.out);
-		});
+		System.out.println(">>> doThinWrapperLaunchTest: "+importStrategy);
+		try {
+			boolean reallyDoThinLaunch = true;
+			Timewatch.monitor("Thin launch with "+importStrategy, Duration.ofMinutes(2), () -> {
+				String buildType = importStrategy.split("\\-")[0].toLowerCase();
+				IProject project = projects.createBootProject("thinly-wrapped-"+buildType, withImportStrategy(importStrategy));
+				ILaunchConfigurationWorkingCopy wc = createBaseWorkingCopy(project.getName(), "com.example.demo.ThinlyWrapped"+ StringUtils.capitalize(buildType) +"Application");
+				
+				createFile(project, "src/main/java/com/example/demo/ShowMessage.java", 
+						"package com.example.demo;\n" + 
+						"\n" + 
+						"import org.springframework.boot.CommandLineRunner;\n" + 
+						"import org.springframework.stereotype.Component;\n" + 
+						"\n" + 
+						"@Component\n" + 
+						"public class ShowMessage implements CommandLineRunner {\n" + 
+						"\n" + 
+						"	@Override\n" + 
+						"	public void run(String... arg0) throws Exception {\n" + 
+						"		System.out.println(\"We have liftoff!\");\n" + 
+						"	}\n" + 
+						"\n" + 
+						"}\n"
+				);
+				StsTestUtil.assertNoErrors(project); // compile project (and check for errors)
+				if (buildType.equals("maven")) {
+					//In gradle its different location, but doens't really matter, this just a 'sanity' check to
+					// see if class got compiled. If not, something else will fail later.
+					assertTrue(project.getFile("target/classes/com/example/demo/ShowMessage.class").exists());
+				}
+				
+				if (reallyDoThinLaunch) {
+					BootLaunchConfigurationDelegate.setUseThinWrapper(wc, true);
+					String[] classpath = getClasspath(new BootLaunchConfigurationDelegate(), wc);
+					assertTrue(classpath.length==1);
+					assertEquals(thinWrapper.getAbsolutePath(), classpath[0]);
+				}
+	
+				LaunchResult result = LaunchUtil.synchLaunch(wc);
+				System.out.println(result);
+				assertContains("We have liftoff!", result.out);
+			});
+		} finally {
+			System.out.println("<<< doThinWrapperLaunchTest: "+importStrategy);
+		}
 	}
 
 	public void testRuntimeClasspathNoTestStuff() throws Exception {
