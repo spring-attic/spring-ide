@@ -16,6 +16,9 @@ import static org.springsource.ide.eclipse.commons.core.util.StringUtil.hasText;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -53,6 +56,9 @@ import org.springframework.ide.eclipse.boot.launch.util.PortFinder;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.core.util.OsUtils;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
+
+import com.google.common.reflect.Reflection;
 
 /**
  * @author Kris De Volder
@@ -542,16 +548,27 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		wc.setAttribute(ANSI_CONSOLE_OUTPUT, enable);
 	}
 
-	@Override
+	//@Override Don't add override tag. Method doesn't exist in older eclipse api
 	public String[][] getClasspathAndModulepath(ILaunchConfiguration conf) throws CoreException {
 		//with Java 9 Beta installed we need this method, because getClasspath is no longer called.
-		if (useThinWrapper(conf)) {
-			return new String[][] {
-				getClasspath(conf),
-				new String[] {}
-			};
- 		};
-		return super.getClasspathAndModulepath(conf);
+		try {
+			if (useThinWrapper(conf)) {
+				return new String[][] {
+					getClasspath(conf),
+					new String[] {}
+				};
+	 		};
+	 		//Can't 'just' do super call because that wouldn't compile on older Eclipse. So we use 'MethodHandles' to
+	 		//call super dynamically. See https://stackoverflow.com/questions/5411434/how-to-call-a-superclass-method-using-java-reflection
+			MethodHandle m = MethodHandles.lookup().findSpecial(BootLaunchConfigurationDelegate.class.getSuperclass(),
+					"getClasspathAndModulepath",
+					MethodType.methodType(String[][].class, ILaunchConfiguration.class),
+					BootLaunchConfigurationDelegate.class
+			);
+			return (String[][]) m.invoke(this, conf);
+		} catch (Throwable e) {
+			throw ExceptionUtil.coreException(e);
+		}
 	}
 
 	@Override
