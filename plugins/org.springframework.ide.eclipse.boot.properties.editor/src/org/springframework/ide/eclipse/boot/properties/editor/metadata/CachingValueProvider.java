@@ -14,9 +14,9 @@ import java.time.Duration;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProviderRegistry.ValueProviderStrategy;
-import org.springframework.ide.eclipse.boot.properties.editor.util.Cache;
-import org.springframework.ide.eclipse.boot.properties.editor.util.LimitedTimeCache;
 import org.springframework.ide.eclipse.editor.support.util.FuzzyMatcher;
+import org.springsource.ide.eclipse.commons.frameworks.core.internal.cache.Cache;
+import org.springsource.ide.eclipse.commons.frameworks.core.internal.cache.LimitedTimeCache;
 
 import reactor.core.publisher.Flux;
 import reactor.util.function.Tuple2;
