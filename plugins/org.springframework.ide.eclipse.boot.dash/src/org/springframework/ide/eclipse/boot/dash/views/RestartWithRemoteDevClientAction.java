@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2016 Pivotal Software, Inc.
+ * Copyright (c) 2015, 2017 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,7 +16,7 @@ import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
@@ -48,8 +48,8 @@ public class RestartWithRemoteDevClientAction extends AbstractCloudAppDashElemen
 		if (model != null) {
 			model.addElementStateListener(stateListener = new ElementStateListener() {
 				public void stateChanged(BootDashElement e) {
-					if (getSelectedElements().contains(e)) {
-						Display.getDefault().asyncExec(new Runnable() {
+					if (getSelectedElements().contains(e) && !PlatformUI.getWorkbench().isClosing()) {
+						PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
 							public void run() {
 								updateEnablement();
 							}

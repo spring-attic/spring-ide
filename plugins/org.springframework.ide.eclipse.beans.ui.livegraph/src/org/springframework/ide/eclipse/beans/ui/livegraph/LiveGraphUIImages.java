@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Spring IDE Developers
+ * Copyright (c) 2016, 2017 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,19 +43,13 @@ public class LiveGraphUIImages {
 	/*
 	 * Available cached Images in the Spring Beans UI plugin image registry.
 	 */
-	public static final String IMG_OBJS_BEAN = NAME_PREFIX + "bean_obj.gif";
-	public static final String IMG_OBJS_BEAN_REF = NAME_PREFIX + "beanref_obj.gif";
-	public static final String IMG_OBJS_CONFIG = NAME_PREFIX + "config_obj.gif";
 	public static final String IMG_OBJS_COLLECTION = NAME_PREFIX + "collection_obj.gif";
 	public static final String IMG_OBJS_REFRESH = NAME_PREFIX + "refresh_obj.gif";
 
 	// Use IPath and toOSString to build the names to ensure they have the slashes correct
 	private final static String OBJECT = "obj16/"; //basic colors - size 16x16
 
-	public static final ImageDescriptor DESC_OBJS_BEAN_REF = createManaged(OBJECT, IMG_OBJS_BEAN_REF);
 	public static final ImageDescriptor DESC_OBJS_COLLECTION = createManaged(OBJECT, IMG_OBJS_COLLECTION);
-	public static final ImageDescriptor DESC_OBJS_BEAN = createManaged(OBJECT, IMG_OBJS_BEAN);
-	public static final ImageDescriptor DESC_OBJS_CONFIG = createManaged(OBJECT, IMG_OBJS_CONFIG);
 	public static final ImageDescriptor REFRESH = createManaged(OBJECT, IMG_OBJS_REFRESH);
 
 	/*

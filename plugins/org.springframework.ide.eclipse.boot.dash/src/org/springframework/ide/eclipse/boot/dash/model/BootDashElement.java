@@ -16,7 +16,8 @@ import java.util.List;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
-import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
+import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModel;
+import org.springframework.ide.eclipse.boot.dash.model.actuator.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 
@@ -50,6 +51,13 @@ public interface BootDashElement extends Nameable, Taggable {
 	 * an empty list means 'no request mappings').
 	 */
 	List<RequestMapping> getLiveRequestMappings();
+
+	/**
+	 * Get the beans from a running process. May return null if beans cannot be
+	 * determined. (Thus, <code>null</code> means unknown, whereas an empty list
+	 * means 'no beans')
+	 */
+	LiveBeansModel getLiveBeans();
 
 	/**
 	 * Get the 'active' launch configuration. This may be null.

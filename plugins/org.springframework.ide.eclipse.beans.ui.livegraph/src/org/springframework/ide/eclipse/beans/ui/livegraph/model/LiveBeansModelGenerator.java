@@ -1,12 +1,12 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2012, 2017 Pivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
- *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ * Contributors:
+ *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.livegraph.model;
 
@@ -34,6 +34,9 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.json.JSONException;
 import org.springframework.context.support.LiveBeansViewMBean;
+import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansJsonParser;
+import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModel;
+import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModelCollection;
 import org.springframework.ide.eclipse.beans.ui.livegraph.LiveGraphUiPlugin;
 import org.springsource.ide.eclipse.commons.core.StatusHandler;
 
@@ -211,8 +214,8 @@ public class LiveBeansModelGenerator {
 	 * @throws CoreException
 	 */
 	public static LiveBeansModel refreshModel(LiveBeansModel originalModel) throws CoreException {
-		LiveBeansSession session = originalModel.getSession();
-		if (session != null) {
+		if (originalModel.getWorkspaceContext() instanceof LiveBeansSession) {
+			LiveBeansSession session = (LiveBeansSession) originalModel.getWorkspaceContext();
 			LiveBeansModel model = connectToModel(session.getServiceUrl(), session.getUsername(),
 					session.getPassword(), session.getApplicationName(), session.getProject());
 			if (model != null) {

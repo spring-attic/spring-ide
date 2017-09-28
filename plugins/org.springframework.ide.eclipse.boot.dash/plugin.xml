@@ -58,6 +58,12 @@
                id="org.springframework.ide.eclipse.boot.dash.tab.RequestMappings"
                label="Request Mappings">
          </propertyTab>
+         <propertyTab
+               afterTab="org.springframework.ide.eclipse.boot.dash.tab.RequestMappings"
+               category="org.springframework.ide.eclipse.boot.dash"
+               id="org.springframework.ide.eclipse.boot.dash.Beans"
+               label="Beans">
+         </propertyTab>
       </propertyTabs>
    </extension>
    
@@ -113,6 +119,20 @@
                tab="org.springframework.ide.eclipse.boot.dash.tab.General">
             <input
                   type="org.springframework.ide.eclipse.boot.dash.model.LocalCloudServiceDashElement">
+            </input>
+         </propertySection>
+         <propertySection
+               class="org.springframework.ide.eclipse.boot.dash.views.properties.BeansPropertiesSection"
+               id="org.springframework.ide.eclipse.boot.dash.section.BeansSection"
+               tab="org.springframework.ide.eclipse.boot.dash.Beans">
+            <input
+                  type="org.springframework.ide.eclipse.boot.dash.model.LaunchConfDashElement">
+            </input>
+            <input
+                  type="org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement">
+            </input>
+            <input
+                  type="org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement">
             </input>
          </propertySection>
       </propertySections>

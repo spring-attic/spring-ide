@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Pivotal Software, Inc.
+ * Copyright (c) 2014, 2017 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,18 +27,16 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.PlatformUI;
-import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansModel;
+import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModel;
 import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansModelGenerator;
 import org.springframework.ide.eclipse.beans.ui.livegraph.views.LiveBeansGraphView;
-import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport.Feature;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.frameworks.ui.internal.actions.AbstractActionDelegate;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
-
-import org.springframework.ide.eclipse.boot.util.Log;
 
 public class OpenLiveBeansGraphAction extends AbstractActionDelegate {
 
@@ -95,7 +93,7 @@ public class OpenLiveBeansGraphAction extends AbstractActionDelegate {
 			}
 		}
 		catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 			MessageDialog.openError(getShell(), "Error", ExceptionUtil.getMessage(e)+"\n\n"
 					+ "Check the error log for more details");
 		}

@@ -21,6 +21,8 @@ import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 
 /**
  * Abstract implementation of common functionality for {@link BootDashElement}
@@ -31,7 +33,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStat
  */
 public abstract class AbstractBdePropertiesSection extends AbstractPropertySection implements ElementStateListener {
 
-	private BootDashElement bde = null;
+	private LiveVariable<BootDashElement> bde = new LiveVariable<>();
 
 	@Override
 	public void createControls(Composite parent, TabbedPropertySheetPage aTabbedPropertySheetPage) {
@@ -50,7 +52,7 @@ public abstract class AbstractBdePropertiesSection extends AbstractPropertySecti
 		} else {
 			Object inputObj = structuredSelection.getFirstElement();
 			Assert.isTrue(inputObj instanceof BootDashElement);
-			bde = (BootDashElement) inputObj;
+			bde.setValue((BootDashElement) inputObj);
 		}
 	}
 
@@ -79,6 +81,10 @@ public abstract class AbstractBdePropertiesSection extends AbstractPropertySecti
 	}
 
 	final protected BootDashElement getBootDashElement() {
+		return bde.getValue();
+	}
+
+	final protected LiveExpression<BootDashElement> getBootDashElementLiveExpression() {
 		return bde;
 	}
 

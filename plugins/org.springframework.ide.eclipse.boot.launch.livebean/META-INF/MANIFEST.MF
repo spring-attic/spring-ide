@@ -15,6 +15,7 @@ Require-Bundle: org.eclipse.ui,
  org.springframework.ide.eclipse.boot.launch,
  org.springsource.ide.eclipse.commons.ui,
  org.springsource.ide.eclipse.commons.livexp,
- org.springsource.ide.eclipse.commons.frameworks.ui
+ org.springsource.ide.eclipse.commons.frameworks.ui,
+ org.springframework.ide.eclipse.beans.ui.live
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy

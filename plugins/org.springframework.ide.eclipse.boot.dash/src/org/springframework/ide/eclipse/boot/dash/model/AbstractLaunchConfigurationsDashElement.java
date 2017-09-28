@@ -36,15 +36,15 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.launching.SocketUtil;
 import org.eclipse.swt.widgets.Display;
+import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModel;
 import org.springframework.ide.eclipse.boot.dash.livexp.PollingLiveExp;
-import org.springframework.ide.eclipse.boot.dash.model.requestmappings.ActuatorClient;
-import org.springframework.ide.eclipse.boot.dash.model.requestmappings.JMXActuatorClient;
-import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
+import org.springframework.ide.eclipse.boot.dash.model.actuator.ActuatorClient;
+import org.springframework.ide.eclipse.boot.dash.model.actuator.JMXActuatorClient;
+import org.springframework.ide.eclipse.boot.dash.model.actuator.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKClient;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKLaunchTracker;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKTunnel;
 import org.springframework.ide.eclipse.boot.dash.util.CollectionUtils;
-import org.springframework.ide.eclipse.boot.dash.util.DebugUtil;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchConfRunStateTracker;
 import org.springframework.ide.eclipse.boot.dash.util.RunStateTracker.RunStateListener;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
@@ -87,7 +87,7 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 
 	public static final EnumSet<RunState> READY_STATES = EnumSet.of(RunState.RUNNING, RunState.DEBUGGING);
 
-	private static final Duration REQUEST_MAPPING_REFRESH_TIMEOUT = Duration.ofMinutes(2);
+	private static final Duration LIVE_DATA_REFRESH_TIMEOUT = Duration.ofMinutes(2);
 
 	private LiveExpression<RunState> runState;
 	private LiveExpression<Integer> livePort;
@@ -99,6 +99,7 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 	private LiveExpression<URI> actuatorUrl;
 
 	private PollingLiveExp<List<RequestMapping>> liveRequestMappings;
+	private PollingLiveExp<LiveBeansModel> liveBeans;
 
 	public AbstractLaunchConfigurationsDashElement(LocalBootDashModel bootDashModel, T delegate) {
 		super(bootDashModel, delegate);
@@ -524,13 +525,34 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 				addDisposableChild(liveRequestMappings);
 				runState.addListener((e, runstate) -> {
 					if (READY_STATES.contains(runstate)) {
-						liveRequestMappings.refreshFor(REQUEST_MAPPING_REFRESH_TIMEOUT);
+						liveRequestMappings.refreshFor(LIVE_DATA_REFRESH_TIMEOUT);
 					} else {
 						liveRequestMappings.refreshOnce();
 					}
 				});
 			}
 			return liveRequestMappings.getValue();
+		}
+	}
+
+	public LiveBeansModel getLiveBeans() {
+		synchronized (this) {
+			if (liveBeans == null) {
+				ActuatorClient client = getActuatorClient();
+				liveBeans = PollingLiveExp.create(client::getBeans);
+				addElementState(liveBeans);
+				addDisposableChild(liveBeans);
+				runState.addListener((e, runstate) -> {
+					if (READY_STATES.contains(runstate)) {
+						// After the app is running refresh for 2 minutes every 5 sec
+						liveBeans.sleepBetweenRefreshes(Duration.ofSeconds(5));
+						liveBeans.refreshFor(LIVE_DATA_REFRESH_TIMEOUT);
+					} else {
+						liveBeans.refreshOnce();
+					}
+				});
+			}
+			return liveBeans.getValue();
 		}
 	}
 

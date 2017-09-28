@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2016 Pivotal, Inc.
+ * Copyright (c) 2015, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,11 +41,10 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.views.properties.tabbed.ITabbedPropertyConstants;
 import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
+import org.springframework.ide.eclipse.boot.dash.model.actuator.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.util.Utils;
 import org.springframework.ide.eclipse.boot.dash.views.RequestMappingLabelProvider;
 import org.springframework.ide.eclipse.boot.dash.views.RequestMappingsColumn;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 import org.springsource.ide.eclipse.commons.ui.SpringUIUtils;
 
@@ -73,7 +72,7 @@ public class RequestMappingPropertiesSection extends AbstractBdePropertiesSectio
 					RequestMappingsColumn col = RequestMappingsColumn.values()[colIdx];
 					switch (col) {
 					case PATH:
-						BootDashElement bde = input.getValue();
+						BootDashElement bde = getBootDashElement();
 						String url = Utils.createUrl(bde.getLiveHost(), bde.getLivePort(), rm.getPath());
 						if (url!=null) {
 							openUrl(url);
@@ -96,8 +95,6 @@ public class RequestMappingPropertiesSection extends AbstractBdePropertiesSectio
 	}
 
 	private Label labelText;
-
-	private LiveVariable<BootDashElement> input = new LiveVariable<>();
 
 	private static final Object[] NO_ELEMENTS = new Object[0];
 	private TabbedPropertySheetPage page;
@@ -151,7 +148,7 @@ public class RequestMappingPropertiesSection extends AbstractBdePropertiesSectio
 		tv.setContentProvider(new ContentProvider());
 		tv.setComparator(sorter);
 //		tv.setLabelProvider(labelProvider = new RequestMappingLabelProvider(tv.getTable().getFont(), input));
-		tv.setInput(input.getValue());
+		tv.setInput(getBootDashElement());
 		tv.getTable().setHeaderVisible(true);
 		stylers = new Stylers(tv.getTable().getFont());
 
@@ -159,7 +156,7 @@ public class RequestMappingPropertiesSection extends AbstractBdePropertiesSectio
 
 		for (RequestMappingsColumn colType : RequestMappingsColumn.values()) {
 			TableViewerColumn col = new TableViewerColumn(tv, colType.getAlignment());
-			col.setLabelProvider(new RequestMappingLabelProvider(stylers, input, colType));
+			col.setLabelProvider(new RequestMappingLabelProvider(stylers, getBootDashElementLiveExpression(), colType));
 			TableColumn colWidget = col.getColumn();
 			colWidget.setText(colType.getLabel());
 			colWidget.setWidth(colType.getDefaultWidth());
@@ -172,7 +169,6 @@ public class RequestMappingPropertiesSection extends AbstractBdePropertiesSectio
 
 	public void setInput(IWorkbenchPart part, ISelection selection) {
 		super.setInput(part, selection);
-		input.setValue(getBootDashElement());
 		tv.setInput(getBootDashElement());
 	}
 

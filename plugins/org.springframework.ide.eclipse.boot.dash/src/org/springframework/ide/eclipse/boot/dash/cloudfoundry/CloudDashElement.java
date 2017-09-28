@@ -13,11 +13,12 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 import java.net.URI;
 import java.util.List;
 
+import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.WrappingBootDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.requestmappings.ActuatorClient;
-import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RequestMapping;
-import org.springframework.ide.eclipse.boot.dash.model.requestmappings.RestActuatorClient;
+import org.springframework.ide.eclipse.boot.dash.model.actuator.ActuatorClient;
+import org.springframework.ide.eclipse.boot.dash.model.actuator.RequestMapping;
+import org.springframework.ide.eclipse.boot.dash.model.actuator.RestActuatorClient;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
@@ -30,6 +31,7 @@ public abstract class CloudDashElement<T> extends WrappingBootDashElement<T> {
 	}
 
 	private LiveExpression<ImmutableList<RequestMapping>> liveRequestMappings;
+	private LiveExpression<LiveBeansModel> liveBeans;
 
 	protected ActuatorClient getActuatorClient(URI target) {
 		return new RestActuatorClient(target, getTypeLookup(), getRestClient());
@@ -60,6 +62,29 @@ public abstract class CloudDashElement<T> extends WrappingBootDashElement<T> {
 			}
 		}
 		return liveRequestMappings.getValue();
+	}
+
+	public LiveBeansModel getLiveBeans() {
+		synchronized (this) {
+			if (liveBeans == null) {
+				final LiveExpression<URI> actuatorUrl = getActuatorUrl();
+				liveBeans = new AsyncLiveExpression<LiveBeansModel>(null, "Fetch beans for '"+getName()+"'") {
+					protected LiveBeansModel compute() {
+						URI target = actuatorUrl.getValue();
+						if (target != null) {
+							ActuatorClient client = getActuatorClient(target);
+							return client.getBeans();
+						}
+						return null;
+					}
+
+				};
+				liveBeans.dependsOn(actuatorUrl);
+				addElementState(liveBeans);
+				addDisposableChild(liveBeans);
+			}
+		}
+		return liveBeans.getValue();
 	}
 
 	protected LiveExpression<URI> getActuatorUrl() {

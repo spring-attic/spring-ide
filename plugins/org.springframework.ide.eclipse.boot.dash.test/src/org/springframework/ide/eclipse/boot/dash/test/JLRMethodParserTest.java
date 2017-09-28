@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test;
 
-import org.springframework.ide.eclipse.boot.dash.model.requestmappings.JLRMethodParser;
+import org.springframework.ide.eclipse.boot.dash.model.actuator.JLRMethodParser;
 
 import junit.framework.TestCase;
 

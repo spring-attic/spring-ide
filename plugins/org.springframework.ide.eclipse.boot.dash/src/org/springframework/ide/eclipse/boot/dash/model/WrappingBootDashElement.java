@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2016 Pivotal, Inc.
+ * Copyright (c) 2015, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,14 +17,13 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 
 import org.eclipse.core.runtime.ListenerList;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.springframework.ide.eclipse.beans.ui.live.model.TypeLookup;
+import org.springframework.ide.eclipse.beans.ui.live.model.TypeLookupImpl;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
-import org.springframework.ide.eclipse.boot.dash.model.requestmappings.TypeLookup;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springframework.ide.eclipse.boot.dash.util.Utils;
@@ -110,19 +109,7 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 
 	protected TypeLookup getTypeLookup() {
 		if (typeLookup==null) {
-			typeLookup = new TypeLookup() {
-				public IType findType(String fqName) {
-					try {
-						IJavaProject jp = getJavaProject();
-						if (jp!=null) {
-							return jp.findType(fqName, new NullProgressMonitor());
-						}
-					} catch (Exception e) {
-						BootDashActivator.log(e);
-					}
-					return null;
-				}
-			};
+			typeLookup = new TypeLookupImpl(getName(), getProject());
 		}
 		return typeLookup;
 	}

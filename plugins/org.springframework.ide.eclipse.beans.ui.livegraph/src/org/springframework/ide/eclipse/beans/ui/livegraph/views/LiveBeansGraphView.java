@@ -1,12 +1,12 @@
 /*******************************************************************************
- *  Copyright (c) 2012 - 2013 VMware, Inc.
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2012, 2017 Pivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
- *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ * Contributors:
+ *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.livegraph.views;
 
@@ -24,6 +24,7 @@ import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
@@ -36,17 +37,21 @@ import org.eclipse.ui.part.ViewPart;
 import org.eclipse.zest.core.viewers.GraphViewer;
 import org.eclipse.zest.core.widgets.ZestStyles;
 import org.eclipse.zest.layouts.LayoutStyles;
+import org.springframework.ide.eclipse.beans.ui.live.actions.OpenBeanClassAction;
+import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModel;
+import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModelCollection;
+import org.springframework.ide.eclipse.beans.ui.live.tree.ContextGroupedBeansContentProvider;
+import org.springframework.ide.eclipse.beans.ui.live.tree.InnerBeansViewerFilter;
+import org.springframework.ide.eclipse.beans.ui.live.tree.LiveBeansTreeLabelProvider;
+import org.springframework.ide.eclipse.beans.ui.live.tree.ResourceGroupedBeansContentProvider;
 import org.springframework.ide.eclipse.beans.ui.livegraph.LiveGraphUiPlugin;
 import org.springframework.ide.eclipse.beans.ui.livegraph.actions.ConnectToApplicationAction;
 import org.springframework.ide.eclipse.beans.ui.livegraph.actions.FilterInnerBeansAction;
 import org.springframework.ide.eclipse.beans.ui.livegraph.actions.LoadModelAction;
-import org.springframework.ide.eclipse.beans.ui.livegraph.actions.OpenBeanClassAction;
-import org.springframework.ide.eclipse.beans.ui.livegraph.actions.OpenBeanDefinitionAction;
+import org.springframework.ide.eclipse.beans.ui.livegraph.actions.OpenXmlBeanDefinitionAction;
 import org.springframework.ide.eclipse.beans.ui.livegraph.actions.RefreshApplicationAction;
 import org.springframework.ide.eclipse.beans.ui.livegraph.actions.ToggleGroupByAction;
 import org.springframework.ide.eclipse.beans.ui.livegraph.actions.ToggleViewModeAction;
-import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansModel;
-import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansModelCollection;
 
 /**
  * A simple view to host our graph
@@ -146,11 +151,20 @@ public class LiveBeansGraphView extends ViewPart {
 		setGroupByMode(prefStore.getInt(PREF_GROUP_MODE));
 		setFilterInnerBeans(prefStore.getBoolean(PREF_FILTER_INNER_BEANS));
 	}
+	
+	private ITreeContentProvider getTreeContentProvider() {
+		if (getGroupByMode() == GROUP_BY_CONTEXT) {
+			return ContextGroupedBeansContentProvider.INSTANCE;
+		} else if (getGroupByMode() == GROUP_BY_RESOURCE) {
+			return ResourceGroupedBeansContentProvider.INSTANCE;
+		}
+		return null;
+	}
 
 	private void createTreeViewer() {
 		treeViewer = new TreeViewer(pagebook, SWT.NONE);
-		treeViewer.setContentProvider(new LiveBeansTreeContentProvider(this));
-		treeViewer.setLabelProvider(new LiveBeansTreeLabelProvider());
+		treeViewer.setContentProvider(getTreeContentProvider());
+		treeViewer.setLabelProvider(LiveBeansTreeLabelProvider.INSTANCE);
 		treeViewer.setSorter(new ViewerSorter());
 
 		treeViewer.addDoubleClickListener(new IDoubleClickListener() {
@@ -249,10 +263,10 @@ public class LiveBeansGraphView extends ViewPart {
 	private boolean isViewerVisible(Viewer viewer) {
 		return viewer != null && !viewer.getControl().isDisposed() && viewer.getControl().isVisible();
 	}
-
+	
 	private void makeActions() {
 		openBeanClassAction = new OpenBeanClassAction();
-		openBeanDefAction = new OpenBeanDefinitionAction();
+		openBeanDefAction = new OpenXmlBeanDefinitionAction();
 		connectApplicationAction = new ConnectToApplicationAction(this);
 		displayModeActions = new ToggleViewModeAction[] { new ToggleViewModeAction(this, DISPLAY_MODE_GRAPH),
 				new ToggleViewModeAction(this, DISPLAY_MODE_TREE) };
@@ -287,9 +301,9 @@ public class LiveBeansGraphView extends ViewPart {
 
 	public void setGroupByMode(int mode) {
 		activeGroupByMode = mode;
-		if (isViewerVisible(treeViewer)) {
-			treeViewer.refresh();
-		}
+//		if (isViewerVisible(treeViewer)) {
+			treeViewer.setContentProvider(getTreeContentProvider());
+//		}
 		for (ToggleGroupByAction action : groupByActions) {
 			action.setChecked(mode == action.getGroupByMode());
 		}
