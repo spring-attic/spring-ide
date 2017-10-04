@@ -32,6 +32,7 @@ public class LiveBeansUiPlugin extends AbstractUIPlugin {
 	public static final String IMG_OBJS_BEAN = NAME_PREFIX + "bean_obj.gif";
 	public static final String IMG_OBJS_BEAN_REF = NAME_PREFIX + "beanref_obj.gif";
 	public static final String IMG_OBJS_CONFIG = NAME_PREFIX + "config_obj.gif";
+	public static final String IMG_OBJS_COLLECTION = NAME_PREFIX + "collection_obj.gif";
 
 	private static LiveBeansUiPlugin plugin;
 	
@@ -58,6 +59,7 @@ public class LiveBeansUiPlugin extends AbstractUIPlugin {
 		reg.put(IMG_OBJS_BEAN, imageDescriptorFromPlugin(PLUGIN_ID, ICON_PATH_PREFIX + IMG_OBJS_BEAN.substring(NAME_PREFIX_LENGTH)));
 		reg.put(IMG_OBJS_BEAN_REF, imageDescriptorFromPlugin(PLUGIN_ID, ICON_PATH_PREFIX + IMG_OBJS_BEAN_REF.substring(NAME_PREFIX_LENGTH)));
 		reg.put(IMG_OBJS_CONFIG, imageDescriptorFromPlugin(PLUGIN_ID, ICON_PATH_PREFIX + IMG_OBJS_CONFIG.substring(NAME_PREFIX_LENGTH)));
+		reg.put(IMG_OBJS_COLLECTION, imageDescriptorFromPlugin(PLUGIN_ID, ICON_PATH_PREFIX + IMG_OBJS_COLLECTION.substring(NAME_PREFIX_LENGTH)));
 	}
 
 

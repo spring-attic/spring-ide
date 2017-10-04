@@ -18,24 +18,28 @@ import java.util.Objects;
  * @author Leo Dos Santos
  * @author Alex Boyko
  */
-public class LiveBeansGroup extends AbstractLiveBeansModelElement {
+public class LiveBeansGroup<T extends AbstractLiveBeansModelElement> extends AbstractLiveBeansModelElement {
 
 	private final String label;
 
-	private final List<LiveBean> beans;
+	private final List<T> elements;
 
 	public LiveBeansGroup(String label) {
+		this(label, new ArrayList<T>());
+	}
+	
+	public LiveBeansGroup(String label, List<T> elements) {
 		super();
 		this.label = label;
-		beans = new ArrayList<LiveBean>();
+		this.elements = elements;
 	}
 
-	public void addBean(LiveBean bean) {
-		beans.add(bean);
+	public void addElement(T bean) {
+		elements.add(bean);
 	}
 
-	public List<LiveBean> getBeans() {
-		return beans;
+	public List<T> getElements() {
+		return elements;
 	}
 
 	public String getDisplayName() {
@@ -49,14 +53,12 @@ public class LiveBeansGroup extends AbstractLiveBeansModelElement {
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof LiveBeansGroup) {
-			LiveBeansGroup other = (LiveBeansGroup) obj;
+			LiveBeansGroup<?> other = (LiveBeansGroup<?>) obj;
 			return Objects.equals(label, other.label)
 					&& Objects.equals(attributes, other.attributes)
-					&& Objects.equals(beans, other.beans);
+					&& Objects.equals(elements, other.elements);
 		}
 		return super.equals(obj);
 	}
 	
-	
-
 }

@@ -25,8 +25,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.views.properties.tabbed.ITabbedPropertyConstants;
 import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
+import org.springframework.ide.eclipse.beans.ui.live.tree.ContextGroupedBeansContentProvider;
 import org.springframework.ide.eclipse.beans.ui.live.tree.LiveBeansTreeLabelProvider;
-import org.springframework.ide.eclipse.beans.ui.live.tree.ResourceGroupedBeansContentProvider;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 
 /**
@@ -82,8 +82,13 @@ public class BeansPropertiesSection extends AbstractBdePropertiesSection {
 		labelText = getWidgetFactory().createLabel(composite, "", SWT.WRAP); //$NON-NLS-1$
 
 		treeViewer = new TreeViewer(composite/*, SWT.NO_SCROLL*/);
-		treeViewer.setContentProvider(new BeansContentProvider(ResourceGroupedBeansContentProvider.INSTANCE));
+		// BootDashElement should be input rather than the LiveBeansModel. Due to
+		// polling the model often to show changes in the model it's best to refresh the
+		// tree viewer rather then set the whole input that would remove the selection
+		// and collapse expanded nodes
+		treeViewer.setContentProvider(new BeansContentProvider(ContextGroupedBeansContentProvider.INSTANCE));
 		treeViewer.setLabelProvider(LiveBeansTreeLabelProvider.INSTANCE);
+		treeViewer.setAutoExpandLevel(2);
 
 		treeViewer.getTree().addTreeListener (new TreeListener () {
 			@Override
@@ -115,7 +120,13 @@ public class BeansPropertiesSection extends AbstractBdePropertiesSection {
 		} else {
 			labelText.setText("");
 		}
+		// No tree widgets means that BootDashElement probably wasn't "running" or had no beans
+		boolean firstTimeTreePopulated = treeViewer.getTree().getItems().length == 0;
 		treeViewer.refresh();
+		if (firstTimeTreePopulated) {
+			// If tree is populated for the first time then auto expand to level 2 manually because new input is not set in this case
+			treeViewer.expandToLevel(2);
+		}
 		reflow(page);
 	}
 

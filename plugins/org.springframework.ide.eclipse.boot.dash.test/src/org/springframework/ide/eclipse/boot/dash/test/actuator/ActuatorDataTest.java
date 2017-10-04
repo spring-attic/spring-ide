@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,7 +15,7 @@ import static org.junit.Assert.assertNotEquals;
 
 import org.junit.Test;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBean;
-import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansGroup;
+import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansContext;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModel;
 import org.springframework.ide.eclipse.beans.ui.live.model.TypeLookup;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.ActuatorClient;
@@ -75,12 +75,12 @@ public class ActuatorDataTest {
 		TestActuatorClient client = new TestActuatorClient(null).beansJson(ActuatorClientTest.getContents("beans-sample.json"));
 		LiveBeansModel liveBeans = client.getBeans();
 		assertEquals(1, liveBeans.getBeansByContext().size());
-		LiveBeansGroup context = liveBeans.getBeansByContext().get(0);
-		assertEquals(2, context.getBeans().size());
+		LiveBeansContext context = liveBeans.getBeansByContext().get(0);
+		assertEquals(2, context.getElements().size());
 		assertEquals(2, liveBeans.getBeans().size());
 		assertEquals(2, liveBeans.getBeansByResource().size());
 
-		assertEquals(context.getBeans(), liveBeans.getBeans());
+		assertEquals(context.getElements(), liveBeans.getBeans());
 
 		LiveBean bean1 = liveBeans.getBeans().get(0);
 		assertEquals(

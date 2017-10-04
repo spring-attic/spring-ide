@@ -14,15 +14,13 @@ package org.springframework.ide.eclipse.beans.ui.live.model;
  * @author Leo Dos Santos
  * @author Alex Boyko
  */
-public class LiveBeansContext extends LiveBeansGroup {
+public class LiveBeansContext extends LiveBeansGroup<LiveBean> {
 
 	public static final String ATTR_CONTEXT = "context";
 
 	public static final String ATTR_PARENT = "parent";
 
 	public static final String ATTR_BEANS = "beans";
-
-	private String displayName;
 
 	private LiveBeansContext parent;
 
@@ -33,18 +31,7 @@ public class LiveBeansContext extends LiveBeansGroup {
 
 	@Override
 	public String getDisplayName() {
-		// compute the display name the first time it's needed
-		if (displayName == null) {
-			String label = getLabel();
-			int indexStart = label.lastIndexOf(":");
-			if (indexStart > -1 && indexStart < label.length()) {
-				displayName = label.substring(indexStart + 1, label.length());
-			}
-			if (displayName == null) {
-				displayName = label;
-			}
-		}
-		return displayName;
+		return getLabel();
 	}
 
 	public LiveBeansContext getParent() {

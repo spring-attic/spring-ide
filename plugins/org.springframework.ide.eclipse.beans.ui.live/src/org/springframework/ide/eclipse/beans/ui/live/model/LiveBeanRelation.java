@@ -47,13 +47,7 @@ public class LiveBeanRelation extends AbstractLiveBeansModelElement {
 	}
 
 	public String getDisplayName() {
-		String label = bean.getDisplayName();
-		if (isDependency) {
-			return "Depends on: " + label;
-		}
-		else {
-			return "Injected into: " + label;
-		}
+		return bean.getDisplayName();
 	}
 
 	public boolean isDependency() {

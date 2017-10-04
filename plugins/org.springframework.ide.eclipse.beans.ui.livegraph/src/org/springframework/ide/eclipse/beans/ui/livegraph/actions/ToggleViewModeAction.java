@@ -12,7 +12,6 @@ package org.springframework.ide.eclipse.beans.ui.livegraph.actions;
 
 import org.eclipse.jface.action.Action;
 import org.springframework.ide.eclipse.beans.ui.live.LiveBeansUiPlugin;
-import org.springframework.ide.eclipse.beans.ui.livegraph.LiveGraphUIImages;
 import org.springframework.ide.eclipse.beans.ui.livegraph.views.LiveBeansGraphView;
 
 /**
@@ -32,7 +31,7 @@ public class ToggleViewModeAction extends Action {
 		}
 		else if (mode == LiveBeansGraphView.DISPLAY_MODE_TREE) {
 			setText("Tree View");
-			setImageDescriptor(LiveGraphUIImages.DESC_OBJS_COLLECTION);
+			setImageDescriptor(LiveBeansUiPlugin.getDefault().getImageRegistry().getDescriptor(LiveBeansUiPlugin.IMG_OBJS_COLLECTION));
 		}
 		this.view = view;
 		this.mode = mode;

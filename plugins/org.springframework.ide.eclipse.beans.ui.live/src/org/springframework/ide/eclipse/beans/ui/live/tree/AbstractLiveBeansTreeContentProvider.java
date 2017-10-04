@@ -10,13 +10,15 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.live.tree;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBean;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeanRelation;
+import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeanType;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansGroup;
 
 /**
@@ -33,23 +35,32 @@ public abstract class AbstractLiveBeansTreeContentProvider implements ITreeConte
 
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof LiveBeansGroup) {
-			LiveBeansGroup group = (LiveBeansGroup) parentElement;
-			return group.getBeans().toArray();
+			LiveBeansGroup<?> group = (LiveBeansGroup<?>) parentElement;
+			return group.getElements().toArray();
 		}
 		else if (parentElement instanceof LiveBean) {
-			Set<LiveBeanRelation> children = new LinkedHashSet<LiveBeanRelation>();
-			LiveBean bean = (LiveBean) parentElement;
-			Set<LiveBean> dependencies = bean.getDependencies();
-			for (LiveBean child : dependencies) {
-				children.add(new LiveBeanRelation(child, true));
-			}
-			Set<LiveBean> injectInto = bean.getInjectedInto();
-			for (LiveBean child : injectInto) {
-				children.add(new LiveBeanRelation(child));
-			}
-			return children.toArray();
+			LiveBean bean = (LiveBean) parentElement;			
+			return getBeanChildren(bean).toArray();
 		}
 		return null;
+	}
+	
+	protected List<Object> getBeanChildren(LiveBean bean) {
+		List<Object> children = new ArrayList<>();
+		
+		children.add(new LiveBeanType(bean));
+				
+		children.add(new LiveBeansGroup<>("Dependencies", bean.getDependencies()
+			.stream()
+			.map(b -> new LiveBeanRelation(b, true))
+			.collect(Collectors.toList())));
+					
+		children.add(new LiveBeansGroup<>("Injected Into", bean.getInjectedInto()
+			.stream()
+			.map(b -> new LiveBeanRelation(b))
+			.collect(Collectors.toList())));
+		
+		return children;
 	}
 
 	public Object getParent(Object element) {
@@ -58,12 +69,10 @@ public abstract class AbstractLiveBeansTreeContentProvider implements ITreeConte
 	}
 
 	public boolean hasChildren(Object element) {
-		if (element instanceof LiveBeansGroup) {
+		if (element instanceof LiveBeansGroup<?>) {
+			return !((LiveBeansGroup<?>)element).getElements().isEmpty();
+		} else if (element instanceof LiveBean) {
 			return true;
-		}
-		else if (element instanceof LiveBean) {
-			LiveBean bean = (LiveBean) element;
-			return !bean.getDependencies().isEmpty() || !bean.getInjectedInto().isEmpty();
 		}
 		return false;
 	}

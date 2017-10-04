@@ -10,12 +10,17 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.live.tree;
 
+import org.eclipse.jdt.ui.ISharedImages;
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.beans.ui.live.LiveBeansUiPlugin;
+import org.springframework.ide.eclipse.beans.ui.live.model.DisplayName;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBean;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeanRelation;
+import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeanType;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansGroup;
+import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansResource;
 
 /**
  * A label provider for the Live Beans tree display
@@ -42,11 +47,18 @@ public class LiveBeansTreeLabelProvider extends LabelProvider {
 	public Image getImage(Object element) {
 		if (element instanceof LiveBean) {
 			return LiveBeansUiPlugin.getDefault().getImageRegistry().get(LiveBeansUiPlugin.IMG_OBJS_BEAN);
-		}
-		else if (element instanceof LiveBeansGroup) {
-			return LiveBeansUiPlugin.getDefault().getImageRegistry().get(LiveBeansUiPlugin.IMG_OBJS_CONFIG);
-		}
-		else if (element instanceof LiveBeanRelation) {
+		} else if (element instanceof LiveBeansResource) {
+			String fileExtension = ((LiveBeansResource)element).getFileExtension();
+			if ("class".equalsIgnoreCase(fileExtension)) {
+				return JavaUI.getSharedImages().getImage(ISharedImages.IMG_OBJS_CFILE);
+			} else {
+				return LiveBeansUiPlugin.getDefault().getImageRegistry().get(LiveBeansUiPlugin.IMG_OBJS_CONFIG);
+			}
+		} else if (element instanceof LiveBeansGroup<?>) {
+			return LiveBeansUiPlugin.getDefault().getImageRegistry().get(LiveBeansUiPlugin.IMG_OBJS_COLLECTION);
+		} else if (element instanceof LiveBeanType) {
+			return JavaUI.getSharedImages().getImage(ISharedImages.IMG_OBJS_CLASS);
+		} else if (element instanceof LiveBeanRelation) {
 			// TODO: incoming/outgoing arrow images???
 			return LiveBeansUiPlugin.getDefault().getImageRegistry().get(LiveBeansUiPlugin.IMG_OBJS_BEAN_REF);
 		}
@@ -55,14 +67,8 @@ public class LiveBeansTreeLabelProvider extends LabelProvider {
 
 	@Override
 	public String getText(Object element) {
-		if (element instanceof LiveBean) {
-			return ((LiveBean) element).getDisplayName();
-		}
-		else if (element instanceof LiveBeansGroup) {
-			return ((LiveBeansGroup) element).getDisplayName();
-		}
-		else if (element instanceof LiveBeanRelation) {
-			return ((LiveBeanRelation) element).getDisplayName();
+		if (element instanceof DisplayName) {
+			return ((DisplayName) element).getDisplayName();
 		}
 		return super.getText(element);
 	}

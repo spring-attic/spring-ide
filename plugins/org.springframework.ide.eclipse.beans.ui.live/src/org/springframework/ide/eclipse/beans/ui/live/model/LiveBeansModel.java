@@ -25,16 +25,16 @@ public class LiveBeansModel implements Comparable<LiveBeansModel> {
 
 	private final List<LiveBean> beans;
 
-	private final List<LiveBeansGroup> contexts;
+	private final List<LiveBeansContext> contexts;
 
-	private final List<LiveBeansGroup> resources;
+	private final List<LiveBeansResource> resources;
 
 	private final TypeLookup typeLookup;
 
 	public LiveBeansModel(TypeLookup typeLookup) {
 		this.beans = new ArrayList<LiveBean>();
-		this.contexts = new ArrayList<LiveBeansGroup>();
-		this.resources = new ArrayList<LiveBeansGroup>();
+		this.contexts = new ArrayList<LiveBeansContext>();
+		this.resources = new ArrayList<LiveBeansResource>();
 		this.typeLookup = typeLookup;
 	}
 
@@ -42,11 +42,11 @@ public class LiveBeansModel implements Comparable<LiveBeansModel> {
 		beans.addAll(beansToAdd);
 	}
 
-	public void addContexts(Collection<? extends LiveBeansGroup> contextsToAdd) {
+	public void addContexts(Collection<? extends LiveBeansContext> contextsToAdd) {
 		contexts.addAll(contextsToAdd);
 	}
 
-	public void addResources(Collection<? extends LiveBeansGroup> resourcesToAdd) {
+	public void addResources(Collection<? extends LiveBeansResource> resourcesToAdd) {
 		resources.addAll(resourcesToAdd);
 	}
 
@@ -65,11 +65,11 @@ public class LiveBeansModel implements Comparable<LiveBeansModel> {
 		return beans;
 	}
 
-	public List<LiveBeansGroup> getBeansByContext() {
+	public List<LiveBeansContext> getBeansByContext() {
 		return contexts;
 	}
 
-	public List<LiveBeansGroup> getBeansByResource() {
+	public List<LiveBeansResource> getBeansByResource() {
 		return resources;
 	}
 

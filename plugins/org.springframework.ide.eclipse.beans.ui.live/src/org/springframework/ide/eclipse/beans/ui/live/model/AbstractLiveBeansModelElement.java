@@ -20,7 +20,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
  * @author Leo Dos Santos
  * @author Alex Boyko
  */
-public abstract class AbstractLiveBeansModelElement implements IAdaptable {
+public abstract class AbstractLiveBeansModelElement implements IAdaptable, DisplayName {
 
 	protected final Map<String, String> attributes;
 

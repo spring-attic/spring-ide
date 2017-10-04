@@ -31,7 +31,7 @@ public class LiveBeansJsonParser {
 
 	private Map<String, LiveBeansContext> contextMap;
 
-	private Map<String, LiveBeansGroup> resourceMap;
+	private Map<String, LiveBeansResource> resourceMap;
 
 	public LiveBeansJsonParser(TypeLookup typeLookup, String jsonInput) {
 		this.jsonInput = jsonInput;
@@ -42,12 +42,12 @@ public class LiveBeansJsonParser {
 		for (LiveBean bean : beansMap.values()) {
 			String resource = bean.getResource();
 			if (resourceMap.containsKey(resource)) {
-				LiveBeansGroup group = resourceMap.get(resource);
-				group.addBean(bean);
+				LiveBeansResource group = resourceMap.get(resource);
+				group.addElement(bean);
 			}
 			else {
-				LiveBeansGroup group = new LiveBeansResource(resource);
-				group.addBean(bean);
+				LiveBeansResource group = new LiveBeansResource(resource);
+				group.addElement(bean);
 				resourceMap.put(resource, group);
 			}
 		}
@@ -56,7 +56,7 @@ public class LiveBeansJsonParser {
 	public LiveBeansModel parse() throws JSONException {
 		beansMap = new LinkedHashMap<String, LiveBean>();
 		contextMap = new LinkedHashMap<String, LiveBeansContext>();
-		resourceMap = new LinkedHashMap<String, LiveBeansGroup>();
+		resourceMap = new LinkedHashMap<String, LiveBeansResource>();
 
 		// JSON structure is an array of context descriptions, each containing
 		// an array of beans
@@ -91,7 +91,7 @@ public class LiveBeansJsonParser {
 				if (typeLookup.getApplicationName() != null) {
 					bean.addAttribute(LiveBean.ATTR_APPLICATION, typeLookup.getApplicationName());
 				}
-				context.addBean(bean);
+				context.addElement(bean);
 				beansMap.put(bean.getId(), bean);
 			}
 		}

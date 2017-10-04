@@ -14,9 +14,7 @@ package org.springframework.ide.eclipse.beans.ui.live.model;
  * @author Leo Dos Santos
  * @author Alex Boyko
  */
-public class LiveBeansResource extends LiveBeansGroup {
-
-	private String displayName;
+public class LiveBeansResource extends LiveBeansGroup<LiveBean> {
 
 	public LiveBeansResource(String label) {
 		super(label);
@@ -26,26 +24,42 @@ public class LiveBeansResource extends LiveBeansGroup {
 	@Override
 	public String getDisplayName() {
 		// compute the display name the first time it's needed
-		if (displayName == null) {
-			String label = getLabel();
-			if (label.equalsIgnoreCase("null")) {
-				displayName = "Container Generated";
-			}
-			else {
-				// Expecting the label to contain some form of
-				// "[file/path/to/resource.ext]" so we're going to parse out the
-				// last segment of the file path.
-				int indexStart = label.lastIndexOf("/");
-				int indexEnd = label.lastIndexOf("]");
-				if (indexStart > -1 && indexEnd > -1 && indexStart < indexEnd) {
-					displayName = label.substring(indexStart + 1, indexEnd);
-				}
-			}
-			if (displayName == null) {
-				displayName = label;
+		String label = getLabel();
+		if (label.equalsIgnoreCase("null")) {
+			return "Container Generated";
+		} else {
+			// Expecting the label to contain some form of
+			// "[file/path/to/resource.ext]" so we're going to parse out the
+			// last segment of the file path.
+			int indexStart = label.indexOf("[");
+			int indexEnd = label.lastIndexOf("]");
+			if (indexStart > -1 && indexEnd > -1 && indexStart < indexEnd) {
+				return label.substring(indexStart + 1, indexEnd);
+			} else {
+				return label;
 			}
 		}
-		return displayName;
+	}
+
+	public String getFileName() {
+		String label = getLabel();
+		int indexStart = label.lastIndexOf("/");
+		int indexEnd = label.lastIndexOf("]");
+		if (indexStart > -1 && indexEnd > -1 && indexStart < indexEnd) {
+			return label.substring(indexStart + 1, indexEnd);
+		}
+		return null;
+	}
+
+	public String getFileExtension() {
+		String filename = getFileName();
+		if (filename != null) {
+			int idx = filename.lastIndexOf('.');
+			if (idx >= 0 && idx < filename.length() - 1) {
+				return filename.substring(idx + 1);
+			}
+		}
+		return null;
 	}
 
 }

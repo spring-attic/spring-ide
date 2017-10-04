@@ -43,13 +43,11 @@ public class LiveGraphUIImages {
 	/*
 	 * Available cached Images in the Spring Beans UI plugin image registry.
 	 */
-	public static final String IMG_OBJS_COLLECTION = NAME_PREFIX + "collection_obj.gif";
 	public static final String IMG_OBJS_REFRESH = NAME_PREFIX + "refresh_obj.gif";
 
 	// Use IPath and toOSString to build the names to ensure they have the slashes correct
 	private final static String OBJECT = "obj16/"; //basic colors - size 16x16
 
-	public static final ImageDescriptor DESC_OBJS_COLLECTION = createManaged(OBJECT, IMG_OBJS_COLLECTION);
 	public static final ImageDescriptor REFRESH = createManaged(OBJECT, IMG_OBJS_REFRESH);
 
 	/*

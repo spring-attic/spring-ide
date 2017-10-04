@@ -10,7 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.live.tree;
 
+import java.util.List;
+
+import org.springframework.ide.eclipse.beans.ui.live.model.LiveBean;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModel;
+import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansResource;
 
 /**
  * Beans grouped by contexts
@@ -31,6 +35,16 @@ public final class ContextGroupedBeansContentProvider extends AbstractLiveBeansT
 			return model.getBeansByContext().toArray();
 		}
 		return new Object[0];
+	}
+
+	@Override
+	protected List<Object> getBeanChildren(LiveBean bean) {
+		List<Object> children = super.getBeanChildren(bean);
+		String resource = bean.getResource();
+		if (resource != null && !resource.isEmpty()) {
+			children.add(1, new LiveBeansResource(resource));
+		}
+		return children;
 	}
 
 }
