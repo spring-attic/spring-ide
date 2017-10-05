@@ -48,7 +48,7 @@ public abstract class AbstractBdePropertiesSection extends AbstractPropertySecti
 		Assert.isTrue(selection instanceof IStructuredSelection);
 		IStructuredSelection structuredSelection = (IStructuredSelection) selection;
 		if (structuredSelection.size() > 1) {
-			bde = null;
+			bde.setValue(null);
 		} else {
 			Object inputObj = structuredSelection.getFirstElement();
 			Assert.isTrue(inputObj instanceof BootDashElement);
