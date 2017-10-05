@@ -19,7 +19,9 @@ import org.eclipse.jface.viewers.Viewer;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBean;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeanRelation;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeanType;
+import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansContext;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansGroup;
+import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansResource;
 
 /**
  * A content provider for the Live Beans tree display
@@ -29,14 +31,17 @@ import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansGroup;
  */
 public abstract class AbstractLiveBeansTreeContentProvider implements ITreeContentProvider {
 
-	public void dispose() {
-
-	}
-
+	@SuppressWarnings("unchecked")
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof LiveBeansGroup) {
 			LiveBeansGroup<?> group = (LiveBeansGroup<?>) parentElement;
-			return group.getElements().toArray();
+			if (group instanceof LiveBeansContext || group instanceof LiveBeansResource) {
+				List<LiveBean> sortedBeans = new ArrayList<>(((LiveBeansGroup<LiveBean>)group).getElements());
+				sortedBeans.sort((a, b) -> a.getDisplayName().compareToIgnoreCase(b.getDisplayName()));
+				return sortedBeans.toArray(new LiveBean[sortedBeans.size()]);
+			} else {
+				return group.getElements().toArray();
+			}
 		}
 		else if (parentElement instanceof LiveBean) {
 			LiveBean bean = (LiveBean) parentElement;			
@@ -64,7 +69,6 @@ public abstract class AbstractLiveBeansTreeContentProvider implements ITreeConte
 	}
 
 	public Object getParent(Object element) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -78,7 +82,6 @@ public abstract class AbstractLiveBeansTreeContentProvider implements ITreeConte
 	}
 
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		// TODO Auto-generated method stub
 
 	}
 

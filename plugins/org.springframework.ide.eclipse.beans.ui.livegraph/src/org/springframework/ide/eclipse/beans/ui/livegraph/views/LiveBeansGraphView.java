@@ -27,7 +27,6 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IActionBars;
@@ -165,7 +164,6 @@ public class LiveBeansGraphView extends ViewPart {
 		treeViewer = new TreeViewer(pagebook, SWT.NONE);
 		treeViewer.setContentProvider(getTreeContentProvider());
 		treeViewer.setLabelProvider(LiveBeansTreeLabelProvider.INSTANCE);
-		treeViewer.setSorter(new ViewerSorter());
 
 		treeViewer.addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
