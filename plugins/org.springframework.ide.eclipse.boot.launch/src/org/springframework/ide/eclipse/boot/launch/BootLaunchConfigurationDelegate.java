@@ -58,8 +58,6 @@ import org.springsource.ide.eclipse.commons.core.util.OsUtils;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
-import com.google.common.reflect.Reflection;
-
 /**
  * @author Kris De Volder
  */
@@ -531,8 +529,17 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 	}
 
 	public static boolean supportsAnsiConsoleOutput() {
+
+		// check for ANSI console plugin
 		Bundle bundle = Platform.getBundle("net.mihai-nita.ansicon.plugin");
-		return bundle != null && bundle.getState() != Bundle.UNINSTALLED;
+		boolean ansiConsolePluginInstalled = bundle != null && bundle.getState() != Bundle.UNINSTALLED;
+
+		// check for macOS High Sierra, since that doesn't work with the ANSI console plugin yet
+		String osName = System.getProperty("os.name");
+		String osVersion = System.getProperty("os.version");
+		boolean macOSHighSierraInstalled = osName != null && osName.equals("Mac OS X") && osVersion != null && osVersion.startsWith("10.13");
+
+		return ansiConsolePluginInstalled && !macOSHighSierraInstalled;
 	}
 
 	public static boolean getEnableAnsiConsoleOutput(ILaunchConfiguration conf) {
