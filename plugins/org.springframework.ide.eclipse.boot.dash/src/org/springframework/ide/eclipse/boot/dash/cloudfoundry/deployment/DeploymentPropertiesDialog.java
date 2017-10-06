@@ -540,16 +540,16 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 				SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
 
 		SourceViewerConfiguration manualSourceViewerConfiguration = null;
-		if (ManifestEditorActivator.getDefault().isLanguageServerEnabled()) {
-			manualSourceViewerConfiguration = new LSBasedSourceViewerConfiguration(ShellProviders.from(composite)) {
-
-				@Override
-				protected IReconcilingStrategy createReconcilerStrategy(ISourceViewer viewer) {
-					return new AppNameReconcilingStrategy(viewer, getAstProvider(), appName);
-				}
-			};
-		}
-		else {
+//		if (ManifestEditorActivator.getDefault().isLanguageServerEnabled()) {
+//			manualSourceViewerConfiguration = new LSBasedSourceViewerConfiguration(ShellProviders.from(composite)) {
+//
+//				@Override
+//				protected IReconcilingStrategy createReconcilerStrategy(ISourceViewer viewer) {
+//					return new AppNameReconcilingStrategy(viewer, getAstProvider(), appName);
+//				}
+//			};
+//		}
+//		else {
 			manualSourceViewerConfiguration = new ManifestYamlSourceViewerConfiguration(ShellProviders.from(composite)) {
 
 				@Override
@@ -561,7 +561,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 				}
 
 			};
-		}
+//		}
 
 		manualYamlViewer.configure(manualSourceViewerConfiguration);
 		manualYamlViewer.getControl().setLayoutData(GridDataFactory.fillDefaults().grab(true, true).hint(SWT.DEFAULT, 200).create());
