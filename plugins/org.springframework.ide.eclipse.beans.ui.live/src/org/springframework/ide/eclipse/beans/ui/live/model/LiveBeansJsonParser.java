@@ -52,15 +52,20 @@ public class LiveBeansJsonParser {
 			}
 		}
 	}
+	
+	protected JSONArray extractContextsJson(String json) throws JSONException {
+		// JSON structure is an array of context descriptions, each containing
+		// an array of beans		
+		return new JSONArray(json);
+	}
 
 	public LiveBeansModel parse() throws JSONException {
 		beansMap = new LinkedHashMap<String, LiveBean>();
 		contextMap = new LinkedHashMap<String, LiveBeansContext>();
 		resourceMap = new LinkedHashMap<String, LiveBeansResource>();
 
-		// JSON structure is an array of context descriptions, each containing
-		// an array of beans
-		JSONArray contextsArray = new JSONArray(jsonInput);
+		JSONArray contextsArray = extractContextsJson(jsonInput);
+		
 		parseContexts(contextsArray);
 		populateContextDependencies(contextsArray);
 		groupByResource();
@@ -77,24 +82,46 @@ public class LiveBeansJsonParser {
 		for (int i = 0; i < beansArray.length(); i++) {
 			JSONObject beanJson = beansArray.getJSONObject(i);
 			if (beanJson != null && beanJson.has(LiveBean.ATTR_BEAN)) {
-				LiveBean bean = new LiveBean(typeLookup, beanJson.getString(LiveBean.ATTR_BEAN));
+				LiveBean bean = parseBean(beanJson);
 				bean.addAttribute(LiveBeansContext.ATTR_CONTEXT, context.getLabel());
-				if (beanJson.has(LiveBean.ATTR_SCOPE)) {
-					bean.addAttribute(LiveBean.ATTR_SCOPE, beanJson.getString(LiveBean.ATTR_SCOPE));
-				}
-				if (beanJson.has(LiveBean.ATTR_TYPE)) {
-					bean.addAttribute(LiveBean.ATTR_TYPE, beanJson.getString(LiveBean.ATTR_TYPE));
-				}
-				if (beanJson.has(LiveBean.ATTR_RESOURCE)) {
-					bean.addAttribute(LiveBean.ATTR_RESOURCE, beanJson.getString(LiveBean.ATTR_RESOURCE));
-				}
-				if (typeLookup.getApplicationName() != null) {
-					bean.addAttribute(LiveBean.ATTR_APPLICATION, typeLookup.getApplicationName());
-				}
 				context.addElement(bean);
 				beansMap.put(bean.getId(), bean);
 			}
 		}
+	}
+	
+	protected LiveBean parseBean(JSONObject beanJson) throws JSONException {
+		LiveBean bean = new LiveBean(typeLookup, beanJson.getString(LiveBean.ATTR_BEAN));
+		if (beanJson.has(LiveBean.ATTR_SCOPE)) {
+			bean.addAttribute(LiveBean.ATTR_SCOPE, beanJson.getString(LiveBean.ATTR_SCOPE));
+		}
+		if (beanJson.has(LiveBean.ATTR_TYPE)) {
+			bean.addAttribute(LiveBean.ATTR_TYPE, beanJson.getString(LiveBean.ATTR_TYPE));
+		}
+		if (beanJson.has(LiveBean.ATTR_RESOURCE)) {
+			bean.addAttribute(LiveBean.ATTR_RESOURCE, beanJson.getString(LiveBean.ATTR_RESOURCE));
+		}
+		if (typeLookup != null && typeLookup.getApplicationName() != null) {
+			bean.addAttribute(LiveBean.ATTR_APPLICATION, typeLookup.getApplicationName());
+		}
+		return bean;
+	}
+	
+	protected JSONArray extractBeans(JSONObject contextJson) {
+		return contextJson.optJSONArray(LiveBeansContext.ATTR_BEANS);
+	}
+	
+	protected String getContextId(JSONObject contextJson) throws JSONException {
+		return contextJson.getString(LiveBeansContext.ATTR_CONTEXT);
+	}
+	
+	protected LiveBeansContext parseContext(JSONObject contextJson) throws JSONException {
+		LiveBeansContext context = new LiveBeansContext(getContextId(contextJson));
+		JSONArray beansArray = extractBeans(contextJson);
+		if (beansArray != null) {
+			parseBeans(context, beansArray);
+		}
+		return context;
 	}
 
 	private void parseContexts(JSONArray contextsArray) throws JSONException {
@@ -102,11 +129,7 @@ public class LiveBeansJsonParser {
 		for (int i = 0; i < contextsArray.length(); i++) {
 			JSONObject contextJson = contextsArray.optJSONObject(i);
 			if (contextJson != null) {
-				LiveBeansContext context = new LiveBeansContext(contextJson.getString(LiveBeansContext.ATTR_CONTEXT));
-				JSONArray beansArray = contextJson.optJSONArray(LiveBeansContext.ATTR_BEANS);
-				if (beansArray != null) {
-					parseBeans(context, beansArray);
-				}
+				LiveBeansContext context = parseContext(contextJson);
 				contextMap.put(context.getLabel(), context);
 			}
 		}
@@ -128,7 +151,7 @@ public class LiveBeansJsonParser {
 						}
 						else {
 							LiveBean dependentBean = new LiveBean(typeLookup, dependency, true);
-							if (typeLookup.getApplicationName() != null) {
+							if (typeLookup != null && typeLookup.getApplicationName() != null) {
 								dependentBean.addAttribute(LiveBean.ATTR_APPLICATION, typeLookup.getApplicationName());
 							}
 							bean.addDependency(dependentBean);
@@ -144,7 +167,7 @@ public class LiveBeansJsonParser {
 		for (int i = 0; i < contextsArray.length(); i++) {
 			JSONObject contextJson = contextsArray.optJSONObject(i);
 			if (contextJson != null) {
-				LiveBeansContext context = contextMap.get(contextJson.getString(LiveBeansContext.ATTR_CONTEXT));
+				LiveBeansContext context = contextMap.get(getContextId(contextJson));
 				if (!contextJson.isNull(LiveBeansContext.ATTR_PARENT)) {
 					String parent = contextJson.getString(LiveBeansContext.ATTR_PARENT);
 					LiveBeansContext parentContext = contextMap.get(parent);

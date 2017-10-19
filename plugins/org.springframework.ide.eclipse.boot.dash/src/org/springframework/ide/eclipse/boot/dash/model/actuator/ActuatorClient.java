@@ -18,12 +18,15 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.osgi.framework.Version;
+import org.osgi.framework.VersionRange;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansJsonParser;
+import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansJsonParser2;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModel;
 import org.springframework.ide.eclipse.beans.ui.live.model.TypeLookup;
-import org.springframework.ide.eclipse.beans.ui.live.model.TypeLookupImpl;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.JLRMethodParser.JLRMethod;
 import org.springframework.ide.eclipse.boot.util.Log;
 
@@ -40,6 +43,8 @@ import com.google.common.base.Objects;
  * @author Kris De Volder
  */
 public abstract class ActuatorClient {
+
+	private static final VersionRange BEANS_PARSER_VERSION_1_RANGE = new VersionRange("[1.0.0, 2.0.0)");
 
 	private final TypeLookup typeLookup;
 
@@ -204,9 +209,12 @@ public abstract class ActuatorClient {
 
 	public List<RequestMapping> getRequestMappings() {
 		try {
-			String json = getRequestMappingData();
-			if (json!=null) {
-				return parse(json);
+			ImmutablePair<String, String> data = getRequestMappingData();
+			if (data != null) {
+				String json = data.left;
+				if (json!=null) {
+					return parse(json);
+				}
 			}
 		} catch (Exception e) {
 			Log.log(e);
@@ -216,9 +224,18 @@ public abstract class ActuatorClient {
 
 	public LiveBeansModel getBeans() {
 		try {
-			String json = getBeansData();
-			if (json != null) {
-				return new LiveBeansJsonParser(new TypeLookupImpl("", null), json).parse();
+			ImmutablePair<String, String> data = getBeansData();
+			if (data != null) {
+				String json = data.left;
+				String version = data.right;
+				if (json != null) {
+					if (version != null) {
+						if (BEANS_PARSER_VERSION_1_RANGE.includes(Version.valueOf(version))) {
+							return new LiveBeansJsonParser(typeLookup, json).parse();
+						}
+					}
+					return new LiveBeansJsonParser2(typeLookup, json).parse();
+				}
 			}
 		} catch (Exception e) {
 			Log.log(e);
@@ -226,7 +243,7 @@ public abstract class ActuatorClient {
 		return null;
 	}
 
-	protected abstract String getRequestMappingData() throws Exception;
+	protected abstract ImmutablePair<String, String> getRequestMappingData() throws Exception;
 
-	protected abstract String getBeansData() throws Exception;
+	protected abstract ImmutablePair<String, String> getBeansData() throws Exception;
 }

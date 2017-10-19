@@ -15,6 +15,7 @@ import java.net.URI;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.ide.eclipse.beans.ui.live.model.TypeLookup;
 
 
@@ -40,12 +41,12 @@ public class RestActuatorClient extends ActuatorClient {
 	}
 
 	@Override
-	protected String getRequestMappingData() throws Exception {
-		return client.target(target).path("/mappings").request().get(String.class);
+	protected ImmutablePair<String, String> getRequestMappingData() throws Exception {
+		return ImmutablePair.of(client.target(target).path("/mappings").request().get(String.class), null);
 	}
 
 	@Override
-	protected String getBeansData() throws Exception {
+	protected ImmutablePair<String, String> getBeansData() throws Exception {
 		return null;
 	}
 

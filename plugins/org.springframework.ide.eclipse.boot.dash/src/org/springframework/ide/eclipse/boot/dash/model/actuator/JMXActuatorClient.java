@@ -15,6 +15,7 @@ import java.util.Set;
 import javax.inject.Provider;
 import javax.management.InstanceNotFoundException;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.ide.eclipse.beans.ui.live.model.TypeLookup;
 import org.springframework.ide.eclipse.boot.launch.util.JMXClient;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
@@ -35,20 +36,22 @@ public class JMXActuatorClient extends ActuatorClient {
 	static class OperationInfo {
 		final String objectName;
 		final String operationName;
-		public OperationInfo(String objectName, String operationName) {
+		final String version;
+		public OperationInfo(String objectName, String operationName, String version) {
 			this.objectName = objectName;
 			this.operationName = operationName;
+			this.version = version;
 		}
 	}
 
 	private static final OperationInfo[] REQUEST_MAPPINGS_OPERATIONS = {
-			new OperationInfo("org.springframework.boot:type=Endpoint,name=Mappings", "mappings"), //Boot 2.x
-			new OperationInfo("org.springframework.boot:type=Endpoint,name=requestMappingEndpoint", "getData") //Boot 1.x
+			new OperationInfo("org.springframework.boot:type=Endpoint,name=Mappings", "mappings", "2"), //Boot 2.x
+			new OperationInfo("org.springframework.boot:type=Endpoint,name=requestMappingEndpoint", "getData", "1") //Boot 1.x
 	};
 
 	private static final OperationInfo[] BEANS_OPERATIONS = {
-			new OperationInfo("org.springframework.boot:type=Endpoint,name=Beans", "beans"), //Boot 2.x
-			new OperationInfo("org.springframework.boot:type=Endpoint,name=beansEndpoint", "getData") //Boot 1.x
+			new OperationInfo("org.springframework.boot:type=Endpoint,name=Beans", "beans", "2"), //Boot 2.x
+			new OperationInfo("org.springframework.boot:type=Endpoint,name=beansEndpoint", "getData", "1") //Boot 1.x
 	};
 
 	private JMXClient client = null;
@@ -60,7 +63,7 @@ public class JMXActuatorClient extends ActuatorClient {
 	}
 
 	@Override
-	protected String getRequestMappingData() throws Exception {
+	protected ImmutablePair<String, String> getRequestMappingData() throws Exception {
 		try {
 			JMXClient client = getClient();
 			if (client!=null) {
@@ -68,7 +71,7 @@ public class JMXActuatorClient extends ActuatorClient {
 					try {
 						Object obj = client.callOperation(op.objectName, op.operationName);
 						if (obj!=null) {
-							return new ObjectMapper().writeValueAsString(obj);
+							return ImmutablePair.of(new ObjectMapper().writeValueAsString(obj), op.version);
 						}
 					} catch (InstanceNotFoundException e) {
 						//Ignore and try other mbean
@@ -85,7 +88,7 @@ public class JMXActuatorClient extends ActuatorClient {
 	}
 
 	@Override
-	protected String getBeansData() throws Exception {
+	protected ImmutablePair<String, String> getBeansData() throws Exception {
 		try {
 			JMXClient client = getClient();
 			if (client!=null) {
@@ -93,7 +96,7 @@ public class JMXActuatorClient extends ActuatorClient {
 					try {
 						Object obj = client.callOperation(op.objectName, op.operationName);
 						if (obj!=null) {
-							return new ObjectMapper().writeValueAsString(obj);
+							return ImmutablePair.of(new ObjectMapper().writeValueAsString(obj), op.version);
 						}
 					} catch (InstanceNotFoundException e) {
 						//Ignore and try other mbean
