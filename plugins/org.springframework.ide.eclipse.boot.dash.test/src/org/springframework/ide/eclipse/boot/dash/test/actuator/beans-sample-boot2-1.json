@@ -1,4 +1,4 @@
-[{
+{
   "parent": null,
   "beans": {
     "standardJacksonObjectMapperBuilderCustomizer": {
@@ -20,4 +20,4 @@
     }
   },
   "id": "application:9999"
-}]
+}
