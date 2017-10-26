@@ -32,9 +32,7 @@ Require-Bundle: org.eclipse.ui,
  javax.ws.rs;bundle-version="2.0.1",
  com.fasterxml.jackson.core.jackson-annotations;bundle-version="2.6.2",
  com.fasterxml.jackson.core.jackson-core;bundle-version="2.6.2",
- com.fasterxml.jackson.core.jackson-databind;bundle-version="2.6.2",
- org.glassfish.jersey.core.jersey-client;bundle-version="2.22.1",
- org.glassfish.jersey.core.jersey-common;bundle-version="2.22.1"
+ com.fasterxml.jackson.core.jackson-databind;bundle-version="2.6.2"
 Bundle-Activator: org.springframework.ide.eclipse.boot.wizard.BootWizardActivator
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.boot.wizard,
@@ -45,3 +43,4 @@ Export-Package: org.springframework.ide.eclipse.boot.wizard,
  org.springframework.ide.eclipse.boot.wizard.guides.ext,
  org.springframework.ide.eclipse.boot.wizard.importing
 Bundle-Vendor: Pivotal Inc.
+Import-Package: org.glassfish.jersey.client

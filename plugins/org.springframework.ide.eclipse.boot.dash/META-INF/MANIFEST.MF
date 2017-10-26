@@ -48,8 +48,6 @@ Require-Bundle: org.eclipse.ui,
  org.apache.commons.lang3,
  org.springframework.ide.eclipse.editor.support,
  javax.ws.rs;bundle-version="2.0.1",
- org.glassfish.jersey.core.jersey-client;bundle-version="2.22.1",
- org.glassfish.jersey.core.jersey-common;bundle-version="2.22.1",
  org.springframework.ide.eclipse.beans.ui.live
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
@@ -67,4 +65,5 @@ Export-Package: org.springframework.ide.eclipse.boot.dash,
  org.springframework.ide.eclipse.boot.dash.util,
  org.springframework.ide.eclipse.boot.dash.views,
  org.springframework.ide.eclipse.boot.dash.views.sections
-Import-Package: org.yaml.snakeyaml
+Import-Package: org.yaml.snakeyaml,
+ org.glassfish.jersey.client
