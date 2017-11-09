@@ -102,11 +102,7 @@ public class BeansPropertiesSection extends AbstractBdePropertiesSection {
 		FilterBoxModel<String> searchBoxModel = new FilterBoxModel<String>() {
 			@Override
 			protected Filter<String> createFilterForInput(String pattern) {
-				if (StringUtil.hasText(pattern)) {
-					String lowercased = pattern.trim().toLowerCase();
-					return (text) -> text.toLowerCase().contains(lowercased) ;
-				}
-				return Filters.acceptAll();
+				return Filters.caseInsensitiveSubstring(pattern);
 			}
 		};
 		WidgetUtil.connect(searchBox, searchBoxModel.getText());
