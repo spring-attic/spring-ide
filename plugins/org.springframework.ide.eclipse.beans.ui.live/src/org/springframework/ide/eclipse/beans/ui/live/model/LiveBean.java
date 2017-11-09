@@ -50,7 +50,6 @@ public class LiveBean extends AbstractLiveBeansModelElement {
 	}
 
 	public LiveBean(TypeLookup typeLookup, String id, boolean innerBean) {
-		super();
 		this.typeLookup = typeLookup;
 		this.beanId = id;
 		this.innerBean = innerBean;
@@ -134,5 +133,10 @@ public class LiveBean extends AbstractLiveBeansModelElement {
 	public int hashCode() {
 		return beanId == null ? super.hashCode() : beanId.hashCode();
 	}	
+	
+	@Override
+	public String toString() {
+		return "LiveBean("+getId()+")";
+	}
 
 }

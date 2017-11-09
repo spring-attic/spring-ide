@@ -18,10 +18,10 @@ import org.springsource.ide.eclipse.commons.livexp.util.Filter;
  * <p>
  * The resulting filter uses these two rules:
  * <p>
- * a) If the wrapped filter accepts a child, then the resulting filter must also
+ * a) If the base-filter accepts a child, then the resulting filter must also
  * accept the child's parent (and grandparent etc.)
  * <p>
- * b) If the wrapped filter accepts a (parent) node, then the resulting filter
+ * b) If the base-filter wrapped filter accepts a (parent) node, then the resulting filter
  * must also accept all the children (and grandchildren etc.) of that node.
  *
  * TODO: it feels like this class could be made more abstract and reused for other

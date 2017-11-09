@@ -31,7 +31,6 @@ public class LiveBeanRelation extends AbstractLiveBeansModelElement {
 	}
 
 	public LiveBeanRelation(LiveBean bean, boolean isDependency) {
-		super();
 		this.bean = bean;
 		this.isDependency = isDependency;
 	}

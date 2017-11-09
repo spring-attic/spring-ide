@@ -32,5 +32,10 @@ public class LiveBeanType implements DisplayName {
 		}
 		return type;
 	}
+	
+	@Override
+	public String toString() {
+		return "LiveBeanType("+bean+")";
+	}
 
 }

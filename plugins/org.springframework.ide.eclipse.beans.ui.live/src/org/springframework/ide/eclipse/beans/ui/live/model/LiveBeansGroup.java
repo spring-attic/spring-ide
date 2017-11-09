@@ -29,7 +29,6 @@ public class LiveBeansGroup<T extends AbstractLiveBeansModelElement> extends Abs
 	}
 	
 	public LiveBeansGroup(String label, List<T> elements) {
-		super();
 		this.label = label;
 		this.elements = elements;
 	}

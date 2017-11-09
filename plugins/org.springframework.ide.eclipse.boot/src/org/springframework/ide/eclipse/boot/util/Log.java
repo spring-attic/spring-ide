@@ -15,6 +15,10 @@ import org.eclipse.core.runtime.IStatus;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
+/**
+ * Deprecated, it was copied to LiveExp for broader reuse. So use that instead.
+ */
+@Deprecated
 public class Log {
 
 	public static void log(Throwable e) {

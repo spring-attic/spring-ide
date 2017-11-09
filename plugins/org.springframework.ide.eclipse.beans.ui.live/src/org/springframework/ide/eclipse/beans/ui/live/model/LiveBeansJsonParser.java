@@ -82,7 +82,7 @@ public class LiveBeansJsonParser {
 		for (int i = 0; i < beansArray.length(); i++) {
 			JSONObject beanJson = beansArray.getJSONObject(i);
 			if (beanJson != null && beanJson.has(LiveBean.ATTR_BEAN)) {
-				LiveBean bean = parseBean(beanJson);
+				LiveBean bean = parseBean(beanJson, context);
 				bean.addAttribute(LiveBeansContext.ATTR_CONTEXT, context.getLabel());
 				context.addElement(bean);
 				beansMap.put(bean.getId(), bean);
@@ -90,7 +90,7 @@ public class LiveBeansJsonParser {
 		}
 	}
 	
-	protected LiveBean parseBean(JSONObject beanJson) throws JSONException {
+	protected LiveBean parseBean(JSONObject beanJson, LiveBeansContext context) throws JSONException {
 		LiveBean bean = new LiveBean(typeLookup, beanJson.getString(LiveBean.ATTR_BEAN));
 		if (beanJson.has(LiveBean.ATTR_SCOPE)) {
 			bean.addAttribute(LiveBean.ATTR_SCOPE, beanJson.getString(LiveBean.ATTR_SCOPE));
