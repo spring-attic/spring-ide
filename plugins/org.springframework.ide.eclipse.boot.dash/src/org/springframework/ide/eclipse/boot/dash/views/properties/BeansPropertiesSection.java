@@ -34,8 +34,8 @@ import org.springframework.ide.eclipse.beans.ui.live.tree.LiveBeansTreeLabelProv
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.FilterBoxModel;
+import org.springsource.ide.eclipse.commons.livexp.ui.util.SwtConnect;
 import org.springsource.ide.eclipse.commons.livexp.ui.util.TreeElementWrappingContentProvider;
-import org.springsource.ide.eclipse.commons.livexp.ui.util.WidgetUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 import org.springsource.ide.eclipse.commons.livexp.util.Filters;
 
@@ -105,7 +105,7 @@ public class BeansPropertiesSection extends AbstractBdePropertiesSection {
 				return Filters.caseInsensitiveSubstring(pattern);
 			}
 		};
-		WidgetUtil.connect(searchBox, searchBoxModel.getText());
+		SwtConnect.connect(searchBox, searchBoxModel.getText());
 		searchBox.addDisposeListener(de -> searchBoxModel.close());
 
 		treeViewer = new TreeViewer(treeViewerComposite /*, SWT.NO_SCROLL*/);
@@ -131,7 +131,7 @@ public class BeansPropertiesSection extends AbstractBdePropertiesSection {
 			}
 		});
 
-		WidgetUtil.connectTextBasedFilter(treeViewer, searchBoxModel.getFilter(), labelProvider, treeContent);
+		SwtConnect.connectTextBasedFilter(treeViewer, searchBoxModel.getFilter(), labelProvider, treeContent);
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(treeViewer.getTree());
 
 		refreshControlsVisibility();
