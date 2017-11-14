@@ -26,10 +26,13 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.m2e.core.embedder.IMaven;
+import org.eclipse.m2e.core.project.IMavenProjectFacade;
+import org.eclipse.m2e.core.project.configurator.AbstractProjectConfigurator;
 import org.eclipse.m2e.core.project.configurator.ProjectConfigurationRequest;
+import org.eclipse.m2e.jdt.IClasspathDescriptor;
+import org.eclipse.m2e.jdt.IJavaProjectConfigurator;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
 import org.springframework.ide.eclipse.boot.properties.editor.util.AptUtils;
-import org.springframework.ide.eclipse.maven.AbstractSpringProjectConfigurator;
 
 /**
  * M2E project configuration which enables JDT APT processor if the project has
@@ -37,12 +40,37 @@ import org.springframework.ide.eclipse.maven.AbstractSpringProjectConfigurator;
  *
  * @author Kris De Volder
  */
-public class EnableJdtAptM2EProjectConfigurator extends AbstractSpringProjectConfigurator {
+public class EnableJdtAptM2EProjectConfigurator extends AbstractProjectConfigurator implements IJavaProjectConfigurator {
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
+	public final void configure(ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException {
+		// Sometimes M2Eclipse calls this method with request == null. Why?
+		if (request != null) {
+			MavenProject mavenProject = request.getMavenProject();
+			IProject project = request.getProject();
+
+			doConfigure(mavenProject, project, request, monitor);
+		}
+	}
+
+	public void configureClasspath(IMavenProjectFacade arg0, IClasspathDescriptor arg1, IProgressMonitor arg2) throws CoreException {
+		//nothing
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void configureRawClasspath(ProjectConfigurationRequest arg0, IClasspathDescriptor arg1, IProgressMonitor arg2)
+			throws CoreException {
+		//nothing
+	}
+
 	protected void doConfigure(MavenProject mavenProject, IProject project,
 			ProjectConfigurationRequest request, IProgressMonitor monitor)
-			throws CoreException {
+					throws CoreException {
 		if (isPreferenceEnabled(mavenProject) && shouldConfigureApt(mavenProject, project, request, monitor)) {
 			AptUtils.configureApt(JavaCore.create(project));
 		}
