@@ -16,7 +16,7 @@ package org.springframework.ide.eclipse.beans.ui.live.model;
  */
 public class LiveBeansContext extends LiveBeansGroup<LiveBean> {
 	
-	public static final String ATTR_ID = "id";
+	public static final String ATTR_CONTEXT_ID = "contextId";
 
 	public static final String ATTR_CONTEXT = "context";
 
