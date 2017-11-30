@@ -31,6 +31,16 @@
                id="org.springframework.ide.eclipse.boot.dash.views.BootDashView">
          </view>
       </perspectiveExtension>
+      <perspectiveExtension
+            targetID="org.eclipse.jdt.ui.JavaPerspective">
+         <view
+               ratio="0.66"
+               relative="org.eclipse.jdt.ui.PackageExplorer"
+               relationship="bottom"
+               visible="true"
+               id="org.springframework.ide.eclipse.boot.dash.views.BootDashView">
+         </view>
+      </perspectiveExtension>
    </extension>
    
    <extension

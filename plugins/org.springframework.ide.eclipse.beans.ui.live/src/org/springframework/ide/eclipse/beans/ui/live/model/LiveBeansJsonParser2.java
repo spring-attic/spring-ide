@@ -44,7 +44,7 @@ public class LiveBeansJsonParser2 extends LiveBeansJsonParser {
 
 	@Override
 	protected String getContextId(JSONObject contextJson) throws JSONException {
-		return contextJson.getString(LiveBeansContext.ATTR_ID);
+		return contextJson.getString(LiveBeansContext.ATTR_CONTEXT_ID);
 	}
 
 	@Override
