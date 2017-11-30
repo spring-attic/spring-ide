@@ -27,8 +27,9 @@
 </extension>
 
 <extension
-  id="springbootbuilder"
-  point="org.eclipse.core.resources.builders">
+      id="springbootbuilder"
+      name="Spring Boot Validations Builder"
+      point="org.eclipse.core.resources.builders">
    <builder>
       <run
             class="org.springframework.ide.eclipse.boot.validation.framework.SpringBootProjectBuilder">
