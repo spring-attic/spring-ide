@@ -40,7 +40,7 @@ public class PasswordDialogModel implements OkButtonHandler {
 			"Click the 'Validate' button to verify the credentials.");
 
 	private static final ValidationResult VALIDATION_IN_PROGRESS_MESSAGE = ValidationResult.info(
-			"Please wait. Concacting CF to verify the credentials..."
+			"Please wait. Contacting CF to verify the credentials..."
 	);
 
 	private CloudFoundryTargetProperties currentParams;

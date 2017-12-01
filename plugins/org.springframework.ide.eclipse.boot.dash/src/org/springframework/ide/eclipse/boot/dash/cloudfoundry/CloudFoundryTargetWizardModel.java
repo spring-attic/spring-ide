@@ -235,7 +235,7 @@ public class CloudFoundryTargetWizardModel {
 					if (t!=null) {
 						refreshToken = t;
 					}
-					String effectiveUser = client.getUserName().block();
+					String effectiveUser = getUserName(client);
 					if (effectiveUser!=null) {
 						userName.setValue(effectiveUser);
 					}
@@ -243,6 +243,15 @@ public class CloudFoundryTargetWizardModel {
 				} finally {
 					client.close();
 				}
+			}
+
+			private String getUserName(ClientRequests client) {
+				try {
+					return client.getUserName().block();
+				} catch (Exception e) {
+					Log.log(e);
+				}
+				return null;
 			}
 		};
 
