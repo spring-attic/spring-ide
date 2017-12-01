@@ -565,11 +565,11 @@
 					<layout>p2</layout>
 					<url>http://download.eclipse.org/cft/1.1.0.RC2/</url>
 				</repository>
-				<!--				<repository>
-									<id>lsp4e-snapshots</id>
-									<layout>p2</layout>
-									<url>http://download.eclipse.org/lsp4e/snapshots/</url>
-								</repository> -->
+				<repository>
+					<id>lsp4e-snapshots</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/lsp4e/snapshots/</url>
+				</repository>
 				<repository>
 					<id>lsp4e-releases</id>
 					<layout>p2</layout>
