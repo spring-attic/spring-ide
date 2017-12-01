@@ -245,6 +245,24 @@
 
 	<profiles>
 
+		<repositories>
+				<repository>
+					<id>lsp4j-snapshots</id>
+					<layout>p2</layout>
+					<url>http://services.typefox.io/open-source/jenkins/job/lsp4j/job/master/lastStableBuild/artifact/build/p2-repository/</url>
+				</repository>
+				<repository>
+					<id>lsp4e-snapshots</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/lsp4e/snapshots/</url>
+				</repository>
+<!--				<repository>
+					<id>lsp4e-releases</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/lsp4e/releases/0.3.0</url>
+				</repository> -->
+		</repositories>
+
 		<profile>
 			<id>e34</id>
 			<properties>
@@ -566,21 +584,6 @@
 					<url>http://download.eclipse.org/cft/1.1.0.RC2/</url>
 				</repository>
 				<repository>
-					<id>lsp4j-snapshots</id>
-					<layout>p2</layout>
-					<url>http://services.typefox.io/open-source/jenkins/job/lsp4j/job/master/lastStableBuild/artifact/build/p2-repository/</url>
-				</repository>
-				<repository>
-					<id>lsp4e-snapshots</id>
-					<layout>p2</layout>
-					<url>http://download.eclipse.org/lsp4e/snapshots/</url>
-				</repository>
-<!--				<repository>
-					<id>lsp4e-releases</id>
-					<layout>p2</layout>
-					<url>http://download.eclipse.org/lsp4e/releases/0.3.0</url>
-				</repository> -->
-				<repository>
 					<id>eclipse-integration-commons</id>
 					<layout>p2</layout>
 					<url>http://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}</url>
@@ -633,16 +636,6 @@
 		  			<id>buildship-for-testing</id>
 		  			<layout>p2</layout>
 		  			<url>http://download.eclipse.org/buildship/updates/e46/releases/1.0/</url>
-				</repository>
-				<!--				<repository>
-									<id>lsp4e-snapshots</id>
-									<layout>p2</layout>
-									<url>http://download.eclipse.org/lsp4e/snapshots/</url>
-								</repository> -->
-				<repository>
-					<id>lsp4e-releases</id>
-					<layout>p2</layout>
-					<url>http://download.eclipse.org/lsp4e/releases/0.3.0</url>
 				</repository>
 				<repository>
 					<id>eclipse-integration-commons</id>
