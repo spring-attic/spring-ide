@@ -339,13 +339,10 @@ public class DefaultUserInteractions implements UserInteractions {
 	@Override
 	public boolean confirmApplicationReplacement(String title, String message, List<String> services) {
 		final boolean[] result = new boolean[] { false };
-		getShell().getDisplay().syncExec(new Runnable() {
-			@Override
-			public void run() {
-				ReplaceExistingApplicationDialog dialog = new ReplaceExistingApplicationDialog(getShell(), title, message,
-						services);
-				result[0] = dialog.open() == IDialogConstants.OK_ID;
-			}
+		getShell().getDisplay().syncExec(() -> {
+			ReplaceExistingApplicationDialog dialog = new ReplaceExistingApplicationDialog(getShell(), title, message,
+					services);
+			result[0] = dialog.open() == IDialogConstants.OK_ID;
 		});
 		return result[0];
 	}
