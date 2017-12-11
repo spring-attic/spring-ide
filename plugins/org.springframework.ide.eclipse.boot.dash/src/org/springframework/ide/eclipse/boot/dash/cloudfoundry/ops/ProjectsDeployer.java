@@ -248,6 +248,7 @@ public class ProjectsDeployer extends CloudOperation {
 
 		} else {
 			element.print("No local manifest file found while replacing existing Cloud application - " + existingAppProperties.getAppName() + " using manifest file: " + manifestFile.getFullPath());
+
 		}
 	}
 }
