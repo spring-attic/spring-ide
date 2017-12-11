@@ -14,19 +14,24 @@ import java.io.StringWriter;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.function.Consumer;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudData;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlGraphDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel.Result;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.LocalRunTarget;
@@ -35,6 +40,8 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springframework.ide.eclipse.boot.util.Log;
+import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 public class ProjectsDeployer extends CloudOperation {
@@ -92,31 +99,69 @@ public class ProjectsDeployer extends CloudOperation {
 		}, ui);
 	}
 
-	protected void doDeployProject(CloudAppDashElement cde, CloudApplicationDeploymentProperties properties,
+	protected CloudData buildOperationCloudData(IProgressMonitor monitor, IProject project) throws Exception {
+		return new CloudData(getRunTarget().getDomains(monitor),  getRunTarget().getBuildpack(project), getRunTarget().getStacks(monitor));
+	}
+
+	protected void doDeployProject(CloudAppDashElement cde, CloudApplicationDeploymentProperties initialProperties,
 			IProject project, IProgressMonitor monitor) throws Exception {
 		ClientRequests client = model.getRunTarget().getClient();
 		CancelationToken cancelationToken = cde.createCancelationToken();
 
+		IFile manifestFile = initialProperties.getManifestFile();
+
+		// An app may already exist in CF, so when confirming to replace the exist app below, the option to
+		// use the existing app deployment properties rather than the initial properties may result in a different deployment
+		// properties. Therefore use a LiveExpression to support possible change in the properties to be used.
+		LiveVariable<CloudApplicationDeploymentProperties> pushPropertiesToUse = new LiveVariable<>(
+				initialProperties);
+		pushPropertiesToUse.addListener((exp, val) -> {
+			// Make sure that the local archive gets set in the properties, even on changes,
+			// because
+			// we want to push the locally archived sources regardless of which other
+			// properties have changed (e.g. bound services, env vars, etc...)
+			val.setArchive(initialProperties.getArchive());
+
+		});
 
 		try {
-			cde.whileStarting(ui, cancelationToken, monitor, () -> {
-				if (client.applicationExists(properties.getAppName())) {
-					CFApplicationDetail existingAppDetails = client.getApplication(properties.getAppName());
 
-					if (!confirmOverwriteExisting(properties, existingAppDetails)) {
-						throw new OperationCanceledException();
-					}
+			cde.whileStarting(ui, cancelationToken, monitor, () -> {
+				CFApplicationDetail app = client.getApplication(initialProperties.getAppName());
+				if (app != null) {
+					CloudData cloudData = buildOperationCloudData(monitor, project);
+					CloudApplicationDeploymentProperties existingAppProperties = CloudApplicationDeploymentProperties.getFor(project, cloudData, app);
+
+					confirmReplaceApp(cloudData, cde, existingAppProperties, project,  manifestFile, monitor, (result) -> {
+						cde.print("Pushing project '"+project.getName()+"' - replacing existing application: " + initialProperties.getAppName());
+						switch (result) {
+						case CANCELED:
+							throw new OperationCanceledException();
+						case USE_MANIFEST:
+							// Initial properties were generated from Manifest some point earlier so just set the initial properties
+							// if using manifest
+							pushPropertiesToUse.setValue(initialProperties);
+							cde.print("Pushing project '"+project.getName()+"' - replacing existing application using manifest");
+							cde.setDeploymentManifestFile(initialProperties.getManifestFile());
+							break;
+						case FORGET_MANIFEST:
+							cde.print("Pushing project '"+project.getName()+"' - replacing existing application ignoring manifest");
+							cde.setDeploymentManifestFile(null);
+							pushPropertiesToUse.setValue(existingAppProperties);
+							break;
+						}
+					});
 				}
-				cde.setDeploymentManifestFile(properties.getManifestFile());
 				cde.setProject(project);
 				copyTags(project, cde);
 				cde.print("Pushing project '"+project.getName()+"'");
-				try (CFPushArguments args = properties.toPushArguments(model.getCloudDomains(monitor))) {
+				try (CFPushArguments args = pushPropertiesToUse.getValue().toPushArguments(model.getCloudDomains(monitor))) {
 					if (isDebugEnabled()) {
 						debugSupport.setupEnvVars(args.getEnv());
 					}
 					client.push(args, CancelationTokens.merge(cancelationToken, monitor));
 					cde.print("Pushing project '"+project.getName()+"' SUCCEEDED!");
+					pushPropertiesToUse.close();
 				}
 				if (cde.refresh()!=null) {
 					//Careful... connecting the debugger must be done after the refresh because it needs the app guid which
@@ -175,14 +220,34 @@ public class ProjectsDeployer extends CloudOperation {
 		}
 	}
 
-	private boolean confirmOverwriteExisting(CloudApplicationDeploymentProperties properties, CFApplicationDetail existingAppDetails) {
-		String title = "Replace Existing Application";
+	private void confirmReplaceApp(CloudData cloudData, CloudAppDashElement element, CloudApplicationDeploymentProperties existingAppProperties, IProject project, IFile manifestFile, IProgressMonitor monitor, Consumer<Result> handleResult) throws Exception{
 		StringWriter writer = new StringWriter();
-		writer.append("Replace existing application - ");
-		writer.append(properties.getAppName());
+		writer.append("Replace existing Cloud application - ");
+		writer.append(existingAppProperties.getAppName());
 		writer.append(" - with the project: ");
-		writer.append(properties.getProject().getName());
+		writer.append(project.getName());
 		writer.append('?');
-		return ui.confirmApplicationReplacement(title, writer.toString(), existingAppDetails.getServices());
+
+		String title = writer.toString();
+
+		writer = new StringWriter();
+		writer.append("WARNING: If using the manifest, any existing bound services in Cloud Foundry not listed in the manifest will be deleted.");
+
+		String message = writer.toString();
+		Result result = Result.USE_MANIFEST;
+
+		if (manifestFile != null && manifestFile.isAccessible()) {
+			element.print("Replacing existing Cloud application - " + existingAppProperties.getAppName() + " using manifest file: " + manifestFile.getFullPath());
+			final String yamlContents = IOUtil.toString(manifestFile.getContents());
+
+			YamlGraphDeploymentProperties yamlGraph = new YamlGraphDeploymentProperties(yamlContents, element.getName(), cloudData);
+
+			result = ui.confirmReplaceApp(title, message, yamlGraph, manifestFile, existingAppProperties);
+
+			handleResult.accept(result);
+
+		} else {
+			element.print("No local manifest file found while replacing existing Cloud application - " + existingAppProperties.getAppName() + " using manifest file: " + manifestFile.getFullPath());
+		}
 	}
 }

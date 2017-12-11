@@ -35,7 +35,8 @@ import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel
  */
 public class ManifestDiffDialog extends TitleAreaDialog {
 
-	private final CompareEditorInput fCompareEditorInput;
+	protected final CompareEditorInput fCompareEditorInput;
+	private String title = "Merge Manifest File";
 
 	/**
 	 * Create a dialog to host the given input.
@@ -48,6 +49,11 @@ public class ManifestDiffDialog extends TitleAreaDialog {
 		setShellStyle(getShellStyle() | SWT.RESIZE | SWT.MAX);
 		Assert.isNotNull(input);
 		fCompareEditorInput= input;
+	}
+
+	public ManifestDiffDialog(Shell shell, ManifestDiffDialogModel model, String title) {
+		this(shell, model);
+		this.title = title;
 	}
 
 	protected void createButtonsForButtonBar(Composite parent) {
@@ -73,7 +79,7 @@ public class ManifestDiffDialog extends TitleAreaDialog {
 	@Override
 	public void create() {
 		super.create();
-		setTitle("Merge Manifest File");
+		setTitle(title);
 		if (fCompareEditorInput != null && fCompareEditorInput.getMessage() != null) {
 			setMessage(fCompareEditorInput.getMessage(), IMessageProvider.WARNING);
 		} else {

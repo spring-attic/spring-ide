@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2016 Pivotal, Inc.
+ * Copyright (c) 2015, 2017 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,10 +10,16 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
-import java.util.List;
 
+import org.eclipse.compare.CompareConfiguration;
+import org.eclipse.compare.CompareEditorInput;
+import org.eclipse.compare.structuremergeviewer.DiffNode;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugModelPresentation;
@@ -23,16 +29,24 @@ import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEdit;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentPropertiesDialog;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.ManifestDiffDialog;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlFileInput;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlGraphDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlInput;
 import org.springframework.ide.eclipse.boot.dash.dialogs.CustomizeAppsManagerURLDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.CustomizeAppsManagerURLDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel;
@@ -48,6 +62,7 @@ import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialogMode
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashTreeContentProvider;
+import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.ui.UiUtil;
@@ -337,14 +352,97 @@ public class DefaultUserInteractions implements UserInteractions {
 	}
 
 	@Override
-	public boolean confirmApplicationReplacement(String title, String message, List<String> services) {
-		final boolean[] result = new boolean[] { false };
+	public ManifestDiffDialogModel.Result confirmReplaceApp(String title, String message,YamlGraphDeploymentProperties yamlGraph, IFile manifestFile, CloudApplicationDeploymentProperties deploymentProperties) throws  Exception {
+		final Exception[] error = new Exception[1];
+		final Result[] result = new Result[1];
 		getShell().getDisplay().syncExec(() -> {
-			ReplaceExistingApplicationDialog dialog = new ReplaceExistingApplicationDialog(getShell(), title, message,
-					services);
-			result[0] = dialog.open() == IDialogConstants.OK_ID;
+			try {
+				result[0] = confirmReplaceApp(title, message, yamlGraph, manifestFile, deploymentProperties, new NullProgressMonitor());
+			} catch (Exception e) {
+				error[0] = e;
+			}
 		});
+
+		if (error[0] != null) {
+			throw error[0];
+		}
 		return result[0];
 	}
 
+	private ManifestDiffDialogModel.Result confirmReplaceApp(String title, String message,YamlGraphDeploymentProperties yamlGraph, IFile manifestFile, CloudApplicationDeploymentProperties existingAppDeploymentProperties, IProgressMonitor monitor) throws Exception {
+		Result result = confirmReplaceAppWithManifest(title, message, yamlGraph, manifestFile, existingAppDeploymentProperties, monitor);
+		if(result == null) {
+			ReplaceExistingApplicationDialog dialog = new ReplaceExistingApplicationDialog(getShell(), title, message);
+			int val = dialog.open();
+			if(val != IDialogConstants.OK_ID) {
+				return Result.CANCELED;
+			}else {
+				return Result.USE_MANIFEST;
+			}
+		}
+		else {
+			return result;
+		}
+	}
+
+	private ManifestDiffDialogModel.Result confirmReplaceAppWithManifest(String title, String message, YamlGraphDeploymentProperties yamlGraph, IFile manifestFile, CloudApplicationDeploymentProperties existingAppDeploymentProperties, IProgressMonitor monitor) throws Exception {
+
+		if (yamlGraph != null && manifestFile != null) {
+			 String yamlContents = IOUtil.toString(manifestFile.getContents());
+
+			TextEdit edit = null;
+			String errorMessage = null;
+			try {
+				MultiTextEdit me = yamlGraph.getDifferences(existingAppDeploymentProperties);
+				edit = me != null && me.hasChildren() ? me : null;
+			} catch (MalformedTreeException e) {
+				errorMessage  = "Failed to create text differences between local manifest file and deployment properties on CF.";
+			} catch (Throwable t) {
+				errorMessage = "Failed to parse local manifest file YAML contents.";
+			}
+			if (errorMessage != null) {
+				throw ExceptionUtil.coreException(errorMessage);
+			}
+
+			if (edit != null) {
+				final IDocument doc = new Document(yamlContents);
+				edit.apply(doc);
+
+				final YamlFileInput left = new YamlFileInput(manifestFile,
+						BootDashActivator.getDefault().getImageRegistry().get(BootDashActivator.CLOUD_ICON));
+				final YamlInput right = new YamlInput("Existing application in Cloud Foundry",
+						BootDashActivator.getDefault().getImageRegistry().get(BootDashActivator.CLOUD_ICON),
+						doc.get());
+
+				CompareConfiguration config = new CompareConfiguration();
+				config.setLeftLabel(left.getName());
+				config.setLeftImage(left.getImage());
+				config.setRightLabel(right.getName());
+				config.setRightImage(right.getImage());
+
+				final CompareEditorInput input = new CompareEditorInput(config) {
+					@Override
+					protected Object prepareInput(IProgressMonitor monitor)
+							throws InvocationTargetException, InterruptedException {
+						setMessage(message);
+						return new DiffNode(left, right);
+					}
+				};
+				input.setTitle("Replacing existing application");
+
+				input.run(monitor);
+
+				// TODO: At the moment, this dialogue offers limited functionality to just compare manifest with existing app. Eventually
+				// we want to have a "full feature" compare editor that allows users to forget manifest
+				// or make changes
+				config.setLeftEditable(false);
+
+				ManifestDiffDialogModel model = new ManifestDiffDialogModel(input);
+
+				int val = new ManifestDiffDialog(getShell(), model, title).open();
+				return ManifestDiffDialog.getResultForCode(val);
+			}
+		}
+		return null;
+	}
 }
