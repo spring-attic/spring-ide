@@ -133,19 +133,17 @@ public class ProjectsDeployer extends CloudOperation {
 					CloudApplicationDeploymentProperties existingAppProperties = CloudApplicationDeploymentProperties.getFor(project, cloudData, app);
 
 					confirmReplaceApp(cloudData, cde, existingAppProperties, project,  manifestFile, monitor, (result) -> {
-						cde.print("Pushing project '"+project.getName()+"' - replacing existing application: " + initialProperties.getAppName());
 						switch (result) {
 						case CANCELED:
+							cde.print("Canceled pushing project '"+project.getName() + "'");
 							throw new OperationCanceledException();
 						case USE_MANIFEST:
 							// Initial properties were generated from Manifest some point earlier so just set the initial properties
 							// if using manifest
 							pushPropertiesToUse.setValue(initialProperties);
-							cde.print("Pushing project '"+project.getName()+"' - replacing existing application using manifest");
 							cde.setDeploymentManifestFile(initialProperties.getManifestFile());
 							break;
 						case FORGET_MANIFEST:
-							cde.print("Pushing project '"+project.getName()+"' - replacing existing application ignoring manifest");
 							cde.setDeploymentManifestFile(null);
 							pushPropertiesToUse.setValue(existingAppProperties);
 							break;
@@ -224,9 +222,9 @@ public class ProjectsDeployer extends CloudOperation {
 		StringWriter writer = new StringWriter();
 		writer.append("Replace existing Cloud application - ");
 		writer.append(existingAppProperties.getAppName());
-		writer.append(" - with the project: ");
+		writer.append(" - with the project '");
 		writer.append(project.getName());
-		writer.append('?');
+		writer.append("'?");
 
 		String title = writer.toString();
 
@@ -245,9 +243,6 @@ public class ProjectsDeployer extends CloudOperation {
 			result = ui.confirmReplaceApp(title, message, yamlGraph, manifestFile, existingAppProperties);
 
 			handleResult.accept(result);
-
-		} else {
-			element.print("No local manifest file found while replacing existing Cloud application - " + existingAppProperties.getAppName() + " using manifest file: " + manifestFile.getFullPath());
 
 		}
 	}
