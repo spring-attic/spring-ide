@@ -376,7 +376,7 @@ public class DefaultUserInteractions implements UserInteractions {
 				existingAppDeploymentProperties, monitor);
 		if (result == null) {
 			String message = "Replace content of the existing Cloud application? Existing deployment properties including bound services will be retained.";
-			if (MessageDialog.openQuestion(getShell(), title, message)) {
+			if (MessageDialog.openConfirm(getShell(), title, message)) {
 				// Not ideal, but using "Forget Manifest" to indicate to use existing Cloud Foundry app deployment properties
 				return Result.FORGET_MANIFEST;
 			} else {
