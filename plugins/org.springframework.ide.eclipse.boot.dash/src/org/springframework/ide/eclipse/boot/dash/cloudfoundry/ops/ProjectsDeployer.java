@@ -127,10 +127,10 @@ public class ProjectsDeployer extends CloudOperation {
 		try {
 
 			cde.whileStarting(ui, cancelationToken, monitor, () -> {
-				CFApplicationDetail app = client.getApplication(initialProperties.getAppName());
-				if (app != null) {
+				CFApplicationDetail existingCloudApp = client.getApplication(initialProperties.getAppName());
+				if (existingCloudApp != null) {
 					CloudData cloudData = buildOperationCloudData(monitor, project);
-					CloudApplicationDeploymentProperties existingAppProperties = CloudApplicationDeploymentProperties.getFor(project, cloudData, app);
+					CloudApplicationDeploymentProperties existingAppProperties = CloudApplicationDeploymentProperties.getFor(project, cloudData, existingCloudApp);
 
 					confirmReplaceApp(cloudData, cde, existingAppProperties, project,  manifestFile, monitor, (result) -> {
 						switch (result) {
