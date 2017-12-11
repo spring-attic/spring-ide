@@ -17,8 +17,8 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.dialogs.IInputValidator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudData;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlGraphDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.dialogs.CustomizeAppsManagerURLDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.CustomizeAppsManagerURLDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel;
@@ -104,6 +104,6 @@ public interface UserInteractions {
 	void openEditAppsManagerURLDialog(CustomizeAppsManagerURLDialogModel model);
 
 	ManifestDiffDialogModel.Result confirmReplaceApp(String title, String message,
-			YamlGraphDeploymentProperties yamlGraph, IFile manifestFile, CloudApplicationDeploymentProperties deploymentProperties)
+			CloudData cloudData, IFile manifestFile, CloudApplicationDeploymentProperties deploymentProperties)
 			throws OperationCanceledException, Exception;
 }

@@ -41,6 +41,7 @@ import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudData;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentPropertiesDialog;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.ManifestDiffDialog;
@@ -55,7 +56,6 @@ import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel.Result;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel;
-import org.springframework.ide.eclipse.boot.dash.dialogs.ReplaceExistingApplicationDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.SelectRemoteEurekaDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialogModel;
@@ -352,12 +352,12 @@ public class DefaultUserInteractions implements UserInteractions {
 	}
 
 	@Override
-	public ManifestDiffDialogModel.Result confirmReplaceApp(String title, String message,YamlGraphDeploymentProperties yamlGraph, IFile manifestFile, CloudApplicationDeploymentProperties deploymentProperties) throws  Exception {
+	public ManifestDiffDialogModel.Result confirmReplaceApp(String title, String message, CloudData cloudData, IFile manifestFile, CloudApplicationDeploymentProperties deploymentProperties) throws  Exception {
 		final Exception[] error = new Exception[1];
 		final Result[] result = new Result[1];
 		getShell().getDisplay().syncExec(() -> {
 			try {
-				result[0] = confirmReplaceApp(title, message, yamlGraph, manifestFile, deploymentProperties, new NullProgressMonitor());
+				result[0] = confirmReplaceApp(title, message, cloudData, manifestFile, deploymentProperties, new NullProgressMonitor());
 			} catch (Exception e) {
 				error[0] = e;
 			}
@@ -369,26 +369,27 @@ public class DefaultUserInteractions implements UserInteractions {
 		return result[0];
 	}
 
-	private ManifestDiffDialogModel.Result confirmReplaceApp(String title, String message,YamlGraphDeploymentProperties yamlGraph, IFile manifestFile, CloudApplicationDeploymentProperties existingAppDeploymentProperties, IProgressMonitor monitor) throws Exception {
-		Result result = confirmReplaceAppWithManifest(title, message, yamlGraph, manifestFile, existingAppDeploymentProperties, monitor);
-		if(result == null) {
-			ReplaceExistingApplicationDialog dialog = new ReplaceExistingApplicationDialog(getShell(), title, message);
-			int val = dialog.open();
-			if(val != IDialogConstants.OK_ID) {
-				return Result.CANCELED;
-			}else {
+	private ManifestDiffDialogModel.Result confirmReplaceApp(String title, String message, CloudData cloudData, IFile manifestFile, CloudApplicationDeploymentProperties existingAppDeploymentProperties, IProgressMonitor monitor) throws Exception {
+		Result result = confirmReplaceAppWithManifest(title, message, cloudData, manifestFile,
+				existingAppDeploymentProperties, monitor);
+		if (result == null) {
+			if (MessageDialog.openQuestion(getShell(), title, message)) {
 				return Result.USE_MANIFEST;
+			} else {
+				return Result.CANCELED;
 			}
-		}
-		else {
+		} else {
 			return result;
 		}
 	}
 
-	private ManifestDiffDialogModel.Result confirmReplaceAppWithManifest(String title, String message, YamlGraphDeploymentProperties yamlGraph, IFile manifestFile, CloudApplicationDeploymentProperties existingAppDeploymentProperties, IProgressMonitor monitor) throws Exception {
+	private ManifestDiffDialogModel.Result confirmReplaceAppWithManifest(String title, String message, CloudData cloudData, IFile manifestFile, CloudApplicationDeploymentProperties existingAppDeploymentProperties, IProgressMonitor monitor) throws Exception {
 
-		if (yamlGraph != null && manifestFile != null) {
-			 String yamlContents = IOUtil.toString(manifestFile.getContents());
+		if (manifestFile != null && manifestFile.isAccessible()) {
+
+			String yamlContents = IOUtil.toString(manifestFile.getContents());
+
+			YamlGraphDeploymentProperties yamlGraph = new YamlGraphDeploymentProperties(yamlContents, existingAppDeploymentProperties.getAppName(), cloudData);
 
 			TextEdit edit = null;
 			String errorMessage = null;

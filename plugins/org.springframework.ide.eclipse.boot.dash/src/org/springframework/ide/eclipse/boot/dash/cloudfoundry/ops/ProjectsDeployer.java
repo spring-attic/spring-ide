@@ -30,7 +30,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientReque
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlGraphDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel.Result;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
@@ -40,7 +39,6 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springframework.ide.eclipse.boot.util.Log;
-import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
@@ -232,18 +230,9 @@ public class ProjectsDeployer extends CloudOperation {
 		writer.append("WARNING: If using the manifest, any existing bound services in Cloud Foundry not listed in the manifest will be deleted.");
 
 		String message = writer.toString();
-		Result result = Result.USE_MANIFEST;
 
-		if (manifestFile != null && manifestFile.isAccessible()) {
-			element.print("Replacing existing Cloud application - " + existingAppProperties.getAppName() + " using manifest file: " + manifestFile.getFullPath());
-			final String yamlContents = IOUtil.toString(manifestFile.getContents());
+		Result result = ui.confirmReplaceApp(title, message, cloudData, manifestFile, existingAppProperties);
 
-			YamlGraphDeploymentProperties yamlGraph = new YamlGraphDeploymentProperties(yamlContents, element.getName(), cloudData);
-
-			result = ui.confirmReplaceApp(title, message, yamlGraph, manifestFile, existingAppProperties);
-
-			handleResult.accept(result);
-
-		}
+		handleResult.accept(result);
 	}
 }
