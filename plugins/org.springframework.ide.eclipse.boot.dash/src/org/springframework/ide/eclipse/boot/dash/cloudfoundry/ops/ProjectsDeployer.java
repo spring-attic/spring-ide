@@ -142,6 +142,8 @@ public class ProjectsDeployer extends CloudOperation {
 							cde.setDeploymentManifestFile(initialProperties.getManifestFile());
 							break;
 						case FORGET_MANIFEST:
+							// "Forget Manifest" means use the existing Cloud app deployment properties (e.g retain existing bound services, memory, env vars, etc..). Only the
+							// app content will be replaced
 							cde.setDeploymentManifestFile(null);
 							pushPropertiesToUse.setValue(existingAppProperties);
 							break;
@@ -226,12 +228,7 @@ public class ProjectsDeployer extends CloudOperation {
 
 		String title = writer.toString();
 
-		writer = new StringWriter();
-		writer.append("WARNING: If using the manifest, any existing bound services in Cloud Foundry not listed in the manifest will be deleted.");
-
-		String message = writer.toString();
-
-		Result result = ui.confirmReplaceApp(title, message, cloudData, manifestFile, existingAppProperties);
+		Result result = ui.confirmReplaceApp(title, cloudData, manifestFile, existingAppProperties);
 
 		handleResult.accept(result);
 	}

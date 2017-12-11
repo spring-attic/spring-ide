@@ -352,12 +352,12 @@ public class DefaultUserInteractions implements UserInteractions {
 	}
 
 	@Override
-	public ManifestDiffDialogModel.Result confirmReplaceApp(String title, String message, CloudData cloudData, IFile manifestFile, CloudApplicationDeploymentProperties deploymentProperties) throws  Exception {
+	public ManifestDiffDialogModel.Result confirmReplaceApp(String title, CloudData cloudData, IFile manifestFile, CloudApplicationDeploymentProperties deploymentProperties) throws  Exception {
 		final Exception[] error = new Exception[1];
 		final Result[] result = new Result[1];
 		getShell().getDisplay().syncExec(() -> {
 			try {
-				result[0] = confirmReplaceApp(title, message, cloudData, manifestFile, deploymentProperties, new NullProgressMonitor());
+				result[0] = confirmReplaceApp(title, cloudData, manifestFile, deploymentProperties, new NullProgressMonitor());
 			} catch (Exception e) {
 				error[0] = e;
 			}
@@ -369,12 +369,16 @@ public class DefaultUserInteractions implements UserInteractions {
 		return result[0];
 	}
 
-	private ManifestDiffDialogModel.Result confirmReplaceApp(String title, String message, CloudData cloudData, IFile manifestFile, CloudApplicationDeploymentProperties existingAppDeploymentProperties, IProgressMonitor monitor) throws Exception {
-		Result result = confirmReplaceAppWithManifest(title, message, cloudData, manifestFile,
+	private ManifestDiffDialogModel.Result confirmReplaceApp(String title, CloudData cloudData, IFile manifestFile, CloudApplicationDeploymentProperties existingAppDeploymentProperties, IProgressMonitor monitor) throws Exception {
+
+
+		Result result = confirmReplaceAppWithManifest(title, cloudData, manifestFile,
 				existingAppDeploymentProperties, monitor);
 		if (result == null) {
+			String message = "Replace content of the existing Cloud application? Existing deployment properties including bound services will be retained.";
 			if (MessageDialog.openQuestion(getShell(), title, message)) {
-				return Result.USE_MANIFEST;
+				// Not ideal, but using "Forget Manifest" to indicate to use existing Cloud Foundry app deployment properties
+				return Result.FORGET_MANIFEST;
 			} else {
 				return Result.CANCELED;
 			}
@@ -383,9 +387,11 @@ public class DefaultUserInteractions implements UserInteractions {
 		}
 	}
 
-	private ManifestDiffDialogModel.Result confirmReplaceAppWithManifest(String title, String message, CloudData cloudData, IFile manifestFile, CloudApplicationDeploymentProperties existingAppDeploymentProperties, IProgressMonitor monitor) throws Exception {
+	private ManifestDiffDialogModel.Result confirmReplaceAppWithManifest(String title, CloudData cloudData, IFile manifestFile, CloudApplicationDeploymentProperties existingAppDeploymentProperties, IProgressMonitor monitor) throws Exception {
 
 		if (manifestFile != null && manifestFile.isAccessible()) {
+
+			String message = "WARNING: If using the manifest, any existing bound services in Cloud Foundry not listed in the manifest will be deleted.";
 
 			String yamlContents = IOUtil.toString(manifestFile.getContents());
 

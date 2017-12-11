@@ -103,7 +103,6 @@ public interface UserInteractions {
 	 */
 	void openEditAppsManagerURLDialog(CustomizeAppsManagerURLDialogModel model);
 
-	ManifestDiffDialogModel.Result confirmReplaceApp(String title, String message,
-			CloudData cloudData, IFile manifestFile, CloudApplicationDeploymentProperties deploymentProperties)
+	ManifestDiffDialogModel.Result confirmReplaceApp(String title, CloudData cloudData, IFile manifestFile, CloudApplicationDeploymentProperties deploymentProperties)
 			throws OperationCanceledException, Exception;
 }
