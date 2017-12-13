@@ -20,7 +20,6 @@
 
    <requires>
       <import feature="org.springframework.ide.eclipse.feature" version="3.9.2"/>
-      <import feature="org.springsource.ide.eclipse.commons" version="3.9.2.qualifier"/>
       <import feature="org.eclipse.ajdt" version="2.0.1" match="greaterOrEqual"/>
    </requires>
 
