@@ -149,6 +149,8 @@ public class ProjectsDeployer extends CloudOperation {
 							break;
 						}
 					});
+				} else {
+					cde.setDeploymentManifestFile(manifestFile);
 				}
 				cde.setProject(project);
 				copyTags(project, cde);
