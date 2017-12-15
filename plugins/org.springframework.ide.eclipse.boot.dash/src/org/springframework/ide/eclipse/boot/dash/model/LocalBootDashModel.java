@@ -24,7 +24,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
-import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
 import org.springframework.ide.eclipse.boot.dash.devtools.DevtoolsPortRefresher;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
 import org.springframework.ide.eclipse.boot.dash.model.local.LocalServicesModel;
@@ -37,7 +36,6 @@ import org.springframework.ide.eclipse.boot.dash.views.LocalElementConsoleManage
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
-import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager.ClasspathListener;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ProjectChangeListenerManager;
@@ -48,6 +46,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 /**
  * Model of the contents for {@link BootDashTreeView}, provides mechanism to attach listeners to model
@@ -83,6 +82,7 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 	private LiveVariable<RefreshState> bootAppsRefreshState = new LiveVariable<>(RefreshState.READY);
 
 	private LiveExpression<RefreshState> refreshState;
+	private BundleListener bundleListener;
 
 	public class WorkspaceListener implements ProjectChangeListener, ClasspathListener {
 
@@ -133,7 +133,7 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 	private void addMavenInitializationIssueEventHandling() {
 		Bundle bundle = Platform.getBundle("org.eclipse.m2e.jdt");
 		if (bundle != null) {
-			BundleListener listener = new BundleListener() {
+			bundleListener = new BundleListener() {
 				@Override
 				public void bundleChanged(BundleEvent event) {
 					if (event.getBundle() == bundle && event.getType() == BundleEvent.STARTED) {
@@ -147,7 +147,7 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 					}
 				}
 			};
-			bundle.getBundleContext().addBundleListener(listener);
+			bundle.getBundleContext().addBundleListener(bundleListener);
 		}
 	}
 
@@ -211,6 +211,14 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 		}
 		launchConfTracker.dispose();
 		launchConfRunStateTracker.dispose();
+		// Remove bundle listener
+		if (bundleListener != null) {
+			Bundle bundle = Platform.getBundle("org.eclipse.m2e.jdt");
+			if (bundle != null) {
+				bundle.getBundleContext().removeBundleListener(bundleListener);
+			}
+		}
+
 	}
 
 	void updateElementsFromWorkspace() {

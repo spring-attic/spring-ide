@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test.mocks;
 
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.RandomStringUtils;
@@ -47,14 +46,10 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFDomain
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.IApplicationLogConsole;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.ParsedUri;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.Randomized;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.RouteAttributes;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.RouteBinding;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.RouteBuilder;
 import org.springframework.ide.eclipse.boot.dash.test.CfTestTargetParams;
 import org.springframework.ide.eclipse.boot.dash.test.util.LiveExpToFlux;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
-import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 
 import com.google.common.collect.ImmutableList;
@@ -438,7 +433,13 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 			app.setTimeoutMaybe(args.getTimeout());
 			app.setHealthCheckTypeMaybe(args.getHealthCheckType());
 			app.setHealthCheckHttpEndpoint(args.getHealthCheckHttpEndpoint());
-			app.setBits(IOUtil.toBytes(new FileInputStream(args.getApplicationDataAsFile())));
+			app.setBits(() -> {
+				try {
+					return Files.readAllBytes(args.getApplicationDataAsFile().toPath());
+				} catch (IOException e) {
+					return new byte[0];
+				}
+			});
 			space.put(app);
 			space.getPushCount(app.getName()).increment();
 

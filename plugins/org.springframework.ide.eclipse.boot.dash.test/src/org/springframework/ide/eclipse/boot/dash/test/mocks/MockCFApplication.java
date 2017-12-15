@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.boot.dash.test.mocks;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -34,13 +33,13 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.InstanceSta
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ApplicationExtras;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFApplicationDetailData;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFApplicationSummaryData;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFRoute;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.RouteBinding;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 
+import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
@@ -100,7 +99,7 @@ public class MockCFApplication {
 	private ImmutableList<CFInstanceStats> stats = ImmutableList.of();
 
 	private CancelationTokens cancelationTokens;
-	private byte[] bits;
+	private Supplier<byte[]> bits;
 
 	public MockCFApplication(MockCloudFoundryClientFactory owner,  MockCFSpace space, String name) {
 		this(owner,
@@ -130,7 +129,7 @@ public class MockCFApplication {
 			public boolean test() throws Exception {
 //				System.out.println("Checking token: "+cancelToken);
 				if (!cancelationToken.isCanceled() && System.currentTimeMillis()<endTime) {
-//					System.out.println("Starting "+getName()+"...");
+					System.out.println("Starting "+getName()+"...");
 					throw new IOException("App still starting");
 				}
 				return true;
@@ -401,7 +400,7 @@ public class MockCFApplication {
 	}
 
 	public String getFileContents(String path) throws IOException {
-		ZipInputStream zip = new ZipInputStream(new ByteArrayInputStream(this.bits));
+		ZipInputStream zip = new ZipInputStream(getBits());
 		ZipEntry entry;
 		while (null != (entry = zip.getNextEntry())) {
 			if (!entry.isDirectory()) {
@@ -422,12 +421,12 @@ public class MockCFApplication {
 		return bytes.toByteArray();
 	}
 
-	public void setBits(byte[] bytes) {
+	public void setBits(Supplier<byte[]> bytes) {
 		this.bits = bytes;
 	}
 
-	public InputStream getBits() {
-		return new ByteArrayInputStream(bits);
+	public ByteArrayInputStream getBits() {
+		return new ByteArrayInputStream(bits.get());
 	}
 
 
