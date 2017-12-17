@@ -391,7 +391,7 @@ public class DefaultUserInteractions implements UserInteractions {
 
 		if (manifestFile != null && manifestFile.isAccessible()) {
 
-			String message = "WARNING: If using the manifest, any existing bound services in Cloud Foundry not listed in the manifest will be deleted.";
+			String message = "WARNING: If using the manifest file, existing service bindings for the application that are not listed in the manifest will be removed.";
 
 			String yamlContents = IOUtil.toString(manifestFile.getContents());
 
