@@ -367,7 +367,7 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		String[] cp = getClasspath(new BootLaunchConfigurationDelegate(), wc);
 		assertClasspath(cp,
 				//ignore:
-				(s) -> s.contains("/jre/lib/"),
+				(s) -> s.contains("/jre/lib/") || s.contains("/Java/Extensions/"),
 				//expect:
 				"target/classes",
 				"spring-boot-starter-1.2.1.RELEASE.jar",
