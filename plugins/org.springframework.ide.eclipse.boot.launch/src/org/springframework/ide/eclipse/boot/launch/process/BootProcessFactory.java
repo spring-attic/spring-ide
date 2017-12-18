@@ -94,8 +94,10 @@ public class BootProcessFactory implements IProcessFactory {
 					streams.getOutputStreamMonitor().addListener(new DumpOutput("%out: "));
 					streams.getErrorStreamMonitor().addListener(new DumpOutput("%err: "));
 				}
-				for (StreamsProxyListener streamsProxyListener : streamsProxyListeners) {
-					streamsProxyListener.streamsProxyCreated(streams, launch);
+				if (streamsProxyListeners!=null) {
+					for (StreamsProxyListener streamsProxyListener : streamsProxyListeners) {
+						streamsProxyListener.streamsProxyCreated(streams, launch);
+					}
 				}
 				return streams;
 			}
