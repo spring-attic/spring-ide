@@ -317,7 +317,7 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		System.out.println(">>> doThinWrapperLaunchTest: "+importStrategy);
 		try {
 			boolean reallyDoThinLaunch = true;
-			Timewatch.monitor("Thin launch with "+importStrategy, Duration.ofMinutes(2), () -> {
+			Timewatch.monitor("Thin launch with "+importStrategy, Duration.ofMinutes(5), () -> {
 				String buildType = importStrategy.split("\\-")[0].toLowerCase();
 				IProject project = projects.createBootProject("thinly-wrapped-"+buildType, withImportStrategy(importStrategy));
 				ILaunchConfigurationWorkingCopy wc = createBaseWorkingCopy(project.getName(), "com.example.demo.ThinlyWrapped"+ StringUtils.capitalize(buildType) +"Application");
@@ -367,7 +367,7 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		String[] cp = getClasspath(new BootLaunchConfigurationDelegate(), wc);
 		assertClasspath(cp,
 				//ignore:
-				(s) -> s.endsWith("jre/lib/resources.jar"),
+				(s) -> s.contains("/jre/lib/"),
 				//expect:
 				"target/classes",
 				"spring-boot-starter-1.2.1.RELEASE.jar",
@@ -406,10 +406,6 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 			assertClasspathEntryExpected(e, expected);
 		}
 
-	}
-
-	private static void assertClasspath(String[] cp, String... expected) {
-		assertClasspath(cp, (s) -> false, expected);
 	}
 
 	private static void assertClasspathEntryExpected(String e, String[] expected) {
