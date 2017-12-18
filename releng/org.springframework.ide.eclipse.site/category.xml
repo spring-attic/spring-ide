@@ -224,6 +224,8 @@
 		<bundle id="org.springsource.ide.eclipse.commons.completions" version="0.0.0"/>
 		<bundle id="org.springsource.ide.eclipse.commons.jdk_tools" version="0.0.0"/>
 
+		<bundle id="org.springframework.ide.eclipse.beans.ui.live" version="0.0.0"/>
+
 		<bundle id="io.projectreactor.reactor-core" version="0.0.0"/>
 		<bundle id="io.projectreactor.reactor-core.source" version="0.0.0"/>
 		<bundle id="org.reactivestreams.reactive-streams" version="0.0.0"/>
