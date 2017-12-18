@@ -22,7 +22,10 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.IStreamListener;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.IStreamMonitor;
-import org.eclipse.debug.core.model.IStreamsProxy;
+import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
+import org.springframework.ide.eclipse.boot.launch.process.BootProcessFactory;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 /**
  * Utility class providing methods to help launching a process from a ILauncConfiguration and waiting for it to
@@ -36,15 +39,26 @@ public class LaunchUtil {
 		return synchLaunch(launchConf, Duration.ofMinutes(2));
 	}
 
+	@SuppressWarnings("resource")
 	public static LaunchResult synchLaunch(ILaunchConfiguration launchConf, Duration timeout) throws CoreException {
-		ILaunch l = launchConf.launch("run", new NullProgressMonitor(), false, true);
-		IProcess process = findProcess(l);
-		IStreamsProxy streams = process.getStreamsProxy();
-
-		StringBuilder out = capture(streams.getOutputStreamMonitor());
-		StringBuilder err = capture(streams.getErrorStreamMonitor());
-		IProcess p = synchLaunch(l, timeout);
-		return new LaunchResult(p.getExitValue(), out.toString(), err.toString());
+		//The way we capture output only works for BootLaunchConfigurationDelegate so make sure that's what this is being used
+		// for:
+		Assert.isLegal(launchConf.getType().getIdentifier().equals(BootLaunchConfigurationDelegate.TYPE_ID));
+		LiveVariable<StringBuilder> out = new LiveVariable<>();
+		LiveVariable<StringBuilder> err = new LiveVariable<>();
+		Disposable disposable = BootProcessFactory.addStreamsProxyListener((streams, launch) -> {
+			if (launch.getLaunchConfiguration().equals(launchConf)) {
+				out.setValue(capture(streams.getOutputStreamMonitor()));
+				err.setValue(capture(streams.getErrorStreamMonitor()));
+			}
+		});
+		try {
+			ILaunch l = launchConf.launch("run", new NullProgressMonitor(), false, true);
+			IProcess p = synchLaunch(l, timeout);
+			return new LaunchResult(p.getExitValue(), out.getValue().toString(), err.getValue().toString());
+		} finally {
+			disposable.dispose();
+		}
 	}
 
 	private static StringBuilder capture(IStreamMonitor stream) {

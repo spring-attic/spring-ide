@@ -15,6 +15,7 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.IProcessFactory;
@@ -27,6 +28,7 @@ import org.springframework.ide.eclipse.boot.launch.util.SpringApplicationLifeCyc
 import org.springframework.ide.eclipse.boot.launch.util.SpringApplicationLifecycleClient;
 import org.springframework.ide.eclipse.boot.util.DumpOutput;
 import org.springframework.ide.eclipse.boot.util.RetryUtil;
+import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 public class BootProcessFactory implements IProcessFactory {
 
@@ -35,6 +37,23 @@ public class BootProcessFactory implements IProcessFactory {
 	 * diagnosing problems during CI build test execution.
 	 */
 	public static boolean ENABLE_OUTPUT_DUMPING = false;
+
+	public interface StreamsProxyListener {
+		void streamsProxyCreated(IStreamsProxy streams, ILaunch launch);
+	}
+
+	private static ListenerList<StreamsProxyListener> streamsProxyListeners = null;
+		//lazy created, only used by testing code, so do not waste space on this in production.
+
+	public static Disposable addStreamsProxyListener(StreamsProxyListener listener) {
+		synchronized (BootProcessFactory.class) {
+			if (streamsProxyListeners==null) {
+				streamsProxyListeners = new ListenerList<>();
+			}
+		}
+		streamsProxyListeners.add(listener);
+		return () -> streamsProxyListeners.remove(listener);
+	}
 
 	private static final boolean DEBUG = false;
 
@@ -74,6 +93,9 @@ public class BootProcessFactory implements IProcessFactory {
 				if (ENABLE_OUTPUT_DUMPING) {
 					streams.getOutputStreamMonitor().addListener(new DumpOutput("%out: "));
 					streams.getErrorStreamMonitor().addListener(new DumpOutput("%err: "));
+				}
+				for (StreamsProxyListener streamsProxyListener : streamsProxyListeners) {
+					streamsProxyListener.streamsProxyCreated(streams, launch);
 				}
 				return streams;
 			}
