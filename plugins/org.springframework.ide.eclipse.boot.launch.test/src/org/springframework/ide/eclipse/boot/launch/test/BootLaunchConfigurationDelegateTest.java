@@ -10,13 +10,18 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.launch.test;
 
+import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withImportStrategy;
+
 import java.io.File;
 import java.net.URL;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -34,10 +39,6 @@ import org.springframework.ide.eclipse.boot.test.util.LaunchResult;
 import org.springframework.ide.eclipse.boot.test.util.LaunchUtil;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.Timewatch;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
-
-import org.apache.commons.lang3.StringUtils;
-
-import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.*;
 
 /**
  * @author Kris De Volder
@@ -154,7 +155,7 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		BootLaunchConfigurationDelegate.setFastStartup(wc, false);
 		assertEquals(false, BootLaunchConfigurationDelegate.getFastStartup(wc));
 	}
-	
+
 	public void testClearProperties() throws Exception {
 		ILaunchConfigurationWorkingCopy wc = createWorkingCopy();
 		BootLaunchConfigurationDelegate.setProperties(wc, Arrays.asList(
@@ -235,7 +236,7 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		assertContains("AUTO-CONFIGURATION REPORT", result.out);
 		assertOk(result);
 	}
-	
+
 	public void testLaunchWithLiveBeans() throws Exception {
 		createLaunchReadyProject(TEST_PROJECT);
 		ILaunchConfigurationWorkingCopy wc = createBaseWorkingCopy();
@@ -295,14 +296,14 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		assertContains("foo='special foo'", result.out);
 		assertOk(result);
 	}
-	
+
 	public void testLaunchWithThinWrapper() throws Exception {
 		URL thinWrapperUrl = new URL("http://repo1.maven.org/maven2/org/springframework/boot/experimental/spring-boot-thin-wrapper/1.0.6.RELEASE/spring-boot-thin-wrapper-1.0.6.RELEASE.jar");
 		File thinWrapper = File.createTempFile("thin-wrapper", ".jar");
 		try {
 			FileUtils.copyURLToFile(thinWrapperUrl, thinWrapper);
 			BootPreferences.getInstance().setThinWrapper(thinWrapper);
-			
+
 			doThinWrapperLaunchTest(thinWrapper, "MAVEN");
 			//Not working: doThinWrapperLaunchTest(thinWrapper, "GRADLE-Buildship 2.x");
 
@@ -311,7 +312,7 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 			BootPreferences.getInstance().setThinWrapper(null);
 		}
 	}
-	
+
 	private void doThinWrapperLaunchTest(File thinWrapper, String importStrategy) throws Exception {
 		System.out.println(">>> doThinWrapperLaunchTest: "+importStrategy);
 		try {
@@ -320,21 +321,21 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 				String buildType = importStrategy.split("\\-")[0].toLowerCase();
 				IProject project = projects.createBootProject("thinly-wrapped-"+buildType, withImportStrategy(importStrategy));
 				ILaunchConfigurationWorkingCopy wc = createBaseWorkingCopy(project.getName(), "com.example.demo.ThinlyWrapped"+ StringUtils.capitalize(buildType) +"Application");
-				
-				createFile(project, "src/main/java/com/example/demo/ShowMessage.java", 
-						"package com.example.demo;\n" + 
-						"\n" + 
-						"import org.springframework.boot.CommandLineRunner;\n" + 
-						"import org.springframework.stereotype.Component;\n" + 
-						"\n" + 
-						"@Component\n" + 
-						"public class ShowMessage implements CommandLineRunner {\n" + 
-						"\n" + 
-						"	@Override\n" + 
-						"	public void run(String... arg0) throws Exception {\n" + 
-						"		System.out.println(\"We have liftoff!\");\n" + 
-						"	}\n" + 
-						"\n" + 
+
+				createFile(project, "src/main/java/com/example/demo/ShowMessage.java",
+						"package com.example.demo;\n" +
+						"\n" +
+						"import org.springframework.boot.CommandLineRunner;\n" +
+						"import org.springframework.stereotype.Component;\n" +
+						"\n" +
+						"@Component\n" +
+						"public class ShowMessage implements CommandLineRunner {\n" +
+						"\n" +
+						"	@Override\n" +
+						"	public void run(String... arg0) throws Exception {\n" +
+						"		System.out.println(\"We have liftoff!\");\n" +
+						"	}\n" +
+						"\n" +
 						"}\n"
 				);
 				StsTestUtil.assertNoErrors(project); // compile project (and check for errors)
@@ -343,14 +344,14 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 					// see if class got compiled. If not, something else will fail later.
 					assertTrue(project.getFile("target/classes/com/example/demo/ShowMessage.class").exists());
 				}
-				
+
 				if (reallyDoThinLaunch) {
 					BootLaunchConfigurationDelegate.setUseThinWrapper(wc, true);
 					String[] classpath = getClasspath(new BootLaunchConfigurationDelegate(), wc);
 					assertTrue(classpath.length==1);
 					assertEquals(thinWrapper.getAbsolutePath(), classpath[0]);
 				}
-	
+
 				LaunchResult result = LaunchUtil.synchLaunch(wc);
 				System.out.println(result);
 				assertContains("We have liftoff!", result.out);
@@ -365,6 +366,9 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		ILaunchConfigurationWorkingCopy wc = createBaseWorkingCopy();
 		String[] cp = getClasspath(new BootLaunchConfigurationDelegate(), wc);
 		assertClasspath(cp,
+				//ignore:
+				(s) -> s.endsWith("jre/lib/resources.jar"),
+				//expect:
 				"target/classes",
 				"spring-boot-starter-1.2.1.RELEASE.jar",
 				"spring-boot-1.2.1.RELEASE.jar",
@@ -386,16 +390,26 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		);
 	}
 
-	private static void assertClasspath(String[] cp, String... expected) {
-		for (int i = 0; i < cp.length; i++) {
-			cp[i]=cp[i].replace('\\', '/');
+	private static void assertClasspath(String[] _cp, Predicate<String> ignoring, String... expected) {
+		List<String> cpList = new ArrayList<String>(_cp.length);
+		for (int i = 0; i < _cp.length; i++) {
+			String normalizedEntry = _cp[i].replace('\\', '/');
+			if (!ignoring.test(normalizedEntry)) {
+				cpList.add(normalizedEntry);
+			}
 		}
+		String[] cp = cpList.toArray(new String[cpList.size()]);
 		for (String e : expected) {
 			assertClasspathHasEntry(cp, e);
 		}
 		for (String e : cp) {
 			assertClasspathEntryExpected(e, expected);
 		}
+
+	}
+
+	private static void assertClasspath(String[] cp, String... expected) {
+		assertClasspath(cp, (s) -> false, expected);
 	}
 
 	private static void assertClasspathEntryExpected(String e, String[] expected) {
@@ -475,7 +489,7 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		createLaunchReadyProject(TEST_PROJECT);
 		ILaunchConfigurationWorkingCopy wc = createBaseWorkingCopy();
 		BootLaunchConfigurationDelegate.setFastStartup(wc, true);
-		
+
 		// Disable life-cycle vm args just to test VM args for fast startup
 		BootLaunchConfigurationDelegate.setEnableLifeCycle(wc, false);
 		BootLaunchConfigurationDelegate.setEnableLiveBeanSupport(wc, false);
@@ -494,12 +508,12 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		createLaunchReadyProject(TEST_PROJECT);
 		ILaunchConfigurationWorkingCopy wc = createBaseWorkingCopy();
 		BootLaunchConfigurationDelegate.setFastStartup(wc, true);
-		
+
 		// Disable life-cycle vm args just to test VM args for fast startup
 		BootLaunchConfigurationDelegate.setEnableLifeCycle(wc, false);
 		BootLaunchConfigurationDelegate.setEnableLiveBeanSupport(wc, false);
 		BootLaunchConfigurationDelegate.setEnableJMX(wc, false);
-		
+
 		wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, "-Xmx1024M");
 
 		String fastStartupArgs = BootActivator.getDefault().getPreferenceStore().getDefaultString(BootPreferences.PREF_BOOT_FAST_STARTUP_JVM_ARGS);
@@ -507,24 +521,24 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		String vmArgs = new BootLaunchConfigurationDelegate().getVMArguments(wc);
 		assertTrue(vmArgs.endsWith("\n" + fastStartupArgs));
 
-		// Also try live beans/JMX arguments 
+		// Also try live beans/JMX arguments
 		BootLaunchConfigurationDelegate.setEnableLifeCycle(wc, true);
 		BootLaunchConfigurationDelegate.setEnableLiveBeanSupport(wc, true);
 		BootLaunchConfigurationDelegate.setEnableJMX(wc, true);
 		LaunchResult result = LaunchUtil.synchLaunch(wc);
 		assertOk(result);
 	}
-	
+
 	public void testEmptyFastStartupVmArgs() throws Exception {
 		createLaunchReadyProject(TEST_PROJECT);
 		ILaunchConfigurationWorkingCopy wc = createBaseWorkingCopy();
 		BootLaunchConfigurationDelegate.setFastStartup(wc, true);
-		
+
 		// Disable life-cycle vm args just to test VM args for fast startup
 		BootLaunchConfigurationDelegate.setEnableLifeCycle(wc, false);
 		BootLaunchConfigurationDelegate.setEnableLiveBeanSupport(wc, false);
 		BootLaunchConfigurationDelegate.setEnableJMX(wc, false);
-		
+
 		String vmArgs = "-Xmx1024M";
 		wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, vmArgs);
 
