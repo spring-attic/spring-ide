@@ -732,8 +732,10 @@ public class NewSpringBootWizardModelTest extends TestCase {
 	private void assertGroupValues(RadioGroup group, String... expecteds) {
 		Set<String> expectedSet = new HashSet<>(Arrays.asList(expecteds));
 		RadioInfo[] radios = group.getRadios();
+		StringBuilder found = new StringBuilder();
 		for (int i = 0; i < radios.length; i++) {
 			String actual = radios[i].getValue();
+			found.append(" "+actual);
 			if (!expectedSet.contains(actual)) {
 				fail("Unexpected: "+actual);
 			}
@@ -744,7 +746,7 @@ public class NewSpringBootWizardModelTest extends TestCase {
 			for (String missing : expectedSet) {
 				notFound.append(" "+missing);
 			}
-			fail("Missing: "+notFound);
+			fail("Missing: "+notFound+"\n Found: "+found);
 		}
 	}
 
