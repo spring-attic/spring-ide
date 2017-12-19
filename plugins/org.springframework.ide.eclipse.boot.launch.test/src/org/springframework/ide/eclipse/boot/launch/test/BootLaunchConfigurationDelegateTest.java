@@ -35,6 +35,7 @@ import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.PropVal;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport;
+import org.springframework.ide.eclipse.boot.launch.process.BootProcessFactory;
 import org.springframework.ide.eclipse.boot.test.util.LaunchResult;
 import org.springframework.ide.eclipse.boot.test.util.LaunchUtil;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.Timewatch;
@@ -298,18 +299,23 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 	}
 
 	public void testLaunchWithThinWrapper() throws Exception {
-		URL thinWrapperUrl = new URL("http://repo1.maven.org/maven2/org/springframework/boot/experimental/spring-boot-thin-wrapper/1.0.6.RELEASE/spring-boot-thin-wrapper-1.0.6.RELEASE.jar");
-		File thinWrapper = File.createTempFile("thin-wrapper", ".jar");
+		BootProcessFactory.ENABLE_OUTPUT_DUMPING = true;
 		try {
-			FileUtils.copyURLToFile(thinWrapperUrl, thinWrapper);
-			BootPreferences.getInstance().setThinWrapper(thinWrapper);
+			URL thinWrapperUrl = new URL("http://repo1.maven.org/maven2/org/springframework/boot/experimental/spring-boot-thin-wrapper/1.0.6.RELEASE/spring-boot-thin-wrapper-1.0.6.RELEASE.jar");
+			File thinWrapper = File.createTempFile("thin-wrapper", ".jar");
+			try {
+				FileUtils.copyURLToFile(thinWrapperUrl, thinWrapper);
+				BootPreferences.getInstance().setThinWrapper(thinWrapper);
 
-			doThinWrapperLaunchTest(thinWrapper, "MAVEN");
-			//Not working: doThinWrapperLaunchTest(thinWrapper, "GRADLE-Buildship 2.x");
+				doThinWrapperLaunchTest(thinWrapper, "MAVEN");
+				//Not working: doThinWrapperLaunchTest(thinWrapper, "GRADLE-Buildship 2.x");
 
+			} finally {
+				FileUtils.deleteQuietly(thinWrapper);
+				BootPreferences.getInstance().setThinWrapper(null);
+			}
 		} finally {
-			FileUtils.deleteQuietly(thinWrapper);
-			BootPreferences.getInstance().setThinWrapper(null);
+			BootProcessFactory.ENABLE_OUTPUT_DUMPING = false;
 		}
 	}
 
