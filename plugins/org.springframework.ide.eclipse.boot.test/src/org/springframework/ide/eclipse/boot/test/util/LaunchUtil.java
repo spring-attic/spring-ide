@@ -22,6 +22,7 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.IStreamListener;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.IStreamMonitor;
+import org.eclipse.debug.core.model.IStreamsProxy;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.process.BootProcessFactory;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -43,21 +44,35 @@ public class LaunchUtil {
 	public static LaunchResult synchLaunch(ILaunchConfiguration launchConf, Duration timeout) throws CoreException {
 		//The way we capture output only works for BootLaunchConfigurationDelegate so make sure that's what this is being used
 		// for:
-		Assert.isLegal(launchConf.getType().getIdentifier().equals(BootLaunchConfigurationDelegate.TYPE_ID));
-		LiveVariable<StringBuilder> out = new LiveVariable<>();
-		LiveVariable<StringBuilder> err = new LiveVariable<>();
-		Disposable disposable = BootProcessFactory.addStreamsProxyListener((streams, launch) -> {
-			if (launch.getLaunchConfiguration().equals(launchConf)) {
-				out.setValue(capture(streams.getOutputStreamMonitor()));
-				err.setValue(capture(streams.getErrorStreamMonitor()));
+		if (launchConf.getType().getIdentifier().equals(BootLaunchConfigurationDelegate.TYPE_ID)) {
+			LiveVariable<StringBuilder> out = new LiveVariable<>();
+			LiveVariable<StringBuilder> err = new LiveVariable<>();
+			Disposable disposable = BootProcessFactory.addStreamsProxyListener((streams, launch) -> {
+				if (launch.getLaunchConfiguration().equals(launchConf)) {
+					out.setValue(capture(streams.getOutputStreamMonitor()));
+					err.setValue(capture(streams.getErrorStreamMonitor()));
+				}
+			});
+			try {
+				ILaunch l = launchConf.launch("run", new NullProgressMonitor(), false, true);
+				IProcess p = synchLaunch(l, timeout);
+				return new LaunchResult(p.getExitValue(), out.getValue().toString(), err.getValue().toString());
+			} finally {
+				disposable.dispose();
 			}
-		});
-		try {
+		} else {
+			//This code has a known race condition, (it is not certain we grab all the output because we can only attach
+			// listeners *after* process already started). We attempted to address this above. But above approach only
+			// works if BootLaunchConfgurationDeletate is used. So we still keep this slightly broken old solution as 
+			// a fallback.
 			ILaunch l = launchConf.launch("run", new NullProgressMonitor(), false, true);
+			IProcess process = findProcess(l);
+			IStreamsProxy streams = process.getStreamsProxy();
+
+			StringBuilder out = capture(streams.getOutputStreamMonitor());
+			StringBuilder err = capture(streams.getErrorStreamMonitor());
 			IProcess p = synchLaunch(l, timeout);
-			return new LaunchResult(p.getExitValue(), out.getValue().toString(), err.getValue().toString());
-		} finally {
-			disposable.dispose();
+			return new LaunchResult(p.getExitValue(), out.toString(), err.toString());
 		}
 	}
 
