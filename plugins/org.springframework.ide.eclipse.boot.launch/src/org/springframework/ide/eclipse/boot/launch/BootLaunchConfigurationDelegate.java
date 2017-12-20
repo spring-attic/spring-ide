@@ -160,7 +160,7 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		String profile = getProfile(conf);
 		boolean debugOutput = getEnableDebugOutput(conf);
 		boolean enableAnsiConsole = supportsAnsiConsoleOutput() && getEnableAnsiConsoleOutput(conf);
-		if ((props==null || props.isEmpty()) && !debugOutput && !hasText(profile) && !enableAnsiConsole) {
+		if ((props==null || props.isEmpty()) && !debugOutput && !hasText(profile) && !enableAnsiConsole && !useThinWrapper(conf)) {
 			//shortcut for case where no boot-specific customizations are specified.
 			return super.getProgramArguments(conf);
 		}
