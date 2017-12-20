@@ -11,6 +11,8 @@
 package org.springframework.ide.eclipse.boot.dash.util;
 
 import java.io.IOException;
+import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Provider;
 import javax.management.AttributeNotFoundException;
@@ -37,12 +39,12 @@ public class CloudCliServiceReadyStateMonitor extends AbstractPollingAppReadySta
 
 	private Provider<JMXConnector> jmxConnectionProvider;
 	private JMXConnector connector;
-	private ObjectName objectName;
+	private String serviceId;
 
 	public CloudCliServiceReadyStateMonitor(Provider<JMXConnector> jmxConnectionProvider, String serviceId) {
 		super();
 		this.jmxConnectionProvider = jmxConnectionProvider;
-		this.objectName = SpringApplicationLifecycleClient.toObjectName("launcher." + serviceId + ":type=RestartEndpoint,name=restartEndpoint");
+		this.serviceId = serviceId;
 	}
 
 	public CloudCliServiceReadyStateMonitor(ILaunch launch, String id) {
@@ -90,16 +92,27 @@ public class CloudCliServiceReadyStateMonitor extends AbstractPollingAppReadySta
 			if (connector != null) {
 				MBeanServerConnection connection = connector.getMBeanServerConnection();
 				try {
-					return (Boolean) connection.getAttribute(objectName, "Running");
+					Set<ObjectName> queryNames = connection.queryNames(SpringApplicationLifecycleClient.toObjectName("launcher." + serviceId + ":type=Endpoint,name=healthEndpoint,identity=*"), null);
+					if (queryNames.size() == 1) {
+						Object o = connection.invoke(queryNames.iterator().next(),"getData",
+								new Object[0],
+								new String[0]);
+						if (o instanceof Map) {
+							return "UP".equals(((Map<?,?>)o).get("status"));
+						}
+//						return dataStr.contains("status=UP");
+					} else if (queryNames.size() > 1) {
+						throw new Exception("Too many beans matching search criteria: " + queryNames);
+					}
 				} catch (AttributeNotFoundException e) {
 					throw new IllegalStateException(
-							"Unexpected: attribute 'Running' not available", e);
+							"Unexpected: attribute 'Data' not available", e);
 				} catch (InstanceNotFoundException e) {
 					return false; // Instance not available yet
 				} catch (MBeanException e) {
 					throw new Exception(e.getCause());
 				} catch (ReflectionException e) {
-					throw new Exception("Failed to retrieve Running attribute",
+					throw new Exception("Failed to retrieve Data attribute",
 							e.getCause());
 				}
 			}
