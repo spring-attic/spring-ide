@@ -301,7 +301,7 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 	public void testLaunchWithThinWrapper() throws Exception {
 		BootProcessFactory.ENABLE_OUTPUT_DUMPING = true;
 		try {
-			URL thinWrapperUrl = new URL("http://repo1.maven.org/maven2/org/springframework/boot/experimental/spring-boot-thin-wrapper/1.0.6.RELEASE/spring-boot-thin-wrapper-1.0.6.RELEASE.jar");
+			URL thinWrapperUrl = new URL("http://repo1.maven.org/maven2/org/springframework/boot/experimental/spring-boot-thin-wrapper/1.0.9.RELEASE/spring-boot-thin-wrapper-1.0.9.RELEASE.jar");
 			File thinWrapper = File.createTempFile("thin-wrapper", ".jar");
 			try {
 				FileUtils.copyURLToFile(thinWrapperUrl, thinWrapper);
