@@ -667,16 +667,16 @@
 			<layout>p2</layout>
 			<url>http://services.typefox.io/open-source/jenkins/job/lsp4j/job/master/lastStableBuild/artifact/build/p2-repository/</url>
 		</repository>
-		<repository>
+<!--		<repository>
 			<id>lsp4e-snapshots</id>
 			<layout>p2</layout>
 			<url>http://download.eclipse.org/lsp4e/snapshots/</url>
-		</repository>
-		<!-- <repository> 
+		</repository> -->
+		<repository> 
 			<id>lsp4e-releases</id> 
 			<layout>p2</layout> 
-			<url>http://download.eclipse.org/lsp4e/releases/0.3.0</url> 
-			</repository> -->
+			<url>http://download.eclipse.org/lsp4e/0.5.0milestone/</url> 
+			</repository>
 		<repository>
 			<id>eclipse-integration-gradle</id>
 			<layout>p2</layout>
