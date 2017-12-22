@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.springframework.ide.eclipse</groupId>
     <artifactId>org.springframework.ide.eclipse.parent</artifactId>
-    <version>3.9.2-SNAPSHOT</version>
+    <version>3.9.3-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <artifactId>org.springframework.ide.eclipse.bestpractices.tests</artifactId>
