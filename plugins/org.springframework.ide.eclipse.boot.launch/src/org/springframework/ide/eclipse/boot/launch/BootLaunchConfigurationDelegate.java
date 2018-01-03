@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2017 Pivotal Software, Inc.
+ * Copyright (c) 2015, 2018 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -529,17 +529,8 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 	}
 
 	public static boolean supportsAnsiConsoleOutput() {
-
-		// check for ANSI console plugin
 		Bundle bundle = Platform.getBundle("net.mihai-nita.ansicon.plugin");
-		boolean ansiConsolePluginInstalled = bundle != null && bundle.getState() != Bundle.UNINSTALLED;
-
-		// check for macOS High Sierra, since that doesn't work with the ANSI console plugin yet
-		String osName = System.getProperty("os.name");
-		String osVersion = System.getProperty("os.version");
-		boolean macOSHighSierraInstalled = osName != null && osName.equals("Mac OS X") && osVersion != null && osVersion.startsWith("10.13");
-
-		return ansiConsolePluginInstalled && !macOSHighSierraInstalled;
+		return bundle != null && bundle.getState() != Bundle.UNINSTALLED;
 	}
 
 	public static boolean getEnableAnsiConsoleOutput(ILaunchConfiguration conf) {
