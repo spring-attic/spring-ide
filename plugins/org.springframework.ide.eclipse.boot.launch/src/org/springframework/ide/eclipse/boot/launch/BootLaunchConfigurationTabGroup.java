@@ -32,7 +32,7 @@ public class BootLaunchConfigurationTabGroup extends AbstractLaunchConfiguration
 			new BootMainTab(),
 			new JavaArgumentsTab(),
 			new JavaJRETab(),
-			new JavaClasspathTab(),
+			new BootClasspathTab(),
 			new SourceLookupTab(),
 			new EnvironmentTab(),
 			new CommonTab()
