@@ -32,7 +32,6 @@ import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
 import org.springframework.ide.eclipse.beans.ui.live.tree.ContextGroupedBeansContentProvider;
 import org.springframework.ide.eclipse.beans.ui.live.tree.LiveBeansTreeLabelProvider;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.FilterBoxModel;
 import org.springsource.ide.eclipse.commons.livexp.ui.util.SwtConnect;
 import org.springsource.ide.eclipse.commons.livexp.ui.util.TreeElementWrappingContentProvider;
