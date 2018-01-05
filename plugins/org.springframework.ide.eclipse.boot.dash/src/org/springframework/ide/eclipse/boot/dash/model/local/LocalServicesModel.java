@@ -104,6 +104,11 @@ public class LocalServicesModel extends AbstractDisposable {
 				UserInteractions ui = viewModel.getContext().getUi();
 				if (bootInstall!=null) {
 					new AutoCloudCliInstaller(bootInstall).performInstall(ui);
+					if (cloudCliInstall.getValue()==null) {
+						//Installation was declined or failed... add filter back.
+						//See: https://www.pivotaltracker.com/story/show/154061574
+						viewerFilters.add(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES);
+					}
 					//Note: triggering refresh in this case should not be necessary because it should be triggered
 					// as needed by the change to cloudCliInstall
 				}
