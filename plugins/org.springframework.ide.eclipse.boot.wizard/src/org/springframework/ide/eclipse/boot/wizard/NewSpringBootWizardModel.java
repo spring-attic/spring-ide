@@ -209,7 +209,8 @@ public class NewSpringBootWizardModel {
 		boolean projectNameValid = projectName.getValidator().getValue() == ValidationResult.OK;
 		if (!projectNameValid) {
 			NameGenerator generator = new NameGenerator(projectName.getValue());
-			while (!projectNameValid) {
+			int limit = 5; //See: https://github.com/spring-projects/spring-ide/issues/230
+			while (!projectNameValid && limit-- > 0) {
 				projectName.setValue(generator.generateNext());
 				projectNameValid = projectName.getValidator().getValue() == ValidationResult.OK;
 			}
