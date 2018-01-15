@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.yaml.refactoring;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -43,7 +45,7 @@ public class PropertiesToYamlConverter {
 	
 	class YamlBuilder {
 		final YamlPath path;
-		final List<String> scalars = new ArrayList<>();
+		final List<Object> scalars = new ArrayList<>();
 		final TreeMap<Integer, YamlBuilder> listItems = new TreeMap<>();
 		final TreeMap<String, YamlBuilder> mapEntries = new TreeMap<>();
 		
@@ -53,7 +55,7 @@ public class PropertiesToYamlConverter {
 		
 		void addProperty(YamlPath path, String value) {
 			if (path.isEmpty()) {
-				scalars.add(value);
+				scalars.add(objectify(value));
 			} else {
 				YamlPathSegment segment = path.getSegment(0);
 				YamlBuilder subBuilder;
@@ -64,6 +66,29 @@ public class PropertiesToYamlConverter {
 				}
 				subBuilder.addProperty(path.dropFirst(1), value);
 			}
+		}
+
+		private Object objectify(String value) {
+			if (value != null) {
+				Object parsed = null; 
+				try {
+					parsed = new BigInteger(value);
+				} catch (NumberFormatException e) {
+					try {
+						parsed = new BigDecimal(value);
+					} catch (NumberFormatException e2) {
+						if (value.equals("true")) {
+							return true;
+						} else if (value.equals("false")) {
+							return false;
+						}
+					}
+				}
+				if (parsed!=null) {
+					return parsed;
+				}
+			}
+			return value;
 		}
 
 		private <T> YamlBuilder getSubBuilder(TreeMap<T, YamlBuilder> subBuilders, YamlPathSegment segment, T key) {

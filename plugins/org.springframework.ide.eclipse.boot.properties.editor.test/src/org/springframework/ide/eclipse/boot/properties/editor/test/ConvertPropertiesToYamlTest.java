@@ -122,6 +122,28 @@ public class ConvertPropertiesToYamlTest {
 		);
 	}
 
+	@Test public void nonStringyValueConversion() throws Exception {
+		//See: https://www.pivotaltracker.com/story/show/154181583
+		//Test that we do not add unnecessary quotes around certain types of values.
+		do_conversionTest(
+				"server.port=8888\n" +
+				"foobar.enabled=true\n" +
+				"foobar.nice=false\n" +
+				"fractional=0.78\n" +
+				"largenumber=989898989898989898989898989898989898989898989898989898989898\n" +
+				"longfractional=-0.989898989898989898989898989898989898989898989898989898989898\n"
+				, // ==>
+				"foobar:\n" +
+				"  enabled: true\n" +
+				"  nice: false\n" +
+				"fractional: 0.78\n" +
+				"largenumber: 989898989898989898989898989898989898989898989898989898989898\n" +
+				"longfractional: -0.989898989898989898989898989898989898989898989898989898989898\n" +
+				"server:\n" +
+				"  port: 8888\n" 
+		);
+	}
+
 	@Test public void emptyFileConversion() throws Exception {
 		do_conversionTest(
 				""
@@ -140,7 +162,7 @@ public class ConvertPropertiesToYamlTest {
 		perform(refactoring);
 		assertEquals(
 			"server:\n" +
-			"  port: '6789'\n"
+			"  port: 6789\n"
 			, 
 			IOUtil.toString(project.getFile("no-extension.yml").getContents())
 		);
