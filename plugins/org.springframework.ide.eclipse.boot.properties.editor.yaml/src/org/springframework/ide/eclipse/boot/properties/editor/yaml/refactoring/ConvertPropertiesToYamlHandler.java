@@ -17,14 +17,13 @@ import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.LocationKind;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.handlers.HandlerUtil;
-import org.springframework.ide.eclipse.boot.util.Log;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizardOpenOperation;
+import org.eclipse.ui.handlers.HandlerUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 public class ConvertPropertiesToYamlHandler extends AbstractHandler {
 
@@ -38,10 +37,9 @@ public class ConvertPropertiesToYamlHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		IEditorInput editorInput = HandlerUtil.getActiveEditorInput(event);
+		IFile file = getTarget(event);
 		try {
-			if (editorInput instanceof IFileEditorInput) {
-				IFile file = ((IFileEditorInput) editorInput).getFile();
+			if (file!=null) {
 				ITextFileBuffer dirtyBuffer = getDirtyFileBuffer(file);
 				if (dirtyBuffer!=null) {
 					dirtyBuffer.commit(null, true);
@@ -66,4 +64,30 @@ public class ConvertPropertiesToYamlHandler extends AbstractHandler {
 		return null;
 	}
 
+	private IFile getTarget(ExecutionEvent event) {
+		ISelection selection = HandlerUtil.getActiveMenuSelection(event);
+		IStructuredSelection ss = null;
+		if (selection instanceof IStructuredSelection) {
+			ss = (IStructuredSelection) selection;
+		} else {
+			selection = HandlerUtil.getActiveMenuEditorInput(event);
+			if (selection instanceof IStructuredSelection) {
+				ss = (IStructuredSelection) selection;
+			}
+		}
+		if (ss!=null && !ss.isEmpty()) {
+			return asFile(ss.getFirstElement());
+		}
+		return null;
+	}
+
+	private IFile asFile(Object selectedElement) {
+		if (selectedElement instanceof IFile) {
+			return (IFile) selectedElement;
+		}
+		if (selectedElement instanceof IAdaptable) {
+			return ((IAdaptable) selectedElement).getAdapter(IFile.class);
+		}
+		return null;
+	}
 }
