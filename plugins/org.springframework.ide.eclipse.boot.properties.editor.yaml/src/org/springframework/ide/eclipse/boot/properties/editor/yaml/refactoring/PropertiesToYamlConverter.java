@@ -78,13 +78,13 @@ public class PropertiesToYamlConverter {
 						parsed = new BigDecimal(value);
 					} catch (NumberFormatException e2) {
 						if (value.equals("true")) {
-							return true;
+							parsed = true;
 						} else if (value.equals("false")) {
-							return false;
+							parsed = false;
 						}
 					}
 				}
-				if (parsed!=null) {
+				if (parsed!=null && parsed.toString().equals(value)) {
 					return parsed;
 				}
 			}

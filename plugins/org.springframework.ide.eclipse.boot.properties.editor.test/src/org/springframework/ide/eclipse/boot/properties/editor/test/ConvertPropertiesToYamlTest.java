@@ -126,6 +126,7 @@ public class ConvertPropertiesToYamlTest {
 		//See: https://www.pivotaltracker.com/story/show/154181583
 		//Test that we do not add unnecessary quotes around certain types of values.
 		do_conversionTest(
+				"exponated=123.4E-12\n" +
 				"server.port=8888\n" +
 				"foobar.enabled=true\n" +
 				"foobar.nice=false\n" +
@@ -133,6 +134,7 @@ public class ConvertPropertiesToYamlTest {
 				"largenumber=989898989898989898989898989898989898989898989898989898989898\n" +
 				"longfractional=-0.989898989898989898989898989898989898989898989898989898989898\n"
 				, // ==>
+				"exponated: '123.4E-12'\n" + //quotes are kept because conversion to number changes the string value
 				"foobar:\n" +
 				"  enabled: true\n" +
 				"  nice: false\n" +
