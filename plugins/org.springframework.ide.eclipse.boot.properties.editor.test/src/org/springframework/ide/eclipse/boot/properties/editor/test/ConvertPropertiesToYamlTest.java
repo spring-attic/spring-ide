@@ -134,7 +134,7 @@ public class ConvertPropertiesToYamlTest {
 				"largenumber=989898989898989898989898989898989898989898989898989898989898\n" +
 				"longfractional=-0.989898989898989898989898989898989898989898989898989898989898\n"
 				, // ==>
-				"exponated: '123.4E-12'\n" + //quotes are kept because conversion to number changes the string value
+				"exponated: '123.4E-12'\n" + //quotes are added because conversion to number changes the string value
 				"foobar:\n" +
 				"  enabled: true\n" +
 				"  nice: false\n" +
@@ -263,75 +263,6 @@ public class ConvertPropertiesToYamlTest {
 		);
 	}
 	
-
-	/* 
-junit.framework.AssertionFailedError: Not found: Blah
- in 
-Direct assignment 'some.property=a-scalar' can not be combined with sub-property assignment 'some.property.sub... Direct assignments will be dropped!
-	at junit.framework.Assert.fail(Assert.java:57)
-	at junit.framework.TestCase.fail(TestCase.java:227)
-	at org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertContains(StsTestCase.java:145)
-	at org.springframework.ide.eclipse.boot.properties.editor.test.ConvertPropertiesToYamlTest.assertStatus(ConvertPropertiesToYamlTest.java:242)
-	at org.springframework.ide.eclipse.boot.properties.editor.test.ConvertPropertiesToYamlTest.lambda$1(ConvertPropertiesToYamlTest.java:168)
-	at org.springframework.ide.eclipse.boot.properties.editor.test.ConvertPropertiesToYamlTest.do_conversionTest(ConvertPropertiesToYamlTest.java:187)
-	at org.springframework.ide.eclipse.boot.properties.editor.test.ConvertPropertiesToYamlTest.scalarAndMapConflict(ConvertPropertiesToYamlTest.java:160)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:26)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:325)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:78)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:57)
-	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
-	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
-	at org.eclipse.jdt.internal.junit4.runner.JUnit4TestReference.run(JUnit4TestReference.java:86)
-	at org.eclipse.jdt.internal.junit.runner.TestExecution.run(TestExecution.java:38)
-	at org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.runTests(RemoteTestRunner.java:459)
-	at org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.runTests(RemoteTestRunner.java:678)
-	at org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.run(RemoteTestRunner.java:382)
-	at org.eclipse.pde.internal.junit.runtime.RemotePluginTestRunner.main(RemotePluginTestRunner.java:66)
-	at org.eclipse.pde.internal.junit.runtime.PlatformUITestHarness.lambda$0(PlatformUITestHarness.java:43)
-	at org.eclipse.swt.widgets.RunnableLock.run(RunnableLock.java:37)
-	at org.eclipse.swt.widgets.Synchronizer.runAsyncMessages(Synchronizer.java:182)
-	at org.eclipse.swt.widgets.Display.runAsyncMessages(Display.java:4497)
-	at org.eclipse.swt.widgets.Display.readAndDispatch(Display.java:4110)
-	at org.eclipse.e4.ui.internal.workbench.swt.PartRenderingEngine$5.run(PartRenderingEngine.java:1155)
-	at org.eclipse.core.databinding.observable.Realm.runWithDefault(Realm.java:336)
-	at org.eclipse.e4.ui.internal.workbench.swt.PartRenderingEngine.run(PartRenderingEngine.java:1044)
-	at org.eclipse.e4.ui.internal.workbench.E4Workbench.createAndRunUI(E4Workbench.java:153)
-	at org.eclipse.ui.internal.Workbench.lambda$3(Workbench.java:680)
-	at org.eclipse.core.databinding.observable.Realm.runWithDefault(Realm.java:336)
-	at org.eclipse.ui.internal.Workbench.createAndRunWorkbench(Workbench.java:594)
-	at org.eclipse.ui.PlatformUI.createAndRunWorkbench(PlatformUI.java:148)
-	at org.eclipse.ui.internal.ide.application.IDEApplication.start(IDEApplication.java:151)
-	at org.eclipse.pde.internal.junit.runtime.NonUIThreadTestApplication.runApp(NonUIThreadTestApplication.java:52)
-	at org.eclipse.pde.internal.junit.runtime.UITestApplication.runApp(UITestApplication.java:43)
-	at org.eclipse.pde.internal.junit.runtime.NonUIThreadTestApplication.start(NonUIThreadTestApplication.java:46)
-	at org.eclipse.equinox.internal.app.EclipseAppHandle.run(EclipseAppHandle.java:196)
-	at org.eclipse.core.runtime.internal.adaptor.EclipseAppLauncher.runApplication(EclipseAppLauncher.java:134)
-	at org.eclipse.core.runtime.internal.adaptor.EclipseAppLauncher.start(EclipseAppLauncher.java:104)
-	at org.eclipse.core.runtime.adaptor.EclipseStarter.run(EclipseStarter.java:388)
-	at org.eclipse.core.runtime.adaptor.EclipseStarter.run(EclipseStarter.java:243)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at org.eclipse.equinox.launcher.Main.invokeFramework(Main.java:653)
-	at org.eclipse.equinox.launcher.Main.basicRun(Main.java:590)
-	at org.eclipse.equinox.launcher.Main.run(Main.java:1499)
-	at org.eclipse.equinox.launcher.Main.main(Main.java:1472)
-
-
-	 */
 	private void do_conversionTest(String input, String expectedOutput) throws Exception {
 		do_conversionTest(input, expectedOutput, (status) -> {
 			assertEquals(RefactoringStatus.OK, status.getSeverity());
