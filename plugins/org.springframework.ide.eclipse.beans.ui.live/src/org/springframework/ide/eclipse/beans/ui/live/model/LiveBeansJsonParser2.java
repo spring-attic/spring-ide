@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.ui.live.model;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -34,11 +35,26 @@ public class LiveBeansJsonParser2 extends LiveBeansJsonParser {
 
 	@Override
 	protected JSONArray extractContextsJson(String json) throws JSONException {
-		Object obj = new JSONTokener(json).nextValue();
-		if (obj instanceof JSONArray) {
-			return (JSONArray) obj;
+		JSONObject contextsObj = new JSONObject(json);
+		if (contextsObj.has("contexts")) {
+			JSONObject contextsMap = contextsObj.getJSONObject("contexts");
+			String[] contextIds = JSONObject.getNames(contextsMap);
+			ArrayList<JSONObject> contextsList = new ArrayList<>(contextIds.length);
+			for (Object contextId : contextIds) {
+				if (contextId instanceof String) {
+					JSONObject contextJson = contextsMap.getJSONObject((String) contextId);
+					contextJson.put(LiveBeansContext.ATTR_CONTEXT_ID, contextId);
+					contextsList.add(contextJson);
+				}
+			}
+			return new JSONArray(contextsList);
 		} else {
-			return new JSONArray(Arrays.asList(obj));
+			Object obj = new JSONTokener(json).nextValue();
+			if (obj instanceof JSONArray) {
+				return (JSONArray) obj;
+			} else {
+				return new JSONArray(Arrays.asList(obj));
+			}
 		}
 	}
 
