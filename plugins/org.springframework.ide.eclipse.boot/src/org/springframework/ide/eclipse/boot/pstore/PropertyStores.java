@@ -18,20 +18,24 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.springframework.ide.eclipse.boot.util.Log;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 /**
  * Provides static helper methods to create IPropertyStore instances,
  */
 public class PropertyStores {
 
-	private static final String QUALIFIER = "microservice-metadata";
+	private static final String DEFAULT_QUALIFIER = "microservice-metadata";
 
 	public static IScopedPropertyStore<IProject> createForProjects() {
+		return createForProjects(DEFAULT_QUALIFIER);
+	}
+
+	public static IScopedPropertyStore<IProject> createForProjects(String qualifier) {
 		return new PreferenceBasedStore<IProject>() {
 			@Override
 			protected IEclipsePreferences createPrefs(IProject p) {
-				IEclipsePreferences prefs = new ProjectScope(p).getNode(QUALIFIER);
+				IEclipsePreferences prefs = new ProjectScope(p).getNode(qualifier);
 				return prefs;
 			}
 		};

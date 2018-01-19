@@ -66,4 +66,7 @@
   </page>
 </extension>
 
+<extension point="org.eclipse.ui.startup">
+      <startup class="org.springframework.ide.eclipse.boot.validation.BootValidationEnabler"/>
+</extension>
 </plugin>
