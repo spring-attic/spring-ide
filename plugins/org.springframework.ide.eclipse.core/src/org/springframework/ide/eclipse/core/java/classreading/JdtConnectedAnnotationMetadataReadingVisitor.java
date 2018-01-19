@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2014 Spring IDE Developers
+ * Copyright (c) 2013, 2018 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Type;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.classreading.AnnotationMetadataReadingVisitor;
 import org.springframework.ide.eclipse.core.model.java.JavaModelSourceLocation;
 
@@ -52,5 +53,17 @@ public class JdtConnectedAnnotationMetadataReadingVisitor extends AnnotationMeta
 	public boolean isAnnotated(String annotationType) {
 		return !ImportResource.class.getName().equals(annotationType) && super.isAnnotated(annotationType);
 	}
-
+	
+	@Override
+	public AnnotationAttributes getAnnotationAttributes(String annotationName, boolean classValuesAsString) {
+		AnnotationAttributes attributes = super.getAnnotationAttributes(annotationName, classValuesAsString);
+		
+		// ignore property sources if they are not found, e.g. due to property placeholders being used
+		if (attributes != null && "org.springframework.context.annotation.PropertySource".equals(annotationName)) {
+			attributes.put("ignoreResourceNotFound", Boolean.TRUE);
+		}
+		
+		return attributes;
+	}
+	
 }
