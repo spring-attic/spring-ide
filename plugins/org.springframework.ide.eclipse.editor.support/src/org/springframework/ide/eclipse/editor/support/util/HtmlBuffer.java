@@ -22,12 +22,13 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jface.internal.text.html.BrowserInformationControl;
-import org.eclipse.jface.internal.text.html.HTMLPrinter;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.swt.graphics.FontData;
 import org.osgi.framework.Bundle;
 import org.springframework.ide.eclipse.editor.support.EditorSupportActivator;
+
+import org.springsource.ide.eclipse.commons.ui.HTMLPrinter;
 
 /**
  * Helper class to make it a little easier to create simple html page (for display in
