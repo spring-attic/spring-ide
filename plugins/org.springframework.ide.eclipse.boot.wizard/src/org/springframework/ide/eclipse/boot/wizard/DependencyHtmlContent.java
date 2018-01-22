@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.boot.wizard;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jface.internal.text.html.HTMLPrinter;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.Util;
 import org.eclipse.swt.SWT;
@@ -22,6 +21,7 @@ import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpe
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Link;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Links;
+import org.springsource.ide.eclipse.commons.ui.HTMLPrinter;
 
 /**
  * Utility class containing static method for creating HTML help/tooltip content for dependency
@@ -45,7 +45,7 @@ class DependencyHtmlContent {
 	 * @return HTML as a <code>string</code>
 	 */
 	public static String generateHtmlDocumentation(Dependency dep, Map<String, String> variables) {
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		HTMLPrinter.insertPageProlog(buffer, 0, String.join("\n", styles()));
 
 		Links links = dep.getLinks();
@@ -83,7 +83,7 @@ class DependencyHtmlContent {
 	}
 
 	private static String linkBullets(Link[] links, Map<String, String> variableValues) {
-		StringBuffer bullets = new StringBuffer();
+		StringBuilder bullets = new StringBuilder();
 		for (Link link : links) {
 			String href = link.getHref();
 			if (link.isTemplated()) {

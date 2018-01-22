@@ -38,12 +38,12 @@ import org.springframework.ide.eclipse.editor.support.EditorSupportActivator;
 @SuppressWarnings("restriction")
 public class HtmlBuffer {
 
-	private StringBuffer buffer = new StringBuffer();
+	private StringBuilder buffer = new StringBuilder();
 	private boolean epilogAdded = false; //to ensure only added once.
 	private static String fgCSSStyles;
 
 	public HtmlBuffer() {
-		this.buffer = new StringBuffer();
+		this.buffer = new StringBuilder();
 	}
 
 	/**
