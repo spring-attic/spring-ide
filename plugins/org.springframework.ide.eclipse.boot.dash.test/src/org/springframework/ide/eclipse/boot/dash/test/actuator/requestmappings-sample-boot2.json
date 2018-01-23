@@ -1,0 +1,125 @@
+{
+	"contexts": {
+		"application": {
+			"mappings": {
+				"dispatcherServlets": {
+					"dispatcherServlet": [
+						{
+							"handler": "ResourceHttpRequestHandler [locations=[class path resource [META-INF/resources/], class path resource [resources/], class path resource [static/], class path resource [public/], ServletContext resource [/], class path resource []], resolvers=[org.springframework.web.servlet.resource.PathResourceResolver@18d3a30f]]",
+							"predicate": "/**/favicon.ico"
+						},
+						{
+							"handler": "public java.lang.Object org.springframework.boot.actuate.endpoint.web.servlet.AbstractWebMvcEndpointHandlerMapping$OperationHandler.handle(javax.servlet.http.HttpServletRequest,java.util.Map<java.lang.String, java.lang.String>)",
+							"predicate": "{[/actuator/health],methods=[GET],produces=[application/vnd.spring-boot.actuator.v2+json || application/json]}"
+						},
+						{
+							"handler": "public java.lang.Object org.springframework.boot.actuate.endpoint.web.servlet.AbstractWebMvcEndpointHandlerMapping$OperationHandler.handle(javax.servlet.http.HttpServletRequest,java.util.Map<java.lang.String, java.lang.String>)",
+							"predicate": "{[/actuator/info],methods=[GET],produces=[application/vnd.spring-boot.actuator.v2+json || application/json]}"
+						},
+						{
+							"handler": "protected java.util.Map<java.lang.String, java.util.Map<java.lang.String, org.springframework.boot.actuate.endpoint.web.Link>> org.springframework.boot.actuate.endpoint.web.servlet.WebMvcEndpointHandlerMapping.links(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)",
+							"predicate": "{[/actuator],methods=[GET],produces=[application/vnd.spring-boot.actuator.v2+json || application/json]}"
+						},
+						{
+							"handler": "public java.lang.String com.example.demo.MyController.hello()",
+							"predicate": "{[/hello]}"
+						},
+						{
+							"handler": "public java.lang.String com.example.demo.MyController.getMethodName(java.lang.String)",
+							"predicate": "{[/greeting],methods=[GET]}"
+						},
+						{
+							"handler": "public org.springframework.web.servlet.ModelAndView org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController.errorHtml(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)",
+							"predicate": "{[/error],produces=[text/html]}"
+						},
+						{
+							"handler": "public org.springframework.http.ResponseEntity<java.util.Map<java.lang.String, java.lang.Object>> org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController.error(javax.servlet.http.HttpServletRequest)",
+							"predicate": "{[/error]}"
+						},
+						{
+							"handler": "ResourceHttpRequestHandler [locations=[class path resource [META-INF/resources/webjars/]], resolvers=[org.springframework.web.servlet.resource.PathResourceResolver@825c3ee]]",
+							"predicate": "/webjars/**"
+						},
+						{
+							"handler": "ResourceHttpRequestHandler [locations=[class path resource [META-INF/resources/], class path resource [resources/], class path resource [static/], class path resource [public/], ServletContext resource [/]], resolvers=[org.springframework.web.servlet.resource.PathResourceResolver@debc23e]]",
+							"predicate": "/**"
+						}
+					]
+				},
+				"servletFilters": [
+					{
+						"servletNameMappings": [],
+						"urlPatternMappings": [
+							"/*"
+						],
+						"name": "requestContextFilter",
+						"className": "org.springframework.boot.web.servlet.filter.OrderedRequestContextFilter"
+					},
+					{
+						"servletNameMappings": [],
+						"urlPatternMappings": [
+							"/*"
+						],
+						"name": "Tomcat WebSocket (JSR356) Filter",
+						"className": "org.apache.tomcat.websocket.server.WsFilter"
+					},
+					{
+						"servletNameMappings": [],
+						"urlPatternMappings": [
+							"/*"
+						],
+						"name": "httpPutFormContentFilter",
+						"className": "org.springframework.boot.web.servlet.filter.OrderedHttpPutFormContentFilter"
+					},
+					{
+						"servletNameMappings": [],
+						"urlPatternMappings": [
+							"/*"
+						],
+						"name": "hiddenHttpMethodFilter",
+						"className": "org.springframework.boot.web.servlet.filter.OrderedHiddenHttpMethodFilter"
+					},
+					{
+						"servletNameMappings": [],
+						"urlPatternMappings": [
+							"/*"
+						],
+						"name": "characterEncodingFilter",
+						"className": "org.springframework.boot.web.servlet.filter.OrderedCharacterEncodingFilter"
+					},
+					{
+						"servletNameMappings": [],
+						"urlPatternMappings": [
+							"/*"
+						],
+						"name": "webMetricsFilter",
+						"className": "org.springframework.boot.actuate.metrics.web.servlet.WebMvcMetricsFilter"
+					},
+					{
+						"servletNameMappings": [],
+						"urlPatternMappings": [
+							"/*"
+						],
+						"name": "webRequestLoggingFilter",
+						"className": "org.springframework.boot.actuate.trace.WebRequestTraceFilter"
+					}
+				],
+				"servlets": [
+					{
+						"mappings": [],
+						"name": "default",
+						"className": "org.apache.catalina.servlets.DefaultServlet"
+					},
+					{
+						"mappings": [
+							"/"
+						],
+						"name": "dispatcherServlet",
+						"className": "org.springframework.web.servlet.DispatcherServlet"
+					}
+				]
+			},
+			"parentId": null
+		}
+	}
+}

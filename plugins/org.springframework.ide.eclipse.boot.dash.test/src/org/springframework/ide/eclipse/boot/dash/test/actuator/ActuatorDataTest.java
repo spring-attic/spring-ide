@@ -14,6 +14,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.Test;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBean;
@@ -21,6 +24,9 @@ import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansContext;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModel;
 import org.springframework.ide.eclipse.beans.ui.live.model.TypeLookup;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.ActuatorClient;
+import org.springframework.ide.eclipse.boot.dash.model.actuator.RequestMapping;
+
+import com.google.common.collect.ImmutableSet;
 
 /**
  * Tests data obtained from the Actuator
@@ -130,4 +136,27 @@ public class ActuatorDataTest {
 				bean2.getBeanType());
 		assertEquals("spring.jackson-org.springframework.boot.autoconfigure.jackson.JacksonProperties", bean2.getId());
 	}
+
+	@Test public void testRequestMappingsBoot2() throws Exception {
+		TestActuatorClient client = new TestActuatorClient(null).version("2").requestMappingJson(ActuatorClientTest.getContents("requestmappings-sample-boot2.json"));
+		List<RequestMapping> mappings = client.getRequestMappings();
+		System.out.println(mappings);
+		ImmutableSet<String> expected = ImmutableSet.of(
+				"/**/favicon.ico",
+				"/actuator/health",
+				"/actuator/info",
+				"/actuator",
+				"/hello",
+				"/greeting",
+				"/error",
+				"/webjars/**",
+				"/**"
+		);
+		assertEquals(expected,
+				mappings.stream()
+				.map(RequestMapping::getPath)
+				.collect(Collectors.toSet())
+		);
+	}
+
 }
