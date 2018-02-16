@@ -38,10 +38,10 @@ import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
-import org.springframework.ide.eclipse.boot.util.FileUtil;
 import org.springframework.ide.eclipse.boot.util.JavaProjectUtil;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.frameworks.core.maintype.MainTypeFinder;
+import org.springsource.ide.eclipse.commons.frameworks.core.util.FileUtil;
 
 public class CloudApplicationArchiverStrategyAsJar implements CloudApplicationArchiverStrategy {
 
@@ -167,7 +167,7 @@ public class CloudApplicationArchiverStrategyAsJar implements CloudApplicationAr
 
 		private File getTempFolder() throws IOException {
 			if (_tempFolder==null) {
-				_tempFolder = FileUtil.createTempFolder(TEMP_FOLDER_NAME);
+				_tempFolder = FileUtil.createTempDirectory(TEMP_FOLDER_NAME);
 			}
 			return _tempFolder;
 		}

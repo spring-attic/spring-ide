@@ -35,6 +35,7 @@ import org.springframework.boot.loader.tools.Repackager;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryUiUtil;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.JavaPackageFragmentRootHandler;
+import org.springsource.ide.eclipse.commons.frameworks.core.util.FileUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 public class CloudApplicationArchiver implements ICloudApplicationArchiver {
@@ -196,7 +197,7 @@ public class CloudApplicationArchiver implements ICloudApplicationArchiver {
 	}
 
 	public String getTempJarPath() throws Exception {
-		File tempFolder = org.springframework.ide.eclipse.boot.util.FileUtil.createTempFolder(TEMP_FOLDER_NAME);
+		File tempFolder = FileUtil.createTempDirectory(TEMP_FOLDER_NAME);
 		tempFolder.delete();
 		tempFolder.mkdirs();
 
