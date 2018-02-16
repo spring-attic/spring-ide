@@ -30,7 +30,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataRepository;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataRepositoryJsonBuilder;
-import org.springframework.ide.eclipse.boot.util.FileUtil;
+import org.springsource.ide.eclipse.commons.frameworks.core.util.FileUtil;
 
 /**
  * Load a {@link ConfigMetadataRepository} from the content of an eclipse
