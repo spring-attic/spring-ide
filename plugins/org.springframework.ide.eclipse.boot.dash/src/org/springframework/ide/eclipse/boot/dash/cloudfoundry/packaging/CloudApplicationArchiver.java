@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2018 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -196,7 +196,7 @@ public class CloudApplicationArchiver implements ICloudApplicationArchiver {
 	}
 
 	public String getTempJarPath() throws Exception {
-		File tempFolder = File.createTempFile(TEMP_FOLDER_NAME, null);
+		File tempFolder = org.springframework.ide.eclipse.boot.util.FileUtil.createTempFolder(TEMP_FOLDER_NAME);
 		tempFolder.delete();
 		tempFolder.mkdirs();
 
@@ -206,7 +206,6 @@ public class CloudApplicationArchiver implements ICloudApplicationArchiver {
 		}
 
 		File targetFile = new File(tempFolder, applicationName + ".jar");
-		targetFile.deleteOnExit();
 
 		String path = new Path(targetFile.getAbsolutePath()).toString();
 
