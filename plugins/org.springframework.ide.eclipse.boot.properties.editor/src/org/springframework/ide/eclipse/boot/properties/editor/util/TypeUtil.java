@@ -414,11 +414,13 @@ public class TypeUtil {
 		//However...
 		//Seems that in Boot 1.3 arrays are now 'Bracketable' and funcion much equivalnt to list (even including 'autogrowing' them).
 		//This is actually more logical too.
-		//So '[' notation in props file can be used for either list or arrays (at leats in recent versions of boot).
-		return isArray(type) || isList(type);
+		//So '[' notation in props file can be used for either list or arrays (at least in recent versions of boot).
+		//Note also 'Set' are now considered bracketable. See: https://www.pivotaltracker.com/story/show/154644992
+		return isArray(type) || isCollection(List.class, type) || isCollection(Set.class, type);
 	}
 
-	public static boolean isList(Type type) {
+	@SuppressWarnings("rawtypes")
+	private static boolean isCollection( Class<? extends Collection> klass, Type type) {
 		//Note: to be really correct we should use JDT infrastructure to resolve
 		//type in project classpath instead of using Java reflection.
 		//However, use reflection here is okay assuming types we care about
@@ -428,7 +430,7 @@ public class TypeUtil {
 			String erasure = type.getErasure();
 			try {
 				Class<?> erasureClass = Class.forName(erasure);
-				return List.class.isAssignableFrom(erasureClass);
+				return klass.isAssignableFrom(erasureClass);
 			} catch (Exception e) {
 				//type not resolveable assume its not 'array like'
 			}
@@ -440,10 +442,15 @@ public class TypeUtil {
 	 * Check if type can be treated / represented as a sequence node in .yml file
 	 */
 	public static boolean isSequencable(Type type) {
-		return isList(type) || isArray(type);
+		return isBracketable(type);
 	}
 
-	public static boolean isArray(Type type) {
+	/**
+	 * Note: this method is private on purpose. arrays, lists and sets function all
+	 * very much the same way as far as props / yml editors are concerned. So code calling
+	 * this method is likely being too specific by limiting to array types only.
+	 */
+	private static boolean isArray(Type type) {
 		return type!=null && type.getErasure().endsWith("[]");
 	}
 
@@ -514,12 +521,10 @@ public class TypeUtil {
 	public boolean isAssignableType(Type type) {
 		return ASSIGNABLE_TYPES.contains(type.getErasure())
 				|| isEnum(type)
-				|| isAssignableList(type);
+				|| isAssignableCollection(type);
 	}
 
-	private boolean isAssignableList(Type type) {
-		//TODO: isBracketable means 'isList' right now, but this may not be
-		// the case in the future.
+	private boolean isAssignableCollection(Type type) {
 		if (isBracketable(type)) {
 			Type domainType = getDomainType(type);
 			return isAtomic(domainType);

@@ -199,7 +199,7 @@ public class SpringPropertiesReconcileEngine implements IReconcileEngine {
 						"Expecting '"+typeUtil.niceTypeName(expectType)+"'",
 						escapedValue));
 			}
-		} else if (TypeUtil.isList(expectType)||TypeUtil.isArray(expectType)) {
+		} else if (TypeUtil.isBracketable(expectType)) {
 			commaListReconciler.reconcile(escapedValue, expectType, problems);
 		}
 	}

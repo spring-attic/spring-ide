@@ -361,7 +361,7 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 											//because value partition includes whitespace around the assignment
 
 			Type type = getValueType(propertyName);
-			if (TypeUtil.isArray(type) || TypeUtil.isList(type)) {
+			if (TypeUtil.isBracketable(type)) {
 				//It is useful to provide content assist for the values in the list when entering a list
 				type = TypeUtil.getDomainType(type);
 			}
@@ -449,7 +449,7 @@ public class SpringPropertiesCompletionEngine implements HoverInfoProvider, ICom
 
 	private Collection<StsValueHint> getValueHints(String query, String propertyName, EnumCaseMode caseMode) {
 		Type type = getValueType(propertyName);
-		if (TypeUtil.isArray(type) || TypeUtil.isList(type)) {
+		if (TypeUtil.isBracketable(type)) {
 			//It is useful to provide content assist for the values in the list when entering a list
 			type = TypeUtil.getDomainType(type);
 		}

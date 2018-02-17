@@ -21,6 +21,8 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesCompletionEngine;
 import org.springframework.ide.eclipse.boot.properties.editor.StsConfigMetadataRepositoryJsonLoader;
@@ -1400,13 +1402,24 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 	}
 
 	public void testCommaListReconcile() throws Exception {
+		String collectionType = "java.util.List";
+		doCommaCollectionReconcile(collectionType);
+	}
+
+	public void testCommaSetReconcile() throws Exception {
+		String collectionType = "java.util.Set";
+		doCommaCollectionReconcile(collectionType);
+	}
+
+	private void doCommaCollectionReconcile(String collectionType)
+			throws Exception, JavaModelException, BadLocationException {
 		MockEditor editor;
 		IProject p = createPredefinedMavenProject("demo-enum");
 		IJavaProject jp = JavaCore.create(p);
 		useProject(jp);
 		assertNotNull(jp.findType("demo.Color"));
 
-		data("my.colors", "java.util.List<demo.Color>", null, "Ooh! nice colors!");
+		data("my.colors", collectionType + "<demo.Color>", null, "Ooh! nice colors!");
 
 		editor = newEditor(
 				"#comment\n" +
@@ -1567,15 +1580,23 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		assertLinkTargets(editor, "red", "demo.Color.RED");
 	}
 
-//	public void testContentAssistAfterRBrack() throws Exception {
-//		//TODO: content assist after ] (auto insert leading '.' if necessary)
-//	}
+	public void testSetOfEnumsCompletions() throws Exception {
+		useProject(createPredefinedMavenProject("demo-enum"));
+		data("my.color-set", "java.util.Set<demo.Color>", null, "Set of colors that can be used.");
 
-	//public void
-
-
-	//TODO: relaxed names for navigation operations (i.e. object properties and enum map keys)
-
-
-
+		assertCompletions("my.colos<*>", 
+				"my.color-set=<*>"
+		);
+		assertCompletions("my.color-set=<*>",
+				"my.color-set=blue<*>",
+				"my.color-set=green<*>",
+				"my.color-set=red<*>"
+		);
+		assertCompletions("my.color-set=B<*>",
+				"my.color-set=BLUE<*>"
+		);
+		assertCompletions("my.color-set=red,B<*>",
+				"my.color-set=red,BLUE<*>"
+		);
+	}
 }
