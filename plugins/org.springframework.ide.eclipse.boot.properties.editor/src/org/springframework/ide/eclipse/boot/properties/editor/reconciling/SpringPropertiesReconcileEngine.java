@@ -19,8 +19,13 @@ import java.util.regex.Pattern;
 
 import javax.inject.Provider;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
+import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEditorMessages;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEscapes;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -41,7 +46,9 @@ import org.springframework.ide.eclipse.editor.support.reconcile.IProblemCollecto
 import org.springframework.ide.eclipse.editor.support.reconcile.IReconcileEngine;
 import org.springframework.ide.eclipse.editor.support.util.DocumentRegion;
 import org.springframework.ide.eclipse.editor.support.util.DocumentUtil;
+import org.springframework.ide.eclipse.editor.support.util.ValueParseException;
 import org.springframework.ide.eclipse.editor.support.util.ValueParser;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 /**
  * Implements reconciling algorithm for {@link SpringPropertiesReconcileStrategy}.
@@ -73,7 +80,6 @@ public class SpringPropertiesReconcileEngine implements IReconcileEngine {
 
 	private Provider<FuzzyMap<PropertyInfo>> fIndexProvider;
 	private TypeUtil typeUtil;
-	private final DelimitedListReconciler commaListReconciler = new DelimitedListReconciler(COMMA, this::reconcileType);
 
 	public SpringPropertiesReconcileEngine(Provider<FuzzyMap<PropertyInfo>> provider, TypeUtil typeUtil) {
 		this.fIndexProvider = provider;
@@ -194,13 +200,15 @@ public class SpringPropertiesReconcileEngine implements IReconcileEngine {
 					//Don't check strings that look like they use variable substitution.
 					parser.parse(valueStr);
 				}
+			} catch (ValueParseException e) {
+				problems.accept(problem(SpringPropertiesProblemType.PROP_VALUE_TYPE_MISMATCH,
+						ExceptionUtil.getMessage(e),
+						e.getHighlightRegion(escapedValue)));
 			} catch (Exception e) {
 				problems.accept(problem(SpringPropertiesProblemType.PROP_VALUE_TYPE_MISMATCH,
 						"Expecting '"+typeUtil.niceTypeName(expectType)+"'",
 						escapedValue));
 			}
-		} else if (TypeUtil.isBracketable(expectType)) {
-			commaListReconciler.reconcile(escapedValue, expectType, problems);
 		}
 	}
 

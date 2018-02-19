@@ -1422,6 +1422,14 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 		data("my.colors", collectionType + "<demo.Color>", null, "Ooh! nice colors!");
 
 		editor = newEditor(
+				"my.colors=\\\n" +
+				"	red , \\\n" +
+				"	green,\\\n" +
+				"	bad\n"
+		);
+		assertProblems(editor, "bad|demo.Color");
+
+		editor = newEditor(
 				"#comment\n" +
 				"my.colors=RED, green, not-a-color , BLUE"
 		);
@@ -1450,14 +1458,6 @@ public class SpringPropertiesEditorTests extends SpringPropertiesEditorTestHarne
 				"	bad , \\\n" +
 				"	green,\\\n" +
 				"	blue\n"
-		);
-		assertProblems(editor, "bad|demo.Color");
-
-		editor = newEditor(
-				"my.colors=\\\n" +
-				"	red , \\\n" +
-				"	green,\\\n" +
-				"	bad\n"
 		);
 		assertProblems(editor, "bad|demo.Color");
 

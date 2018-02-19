@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.text.IDocument;
 import org.springframework.boot.configurationmetadata.Deprecation;
 import org.springframework.boot.configurationmetadata.Deprecation.Level;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
@@ -33,7 +34,8 @@ import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.Bean
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil.EnumCaseMode;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypedProperty;
 import org.springframework.ide.eclipse.editor.support.reconcile.IProblemCollector;
-import org.springsource.ide.eclipse.commons.core.util.StringUtil;
+import org.springframework.ide.eclipse.editor.support.util.DocumentRegion;
+import org.springframework.ide.eclipse.editor.support.util.ValueParseException;
 import org.springframework.ide.eclipse.editor.support.util.ValueParser;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeRef;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeRef.Kind;
@@ -41,6 +43,8 @@ import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeRef.TupleValu
 import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlFileAST;
 import org.springframework.ide.eclipse.editor.support.yaml.reconcile.YamlASTReconciler;
+import org.springsource.ide.eclipse.commons.core.util.StringUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.NodeId;
@@ -76,7 +80,7 @@ public class ApplicationYamlASTReconciler implements YamlASTReconciler {
 			mon.beginTask("Reconcile", nodes.size());
 			try {
 				for (Node node : nodes) {
-					reconcile(node, nav);
+					reconcile(ast, node, nav);
 					mon.worked(1);
 				}
 			} finally {
@@ -85,12 +89,12 @@ public class ApplicationYamlASTReconciler implements YamlASTReconciler {
 		}
 	}
 
-	protected void reconcile(Node node, IndexNavigator nav) {
+	protected void reconcile(YamlFileAST root, Node node, IndexNavigator nav) {
 		switch (node.getNodeId()) {
 		case mapping:
 			checkForDuplicateKeys((MappingNode)node);
 			for (NodeTuple entry : ((MappingNode)node).getValue()) {
-				reconcile(entry, nav);
+				reconcile(root, entry, nav);
 			}
 			break;
 		case scalar:
@@ -131,7 +135,7 @@ public class ApplicationYamlASTReconciler implements YamlASTReconciler {
 		return propName!=null && propName.equals("spring.profiles");
 	}
 
-	private void reconcile(NodeTuple entry, IndexNavigator nav) {
+	private void reconcile(YamlFileAST root, NodeTuple entry, IndexNavigator nav) {
 		Node keyNode = entry.getKeyNode();
 		String key = asScalar(keyNode);
 		if (key==null) {
@@ -163,12 +167,12 @@ public class ApplicationYamlASTReconciler implements YamlASTReconciler {
 				if (match.isDeprecated()) {
 					deprecatedProperty(match, keyNode);
 				}
-				reconcile(entry.getValueNode(), type);
+				reconcile(root, entry.getValueNode(), type);
 			} else if (extension!=null) {
 				//We don't really care about the extension only about the fact that it
 				// exists and so it is meaningful to continue checking...
 				Node valueNode = entry.getValueNode();
-				reconcile(valueNode, subNav);
+				reconcile(root, valueNode, subNav);
 			} else {
 				//both are null, this means there's no valid property with the current prefix
 				//whether exact or extending it with further navigation
@@ -180,17 +184,17 @@ public class ApplicationYamlASTReconciler implements YamlASTReconciler {
 	/**
 	 * Reconcile a node given the type that we expect the node to be.
 	 */
-	private void reconcile(Node node, Type type) {
+	private void reconcile(YamlFileAST root, Node node, Type type) {
 		if (type!=null) {
 			switch (node.getNodeId()) {
 			case scalar:
-				reconcile((ScalarNode)node, type);
+				reconcile(root, (ScalarNode)node, type);
 				break;
 			case sequence:
-				reconcile((SequenceNode)node, type);
+				reconcile(root, (SequenceNode)node, type);
 				break;
 			case mapping:
-				reconcile((MappingNode)node, type);
+				reconcile(root, (MappingNode)node, type);
 				break;
 			case anchor:
 				//TODO: what should we do with anchor nodes
@@ -201,7 +205,7 @@ public class ApplicationYamlASTReconciler implements YamlASTReconciler {
 		}
 	}
 
-	private void reconcile(MappingNode mapping, Type type) {
+	private void reconcile(YamlFileAST root, MappingNode mapping, Type type) {
 		checkForDuplicateKeys(mapping);
 		if (typeUtil.isAtomic(type)) {
 			expectTypeFoundMapping(type, mapping);
@@ -210,7 +214,7 @@ public class ApplicationYamlASTReconciler implements YamlASTReconciler {
 			Type valueType = TypeUtil.getDomainType(type);
 			if (keyType!=null) {
 				for (NodeTuple entry : mapping.getValue()) {
-					reconcile(entry.getKeyNode(), keyType);
+					reconcile(root, entry.getKeyNode(), keyType);
 				}
 			}
 			if (valueType!=null) {
@@ -227,7 +231,7 @@ public class ApplicationYamlASTReconciler implements YamlASTReconciler {
 							nestedValueType = type;
 						}
 					}
-					reconcile(entry.getValueNode(), nestedValueType);
+					reconcile(root, entry.getValueNode(), nestedValueType);
 				}
 			}
 		} else {
@@ -249,7 +253,7 @@ public class ApplicationYamlASTReconciler implements YamlASTReconciler {
 								if (typedProperty.isDeprecated()) {
 									deprecatedProperty(type, typedProperty, keyNode);
 								}
-								reconcile(valNode, typedProperty.getType());
+								reconcile(root, valNode, typedProperty.getType());
 							}
 						}
 					}
@@ -258,14 +262,14 @@ public class ApplicationYamlASTReconciler implements YamlASTReconciler {
 		}
 	}
 
-	private void reconcile(SequenceNode seq, Type type) {
+	private void reconcile(YamlFileAST root, SequenceNode seq, Type type) {
 		if (typeUtil.isAtomic(type)) {
 			expectTypeFoundSequence(type, seq);
 		} else if (TypeUtil.isSequencable(type)) {
 			Type domainType = TypeUtil.getDomainType(type);
 			if (domainType!=null) {
 				for (Node element : seq.getValue()) {
-					reconcile(element, domainType);
+					reconcile(root, element, domainType);
 				}
 			}
 		} else {
@@ -274,7 +278,7 @@ public class ApplicationYamlASTReconciler implements YamlASTReconciler {
 	}
 
 
-	private void reconcile(ScalarNode scalar, Type type) {
+	private void reconcile(YamlFileAST root, ScalarNode scalar, Type type) {
 		String stringValue = scalar.getValue();
 		if (!hasPlaceHolder(stringValue)) { //don't check anything with ${} expressions in it as we
 											// don't know its actual value
@@ -285,9 +289,10 @@ public class ApplicationYamlASTReconciler implements YamlASTReconciler {
 				//  expected type
 				try {
 					valueParser.parse(stringValue);
+				} catch (ValueParseException e) {
+					valueParseError(root, scalar, e);
 				} catch (Exception e) {
-					//Couldn't parse
-					valueTypeMismatch(type, scalar);
+					valueTypeMismatch(type, scalar, e);
 				}
 			}
 		}
@@ -305,10 +310,16 @@ public class ApplicationYamlASTReconciler implements YamlASTReconciler {
 		expectType(SpringPropertiesProblemType.YAML_EXPECT_TYPE_FOUND_SEQUENCE, type, seq);
 	}
 
-	private void valueTypeMismatch(Type type, ScalarNode scalar) {
+	private void valueTypeMismatch(Type type, ScalarNode scalar, Exception e) {
 		expectType(SpringPropertiesProblemType.YAML_VALUE_TYPE_MISMATCH, type, scalar);
 	}
 
+	private void valueParseError(YamlFileAST root, ScalarNode scalar, ValueParseException e) {
+		IDocument doc = root.getDocument();
+		DocumentRegion containingRegion = new DocumentRegion(doc, scalar.getStartMark().getIndex(), scalar.getEndMark().getIndex());
+		problems.accept(problem(SpringPropertiesProblemType.YAML_VALUE_TYPE_MISMATCH, e.getHighlightRegion(containingRegion), ExceptionUtil.getMessage(e)));
+	}
+	
 	private void unkownProperty(Node node, String name, NodeTuple entry) {
 		SpringPropertyProblem p = problem(SpringPropertiesProblemType.YAML_UNKNOWN_PROPERTY, node, "Unknown property '"+name+"'");
 		p.setPropertyName(extendForQuickfix(StringUtil.camelCaseToHyphens(name), entry.getValueNode()));
@@ -387,7 +398,11 @@ public class ApplicationYamlASTReconciler implements YamlASTReconciler {
 				: SpringPropertiesProblemType.PROP_DEPRECATED_WARNING;
 	}
 
-	protected SpringPropertyProblem problem(SpringPropertiesProblemType type, Node node, String msg) {
+	private SpringPropertyProblem problem(SpringPropertiesProblemType type, DocumentRegion region, String msg) {
+		return SpringPropertyProblem.problem(type, msg, region.getStart(), region.getLength());
+	}
+
+	private SpringPropertyProblem problem(SpringPropertiesProblemType type, Node node, String msg) {
 		int start = node.getStartMark().getIndex();
 		int end = node.getEndMark().getIndex();
 		return SpringPropertyProblem.problem(type, msg, start, end-start);

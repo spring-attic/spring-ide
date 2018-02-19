@@ -243,6 +243,17 @@ public class TypeUtil {
 			// provide a parser that allows throws
 			return new AlwaysFailingParser(niceTypeName(type));
 		}
+		if (isSequencable(type)) {
+			//Trying to parse list from scalars is possible if the domain type is parseable. Spring boot
+			// will try to interpret the string as a comma-separated list
+			Type elType = getDomainType(type);
+			if (elType!=null) {
+				ValueParser elParser = getValueParser(elType);
+				if (elParser!=null) {
+					return new DelimitedStringParser(elParser);
+				}
+			}
+		}
 		return null;
 	}
 

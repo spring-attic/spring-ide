@@ -3549,6 +3549,56 @@ public class YamlEditorTests extends ApplicationYamlEditorTestHarness {
 		assertProblems(editor,  "bogus|Unknown property");
 	}
 
+	public void testSetOfEnumReconcile() throws Exception {
+		String collectionType = "java.util.Set";
+		doCollectionOfEnumReconcileTest(collectionType);
+	}
+
+	public void testListOfEnumReconcile() throws Exception {
+		String collectionType = "java.util.List";
+		doCollectionOfEnumReconcileTest(collectionType);
+	}
+
+	private void doCollectionOfEnumReconcileTest(String collectionType) throws Exception {
+		IProject p = createPredefinedMavenProject("demo-enum");
+		useProject(p);
+		data("my.colors", collectionType + "<demo.Color>", null, "Ooh! nice colors!");
+		YamlEditor editor;
+
+		//comma-separated string
+		editor = new YamlEditor(
+				"my:\n" +
+				"  colors: red,green,BLUE,not-a-color\n"
+		);
+		assertProblems(editor, "not-a-color|'not-a-color' is not valid for Enum 'demo.Color");
+
+		//comma-separated string
+		editor = new YamlEditor(
+				"my:\n" +
+				"  colors: red, green,  not-a-color, BLUE\n"
+		);
+		assertProblems(editor, "not-a-color|'not-a-color' is not valid for Enum 'demo.Color");
+
+		//flow list
+		editor = new YamlEditor(
+				"my:\n" +
+				"  colors: [red, green, BLUE, not-a-color]"
+		);
+		assertProblems(editor, "not-a-color|Expecting a 'demo.Color");
+		
+		//block list
+		editor = new YamlEditor(
+				"my:\n" +
+				"  colors:\n" +
+				"  - red\n" +
+				"  - green\n" +
+				"  - BLUE\n" +
+				"  - not-a-color\n"
+		);
+		assertProblems(editor, "not-a-color|Expecting a 'demo.Color");
+
+	}
+
 	///////////////// cruft ////////////////////////////////////////////////////////
 
 	private void generateNestedProperties(int levels, String[] names, String prefix) {
