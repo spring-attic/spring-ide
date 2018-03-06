@@ -38,7 +38,7 @@ Import-Package: javax.annotation,
  org.springframework.util;version="[4.0.0,4.4.0)"
 Eclipse-LazyStart: true
 Bundle-Vendor: %providerName
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.beans.core.autowire,
  org.springframework.ide.eclipse.beans.core.autowire.internal.provider,
