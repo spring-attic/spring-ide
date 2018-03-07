@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2017 Pivotal, Inc.
+ * Copyright (c) 2015, 2018 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,11 +28,10 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.layout.FormAttachment;
-import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
@@ -99,6 +98,7 @@ public class RequestMappingPropertiesSection extends AbstractBdePropertiesSectio
 	private static final Object[] NO_ELEMENTS = new Object[0];
 	private TabbedPropertySheetPage page;
 	private Composite composite;
+	private StackLayout layout;
 	private TableViewer tv;
 	private RequestMappingLabelProvider labelProvider;
 	private Stylers stylers;
@@ -132,18 +132,19 @@ public class RequestMappingPropertiesSection extends AbstractBdePropertiesSectio
 	public void createControls(Composite parent, TabbedPropertySheetPage aTabbedPropertySheetPage) {
 		super.createControls(parent, aTabbedPropertySheetPage);
 		this.page = aTabbedPropertySheetPage;
-		composite = getWidgetFactory().createFlatFormComposite(parent);
+		composite = getWidgetFactory().createComposite(parent, SWT.NONE);
+
+		// Layout variant to have owner composite size to be equal the client area size of the next upper level ScrolledComposite
+		composite.setLayout(layout = new SectionStackLayout());
+
+		layout.marginWidth = ITabbedPropertyConstants.HSPACE + 2;
+		layout.marginHeight = ITabbedPropertyConstants.VSPACE + 4;
+
 		page.getControl().setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_RED));
-		FormData data;
 
 		labelText = getWidgetFactory().createLabel(composite, "", SWT.WRAP); //$NON-NLS-1$
-		data = new FormData();
-		data.left = new FormAttachment(0, 0);
-		data.right = new FormAttachment(100, 0);
-		data.top = new FormAttachment(0, ITabbedPropertyConstants.VSPACE);
-		labelText.setLayoutData(data);
 
-		this.tv = new TableViewer(composite, SWT.BORDER|SWT.FULL_SELECTION|SWT.NO_SCROLL);
+		this.tv = new TableViewer(composite, SWT.BORDER|SWT.FULL_SELECTION/*|SWT.NO_SCROLL*/);
 
 		tv.setContentProvider(new ContentProvider());
 		tv.setComparator(sorter);
@@ -183,57 +184,15 @@ public class RequestMappingPropertiesSection extends AbstractBdePropertiesSectio
 			labelText.setText("");
 		}
 		tv.refresh();
-		reflow(page);
-	}
-
-	private void reflow(TabbedPropertySheetPage page) {
-		final Composite target = getReflowTarget(page);
-		if (target!=null) {
-			target.getDisplay().asyncExec(new Runnable() {
-				public void run() {
-					target.layout(true, true);
-				}
-			});
-		}
-	}
-
-	private Composite getReflowTarget(TabbedPropertySheetPage page) {
-		return page.getControl().getParent();
-//		Control c = page.getControl();
-//		Composite composite = null;
-//		while (c!=null) {
-//			if (c instanceof Composite) {
-//				composite = (Composite) c;
-//			}
-//			c = c.getParent();
-//		}
-//		return composite;
+		SectionStackLayout.reflow(page);
 	}
 
 	private void refreshControlsVisibility() {
 		BootDashElement bde = getBootDashElement();
 		if (bde == null || bde.getLiveRequestMappings() == null) {
-			tv.getControl().setVisible(false);
-
-			FormData data = new FormData();
-			data.left = new FormAttachment(0, 0);
-			data.top = new FormAttachment(0, 0);
-			data.right = new FormAttachment(0, 0);
-			data.bottom = new FormAttachment(0, 0);
-			tv.getControl().setLayoutData(data);
-
-			labelText.setVisible(true);
+			layout.topControl = labelText;
 		} else {
-			tv.getControl().setVisible(true);
-
-			FormData data = new FormData();
-			data.left = new FormAttachment(0, 0);
-			data.top = new FormAttachment(0, ITabbedPropertyConstants.VSPACE);
-			data.right = new FormAttachment(100, 0);
-			data.bottom = new FormAttachment(100, 0);
-			tv.getControl().setLayoutData(data);
-
-			labelText.setVisible(false);
+			layout.topControl = tv.getControl();
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Pivotal, Inc.
+ * Copyright (c) 2017, 2018 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,12 +17,9 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.TreeEvent;
 import org.eclipse.swt.events.TreeListener;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -53,19 +50,6 @@ public class BeansPropertiesSection extends AbstractBdePropertiesSection {
 	private Text searchBox;
 	private Composite treeViewerComposite;
 
-	/**
-	 * Searches for the upper level <code>ScrolledComposite</code>. Returns the passed composite if not found.
-	 * @param composite
-	 * @return
-	 */
-	private static Composite getScrolledComposite(Composite composite) {
-		Composite c = composite;
-		while(c != null && !(c instanceof ScrolledComposite)) {
-			c = c.getParent();
-		}
-		return c == null ? composite : c;
-	}
-
 	@Override
 	public void createControls(Composite parent, TabbedPropertySheetPage aTabbedPropertySheetPage) {
 		super.createControls(parent, aTabbedPropertySheetPage);
@@ -73,19 +57,7 @@ public class BeansPropertiesSection extends AbstractBdePropertiesSection {
 
 		Composite composite = getWidgetFactory().createComposite(parent, SWT.NONE);
 
-		// Layout variant to have owner composite size to be equal the client area size of the next upper level ScrolledComposite
-		composite.setLayout(layout = new StackLayout() {
-			@Override
-			protected Point computeSize(Composite composite, int wHint, int hHint, boolean flushCache) {
-				Point size = super.computeSize(composite, wHint, hHint, flushCache);
-				if (page.getControl() instanceof Composite) {
-					Composite container = getScrolledComposite(composite);
-					Rectangle r = container.getClientArea();
-					size = new Point(r.width, r.height);
-				}
-				return size;
-			}
-		});
+		composite.setLayout(layout = new SectionStackLayout());
 
 		layout.marginWidth = ITabbedPropertyConstants.HSPACE + 2;
 		layout.marginHeight = ITabbedPropertyConstants.VSPACE + 4;
@@ -122,11 +94,11 @@ public class BeansPropertiesSection extends AbstractBdePropertiesSection {
 		treeViewer.getTree().addTreeListener (new TreeListener () {
 			@Override
 			public void treeExpanded (TreeEvent e) {
-				reflow(page);
+				SectionStackLayout.reflow(page);
 			}
 			@Override
 			public void treeCollapsed (TreeEvent e) {
-				reflow(page);
+				SectionStackLayout.reflow(page);
 			}
 		});
 
@@ -158,21 +130,7 @@ public class BeansPropertiesSection extends AbstractBdePropertiesSection {
 			// If tree is populated for the first time then auto expand to level 2 manually because new input is not set in this case
 			treeViewer.expandToLevel(2);
 		}
-		reflow(page);
-	}
-
-	private void reflow(TabbedPropertySheetPage page) {
-		final Composite target = page.getControl().getParent();
-		if (target!=null) {
-			target.getDisplay().asyncExec(new Runnable() {
-				public void run() {
-					if (!target.isDisposed()) {
-						target.layout(true, true);
-						page.resizeScrolledComposite();
-					}
-				}
-			});
-		}
+		SectionStackLayout.reflow(page);
 	}
 
 	private void refreshControlsVisibility() {
