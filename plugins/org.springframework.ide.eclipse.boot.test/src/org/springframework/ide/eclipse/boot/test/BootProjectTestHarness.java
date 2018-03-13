@@ -187,13 +187,13 @@ public class BootProjectTestHarness {
 					//existing selection is fine
 				} else {
 					//try to select the latest available version and verify it meets the requirement
-					bootVersionRadio.setValue(selected =  getLatestVersion(bootVersionRadio));
+					bootVersionRadio.setValue(selected =  getLatestVersion(bootVersionRadio, WANTED_RANGE));
 					selectedVersion = getVersion(selected);
 					Assert.isTrue(WANTED_RANGE.includes(selectedVersion));
 				}
 			}
 
-			private RadioInfo getLatestVersion(RadioGroup bootVersionRadio) {
+			private RadioInfo getLatestVersion(RadioGroup bootVersionRadio, VersionRange versionRange) {
 				RadioInfo[] infos = bootVersionRadio.getRadios();
 				Arrays.sort(infos, new Comparator<RadioInfo>() {
 					public int compare(RadioInfo o1, RadioInfo o2) {
@@ -202,7 +202,14 @@ public class BootProjectTestHarness {
 						return v2.compareTo(v1);
 					}
 				});
-				return infos[0];
+				
+				for (int i = 0; i < infos.length; i++) {
+					if (versionRange == null || versionRange.includes(getVersion(infos[i]))) {
+						return infos[i];
+					}
+				}
+				
+				return null;
 			}
 
 			private Version getVersion(RadioInfo info) {
