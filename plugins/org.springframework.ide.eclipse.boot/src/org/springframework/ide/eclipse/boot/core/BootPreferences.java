@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChange
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.springframework.ide.eclipse.boot.util.Log;
+import org.springsource.ide.eclipse.commons.core.preferences.StsProperties;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
@@ -180,15 +181,26 @@ public class BootPreferences implements IPreferenceChangeListener {
 
 	/**
 	 * Cleanup a number of items:
-	 *  - removing trailling / leading whitespace
+	 *  - removing trailing / leading whitespace
 	 *  - remove emtpy elements
+	 *  - convert old default http url to https
 	 *  - remove duplicate elements
 	 */
 	private static Flux<String> clean(Flux<String> elements) {
 		return elements
 				.map(String::trim)
+				.map(url -> convertToHttps(url))
 				.filter((s) -> !s.isEmpty())
 				.distinct();
+	}
+
+	private static String convertToHttps(String url) {
+		//This is a bit yuck, but it is the only sure way to catch old values of this
+		// that have gotten persisted somehow in user's old workspace state.
+		if (url.equals("http://start.spring.io")) {
+			return StsProperties.getInstance().getInstance().get("spring.initializr.json.url");
+		}
+		return url;
 	}
 
 	private static Flux<String> clean(String[] elements) {
