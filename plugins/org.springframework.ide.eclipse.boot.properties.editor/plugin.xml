@@ -19,11 +19,12 @@
    <extension
          point="org.eclipse.ui.editors">
       <editor
-            name="Spring Properties Editor"
-            icon="icons/spring_obj.gif"
             class="org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesFileEditor"
-            symbolicFontName="org.eclipse.jdt.ui.PropertiesFileEditor.textfont"
-            id="org.springframework.ide.eclipse.PropertiesFileEditor">
+            contributorClass="org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEditorActionContributor"
+            icon="icons/spring_obj.gif"
+            id="org.springframework.ide.eclipse.PropertiesFileEditor"
+            name="Spring Properties Editor"
+            symbolicFontName="org.eclipse.jdt.ui.PropertiesFileEditor.textfont">
             <contentTypeBinding
                contentTypeId="org.springframework.ide.eclipse.applicationProperties"
             /> 

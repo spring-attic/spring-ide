@@ -20,10 +20,11 @@
    <extension
          point="org.eclipse.ui.editors">
       <editor
-            name="Spring Yaml Properties Editor"
-            icon="icons/spring_yml.png"
             class="org.springframework.ide.eclipse.boot.properties.editor.yaml.SpringYamlEditor"
-            id="org.springframework.ide.eclipse.boot.properties.editor.yaml.SpringYamlEditor">
+            contributorClass="org.eclipse.ui.editors.text.TextEditorActionContributor"
+            icon="icons/spring_yml.png"
+            id="org.springframework.ide.eclipse.boot.properties.editor.yaml.SpringYamlEditor"
+            name="Spring Yaml Properties Editor">
             <contentTypeBinding
                contentTypeId="org.springframework.ide.eclipse.application.yml"
             /> 
