@@ -65,7 +65,7 @@ public class BootProjectTestHarness {
 	}
 
 
-	public static final long BOOT_PROJECT_CREATION_TIMEOUT = 5*60*1000; // long, may download maven dependencies
+	public static final long BOOT_PROJECT_CREATION_TIMEOUT = 10*60*1000; // long, may download maven dependencies
 
 	private IWorkspace workspace;
 
