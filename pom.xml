@@ -83,7 +83,7 @@
 		<maven.test.failure.ignore>false</maven.test.failure.ignore>
 		<encoding>UTF-8</encoding>
 		<test.osvmargs></test.osvmargs>
-		<test.vmargs>${test.osvmargs} -Dreactor.io.epoll=false -Dspring.initializr.json.url=http://start-development.cfapps.io -Dorg.slf4j.simpleLogger.log.cloudfoundry-client=debug</test.vmargs>
+		<test.vmargs>${test.osvmargs} -Dreactor.io.epoll=false -Dspring.initializr.json.url=https://start-development.cfapps.io -Dorg.slf4j.simpleLogger.log.cloudfoundry-client=debug</test.vmargs>
 <!--		<test.vmargs>${test.osvmargs} -Dspring.initializr.json.url=http://start.spring.io</test.vmargs> -->
 	</properties>
 
