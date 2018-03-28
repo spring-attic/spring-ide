@@ -19,8 +19,7 @@ import org.eclipse.core.runtime.Path;
 import org.springframework.ide.eclipse.boot.wizard.content.CodeSet;
 import org.springframework.ide.eclipse.boot.wizard.content.GithubRepoContent;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.UIThreadDownloadDisallowed;
-import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
-import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;

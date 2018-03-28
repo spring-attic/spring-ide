@@ -25,9 +25,8 @@ import org.springframework.ide.eclipse.boot.wizard.content.GithubRepoContent;
 import org.springframework.ide.eclipse.boot.wizard.importing.ImportConfiguration;
 import org.springframework.ide.eclipse.boot.wizard.importing.ImportStrategy;
 import org.springframework.ide.eclipse.boot.wizard.importing.ImportUtils;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
-import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
-import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;

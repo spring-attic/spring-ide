@@ -90,7 +90,6 @@
 	<modules>
 
 		<!-- gradle -->
-		<module>plugins/org.springframework.ide.eclipse.gradle</module>
 		<module>plugins/org.springframework.ide.eclipse.buildship</module>
 		<module>plugins/org.springframework.ide.eclipse.buildship20</module>
 
@@ -730,11 +729,6 @@
 			<id>lsp4e-releases</id> 
 			<layout>p2</layout> 
 			<url>http://download.eclipse.org/lsp4e/0.5.0milestone/</url> 
-			</repository>
-		<repository>
-			<id>eclipse-integration-gradle</id>
-			<layout>p2</layout>
-			<url>http://dist.springsource.com/${dist.type}/TOOLS/gradle/${dist.pathpostfix}</url>
 		</repository>
 		<repository>
 			<!-- necessary for maven and ant AWS dependency -->

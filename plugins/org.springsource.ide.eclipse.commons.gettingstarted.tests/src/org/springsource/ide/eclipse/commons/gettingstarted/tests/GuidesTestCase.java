@@ -10,16 +10,19 @@
  *******************************************************************************/
 package org.springsource.ide.eclipse.commons.gettingstarted.tests;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.springframework.ide.eclipse.boot.wizard.content.GithubRepoContent;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
-import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
-import org.springsource.ide.eclipse.gradle.core.util.GradleRunnable;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import junit.framework.TestCase;
 
@@ -41,8 +44,43 @@ public class GuidesTestCase extends TestCase {
 		this.guide = guide;
 	}
 	
+	public static abstract class GradleRunnable implements IRunnableWithProgress {
+		
+		private String jobName;
+
+		public GradleRunnable(String jobName) {
+			this.jobName = jobName == null ? "buildJob" : jobName;
+		}
+
+		public String getJobName() {
+			return jobName;
+		}
+
+		/**
+		 * This method is here so that GradleRunnable can be used as an {@link IRunnableWithProgress}. It is final
+		 * as you are not supposed to implement it directly. Implement the doit method instead.
+		 */
+		@Override
+		public final void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+			try {
+				doit(monitor);
+			} catch (InterruptedException e) {
+				throw e;
+			} catch (OperationCanceledException e) {
+				throw new InterruptedException("Canceled by user");
+			} catch (InvocationTargetException e) {
+				throw e;
+			} catch (Throwable e) {
+				throw new InvocationTargetException(e);
+			}
+		}
+
+		public abstract void doit(IProgressMonitor mon) throws Exception;
+		
+	}
+	
 	public static void buildJob(final GradleRunnable gradleRunnable) throws Exception {
-		final Job job = new Job("buildJob") {
+		final Job job = new Job(gradleRunnable.getJobName()) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {

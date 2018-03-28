@@ -109,15 +109,6 @@
       </initializer>
   </extension>
 <extension
-      point="org.springsource.ide.eclipse.gradle.core.projectConfigurators">
-       <configurator
-             after="org.springframework.ide.eclipse.springproject"
-             class="org.springframework.ide.eclipse.boot.properties.editor.gradle.EnableJdtAptGradleProjectConfigurator"
-                id="org.springframework.ide.eclipse.boot.properties.editor.gradle.EnableJdtAptGradleProjectConfigurator"
-             name="Spring">
-       </configurator>
-</extension>
-<extension
       point="org.springframework.ide.eclipse.boot.launch.property.proposals">
    <provider
          class="org.springframework.ide.eclipse.boot.launch.properties.editor.launch.SpringBootPropertyNameContentProposalProvider$Factory">

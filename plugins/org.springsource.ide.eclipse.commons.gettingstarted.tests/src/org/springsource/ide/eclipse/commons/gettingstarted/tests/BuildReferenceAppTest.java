@@ -24,8 +24,8 @@ import org.springframework.ide.eclipse.boot.wizard.content.BuildType;
 import org.springframework.ide.eclipse.boot.wizard.content.CodeSet;
 import org.springframework.ide.eclipse.boot.wizard.content.ReferenceApp;
 import org.springframework.ide.eclipse.boot.wizard.importing.ImportStrategy;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
-import org.springsource.ide.eclipse.gradle.core.util.ExceptionUtil;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
