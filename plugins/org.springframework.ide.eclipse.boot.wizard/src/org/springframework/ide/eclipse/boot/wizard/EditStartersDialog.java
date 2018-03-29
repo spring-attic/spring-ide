@@ -137,6 +137,7 @@ public class EditStartersDialog extends DialogWithSections {
 //		return color.getValue();
 //	}
 
+	@SuppressWarnings("resource")
 	private SearchBoxSection searchBox(EditStartersModel model) {
 		return new SearchBoxSection(this, model.searchBox.getText()) {
 			@Override
@@ -148,7 +149,6 @@ public class EditStartersDialog extends DialogWithSections {
 	}
 
 	private boolean searchBoxShouldGrabFocus() {
-		System.out.println("firstSeachBox = "+this.firstSearchBox);
 		try {
 			return this.firstSearchBox && isCloseToOpeningTime();
 		} finally {
@@ -157,9 +157,7 @@ public class EditStartersDialog extends DialogWithSections {
 	}
 
 	private boolean isCloseToOpeningTime() {
-		System.out.println("openingTime = "+openingTime);
 		long age = System.currentTimeMillis() - openingTime;
-		System.out.println("age = "+age);
 		return age < 3000;
 	}
 

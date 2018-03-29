@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.wizard;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.BootPreferences;
+import org.springframework.ide.eclipse.boot.core.initializr.HttpRedirectionException;
 import org.springframework.ide.eclipse.boot.wizard.InitializrFactoryModel.ModelFactory;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
@@ -53,8 +54,13 @@ public final class InitializrFactoryModel<M> implements OkButtonHandler {
 				M m = factory.createModel(getServiceUrlField().getValue());
 				modelValidator.setValue(ValidationResult.OK);
 				return m;
-			} catch (Exception e) {
-				modelValidator.setValue(ValidationResult.error(ExceptionUtil.getMessage(e)));
+			} catch (Exception _e) {
+				Throwable e = ExceptionUtil.getDeepestCause(_e);
+				if (e instanceof HttpRedirectionException) {
+					serviceUrlField.getVariable().setValue(((HttpRedirectionException)e).redirectedTo);
+				} else {
+					modelValidator.setValue(ValidationResult.error(ExceptionUtil.getMessage(e)));
+				}
 			}
 			return null;
 		}

@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.core.initializr;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
@@ -30,6 +31,7 @@ import org.json.JSONTokener;
 import org.osgi.framework.Version;
 import org.osgi.framework.VersionRange;
 import org.springframework.ide.eclipse.boot.util.Log;
+import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
@@ -44,12 +46,12 @@ public class InitializrServiceSpec {
 
 	private JSONObject data;
 	public static final String JSON_CONTENT_TYPE_HEADER = "application/vnd.initializr.v2.1+json";
-	
+
 	/**
-	 * Boot version link template variable 
+	 * Boot version link template variable
 	 */
 	public static final String BOOT_VERSION_LINK_TEMPLATE_VARIABLE = "bootVersion";
-	
+
 	/**
 	 * Pattern matching link template variables
 	 */
@@ -60,13 +62,17 @@ public class InitializrServiceSpec {
 		this.data = jsonObject;
 	}
 
-	public static InitializrServiceSpec parseFrom(URLConnectionFactory urlConnectionFactory, URL url) throws IOException, Exception {
+	public static InitializrServiceSpec parseFrom(URLConnectionFactory urlConnectionFactory, URL url) throws HttpRedirectionException, Exception {
 		URLConnection conn = null;
 		InputStream input = null;
 		try {
 			conn = urlConnectionFactory.createConnection(url);
 			conn.addRequestProperty("Accept", JSON_CONTENT_TYPE_HEADER);
 			conn.connect();
+			String redirectedTo = getRedirected(conn);
+			if (StringUtil.hasText(redirectedTo)) {
+				throw new HttpRedirectionException(redirectedTo);
+			}
 			input = conn.getInputStream();
 			return parseFrom(input);
 		} finally {
@@ -77,6 +83,22 @@ public class InitializrServiceSpec {
 				}
 			}
 		}
+	}
+
+	private static String getRedirected(URLConnection _conn) throws IOException {
+		if (_conn instanceof HttpURLConnection) {
+			HttpURLConnection conn = (HttpURLConnection) _conn;
+			int status = conn.getResponseCode();
+			if (status != HttpURLConnection.HTTP_OK) {
+				if (status == HttpURLConnection.HTTP_MOVED_TEMP ||
+					status == HttpURLConnection.HTTP_MOVED_PERM ||
+					status == HttpURLConnection.HTTP_SEE_OTHER
+				) {
+					return conn.getHeaderField("Location");
+				}
+			}
+		}
+		return null;
 	}
 
 	public static InitializrServiceSpec parseFrom(InputStream input) throws Exception {
@@ -115,7 +137,8 @@ public class InitializrServiceSpec {
 		private String description;
 		private String versionRange;
 		private Links links;
-		
+
+		@Override
 		public String getId() {
 			return id;
 		}
@@ -162,7 +185,7 @@ public class InitializrServiceSpec {
 			}
 			return deps;
 		}
-		
+
 		public void setVersionRange(String range) {
 			this.versionRange = range;
 		}
@@ -193,7 +216,7 @@ public class InitializrServiceSpec {
 			return true;
 		}
 	}
-	
+
 	public static class Links {
 		private Link[] guides = new Link[0];
 		private Link[] references = new Link[0];
@@ -226,7 +249,7 @@ public class InitializrServiceSpec {
 			return links;
 		}
 	}
-	
+
 	public static class Link {
 		private String href;
 		private String title;
@@ -263,9 +286,9 @@ public class InitializrServiceSpec {
 			link.setTitle(obj.optString("title", null));
 			link.setTemplated(obj.optBoolean("templated", false));
 			return link;
-		}		
+		}
 	}
-	
+
 	public static class DependencyGroup extends Nameable {
 
 		private Dependency[] content;
@@ -395,7 +418,7 @@ public class InitializrServiceSpec {
 		}
 		return new DependencyGroup[0];
 	}
-	
+
 	public static String substituteTemplateVariables(String template, Map<String, String> variableValues) throws CoreException {
 		Matcher matcher = LINK_TEMPLATE_VARIABLE_PATTERN.matcher(template);
 		String result = template;
