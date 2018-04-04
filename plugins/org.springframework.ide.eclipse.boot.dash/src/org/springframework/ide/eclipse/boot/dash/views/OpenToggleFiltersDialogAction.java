@@ -20,7 +20,7 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 /**
  * @author Kris De Volder
  */
-public class OpenToggleFiltersDialogAction extends AbstractBootDashElementsAction {
+public class OpenToggleFiltersDialogAction extends AbstractBootDashAction {
 
 	/**
 	 * Represents the filters in the view (i.e. the ones currently in effect when dlg opens).
@@ -28,16 +28,11 @@ public class OpenToggleFiltersDialogAction extends AbstractBootDashElementsActio
 	private ToggleFiltersModel viewModel;
 
 	public OpenToggleFiltersDialogAction(ToggleFiltersModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
-		super(selection, ui);
+		super(ui);
 		this.viewModel = model;
 		setText("Filters...");
 		setImageDescriptor(BootDashActivator.getImageDescriptor("icons/filter.png"));
 		setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/filter_disabled.png"));
-	}
-
-	@Override
-	public void updateEnablement() {
-		setEnabled(true);
 	}
 
 	@Override

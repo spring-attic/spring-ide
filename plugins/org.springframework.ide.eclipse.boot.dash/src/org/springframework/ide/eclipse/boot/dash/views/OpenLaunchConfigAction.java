@@ -27,8 +27,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
  */
 public class OpenLaunchConfigAction extends AbstractBootDashElementsAction {
 
-	public OpenLaunchConfigAction(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
-		super(model, selection, ui);
+	public OpenLaunchConfigAction(Params params) {
+		super(params);
 		this.setText("Open Config");
 		this.setToolTipText("Open the launch configuration associated with the selected element, if one exists, or create one if it doesn't.");
 		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/write_obj.png"));

@@ -33,8 +33,11 @@ public class DeleteElementsAction<T extends RunTargetType> extends AbstractBootD
 
 	private Class<T> targetTypeClass;
 
-	public DeleteElementsAction(Class<T> targetType, MultiSelection<BootDashElement> selection, UserInteractions ui) {
-		super(selection, ui);
+	public DeleteElementsAction(BootDashActions actions, Class<T> targetType, MultiSelection<BootDashElement> selection, UserInteractions ui) {
+		super(new Params(actions)
+				.setSelection(selection)
+				.setUi(ui)
+		);
 		this.targetTypeClass = targetType;
 		Assert.isNotNull(ui);
 		this.setText("Delete Elements");

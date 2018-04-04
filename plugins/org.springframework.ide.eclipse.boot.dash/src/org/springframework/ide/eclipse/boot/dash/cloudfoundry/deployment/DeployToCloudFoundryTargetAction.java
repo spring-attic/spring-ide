@@ -17,13 +17,10 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDa
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
-import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
-import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashElementsAction;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -40,8 +37,8 @@ public class DeployToCloudFoundryTargetAction extends AbstractBootDashElementsAc
 	private RunTarget target;
 	private ValueListener<ClientRequests> connectionListener;
 
-	public DeployToCloudFoundryTargetAction(BootDashViewModel model, RunTarget target, RunState runningOrDebugging, MultiSelection<BootDashElement> selection, UserInteractions ui) {
-		super(model, selection, ui);
+	public DeployToCloudFoundryTargetAction(Params params, RunTarget target, RunState runningOrDebugging) {
+		super(params);
 		this.setText(target.getName());
 		Assert.isLegal(target.getType() instanceof CloudFoundryRunTargetType);
 		Assert.isLegal(runningOrDebugging==RunState.RUNNING || runningOrDebugging==RunState.DEBUGGING);

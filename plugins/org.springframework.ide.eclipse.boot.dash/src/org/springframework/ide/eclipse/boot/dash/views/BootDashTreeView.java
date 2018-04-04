@@ -290,6 +290,10 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 		return ui;
 	}
 
+	public BootDashActions getActions() {
+		return actions;
+	}
+
 	@Override
 	public Shell getShell() {
 		return getSite().getShell();

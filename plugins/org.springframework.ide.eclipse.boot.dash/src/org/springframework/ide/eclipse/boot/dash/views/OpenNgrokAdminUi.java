@@ -12,11 +12,8 @@ package org.springframework.ide.eclipse.boot.dash.views;
 
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.LocalRunTarget;
-import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKClient;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKLaunchTracker;
 
@@ -24,8 +21,8 @@ import com.google.common.collect.ImmutableSet;
 
 public class OpenNgrokAdminUi extends AbstractBootDashElementsAction {
 
-	public OpenNgrokAdminUi(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
-		super(model, selection, ui);
+	public OpenNgrokAdminUi(Params params) {
+		super(params);
 		this.setText("Open Ngrok Admin UI");
 		this.setToolTipText("Opens Ngrok Admin UI for this app in a Web Browser");
 		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/open_browser.png")); //TODO: different icon?

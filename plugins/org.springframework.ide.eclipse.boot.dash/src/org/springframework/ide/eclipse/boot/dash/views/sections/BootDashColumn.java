@@ -13,12 +13,8 @@ package org.springframework.ide.eclipse.boot.dash.views.sections;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
-import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
-import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
-import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashElementsAction;
-import org.springframework.ide.eclipse.boot.dash.views.OpenInBrowserAction;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 
@@ -39,12 +35,6 @@ public enum BootDashColumn {
 	//Configure some odds and ends that don't apply to every column:
 	static {
 		RUN_STATE_ICN.longLabel = "State";
-
-		RUN_STATE_ICN.singleClickAction = new BootDashActionFactory() {
-			public AbstractBootDashElementsAction create(BootDashViewModel model, LiveExpression<BootDashElement> hoverElement, UserInteractions ui) {
-				return new OpenInBrowserAction(model, MultiSelection.singletonOrEmpty(BootDashElement.class, hoverElement), ui);
-			}
-		};
 
 		TAGS.editingSupport = new EditingSupportFactory() {
 			@Override

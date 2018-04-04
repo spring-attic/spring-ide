@@ -18,14 +18,11 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
-import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractLaunchConfigurationsDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.LocalCloudServiceDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
-import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKClient;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKInstallManager;
@@ -36,12 +33,9 @@ import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKInstallManager;
 public class ExposeAppAction extends RunStateAction {
 
 	private NGROKInstallManager ngrokManager;
-	private BootDashViewModel model;
 
-	public ExposeAppAction(final BootDashViewModel model, final MultiSelection<BootDashElement> selection,
-			final UserInteractions ui, final RunState goalState, final NGROKInstallManager ngrokManager) {
-		super(model, selection, ui, goalState);
-		this.model = model;
+	public ExposeAppAction(Params params, final RunState goalState, final NGROKInstallManager ngrokManager) {
+		super(params, goalState);
 
 		Assert.isLegal(goalState == RunState.RUNNING || goalState == RunState.DEBUGGING);
 

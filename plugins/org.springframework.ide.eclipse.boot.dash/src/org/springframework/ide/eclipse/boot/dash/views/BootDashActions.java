@@ -13,6 +13,8 @@ package org.springframework.ide.eclipse.boot.dash.views;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
@@ -36,6 +38,7 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.LocalRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKInstallManager;
+import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashElementsAction.Params;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 
@@ -89,6 +92,8 @@ public class BootDashActions {
 	private DisposingFactory<RunTarget, AbstractBootDashAction> debugOnTargetActions;
 	private DisposingFactory<RunTarget, AbstractBootDashAction> runOnTargetActions;
 
+	private Map<String, IAction> defIdToActions = new HashMap<>();
+
 	public BootDashActions(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		this(
 				model,
@@ -108,12 +113,16 @@ public class BootDashActions {
 		makeActions();
 	}
 
+	private Params defaultActionParams() {
+		return new Params(this).setModel(model).setSelection(elementsSelection).setUi(ui);
+	}
+
 	protected void makeActions() {
-		RunStateAction restartAction = new RestartAction(model, elementsSelection, ui, RunState.RUNNING);
+		RunStateAction restartAction = new RestartAction(defaultActionParams().setDefinitionId("org.springframework.ide.eclipse.boot.dash.boot.dash.RestartAction"), RunState.RUNNING);
 
-		RunStateAction rebugAction = new RedebugAction(model, elementsSelection, ui, RunState.DEBUGGING);
+		RunStateAction rebugAction = new RedebugAction(defaultActionParams().setDefinitionId("org.springframework.ide.eclipse.boot.dash.boot.dash.RedebugAction"), RunState.DEBUGGING);
 
-		RunStateAction stopAction = new RunStateAction(model, elementsSelection, ui, RunState.INACTIVE) {
+		RunStateAction stopAction = new RunStateAction(defaultActionParams().setDefinitionId("org.springframework.ide.eclipse.boot.dash.boot.dash.StopAction"), RunState.INACTIVE) {
 			@Override
 			protected boolean currentStateAcceptable(RunState s) {
 				// Enable stop button so CF apps can be stopped when "STARTING"
@@ -152,25 +161,27 @@ public class BootDashActions {
 		stopAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/stop.png"));
 		stopAction.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/stop_disabled.png"));
 
+
+
 		runStateActions = new RunStateAction[] { restartAction, rebugAction, stopAction };
 
-		openConfigAction = new OpenLaunchConfigAction(model, elementsSelection, ui);
-		openConsoleAction = new OpenConsoleAction(elementsSelection, model, ui);
-		openBrowserAction = new OpenInBrowserAction(model, elementsSelection, ui);
-		openNgrokAdminUi = new OpenNgrokAdminUi(model, elementsSelection, ui);
-		openInPackageExplorerAction = new OpenInPackageExplorer(elementsSelection, ui);
+		openConfigAction = new OpenLaunchConfigAction(defaultActionParams().setDefinitionId("org.springframework.ide.eclipse.boot.dash.boot.dash.OpenLaunchConfigAction"));
+		openConsoleAction = new OpenConsoleAction(defaultActionParams());
+		openBrowserAction = new OpenInBrowserAction(defaultActionParams());
+		openNgrokAdminUi = new OpenNgrokAdminUi(defaultActionParams());
+		openInPackageExplorerAction = new OpenInPackageExplorer(defaultActionParams());
 		addTargetActions = createAddTargetActions();
 
-		deleteAppsAction = new DeleteElementsAction<>(CloudFoundryRunTargetType.class, elementsSelection, ui);
+		deleteAppsAction = new DeleteElementsAction<>(this, CloudFoundryRunTargetType.class, elementsSelection, ui);
 		deleteAppsAction.setText("Delete");
 		deleteAppsAction.setToolTipText("Permantently removes selected artifact(s) from CloudFoundry");
-		deleteConfigsAction = new DeleteElementsAction<>(LocalRunTargetType.class, elementsSelection, ui);
+		deleteConfigsAction = new DeleteElementsAction<>(this, LocalRunTargetType.class, elementsSelection, ui);
 		deleteConfigsAction.setText("Delete Config");
 		deleteConfigsAction.setToolTipText("Permantently deletes Launch Configgurations from the workspace");
 
-		restartOnlyAction = new RestartApplicationOnlyAction(elementsSelection, ui);
-		reconnectCloudConsoleAction = new ReconnectCloudConsoleAction(elementsSelection, ui);
-		selectManifestAction = new SelectManifestAction(elementsSelection, ui);
+		restartOnlyAction = new RestartApplicationOnlyAction(defaultActionParams());
+		reconnectCloudConsoleAction = new ReconnectCloudConsoleAction(defaultActionParams());
+		selectManifestAction = new SelectManifestAction(defaultActionParams());
 
 		if (sectionSelection != null) {
 			refreshAction = new RefreshRunTargetAction(sectionSelection, ui);
@@ -190,21 +201,21 @@ public class BootDashActions {
 			toggleFilterActions[i] = new ToggleFilterAction(model, model.getToggleFilters().getAvailableFilters()[i], ui);
 		}
 
-		exposeRunAppAction = new ExposeAppAction(model, elementsSelection, ui, RunState.RUNNING, NGROKInstallManager.getInstance());
+		exposeRunAppAction = new ExposeAppAction(defaultActionParams(), RunState.RUNNING, NGROKInstallManager.getInstance());
 		exposeRunAppAction.setText("(Re)start and Expose via ngrok");
 		exposeRunAppAction.setToolTipText("Start or restart the process associated with the selected elements and expose it to the outside world via an ngrok tunnel");
 		exposeRunAppAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart.png"));
 		exposeRunAppAction.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart_disabled.png"));
 
-		exposeDebugAppAction = new ExposeAppAction(model, elementsSelection, ui, RunState.DEBUGGING, NGROKInstallManager.getInstance());
+		exposeDebugAppAction = new ExposeAppAction(defaultActionParams(), RunState.DEBUGGING, NGROKInstallManager.getInstance());
 		exposeDebugAppAction.setText("(Re)debug and Expose via ngrok");
 		exposeDebugAppAction.setToolTipText("Start or restart the process associated with the selected elements in debug mode and expose it to the outside world via an ngrok tunnel");
 		exposeDebugAppAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/rebug.png"));
 		exposeDebugAppAction.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/rebug_disabled.png"));
 
-		restartWithRemoteDevClientAction = new RestartWithRemoteDevClientAction(model, elementsSelection, ui);
+		restartWithRemoteDevClientAction = new RestartWithRemoteDevClientAction(defaultActionParams());
 
-		duplicateConfigAction = new DuplicateConfigAction(model, elementsSelection, ui);
+		duplicateConfigAction = new DuplicateConfigAction(defaultActionParams());
 
 		debugOnTargetActions = createDeployOnTargetActions(RunState.DEBUGGING);
 		runOnTargetActions = createDeployOnTargetActions(RunState.RUNNING);
@@ -224,9 +235,8 @@ public class BootDashActions {
 	}
 
 	private static final class RestartAction extends RunOrDebugStateAction {
-		private RestartAction(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui,
-				RunState goalState) {
-			super(model, selection, ui, goalState);
+		private RestartAction(Params params, RunState goalState) {
+			super(params, goalState);
 			setText("(Re)start");
 			setToolTipText("Start or restart the process associated with the selected elements");
 			setImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart.png"));
@@ -235,9 +245,8 @@ public class BootDashActions {
 	}
 
 	private static final class RedebugAction extends RunOrDebugStateAction {
-		private RedebugAction(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui,
-				RunState goalState) {
-			super(model, selection, ui, goalState);
+		private RedebugAction(Params params, RunState goalState) {
+			super(params, goalState);
 			setText("(Re)debug");
 			setToolTipText("Start or restart the process associated with the selected elements in debug mode");
 			setImageDescriptor(BootDashActivator.getImageDescriptor("icons/rebug.png"));
@@ -247,9 +256,8 @@ public class BootDashActions {
 
 	public static class RunOrDebugStateAction extends RunStateAction {
 
-		public RunOrDebugStateAction(BootDashViewModel model, MultiSelection<BootDashElement> selection,
-				UserInteractions ui, RunState goalState) {
-			super(model, selection, ui, goalState);
+		public RunOrDebugStateAction(Params params, RunState goalState) {
+			super(params, goalState);
 			Assert.isLegal(goalState == RunState.RUNNING || goalState == RunState.DEBUGGING);
 		}
 
@@ -501,9 +509,18 @@ public class BootDashActions {
 		return new DisposingFactory<RunTarget, AbstractBootDashAction>(runtargets) {
 			@Override
 			protected AbstractBootDashAction create(RunTarget target) {
-				return new DeployToCloudFoundryTargetAction(model, target, runningOrDebugging, elementsSelection, ui);
+				return new DeployToCloudFoundryTargetAction(defaultActionParams(), target, runningOrDebugging);
 			}
 		};
+	}
+
+	void bindAction(AbstractBootDashElementsAction action) {
+		Assert.isTrue(!defIdToActions .containsKey(action.getActionDefinitionId()), "Duplicate action definition id " + action.getActionDefinitionId());
+		defIdToActions.put(action.getActionDefinitionId(), action);
+	}
+
+	public IAction getAction(String id) {
+		return defIdToActions.get(id);
 	}
 
 }

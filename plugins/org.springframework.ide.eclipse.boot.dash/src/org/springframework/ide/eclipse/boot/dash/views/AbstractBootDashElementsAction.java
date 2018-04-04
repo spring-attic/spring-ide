@@ -40,23 +40,15 @@ public class AbstractBootDashElementsAction extends AbstractBootDashAction {
 		}
 	}
 
-	private final MultiSelection<BootDashElement> selection;
-	private ValueListener<ImmutableSet<BootDashElement>> selectionListener;
-	protected final BootDashViewModel model;
+	final private MultiSelection<BootDashElement> selection;
+	final private ValueListener<ImmutableSet<BootDashElement>> selectionListener;
+	final protected BootDashViewModel model;
 	private ElementStateListener modelListener;
 
-	public AbstractBootDashElementsAction(MultiSelection<BootDashElement> selection, UserInteractions ui) {
-		this(null, selection, ui);
-	}
-
-	public AbstractBootDashElementsAction(BootDashViewModel model, MultiSelection<BootDashElement> _selection, UserInteractions ui) {
-		this(model, _selection, ui, IAction.AS_UNSPECIFIED);
-	}
-
-	public AbstractBootDashElementsAction(BootDashViewModel model, MultiSelection<BootDashElement> _selection, UserInteractions ui, int style) {
-		super(ui, style);
-		this.model = model;
-		this.selection = _selection;
+	public AbstractBootDashElementsAction(Params params) {
+		super(params.ui, params.style);
+		this.model = params.model;
+		this.selection = params.selection;
 		if (model!=null) {
 			model.addElementStateListener(modelListener = new ElementStateListener() {
 				public void stateChanged(BootDashElement e) {
@@ -77,6 +69,10 @@ public class AbstractBootDashElementsAction extends AbstractBootDashAction {
 				update();
 			}
 		});
+		if (params.definitionId != null) {
+			this.setActionDefinitionId(params.definitionId);
+			params.actions.bindAction(this);
+		}
 	}
 
 	public void update() {
@@ -114,5 +110,39 @@ public class AbstractBootDashElementsAction extends AbstractBootDashAction {
 			modelListener = null;
 		}
 		super.dispose();
+	}
+
+	public static class Params {
+		private BootDashActions actions;
+		private BootDashViewModel model;
+		private MultiSelection<BootDashElement> selection;
+		private UserInteractions ui;
+		private int style = IAction.AS_UNSPECIFIED;
+		private String definitionId;
+
+		public Params(BootDashActions actions) {
+			this.actions = actions;
+		}
+
+		public Params setModel(BootDashViewModel model) {
+			this.model = model;
+			return this;
+		}
+		public Params setSelection(MultiSelection<BootDashElement> selection) {
+			this.selection = selection;
+			return this;
+		}
+		public Params setUi(UserInteractions ui) {
+			this.ui = ui;
+			return this;
+		}
+		public Params setStyle(int style) {
+			this.style = style;
+			return this;
+		}
+		public Params setDefinitionId(String definitionId) {
+			this.definitionId = definitionId;
+			return this;
+		}
 	}
 }

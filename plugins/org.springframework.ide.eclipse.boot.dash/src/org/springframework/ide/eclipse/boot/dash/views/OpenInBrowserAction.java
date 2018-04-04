@@ -11,15 +11,12 @@
 package org.springframework.ide.eclipse.boot.dash.views;
 
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
-import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 public class OpenInBrowserAction extends AbstractBootDashElementsAction {
 
-	public OpenInBrowserAction(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
-		super(model, selection, ui);
+	public OpenInBrowserAction(Params params) {
+		super(params);
 		this.setText("Open Web Browser");
 		this.setToolTipText("Open a Web Browser on the default URL");
 		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/open_browser.png"));

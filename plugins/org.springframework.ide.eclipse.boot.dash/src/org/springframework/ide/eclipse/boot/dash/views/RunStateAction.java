@@ -15,12 +15,9 @@ import java.util.Collection;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
-import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
-import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
 
 /**
@@ -43,20 +40,14 @@ public abstract class RunStateAction extends AbstractBootDashElementsAction {
 	private static final ISchedulingRule SCEDULING_RULE = JobUtil.lightRule("RunStateAction.RULE");
 	protected final RunState goalState;
 	private ElementStateListener stateListener = null;
-	private BootDashViewModel model;
 
 	protected void configureJob(Job job) {
 		job.setRule(SCEDULING_RULE);
 	}
 
-	public RunStateAction(
-			BootDashViewModel model,
-			MultiSelection<BootDashElement> selection,
-			UserInteractions ui,
-			RunState goalState) {
-		super(selection, ui);
+	public RunStateAction(Params params, RunState goalState) {
+		super(params);
 		debug("Create RunStateAction "+goalState);
-		this.model = model;
 		this.goalState = goalState;
 		model.addElementStateListener(stateListener = new ElementStateListener() {
 			public void stateChanged(BootDashElement e) {

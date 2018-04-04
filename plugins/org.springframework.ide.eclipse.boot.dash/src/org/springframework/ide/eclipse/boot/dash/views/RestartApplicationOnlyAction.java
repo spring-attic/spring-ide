@@ -17,14 +17,12 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
-import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 public class RestartApplicationOnlyAction extends AbstractCloudAppDashElementsAction {
 
-	public RestartApplicationOnlyAction(MultiSelection<BootDashElement> selection, UserInteractions ui) {
-		super(selection, ui);
+	public RestartApplicationOnlyAction(Params params) {
+		super(params);
 		Assert.isNotNull(ui);
 		this.setText("Restart Only");
 		this.setToolTipText("Restarts the application without uploading changes.");

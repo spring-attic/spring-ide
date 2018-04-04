@@ -16,16 +16,14 @@ import java.util.Iterator;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
-import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 @SuppressWarnings("restriction")
 public class OpenInPackageExplorer extends AbstractBootDashElementsAction {
 
-	public OpenInPackageExplorer(MultiSelection<BootDashElement> selection, UserInteractions ui) {
-		super(selection, ui);
+	public OpenInPackageExplorer(Params params) {
+		super(params);
 		this.setText("Open In Package Explorer");
 		this.setToolTipText("Open In Package Explorer");
 		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/package.png"));

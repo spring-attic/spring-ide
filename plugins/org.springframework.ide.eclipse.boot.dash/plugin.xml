@@ -155,6 +155,33 @@
             id="org.springframework.ide.eclipse.boot.dash.ShowBootDashboard"
             name="Boot Dashboard">
       </command>
+      <command
+            categoryId="org.eclipse.ui.category.window"
+            defaultHandler="org.springframework.ide.eclipse.boot.dash.views.BootDashHandler"
+            description="Open Launch Configuration"
+            id="org.springframework.ide.eclipse.boot.dash.boot.dash.OpenLaunchConfigAction"
+            name="Open Config">
+      </command>
+      <command
+            categoryId="org.eclipse.ui.category.window"
+            defaultHandler="org.springframework.ide.eclipse.boot.dash.views.BootDashHandler"
+            description="(Re)start Boot App"
+            id="org.springframework.ide.eclipse.boot.dash.boot.dash.RestartAction"
+            name="(Re)start">
+      </command>
+      <command
+            categoryId="org.eclipse.ui.category.window"
+            defaultHandler="org.springframework.ide.eclipse.boot.dash.views.BootDashHandler"
+            description="(Re)debug Boot App"
+            id="org.springframework.ide.eclipse.boot.dash.boot.dash.RedebugAction"
+            name="(Re)debug">
+      </command>
+      <command
+            categoryId="org.eclipse.ui.category.window"
+            description="Stop Boot App"
+            id="org.springframework.ide.eclipse.boot.dash.boot.dash.StopAction"
+            name="Stop">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -230,6 +257,33 @@
          id="org.springframework.ide.eclipse.boot.dash.yamlMergeViewer"
          label="YAML Text Merge">
    </viewer>
+</extension>
+<extension
+      point="org.eclipse.ui.bindings">
+   <key
+         commandId="org.springframework.ide.eclipse.boot.dash.boot.dash.OpenLaunchConfigAction"
+         contextId="org.eclipse.ui.contexts.window"
+         schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+         sequence="M1+M2+M3+B F">
+   </key>
+   <key
+         commandId="org.springframework.ide.eclipse.boot.dash.boot.dash.RestartAction"
+         contextId="org.eclipse.ui.contexts.window"
+         schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+         sequence="M1+M2+M3+B R">
+   </key>
+   <key
+         commandId="org.springframework.ide.eclipse.boot.dash.boot.dash.RedebugAction"
+         contextId="org.eclipse.ui.contexts.window"
+         schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+         sequence="M1+M2+M3+B D">
+   </key>
+   <key
+         commandId="org.springframework.ide.eclipse.boot.dash.boot.dash.StopAction"
+         contextId="org.eclipse.ui.contexts.window"
+         schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+         sequence="M1+M2+M3+B S">
+   </key>
 </extension>
 
 </plugin>

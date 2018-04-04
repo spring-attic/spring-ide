@@ -19,11 +19,8 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
-import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 /**
  * Action for starting/restarting Remove DevTools Client application
@@ -33,12 +30,10 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
  */
 public class RestartWithRemoteDevClientAction extends AbstractCloudAppDashElementsAction {
 
-	private BootDashViewModel model;
 	private ElementStateListener stateListener;
 
-	public RestartWithRemoteDevClientAction(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
-		super(selection, ui);
-		this.model = model;
+	public RestartWithRemoteDevClientAction(Params params) {
+		super(params);
 		this.setText("(Re)start Remote DevTools Client");
 		this.setToolTipText("Restarts application with the Remote DevTools Client attched.");
 		URL url = FileLocator.find(Platform.getBundle("org.springframework.ide.eclipse.boot"), new Path("resources/icons/boot-devtools-icon.png"), null);

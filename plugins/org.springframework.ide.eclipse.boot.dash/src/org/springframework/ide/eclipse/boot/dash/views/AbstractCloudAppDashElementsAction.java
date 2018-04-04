@@ -10,12 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
-import org.eclipse.jface.action.IAction;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
-import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
-import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 /**
  * Action for {@link CloudAppDashElement} elements only
@@ -25,16 +21,8 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
  */
 public class AbstractCloudAppDashElementsAction extends AbstractBootDashElementsAction {
 
-	public AbstractCloudAppDashElementsAction(BootDashViewModel model, MultiSelection<BootDashElement> _selection, UserInteractions ui, int style) {
-		super(model, _selection, ui, style);
-	}
-
-	public AbstractCloudAppDashElementsAction(MultiSelection<BootDashElement> selection, UserInteractions ui) {
-		this(null, selection, ui);
-	}
-
-	public AbstractCloudAppDashElementsAction(BootDashViewModel model, MultiSelection<BootDashElement> _selection, UserInteractions ui) {
-		this(model, _selection, ui, IAction.AS_UNSPECIFIED);
+	public AbstractCloudAppDashElementsAction(Params params) {
+		super(params);
 	}
 
 	@Override

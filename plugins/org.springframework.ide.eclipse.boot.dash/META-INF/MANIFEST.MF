@@ -48,7 +48,8 @@ Require-Bundle: org.eclipse.ui,
  org.apache.commons.lang3,
  org.springframework.ide.eclipse.editor.support,
  javax.ws.rs;bundle-version="2.0.1",
- org.springframework.ide.eclipse.beans.ui.live
+ org.springframework.ide.eclipse.beans.ui.live,
+ org.eclipse.core.commands
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,

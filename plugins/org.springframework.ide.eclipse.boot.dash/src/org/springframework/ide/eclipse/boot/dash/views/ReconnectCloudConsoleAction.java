@@ -19,15 +19,13 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
-import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
-import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 public class ReconnectCloudConsoleAction extends AbstractCloudAppDashElementsAction {
 
-	public ReconnectCloudConsoleAction(MultiSelection<BootDashElement> selection, UserInteractions ui) {
-		super(selection, ui);
+	public ReconnectCloudConsoleAction(Params params) {
+		super(params);
 		this.setText("Reconnect Console");
 		this.setToolTipText("Reconnect Console");
 		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/open_console.png"));
