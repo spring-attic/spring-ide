@@ -52,7 +52,7 @@ public abstract class AbstractBdePropertyControl implements BootDashElementPrope
 	@Override
 	public void createControl(Composite composite, TabbedPropertySheetPage page) {
 		stylers = new Stylers(composite.getFont());
-		bdeLabels = new BootDashLabels(stylers);
+		bdeLabels = new BootDashLabels(stylers).setDeclutter(false);
 	}
 
 	protected Stylers getStylers() {

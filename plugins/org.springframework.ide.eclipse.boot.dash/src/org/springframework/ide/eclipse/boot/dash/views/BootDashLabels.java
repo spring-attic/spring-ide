@@ -43,7 +43,6 @@ import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKLaunchTracker;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
-import org.springsource.ide.eclipse.commons.livexp.ui.Ilabelable;
 import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 
 import com.google.common.collect.ImmutableSet;
@@ -80,6 +79,8 @@ public class BootDashLabels implements Disposable {
 	private ImageDecorator images = new ImageDecorator();
 
 	private Stylers stylers;
+
+	private boolean declutter = true;
 
 	/**
 	 * This constructor is deprecated. It produces something incapable of
@@ -408,7 +409,7 @@ public class BootDashLabels implements Disposable {
 			case INSTANCES:
 				int actual = element.getActualInstances();
 				int desired = element.getDesiredInstances();
-				if (desired!=1 || actual > 1) { //Don't show: less clutter, you can already see whether a single instance is running or not
+				if (!declutter || desired!=1 || actual > 1) { //Don't show: less clutter, you can already see whether a single instance is running or not
 					if (stylers == null) {
 						label = actual + "/" + desired;
 					} else {
@@ -513,6 +514,17 @@ public class BootDashLabels implements Disposable {
 			}
 		}
 		return decoratedImages;
+	}
+
+	/**
+	 * Enables or disables decluttering. Decluttering means some
+	 * 'obvious' information is hidden from generated label text.
+	 * <p>
+	 * Decluttering is enabled by default.
+	 */
+	public BootDashLabels setDeclutter(boolean declutter) {
+		this.declutter = declutter;
+		return this;
 	}
 
 }
