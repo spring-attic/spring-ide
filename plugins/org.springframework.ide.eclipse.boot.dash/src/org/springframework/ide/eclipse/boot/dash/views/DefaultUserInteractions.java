@@ -391,16 +391,14 @@ public class DefaultUserInteractions implements UserInteractions {
 
 		if (manifestFile != null && manifestFile.isAccessible()) {
 
-			String message = "WARNING: If using the manifest file, existing service bindings for the application that are not listed in the manifest will be removed.";
 
 			String yamlContents = IOUtil.toString(manifestFile.getContents());
 
-			YamlGraphDeploymentProperties yamlGraph = new YamlGraphDeploymentProperties(yamlContents, existingAppDeploymentProperties.getAppName(), cloudData);
-
+			YamlGraphDeploymentProperties newDeploymentProperties = new YamlGraphDeploymentProperties(yamlContents, existingAppDeploymentProperties.getAppName(), cloudData);
 			TextEdit edit = null;
 			String errorMessage = null;
 			try {
-				MultiTextEdit me = yamlGraph.getDifferences(existingAppDeploymentProperties);
+				MultiTextEdit me = newDeploymentProperties.getDifferences(existingAppDeploymentProperties);
 				edit = me != null && me.hasChildren() ? me : null;
 			} catch (MalformedTreeException e) {
 				errorMessage  = "Failed to create text differences between local manifest file and deployment properties on CF.";
@@ -431,9 +429,12 @@ public class DefaultUserInteractions implements UserInteractions {
 					@Override
 					protected Object prepareInput(IProgressMonitor monitor)
 							throws InvocationTargetException, InterruptedException {
-						setMessage(message);
+						if (hasDeletedService(newDeploymentProperties, existingAppDeploymentProperties)) {
+							setMessage("WARNING: If using the manifest file, existing service bindings for the application that are not listed in the manifest will be removed.");
+						}
 						return new DiffNode(left, right);
 					}
+
 				};
 				input.setTitle("Replacing existing application");
 
@@ -452,4 +453,9 @@ public class DefaultUserInteractions implements UserInteractions {
 		}
 		return null;
 	}
+
+	private boolean hasDeletedService(YamlGraphDeploymentProperties newDeployment, CloudApplicationDeploymentProperties oldDeployment) {
+		return !newDeployment.getServices().containsAll(oldDeployment.getServices());
+	}
+
 }
