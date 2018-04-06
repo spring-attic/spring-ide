@@ -65,10 +65,11 @@ public class NewSpringBootWizardTest extends TestCase {
 //			fail("File is not executable: "+file+"\n"+process);
 //		}
 //	}
-//	
+//
 	public void testEchoJavaHome() throws Exception {
-		ExternalCommand cmd = new ExternalCommand("$JAVA_HOME");
-		System.out.println("JAVA_HOME=" + new ExternalProcess(new File("."), cmd, true).getErr());
-		System.out.println("JAVA_HOME=" + new ExternalProcess(new File("."), cmd, true).getOut());
+		ExternalCommand cmd = new ExternalCommand("echo", "$JAVA_HOME");
+		File currentworkingFolder = new File(".").getCanonicalFile();
+		System.out.println("JAVA_HOME=" + new ExternalProcess(currentworkingFolder, cmd, true).getErr());
+		System.out.println("JAVA_HOME=" + new ExternalProcess(currentworkingFolder, cmd, true).getOut());
 	}
 }
