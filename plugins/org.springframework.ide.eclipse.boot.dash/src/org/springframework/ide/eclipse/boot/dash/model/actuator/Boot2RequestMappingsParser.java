@@ -34,7 +34,13 @@ public class Boot2RequestMappingsParser implements RequestMappingsParser {
 				JSONArray servlets = dispatcherServlets.getJSONArray(servletId);
 				for (int i = 0; i < servlets.length(); i++) {
 					JSONObject servlet = servlets.getJSONObject(i);
-					result.addAll(RequestMappingImpl.create(servlet.getString("predicate"), servlet.getString("handler"), typeLookup));
+					JSONObject details = servlet.optJSONObject("details");
+					if (details == null) {
+						// Fall back to 1.x for missing "details" property, i.e. no method handler defined
+						result.addAll(RequestMapping1x.create(servlet.getString("predicate"), servlet.getString("handler"), typeLookup));
+					} else {
+						result.addAll(RequestMapping2x.create(typeLookup, servlet.getString("handler"), details));
+					}
 				}
 			}
 //			JSONObject value = obj.getJSONObject(rawKey);

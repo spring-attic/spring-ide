@@ -46,7 +46,7 @@ public class Boot1RequestMappingsParser implements RequestMappingsParser {
 		while (keys.hasNext()) {
 			String rawKey = keys.next();
 			JSONObject value = obj.getJSONObject(rawKey);
-			Collection<RequestMappingImpl> mappings = RequestMappingImpl.create(rawKey, value.optString("method"), typeLookup);
+			Collection<RequestMapping1x> mappings = RequestMapping1x.create(rawKey, value.optString("method"), typeLookup);
 			result.addAll(mappings);
 		}
 		return result;
