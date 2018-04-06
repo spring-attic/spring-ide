@@ -12,7 +12,6 @@ package org.springframework.ide.eclipse.boot.dash;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,6 +24,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.BootDashBuildpackHintProvider;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.BuildpackHintGenerator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CfTargetsInfo;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CfTargetsInfo.Target;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
@@ -183,27 +184,16 @@ public class BootDashActivator extends AbstractUIPlugin {
 		return model;
 	}
 
-
 	private void updateCloudTargetsInManifestEditor(ImmutableSet<RunTarget> value) {
 		Set<RunTarget> toUpdate = value == null ? ImmutableSet.of() : value;
 
-		List<Map<String, Object>> entries = getCfTargetLoginOptions(toUpdate);
-		Map<String, Object> result = null;
-
-		if (entries != null) {
-			result = new HashMap<>();
-			Map<String, Object> clientParamsData = ImmutableMap.of(
-				"parameters", entries,
-				"messages", LS_DIAGNOSTIC_MESSAGES
-			);
-			result.put("cfClientParams", clientParamsData);
-		}
-
-		ManifestEditorActivator.getDefault().setCfTargetLoginOptions(result);
+		CfTargetsInfo targetsInfo = asTargetsInfo(toUpdate);
+		ManifestEditorActivator.getDefault().setCfTargetsInfo(targetsInfo);
 	}
 
 	/**
-	 * Add a listener to be notified when the refresh token becomes available OR changes
+	 * Add a listener to be notified when the refresh token becomes available OR
+	 * changes
 	 */
 	private void addRefreshTokenListener(DefaultClientRequestsV2 client) {
 		if (client != null && client.getRefreshTokens() != null && this.model != null
@@ -221,18 +211,6 @@ public class BootDashActivator extends AbstractUIPlugin {
 		}
 	}
 
-	private List<Map<String, Object>> getCfTargetLoginOptions(Collection<RunTarget> targets) {
-		List<Map<String, Object>> entries = new ArrayList<>();
-
-		for (RunTarget runTarget : targets) {
-			if (runTarget instanceof CloudFoundryRunTarget) {
-				collectTargetInfo((CloudFoundryRunTarget) runTarget, entries);
-			}
-		}
-
-		return entries;
-	}
-
 	private void addClientChangeListeners(ImmutableSet<RunTarget> targets) {
 		if (targets != null) {
 			for (RunTarget runTarget : targets) {
@@ -243,26 +221,38 @@ public class BootDashActivator extends AbstractUIPlugin {
 		}
 	}
 
-	private void collectTargetInfo(CloudFoundryRunTarget cloudFoundryRunTarget, List<Map<String, Object>> entries) {
-		CloudFoundryTargetProperties properties = cloudFoundryRunTarget.getTargetProperties();
-		String target = properties.getUrl();
-		String org = properties.getOrganizationName();
-		String space = properties.getSpaceName();
-		boolean sslDisabled = properties.skipSslValidation();
+	private CfTargetsInfo asTargetsInfo(Collection<RunTarget> targets) {
+		List<CfTargetsInfo.Target> collectedTargets = new ArrayList<>();
+		for (RunTarget runTarget : targets) {
+			if (runTarget instanceof CloudFoundryRunTarget) {
 
-		if (cloudFoundryRunTarget.isConnected()) {
-			String token = cloudFoundryRunTarget.getClient().getRefreshToken();
-			if (token != null) {
-				Map<String, Object> entry = new HashMap<>();
-				entry.put("Target", target);
-				entry.put("OrgName", org);
-				entry.put("SpaceName", space);
-				entry.put("SSLDisabled", sslDisabled);
-				entry.put("RefreshToken", token);
+				CloudFoundryRunTarget cloudFoundryRunTarget = (CloudFoundryRunTarget) runTarget;
+				if (cloudFoundryRunTarget.isConnected()) {
+					String token = cloudFoundryRunTarget.getClient().getRefreshToken();
+					if (token != null) {
+						CloudFoundryTargetProperties properties = cloudFoundryRunTarget.getTargetProperties();
+						String target = properties.getUrl();
+						String org = properties.getOrganizationName();
+						String space = properties.getSpaceName();
+						boolean sslDisabled = properties.skipSslValidation();
 
-				entries.add(entry);
+						CfTargetsInfo.Target integrationTarget = new Target();
+
+						integrationTarget.setApi(target);
+						integrationTarget.setOrg(org);
+						integrationTarget.setSpace(space);
+						integrationTarget.setSslDisabled(sslDisabled);
+						integrationTarget.setRefreshToken(token);
+						collectedTargets.add(integrationTarget);
+					}
+				}
 			}
 		}
+
+		CfTargetsInfo targetsInfo = new CfTargetsInfo();
+		targetsInfo.setCfTargets(collectedTargets);
+		targetsInfo.setCfDiagnosticMessages(LS_DIAGNOSTIC_MESSAGES);
+		return targetsInfo ;
 	}
 
 	@Override

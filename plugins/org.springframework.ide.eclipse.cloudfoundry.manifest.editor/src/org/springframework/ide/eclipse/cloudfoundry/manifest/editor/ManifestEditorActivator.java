@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Pivotal, Inc.
+ * Copyright (c) 2016, 2018 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,7 +30,7 @@ public class ManifestEditorActivator extends AbstractUIPlugin {
 
 	// The shared instance
 	private static ManifestEditorActivator plugin;
-
+	
 	/**
 	 * The constructor
 	 */
@@ -83,13 +83,13 @@ public class ManifestEditorActivator extends AbstractUIPlugin {
 		return this.buildpackProvider;
 	}
 	
-	public void setCfTargetLoginOptions(Map<String, Object> cfTargetLoginOptions) {
+	public void setCfTargetsInfo(Object targetsInfo) {
 		try {
 			Bundle lsBundle = Platform.getBundle("org.springframework.tooling.cloudfoundry.manifest.ls");
 			if (lsBundle != null && lsBundle.getState() != Bundle.INSTALLED) {
 				Class<?> lsClass = lsBundle.loadClass("org.springframework.tooling.cloudfoundry.manifest.ls.CloudFoundryManifestLanguageServer");
 				Method lsMethod = lsClass.getMethod("setCfTargetLoginOptions", Object.class);
-				lsMethod.invoke(null, cfTargetLoginOptions);
+				lsMethod.invoke(null, targetsInfo);
 			}
 		}
 		catch (Exception e) {
