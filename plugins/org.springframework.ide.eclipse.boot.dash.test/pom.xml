@@ -20,7 +20,7 @@
 				<version>${tycho-version}</version>
 				<configuration>
 					<useUIHarness>true</useUIHarness>
-					<forkedProcessTimeoutInSeconds>720000</forkedProcessTimeoutInSeconds>
+					<forkedProcessTimeoutInSeconds>7200</forkedProcessTimeoutInSeconds>
 					<testSuite>org.springframework.ide.eclipse.boot.dash.test</testSuite>
 					<testClass>org.springframework.ide.eclipse.boot.dash.test.AllBootDashTests</testClass>
 				</configuration>
