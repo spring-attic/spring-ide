@@ -178,6 +178,7 @@
       </command>
       <command
             categoryId="org.eclipse.ui.category.window"
+            defaultHandler="org.springframework.ide.eclipse.boot.dash.views.BootDashHandler"
             description="Stop Boot App"
             id="org.springframework.ide.eclipse.boot.dash.boot.dash.StopAction"
             name="Stop">
