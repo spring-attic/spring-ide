@@ -6,7 +6,7 @@ Bundle-SymbolicName: org.springsource.ide.eclipse.commons.cloudfoundry.client.v2
 Bundle-Version: 3.9.4.qualifier
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Require-Bundle: io.projectreactor.reactor-core;bundle-version="3.0.7",
+Require-Bundle: io.projectreactor.reactor-core;bundle-version="[3.1.5,3.1.6)",
  org.reactivestreams.reactive-streams;bundle-version="1.0.0"
 Bundle-ClassPath: dependencies/cloudfoundry-client-3.8.0.RELEASE.jar,
  dependencies/cloudfoundry-client-reactor-3.8.0.RELEASE.jar,
