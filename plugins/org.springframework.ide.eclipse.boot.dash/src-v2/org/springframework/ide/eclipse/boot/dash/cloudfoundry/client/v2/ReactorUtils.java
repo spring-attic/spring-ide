@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Pivotal, Inc.
+ * Copyright (c) 2016, 2018 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,7 +45,7 @@ public class ReactorUtils {
 	 */
 	public static <T> Mono<T> toMono(CancelationToken cancelToken) {
 		return Mono.delay(Duration.ofSeconds(1))
-		.then((ping) ->
+		.flatMap((ping) ->
 			cancelToken.isCanceled()
 				? Mono.<T>error(new OperationCanceledException())
 				: Mono.empty()
@@ -79,7 +79,7 @@ public class ReactorUtils {
 	public static <T> T get(Duration timeout, CancelationToken cancelationToken, Mono<T> mono) throws Exception {
 		try {
 			return Mono.first(mono, toMono(cancelationToken))
-			.otherwise(errorFilter(cancelationToken))
+			.onErrorResume(errorFilter(cancelationToken))
 			.block(timeout);
 		} catch (Exception e) {
 			dumpStacks();
@@ -158,21 +158,21 @@ public class ReactorUtils {
 		return Flux.merge(
 			operations
 			.map((Mono<Void> op) -> {
-				return op.otherwise((e) -> {
+				return op.onErrorResume((e) -> {
 					failure.compareAndSet(null, e);
 					return Mono.empty();
 				});
 			}),
 			concurrency //limit concurrency otherwise troubles (flooding/choking request broker?)
 		)
-		.then(() -> {
+		.then(Mono.defer(() -> {
 			Throwable error = failure.get();
 			if (error!=null) {
 				return Mono.error(error);
 			} else {
 				return Mono.empty();
 			}
-		});
+		}));
 	}
 
 	/**

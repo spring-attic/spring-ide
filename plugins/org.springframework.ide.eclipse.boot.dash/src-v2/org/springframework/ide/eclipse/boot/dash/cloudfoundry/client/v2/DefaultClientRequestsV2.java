@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Pivotal, Inc.
+ * Copyright (c) 2016, 2018 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -211,7 +211,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		//Stuff used in computing the 'extras'...
 		Mono<UUID> appIdMono = getApplicationId(appName);
 		Mono<ApplicationEntity> entity = appIdMono
-			.then((appId) ->
+			.flatMap((appId) ->
 				client_getApplication(appId)
 			)
 			.map((appResource) -> appResource.getEntity())
@@ -223,12 +223,12 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 				DefaultClientRequestsV2.this.getEnv(appName)
 		);
 		Mono<String> buildpack = prefetch("buildpack",
-				entity.then((e) -> Mono.justOrEmpty(e.getBuildpack()))
+				entity.flatMap((e) -> Mono.justOrEmpty(e.getBuildpack()))
 		);
 
 		Mono<String> stack = prefetch("stack",
-			entity.then((e) -> Mono.justOrEmpty(e.getStackId()))
-			.then((stackId) -> {
+			entity.flatMap((e) -> Mono.justOrEmpty(e.getStackId()))
+			.flatMap((stackId) -> {
 				return client_getStack(stackId);
 			}).map((response) -> {
 				return response.getEntity().getName();
@@ -236,19 +236,19 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		);
 		Mono<Integer> timeout = prefetch("timeout",
 				entity
-				.then((v) -> Mono.justOrEmpty(v.getHealthCheckTimeout()))
+				.flatMap((v) -> Mono.justOrEmpty(v.getHealthCheckTimeout()))
 		);
 
 		Mono<String> command = prefetch("command",
-				entity.then((e) -> Mono.justOrEmpty(e.getCommand()))
+				entity.flatMap((e) -> Mono.justOrEmpty(e.getCommand()))
 		);
 
 		Mono<String> healthCheckType = prefetch("healthCheckType",
-				entity.then((e) -> Mono.justOrEmpty(e.getHealthCheckType()))
+				entity.flatMap((e) -> Mono.justOrEmpty(e.getHealthCheckType()))
 		);
 
 		Mono<String> healthCheckHttpEndpoint = prefetch("healthCheckHttpEndpoint",
-				entity.then((e) -> Mono.justOrEmpty(e.getHealthCheckHttpEndpoint()))
+				entity.flatMap((e) -> Mono.justOrEmpty(e.getHealthCheckHttpEndpoint()))
 		);
 
 		return new ApplicationExtras() {
@@ -516,7 +516,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 			@Override
 			public SshHost getSshHost() throws Exception {
 				return ReactorUtils.get(
-					info.then((i) -> {
+					info.flatMap((i) -> {
 						String fingerPrint = i.getApplicationSshHostKeyFingerprint();
 						String host = i.getApplicationSshEndpoint();
 						int port = 22; //Default ssh port
@@ -640,7 +640,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		}
 
 		public Mono<Boolean> isTcp(String domainName) {
-			return domainsByName.then(dmap -> {
+			return domainsByName.flatMap(dmap -> {
 				CFCloudDomain domain = dmap.get(domainName);
 				return Mono.just(domain!=null && domain.getType()==CFDomainType.TCP);
 			});
@@ -706,7 +706,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		return ReactorUtils.get(
 				getApplicationMono(appName)
 				.map((app) -> true)
-				.otherwiseIfEmpty(Mono.just(false))
+				.switchIfEmpty(Mono.just(false))
 		);
 	}
 
@@ -715,7 +715,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		.map((app) -> Optional.of(app))
 		.switchIfEmpty(Mono.just(Optional.<ApplicationDetail>empty()))
 		.onErrorResume((error) -> Mono.just(Optional.<ApplicationDetail>empty()))
-		.then((Optional<ApplicationDetail> app) -> {
+		.flatMap((Optional<ApplicationDetail> app) -> {
 			if (app.isPresent()) {
 				return then.apply(app.get());
 			} else {
@@ -765,7 +765,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		 )
 		.then(mono_debug("Updating routes, bound services, and environment variables..."))
 		.then(getApplicationDetail(appName))
-		.then((appDetail) -> {
+		.flatMap((appDetail) -> {
 			return Flux.merge(
 				setRoutes(appDetail, params.getRoutes(), params.getRandomRoute()),
 				bindAndUnbindServices(appName, params.getServices()),
@@ -837,7 +837,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	public Mono<Void> setRoutes(String appName, Collection<String> desiredUrls, boolean randomRoute) {
 		return getApplicationDetail(appName)
-		.then(appDetails -> setRoutes(appDetails, desiredUrls, randomRoute));
+		.flatMap(appDetails -> setRoutes(appDetails, desiredUrls, randomRoute));
 	}
 
 	private Mono<Void> mapDesiredRoutes(ApplicationDetail appDetail, DomainsOracle domains, Collection<String> desiredUrls, boolean randomRoute) {
@@ -861,7 +861,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	private Mono<Void> mapRoute(DomainsOracle domains, String appName, String desiredUrl, boolean randomRoute) {
 		debug("mapRoute: "+appName+" -> "+desiredUrl);
 		return toRoute(domains, desiredUrl)
-		.then((CFRoute route) -> mapRoute(domains, appName, route, randomRoute))
+		.flatMap((CFRoute route) -> mapRoute(domains, appName, route, randomRoute))
 		.doOnError((e) -> {
 			Log.info("mapRoute FAILED!");
 			Log.log(e);
@@ -878,7 +878,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 			_builder = _builder.map(builder -> builder.domain(route.getDomain()));
 		}
 		if (randomRoute) {
-			_builder = _builder.then((MapRouteRequest.Builder builder) ->
+			_builder = _builder.flatMap((MapRouteRequest.Builder builder) ->
 				// Can only set random port to true if route is TCP route
 				domains.isTcp(route.getDomain()).map(isTcp -> {
 					if (isTcp) {
@@ -904,7 +904,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 			}
 			return builder;
 		});
-		return _builder.then(builder -> {
+		return _builder.flatMap(builder -> {
 			MapRouteRequest mapRouteReq = builder.build();
 			return log("operations.routes.map("+mapRouteReq+")",
 				_operations.routes().map(mapRouteReq)
@@ -914,7 +914,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 	private Mono<CFRoute> toRoute(DomainsOracle domains, String desiredUrl) {
-		return domains.getDomainsMono().then((ds) -> {
+		return domains.getDomainsMono().flatMap((ds) -> {
 			try {
 				CFRoute route = CFRoute.builder().from(desiredUrl, ds).build();
 				route.validate();
@@ -1106,7 +1106,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	public Mono<Void> setEnvVars(String appName, Map<String, String> environment) {
 		return getApplicationId(appName)
-		.then((applicationId) -> setEnvVars(applicationId, environment));
+		.flatMap((applicationId) -> setEnvVars(applicationId, environment));
 	}
 
 //	protected Publisher<? extends Object> setEnvVar(String appName, String var, String value) {
@@ -1153,7 +1153,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	@Override
 	public Mono<Void> deleteServiceAsync(String serviceName) {
 		return getService(serviceName)
-		.then(this::deleteServiceInstance);
+		.flatMap(this::deleteServiceInstance);
 	}
 
 	protected Mono<Void> deleteServiceInstance(ServiceInstance s) {
