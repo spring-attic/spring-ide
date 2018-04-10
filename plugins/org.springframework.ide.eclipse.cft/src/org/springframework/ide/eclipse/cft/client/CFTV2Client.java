@@ -47,7 +47,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.springframework.ide.eclipse.cft.CFTConsole;
 import org.springframework.ide.eclipse.cft.Log;
 
-import reactor.core.Cancellation;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 
 public class CFTV2Client implements CFClient {
@@ -118,7 +118,7 @@ public class CFTV2Client implements CFClient {
 		V2LogListener v2Listener = asV2LogListener(listener);
 		Flux<LogMessage> stream = operations.applications()
 				.logs(LogsRequest.builder().name(appName).recent(recentLogs).build());
-		final Cancellation cancellation = stream.subscribe(v2Listener::onMessage, v2Listener::onError);
+		final Disposable cancellation = stream.subscribe(v2Listener::onMessage, v2Listener::onError);
 		return new CFStreamingLogToken() {
 
 			@Override
