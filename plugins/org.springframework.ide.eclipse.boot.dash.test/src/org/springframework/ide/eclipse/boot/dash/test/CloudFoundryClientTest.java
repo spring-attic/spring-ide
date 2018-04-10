@@ -1095,6 +1095,9 @@ public class CloudFoundryClientTest {
 	}
 
 	private void push(CFPushArguments _params) throws Exception {
+		if (_params.getMemory() == null) {
+			_params.setMemory(256);
+		}
 		try (CFPushArguments params = _params) {
 			client.push(params, CancelationTokens.NULL);
 		}
