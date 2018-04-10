@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Pivotal, Inc.
+ * Copyright (c) 2016, 2018 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -197,7 +197,7 @@ public class PasswordDialogModel implements OkButtonHandler {
 			);
 			ClientRequests client = clientFactory.getClient(params);
 			return client.getUserName()
-			.then(actualUserName -> {
+			.flatMap(actualUserName -> {
 				refreshToken.setValue(client.getRefreshToken());
 				if (!currentParams.getUsername().equals(actualUserName)) {
 					return Mono.just(ValidationResult.error("The credentials belong to a different user!"));

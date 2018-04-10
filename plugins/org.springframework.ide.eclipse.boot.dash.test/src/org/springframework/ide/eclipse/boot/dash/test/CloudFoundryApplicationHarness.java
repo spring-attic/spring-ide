@@ -23,7 +23,7 @@ import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
-import reactor.core.Cancellation;
+import reactor.core.Disposable;
 
 public class CloudFoundryApplicationHarness extends AbstractDisposable {
 
@@ -64,7 +64,7 @@ public class CloudFoundryApplicationHarness extends AbstractDisposable {
 				}
 
 			};
-			Cancellation logToken = client.streamLogs(name, logConsole);
+			Disposable logToken = client.streamLogs(name, logConsole);
 			onDispose((d) -> {
 				logToken.dispose();
 			});

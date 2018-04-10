@@ -31,7 +31,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.springframework.ide.eclipse.cloudfoundry.manifest.editor,
  org.springframework.ide.eclipse.core,
  org.reactivestreams.reactive-streams;bundle-version="1.0.0",
- io.projectreactor.reactor-core;bundle-version="3.0.5",
+ io.projectreactor.reactor-core;bundle-version="[3.1.5,3.1.6)",
  org.apache.commons.lang,
  javax.ws.rs;bundle-version="2.0.1",
  org.eclipse.osgi
