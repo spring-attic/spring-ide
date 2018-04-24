@@ -81,7 +81,7 @@ public class RequestMappingViewLabelProvider extends LabelProvider implements
 		Object value = annotation.getValue();
 		if (value instanceof Set) {
 			for (AnnotationMemberValuePair pair : (Set<AnnotationMemberValuePair>) value) {
-				if (pair.getName() == null) {
+				if (pair.getName() == null || "path".equals(pair.getName())) {
 					String url = pair.getValue();
 					if (url.endsWith("/**")) { //$NON-NLS-1$
 						url = url.substring(0, url.length() - 3);
@@ -104,7 +104,7 @@ public class RequestMappingViewLabelProvider extends LabelProvider implements
 		Object value = annotation.getValue();
 		if (value instanceof Set) {
 			for (AnnotationMemberValuePair pair : (Set<AnnotationMemberValuePair>) value) {
-				if (pair.getName() == null) {
+				if (pair.getName() == null || "path".equals(pair.getName())) {
 					if (classUrl.equals("/") && pair.getValue().startsWith("/")) { //$NON-NLS-1$ //$NON-NLS-2$
 						return pair.getValue();
 					}
