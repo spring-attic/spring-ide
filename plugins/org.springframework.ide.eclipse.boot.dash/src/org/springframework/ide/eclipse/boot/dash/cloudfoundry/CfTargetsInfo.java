@@ -90,5 +90,10 @@ public class CfTargetsInfo {
 		public void setRefreshToken(String refreshToken) {
 			this.refreshToken = refreshToken;
 		}
+
+		@Override
+		public String toString() {
+			return "Target [api=" + api + ", org=" + org + ", space=" + space + "]";
+		}
 	}
 }

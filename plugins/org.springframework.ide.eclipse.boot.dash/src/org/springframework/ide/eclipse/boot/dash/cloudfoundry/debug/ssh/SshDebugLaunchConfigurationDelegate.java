@@ -80,11 +80,12 @@ public class SshDebugLaunchConfigurationDelegate extends AbstractBootLaunchConfi
 		Assert.isTrue(ILaunchManager.DEBUG_MODE.equals(mode));
 		BootDashViewModel context = getContext();
 		mon.beginTask("Establish SSH Debug Connection to "+getAppName(conf)+" on "+getRunTarget(conf, context), 4);
+		CloudAppDashElement app = null;
 		try {
 			CloudFoundryRunTarget target = getRunTarget(conf, context);
 			SshDebugSupport debugSupport = getDebugSupport(conf, context);
 
-			CloudAppDashElement app = getApp(conf, context);
+			app = getApp(conf, context);
 
 			if (app!=null && target!=null && debugSupport.isSupported(app)) {
 				//1: determine SSH tunnel parameters
@@ -112,6 +113,9 @@ public class SshDebugLaunchConfigurationDelegate extends AbstractBootLaunchConfi
 				app.log("Launching remote debug connector... DONE");
 			}
 		} catch (Exception e) {
+			if (app!=null) {
+				app.log("ERROR: "+ExceptionUtil.getMessage(e));
+			}
 			throw ExceptionUtil.coreException(e);
 		} finally {
 			mon.done();
