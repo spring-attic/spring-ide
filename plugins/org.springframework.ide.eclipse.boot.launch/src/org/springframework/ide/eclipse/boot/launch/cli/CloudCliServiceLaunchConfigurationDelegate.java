@@ -43,6 +43,8 @@ import org.springframework.ide.eclipse.boot.launch.util.PortFinder;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.core.util.ProcessUtils;
 
+import org.springframework.ide.eclipse.boot.launch.util.PortFinder;
+
 /**
  * Spring Cloud CLI service launch configuration
  *

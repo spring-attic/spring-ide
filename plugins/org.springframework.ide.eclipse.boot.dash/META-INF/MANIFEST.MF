@@ -27,7 +27,6 @@ Require-Bundle: org.eclipse.ui,
  com.google.guava;bundle-version="15.0.0",
  org.eclipse.equinox.security,
  org.eclipse.ui.views.properties.tabbed,
- com.jcraft.jsch,
  org.eclipse.ui.editors,
  org.eclipse.jface.text,
  org.dadacoalition.yedit,
@@ -49,7 +48,8 @@ Require-Bundle: org.eclipse.ui,
  org.springframework.ide.eclipse.editor.support,
  javax.ws.rs;bundle-version="2.0.1",
  org.springframework.ide.eclipse.beans.ui.live,
- org.eclipse.core.commands
+ org.eclipse.core.commands,
+ com.hierynomus.sshj;bundle-version="0.24.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,

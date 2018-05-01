@@ -12,14 +12,25 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.SocketTimeoutException;
+import java.time.Duration;
+import java.util.concurrent.CompletableFuture;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshHost;
 import org.springframework.ide.eclipse.boot.dash.util.LogSink;
+import org.springframework.ide.eclipse.boot.launch.util.PortFinder;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.Session;
-import com.jcraft.jsch.UserInfo;
+import net.schmizz.sshj.DefaultConfig;
+import net.schmizz.sshj.SSHClient;
+import net.schmizz.sshj.connection.channel.direct.LocalPortForwarder;
+import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
 
 /**
  * This class is responsible for creating an ssh tunnel to a remote port. This class implements
@@ -27,64 +38,71 @@ import com.jcraft.jsch.UserInfo;
  */
 public class SshTunnel implements Closeable {
 
-	private Session session;
 	private int localPort;
+	private SSHClient ssh;
+	private LocalPortForwarder portForwarder;
 
-	public SshTunnel(SshHost sshHost, String user, String oneTimeCode, int remotePort, LogSink log) throws JSchException {
-		JSch jsch = new JSch();
-		session = jsch.getSession(user, sshHost.getHost(), sshHost.getPort());
-		log.log("Ssh session created");
+	public SshTunnel(SshHost sshHost, String user, String oneTimeCode, int remotePort, LogSink log) throws Exception {
+		DefaultConfig config = new DefaultConfig();
+		ssh = new SSHClient(config);
+		ssh.addHostKeyVerifier(new PromiscuousVerifier()); //TODO: use fingerprint verifier
+		log.log("Ssh client created");
 
-		session.setPassword(oneTimeCode);
-		session.setUserInfo(getUserInfo(oneTimeCode));
-		session.setServerAliveInterval(15_000); //15 seconds
-		session.connect();
+		ssh.connect(sshHost.getHost(), sshHost.getPort());
+		ssh.authPassword(user, oneTimeCode);
+		ssh.getConnection().getKeepAlive().setKeepAliveInterval(15);
 		log.log("Ssh client connected");
 
-		localPort = session.setPortForwardingL(0, "localhost", remotePort); //$NON-NLS-1$
-		log.log("Ssh tunnel created: localPort = "+localPort);
-	}
-
-	private UserInfo getUserInfo(final String accessToken) {
-		return new UserInfo() {
-
+		ServerSocket ss = new ServerSocket(0);
+		ss.setSoTimeout(5_000);
+		localPort = PortFinder.findFreePort();
+		localPort = ss.getLocalPort();
+		Job job = new Job("SshTunnel port forwarding") {
 			@Override
-			public void showMessage(String arg0) {
-				// TODO Auto-generated method stub
-			}
-
-			@Override
-			public boolean promptYesNo(String arg0) {
-				return true;
-			}
-
-			@Override
-			public boolean promptPassword(String arg0) {
-				return true;
-			}
-
-			@Override
-			public boolean promptPassphrase(String arg0) {
-				return false;
-			}
-
-			@Override
-			public String getPassword() {
-				return accessToken;
-			}
-
-			@Override
-			public String getPassphrase() {
-				return null;
+			protected IStatus run(IProgressMonitor arg0) {
+				final LocalPortForwarder.Parameters params = new LocalPortForwarder.Parameters("0.0.0.0", localPort, "localhost", remotePort);
+				try {
+					portForwarder = ssh.newLocalPortForwarder(params, ss);
+					boolean timeout;
+					do {
+						timeout = false;
+						try {
+							portForwarder.listen();
+						} catch (SocketTimeoutException e) {
+							timeout = true;
+						}
+					} while (timeout);
+				} catch (IOException e) {
+					Log.log(e);
+				} finally {
+					try {
+						ss.close();
+					} catch (IOException e) {
+					}
+				}
+				return Status.OK_STATUS;
 			}
 		};
+		job.setSystem(true);
+		job.schedule();
+		log.log("Ssh tunnel created: localPort = "+localPort);
 	}
 
 	@Override
 	synchronized public void close() throws IOException {
-		if (session!=null) {
-			session.disconnect();
-			session = null;
+		if (portForwarder!=null) {
+			try {
+				portForwarder.close();
+			} catch (Exception e) {
+			}
+			portForwarder = null;
+		}
+		if (ssh!=null) {
+			try {
+				ssh.disconnect();
+			} catch (Exception e) {
+			}
+			ssh = null;
 		}
 	}
 
