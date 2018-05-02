@@ -27,6 +27,9 @@ import org.springframework.ide.eclipse.boot.dash.util.LogSink;
 import org.springframework.ide.eclipse.boot.launch.util.PortFinder;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
+import net.schmizz.keepalive.KeepAlive;
+import net.schmizz.keepalive.KeepAliveProvider;
+import net.schmizz.keepalive.KeepAliveRunner;
 import net.schmizz.sshj.DefaultConfig;
 import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.connection.channel.direct.LocalPortForwarder;
@@ -44,13 +47,16 @@ public class SshTunnel implements Closeable {
 
 	public SshTunnel(SshHost sshHost, String user, String oneTimeCode, int remotePort, LogSink log) throws Exception {
 		DefaultConfig config = new DefaultConfig();
+		config.setKeepAliveProvider(KeepAliveProvider.KEEP_ALIVE); // Hopefuly this is better at detecting dropped connections from server (e.g. when app is stopped or dies).
 		ssh = new SSHClient(config);
-		ssh.addHostKeyVerifier(new PromiscuousVerifier()); //TODO: use fingerprint verifier
+		ssh.addHostKeyVerifier(sshHost.getFingerPrint());
 		log.log("Ssh client created");
 
 		ssh.connect(sshHost.getHost(), sshHost.getPort());
 		ssh.authPassword(user, oneTimeCode);
-		ssh.getConnection().getKeepAlive().setKeepAliveInterval(15);
+		KeepAliveRunner keepAlive = (KeepAliveRunner) ssh.getConnection().getKeepAlive();
+		keepAlive.setKeepAliveInterval(5);
+		keepAlive.setMaxAliveCount(1);
 		log.log("Ssh client connected");
 
 		ServerSocket ss = new ServerSocket(0);
