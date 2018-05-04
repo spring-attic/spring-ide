@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2013, 2015 Pivotal, Inc.
+ *  Copyright (c) 2013, 2018 Pivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -170,6 +170,7 @@ public abstract class CodeSet {
 			public Void doit(CodeSetEntry e) throws Exception {
 				IPath path = e.getPath();
 				File target = new File(location, path.toString());
+				assertCorrectOutputLocation(location, target);
 				if (e.isDirectory()) {
 					target.mkdirs();
 				} else {
@@ -184,6 +185,16 @@ public abstract class CodeSet {
 				return null;
 			}
 		});
+	}
+
+	/**
+	 * Checks output location folder and target file location
+	 * @param location location folder
+	 * @param target target file
+	 * @throws Exception throws exception if there is a problem
+	 */
+	protected void assertCorrectOutputLocation(File location, File target) throws Exception {
+
 	}
 
 	public ValidationResult validateBuildType(BuildType buildType) throws UIThreadDownloadDisallowed {

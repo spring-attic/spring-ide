@@ -10,11 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard.content;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.zip.ZipException;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
@@ -175,6 +177,14 @@ public class ZipFileCodeSet extends CodeSet {
 				zip.close();
 			} catch (IOException e) {
 			}
+		}
+	}
+
+	@Override
+	protected void assertCorrectOutputLocation(File location, File target) throws Exception {
+		if (!target.toPath().normalize().startsWith(location.toPath().normalize())) {
+			throw new ZipException("The file " + target
+					+ " is trying to leave the target output directory of " + location);
 		}
 	}
 
