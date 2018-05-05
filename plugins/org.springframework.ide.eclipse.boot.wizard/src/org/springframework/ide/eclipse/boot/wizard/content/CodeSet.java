@@ -165,12 +165,13 @@ public abstract class CodeSet {
 				throw new IOException("Data already exists at location and it could not be deleted: "+location);
 			}
 		}
+		java.nio.file.Path normalizedLocationPath = location.toPath().normalize();
 		each(new CodeSet.Processor<Void>() {
 			@Override
 			public Void doit(CodeSetEntry e) throws Exception {
 				IPath path = e.getPath();
 				File target = new File(location, path.toString());
-				assertCorrectOutputLocation(location, target);
+				assertCorrectOutputLocation(normalizedLocationPath, target.toPath().normalize());
 				if (e.isDirectory()) {
 					target.mkdirs();
 				} else {
@@ -189,11 +190,11 @@ public abstract class CodeSet {
 
 	/**
 	 * Checks output location folder and target file location
-	 * @param location location folder
-	 * @param target target file
+	 * @param normalizedLocation normalized location folder path
+	 * @param normalizedTarget normalized target file path
 	 * @throws Exception throws exception if there is a problem
 	 */
-	protected void assertCorrectOutputLocation(File location, File target) throws Exception {
+	protected void assertCorrectOutputLocation(java.nio.file.Path normalizedLocation, java.nio.file.Path normalizedTarget) throws Exception {
 
 	}
 

@@ -181,10 +181,10 @@ public class ZipFileCodeSet extends CodeSet {
 	}
 
 	@Override
-	protected void assertCorrectOutputLocation(File location, File target) throws Exception {
-		if (!target.toPath().normalize().startsWith(location.toPath().normalize())) {
-			throw new ZipException("The file " + target
-					+ " is trying to leave the target output directory of " + location);
+	protected void assertCorrectOutputLocation(java.nio.file.Path normalizedLocation, java.nio.file.Path normalizedTarget) throws Exception {
+		if (!normalizedTarget.startsWith(normalizedLocation)) {
+			throw new ZipException("The file " + normalizedTarget
+					+ " is trying to leave the target output directory of " + normalizedLocation);
 		}
 	}
 
