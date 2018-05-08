@@ -44,28 +44,29 @@ public class RestartAction extends Action implements IUpdate {
 		update();
 	}
 
+	@Override
 	@SuppressWarnings("deprecation")
 	public void update() {
 		boolean bootProject = false;
 		boolean devtools = false;
 		boolean running = !this.console.getProcess().isTerminated();
-		
+
 		try {
 			IProcess process = this.console.getProcess();
 			ILaunchConfiguration launchConfiguration = process.getLaunch().getLaunchConfiguration();
-			ILaunchConfigurationType type = launchConfiguration.getType();
-			if (type!=null) {
-				ILaunchConfigurationDelegate delegate = type.getDelegate();
-				
-				bootProject = delegate instanceof BootLaunchConfigurationDelegate;
-	
-				IProject project = BootLaunchConfigurationDelegate.getProject(launchConfiguration);
-				devtools = BootPropertyTester.hasDevtools(project);
-			}
+			if (launchConfiguration!=null) {
+				ILaunchConfigurationType type = launchConfiguration.getType();
+				if (type!=null) {
+					ILaunchConfigurationDelegate delegate = type.getDelegate();
 
+					bootProject = delegate instanceof BootLaunchConfigurationDelegate;
+
+					IProject project = BootLaunchConfigurationDelegate.getProject(launchConfiguration);
+					devtools = BootPropertyTester.hasDevtools(project);
+				}
+			}
 		} catch (CoreException e) {
 		}
-		
 		setEnabled(running & bootProject & devtools);
 	}
 
