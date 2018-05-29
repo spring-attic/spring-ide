@@ -231,6 +231,17 @@
 		<bundle id="org.reactivestreams.reactive-streams" version="0.0.0"/>
 		<bundle id="org.reactivestreams.reactive-streams.source" version="0.0.0"/>
 
+	    <bundle id="bcpkix" version="0.0.0"/>
+	    <bundle id="bcpkix.source" version="0.0.0"/>
+	    <bundle id="bcprov" version="0.0.0"/>
+	    <bundle id="bcprov.source" version="0.0.0"/>
+	    <bundle id="com.hierynomus.sshj" version="0.0.0"/>
+	    <bundle id="com.hierynomus.sshj.source" version="0.0.0"/>
+	    <bundle id="com.jcraft.jzlib" version="0.0.0"/>
+	    <bundle id="com.jcraft.jzlib.source" version="0.0.0"/>
+	    <bundle id="net.i2p.crypto.eddsa" version="0.0.0"/>
+	    <bundle id="net.i2p.crypto.eddsa.source" version="0.0.0"/>
+
 		<bundle id="com.google.protobuf" version="0.0.0"/>
 
 		<bundle id="org.eclipse.lsp4e" version="0.0.0"/>
