@@ -61,6 +61,9 @@ public class ChooseOneSectionTable<T> extends ChooseOneSection {
 		}
 
 		public void setSearchTerm(String text) {
+			if (!text.startsWith("*")) {
+				text = "*"+text;
+			}
 			matcher = new StringMatcher(text, true, false);
 		}
 
@@ -84,8 +87,7 @@ public class ChooseOneSectionTable<T> extends ChooseOneSection {
 			if (matcher==null) {
 				return true; // Search term not set... anything is acceptable.
 			} else {
-				Position x = matcher.find(text, 0, text.length());
-				return x!=null;
+				return matcher.match(text);
 			}
 		}
 
@@ -140,6 +142,7 @@ public class ChooseOneSectionTable<T> extends ChooseOneSection {
 		grab.applyTo(tv.getTable());
 
 		whenVisible(tv.getControl(), new Runnable() {
+			@Override
 			public void run() {
 				T preSelect = selection.selection.getValue();
 				if (preSelect!=null) {
@@ -151,6 +154,7 @@ public class ChooseOneSectionTable<T> extends ChooseOneSection {
 		});
 
 		tv.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
 			@SuppressWarnings("unchecked")
 			public void selectionChanged(SelectionChangedEvent event) {
 				ISelection sel = tv.getSelection();
@@ -164,6 +168,7 @@ public class ChooseOneSectionTable<T> extends ChooseOneSection {
 		});
 
 		searchBox.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				filter.setSearchTerm(searchBox.getText());
 				tv.refresh();
@@ -173,6 +178,7 @@ public class ChooseOneSectionTable<T> extends ChooseOneSection {
 
 	private void whenVisible(final Control control, final Runnable runnable) {
 		PaintListener l = new PaintListener() {
+			@Override
 			public void paintControl(PaintEvent e) {
 				runnable.run();
 				control.removePaintListener(this);

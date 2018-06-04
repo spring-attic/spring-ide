@@ -42,7 +42,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.internal.misc.StringMatcher;
-import org.eclipse.ui.internal.misc.StringMatcher.Position;
 import org.springframework.ide.eclipse.boot.wizard.BootWizardActivator;
 import org.springframework.ide.eclipse.boot.wizard.content.ContentManager;
 import org.springframework.ide.eclipse.boot.wizard.content.ContentManager.DownloadState;
@@ -185,6 +184,9 @@ public class ChooseTypedContentSection extends WizardPageSection {
 
 		public void setSearchTerm(String text) {
 			if (StringUtils.isNotBlank(text)) {
+				if (!text.startsWith("*")) {
+					text = "*" + text;
+				}
 				matcher = new StringMatcher(text, true, false);
 			} else {
 				matcher = null;
@@ -239,8 +241,7 @@ public class ChooseTypedContentSection extends WizardPageSection {
 				if (text == null) {
 					return false;
 				} else {
-					Position x = matcher.find(text, 0, text.length());
-					return x != null;
+					return matcher.match(text);
 				}
 			}
 		}
