@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard.guides;
 
+import java.util.function.Predicate;
+
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -31,9 +33,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.internal.misc.StringMatcher;
-import org.eclipse.ui.internal.misc.StringMatcher.Position;
 import org.springframework.ide.eclipse.boot.wizard.content.Describable;
+import org.springframework.ide.eclipse.boot.wizard.util.StringMatchers;
+import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.SelectionModel;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
@@ -52,7 +54,7 @@ public class ChooseOneSectionTable<T> extends ChooseOneSection {
 
 	private class ChoicesFilter extends ViewerFilter {
 
-		private StringMatcher matcher = null;
+		private Predicate<String> matcher = null;
 
 		public ChoicesFilter() {
 			if (searchBox!=null) {
@@ -61,10 +63,7 @@ public class ChooseOneSectionTable<T> extends ChooseOneSection {
 		}
 
 		public void setSearchTerm(String text) {
-			if (!text.startsWith("*")) {
-				text = "*"+text;
-			}
-			matcher = new StringMatcher(text, true, false);
+			matcher = StringMatchers.caseInsensitiveSubstring(text);
 		}
 
 		@Override
@@ -87,7 +86,7 @@ public class ChooseOneSectionTable<T> extends ChooseOneSection {
 			if (matcher==null) {
 				return true; // Search term not set... anything is acceptable.
 			} else {
-				return matcher.match(text);
+				return matcher.test(text);
 			}
 		}
 
