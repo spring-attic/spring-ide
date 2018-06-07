@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.wizard.guides;
 
 import java.util.HashMap;
+import java.util.function.Predicate;
 
 import javax.inject.Provider;
 
@@ -41,8 +42,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.internal.misc.StringMatcher;
-import org.eclipse.ui.internal.misc.StringMatcher.Position;
 import org.springframework.ide.eclipse.boot.wizard.BootWizardActivator;
 import org.springframework.ide.eclipse.boot.wizard.content.ContentManager;
 import org.springframework.ide.eclipse.boot.wizard.content.ContentManager.DownloadState;
@@ -50,6 +49,7 @@ import org.springframework.ide.eclipse.boot.wizard.content.ContentType;
 import org.springframework.ide.eclipse.boot.wizard.content.Describable;
 import org.springframework.ide.eclipse.boot.wizard.content.DisplayNameable;
 import org.springframework.ide.eclipse.boot.wizard.content.GSContent;
+import org.springframework.ide.eclipse.boot.wizard.util.StringMatchers;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.SelectionModel;
@@ -174,7 +174,7 @@ public class ChooseTypedContentSection extends WizardPageSection {
 
 	private class ChoicesFilter extends ViewerFilter {
 
-		private StringMatcher matcher = null;
+		private Predicate<String> matcher = null;
 		private final HashMap<Object, Boolean> cache = new HashMap<>();
 
 		public ChoicesFilter() {
@@ -184,11 +184,7 @@ public class ChooseTypedContentSection extends WizardPageSection {
 		}
 
 		public void setSearchTerm(String text) {
-			if (StringUtils.isNotBlank(text)) {
-				matcher = new StringMatcher(text, true, false);
-			} else {
-				matcher = null;
-			}
+			matcher = StringMatchers.caseInsensitiveSubstring(text);
 			cache.clear();
 		}
 
@@ -239,8 +235,7 @@ public class ChooseTypedContentSection extends WizardPageSection {
 				if (text == null) {
 					return false;
 				} else {
-					Position x = matcher.find(text, 0, text.length());
-					return x != null;
+					return matcher.test(text);
 				}
 			}
 		}

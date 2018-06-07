@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard.guides;
 
+import java.util.function.Predicate;
+
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -31,9 +33,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.internal.misc.StringMatcher;
-import org.eclipse.ui.internal.misc.StringMatcher.Position;
 import org.springframework.ide.eclipse.boot.wizard.content.Describable;
+import org.springframework.ide.eclipse.boot.wizard.util.StringMatchers;
+import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.SelectionModel;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
@@ -52,7 +54,7 @@ public class ChooseOneSectionTable<T> extends ChooseOneSection {
 
 	private class ChoicesFilter extends ViewerFilter {
 
-		private StringMatcher matcher = null;
+		private Predicate<String> matcher = null;
 
 		public ChoicesFilter() {
 			if (searchBox!=null) {
@@ -61,7 +63,7 @@ public class ChooseOneSectionTable<T> extends ChooseOneSection {
 		}
 
 		public void setSearchTerm(String text) {
-			matcher = new StringMatcher(text, true, false);
+			matcher = StringMatchers.caseInsensitiveSubstring(text);
 		}
 
 		@Override
@@ -84,8 +86,7 @@ public class ChooseOneSectionTable<T> extends ChooseOneSection {
 			if (matcher==null) {
 				return true; // Search term not set... anything is acceptable.
 			} else {
-				Position x = matcher.find(text, 0, text.length());
-				return x!=null;
+				return matcher.test(text);
 			}
 		}
 
@@ -140,6 +141,7 @@ public class ChooseOneSectionTable<T> extends ChooseOneSection {
 		grab.applyTo(tv.getTable());
 
 		whenVisible(tv.getControl(), new Runnable() {
+			@Override
 			public void run() {
 				T preSelect = selection.selection.getValue();
 				if (preSelect!=null) {
@@ -151,6 +153,7 @@ public class ChooseOneSectionTable<T> extends ChooseOneSection {
 		});
 
 		tv.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
 			@SuppressWarnings("unchecked")
 			public void selectionChanged(SelectionChangedEvent event) {
 				ISelection sel = tv.getSelection();
@@ -164,6 +167,7 @@ public class ChooseOneSectionTable<T> extends ChooseOneSection {
 		});
 
 		searchBox.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				filter.setSearchTerm(searchBox.getText());
 				tv.refresh();
@@ -173,6 +177,7 @@ public class ChooseOneSectionTable<T> extends ChooseOneSection {
 
 	private void whenVisible(final Control control, final Runnable runnable) {
 		PaintListener l = new PaintListener() {
+			@Override
 			public void paintControl(PaintEvent e) {
 				runnable.run();
 				control.removePaintListener(this);
