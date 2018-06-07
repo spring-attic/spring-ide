@@ -1,6 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2015, 2018 Pivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Pivotal, Inc. - initial API and implementation
+ *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.metadata;
-
-import static org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2.getHTMLContent;
 
 import javax.inject.Provider;
 
@@ -9,6 +17,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover;
 import org.springframework.boot.configurationmetadata.Deprecation;
 import org.springframework.boot.configurationmetadata.ValueHint;
 import org.springframework.ide.eclipse.boot.properties.editor.util.TypeUtil;
@@ -26,6 +35,7 @@ import org.springsource.ide.eclipse.commons.core.util.StringUtil;
  *
  * @author Kris De Volder
  */
+@SuppressWarnings("restriction")
 public class StsValueHint {
 
 	private static final HtmlSnippet EMPTY_DESCRIPTION = HtmlSnippet.italic("No description");
@@ -118,7 +128,7 @@ public class StsValueHint {
 		return () -> {
 			try {
 				@SuppressWarnings("restriction")
-				String htmlText = getHTMLContent(je, true);
+				String htmlText = JavadocHover.getHoverInfo(new IJavaElement[] { je }, null, null, null).getHtml();
 				if (StringUtil.hasText(htmlText)) {
 					return HtmlSnippet.raw(htmlText);
 				}
@@ -151,6 +161,5 @@ public class StsValueHint {
 			}
 		};
 	}
-
 
 }

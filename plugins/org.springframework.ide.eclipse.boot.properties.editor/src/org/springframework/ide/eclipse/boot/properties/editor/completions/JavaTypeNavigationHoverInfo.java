@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.completions;
 
-import static org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2.getHTMLContent;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -20,7 +18,7 @@ import java.util.Map;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover;
 import org.springframework.boot.configurationmetadata.Deprecation;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Type;
@@ -139,13 +137,9 @@ public class JavaTypeNavigationHoverInfo extends AbstractPropertyHoverInfo {
 		try {
 			List<IJavaElement> jes = getAllJavaElements();
 			if (jes!=null) {
-				for (IJavaElement je : jes) {
-					if (je instanceof IMember) {
-						String jdoc = getHTMLContent((IMember)je, true);
-						if (jdoc!=null) {
-							return HtmlSnippet.raw(jdoc);
-						}
-					}
+				String jdoc = JavadocHover.getHoverInfo(jes.toArray(new IJavaElement[jes.size()]), null, null, null).getHtml();
+				if (jdoc!=null) {
+					return HtmlSnippet.raw(jdoc);
 				}
 			}
 		} catch (Exception e) {
@@ -197,7 +191,7 @@ public class JavaTypeNavigationHoverInfo extends AbstractPropertyHoverInfo {
 					}
 				}
 			} else {
-				ArrayList<IJavaElement> elements = new ArrayList<IJavaElement>(3);
+				ArrayList<IJavaElement> elements = new ArrayList<>(3);
 				maybeAdd(elements, typeUtil.getField(beanType, propName));
 				maybeAdd(elements, typeUtil.getSetter(beanType, propName));
 				maybeAdd(elements, typeUtil.getGetter(beanType, propName));
