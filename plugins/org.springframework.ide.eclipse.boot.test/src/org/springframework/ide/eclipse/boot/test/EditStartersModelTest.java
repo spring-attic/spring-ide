@@ -246,16 +246,16 @@ public class EditStartersModelTest {
 		int finalBomCount = getBomCount(pom);
 		assertEquals(initialBomCount+1, finalBomCount);
 
-		//check that both repos got added
-		assertRepoCount(2, pom);
+		//check that one repo got added
+		assertRepoCount(1, pom);
 
-		Element repo = getRepo(pom, "spring-snapshots");
-		assertNotNull(repo);
-		assertEquals("Spring Snapshots", getTextChild(repo, "name"));
-		assertEquals("https://repo.spring.io/snapshot", getTextChild(repo, "url"));
-		assertEquals("true", getSnapshotsEnabled(repo));
+//		Element repo = getRepo(pom, "spring-snapshots");
+//		assertNotNull(repo);
+//		assertEquals("Spring Snapshots", getTextChild(repo, "name"));
+//		assertEquals("https://repo.spring.io/snapshot", getTextChild(repo, "url"));
+//		assertEquals("true", getSnapshotsEnabled(repo));
 
-		repo = getRepo(pom, "spring-milestones");
+		Element repo = getRepo(pom, "spring-milestones");
 		assertNotNull(repo);
 		assertEquals("Spring Milestones", getTextChild(repo, "name"));
 		assertEquals("https://repo.spring.io/milestone", getTextChild(repo, "url"));
@@ -287,7 +287,7 @@ public class EditStartersModelTest {
 		int finalBomCount = getBomCount(pom);
 		assertEquals(initialBomCount+2, finalBomCount);
 		{
-			Element bom = getBom(pom, "spring-cloud-starter-parent");
+			Element bom = getBom(pom, "spring-cloud-dependencies");
 			assertEquals("org.springframework.cloud", getTextChild(bom,GROUP_ID));
 			assertEquals("Finchley.RC2", getTextChild(bom,VERSION));
 			assertEquals("pom", getTextChild(bom,TYPE));
@@ -323,9 +323,23 @@ public class EditStartersModelTest {
 		//check that only ONE repo got added
 		IDOMDocument pom = parsePom(project);
 
-		assertNotNull(getRepo(pom, "spring-milestones"));
-		assertNull(getRepo(pom, "spring-snapshots"));
-		assertRepoCount(1, pom);
+		//check the dependency got added to the pom
+		assertNotNull(findDependency(pom, new MavenId("org.springframework.cloud", "spring-cloud-starter-eureka")));
+
+		//check that both repos got added
+		assertRepoCount(2, pom);
+
+		Element repo = getRepo(pom, "spring-snapshots");
+		assertNotNull(repo);
+		assertEquals("Spring Snapshots", getTextChild(repo, "name"));
+		assertEquals("https://repo.spring.io/snapshot", getTextChild(repo, "url"));
+		assertEquals("true", getSnapshotsEnabled(repo));
+
+		repo = getRepo(pom, "spring-milestones");
+		assertNotNull(repo);
+		assertEquals("Spring Milestones", getTextChild(repo, "name"));
+		assertEquals("https://repo.spring.io/milestone", getTextChild(repo, "url"));
+		assertEquals("false", getSnapshotsEnabled(repo));
 	}
 
 	@Test

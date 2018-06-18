@@ -1,5 +1,5 @@
 {
-  "bootVersion": "1.3.1.RELEASE",
+  "bootVersion": "2.0.3.RELEASE",
   "dependencies": {
     "cloud-eureka": {
       "groupId": "org.springframework.cloud",
@@ -29,10 +29,11 @@
   "boms": {
     "cloud-bom": {
       "groupId": "org.springframework.cloud",
-      "artifactId": "spring-cloud-starter-parent",
-      "version": "Brixton.M3",
+      "artifactId": "spring-cloud-dependencies",
+      "version": "Finchley.RC2",
       "repositories": [
-        "spring-milestones"
+        "spring-milestones",
+        "spring-snapshots"
       ]
     }
   }
