@@ -28,7 +28,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.bootVersion;
-import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.addBootVersion;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
 
 import java.io.IOException;
@@ -64,10 +63,10 @@ import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.boot.test.util.TestBracketter;
-import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.boot.wizard.EditStartersModel;
 import org.springframework.ide.eclipse.boot.wizard.PopularityTracker;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -78,7 +77,7 @@ import org.w3c.dom.Element;
 @SuppressWarnings("restriction")
 public class EditStartersModelTest {
 
-	private static final String BOOT_1_3_X_RELEASE = "1.3.8.RELEASE";
+	private static final String BOOT_2_0_X_RELEASE = "2.0.3.RELEASE";
 	private static final String REPOSITORY = "repository";
 	private static final String REPOSITORIES = "repositories";
 	private MockInitializrService initializr = new MockInitializrService();
@@ -227,8 +226,7 @@ public class EditStartersModelTest {
 	public void addMultipleStartersWithSameBom() throws Exception {
 		//This test uses more 'controlled' parameters:
 		IProject project = harness.createBootProject("addMultipleStartersWithSameBom",
-				addBootVersion(BOOT_1_3_X_RELEASE),
-				bootVersion(BOOT_1_3_X_RELEASE), // boot version fixed
+				bootVersion(BOOT_2_0_X_RELEASE), // boot version fixed
 				withStarters("web")
 		);
 		initializr.setInputs("sample"); // sample intializr json captured for this version
@@ -268,13 +266,13 @@ public class EditStartersModelTest {
 	public void addMultipleStartersWithDifferentBom() throws Exception {
 		//This test uses more 'controlled' parameters:
 		IProject project = harness.createBootProject("addMultipleStartersWithDifferentBom",
-				addBootVersion(BOOT_1_3_X_RELEASE),
-				bootVersion(BOOT_1_3_X_RELEASE), // boot version fixed
+				bootVersion(BOOT_2_0_X_RELEASE), // boot version fixed
 				withStarters("web")
 		);
 		initializr.setInputs("sample"); // sample intializr json captured for this version
 		final ISpringBootProject bootProject = springBootCore.project(project);
 		int initialBomCount = getBomCount(parsePom(project));
+		StsTestUtil.assertNoErrors(project); //force project build
 
 		EditStartersModel wizard = createWizard(project);
 		wizard.addDependency("cloud-eureka");
@@ -291,14 +289,14 @@ public class EditStartersModelTest {
 		{
 			Element bom = getBom(pom, "spring-cloud-starter-parent");
 			assertEquals("org.springframework.cloud", getTextChild(bom,GROUP_ID));
-			assertEquals("Brixton.M3", getTextChild(bom,VERSION));
+			assertEquals("Finchley.RC2", getTextChild(bom,VERSION));
 			assertEquals("pom", getTextChild(bom,TYPE));
 			assertEquals("import", getTextChild(bom,SCOPE));
 		}
 		{
 			Element bom = getBom(pom, "vaadin-bom");
 			assertEquals("com.vaadin", getTextChild(bom,GROUP_ID));
-			assertEquals("7.5.5", getTextChild(bom,VERSION));
+			assertEquals("8.4.1", getTextChild(bom,VERSION));
 			assertEquals("pom", getTextChild(bom,TYPE));
 			assertEquals("import", getTextChild(bom,SCOPE));
 		}
@@ -307,9 +305,8 @@ public class EditStartersModelTest {
 	@Test
 	public void addBomWithSubsetOfRepos() throws Exception {
 		//This test uses more 'controlled' parameters:
-		String bootVersion = BOOT_1_3_X_RELEASE;
+		String bootVersion = BOOT_2_0_X_RELEASE;
 		IProject project = harness.createBootProject("addBomWithSubsetOfRepos",
-				addBootVersion(BOOT_1_3_X_RELEASE),
 				bootVersion(bootVersion), // boot version fixed
 				withStarters("web")
 		);
@@ -334,9 +331,8 @@ public class EditStartersModelTest {
 	@Test
 	public void addDependencyWithRepo() throws Exception {
 		//This test uses more 'controlled' parameters:
-		String bootVersion = BOOT_1_3_X_RELEASE;
+		String bootVersion = BOOT_2_0_X_RELEASE;
 		IProject project = harness.createBootProject("addDependencyWithRepo",
-				addBootVersion(BOOT_1_3_X_RELEASE),
 				bootVersion(bootVersion), // boot version fixed
 				withStarters("web")
 		);
