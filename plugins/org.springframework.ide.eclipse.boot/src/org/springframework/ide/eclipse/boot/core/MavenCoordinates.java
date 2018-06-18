@@ -35,6 +35,13 @@ public class MavenCoordinates implements IMavenCoordinates, Ilabelable {
 		this.classifier = null;
 	}
 
+	public MavenCoordinates(String group, String artifact) {
+		this.group = group;
+		this.artifact = artifact;
+		this.version = null;
+		this.classifier = null;
+	}
+
 	public MavenCoordinates(DependencyInfo dep) {
 		this(dep.getGroupId(),dep.getArtifactId(),dep.getClassifier(),dep.getVersion());
 	}

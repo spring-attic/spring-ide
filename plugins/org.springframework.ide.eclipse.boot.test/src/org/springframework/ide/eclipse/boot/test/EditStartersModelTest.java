@@ -357,6 +357,60 @@ public class EditStartersModelTest {
 		assertRepoCount(1, pom);
 	}
 
+	@Test
+	public void unselectAllDependencies() throws Exception {
+		//See: https://github.com/spring-projects/sts4/issues/52
+		IProject project = harness.createBootProject("projectToUnselectoAll", withStarters("web", "actuator"));
+		StsTestUtil.assertNoErrors(project); //force project build
+
+		EditStartersModel wizard = createWizard(project);
+		wizard.removeDependency("web");
+		wizard.removeDependency("actuator");
+
+		performOk(wizard);
+
+		final ISpringBootProject bootProject = springBootCore.project(project);
+		StsTestUtil.assertNoErrors(project);
+		assertStarters(bootProject.getBootStarters() /*NONE*/);
+
+		IDOMDocument pom = parsePom(project);
+		assertNotNull(findDependency(pom, new MavenId("org.springframework.boot", "spring-boot-starter")));
+	}
+
+	@Test
+	public void addDependenciesFromEmpty() throws Exception {
+		//See: https://github.com/spring-projects/sts4/issues/52
+		IProject project = harness.createBootProject("projectToUnselectoAll");
+		final ISpringBootProject bootProject = springBootCore.project(project);
+		StsTestUtil.assertNoErrors(project); //force project build
+		assertStarters(bootProject.getBootStarters() /*NONE*/);
+		{	//Check the state of the default dependencies
+			IDOMDocument pom = parsePom(project);
+			assertNotNull(findDependency(pom, new MavenId("org.springframework.boot", "spring-boot-starter")));
+			assertEquals("test", getScope(findDependency(pom, new MavenId("org.springframework.boot", "spring-boot-starter-test"))));
+		}
+
+		EditStartersModel wizard = createWizard(project);
+		wizard.addDependency("web");
+		wizard.addDependency("actuator");
+
+		System.out.println("-- pom before ---");
+		System.out.println(IOUtil.toString(project.getFile("pom.xml").getContents()));
+
+		performOk(wizard);
+
+		System.out.println("-- pom after ---");
+		System.out.println(IOUtil.toString(project.getFile("pom.xml").getContents()));
+
+		StsTestUtil.assertNoErrors(project);
+		assertStarters(bootProject.getBootStarters(), "web", "actuator");
+		{	//Check the state of the default dependencies
+			IDOMDocument pom = parsePom(project);
+			assertNull(findDependency(pom, new MavenId("org.springframework.boot", "spring-boot-starter")));
+			assertEquals("test", getScope(findDependency(pom, new MavenId("org.springframework.boot", "spring-boot-starter-test"))));
+		}
+	}
+
 //	@Test
 //	public void serviceUnavailable() throws Exception {
 //		String bootVersion = BOOT_1_3_X_RELEASE;
