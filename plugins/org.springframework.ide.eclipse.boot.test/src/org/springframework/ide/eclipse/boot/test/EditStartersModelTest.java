@@ -27,7 +27,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.addBootVersion;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.bootVersion;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
 import static org.springframework.ide.eclipse.boot.util.PomUtils.getArtifactId;
@@ -78,10 +77,10 @@ import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.boot.test.util.TestBracketter;
-import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.boot.wizard.EditStartersModel;
 import org.springframework.ide.eclipse.boot.wizard.PopularityTracker;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -92,7 +91,7 @@ import org.w3c.dom.Element;
 @SuppressWarnings("restriction")
 public class EditStartersModelTest {
 
-	private static final String BOOT_1_3_X_RELEASE = "1.3.8.RELEASE";
+	private static final String BOOT_2_0_X_RELEASE = "2.0.3.RELEASE";
 	private static final String REPOSITORY = "repository";
 	private static final String REPOSITORIES = "repositories";
 	private MockInitializrService initializr = new MockInitializrService();
@@ -286,8 +285,7 @@ public class EditStartersModelTest {
 	public void addMultipleStartersWithSameBom() throws Exception {
 		//This test uses more 'controlled' parameters:
 		IProject project = harness.createBootProject("addMultipleStartersWithSameBom",
-				addBootVersion(BOOT_1_3_X_RELEASE),
-				bootVersion(BOOT_1_3_X_RELEASE), // boot version fixed
+				bootVersion(BOOT_2_0_X_RELEASE), // boot version fixed
 				withStarters("web")
 		);
 		initializr.setInputs("sample"); // sample intializr json captured for this version
@@ -307,6 +305,101 @@ public class EditStartersModelTest {
 		int finalBomCount = getBomCount(pom);
 		assertEquals(initialBomCount+1, finalBomCount);
 
+		//check that one repo got added
+		assertRepoCount(1, pom);
+
+//		Element repo = getRepo(pom, "spring-snapshots");
+//		assertNotNull(repo);
+//		assertEquals("Spring Snapshots", getTextChild(repo, "name"));
+//		assertEquals("https://repo.spring.io/snapshot", getTextChild(repo, "url"));
+//		assertEquals("true", getSnapshotsEnabled(repo));
+
+		Element repo = getRepo(pom, "spring-milestones");
+		assertNotNull(repo);
+		assertEquals("Spring Milestones", getTextChild(repo, "name"));
+		assertEquals("https://repo.spring.io/milestone", getTextChild(repo, "url"));
+		assertEquals("false", getSnapshotsEnabled(repo));
+	}
+
+	@Test
+	public void addMultipleStartersWithDifferentBom() throws Exception {
+		//This test uses more 'controlled' parameters:
+		IProject project = harness.createBootProject("addMultipleStartersWithDifferentBom",
+				bootVersion(BOOT_2_0_X_RELEASE), // boot version fixed
+				withStarters("web")
+		);
+		initializr.setInputs("sample"); // sample intializr json captured for this version
+		initializr.enableFakePomGenerator();
+		final ISpringBootProject bootProject = springBootCore.project(project);
+		int initialBomCount = getBomCount(parsePom(project));
+		StsTestUtil.assertNoErrors(project); //force project build
+
+		EditStartersModel wizard = createWizard(project);
+		wizard.addDependency("cloud-eureka");
+		wizard.addDependency("vaadin");
+		performOk(wizard);
+
+//		System.out.println("-- pom after ---");
+//		System.out.println(IOUtil.toString(project.getFile("pom.xml").getContents()));
+
+// Note Doing 'fake' stuff causes broken project. So the below will fail. We should test
+// pom content more directly for this test.
+//		StsTestUtil.assertNoErrors(project); //force project build
+//		assertStarters(bootProject.getBootStarters(), "web", "cloud-eureka", "vaadin");
+
+		IDOMDocument pom = parsePom(project);
+		assertMavenDeps(project,
+				"org.springframework.boot:spring-boot-starter-web",
+				"org.springframework.boot:spring-boot-starter-test@test",
+				"org.springframework.cloud:spring-cloud-starter-netflix-eureka-client",
+				"com.vaadin:vaadin-spring-boot-starter"
+		);
+		int finalBomCount = getBomCount(pom);
+		assertEquals(initialBomCount+2, finalBomCount);
+		{
+			Element bom = getBom(pom, "spring-cloud-dependencies");
+			assertEquals("org.springframework.cloud", getTextChild(bom,GROUP_ID));
+			assertEquals("Finchley.RC2", getTextChild(bom,VERSION));
+			assertEquals("pom", getTextChild(bom,TYPE));
+			assertEquals("import", getTextChild(bom,SCOPE));
+		}
+		{
+			Element bom = getBom(pom, "vaadin-bom");
+			assertEquals("com.vaadin", getTextChild(bom,GROUP_ID));
+			assertEquals("8.4.1", getTextChild(bom,VERSION));
+			assertEquals("pom", getTextChild(bom,TYPE));
+			assertEquals("import", getTextChild(bom,SCOPE));
+		}
+	}
+
+	@Test
+	public void addBomWithSubsetOfRepos() throws Exception {
+		//This test uses more 'controlled' parameters:
+		String bootVersion = BOOT_2_0_X_RELEASE;
+		IProject project = harness.createBootProject("addBomWithSubsetOfRepos",
+				bootVersion(bootVersion), // boot version fixed
+				withStarters("web")
+		);
+
+		initializr.setInputs("sample-with-fakes"); // must use 'fake' data because the situation we are after doesn't exist in the real data
+		initializr.enableFakePomGenerator();
+
+		EditStartersModel wizard = createWizard(project);
+		wizard.addDependency("cloud-eureka");
+		performOk(wizard);
+
+		System.out.println("-- pom after ---");
+		System.out.println(IOUtil.toString(project.getFile("pom.xml").getContents()));
+
+		//!!! fake data may not produce a project that builds without
+		//!!! problem so don't check for build errors in this test
+
+		//check that only ONE repo got added
+		IDOMDocument pom = parsePom(project);
+
+		//check the dependency got added to the pom
+		assertNotNull(findDependency(pom, new MavenId("org.springframework.cloud", "spring-cloud-starter-eureka")));
+
 		//check that both repos got added
 		assertRepoCount(2, pom);
 
@@ -324,89 +417,10 @@ public class EditStartersModelTest {
 	}
 
 	@Test
-	public void addMultipleStartersWithDifferentBom() throws Exception {
-		//This test uses more 'controlled' parameters:
-		IProject project = harness.createBootProject("addMultipleStartersWithDifferentBom",
-				addBootVersion(BOOT_1_3_X_RELEASE),
-				bootVersion(BOOT_1_3_X_RELEASE), // boot version fixed
-				withStarters("web")
-		);
-		initializr.setInputs("sample"); // sample intializr json captured for this version
-		initializr.enableFakePomGenerator();
-		final ISpringBootProject bootProject = springBootCore.project(project);
-		int initialBomCount = getBomCount(parsePom(project));
-
-		EditStartersModel wizard = createWizard(project);
-		wizard.addDependency("cloud-eureka");
-		wizard.addDependency("vaadin");
-		performOk(wizard);
-
-		System.out.println("-- pom after ---");
-		System.out.println(IOUtil.toString(project.getFile("pom.xml").getContents()));
-
-// Note Doing 'fake' stuff causes broken project. So the below will fail. We should test
-// pom content more directly for this test.
-//		StsTestUtil.assertNoErrors(project); //force project build
-//		assertStarters(bootProject.getBootStarters(), "web", "cloud-eureka", "vaadin");
-
-		IDOMDocument pom = parsePom(project);
-		assertMavenDeps(project,
-				"org.springframework.boot:spring-boot-starter-web",
-				"org.springframework.boot:spring-boot-starter-test@test",
-				"org.springframework.cloud:spring-cloud-starter-eureka",
-				"com.vaadin:vaadin-spring-boot-starter"
-		);
-		int finalBomCount = getBomCount(pom);
-		assertEquals(initialBomCount+2, finalBomCount);
-		{
-			Element bom = getBom(pom, "spring-cloud-starter-parent");
-			assertEquals("org.springframework.cloud", getTextChild(bom,GROUP_ID));
-			assertEquals("Brixton.M3", getTextChild(bom,VERSION));
-			assertEquals("pom", getTextChild(bom,TYPE));
-			assertEquals("import", getTextChild(bom,SCOPE));
-		}
-		{
-			Element bom = getBom(pom, "vaadin-bom");
-			assertEquals("com.vaadin", getTextChild(bom,GROUP_ID));
-			assertEquals("7.5.5", getTextChild(bom,VERSION));
-			assertEquals("pom", getTextChild(bom,TYPE));
-			assertEquals("import", getTextChild(bom,SCOPE));
-		}
-	}
-
-	@Test
-	public void addBomWithSubsetOfRepos() throws Exception {
-		//This test uses more 'controlled' parameters:
-		String bootVersion = BOOT_1_3_X_RELEASE;
-		IProject project = harness.createBootProject("addBomWithSubsetOfRepos",
-				addBootVersion(BOOT_1_3_X_RELEASE),
-				bootVersion(bootVersion), // boot version fixed
-				withStarters("web")
-		);
-
-		initializr.setInputs("sample-with-fakes"); // must use 'fake' data because the situation we are after doesn't exist in the real data
-
-		EditStartersModel wizard = createWizard(project);
-		wizard.addDependency("cloud-eureka");
-		performOk(wizard);
-
-		//!!! fake data may not produce a project that builds without
-		//!!! problem so don't check for build errors in this test
-
-		//check that only ONE repo got added
-		IDOMDocument pom = parsePom(project);
-
-		assertNotNull(getRepo(pom, "spring-milestones"));
-		assertNull(getRepo(pom, "spring-snapshots"));
-		assertRepoCount(1, pom);
-	}
-
-	@Test
 	public void addDependencyWithRepo() throws Exception {
 		//This test uses more 'controlled' parameters:
-		String bootVersion = BOOT_1_3_X_RELEASE;
+		String bootVersion = BOOT_2_0_X_RELEASE;
 		IProject project = harness.createBootProject("addDependencyWithRepo",
-				addBootVersion(BOOT_1_3_X_RELEASE),
 				bootVersion(bootVersion), // boot version fixed
 				withStarters("web")
 		);

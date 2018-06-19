@@ -79,6 +79,7 @@ public class BootProjectTestHarness {
 		void apply(NewSpringBootWizardModel wizard);
 
 		WizardConfigurer NULL = new WizardConfigurer(){
+			@Override
 			public void apply(NewSpringBootWizardModel wizard) {/*do nothing*/}
 		};
 	}
@@ -87,6 +88,7 @@ public class BootProjectTestHarness {
 		final ImportStrategy is = ImportStrategies.withId(id);
 		Assert.isNotNull(is);
 		return new WizardConfigurer() {
+			@Override
 			public void apply(NewSpringBootWizardModel wizard) {
 				wizard.setImportStrategy(is);
 			}
@@ -106,7 +108,7 @@ public class BootProjectTestHarness {
 			fail("Couldn't find packaging type '"+packagingTypeName+"' in the wizard model");
 		};
 	}
-	
+
 	public static WizardConfigurer withLanguage(final String language) {
 		return (wizard) -> {
 			RadioGroup languageRadio = wizard.getRadioGroups().getGroup("language");
@@ -116,10 +118,11 @@ public class BootProjectTestHarness {
 			languageRadio.setValue(l);
 		};
 	}
-	
+
 	public static WizardConfigurer withStarters(final String... ids) {
 		if (ids.length>0) {
 			return new WizardConfigurer() {
+				@Override
 				public void apply(NewSpringBootWizardModel wizard) {
 					for (String id : ids) {
 						wizard.addDependency(id);
@@ -132,6 +135,7 @@ public class BootProjectTestHarness {
 
 	public static WizardConfigurer setPackage(final String pkgName) {
 		return new WizardConfigurer() {
+			@Override
 			public void apply(NewSpringBootWizardModel wizard) {
 				wizard.getStringInput("packageName").setValue(pkgName);
 			}
@@ -144,6 +148,7 @@ public class BootProjectTestHarness {
 	 */
 	public static WizardConfigurer bootVersion(final String wantedVersion) throws Exception {
 		return new WizardConfigurer() {
+			@Override
 			public void apply(NewSpringBootWizardModel wizard) {
 				RadioGroup bootVersionRadio = wizard.getBootVersion();
 				for (RadioInfo option : bootVersionRadio.getRadios()) {
@@ -157,21 +162,6 @@ public class BootProjectTestHarness {
 		};
 	}
 
-	public static WizardConfigurer addBootVersion(String version) throws Exception {
-		return new WizardConfigurer() {
-			public void apply(NewSpringBootWizardModel wizard) {
-				RadioGroup bootVersionRadio = wizard.getBootVersion();
-				for (RadioInfo option : bootVersionRadio.getRadios()) {
-					if (option.getValue().equals(version)) {
-						return;
-					}
-				}
-				Version qualifierVersion = Version.valueOf(version);
-				bootVersionRadio.add(new RadioInfo(qualifierVersion.getMajor() + "." + qualifierVersion.getMinor() + "." + qualifierVersion.getMicro(), version, false));
-			}
-		};
-	}
-	
 	/**
 	 * @return A wizard configurer that ensures the selected 'boot version' is at least
 	 * a given version of boot.
@@ -179,6 +169,7 @@ public class BootProjectTestHarness {
 	public static WizardConfigurer bootVersionAtLeast(final String wantedVersion) throws Exception {
 		final VersionRange WANTED_RANGE = new VersionRange(wantedVersion);
 		return new WizardConfigurer() {
+			@Override
 			public void apply(NewSpringBootWizardModel wizard) {
 				RadioGroup bootVersionRadio = wizard.getBootVersion();
 				RadioInfo selected = bootVersionRadio.getValue();
@@ -196,19 +187,20 @@ public class BootProjectTestHarness {
 			private RadioInfo getLatestVersion(RadioGroup bootVersionRadio, VersionRange versionRange) {
 				RadioInfo[] infos = bootVersionRadio.getRadios();
 				Arrays.sort(infos, new Comparator<RadioInfo>() {
+					@Override
 					public int compare(RadioInfo o1, RadioInfo o2) {
 						Version v1 = getVersion(o1);
 						Version v2 = getVersion(o2);
 						return v2.compareTo(v1);
 					}
 				});
-				
+
 				for (int i = 0; i < infos.length; i++) {
 					if (versionRange == null || versionRange.includes(getVersion(infos[i]))) {
 						return infos[i];
 					}
 				}
-				
+
 				return null;
 			}
 
@@ -238,6 +230,7 @@ public class BootProjectTestHarness {
 	public IProject createBootProject(final String projectName, final WizardConfigurer... extraConfs) throws Exception {
 		RetryUtil.retryWhen("createBootProject("+projectName+")", 3, RetryUtil.errorWithMsg("Read timed out"), () -> {
 			final Job job = new Job("Create boot project '"+projectName+"'") {
+				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
 						//No point doing a retry if we will just fail because project already exists!
