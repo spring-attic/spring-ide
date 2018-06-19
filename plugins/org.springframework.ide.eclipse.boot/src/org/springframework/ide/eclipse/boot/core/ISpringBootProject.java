@@ -11,14 +11,14 @@
 package org.springframework.ide.eclipse.boot.core;
 
 import java.io.File;
-import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
-import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
+import org.springframework.ide.eclipse.boot.util.DependencyDelta;
 
 /**
  * SpringBoot-centric view on an IProject instance.
@@ -67,11 +67,9 @@ public interface ISpringBootProject {
 	public List<SpringBootStarter> getBootStarters() throws Exception;
 
 	/**
-	 * Modify project classpath adding and/or removing starters to make them match the given
-	 * set of starters. Note that versions of starters are generally ignored by this operation.
-	 * @throws CoreException
+	 * Modify project classpath adding and/or removing maven dependencies
 	 */
-	public void setStarters(Collection<SpringBootStarter> values) throws Exception;
+	public void modifyDependencies(DependencyDelta values) throws Exception;
 
 	/**
 	 * Modify project's classpath to add a given maven style dependency.
@@ -114,5 +112,12 @@ public interface ISpringBootProject {
 	public String getPackaging() throws CoreException;
 
 	public File executePackagingScript(IProgressMonitor monitor) throws CoreException;
+
+	/**
+	 * Generates the contetns of a pom using this project's initializer service, using given list of dependencies
+	 * to select known starters (i.e. any dependency in the list that corresponds to a known starter will be selected.
+	 * Dependencies not corresponding to a known starter are silently ignored.
+	 */
+	public String generatePom(List<Dependency> initialDependencies) throws Exception;
 
 }

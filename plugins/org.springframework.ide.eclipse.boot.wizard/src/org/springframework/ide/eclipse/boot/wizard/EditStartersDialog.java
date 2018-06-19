@@ -171,7 +171,7 @@ public class EditStartersDialog extends DialogWithSections {
 		}
 		InitializrFactoryModel<EditStartersModel> fmodel = new InitializrFactoryModel<>((url) -> {
 			if (url!=null) {
-				InitializrService initializr = InitializrService.create(BootActivator.getUrlConnectionFactory(), url);
+				InitializrService initializr = InitializrService.create(BootActivator.getUrlConnectionFactory(), () -> url);
 				SpringBootCore core = new SpringBootCore(initializr);
 				return new EditStartersModel(
 						selectedProject,

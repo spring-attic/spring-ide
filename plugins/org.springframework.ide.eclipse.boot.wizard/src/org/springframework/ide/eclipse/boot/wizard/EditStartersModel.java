@@ -36,6 +36,7 @@ import org.springframework.ide.eclipse.boot.core.SpringBootStarters;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.DependencyGroup;
+import org.springframework.ide.eclipse.boot.util.DependencyDelta;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -66,10 +67,13 @@ public class EditStartersModel implements OkButtonHandler {
 	private HashSet<MavenId> activeStarters;
 	private SpringBootStarters starters;
 
+	protected final SpringBootCore springBootCore;
+
 	/**
 	 * Create EditStarters dialog model and initialize it based on a project selection.
 	 */
 	public EditStartersModel(IProject selectedProject, SpringBootCore springBootCore, IPreferenceStore store) throws Exception {
+		this.springBootCore = springBootCore;
 		this.popularities = new PopularityTracker(store);
 		this.defaultDependencies = new DefaultDependencies(store);
 		this.project = springBootCore.project(selectedProject);
@@ -85,6 +89,13 @@ public class EditStartersModel implements OkButtonHandler {
 		return project.getProject().getName();
 	}
 
+	protected DependencyDelta getDelta() throws Exception {
+		String referencePom = project.generatePom(initialDependencies);
+		String targetPom = project.generatePom(dependencies.getCurrentSelection());
+		return DependencyDelta.create(referencePom, targetPom);
+	}
+
+	@Override
 	public void performOk() {
 		Job job = new Job("Modifying starters for "+getProjectName()) {
 			@Override
@@ -99,7 +110,7 @@ public class EditStartersModel implements OkButtonHandler {
 							selectedStarters.add(starter);
 						}
 					}
-					project.setStarters(selectedStarters);
+					project.modifyDependencies(getDelta());
 					for (Dependency s : selected) {
 						if (!initialDependencies.contains(s)) {
 							popularities.incrementUsageCount(s);
@@ -266,6 +277,7 @@ public class EditStartersModel implements OkButtonHandler {
 		for (String catName : dependencies.getCategories()) {
 			MultiSelectionFieldModel<Dependency> cat = dependencies.getContents(catName);
 			for (Dependency dep : cat.getChoices()) {
+//				System.out.println(dep.getId());
 				if (dependencyId.equals(dep.getId())) {
 					cat.select(dep);
 					return; //dep found and added to selection
