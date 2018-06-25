@@ -29,22 +29,36 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.bootVersion;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
+import static org.springframework.ide.eclipse.boot.util.PomUtils.getArtifactId;
+import static org.springframework.ide.eclipse.boot.util.PomUtils.getGroupId;
+import static org.springframework.ide.eclipse.boot.util.PomUtils.getScope;
+import static org.springframework.ide.eclipse.boot.util.PomUtils.getTextChild;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Result;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.m2e.core.ui.internal.editing.PomEdits;
 import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
@@ -144,6 +158,51 @@ public class EditStartersModelTest {
 	private void performOk(EditStartersModel wizard) throws Exception {
 		wizard.performOk();
 		Job.getJobManager().join(EditStartersModel.JOB_FAMILY, null);
+	}
+
+	@Test
+	public void crossSelection() throws Exception {
+		//Test case derived from bug report: https://www.pivotaltracker.com/story/show/157257493
+
+		IProject project = harness.createBootProject("cross-select", withStarters());
+		assertMavenDeps(project,
+				"org.springframework.boot:spring-boot-starter",
+				"org.springframework.boot:spring-boot-starter-test@test"
+		);
+
+		{	//Add 'cloud-stream'
+			EditStartersModel wizard = createWizard(project);
+			assertStarterDeps(wizard.dependencies.getCurrentSelection() /*NONE*/);
+			wizard.addDependency("cloud-stream");
+			performOk(wizard);
+			StsTestUtil.assertNoErrors(project); //force project build
+
+			assertMavenDeps(project,
+					"org.springframework.cloud:spring-cloud-stream",
+					"org.springframework.boot:spring-boot-starter-test@test",
+					"org.springframework.cloud:spring-cloud-stream-test-support@test" //comes in automatically with spring-cloud-stream
+			);
+		}
+
+
+		{	//Add 'rabbitmq'
+			EditStartersModel wizard = createWizard(project);
+			assertStarterDeps(wizard.dependencies.getCurrentSelection(), "cloud-stream");
+			wizard.addDependency("amqp");
+			performOk(wizard);
+			StsTestUtil.assertNoErrors(project); //force project build
+
+			assertMavenDeps(project,
+					//old:
+					"org.springframework.cloud:spring-cloud-stream",
+					"org.springframework.boot:spring-boot-starter-test@test",
+					"org.springframework.cloud:spring-cloud-stream-test-support@test",
+					//added:
+					"org.springframework.boot:spring-boot-starter-amqp", //by user selection (amqp)
+					"org.springframework.cloud:spring-cloud-stream-binder-rabbit" // cross-selection from rabbit + spring-cloud-stream
+			);
+		}
+
 	}
 
 	/**
@@ -270,6 +329,7 @@ public class EditStartersModelTest {
 				withStarters("web")
 		);
 		initializr.setInputs("sample"); // sample intializr json captured for this version
+		initializr.enableFakePomGenerator();
 		final ISpringBootProject bootProject = springBootCore.project(project);
 		int initialBomCount = getBomCount(parsePom(project));
 		StsTestUtil.assertNoErrors(project); //force project build
@@ -279,11 +339,21 @@ public class EditStartersModelTest {
 		wizard.addDependency("vaadin");
 		performOk(wizard);
 
-		StsTestUtil.assertNoErrors(project); //force project build
+//		System.out.println("-- pom after ---");
+//		System.out.println(IOUtil.toString(project.getFile("pom.xml").getContents()));
 
-		assertStarters(bootProject.getBootStarters(), "web", "cloud-eureka", "vaadin");
+// Note Doing 'fake' stuff causes broken project. So the below will fail. We should test
+// pom content more directly for this test.
+//		StsTestUtil.assertNoErrors(project); //force project build
+//		assertStarters(bootProject.getBootStarters(), "web", "cloud-eureka", "vaadin");
 
 		IDOMDocument pom = parsePom(project);
+		assertMavenDeps(project,
+				"org.springframework.boot:spring-boot-starter-web",
+				"org.springframework.boot:spring-boot-starter-test@test",
+				"org.springframework.cloud:spring-cloud-starter-netflix-eureka-client",
+				"com.vaadin:vaadin-spring-boot-starter"
+		);
 		int finalBomCount = getBomCount(pom);
 		assertEquals(initialBomCount+2, finalBomCount);
 		{
@@ -312,10 +382,14 @@ public class EditStartersModelTest {
 		);
 
 		initializr.setInputs("sample-with-fakes"); // must use 'fake' data because the situation we are after doesn't exist in the real data
+		initializr.enableFakePomGenerator();
 
 		EditStartersModel wizard = createWizard(project);
 		wizard.addDependency("cloud-eureka");
 		performOk(wizard);
+
+		System.out.println("-- pom after ---");
+		System.out.println(IOUtil.toString(project.getFile("pom.xml").getContents()));
 
 		//!!! fake data may not produce a project that builds without
 		//!!! problem so don't check for build errors in this test
@@ -352,6 +426,7 @@ public class EditStartersModelTest {
 		);
 
 		initializr.setInputs("sample-with-fakes"); // must use 'fake' data because the situation we are after doesn't exist in the real data
+		initializr.enableFakePomGenerator();
 
 		EditStartersModel wizard = createWizard(project);
 		wizard.addDependency("fake-dep");
@@ -408,13 +483,13 @@ public class EditStartersModelTest {
 		wizard.addDependency("web");
 		wizard.addDependency("actuator");
 
-		System.out.println("-- pom before ---");
-		System.out.println(IOUtil.toString(project.getFile("pom.xml").getContents()));
+//		System.out.println("-- pom before ---");
+//		System.out.println(IOUtil.toString(project.getFile("pom.xml").getContents()));
 
 		performOk(wizard);
 
-		System.out.println("-- pom after ---");
-		System.out.println(IOUtil.toString(project.getFile("pom.xml").getContents()));
+//		System.out.println("-- pom after ---");
+//		System.out.println(IOUtil.toString(project.getFile("pom.xml").getContents()));
 
 		StsTestUtil.assertNoErrors(project);
 		assertStarters(bootProject.getBootStarters(), "web", "actuator");
@@ -462,26 +537,6 @@ public class EditStartersModelTest {
 			return findChild(repos, REPOSITORY, childEquals("id", id));
 		}
 		return null;
-	}
-
-	private String getScope(Element depEl) {
-		return getTextChild(depEl, SCOPE);
-	}
-
-	private String getTextChild(Element depEl, String name) {
-		Element child = findChild(depEl, name);
-		if (child!=null) {
-			return PomEdits.getTextValue(child);
-		}
-		return null;
-	}
-
-	private String getGroupId(Element depEl) {
-		return getTextChild(depEl, GROUP_ID);
-	}
-
-	private String getArtifactId(Element depEl) {
-		return getTextChild(depEl, ARTIFACT_ID);
 	}
 
 	public IDOMDocument parsePom(IProject project) throws IOException, CoreException {
@@ -619,6 +674,7 @@ public class EditStartersModelTest {
 
 		private SpringBootStarters starters;
 		private boolean unavailable = false;
+		private boolean generateFakePom = false;
 
 		/**
 		 * Causes the mock to parse input from given input streams instead of calling out to
@@ -629,6 +685,10 @@ public class EditStartersModelTest {
 					InitializrServiceSpec.parseFrom(main),
 					InitializrDependencySpec.parseFrom(dependencies)
 			);
+		}
+
+		public void enableFakePomGenerator() {
+			generateFakePom = true;
 		}
 
 		/**
@@ -662,6 +722,84 @@ public class EditStartersModelTest {
 			this.unavailable = true;
 		}
 
+		@Override
+		public String getPom(String bootVersion, List<String> starters) throws Exception {
+			if (unavailable) {
+				throw new IOException("Initializr Service Unavailable");
+			} else if (generateFakePom) {
+				return generateFakePom(bootVersion, starters);
+			} else {
+				return InitializrService.DEFAULT.getPom(bootVersion, starters);
+			}
+		}
+
+		private String generateFakePom(String bootVersion, List<String> starters) throws Exception {
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			Document pom = dbf.newDocumentBuilder().newDocument();
+			Element rootElement = pom.createElement("project");
+			pom.appendChild(rootElement);
+
+			Element depsEl = pom.createElement(DEPENDENCIES);
+			rootElement.appendChild(depsEl);
+
+			SpringBootStarters knownStarters = getStarters(bootVersion);
+			for (String starterId : starters) {
+				SpringBootStarter starter = knownStarters.getStarter(starterId);
+				Element dep = pom.createElement(DEPENDENCY);
+				depsEl.appendChild(dep);
+
+				{
+					Element gid = pom.createElement(GROUP_ID);
+					gid.appendChild(pom.createTextNode(starter.getGroupId()));
+					dep.appendChild(gid);
+				}
+				{
+					Element aid = pom.createElement(ARTIFACT_ID);
+					aid.appendChild(pom.createTextNode(starter.getArtifactId()));
+					dep.appendChild(aid);
+				}
+			}
+
+			Transformer tf = TransformerFactory.newInstance().newTransformer();
+			StringWriter stringWriter = new StringWriter();
+			tf.transform(new DOMSource(pom), new StreamResult(stringWriter));
+			return stringWriter.toString();
+		}
 	}
+
+	/**
+	 * Deps are string in this format "<gid>:<aid>@<scope>". The '@<scope>' part can be omited
+	 * to indicate a dependency with default scope.
+	 */
+	private void assertMavenDeps(IProject project, String... _expectedDeps) throws IOException, CoreException {
+		IDOMDocument pom = parsePom(project);
+		Element depsEl = findChild(pom.getDocumentElement(), DEPENDENCIES);
+		List<Element> depNodes = findChilds(depsEl, DEPENDENCY);
+		List<String> actualDeps = new ArrayList<>();
+		for (Element depEl : depNodes) {
+			String dep = getGroupId(depEl) + ":" + getArtifactId(depEl);
+			String scope = getScope(depEl) ;
+			if (scope!=null) {
+				dep = dep + "@" + scope;
+			}
+			actualDeps.add(dep);
+		}
+
+		Collections.sort(actualDeps);
+		List<String> expectedDeps = new ArrayList<>(Arrays.asList(_expectedDeps));
+		Collections.sort(expectedDeps);
+
+		assertEquals(onePerLine(expectedDeps), onePerLine(actualDeps));
+	}
+
+	private String onePerLine(List<String> strings) {
+		StringBuilder builder = new StringBuilder();
+		for (String string : strings) {
+			builder.append(string);
+			builder.append('\n');
+		}
+		return builder.toString();
+	}
+
 
 }

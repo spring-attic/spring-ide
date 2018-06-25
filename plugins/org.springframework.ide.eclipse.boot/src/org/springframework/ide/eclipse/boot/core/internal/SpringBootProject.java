@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.core.internal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.core.resources.IProject;
@@ -23,6 +24,7 @@ import org.springframework.ide.eclipse.boot.core.MavenId;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarters;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 public abstract class SpringBootProject implements ISpringBootProject {
@@ -97,6 +99,22 @@ public abstract class SpringBootProject implements ISpringBootProject {
 			}
 		}
 		return starters;
+	}
+
+	@Override
+	public String generatePom(List<Dependency> initialDependencies) throws Exception {
+		SpringBootStarters knownStarters = getStarterInfos();
+
+		List<String> starterIds = new ArrayList<>();
+		for (Dependency dep : initialDependencies) {
+			String id = dep.getId();
+			//ignore unkown deps
+			if (knownStarters.getStarter(id)!=null) {
+				starterIds.add(id);
+			}
+		}
+
+		return initializr.getPom(getBootVersion(), starterIds);
 	}
 
 	public boolean isKnownStarter(MavenId mavenId) {

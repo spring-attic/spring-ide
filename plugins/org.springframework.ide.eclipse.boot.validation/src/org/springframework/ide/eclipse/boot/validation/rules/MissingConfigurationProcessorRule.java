@@ -125,6 +125,7 @@ public class MissingConfigurationProcessorRule extends BootValidationRule {
 			return true;
 		}
 	};
+	private static final String BUILDSHIP_NATURE = "org.eclipse.buildship.core.gradleprojectnature";
 
 	public static class ValidationVisitor {
 
@@ -225,6 +226,18 @@ public class MissingConfigurationProcessorRule extends BootValidationRule {
 	public void validate(IModelElement _cu, IValidationContext context, IProgressMonitor mon) {
 		CompilationUnitElement cu = (CompilationUnitElement) _cu;
 		try{
+			if (cu.getCompilationUnit().getJavaProject().getProject().hasNature(BUILDSHIP_NATURE)) {
+				//Skip validation. We can consider re-enabling this when buildship adds support for configuring 
+				//JDT APT (https://github.com/eclipse/buildship/issues/329). Then it will make sense to look for 
+				//annotation processor on the eclipse processor path.
+				//Until then annotation processing doesn't really work in Gradle + Buildship anyway and 
+				//validation of this rule is hard (need to ask gradle tooling api which we don't have here)... 
+				//and counter-productive.
+				//See also: 
+				// - https://github.com/spring-projects/spring-ide/issues/266
+				// - https://www.pivotaltracker.com/story/show/156543983
+				return;
+			}
 			if (CLASSPATH_MATCHER.match(cu.getClasspath())) {
 				ValidationVisitor visitor = new ValidationVisitor(context, cu);
 				visitor.visit(cu.getCompilationUnit(), mon);

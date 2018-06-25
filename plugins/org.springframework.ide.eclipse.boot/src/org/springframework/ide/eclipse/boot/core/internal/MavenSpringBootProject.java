@@ -40,6 +40,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -89,7 +91,9 @@ import org.springframework.ide.eclipse.boot.core.MavenId;
 import org.springframework.ide.eclipse.boot.core.Repo;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
+import org.springframework.ide.eclipse.boot.core.SpringBootStarters;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
+import org.springframework.ide.eclipse.boot.util.DependencyDelta;
 import org.springframework.ide.eclipse.boot.util.DumpOutput;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
@@ -125,39 +129,6 @@ public class MavenSpringBootProject extends SpringBootProject {
 	private static final String SNAPSHOTS = "snapshots";
 
 	private static final String ENABLED = "enabled";
-
-	/**
-	 * 'Pseudo' starters that should be added when nothing is selected. We call it a 'pseudo' starter
-	 * because initializr service doesn't give information about it via dependencies api. So when
-	 * checking whether it is a 'known starter' the result will be 'false'.
-	 */
-	private static final Collection<SpringBootStarter> NO_SELECTION_STARTERS = ImmutableList.of(
-			new SpringBootStarter("default.main",
-					new MavenCoordinates("org.springframework.boot", "spring-boot-starter"),
-					null, //scope
-					null, //bom
-					null  //repo
-			)
-// Note: It might seem logical that we should also have the below "default.test" 'pseudo starter' as a NO_SELECTION_STARTER
-//  It is indeed added on a 'no selection' project. However, it is also added *always* on any project with selections.
-//  So that means we don't have to worry here about ever adding it ourselves (it is allways there, for any generated project).
-//  Also, should we in fact, treat it similar to "default.main" starter, then it will actually get removed,
-//  when the user adds a real starter to a 'empty' project, and this is wrong!
-//			new SpringBootStarter("default.test",
-//					new MavenCoordinates("org.springframework.boot", "spring-boot-starter-test"),
-//					"test", //scope
-//					null, //bom
-//					null //repo
-//			)
-	);
-	private static final Collection<MavenId> DEFAULT_STARTER_MAVEN_IDS;
-	static {
-		Builder<MavenId> builder = ImmutableSet.builder();
-		for (SpringBootStarter s : NO_SELECTION_STARTERS) {
-			builder.add(s.getMavenId());
-		}
-		DEFAULT_STARTER_MAVEN_IDS = builder.build();
-	}
 
 	public MavenSpringBootProject(IProject project, InitializrService initializr) {
 		super(project, initializr);
@@ -285,53 +256,40 @@ public class MavenSpringBootProject extends SpringBootProject {
 	}
 
 	@Override
-	public void setStarters(Collection<SpringBootStarter> _starters) throws CoreException {
-		if (_starters.isEmpty()) {
-			//See https://www.pivotaltracker.com/story/show/157144736
-			_starters = NO_SELECTION_STARTERS;
-		}
+	public void modifyDependencies(DependencyDelta delta) throws CoreException {
 		try {
-			final Map<MavenId, SpringBootStarter> starters = new HashMap<>();
-			for (SpringBootStarter s : _starters) {
-				starters.put(s.getMavenId(), s);
-			}
-
 			IFile file = getPomFile();
+			SpringBootStarters knownStarters = getStarterInfos();
 			performOnDOMDocument(new OperationTuple(file, new Operation() {
 				@Override
 				public void process(Document pom) {
 					Element depsEl = getChild(
 							pom.getDocumentElement(), DEPENDENCIES);
 					List<Element> children = findChilds(depsEl, DEPENDENCY);
+					//Remove dependencies the delta says should be removed:
 					for (Element c : children) {
-						//We only care about 'starter' dependencies. Leave everything else alone.
-						// Also... don't touch nodes that are already there, unless they are to
-						// be removed. This way we don't mess up versions, comments or other stuff
-						// that a user may have inserted via manual edits.
 						String aid = getTextValue(findChild(c, ARTIFACT_ID));
 						String gid = getTextValue(findChild(c, GROUP_ID));
 						if (aid!=null && gid!=null) { //ignore invalid entries that don't have gid or aid
 							MavenId id = new MavenId(gid, aid);
-							if (isKnownStarter(id)||DEFAULT_STARTER_MAVEN_IDS.contains(id)) {
-								boolean keep = starters.remove(id)!=null;
-								if (!keep) {
-									depsEl.removeChild(c);
-								}
+							if (delta.isRemoved(id)) {
+								depsEl.removeChild(c);
 							}
 						}
 					}
 
-					//if 'starters' is not empty at this point, it contains remaining starters we have not seen
-					// in the pom, so we need to add them.
-					for (MavenId mid : starters.keySet()) {
-						SpringBootStarter starter = starters.get(mid);
-						createDependency(depsEl, starter.getDependency(), starter.getScope());
-						createBomIfNeeded(pom, starter.getBom());
-						createRepoIfNeeded(pom, starter.getRepo());
+					//
+					for (Entry<MavenId, Optional<String>> added : delta.added.entrySet()) {
+						MavenId mid = added.getKey();
+						String scope = added.getValue().orElse(null);
+						SpringBootStarter starter = knownStarters.getStarter(mid);
+						createDependency(depsEl, new MavenCoordinates(mid.getGroupId(), mid.getArtifactId()), scope);
+						if (starter!=null) {
+							createBomIfNeeded(pom, starter.getBom());
+							createRepoIfNeeded(pom, starter.getRepo());
+						}
 					}
 				}
-
-
 			}));
 		} catch (Throwable e) {
 			throw ExceptionUtil.coreException(e);

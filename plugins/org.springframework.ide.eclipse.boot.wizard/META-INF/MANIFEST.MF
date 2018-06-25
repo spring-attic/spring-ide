@@ -41,6 +41,7 @@ Export-Package: org.springframework.ide.eclipse.boot.wizard,
  org.springframework.ide.eclipse.boot.wizard.github.auth,
  org.springframework.ide.eclipse.boot.wizard.guides,
  org.springframework.ide.eclipse.boot.wizard.guides.ext,
- org.springframework.ide.eclipse.boot.wizard.importing
+ org.springframework.ide.eclipse.boot.wizard.importing,
+ org.springframework.ide.eclipse.boot.wizard.util
 Bundle-Vendor: Pivotal Inc.
 Import-Package: org.glassfish.jersey.client

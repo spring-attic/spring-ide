@@ -52,6 +52,11 @@ public class EnableDisableBootDevtoolsTest {
 		public SpringBootStarters getStarters(String bootVersion) {
 			return null;
 		}
+
+		@Override
+		public String getPom(String bootVersion, List<String> starters) throws Exception {
+			throw new UnsupportedOperationException();
+		}
 	};
 	private SpringBootCore springBootCore = new SpringBootCore(initializr);
 	private BootProjectTestHarness projects = new BootProjectTestHarness(ResourcesPlugin.getWorkspace());
@@ -81,6 +86,7 @@ public class EnableDisableBootDevtoolsTest {
 		delegate.run(action);
 
 		new ACondition("Wait for 'devtools' starter to be added") {
+			@Override
 			public boolean test() throws Exception {
 				assertDependency(project.getDependencies(), SPRING_BOOT_DEVTOOLS_GID, SPRING_BOOT_DEVTOOLS_AID);
 				return true;
@@ -108,6 +114,7 @@ public class EnableDisableBootDevtoolsTest {
 		delegate.run(action);
 
 		new ACondition("Wait for 'devtools' starter to be removed") {
+			@Override
 			public boolean test() throws Exception {
 				assertNoDependency(project.getDependencies(), SPRING_BOOT_DEVTOOLS_GID, SPRING_BOOT_DEVTOOLS_AID);
 				return true;
