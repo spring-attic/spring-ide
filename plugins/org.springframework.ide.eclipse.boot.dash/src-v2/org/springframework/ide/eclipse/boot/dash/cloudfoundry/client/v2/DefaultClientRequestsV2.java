@@ -32,14 +32,13 @@ import org.cloudfoundry.client.v2.applications.UpdateApplicationRequest;
 import org.cloudfoundry.client.v2.applications.UpdateApplicationResponse;
 import org.cloudfoundry.client.v2.buildpacks.ListBuildpacksRequest;
 import org.cloudfoundry.client.v2.buildpacks.ListBuildpacksResponse;
-import org.cloudfoundry.client.v2.domains.ListDomainsRequest;
-import org.cloudfoundry.client.v2.domains.ListDomainsResponse;
 import org.cloudfoundry.client.v2.info.GetInfoRequest;
 import org.cloudfoundry.client.v2.info.GetInfoResponse;
 import org.cloudfoundry.client.v2.serviceinstances.DeleteServiceInstanceRequest;
 import org.cloudfoundry.client.v2.stacks.GetStackRequest;
 import org.cloudfoundry.client.v2.stacks.GetStackResponse;
 import org.cloudfoundry.client.v2.userprovidedserviceinstances.DeleteUserProvidedServiceInstanceRequest;
+import org.cloudfoundry.client.v2.users.GetUserRequest;
 import org.cloudfoundry.doppler.LogMessage;
 import org.cloudfoundry.operations.CloudFoundryOperations;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
@@ -1342,7 +1341,16 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	@Override
 	public Mono<String> getUserName() {
 		return log("uaa.getUsername",
-				_uaa.getUsername()
+				/*
+				 * UAA times out at start until the client is cached. Needs ~2 mins to fetch the user.
+				 * Instead get userID from client info and then fetch the user complete data from id to get the user name. This works and bypasses UAA
+				 */
+//				_uaa.getUsername()
+				client_getInfo()
+					.flatMap(info -> _client
+							.users()
+							.get(GetUserRequest.builder().userId(info.getUser()).build())
+							.map(response -> response.getEntity().getUsername()))
 		).timeout(GET_USERNAME_TIMEOUT);
 	}
 
