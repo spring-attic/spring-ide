@@ -48,7 +48,6 @@ import com.google.common.collect.ImmutableSet;
  */
 public class BootDashActivator extends AbstractUIPlugin {
 
-
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.boot.dash"; //$NON-NLS-1$
 
@@ -63,11 +62,11 @@ public class BootDashActivator extends AbstractUIPlugin {
 	public static final String CHECK_GREYSCALE_ICON = "check-greyscale";
 
 	// NOTE: using ':' to separate the "shorter" part of the message from the longer. The longer part may be shown in the UI by expanding the hover info
-	private static final String TARGET_SOURCE = "Boot Dash";
-	private static final String NO_ORG_SPACE = "Boot Dash - No org/space selected: Verify Cloud Foundry target connection in Boot Dashboard or login via 'cf' CLI";
+	private static final String TARGET_SOURCE = "Boot Dashboard";
+	private static final String NO_ORG_SPACE = "Boot Dashboard - No org/space selected: Verify Cloud Foundry target connection in Boot Dashboard or login via 'cf' CLI";
 	// Make this a "generic" message, instead of using "Boot Dash" prefix as it shows general instructions when there are not targets
 	private static final String NO_TARGETS = "No Cloud Foundry targets found: Create a target in Boot Dashboard or login via 'cf' CLI";
-	private static final String CONNECTION_ERROR = "Boot Dash - Error connecting to Cloud Foundry target: Verify network connection or that existing target has valid credentials.";
+	private static final String CONNECTION_ERROR = "Boot Dashboard - Error connecting to Cloud Foundry target: Verify network connection or that existing target has valid credentials.";
 
 
 	// The shared instance
