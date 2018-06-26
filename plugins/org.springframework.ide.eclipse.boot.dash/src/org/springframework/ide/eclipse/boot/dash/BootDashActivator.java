@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2017 Pivotal, Inc.
+ * Copyright (c) 2015, 2018 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.boot.dash;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.net.proxy.IProxyService;
@@ -26,6 +25,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.BootDashBuildpackH
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.BuildpackHintGenerator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CfTargetsInfo;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CfTargetsInfo.Target;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CfTargetsInfo.TargetDiagnosticMessages;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
@@ -41,13 +41,13 @@ import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestEdit
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 /**
  * The activator class controls the plug-in life cycle
  */
 public class BootDashActivator extends AbstractUIPlugin {
+
 
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.boot.dash"; //$NON-NLS-1$
@@ -62,12 +62,13 @@ public class BootDashActivator extends AbstractUIPlugin {
 	public static final String CHECK_ICON = "check";
 	public static final String CHECK_GREYSCALE_ICON = "check-greyscale";
 
-	private static final Map<String, String> LS_DIAGNOSTIC_MESSAGES = ImmutableMap.of(
-		"noTargetsFound", "No Cloud Foundry targets found: Connect CF Target(s) in Boot Dashboard or login via CF CLI",
-		"unauthorised", "Permission denied: Verify credentials to CF Target from Boot Dashboard or CF CLI are correct",
-		"noNetworkConnection", "No connection to Cloud Foundry: Connect CF Target via Boot Dashboard or login via CF CLI or verify network connections",
-		"noOrgSpace", "No org/space selected: Connect CF Target in Boot Dashboard or login via CF CLI"
-	);
+	// NOTE: using ':' to separate the "shorter" part of the message from the longer. The longer part may be shown in the UI by expanding the hover info
+	private static final String TARGET_SOURCE = "Boot Dash";
+	private static final String NO_ORG_SPACE = "Boot Dash - No org/space selected: Verify Cloud Foundry target connection in Boot Dashboard or login via 'cf' CLI";
+	// Make this a "generic" message, instead of using "Boot Dash" prefix as it shows general instructions when there are not targets
+	private static final String NO_TARGETS = "No Cloud Foundry targets found: Create a target in Boot Dashboard or login via 'cf' CLI";
+	private static final String CONNECTION_ERROR = "Boot Dash - Error connecting to Cloud Foundry target: Verify network connection or that existing target has valid credentials.";
+
 
 	// The shared instance
 	private static BootDashActivator plugin;
@@ -251,8 +252,17 @@ public class BootDashActivator extends AbstractUIPlugin {
 
 		CfTargetsInfo targetsInfo = new CfTargetsInfo();
 		targetsInfo.setCfTargets(collectedTargets);
-		targetsInfo.setCfDiagnosticMessages(LS_DIAGNOSTIC_MESSAGES);
+		targetsInfo.setDiagnosticMessages(getDiagnosticMessages());
 		return targetsInfo ;
+	}
+
+	private TargetDiagnosticMessages getDiagnosticMessages() {
+		TargetDiagnosticMessages messages = new TargetDiagnosticMessages();
+		messages.setConnectionError(CONNECTION_ERROR);
+		messages.setNoOrgSpace(NO_ORG_SPACE);
+		messages.setNoTargetsFound(NO_TARGETS);
+		messages.setTargetSource(TARGET_SOURCE);
+		return messages;
 	}
 
 	@Override
