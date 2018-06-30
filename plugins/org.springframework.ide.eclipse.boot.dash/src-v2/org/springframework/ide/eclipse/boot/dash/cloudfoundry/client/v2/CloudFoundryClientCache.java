@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Pivotal, Inc.
+ * Copyright (c) 2016, 2018 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,7 +17,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.cloudfoundry.client.CloudFoundryClient;
-import org.cloudfoundry.reactor.ConnectionContext;
+import org.cloudfoundry.client.v2.info.GetInfoRequest;
+import org.cloudfoundry.client.v2.info.GetInfoResponse;
 import org.cloudfoundry.reactor.DefaultConnectionContext;
 import org.cloudfoundry.reactor.ProxyConfiguration;
 import org.cloudfoundry.reactor.TokenProvider;
@@ -29,11 +30,12 @@ import org.cloudfoundry.reactor.tokenprovider.RefreshTokenGrantTokenProvider;
 import org.cloudfoundry.reactor.uaa.ReactorUaaClient;
 import org.eclipse.core.net.proxy.IProxyData;
 import org.eclipse.core.net.proxy.IProxyService;
-import org.eclipse.core.runtime.Assert;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.util.StringUtils;
+
+import reactor.core.publisher.Mono;
 
 /**
  * TODO: Remove this class when the 'thread leak bug' in V2 client is fixed.
@@ -62,6 +64,7 @@ public class CloudFoundryClientCache {
 		final CloudFoundryClient client;
 		final ReactorUaaClient uaaClient;
 		final ReactorDopplerClient doppler;
+		final Mono<GetInfoResponse> info;
 
 		private ProxyConfiguration getProxy(String host) {
 			try {
@@ -132,6 +135,9 @@ public class CloudFoundryClientCache {
 					.connectionContext(connection)
 					.tokenProvider(tokenProvider)
 					.build();
+
+			// Cache CF client info - workaround for https://www.pivotaltracker.com/story/show/158741609
+			info = client.info().get(GetInfoRequest.builder().build()).cache();
 		}
 
 		private TokenProvider createTokenProvider(Params params) {
