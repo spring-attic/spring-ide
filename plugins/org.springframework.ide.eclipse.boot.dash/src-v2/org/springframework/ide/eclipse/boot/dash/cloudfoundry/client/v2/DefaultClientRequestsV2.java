@@ -178,7 +178,8 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 				.build();
 		debug("<<< creating cf operations");
 		this.orgId = getOrgId();
-		this.info = client_getInfo().cache();
+		// Use cached info, workaround for https://www.pivotaltracker.com/story/show/158741609
+		this.info = provider.info;
 		debug("DefaultClientRequestsV2 created: "+instances.incrementAndGet());
 	}
 
@@ -1346,7 +1347,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 				 * Instead get userID from client info and then fetch the user complete data from id to get the user name. This works and bypasses UAA
 				 */
 //				_uaa.getUsername()
-				client_getInfo()
+				info
 					.flatMap(info -> _client
 							.users()
 							.get(GetUserRequest.builder().userId(info.getUser()).build())
