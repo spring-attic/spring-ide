@@ -14,7 +14,7 @@
 <feature
       id="org.springframework.ide.eclipse.security.feature"
       label="%featureName"
-      version="3.9.5.qualifier"
+      version="3.9.6.qualifier"
       provider-name="%providerName"
       plugin="org.springframework.ide.eclipse">
 
@@ -31,7 +31,7 @@
    </license>
 
    <requires>
-      <import feature="org.springframework.ide.eclipse.feature" version="3.9.5"/>
+      <import feature="org.springframework.ide.eclipse.feature" version="3.9.6"/>
    </requires>
 
    <plugin

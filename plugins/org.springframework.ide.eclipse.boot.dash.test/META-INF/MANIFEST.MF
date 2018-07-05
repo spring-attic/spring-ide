@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Test
 Fragment-Host: org.springframework.ide.eclipse.boot.dash;bundle-version="3.7.3"
 Bundle-SymbolicName: org.springframework.ide.eclipse.boot.dash.test
-Bundle-Version: 3.9.5.qualifier
+Bundle-Version: 3.9.6.qualifier
 Bundle-Vendor: Pivotal Inc
 Require-Bundle: org.eclipse.core.runtime,
  org.junit,
