@@ -484,9 +484,9 @@ public class NewSpringBootWizardModel {
 						Map<String, String> variables = new HashMap<>();
 						variables.put(InitializrServiceSpec.BOOT_VERSION_LINK_TEMPLATE_VARIABLE,
 								bootVersion.getSelection().selection.getValue().getValue());
-						return DependencyHtmlContent.generateHtmlDocumentation(dep, variables);
+						return DependencyTooltipContent.generateHtmlDocumentation(dep, variables);
 					},
-					DependencyHtmlContent.generateRequirements(dep),
+					DependencyTooltipContent.generateRequirements(dep),
 					createEnablementExp(bootVersion, dep)
 				);
 			}

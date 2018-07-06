@@ -150,8 +150,8 @@ public class EditStartersModel implements OkButtonHandler {
 				for (Dependency dep : dgroup.getContent()) {
 					if (starters.contains(dep.getId())) {
 						dependencies.choice(catName, dep.getName(), dep,
-								() -> DependencyHtmlContent.generateHtmlDocumentation(dep, variables),
-								DependencyHtmlContent.generateRequirements(dep),
+								() -> DependencyTooltipContent.generateHtmlDocumentation(dep, variables),
+								DependencyTooltipContent.generateRequirements(dep),
 								LiveExpression.constant(true)
 						);
 						MavenId mavenId = starters.getMavenId(dep.getId());

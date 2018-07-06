@@ -34,7 +34,7 @@ import org.springsource.ide.eclipse.commons.ui.HTMLPrinter;
  *
  */
 @SuppressWarnings("restriction")
-class DependencyHtmlContent {
+public class DependencyTooltipContent {
 
 	private static final String UNIT; // See https://bugs.eclipse.org/bugs/show_bug.cgi?id=155993
 	static {
@@ -152,24 +152,26 @@ class DependencyHtmlContent {
 	}
 
 	public static String generateRequirements(Dependency dep) {
-		String rangeString = dep.getVersionRange();
-		if (StringUtil.hasText(rangeString)) { //check to avoid errors on empty string or null
-			try {
-				VersionRange versionRange = new VersionRange(rangeString);
-				Version l = versionRange.getLeft();
-				Version r = versionRange.getRight();
-				if (l!=null && r!=null) {
-					return "Requires Spring Boot "+
-							rangeText(l, versionRange.getLeftType()) + " and " + rangeText(r, versionRange.getRightType());
-				} else if (l!=null) {
-					return "Requires Spring Boot "+
-							rangeText(l, versionRange.getLeftType());
-				} else if (r!=null) {
-					return "Requires Spring Boot "+
-							rangeText(r, versionRange.getRightType());
+		if (dep!=null) {
+			String rangeString = dep.getVersionRange();
+			if (StringUtil.hasText(rangeString)) { //check to avoid logging errors on empty string or null
+				try {
+					VersionRange versionRange = new VersionRange(rangeString);
+					Version l = versionRange.getLeft();
+					Version r = versionRange.getRight();
+					if (l!=null && r!=null) {
+						return "Requires Spring Boot "+
+								rangeText(l, versionRange.getLeftType()) + " and " + rangeText(r, versionRange.getRightType());
+					} else if (l!=null) {
+						return "Requires Spring Boot "+
+								rangeText(l, versionRange.getLeftType());
+					} else if (r!=null) {
+						return "Requires Spring Boot "+
+								rangeText(r, versionRange.getRightType());
+					}
+				} catch (Exception e) {
+					Log.log(e);
 				}
-			} catch (Exception e) {
-				Log.log(e);
 			}
 		}
 		return null;

@@ -74,6 +74,7 @@ public class NewSpringBootWizardModelTest extends TestCase {
 	public static NewSpringBootWizardModel parseFrom(String resourcePath, IPreferenceStore store) throws Exception {
 		URL formUrl = resourceUrl(resourcePath);
 		return new NewSpringBootWizardModel(new URLConnectionFactory(), formUrl.toString(), store) {
+			@Override
 			protected void importProject(org.eclipse.core.runtime.IProgressMonitor mon) throws java.lang.reflect.InvocationTargetException ,InterruptedException {
 				//do nothing (this is a fake wizard, not meant to create real projects).
 			}
@@ -240,6 +241,8 @@ public class NewSpringBootWizardModelTest extends TestCase {
 
 		bootVersion.setValue(older);
 		assertFalse(bitronixEnabled.getValue());
+		CheckBoxModel<Dependency> bitronixChekbox = getCheckboxById(model.dependencies.getAllBoxes(), "jta-bitronix");
+		assertEquals("Requires Spring Boot >=1.2.0.M1", bitronixChekbox.getRequirementTooltip());
 		assertTrue(thymeleafEnabled.getValue());
 
 		bootVersion.setValue(newer);
@@ -397,7 +400,7 @@ public class NewSpringBootWizardModelTest extends TestCase {
 		assertFilterAccepts(model, false, "foo", "foo", "label", "desc");
 
 	}
-	
+
 	public void testValidDefaultProjectName() throws Exception {
 		ensureProject("demo");
 		ensureProject("demo-1");
@@ -413,12 +416,12 @@ public class NewSpringBootWizardModelTest extends TestCase {
 			p1.create(new NullProgressMonitor());
 		}
 	}
-	
+
 	public void testArtifactIdSyncWithProjectName() throws Exception {
 		NewSpringBootWizardModel model = parseFrom(INITIALIZR_JSON);
 		assertEquals("demo", model.getProjectName().getValue());
 		assertEquals("demo", model.getArtifactId().getValue());
-		
+
 		model.getProjectName().setValue("demo-1");
 		assertEquals("demo-1", model.getProjectName().getValue());
 		assertEquals("demo-1", model.getArtifactId().getValue());
@@ -434,12 +437,12 @@ public class NewSpringBootWizardModelTest extends TestCase {
 		model.getArtifactId().setValue("demo-2");
 		assertEquals("demo-2", model.getProjectName().getValue());
 		assertEquals("demo-2", model.getArtifactId().getValue());
-		
+
 		model.getProjectName().setValue("demo-3");
 		assertEquals("demo-3", model.getProjectName().getValue());
 		assertEquals("demo-3", model.getArtifactId().getValue());
 	}
-	
+
 	public void testProjectNameSavedAndRestored() throws Exception {
 		//See: https://www.pivotaltracker.com/story/show/145645973
 		IPreferenceStore prefs = new MockPrefsStore();
@@ -449,12 +452,12 @@ public class NewSpringBootWizardModelTest extends TestCase {
 			model.performFinish(new NullProgressMonitor());
 			assertEquals("another-name", model.getProjectName().getValue());
 		}
-		
+
 		{
 			NewSpringBootWizardModel model = parseFrom(INITIALIZR_JSON, prefs);
 			assertEquals("another-name", model.getProjectName().getValue());
 		}
-		
+
 		ensureProject("another-name");
 		{
 			NewSpringBootWizardModel model = parseFrom(INITIALIZR_JSON, prefs);
@@ -512,7 +515,7 @@ public class NewSpringBootWizardModelTest extends TestCase {
 		}
 		return null;
 	}
-	
+
 	private void assertCheckboxes(List<CheckBoxModel<Dependency>> actuals, Dependency... expecteds) {
 		StringBuilder expectedIds = new StringBuilder();
 		for (Dependency e : expecteds) {
@@ -753,18 +756,18 @@ public class NewSpringBootWizardModelTest extends TestCase {
 			assertEquals(expectNames[i], groups.get(i).getName());
 		}
 	}
-	
+
 	public void testTemplateVariableSubstitution() throws Exception {
 		Map<String, String> values = new HashMap<>();
 		values.put("bootVersion", "2.0.0");
 		values.put("stars", "5");
-		
+
 		String actual = InitializrServiceSpec.substituteTemplateVariables("Here is Spring Boot {bootVersion} version. It's rated with {stars} stars.", values);
 		assertEquals("Here is Spring Boot 2.0.0 version. It's rated with 5 stars.", actual);
-		
+
 		actual = InitializrServiceSpec.substituteTemplateVariables("Here is Spring Boot {bootVersion} version.", values);
 		assertEquals("Here is Spring Boot 2.0.0 version.", actual);
-		
+
 		try {
 			InitializrServiceSpec.substituteTemplateVariables("Here is Spring Boot {bootVersion} version. It's really {awesome} stuff!", values);
 			fail("Should have failed the template string variable substitution! Unknown variable expected!");
@@ -772,5 +775,5 @@ public class NewSpringBootWizardModelTest extends TestCase {
 			// ignore - let the test pass
 		}
 	}
-	
+
 }

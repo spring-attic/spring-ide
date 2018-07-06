@@ -16,7 +16,8 @@ import org.junit.runners.Suite.SuiteClasses;
 		InitializrDependencySpecTest.class,
 		SpringBootValidationTest.class,
 		GSGWizardModelTest.class,
-		InitializrFactoryModelTest.class
+		InitializrFactoryModelTest.class,
+		DependencyTooltipContentTest.class,
 })
 public class AllSpringBootTests {
 
