@@ -24,6 +24,7 @@ import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpe
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Link;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Links;
 import org.springframework.ide.eclipse.boot.util.Log;
+import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.ui.HTMLPrinter;
 
 /**
@@ -152,22 +153,24 @@ class DependencyHtmlContent {
 
 	public static String generateRequirements(Dependency dep) {
 		String rangeString = dep.getVersionRange();
-		try {
-			VersionRange versionRange = new VersionRange(rangeString);
-			Version l = versionRange.getLeft();
-			Version r = versionRange.getRight();
-			if (l!=null && r!=null) {
-				return "Requires Spring Boot "+
-						rangeText(l, versionRange.getLeftType()) + " and " + rangeText(r, versionRange.getRightType());
-			} else if (l!=null) {
-				return "Requires Spring Boot "+
-						rangeText(l, versionRange.getLeftType());
-			} else if (r!=null) {
-				return "Requires Spring Boot "+
-						rangeText(r, versionRange.getRightType());
+		if (StringUtil.hasText(rangeString)) { //check to avoid errors on empty string or null
+			try {
+				VersionRange versionRange = new VersionRange(rangeString);
+				Version l = versionRange.getLeft();
+				Version r = versionRange.getRight();
+				if (l!=null && r!=null) {
+					return "Requires Spring Boot "+
+							rangeText(l, versionRange.getLeftType()) + " and " + rangeText(r, versionRange.getRightType());
+				} else if (l!=null) {
+					return "Requires Spring Boot "+
+							rangeText(l, versionRange.getLeftType());
+				} else if (r!=null) {
+					return "Requires Spring Boot "+
+							rangeText(r, versionRange.getRightType());
+				}
+			} catch (Exception e) {
+				Log.log(e);
 			}
-		} catch (Exception e) {
-			Log.log(e);
 		}
 		return null;
 	}
