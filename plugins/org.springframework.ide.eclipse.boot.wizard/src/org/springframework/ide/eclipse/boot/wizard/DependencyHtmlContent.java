@@ -17,10 +17,13 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.Util;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.FontData;
+import org.osgi.framework.Version;
+import org.osgi.framework.VersionRange;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Link;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Links;
+import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.ui.HTMLPrinter;
 
 /**
@@ -145,6 +148,48 @@ class DependencyHtmlContent {
 			"ul	        { margin-top: 0px; margin-bottom: 0em; margin-left: 1em; padding-left: 1em; }",
 			"li	        { margin-top: 0px; margin-bottom: 0px; }"
 		};
+	}
+
+	public static String generateRequirements(Dependency dep) {
+		String rangeString = dep.getVersionRange();
+		try {
+			VersionRange versionRange = new VersionRange(rangeString);
+			Version l = versionRange.getLeft();
+			Version r = versionRange.getRight();
+			if (l!=null && r!=null) {
+				return "Requires Spring Boot "+
+						rangeText(l, versionRange.getLeftType()) + " and " + rangeText(r, versionRange.getRightType());
+			} else if (l!=null) {
+				return "Requires Spring Boot "+
+						rangeText(l, versionRange.getLeftType());
+			} else if (r!=null) {
+				return "Requires Spring Boot "+
+						rangeText(r, versionRange.getRightType());
+			}
+		} catch (Exception e) {
+			Log.log(e);
+		}
+		return null;
+	}
+
+	private static String rangeText(Version range, char type) {
+		return rangeTypeText(type) + range.toString();
+	}
+
+	private static String rangeTypeText(char type) {
+		switch (type) {
+		case VersionRange.LEFT_CLOSED:
+			return ">=";
+		case VersionRange.LEFT_OPEN:
+			return ">";
+		case VersionRange.RIGHT_CLOSED:
+			return "<=";
+		case VersionRange.RIGHT_OPEN:
+			return "<";
+		default:
+			//Shouldn't happen... but anyhow.
+			return "??";
+		}
 	}
 
 }

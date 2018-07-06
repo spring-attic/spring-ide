@@ -19,11 +19,13 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
+import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
@@ -53,6 +55,7 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 		private final LiveExpression<Boolean> enablement;
 		private final T value;
 		private Supplier<String> tooltipHtml; //optional HTML tooltip supplier
+		private String requirementTooltip; //optional, a user-readable string explaining the requirements (this can be shown as a explanation to the user for a disabled checkbox).
 		public CheckBoxModel(String label, T value, LiveVariable<Boolean> selection, LiveExpression<Boolean> enablement) {
 			this.label = label;
 			this.value = value;
@@ -81,6 +84,12 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 		public String toString() {
 			return "CheckBox("+label+", "+getSelection().getValue()+")" ;
 		}
+		public String getRequirementTooltip() {
+			return requirementTooltip;
+		}
+		public void setRequirementTooltip(String requirementTooltip) {
+			this.requirementTooltip = requirementTooltip;
+		}
 	}
 
 	private List<CheckBoxModel<T>> model;
@@ -108,7 +117,6 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 	private static class CheckBox<T> extends WizardPageSection {
 
 		private Button cb;
-		private HtmlTooltip tooltip;
 		private CheckBoxModel<T> model;
 		private LiveVariable<Boolean> isVisible = new LiveVariable<>(true);
 		private ValueListener<Boolean> selectionListener;
@@ -127,18 +135,29 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 		@Override
 		public void createContents(Composite page) {
 			if (page!=null && !page.isDisposed()) {
-				this.cb = new Button(page, SWT.CHECK);
+				Composite composite = new Composite(page, SWT.NONE);
+				composite.setLayout(new FillLayout());
+				this.cb = new Button(composite, SWT.CHECK);
 				cb.setText(model.getLabel());
 
 				Supplier<String> html = model.getTooltipHtml();
 				if (html != null) {
 					// Setup HTML tooltip and its content
-					this.tooltip = new HtmlTooltip(cb);
-					this.tooltip.setMaxSize(400, 400);
-					this.tooltip.setHtml(html);
+					{
+						HtmlTooltip tooltip = new HtmlTooltip(cb);
+						tooltip.setMaxSize(400, 400);
+						tooltip.setHtml(html);
+					}
+					String requirements = model.getRequirementTooltip();
+					if (StringUtil.hasText(requirements)) {
+						//The tooltip on the composite will only be shown when the checkbox widget itself is disabled:
+						//See https://stackoverflow.com/questions/39096291/tooltip-is-not-visible-for-a-disabled-control-in-java-swt
+						composite.setToolTipText(requirements);
+					}
 				}
 
 				model.getSelection().addListener(selectionListener = new ValueListener<Boolean>() {
+					@Override
 					public void gotValue(LiveExpression<Boolean> exp, Boolean value) {
 						// note: checkbox button may be null in cases where the
 						// model keeps changing in the container section and the selection
@@ -148,14 +167,14 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 						}
 					}
 				});
-				GridDataFactory.fillDefaults().grab(true, false).applyTo(cb);
+				GridDataFactory.fillDefaults().grab(true, false).applyTo(composite);
 				cb.addSelectionListener(new SelectionListener() {
-					//@Override
+					@Override
 					public void widgetSelected(SelectionEvent e) {
 						handleSelection();
 					}
 
-					//@Override
+					@Override
 					public void widgetDefaultSelected(SelectionEvent e) {
 						handleSelection();
 					}
@@ -167,6 +186,7 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 				LiveExpression<Boolean> enablement = model.getEnablement();
 				if (enablement!=null) {
 					enablement.addListener(enablementListener = new ValueListener<Boolean>() {
+						@Override
 						public void gotValue(LiveExpression<Boolean> exp, Boolean value) {
 							if (value!=null) {
 								cb.setEnabled(value);
@@ -175,10 +195,11 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 					});
 				}
 				isVisible.addListener(new ValueListener<Boolean>() {
+					@Override
 					public void gotValue(LiveExpression<Boolean> exp, Boolean reveal) {
-						if (reveal!=null && cb !=null && !cb.isDisposed()) {
-							cb.setVisible(reveal);
-							GridData data = (GridData) cb.getLayoutData();
+						if (reveal!=null && composite !=null && !composite.isDisposed()) {
+							composite.setVisible(reveal);
+							GridData data = (GridData) composite.getLayoutData();
 							data.exclude = !reveal;
 						}
 					}

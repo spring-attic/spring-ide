@@ -48,6 +48,7 @@ public class MultiSelectionFieldModel<T> {
 
 	private Map<T,String> labelMap = new LinkedHashMap<T, String>();
 	private Map<T,Supplier<String>> tooltipsHtml = null; //don't allocate unless used.
+	private Map<T,String> requirementToolstips = null; //don't allocate unless used.
 	private boolean mustSort;
 
 	private Map<T, LiveExpression<Boolean>> enablements = null;
@@ -114,13 +115,14 @@ public class MultiSelectionFieldModel<T> {
 		return this;
 	}
 
-	public void choice(String label, T value, Supplier<String> tooltipHtml) {
+	public void choice(String label, T value, Supplier<String> tooltipHtml, String requirementTooltip) {
 		choice(label, value);
 		setTooltipHtml(value, tooltipHtml);
+		setRequirementTooltip(value, requirementTooltip);
 	}
 
-	public void choice(String label, T value, Supplier<String> tooltipHtml, LiveExpression<Boolean> enablement) {
-		choice(label, value, tooltipHtml);
+	public void choice(String label, T value, Supplier<String> tooltipHtml, String requirementTooltip, LiveExpression<Boolean> enablement) {
+		choice(label, value, tooltipHtml, requirementTooltip);
 		if (enablements==null) {
 			enablements = new HashMap<T, LiveExpression<Boolean>>();
 		}
@@ -152,6 +154,7 @@ public class MultiSelectionFieldModel<T> {
 		T[] choices = values.toArray((T[]) Array.newInstance(getType(), values.size()));
 		if (mustSort) {
 			Arrays.sort(choices, new Comparator<T>() {
+				@Override
 				public int compare(T o1, T o2) {
 					String s1 = getLabel(o1);
 					String s2 = getLabel(o2);
@@ -196,16 +199,31 @@ public class MultiSelectionFieldModel<T> {
 			CheckBoxModel<T> cb;
 			checkboxes.add(cb = new CheckBoxModel<T>(getLabel(choice), choice, getSelection(choice), getEnablement(choice)));
 			cb.setTooltipHtml(getTooltipHtml(choice));
+			cb.setRequirementTooltip(getRequirementTooltip(choice));
 		}
 		return Collections.unmodifiableList(checkboxes);
 	}
-	
+
+	private String getRequirementTooltip(T choice) {
+		if (requirementToolstips!=null) {
+			return requirementToolstips.get(choice);
+		}
+		return null;
+	}
+
+	public void setRequirementTooltip(T value, String tt) {
+		if (requirementToolstips==null) {
+			requirementToolstips = new HashMap<T, String>();
+		}
+		requirementToolstips.put(value,  tt);
+	}
+
 	public void clearSelection() {
 		selections.values().forEach(liveVar -> {
 			liveVar.setValue(false);
 		});
 	}
-	
+
 	public void addSelectionListener(ValueListener<Boolean> listener) {
 		selections.values().forEach(livevar -> {
 			livevar.addListener(listener);

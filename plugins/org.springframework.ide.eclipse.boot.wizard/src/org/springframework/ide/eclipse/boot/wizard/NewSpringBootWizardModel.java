@@ -478,13 +478,17 @@ public class NewSpringBootWizardModel {
 		for (DependencyGroup dgroup : serviceSpec.getDependencies()) {
 			String catName = dgroup.getName();
 			for (Dependency dep : dgroup.getContent()) {
-				dependencies.choice(catName, dep.getName(), dep, () -> {
-					// Setup link template variable values
-					Map<String, String> variables = new HashMap<>();
-					variables.put(InitializrServiceSpec.BOOT_VERSION_LINK_TEMPLATE_VARIABLE,
-							bootVersion.getSelection().selection.getValue().getValue());
-					return DependencyHtmlContent.generateHtmlDocumentation(dep, variables);
-				}, createEnablementExp(bootVersion, dep));
+				dependencies.choice(catName, dep.getName(), dep,
+					() -> {
+						// Setup link template variable values
+						Map<String, String> variables = new HashMap<>();
+						variables.put(InitializrServiceSpec.BOOT_VERSION_LINK_TEMPLATE_VARIABLE,
+								bootVersion.getSelection().selection.getValue().getValue());
+						return DependencyHtmlContent.generateHtmlDocumentation(dep, variables);
+					},
+					DependencyHtmlContent.generateRequirements(dep),
+					createEnablementExp(bootVersion, dep)
+				);
 			}
 		}
 	}

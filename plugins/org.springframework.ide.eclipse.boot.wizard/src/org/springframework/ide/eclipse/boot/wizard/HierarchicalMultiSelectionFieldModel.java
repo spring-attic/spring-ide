@@ -73,9 +73,9 @@ public class HierarchicalMultiSelectionFieldModel<T> {
 	/**
 	 * Add a choice to a category, create the category if it doesn't exist yet.
 	 */
-	public void choice(String catName, String name, T dep, Supplier<String> tooltipHtml, LiveExpression<Boolean> enablement) {
+	public void choice(String catName, String name, T dep, Supplier<String> tooltipHtml, String requirementTooltip, LiveExpression<Boolean> enablement) {
 		MultiSelectionFieldModel<T> cat = ensureCategory(catName);
-		cat.choice(name, dep, tooltipHtml, enablement);
+		cat.choice(name, dep, tooltipHtml, requirementTooltip, enablement);
 	}
 
 	public void setSelection(String catName, T dep, boolean selected) {
@@ -110,9 +110,9 @@ public class HierarchicalMultiSelectionFieldModel<T> {
 		}
 		return allUsedBoxes;
 	}
-	
+
 	public void clearSelection() {
 		categories.values().forEach(MultiSelectionFieldModel::clearSelection);
 	}
-	
+
 }
