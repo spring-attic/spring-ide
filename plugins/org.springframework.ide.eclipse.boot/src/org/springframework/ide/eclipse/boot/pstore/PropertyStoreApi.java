@@ -79,6 +79,20 @@ public class PropertyStoreApi {
 		return dflt;
 	}
 
+	public int get(String key, int dflt) {
+		String string = get(key);
+		if (StringUtil.hasText(string)) {
+			try {
+				return Integer.parseInt(string);
+			} catch (Exception e) {
+				Log.log(e);
+			}
+		}
+		return dflt;
+	}
+
+
+
 	public void put(String id, boolean enable) throws Exception {
 		put(id, Boolean.toString(enable));
 	}
@@ -86,6 +100,5 @@ public class PropertyStoreApi {
 	public IPropertyStore getBackingStore() {
 		return backingStore;
 	}
-
 
 }

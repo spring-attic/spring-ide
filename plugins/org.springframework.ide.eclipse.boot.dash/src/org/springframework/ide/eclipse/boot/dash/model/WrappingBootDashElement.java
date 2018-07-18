@@ -53,7 +53,6 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 
 	private BootDashModel bootDashModel;
 	private TypeLookup typeLookup;
-	private ListenerList disposeListeners = new ListenerList();
 
 	@SuppressWarnings("rawtypes")
 	private ValueListener elementStateNotifier = new ValueListener() {
@@ -190,18 +189,6 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 	@Override
 	public ImmutableSet<BootDashElement> getCurrentChildren() {
 		return getChildren().getValue();
-	}
-
-	@Override
-	public void onDispose(DisposeListener listener) {
-		this.disposeListeners.add(listener);
-	}
-
-	@Override
-	public void dispose() {
-		for (Object l : disposeListeners.getListeners()) {
-			((DisposeListener)l).disposed(this);
-		}
 	}
 
 	@Override

@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshHost;
 import org.springframework.ide.eclipse.boot.dash.util.LogSink;
 import org.springframework.ide.eclipse.boot.launch.util.PortFinder;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import net.schmizz.keepalive.KeepAlive;
@@ -41,11 +42,16 @@ import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
  */
 public class SshTunnel implements Closeable {
 
+	private boolean closeRequested = false;
 	private int localPort;
 	private SSHClient ssh;
 	private LocalPortForwarder portForwarder;
 
 	public SshTunnel(SshHost sshHost, String user, String oneTimeCode, int remotePort, LogSink log) throws Exception {
+		this(sshHost, user, oneTimeCode, remotePort, log, 0);
+	}
+
+	public SshTunnel(SshHost sshHost, String user, String oneTimeCode, int remotePort, LogSink log, int _localPort) throws Exception {
 		DefaultConfig config = new DefaultConfig();
 		config.setKeepAliveProvider(KeepAliveProvider.KEEP_ALIVE); // Hopefuly this is better at detecting dropped connections from server (e.g. when app is stopped or dies).
 		ssh = new SSHClient(config);
@@ -59,27 +65,32 @@ public class SshTunnel implements Closeable {
 		keepAlive.setMaxAliveCount(1);
 		log.log("Ssh client connected");
 
-		ServerSocket ss = new ServerSocket(0);
+		ServerSocket ss = new ServerSocket(_localPort);
 		ss.setSoTimeout(5_000);
-		localPort = PortFinder.findFreePort();
 		localPort = ss.getLocalPort();
 		Job job = new Job("SshTunnel port forwarding") {
+
 			@Override
 			protected IStatus run(IProgressMonitor arg0) {
 				final LocalPortForwarder.Parameters params = new LocalPortForwarder.Parameters("0.0.0.0", localPort, "localhost", remotePort);
 				try {
 					portForwarder = ssh.newLocalPortForwarder(params, ss);
-					boolean timeout;
+					boolean retry;
 					do {
-						timeout = false;
+						retry = false;
 						try {
 							portForwarder.listen();
-						} catch (SocketTimeoutException e) {
-							timeout = true;
+						} catch (IOException e) {
+							if (!closeRequested) {
+								if (e instanceof SocketTimeoutException) {
+									//don't log it happens all the time and is expected
+								} else {
+									log.log(ExceptionUtil.getMessage(e));
+								}
+								retry = true;
+							}
 						}
-					} while (timeout);
-				} catch (IOException e) {
-					Log.log(e);
+					} while (retry);
 				} finally {
 					try {
 						ss.close();
@@ -95,7 +106,7 @@ public class SshTunnel implements Closeable {
 	}
 
 	@Override
-	synchronized public void close() throws IOException {
+	synchronized public void close() {
 		if (portForwarder!=null) {
 			try {
 				portForwarder.close();

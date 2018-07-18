@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.JmxSupport;
 import org.springframework.ide.eclipse.boot.dash.test.actuator.ActuatorClientTest;
 import org.springframework.ide.eclipse.boot.dash.test.actuator.ActuatorDataTest;
 import org.springframework.ide.eclipse.boot.dash.test.yaml.AppNameReconcilerTest;
@@ -27,6 +28,7 @@ import org.springframework.ide.eclipse.boot.dash.test.yaml.Yaml2DeploymentProper
 	// how long it takes to run them. Faster ones at the top.
 
 	//New: (move down the chain later based on runtime)
+	JmxSupportTest.class,
 	PropertyFileStoreTest.class,
 
 	// Manifest YAML/Deployment Properties tests (less than 2 seconds per suite)

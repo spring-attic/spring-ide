@@ -26,7 +26,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.core.Configuration;
 
 import org.apache.http.conn.ssl.SSLContextBuilder;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
@@ -54,6 +53,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationOperation;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.JmxSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.RemoteDevClientStartOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.SetHealthCheckOperation;
@@ -96,6 +96,7 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 
 	static final private String DEPLOYMENT_MANIFEST_FILE_PATH = "deploymentManifestFilePath"; //$NON-NLS-1$
 	private static final String PROJECT_NAME = "PROJECT_NAME";
+	private static final String CF_JMX_PORT = "CF_JMX_PORT";
 
 	private CancelationTokens cancelationTokens;
 
@@ -141,6 +142,7 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 	 * this one bit of the model state rather than refresh all the data from CF.
 	 */
 	private final LiveVariable<String> healthCheckOverride = new LiveVariable<>();
+	private JmxSupport jmxSupport;
 	{
 		appData.addListener((e, v) -> {
 			healthCheckOverride.setValue(null);
@@ -166,6 +168,7 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 		addElementNotifier(appData);
 		addElementNotifier(healthCheckOverride);
 		this.addDisposableChild(baseRunState);
+		getJmxSupport(); //Force creation of JMXSupport object
 	}
 
 	public CloudFoundryBootDashModel getCloudModel() {
@@ -329,6 +332,18 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Returns the remote jmx port that should/will be used when deploying this
+	 * app to CF (so that we can SSH tunnel to that port to attach to JMX on the remote app).
+	 */
+	public int getCfJmxPort() {
+		return getPersistentProperties().get(CF_JMX_PORT, -1);
+	}
+
+	public void setCfJmxPort(int port) throws Exception {
+		getPersistentProperties().put(CF_JMX_PORT, port>0 ? ""+port : null);
 	}
 
 	/**
@@ -731,6 +746,10 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 			// Update JAVA_OPTS env variable with Remote DevTools Client secret
 			DevtoolsUtil.setupEnvVarsForRemoteClient(properties.getEnvironmentVariables(),
 					DevtoolsUtil.getSecret(project));
+			JmxSupport jmxSupport = getJmxSupport();
+			if (jmxSupport!=null) {
+				jmxSupport.setupEnvVars(properties.getEnvironmentVariables());
+			}
 			if (debugSupport != null) {
 				if (isDebugging) {
 					debugSupport.setupEnvVars(properties.getEnvironmentVariables());
@@ -791,6 +810,13 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 	@Override
 	public EnumSet<RunState> supportedGoalStates() {
 		return CloudFoundryRunTarget.RUN_GOAL_STATES;
+	}
+
+	public synchronized JmxSupport getJmxSupport() {
+		if (jmxSupport == null && getProject()!=null) {
+			this.jmxSupport = new JmxSupport(this);
+		}
+		return jmxSupport;
 	}
 
 }
