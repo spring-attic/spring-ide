@@ -23,8 +23,10 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshHost;
+import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
 import org.springframework.ide.eclipse.boot.dash.util.LogSink;
 import org.springframework.ide.eclipse.boot.launch.util.PortFinder;
+import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
@@ -40,7 +42,7 @@ import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
  * This class is responsible for creating an ssh tunnel to a remote port. This class implements
  * Closeable, its close method must be called to close the tunnel and avoid resource leak.
  */
-public class SshTunnel implements Closeable {
+public class SshTunnel extends AbstractDisposable {
 
 	private boolean closeRequested = false;
 	private int localPort;
@@ -106,7 +108,7 @@ public class SshTunnel implements Closeable {
 	}
 
 	@Override
-	synchronized public void close() {
+	synchronized public void dispose() {
 		if (portForwarder!=null) {
 			try {
 				portForwarder.close();
@@ -121,6 +123,7 @@ public class SshTunnel implements Closeable {
 			}
 			ssh = null;
 		}
+		super.dispose();
 	}
 
 	public int getLocalPort() {

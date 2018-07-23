@@ -17,18 +17,28 @@ import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 public abstract class AbstractDisposable implements Disposable, OnDispose {
 
-	private ListenerList disposeListeners = new ListenerList();
+	private ListenerList<DisposeListener> disposeListeners = new ListenerList<>();
 
 	@Override
-	public void onDispose(DisposeListener l) {
-		this.disposeListeners.add(l);
+	public synchronized void onDispose(DisposeListener l) {
+		if (disposeListeners!=null) {
+			this.disposeListeners.add(l);
+		} else {
+			//already disposed. Call listener right away!
+			l.disposed(this);
+		}
 	}
 
 	@Override
 	public void dispose() {
-		if (disposeListeners!=null) {
-			for (Object _l : disposeListeners.getListeners()) {
-				DisposeListener l = (DisposeListener) _l;
+		ListenerList<DisposeListener> listeners;
+		synchronized (this) {
+			listeners = disposeListeners;
+			disposeListeners = null;
+		}
+		if (listeners!=null) {
+			for (Object _l : listeners.getListeners()) {
+				DisposeListener l = (DisposeListener)_l;
 				l.disposed(this);
 			}
 		}

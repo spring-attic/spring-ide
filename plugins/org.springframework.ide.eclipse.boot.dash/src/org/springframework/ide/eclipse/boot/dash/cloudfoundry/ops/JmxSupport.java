@@ -16,18 +16,21 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElemen
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshClientSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshHost;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnel;
-import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
+import org.springframework.ide.eclipse.boot.dash.util.JmxSshTunnelManager;
 import org.springframework.ide.eclipse.boot.launch.util.PortFinder;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 /**
  * Helper class providing functionality to connect to JMX on a remote spring boot app
  * running on CF, using ssh tunneling.
+ * <p>
+ * The main responsiblity of this class is to manage tunnel life-cycle based on the
+ * app's state. (I.e. ensure tunnel is created when app started and tunnel is closed
+ * when app stopped or deleted).
  *
  * @author Kris De Volder
  */
@@ -53,8 +56,11 @@ public class JmxSupport {
 	private SshTunnel sshTunnel;
 	private boolean disposed;
 
-	public JmxSupport(CloudAppDashElement cde) {
+	private JmxSshTunnelManager tunnels;
+
+	public JmxSupport(CloudAppDashElement cde, JmxSshTunnelManager tunnels) {
 		this.app = cde;
+		this.tunnels = tunnels;
 		this.tunnelPort = new AsyncLiveExpression<Integer>(null, "Update SSH JMX Tunnel for "+app.getName()) {
 			{
 				dependsOn(app.getBaseRunStateExp());
@@ -151,11 +157,10 @@ public class JmxSupport {
 				//2: create tunnel
 				app.log("Creating JMX SSH tunnel...");
 				SshTunnel sshTunnel = new SshTunnel(sshHost, sshUser, sshCode, remotePort, app, remotePort);
-				String jmxUrl = "service:jmx:rmi://localhost:"+remotePort+"/jndi/rmi://localhost:"+remotePort+"/jmxrmi";
+				String jmxUrl = getJmxUrl(remotePort);
 				app.log("JMX SSH tunnel URL = "+jmxUrl);
+				tunnels.add(sshTunnel);
 				return sshTunnel;
-				//TODO: configure language server with URL.
-
 			} catch (Exception e) {
 				app.setError(e);
 				app.log(ExceptionUtil.getMessage(e));
@@ -163,5 +168,9 @@ public class JmxSupport {
 			}
 		}
 		return null;
+	}
+
+	public static String getJmxUrl(int port) {
+		return "service:jmx:rmi://localhost:"+port+"/jndi/rmi://localhost:"+port+"/jmxrmi";
 	}
 }

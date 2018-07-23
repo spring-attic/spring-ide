@@ -271,7 +271,7 @@ public class SshDebugLaunchConfigurationDelegate extends AbstractBootLaunchConfi
 					private void handleTermination(ProcessTracker tracker, ILaunch targetLaunch) {
 						if (launch.equals(targetLaunch)) {
 							tracker.dispose();
-							IOUtil.close(tunnel);
+							tunnel.dispose();
 						}
 					}
 				});

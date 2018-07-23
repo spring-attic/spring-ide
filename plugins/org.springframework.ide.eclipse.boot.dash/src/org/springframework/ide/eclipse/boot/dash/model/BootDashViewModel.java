@@ -22,6 +22,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshDebugSupport;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springframework.ide.eclipse.boot.dash.util.JmxSshTunnelManager;
 import org.springframework.ide.eclipse.boot.dash.util.TreeAwareFilter;
 import org.springframework.ide.eclipse.boot.util.ProcessTracker;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
@@ -32,12 +33,14 @@ import org.springsource.ide.eclipse.commons.livexp.util.Filters;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnel;
 
 /**
  * @author Kris De Volder
  */
 public class BootDashViewModel extends AbstractDisposable {
 
+	private JmxSshTunnelManager jmxSshTunnels = new JmxSshTunnelManager();
 	private LiveSetVariable<RunTarget> runTargets;
 	private BootDashModelManager models;
 	private Set<RunTargetType> runTargetTypes;
@@ -184,6 +187,10 @@ public class BootDashViewModel extends AbstractDisposable {
 
 	public BootDashModelContext getContext() {
 		return context;
+	}
+
+	public JmxSshTunnelManager getJmxSshTunnelManager() {
+		return jmxSshTunnels;
 	}
 
 }

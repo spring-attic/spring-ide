@@ -10,15 +10,18 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.net.proxy.IProxyService;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.BootDashBuildpackHintProvider;
@@ -39,6 +42,7 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetT
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestEditorActivator;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
 import com.google.common.collect.ImmutableSet;
@@ -175,13 +179,36 @@ public class BootDashActivator extends AbstractUIPlugin {
 					// On target changes, add the client listener in each target so that when the client changes, a notification is sent
 					addClientChangeListeners(value);
 				}
-
 			});
 
 //			DebugSelectionListener debugSelectionListener = new DebugSelectionListener(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService());
 //			model.addDisposableChild(debugSelectionListener);
+
+			model.getJmxSshTunnelManager().getUrls().addListener((exp, v) -> {
+//				System.out.println(">>>>> jmx urls ===");
+//				for (String url : exp.getValue()) {
+//					System.out.println(url);
+//				}
+//				System.out.println("<<<<< jmx urls ===");
+				sendRemoteBootAppUrls(exp.getValue());
+			});
 		}
 		return model;
+	}
+
+	private void sendRemoteBootAppUrls(ImmutableSet<String> newUrls) {
+		try {
+			Bundle lsBundle = Platform.getBundle("org.springframework.tooling.boot.ls");
+			if (lsBundle != null && lsBundle.getState() != Bundle.INSTALLED) {
+				Class<?> lsClass = lsBundle.loadClass("org.springframework.tooling.boot.ls.BootLanguageServerPlugin");
+				Method lsMethod = lsClass.getMethod("getRemoteBootApps");
+				@SuppressWarnings("unchecked")
+				LiveSetVariable<String> remoteBootAppsVar = (LiveSetVariable<String>) lsMethod.invoke(null);
+				remoteBootAppsVar.replaceAll(newUrls);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void updateCloudTargetsInManifestEditor(ImmutableSet<RunTarget> value) {

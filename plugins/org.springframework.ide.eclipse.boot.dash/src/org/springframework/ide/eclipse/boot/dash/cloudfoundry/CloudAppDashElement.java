@@ -814,7 +814,7 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 
 	public synchronized JmxSupport getJmxSupport() {
 		if (jmxSupport == null && getProject()!=null) {
-			this.jmxSupport = new JmxSupport(this);
+			this.jmxSupport = new JmxSupport(this, getViewModel().getJmxSshTunnelManager());
 		}
 		return jmxSupport;
 	}
