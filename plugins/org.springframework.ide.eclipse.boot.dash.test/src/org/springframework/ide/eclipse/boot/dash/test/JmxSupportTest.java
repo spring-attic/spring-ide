@@ -19,15 +19,17 @@ import org.junit.Test;
 import static org.mockito.Mockito.*;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.JmxSupport;
+import org.springframework.ide.eclipse.boot.dash.util.JmxSshTunnelManager;
 
 public class JmxSupportTest {
 
 	CloudAppDashElement cde = mock(CloudAppDashElement.class);
+	JmxSshTunnelManager tunnels = new JmxSshTunnelManager();
 
 	@Test
 	public void setupEnvVars() throws Exception {
 		when(cde.getCfJmxPort()).thenReturn(1234);
-		JmxSupport jmx = new JmxSupport(cde);
+		JmxSupport jmx = new JmxSupport(cde, tunnels);
 
 		Map<String, String> env = new HashMap<>();
 		jmx.setupEnvVars(env);
@@ -55,7 +57,7 @@ public class JmxSupportTest {
 	@Test
 	public void setupEnvVars_preserve_unrelated_java_opts() throws Exception {
 		when(cde.getCfJmxPort()).thenReturn(1234);
-		JmxSupport jmx = new JmxSupport(cde);
+		JmxSupport jmx = new JmxSupport(cde, tunnels);
 
 		Map<String, String> env = new HashMap<>();
 		env.put("JAVA_OPTS", "-Dsomething.already=here");
