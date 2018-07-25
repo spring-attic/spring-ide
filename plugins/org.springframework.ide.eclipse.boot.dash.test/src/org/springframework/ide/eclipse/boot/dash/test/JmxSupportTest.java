@@ -19,7 +19,10 @@ import org.junit.Test;
 import static org.mockito.Mockito.*;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.JmxSupport;
+import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.util.JmxSshTunnelManager;
+import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 public class JmxSupportTest {
 
@@ -28,8 +31,11 @@ public class JmxSupportTest {
 
 	@Test
 	public void setupEnvVars() throws Exception {
-		when(cde.getCfJmxPort()).thenReturn(1234);
-		JmxSupport jmx = new JmxSupport(cde, tunnels);
+		int testPort = 1234;
+		when(cde.getBaseRunStateExp()).thenReturn(LiveExpression.constant(RunState.INACTIVE));
+		JmxSupport jmx = new JmxSupport(cde, tunnels) {
+			public int getPort() {return testPort; }
+		};
 
 		Map<String, String> env = new HashMap<>();
 		jmx.setupEnvVars(env);
@@ -56,8 +62,11 @@ public class JmxSupportTest {
 
 	@Test
 	public void setupEnvVars_preserve_unrelated_java_opts() throws Exception {
-		when(cde.getCfJmxPort()).thenReturn(1234);
-		JmxSupport jmx = new JmxSupport(cde, tunnels);
+		int testPort = 1234;
+		when(cde.getBaseRunStateExp()).thenReturn(LiveExpression.constant(RunState.INACTIVE));
+		JmxSupport jmx = new JmxSupport(cde, tunnels) {
+			public int getPort() {return testPort; }
+		};
 
 		Map<String, String> env = new HashMap<>();
 		env.put("JAVA_OPTS", "-Dsomething.already=here");
