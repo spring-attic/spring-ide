@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.boot.dash.test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.JmxSupport;
 import org.springframework.ide.eclipse.boot.dash.test.actuator.ActuatorClientTest;
 import org.springframework.ide.eclipse.boot.dash.test.actuator.ActuatorDataTest;
 import org.springframework.ide.eclipse.boot.dash.test.yaml.AppNameReconcilerTest;

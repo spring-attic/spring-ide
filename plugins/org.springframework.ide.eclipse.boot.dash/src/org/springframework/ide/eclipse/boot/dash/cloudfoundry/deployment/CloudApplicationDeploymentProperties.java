@@ -23,7 +23,6 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudData;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
@@ -32,6 +31,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFRoute;
 
 public class CloudApplicationDeploymentProperties implements DeploymentProperties {
 
+	private boolean enableJmxSshTunnel;
 	private List<String> boundServices;
 	private Map<String, String> environmentVariables;
 	private String buildpack;
@@ -44,6 +44,14 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 	private LinkedHashSet<String> urls;
 
 	private String appName;
+
+	public boolean getEnableJmxSshTunnel() {
+		return enableJmxSshTunnel;
+	}
+
+	public void setEnableJmxSshTunnel(boolean enableJmxSshTunnel) {
+		this.enableJmxSshTunnel = enableJmxSshTunnel;
+	}
 
 	private IProject project;
 

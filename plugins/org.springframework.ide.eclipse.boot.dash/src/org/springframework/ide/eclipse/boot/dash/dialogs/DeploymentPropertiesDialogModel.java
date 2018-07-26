@@ -671,6 +671,7 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 
 	final public LiveVariable<ManifestType> type = new LiveVariable<>();
+	final public LiveVariable<Boolean> enableJmxSshTunnel = new LiveVariable<>();
 
 	final private CFApplication deployedApp;
 
@@ -724,14 +725,21 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 		if (type.getValue() == null) {
 			return null;
 		}
+		CloudApplicationDeploymentProperties props = null;
 		switch (type.getValue()) {
 		case FILE:
-			return fileModel.getDeploymentProperties();
+			props = fileModel.getDeploymentProperties();
+			break;
 		case MANUAL:
-			return manualModel.getDeploymentProperties();
+			props = manualModel.getDeploymentProperties();
+			break;
 		default:
-			return null;
 		}
+		if (props!=null) {
+			Boolean enableJmx = enableJmxSshTunnel.getValue();
+			props.setEnableJmxSshTunnel(enableJmx!=null && enableJmx);
+		}
+		return props;
 	}
 
 	public void cancelPressed() {

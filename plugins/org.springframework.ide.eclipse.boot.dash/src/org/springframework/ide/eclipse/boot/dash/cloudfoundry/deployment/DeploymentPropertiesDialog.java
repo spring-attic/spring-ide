@@ -92,6 +92,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
+import org.springsource.ide.eclipse.commons.livexp.ui.util.SwtConnect;
 
 /**
  * Cloud Foundry Application deployment properties dialog. Allows user to select
@@ -222,6 +223,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 	};
 
 	final private DeploymentPropertiesDialogModel model;
+	private Button buttonEnableJmx;
 
 	public DeploymentPropertiesDialog(Shell parentShell, DeploymentPropertiesDialogModel model) {
 		super(parentShell);
@@ -245,6 +247,8 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		createResizeSash(composite);
 
 		createYamlContentsGroup(composite);
+
+		createJmxSshOptionsGroup(composite);
 
 		activateHanlders();
 
@@ -304,6 +308,19 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 			workspaceViewer.setSelection(workspaceViewer.getSelection(), true);
 		}
 		return container;
+	}
+
+	private void createJmxSshOptionsGroup(Composite composite) {
+		Group group = new Group(composite, SWT.NONE);
+		group.setText("JMX Ssh Tunnel");
+		group.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
+		group.setLayout(new GridLayout(2, true));
+
+		buttonEnableJmx = new Button(group, SWT.CHECK);
+		buttonEnableJmx.setText("Enable");
+		buttonEnableJmx.setToolTipText("Activate JMX on the deployed app and create an SSH tunnel to it so it can be accessed locally.");
+
+		SwtConnect.checkbox(buttonEnableJmx, model.enableJmxSshTunnel);
 	}
 
 	private void createModeSwitchGroup(Composite composite) {

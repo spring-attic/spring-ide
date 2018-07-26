@@ -29,7 +29,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicati
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel.Result;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -156,6 +155,7 @@ public class ProjectsDeployer extends CloudOperation {
 				cde.setProject(project);
 				copyTags(project, cde);
 				cde.print("Pushing project '"+project.getName()+"'");
+				cde.setEnableJmxSshTunnel(pushPropertiesToUse.getValue().getEnableJmxSshTunnel());
 				JmxSupport jmxSupport = cde.getJmxSupport();
 				try (CFPushArguments args = pushPropertiesToUse.getValue().toPushArguments(model.getCloudDomains(monitor))) {
 					if (jmxSupport!=null) jmxSupport.setupEnvVars(args.getEnv());

@@ -97,6 +97,7 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 	static final private String DEPLOYMENT_MANIFEST_FILE_PATH = "deploymentManifestFilePath"; //$NON-NLS-1$
 	private static final String PROJECT_NAME = "PROJECT_NAME";
 	private static final String CF_JMX_PORT = "CF_JMX_PORT";
+	private static final String CF_JMX_ENABLED = "CF_JMX_ENABLED";
 
 	private CancelationTokens cancelationTokens;
 
@@ -168,7 +169,6 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 		addElementNotifier(appData);
 		addElementNotifier(healthCheckOverride);
 		this.addDisposableChild(baseRunState);
-		getJmxSupport(); //Force creation of JMXSupport object
 	}
 
 	public CloudFoundryBootDashModel getCloudModel() {
@@ -345,6 +345,15 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 	public void setCfJmxPort(int port) throws Exception {
 		getPersistentProperties().put(CF_JMX_PORT, port>0 ? ""+port : null);
 	}
+
+	public boolean getEnableJmxSshTunnel() {
+		return getPersistentProperties().get(CF_JMX_ENABLED, false);
+	}
+
+	public void setEnableJmxSshTunnel(boolean enable) throws Exception {
+		getPersistentProperties().put(CF_JMX_ENABLED, enable);
+	}
+
 
 	/**
 	 * Returns the project associated with this element or null. The project returned is
@@ -813,7 +822,7 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 	}
 
 	public synchronized JmxSupport getJmxSupport() {
-		if (jmxSupport == null && getProject()!=null) {
+		if (jmxSupport == null && getProject()!=null && getEnableJmxSshTunnel()) {
 			this.jmxSupport = new JmxSupport(this, getViewModel().getJmxSshTunnelManager());
 		}
 		return jmxSupport;
