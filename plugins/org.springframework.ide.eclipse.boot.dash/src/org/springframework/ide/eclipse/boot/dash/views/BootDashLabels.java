@@ -369,6 +369,17 @@ public class BootDashLabels implements Disposable {
 				} else {
 					styledLabel = new StyledString();
 				}
+				break;
+			case JMX_SSH_TUNNEL:
+				if (element instanceof CloudAppDashElement) {
+					CloudAppDashElement cfApp = (CloudAppDashElement) element;
+					if (cfApp.getEnableJmxSshTunnel()) {
+						styledLabel = new StyledString("jmx", stylers.darkGreen());
+					}
+				} else {
+					styledLabel = new StyledString();
+				}
+				break;
 			case RUN_STATE_ICN:
 				label = element.getRunState().toString();
 				break;
