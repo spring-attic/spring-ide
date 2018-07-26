@@ -823,7 +823,7 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 
 	public synchronized JmxSupport getJmxSupport() {
 		if (jmxSupport == null && getProject()!=null && getEnableJmxSshTunnel()) {
-			this.jmxSupport = new JmxSupport(this, getViewModel().getJmxSshTunnelManager());
+			this.jmxSupport = new JmxSupport(this, getViewModel().getJmxSshTunnelManager(), getViewModel().getSshTunnelFactory());
 		}
 		return jmxSupport;
 	}

@@ -105,7 +105,7 @@ public class SshDebugLaunchConfigurationDelegate extends AbstractBootLaunchConfi
 
 				//2: create tunnel
 				app.log("Creating tunnel...");
-				SshTunnel tunnel = new SshTunnel(sshHost, sshUser, sshCode, remotePort, app);
+				SshTunnel tunnel = new SshTunnelImpl(sshHost, sshUser, sshCode, remotePort, app); //TODO: use SshTunnelFactory?
 
 				//3: connect debugger stuff
 				app.log("Launching remote debug connector...");

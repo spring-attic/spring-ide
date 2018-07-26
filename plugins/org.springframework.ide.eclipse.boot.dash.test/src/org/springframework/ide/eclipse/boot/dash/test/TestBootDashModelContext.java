@@ -22,12 +22,14 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnelFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockSecuredCredentialStore;
+import org.springframework.ide.eclipse.boot.dash.test.mocks.MockSshTunnel;
 import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
 import org.springframework.ide.eclipse.boot.pstore.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.pstore.InMemoryPropertyStore;
@@ -51,6 +53,7 @@ public class TestBootDashModelContext implements BootDashModelContext {
 	private IPropertyStore installProperties = new InMemoryPropertyStore();
 	private BootInstallManager bootInstalls;
 	private UserInteractions ui;
+	private SshTunnelFactory sshTunnelFactory = MockSshTunnel::new;
 
 	public TestBootDashModelContext(IWorkspace workspace, ILaunchManager launchMamager, UserInteractions ui) {
 		Assert.isNotNull(ui);
@@ -136,6 +139,11 @@ public class TestBootDashModelContext implements BootDashModelContext {
 	@Override
 	public UserInteractions getUi() {
 		return ui;
+	}
+
+	@Override
+	public SshTunnelFactory getSshTunnelFactory() {
+		return sshTunnelFactory;
 	}
 
 }

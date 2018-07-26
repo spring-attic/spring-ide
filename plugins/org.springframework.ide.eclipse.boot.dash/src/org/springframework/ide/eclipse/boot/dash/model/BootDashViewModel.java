@@ -34,6 +34,7 @@ import org.springsource.ide.eclipse.commons.livexp.util.Filters;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnelFactory;
 
 /**
  * @author Kris De Volder
@@ -191,6 +192,10 @@ public class BootDashViewModel extends AbstractDisposable {
 
 	public JmxSshTunnelManager getJmxSshTunnelManager() {
 		return jmxSshTunnels;
+	}
+
+	public SshTunnelFactory getSshTunnelFactory() {
+		return context.getSshTunnelFactory();
 	}
 
 }

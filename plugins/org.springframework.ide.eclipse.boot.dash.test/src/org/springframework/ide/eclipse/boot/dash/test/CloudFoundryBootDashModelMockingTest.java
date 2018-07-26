@@ -91,6 +91,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.HealthCheck
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFDomainStatus;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ReactorUtils;
 import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel.ManifestType;
+import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel;
@@ -106,12 +107,14 @@ import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.DeploymentAnswerer;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCFApplication;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCFSpace;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.RunStateHistory;
 import org.springframework.ide.eclipse.boot.dash.test.util.ZipDiff;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
+import org.springframework.ide.eclipse.boot.dash.util.JmxSshTunnelManager;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.CustmomizeTargetLabelAction;
 import org.springframework.ide.eclipse.boot.dash.views.CustomizeTargetLabelDialogModel;
@@ -873,6 +876,76 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertEquals(ImmutableList.of("tcp.domain.com:63000"), uris);
 
 		doUnchangedAppRestartTest(app, deployedApp);
+	}
+
+	@Test public void deploy_app_with_jmx_ssh_tunnel_enabled() throws Exception {
+		String appName = "tunneled-jmx-app";
+		String apiUrl = "http://api.some-cloud.com";
+		String username = "freddy"; String password = MockCloudFoundryClientFactory.FAKE_PASSWORD;
+
+		MockCFSpace space = clientFactory.defSpace("my-org", "my-space");
+		clientFactory.defDomain("tcp.domain.com", CFDomainType.TCP, CFDomainStatus.SHARED);
+
+		CloudFoundryBootDashModel target = harness.createCfTarget(new CFClientParams(apiUrl, username,
+				CFCredentials.fromPassword(password), false, "my-org", "my-space", false));
+		IProject project = projects.createBootProject("to-deploy", withStarters("web", "actuator"));
+		IFile manifest = createFile(project, "manifest.yml",
+				"applications:\n" +
+				"- name: "+appName+"\n"
+		);
+		harness.answerDeploymentPrompt(ui, new DeploymentAnswerer() {
+			@Override
+			public void apply(DeploymentPropertiesDialogModel dialog) throws Exception {
+				dialog.enableJmxSshTunnel.setValue(true);
+				dialog.type.setValue(ManifestType.FILE);
+				dialog.setSelectedManifest(manifest);
+				dialog.okPressed();
+			}
+		});
+		target.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		waitForApps(target, appName);
+		CloudAppDashElement app = getApplication(target, project);
+		waitForState(app, RunState.RUNNING, 10_000);
+
+		assertTrue(app.getEnableJmxSshTunnel());
+		int jmxPort = app.getCfJmxPort();
+		JmxSshTunnelManager tunnels = harness.getJmxSshTunnelManager();
+		ACondition.waitFor("sshtunnel creation", 2_000, () -> {
+			assertEquals(ImmutableSet.of("service:jmx:rmi://localhost:"+jmxPort+"/jndi/rmi://localhost:"+jmxPort+"/jmxrmi"), tunnels.getUrls().getValues());
+		});
+
+		ACondition.waitFor("stop hammering", 20000, () -> {
+			app.stopAsync(ui);
+			assertEquals(RunState.INACTIVE, app.getRunState());
+		});
+		ACondition.waitFor("tunnel closed", 2_000, () -> {
+			assertEquals(ImmutableSet.of(), tunnels.getUrls().getValues());
+		});
+	}
+
+	@Test public void deploy_app_with_jmx_ssh_tunnel_disabled() throws Exception {
+		String appName = "tunneled-jmx-app";
+		String apiUrl = "http://api.some-cloud.com";
+		String username = "freddy"; String password = MockCloudFoundryClientFactory.FAKE_PASSWORD;
+
+		MockCFSpace space = clientFactory.defSpace("my-org", "my-space");
+		clientFactory.defDomain("tcp.domain.com", CFDomainType.TCP, CFDomainStatus.SHARED);
+
+		CloudFoundryBootDashModel target = harness.createCfTarget(new CFClientParams(apiUrl, username,
+				CFCredentials.fromPassword(password), false, "my-org", "my-space", false));
+		IProject project = projects.createBootProject("to-deploy", withStarters("web", "actuator"));
+		IFile manifest = createFile(project, "manifest.yml",
+				"applications:\n" +
+				"- name: "+appName+"\n"
+		);
+		harness.answerDeploymentPrompt(ui, manifest); //Note: don't need to disable explictly because its the default.
+		target.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		waitForApps(target, appName);
+		CloudAppDashElement app = getApplication(target, project);
+		waitForState(app, RunState.RUNNING, 10_000);
+
+		assertFalse(app.getEnableJmxSshTunnel());
+		assertEquals(-1, app.getCfJmxPort());
 	}
 
 	@Test public void pushTcpRouteWithFixedPort() throws Exception {

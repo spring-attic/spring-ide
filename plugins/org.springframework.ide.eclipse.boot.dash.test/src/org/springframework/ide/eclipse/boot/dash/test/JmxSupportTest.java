@@ -11,29 +11,32 @@
 package org.springframework.ide.eclipse.boot.dash.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
-import static org.mockito.Mockito.*;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnelFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.JmxSupport;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
+import org.springframework.ide.eclipse.boot.dash.test.mocks.MockSshTunnel;
 import org.springframework.ide.eclipse.boot.dash.util.JmxSshTunnelManager;
-import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 public class JmxSupportTest {
 
 	CloudAppDashElement cde = mock(CloudAppDashElement.class);
 	JmxSshTunnelManager tunnels = new JmxSshTunnelManager();
+	SshTunnelFactory tunnelFactory = MockSshTunnel::new;
 
 	@Test
 	public void setupEnvVars() throws Exception {
 		int testPort = 1234;
 		when(cde.getBaseRunStateExp()).thenReturn(LiveExpression.constant(RunState.INACTIVE));
-		JmxSupport jmx = new JmxSupport(cde, tunnels) {
+		JmxSupport jmx = new JmxSupport(cde, tunnels, tunnelFactory) {
 			public int getPort() {return testPort; }
 		};
 
@@ -64,7 +67,7 @@ public class JmxSupportTest {
 	public void setupEnvVars_preserve_unrelated_java_opts() throws Exception {
 		int testPort = 1234;
 		when(cde.getBaseRunStateExp()).thenReturn(LiveExpression.constant(RunState.INACTIVE));
-		JmxSupport jmx = new JmxSupport(cde, tunnels) {
+		JmxSupport jmx = new JmxSupport(cde, tunnels, tunnelFactory) {
 			public int getPort() {return testPort; }
 		};
 

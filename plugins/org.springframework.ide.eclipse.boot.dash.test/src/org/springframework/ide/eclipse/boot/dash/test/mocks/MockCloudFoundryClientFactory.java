@@ -41,6 +41,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshClientSupport;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshHost;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFCloudDomainData;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFDomainStatus;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
@@ -55,6 +56,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
+import junit.framework.Assert;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -184,6 +186,36 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
 	private class MockClient implements ClientRequests {
 
+		private class MockSshClientSupport implements SshClientSupport {
+
+			@Override
+			public SshHost getSshHost() throws Exception {
+				return new SshHost("ssh.host.somewhere", 2222, "some-ssh-fingerprint");
+			}
+
+			@Override
+			public String getSshUser(String appName, int instance) throws Exception {
+				MockCFApplication app = getSpace().getApplication(appName);
+				if (app==null) {
+					throw new IOException("App not found");
+				}
+				UUID guid = app.getGuid();
+				Assert.assertNotNull(guid);
+				return getSshUser(guid, instance);
+			}
+
+			@Override
+			public String getSshCode() throws Exception {
+				return "an-ssh-code";
+			}
+
+			@Override
+			public String getSshUser(UUID appGuid, int instance) throws Exception {
+				return appGuid+"/"+instance;
+			}
+
+		}
+
 		private int nextPort = 63000;
 		private synchronized int choosePort() {
 			return nextPort++;
@@ -259,8 +291,7 @@ public class MockCloudFoundryClientFactory extends CloudFoundryClientFactory {
 
 		@Override
 		public SshClientSupport getSshClientSupport() throws Exception {
-			notImplementedStub();
-			return null;
+			return new MockSshClientSupport();
 		}
 
 		@SuppressWarnings("unchecked")

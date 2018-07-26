@@ -24,6 +24,8 @@ import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnelFactory;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnelImpl;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions;
@@ -59,6 +61,8 @@ public class DefaultBootDashModelContext implements BootDashModelContext {
 		}
 		return null;
 	});
+
+	private SshTunnelFactory sshTunnelFactory = SshTunnelImpl::new;
 
 	@Override
 	public IWorkspace getWorkspace() {
@@ -118,6 +122,11 @@ public class DefaultBootDashModelContext implements BootDashModelContext {
 	@Override
 	public UserInteractions getUi() {
 		return ui;
+	}
+
+	@Override
+	public SshTunnelFactory getSshTunnelFactory() {
+		return sshTunnelFactory;
 	}
 
 }

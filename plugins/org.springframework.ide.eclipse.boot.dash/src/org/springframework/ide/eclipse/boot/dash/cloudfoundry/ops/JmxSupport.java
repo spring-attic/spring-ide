@@ -16,6 +16,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElemen
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshClientSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshHost;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnelFactory;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.util.JmxSshTunnelManager;
 import org.springframework.ide.eclipse.boot.launch.util.PortFinder;
@@ -57,8 +58,10 @@ public class JmxSupport {
 	private boolean disposed;
 
 	private JmxSshTunnelManager tunnels;
+	private SshTunnelFactory tunnelFactory;
 
-	public JmxSupport(CloudAppDashElement cde, JmxSshTunnelManager tunnels) {
+	public JmxSupport(CloudAppDashElement cde, JmxSshTunnelManager tunnels, SshTunnelFactory tunnelFactory) {
+		this.tunnelFactory = tunnelFactory;
 		this.app = cde;
 		this.tunnels = tunnels;
 		this.tunnelPort = new AsyncLiveExpression<Integer>(null, "Update SSH JMX Tunnel for "+app.getName()) {
@@ -156,7 +159,7 @@ public class JmxSupport {
 
 				//2: create tunnel
 				app.log("Creating JMX SSH tunnel...");
-				SshTunnel sshTunnel = new SshTunnel(sshHost, sshUser, sshCode, remotePort, app, remotePort);
+				SshTunnel sshTunnel = tunnelFactory.create(sshHost, sshUser, sshCode, remotePort, app, remotePort);
 				String jmxUrl = getJmxUrl(remotePort);
 				app.log("JMX SSH tunnel URL = "+jmxUrl);
 				tunnels.add(sshTunnel);

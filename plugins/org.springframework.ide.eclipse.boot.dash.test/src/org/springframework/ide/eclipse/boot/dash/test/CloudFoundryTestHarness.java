@@ -50,6 +50,7 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockRunnableContext;
+import org.springframework.ide.eclipse.boot.dash.util.JmxSshTunnelManager;
 import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.Asserter1;
@@ -376,6 +377,10 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 
 	public IPropertyStore getPrivateStore() {
 		return context.getPrivatePropertyStore();
+	}
+
+	public JmxSshTunnelManager getJmxSshTunnelManager() {
+		return model.getJmxSshTunnelManager();
 	}
 
 }
