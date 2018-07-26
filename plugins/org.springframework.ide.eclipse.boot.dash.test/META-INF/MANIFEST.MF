@@ -18,8 +18,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.springframework.ide.eclipse.boot.launch,
  org.eclipse.jdt.launching,
  org.eclipse.debug.ui,
- org.mockito,
- org.hamcrest.library,
+ org.mockito;bundle-version="[1.9.5,1.9.6)",
  org.springframework.ide.eclipse.boot,
  org.eclipse.core.expressions,
  org.springframework.ide.eclipse.boot.test,
@@ -33,7 +32,8 @@ Require-Bundle: org.eclipse.core.runtime,
  io.projectreactor.reactor-core;bundle-version="[3.1.5,3.1.6)",
  org.apache.commons.lang,
  javax.ws.rs;bundle-version="2.0.1",
- org.eclipse.osgi
+ org.eclipse.osgi,
+ org.hamcrest;bundle-version="[1.1.0,1.2.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.jface.resource

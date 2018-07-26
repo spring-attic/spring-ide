@@ -15,7 +15,6 @@ Require-Bundle: org.eclipse.ui,
  org.springsource.ide.eclipse.commons.core,
  org.springsource.ide.eclipse.commons.tests.util,
  org.springframework.ide.eclipse.core,
- org.hamcrest.library,
  org.eclipse.ui.ide,
  org.eclipse.debug.core,
  org.eclipse.jdt.launching,
@@ -25,14 +24,14 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.m2e.core.ui,
  org.eclipse.wst.sse.core,
  org.eclipse.wst.xml.core,
- org.mockito;bundle-version="[1.9.5,2.0.0)",
- org.hamcrest.library,
+ org.mockito;bundle-version="[1.9.5,1.9.6)",
  org.springframework.ide.eclipse.boot.wizard;bundle-version="3.8.2",
  org.glassfish.jersey.bundles.repackaged.jersey-guava;bundle-version="2.22.1",
  org.glassfish.jersey.core.jersey-client;bundle-version="2.22.1",
  org.glassfish.jersey.core.jersey-common;bundle-version="2.22.1",
  org.springframework.ide.eclipse.boot.validation,
- org.springframework.ide.eclipse.boot.launch
+ org.springframework.ide.eclipse.boot.launch,
+ org.hamcrest;bundle-version="[1.1.0,1.2.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: Pivotal Inc.
