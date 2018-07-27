@@ -16,9 +16,11 @@ import javax.inject.Provider;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Hyperlink;
@@ -34,7 +36,7 @@ import org.springsource.ide.eclipse.commons.ui.UiUtil;
 public class ReadOnlyStringPropertyControl<T extends BootDashElement> extends AbstractBdePropertyControl {
 
 	private final String label;
-	private Label value;
+	private StyledText value;
 
 	private final Class<T> type;
 	private final Function<T, String> getter;
@@ -50,7 +52,9 @@ public class ReadOnlyStringPropertyControl<T extends BootDashElement> extends Ab
 		super.createControl(composite, page);
 
 		page.getWidgetFactory().createLabel(composite, label).setLayoutData(GridDataFactory.fillDefaults().create()); //$NON-NLS-1$
-		value = page.getWidgetFactory().createLabel(composite, "Getting value...");
+		value = new StyledText(composite, SWT.READ_ONLY);
+		value.setCaret(null);
+		value.setText("Getting value...");
 		value.setLayoutData(GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.FILL).create());
 	}
 

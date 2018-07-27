@@ -828,4 +828,12 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 		return jmxSupport;
 	}
 
+	public String getJmxUrl() {
+		int port = getCfJmxPort();
+		if (port>0) {
+			return JmxSupport.getJmxUrl(port);
+		}
+		return null;
+	}
+
 }
