@@ -923,6 +923,63 @@ public class CloudFoundryBootDashModelMockingTest {
 		});
 	}
 
+	@Test public void jmx_ssh_tunnel_created_on_eclipse_restart() throws Exception {
+		String appName = "tunneled-jmx-app";
+		String apiUrl = "http://api.some-cloud.com";
+		String username = "freddy"; String password = MockCloudFoundryClientFactory.FAKE_PASSWORD;
+		IProject project = projects.createBootProject("to-deploy", withStarters("web", "actuator"));
+
+		{
+			MockCFSpace space = clientFactory.defSpace("my-org", "my-space");
+			clientFactory.defDomain("tcp.domain.com", CFDomainType.TCP, CFDomainStatus.SHARED);
+
+			CloudFoundryBootDashModel target = harness.createCfTarget(new CFClientParams(apiUrl, username,
+					CFCredentials.fromPassword(password), false, "my-org", "my-space", false));
+			IFile manifest = createFile(project, "manifest.yml",
+					"applications:\n" +
+					"- name: "+appName+"\n"
+			);
+			harness.answerDeploymentPrompt(ui, new DeploymentAnswerer() {
+				@Override
+				public void apply(DeploymentPropertiesDialogModel dialog) throws Exception {
+					dialog.enableJmxSshTunnel.setValue(true);
+					dialog.type.setValue(ManifestType.FILE);
+					dialog.setSelectedManifest(manifest);
+					dialog.okPressed();
+				}
+			});
+			target.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+			waitForApps(target, appName);
+			CloudAppDashElement app = getApplication(target, project);
+			waitForState(app, RunState.RUNNING, 10_000);
+
+			assertTrue(app.getEnableJmxSshTunnel());
+			int jmxPort = app.getCfJmxPort();
+			JmxSshTunnelManager tunnels = harness.getJmxSshTunnelManager();
+			ACondition.waitFor("sshtunnel creation", 2_000, () -> {
+				assertEquals(ImmutableSet.of("service:jmx:rmi://localhost:"+jmxPort+"/jndi/rmi://localhost:"+jmxPort+"/jmxrmi"), tunnels.getUrls().getValues());
+			});
+		}
+
+		harness.reload();
+
+		{
+			CloudFoundryBootDashModel target = harness.getCfTargetModel();
+			waitForApps(target, appName);
+			CloudAppDashElement app = getApplication(target, project);
+			waitForState(app, RunState.RUNNING, 10_000);
+
+			assertTrue(app.getEnableJmxSshTunnel());
+			int jmxPort = app.getCfJmxPort();
+			JmxSshTunnelManager tunnels = harness.getJmxSshTunnelManager();
+			ACondition.waitFor("sshtunnel creation", 2_000, () -> {
+				assertEquals(ImmutableSet.of("service:jmx:rmi://localhost:"+jmxPort+"/jndi/rmi://localhost:"+jmxPort+"/jmxrmi"), tunnels.getUrls().getValues());
+			});
+		}
+
+
+	}
+
 	@Test public void deploy_app_with_jmx_ssh_tunnel_disabled() throws Exception {
 		String appName = "tunneled-jmx-app";
 		String apiUrl = "http://api.some-cloud.com";

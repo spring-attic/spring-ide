@@ -169,6 +169,8 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 		addElementNotifier(appData);
 		addElementNotifier(healthCheckOverride);
 		this.addDisposableChild(baseRunState);
+		getJmxSupport(); //Must force creation of jmxSupport object, if applicable, otherwise it's runstate listener will not be
+				// active to start JmxSshTunnel. See bug: https://www.pivotaltracker.com/story/show/159376406
 	}
 
 	public CloudFoundryBootDashModel getCloudModel() {
