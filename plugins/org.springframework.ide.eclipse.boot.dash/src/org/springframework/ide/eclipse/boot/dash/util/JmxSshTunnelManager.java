@@ -10,9 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.util;
 
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
+import java.util.Map.Entry;
 
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.JmxSupport;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
@@ -29,27 +33,29 @@ import com.google.common.collect.ImmutableSet.Builder;
  */
 public class JmxSshTunnelManager {
 
-	private Set<SshTunnel> tunnels = new HashSet<>();
+	private Map<SshTunnel, CloudAppDashElement> tunnels = new HashMap<>();
 
-	private ObservableSet<String> jmxUrls = ObservableSet.<String>builder()
+	private ObservableSet<Pair<String,String>> jmxUrls = ObservableSet.<Pair<String,String>>builder()
 			.refresh(AsyncMode.ASYNC)
 			.compute(this::collectUrls)
 			.build();
 
-	private synchronized ImmutableSet<String> collectUrls() {
-		Builder<String> builder = ImmutableSet.builder();
-		for (SshTunnel tunnel : tunnels) {
+	private synchronized ImmutableSet<Pair<String,String>> collectUrls() {
+		Builder<Pair<String,String>> builder = ImmutableSet.builder();
+		for (Entry<SshTunnel, CloudAppDashElement> entry : tunnels.entrySet()) {
+			SshTunnel tunnel = entry.getKey();
+			CloudAppDashElement app = entry.getValue();
 			int port = tunnel.getLocalPort();
 			if (port>0) {
-				builder.add(JmxSupport.getJmxUrl(port));
+				builder.add(Pair.of(JmxSupport.getJmxUrl(port), app.getLiveHost()));
 			}
 		}
 		return builder.build();
 	}
 
-	public void add(SshTunnel sshTunnel) {
+	public void add(SshTunnel sshTunnel, CloudAppDashElement app) {
 		sshTunnel.onDispose(this::handleTunnelClosed);
-		tunnels.add(sshTunnel);
+		tunnels.put(sshTunnel, app);
 		jmxUrls.refresh();
 	}
 
@@ -58,7 +64,10 @@ public class JmxSshTunnelManager {
 		jmxUrls.refresh();
 	}
 
-	public ObservableSet<String> getUrls() {
+	/**
+	 * LiveSet of pairs containing a url (left value) + corresponding cf app's host name (rigt value) in each pair.
+	 */
+	public ObservableSet<Pair<String,String>> getUrls() {
 		return jmxUrls;
 	}
 

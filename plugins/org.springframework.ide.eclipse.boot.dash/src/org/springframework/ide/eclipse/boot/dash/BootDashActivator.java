@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.core.net.proxy.IProxyService;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -196,15 +197,15 @@ public class BootDashActivator extends AbstractUIPlugin {
 		return model;
 	}
 
-	private void sendRemoteBootAppUrls(ImmutableSet<String> newUrls) {
+	private void sendRemoteBootAppUrls(ImmutableSet<Pair<String, String>> immutableSet) {
 		try {
 			Bundle lsBundle = Platform.getBundle("org.springframework.tooling.boot.ls");
 			if (lsBundle != null && lsBundle.getState() != Bundle.INSTALLED) {
 				Class<?> lsClass = lsBundle.loadClass("org.springframework.tooling.boot.ls.BootLanguageServerPlugin");
 				Method lsMethod = lsClass.getMethod("getRemoteBootApps");
 				@SuppressWarnings("unchecked")
-				LiveSetVariable<String> remoteBootAppsVar = (LiveSetVariable<String>) lsMethod.invoke(null);
-				remoteBootAppsVar.replaceAll(newUrls);
+				LiveSetVariable<Pair<String, String>> remoteBootAppsVar = (LiveSetVariable<Pair<String,String>>) lsMethod.invoke(null);
+				remoteBootAppsVar.replaceAll(immutableSet);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

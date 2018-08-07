@@ -162,7 +162,7 @@ public class JmxSupport {
 				SshTunnel sshTunnel = tunnelFactory.create(sshHost, sshUser, sshCode, remotePort, app, remotePort);
 				String jmxUrl = getJmxUrl(remotePort);
 				app.log("JMX SSH tunnel URL = "+jmxUrl);
-				tunnels.add(sshTunnel);
+				tunnels.add(sshTunnel, app);
 				return sshTunnel;
 			} catch (Exception e) {
 				app.setError(e);
