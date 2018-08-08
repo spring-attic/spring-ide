@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2018 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,15 +46,6 @@ public abstract class CloudApplicationOperation extends CloudOperation {
 
 	public void setSchedulingRule(ISchedulingRule schedulingRule) {
 		this.schedulingRule = schedulingRule;
-	}
-
-	protected void resetAndShowConsole() {
-		try {
-			model.getElementConsoleManager().resetConsole(appName);
-			model.getElementConsoleManager().showConsole(appName);
-		} catch (Exception e) {
-			BootDashActivator.log(e);
-		}
 	}
 
 	protected void log(String message) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2017 Pivotal, Inc.
+ * Copyright (c) 2015, 2018 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -158,6 +158,15 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 		}
 	}
 
+	protected void resetAndShowConsole() {
+		try {
+			getCloudModel().getElementConsoleManager().resetConsole(getName());
+			getCloudModel().getElementConsoleManager().showConsole(getName());
+		} catch (Exception e) {
+			BootDashActivator.log(e);
+		}
+	}
+
 	public CloudAppDashElement(CloudFoundryBootDashModel model, String appName, IPropertyStore modelStore) {
 		super(model, new CloudAppIdentity(appName, model.getRunTarget()));
 		this.cancelationTokens = new CancelationTokens();
@@ -189,7 +198,6 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 	public void stop(CancelationToken cancelationToken, IProgressMonitor monitor) throws Exception {
 		checkTerminationRequested(cancelationToken, monitor);
 		getClient().stopApplication(getName());
-		getCloudModel().getElementConsoleManager().terminateConsole(getName());
 		refresh();
 	}
 
@@ -780,7 +788,7 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 	}
 
 	public void whileStarting(UserInteractions ui, CancelationToken cancelationToken, IProgressMonitor monitor, Task task) throws Exception {
-		showConsole();
+		resetAndShowConsole();
 		startOperationTracker.whileExecuting(ui, cancelationToken, monitor, task);
 		refresh();
 	}

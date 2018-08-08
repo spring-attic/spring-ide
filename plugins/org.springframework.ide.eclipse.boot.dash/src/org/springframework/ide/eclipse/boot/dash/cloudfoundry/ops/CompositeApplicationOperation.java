@@ -43,7 +43,7 @@ public class CompositeApplicationOperation extends CloudApplicationOperation {
 	public CompositeApplicationOperation(CloudApplicationOperation enclosedOp) {
 		super(enclosedOp.getName(), enclosedOp.model, enclosedOp.appName, enclosedOp.getCancelationToken());
 
-		this.operations = new ArrayList<Operation<?>>();
+		this.operations = new ArrayList<>();
 		this.operations.add(enclosedOp);
 		setSchedulingRule(enclosedOp.getSchedulingRule());
 	}
@@ -61,9 +61,6 @@ public class CompositeApplicationOperation extends CloudApplicationOperation {
 			}
 
 			// Run ops in series
-			if (resetConsole) {
-				resetAndShowConsole();
-			}
 
 			for (Operation<?> op : operations) {
 				op.run(monitor);
