@@ -71,11 +71,11 @@ import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManag
 import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
-import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 /**
  * A handle to a Cloud application. NOTE: This element should NOT hold Cloud
@@ -163,7 +163,7 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 			getCloudModel().getElementConsoleManager().resetConsole(getName());
 			getCloudModel().getElementConsoleManager().showConsole(getName());
 		} catch (Exception e) {
-			BootDashActivator.log(e);
+			Log.log(e);
 		}
 	}
 
