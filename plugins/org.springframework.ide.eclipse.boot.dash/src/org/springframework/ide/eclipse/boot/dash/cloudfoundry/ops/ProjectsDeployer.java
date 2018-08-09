@@ -119,6 +119,7 @@ public class ProjectsDeployer extends CloudOperation {
 			// we want to push the locally archived sources regardless of which other
 			// properties have changed (e.g. bound services, env vars, etc...)
 			val.setArchive(initialProperties.getArchive());
+			val.setEnableJmxSshTunnel(initialProperties.getEnableJmxSshTunnel());
 
 		});
 
