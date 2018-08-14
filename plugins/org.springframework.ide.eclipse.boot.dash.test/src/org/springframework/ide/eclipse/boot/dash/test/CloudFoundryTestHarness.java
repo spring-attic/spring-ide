@@ -14,6 +14,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -42,7 +43,6 @@ import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.StoreCredentialsMode;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
@@ -283,6 +283,7 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 	}
 
 	public void answerDeploymentPrompt(UserInteractions ui, DeploymentAnswerer answerer) throws Exception {
+		reset(ui);
 		when(ui.promptApplicationDeploymentProperties(any(DeploymentPropertiesDialogModel.class)))
 		.thenAnswer(new Answer<CloudApplicationDeploymentProperties>() {
 			@Override
