@@ -12,7 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.test;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
@@ -49,6 +49,7 @@ import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
+import org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.MultipleChoiceAnswerer;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockRunnableContext;
 import org.springframework.ide.eclipse.boot.dash.util.JmxSshTunnelManager;
 import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
@@ -63,10 +64,13 @@ import com.google.common.collect.ImmutableSet;
 public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 
 	@FunctionalInterface
+	public interface MultipleChoiceAnswerer {
+		int apply(String title, String msg, String[] choices, int defaultIndex);
+	}
+
+	@FunctionalInterface
 	public interface DeploymentAnswerer {
-
 		void apply(DeploymentPropertiesDialogModel model) throws Exception;
-
 	}
 
 	@FunctionalInterface
@@ -208,6 +212,24 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 		});
 	}
 
+	public void answerConfirmationMultipleChoice(UserInteractions ui, MultipleChoiceAnswerer answerer) {
+		doAnswer(new Answer<Integer>() {
+			@Override
+			public Integer answer(InvocationOnMock invocation) throws Throwable {
+				// int confirmOperation(String title, String message, String[] buttonLabels, int defaultButtonIndex);
+				String title = (String) invocation.getArguments()[0];
+				String msg = (String) invocation.getArguments()[1];
+				String[] choices = (String[]) invocation.getArguments()[2];
+				int defaultIndex = (int) invocation.getArguments()[3];
+				return answerer.apply(title, msg, choices, defaultIndex);
+			}
+		})
+		.when(ui)
+		.confirmOperation(any(), any(), any(), anyInt());
+	}
+
+
+
 	public void answerDeploymentPrompt(UserInteractions ui, final String appName, final String hostName, final List<String> bindServices) throws Exception {
 		//TODO: replace this method with something more 'generic' that accepts a function which is passed the deploymentProperties
 		// so that it can add additional infos to it.
@@ -283,7 +305,6 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 	}
 
 	public void answerDeploymentPrompt(UserInteractions ui, DeploymentAnswerer answerer) throws Exception {
-		reset(ui);
 		when(ui.promptApplicationDeploymentProperties(any(DeploymentPropertiesDialogModel.class)))
 		.thenAnswer(new Answer<CloudApplicationDeploymentProperties>() {
 			@Override

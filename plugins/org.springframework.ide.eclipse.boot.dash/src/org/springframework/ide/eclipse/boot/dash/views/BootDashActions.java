@@ -69,6 +69,7 @@ public class BootDashActions {
 	private RestartApplicationOnlyAction restartOnlyAction;
 	private SelectManifestAction selectManifestAction;
 	private RestartWithRemoteDevClientAction restartWithRemoteDevClientAction;
+	private EnableJmxSshTunnelAction enableJmxSshTunnel;
 	private OpenCloudAdminConsoleAction openCloudAdminConsoleAction;
 	private ReconnectCloudConsoleAction reconnectCloudConsoleAction;
 	private ToggleBootDashModelConnection toggleTargetConnectionAction;
@@ -93,6 +94,7 @@ public class BootDashActions {
 	private DisposingFactory<RunTarget, AbstractBootDashAction> runOnTargetActions;
 
 	private Map<String, IAction> defIdToActions = new HashMap<>();
+
 
 	public BootDashActions(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		this(
@@ -214,6 +216,8 @@ public class BootDashActions {
 		exposeDebugAppAction.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/rebug_disabled.png"));
 
 		restartWithRemoteDevClientAction = new RestartWithRemoteDevClientAction(defaultActionParams());
+
+		enableJmxSshTunnel = new EnableJmxSshTunnelAction(defaultActionParams());
 
 		duplicateConfigAction = new DuplicateConfigAction(defaultActionParams());
 
@@ -521,6 +525,10 @@ public class BootDashActions {
 
 	public IAction getAction(String id) {
 		return defIdToActions.get(id);
+	}
+
+	public EnableJmxSshTunnelAction getEnableJmxSshTunnel() {
+		return enableJmxSshTunnel;
 	}
 
 }

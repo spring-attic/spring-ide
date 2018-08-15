@@ -361,7 +361,11 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 	}
 
 	public void setEnableJmxSshTunnel(boolean enable) throws Exception {
+		boolean old = getEnableJmxSshTunnel();
 		getPersistentProperties().put(CF_JMX_ENABLED, enable);
+		if (old!=enable) {
+			cloudModel.notifyElementChanged(this, "JMX SSH enablement changed");
+		}
 	}
 
 

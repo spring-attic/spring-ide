@@ -63,6 +63,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -119,6 +120,7 @@ import org.springframework.ide.eclipse.boot.dash.util.JmxSshTunnelManager;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.CustmomizeTargetLabelAction;
 import org.springframework.ide.eclipse.boot.dash.views.CustomizeTargetLabelDialogModel;
+import org.springframework.ide.eclipse.boot.dash.views.EnableJmxSshTunnelAction;
 import org.springframework.ide.eclipse.boot.dash.views.UpdatePasswordAction;
 import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
@@ -880,7 +882,6 @@ public class CloudFoundryBootDashModelMockingTest {
 	}
 
 	@Test public void redeploy_app_and_enable_ssh_tunnel() throws Exception {
-		//See: https://www.pivotaltracker.com/story/show/159600918
 		String appName = "tunneled-jmx-app";
 		String apiUrl = "http://api.some-cloud.com";
 		String username = "freddy"; String password = MockCloudFoundryClientFactory.FAKE_PASSWORD;
@@ -914,7 +915,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		});
 
 		//Now... redeploy and overwrite, cahning ssh enablement
-
+		reset(ui);
 		harness.answerDeploymentPrompt(ui, new DeploymentAnswerer() {
 			@Override
 			public void apply(DeploymentPropertiesDialogModel dialog) throws Exception {
@@ -952,6 +953,156 @@ public class CloudFoundryBootDashModelMockingTest {
 		});
 	}
 
+	@Test public void enable_jmx_after_deploy_decline_restart() throws Exception {
+		//See: https://www.pivotaltracker.com/story/show/159349926
+		String appName = "tunneled-jmx-app";
+		String apiUrl = "http://api.some-cloud.com";
+		String username = "freddy"; String password = MockCloudFoundryClientFactory.FAKE_PASSWORD;
+
+		MockCFSpace space = clientFactory.defSpace("my-org", "my-space");
+		CloudFoundryBootDashModel target = harness.createCfTarget(new CFClientParams(apiUrl, username,
+				CFCredentials.fromPassword(password), false, "my-org", "my-space", false));
+		IProject project = projects.createBootProject("to-deploy", withStarters("web", "actuator"));
+		IFile manifest = createFile(project, "manifest.yml",
+				"applications:\n" +
+				"- name: "+appName+"\n"
+		);
+		harness.answerDeploymentPrompt(ui, new DeploymentAnswerer() {
+			@Override
+			public void apply(DeploymentPropertiesDialogModel dialog) throws Exception {
+				dialog.enableJmxSshTunnel.setValue(false);
+				dialog.type.setValue(ManifestType.FILE);
+				dialog.setSelectedManifest(manifest);
+				dialog.okPressed();
+			}
+		});
+		target.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		waitForApps(target, appName);
+		CloudAppDashElement app = getApplication(target, project);
+		waitForState(app, RunState.RUNNING, 10_000);
+		assertFalse(app.getEnableJmxSshTunnel());
+
+		harness.selection.setElements(app);
+		EnableJmxSshTunnelAction toggleJmx = actions.getEnableJmxSshTunnel();
+		assertTrue(toggleJmx.isEnabled());
+		assertTrue(toggleJmx.isVisible());
+		assertEquals("Enable JMX Ssh Tunnelling", toggleJmx.getText());
+
+		harness.answerConfirmationMultipleChoice(ui, (title, msg, choices, defaultIndex) -> {
+			assertEquals("Enabling JMX Requires Restart", title);
+			for (int i = 0; i < choices.length; i++) {
+				if (choices[i].startsWith("No")) {
+					return i;
+				}
+			}
+			throw new IllegalStateException("Didn't find expected choice");
+		});
+
+		toggleJmx.run();
+		assertTrue(app.getEnableJmxSshTunnel());
+
+		JmxSshTunnelManager tunnels = harness.getJmxSshTunnelManager();
+		ACondition.expectAllways("sshtunnel creation", 2_000, () -> {
+			assertTrue(tunnels.getUrls().getValues().isEmpty());
+		});
+
+		ACondition.waitFor("stop hammering", 2_000, () -> {
+			app.stopAsync(ui);
+			assertEquals(RunState.INACTIVE, app.getRunState());
+		});
+	}
+
+	@Test public void enable_and_disable_jmx_after_deploy() throws Exception {
+		//See: https://www.pivotaltracker.com/story/show/159349926
+		String appName = "tunneled-jmx-app";
+		String apiUrl = "http://api.some-cloud.com";
+		String username = "freddy"; String password = MockCloudFoundryClientFactory.FAKE_PASSWORD;
+
+		MockCFSpace space = clientFactory.defSpace("my-org", "my-space");
+		CloudFoundryBootDashModel target = harness.createCfTarget(new CFClientParams(apiUrl, username,
+				CFCredentials.fromPassword(password), false, "my-org", "my-space", false));
+		IProject project = projects.createBootProject("to-deploy", withStarters("web", "actuator"));
+		IFile manifest = createFile(project, "manifest.yml",
+				"applications:\n" +
+				"- name: "+appName+"\n"
+		);
+		harness.answerDeploymentPrompt(ui, new DeploymentAnswerer() {
+			@Override
+			public void apply(DeploymentPropertiesDialogModel dialog) throws Exception {
+				dialog.enableJmxSshTunnel.setValue(false);
+				dialog.type.setValue(ManifestType.FILE);
+				dialog.setSelectedManifest(manifest);
+				dialog.okPressed();
+			}
+		});
+		target.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		waitForApps(target, appName);
+		CloudAppDashElement app = getApplication(target, project);
+		waitForState(app, RunState.RUNNING, 10_000);
+		assertFalse(app.getEnableJmxSshTunnel());
+
+		harness.selection.setElements(app);
+		EnableJmxSshTunnelAction toggleJmx = actions.getEnableJmxSshTunnel();
+		assertTrue(toggleJmx.isEnabled());
+		assertTrue(toggleJmx.isVisible());
+		assertEquals("Enable JMX Ssh Tunnelling", toggleJmx.getText());
+
+		harness.answerConfirmationMultipleChoice(ui, (title, msg, choices, defaultIndex) -> {
+			assertEquals("Enabling JMX Requires Restart", title);
+			for (int i = 0; i < choices.length; i++) {
+				if (choices[i].startsWith("Yes")) {
+					return i;
+				}
+			}
+			throw new IllegalStateException("Didn't find expected choice");
+		});
+
+		toggleJmx.run();
+		assertTrue(app.getEnableJmxSshTunnel());
+
+		JmxSshTunnelManager tunnels = harness.getJmxSshTunnelManager();
+		ACondition.waitFor("sshtunnel creation", 2_000, () -> {
+			int jmxPort = app.getCfJmxPort();
+			assertEquals(
+				ImmutableSet.of(Pair.of(
+					"service:jmx:rmi://localhost:"+jmxPort+"/jndi/rmi://localhost:"+jmxPort+"/jmxrmi",
+					"tunneled-jmx-app.cfmockapps.io"
+				)),
+				tunnels.getUrls().getValues()
+			);
+		});
+
+		reset(ui);
+		harness.answerConfirmationMultipleChoice(ui, (title, msg, choices, defaultIndex) -> {
+			assertEquals("Disabling JMX Requires Restart", title);
+			for (int i = 0; i < choices.length; i++) {
+				if (choices[i].startsWith("Yes")) {
+					return i;
+				}
+			}
+			throw new IllegalStateException("Didn't find expected choice");
+		});
+
+		assertTrue(toggleJmx.isEnabled());
+		assertTrue(toggleJmx.isVisible());
+		assertEquals("Disable JMX Ssh Tunnelling", toggleJmx.getText());
+
+		toggleJmx.run();
+		assertFalse(app.getEnableJmxSshTunnel());
+
+		ACondition.waitFor("tunnel closed", 2_000, () -> {
+			assertEquals(ImmutableSet.of(), tunnels.getUrls().getValues());
+		});
+		ACondition.waitFor("app restarted", 2_000, () -> {
+			assertEquals(runOrDebug, app.getRunState());
+		});
+
+		ACondition.waitFor("stop hammering", 2_000, () -> {
+			app.stopAsync(ui);
+			assertEquals(RunState.INACTIVE, app.getRunState());
+		});
+	}
+
 	@Test public void deploy_app_with_jmx_ssh_tunnel_enabled() throws Exception {
 		String appName = "tunneled-jmx-app";
 		String apiUrl = "http://api.some-cloud.com";
@@ -982,9 +1133,10 @@ public class CloudFoundryBootDashModelMockingTest {
 		waitForState(app, RunState.RUNNING, 10_000);
 
 		assertTrue(app.getEnableJmxSshTunnel());
-		int jmxPort = app.getCfJmxPort();
 		JmxSshTunnelManager tunnels = harness.getJmxSshTunnelManager();
 		ACondition.waitFor("sshtunnel creation", 2_000, () -> {
+			int jmxPort = app.getCfJmxPort();
+			assertTrue(jmxPort>0);
 			assertEquals(
 				ImmutableSet.of(Pair.of(
 					"service:jmx:rmi://localhost:"+jmxPort+"/jndi/rmi://localhost:"+jmxPort+"/jmxrmi",
@@ -997,9 +1149,6 @@ public class CloudFoundryBootDashModelMockingTest {
 		ACondition.waitFor("stop hammering", 20000, () -> {
 			app.stopAsync(ui);
 			assertEquals(RunState.INACTIVE, app.getRunState());
-		});
-		ACondition.waitFor("tunnel closed", 2_000, () -> {
-			assertEquals(ImmutableSet.of(), tunnels.getUrls().getValues());
 		});
 	}
 
