@@ -93,7 +93,7 @@ public class JmxSupport {
 
 	private synchronized void ensureTunnel(Integer port) {
 		if (sshTunnel==null && !disposed) {
-			sshTunnel = createSshTunnel(port);
+			createSshTunnel(port);
 		}
 	}
 
@@ -141,7 +141,7 @@ public class JmxSupport {
 		}
 	}
 
-	private SshTunnel createSshTunnel(Integer port) {
+	private void createSshTunnel(Integer port) {
 		if (port!=null && port>0) {
 			try {
 				app.log("Fetching JMX SSH tunnel parameters...");
@@ -159,21 +159,24 @@ public class JmxSupport {
 
 				//2: create tunnel
 				app.log("Creating JMX SSH tunnel...");
-				SshTunnel sshTunnel = tunnelFactory.create(sshHost, sshUser, sshCode, remotePort, app, remotePort);
+				this.sshTunnel = tunnelFactory.create(sshHost, sshUser, sshCode, remotePort, app, remotePort);
 				String jmxUrl = getJmxUrl(remotePort);
 				app.log("JMX SSH tunnel URL = "+jmxUrl);
 				tunnels.add(sshTunnel, app);
-				return sshTunnel;
 			} catch (Exception e) {
 				app.setError(e);
 				app.log(ExceptionUtil.getMessage(e));
 				Log.log(e);
 			}
 		}
-		return null;
 	}
 
 	public static String getJmxUrl(int port) {
 		return "service:jmx:rmi://localhost:"+port+"/jndi/rmi://localhost:"+port+"/jmxrmi";
+	}
+
+	public boolean isTunnelActive() {
+		SshTunnel sshTunnel = this.sshTunnel;
+		return sshTunnel != null && !sshTunnel.isDisposed();
 	}
 }

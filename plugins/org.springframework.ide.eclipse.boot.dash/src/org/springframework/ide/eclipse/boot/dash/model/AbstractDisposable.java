@@ -19,6 +19,10 @@ public abstract class AbstractDisposable implements Disposable, OnDispose {
 
 	private ListenerList<DisposeListener> disposeListeners = new ListenerList<>();
 
+	public boolean isDisposed() {
+		return disposeListeners==null;
+	}
+
 	@Override
 	public synchronized void onDispose(DisposeListener l) {
 		if (disposeListeners!=null) {

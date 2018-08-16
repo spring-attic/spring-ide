@@ -31,7 +31,7 @@ public class CloudFoundryAppPropertiesSection extends AbstractBdeGeneralProperti
 				new DefaultPathPropertyControl(),
 				new ReadOnlyStringPropertyControl<>(CloudAppDashElement.class, "Healthcheck:", (e) -> e.getHealthCheck()),
 				new ReadOnlyStringPropertyControl<>(CloudAppDashElement.class, "Healthcheck Http Endpoint:", (e) -> e.getHealthCheckHttpEndpoint()),
-				new ReadOnlyStringPropertyControl<>(CloudAppDashElement.class, "Jmx Ssh Tunnel:", (e) -> e.getEnableJmxSshTunnel()?"enabled" : "disabled"),
+				new ReadOnlyStringPropertyControl<>(CloudAppDashElement.class, "Jmx Ssh Tunnel:", (e) -> e.getJmxSshTunnelStatus().getValue().getLabel()),
 				new ReadOnlyStringPropertyControl<>(CloudAppDashElement.class, "Jmx Local Port:", (e) -> e.getCfJmxPort()>0 ? (""+e.getCfJmxPort()) : ""),
 				new ReadOnlyStringPropertyControl<>(CloudAppDashElement.class, "Jmx URL:", (e) -> e.getJmxUrl()),
 				new TagsPropertyControl()

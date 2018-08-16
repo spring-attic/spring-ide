@@ -144,6 +144,24 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 	 */
 	private final LiveVariable<String> healthCheckOverride = new LiveVariable<>();
 	private JmxSupport jmxSupport;
+	private LiveExpression<JmxSshTunnelStatus> jmxSshTunnelStatus = new LiveExpression<JmxSshTunnelStatus>() {
+
+		//This liveexp is refreshed calls to its 'refresh' method
+		//  - from jmxSshTunnelManager whenever a tunnel is created or disposed.
+		//  - from setEnableJmxSshTunnel method.
+
+		@Override
+		protected JmxSshTunnelStatus compute() {
+			if (getEnableJmxSshTunnel()) {
+				 return jmxSupport!=null && jmxSupport.isTunnelActive()
+					? JmxSshTunnelStatus.ACTIVE
+					: JmxSshTunnelStatus.INACTIVE;
+			} else {
+				return JmxSshTunnelStatus.DISABLED;
+			}
+		}
+	};
+
 	{
 		appData.addListener((e, v) -> {
 			healthCheckOverride.setValue(null);
@@ -177,9 +195,11 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 		addElementNotifier(baseRunState);
 		addElementNotifier(appData);
 		addElementNotifier(healthCheckOverride);
+		addElementNotifier(jmxSshTunnelStatus);
 		this.addDisposableChild(baseRunState);
 		getJmxSupport(); //Must force creation of jmxSupport object, if applicable, otherwise it's runstate listener will not be
 				// active to start JmxSshTunnel. See bug: https://www.pivotaltracker.com/story/show/159376406
+		jmxSshTunnelStatus.refresh();
 	}
 
 	public CloudFoundryBootDashModel getCloudModel() {
@@ -356,6 +376,10 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 		getPersistentProperties().put(CF_JMX_PORT, port>0 ? ""+port : null);
 	}
 
+	public LiveExpression<JmxSshTunnelStatus> getJmxSshTunnelStatus() {
+		return jmxSshTunnelStatus;
+	}
+
 	public boolean getEnableJmxSshTunnel() {
 		return getPersistentProperties().get(CF_JMX_ENABLED, false);
 	}
@@ -363,9 +387,7 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 	public void setEnableJmxSshTunnel(boolean enable) throws Exception {
 		boolean old = getEnableJmxSshTunnel();
 		getPersistentProperties().put(CF_JMX_ENABLED, enable);
-		if (old!=enable) {
-			cloudModel.notifyElementChanged(this, "JMX SSH enablement changed");
-		}
+		jmxSshTunnelStatus.refresh();
 	}
 
 

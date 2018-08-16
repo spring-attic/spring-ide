@@ -57,10 +57,12 @@ public class JmxSshTunnelManager {
 		sshTunnel.onDispose(this::handleTunnelClosed);
 		tunnels.put(sshTunnel, app);
 		jmxUrls.refresh();
+		app.getJmxSshTunnelStatus().refresh();
 	}
 
 	private void handleTunnelClosed(Disposable disposed) {
-		tunnels.remove(disposed);
+		CloudAppDashElement owner = tunnels.remove(disposed);
+		owner.getJmxSshTunnelStatus().refresh();
 		jmxUrls.refresh();
 	}
 

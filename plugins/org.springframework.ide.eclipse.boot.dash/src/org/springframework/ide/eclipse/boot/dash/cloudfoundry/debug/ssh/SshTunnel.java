@@ -7,4 +7,6 @@ public interface SshTunnel extends Disposable, OnDispose {
 
 	int getLocalPort();
 
+	boolean isDisposed();
+
 }

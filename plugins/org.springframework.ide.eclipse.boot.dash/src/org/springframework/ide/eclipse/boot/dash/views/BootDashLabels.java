@@ -31,6 +31,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElemen
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudServiceInstanceDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.JmxSshTunnelStatus;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractLaunchConfigurationsDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
@@ -373,8 +374,9 @@ public class BootDashLabels implements Disposable {
 			case JMX_SSH_TUNNEL:
 				if (element instanceof CloudAppDashElement) {
 					CloudAppDashElement cfApp = (CloudAppDashElement) element;
-					if (cfApp.getEnableJmxSshTunnel()) {
-						styledLabel = new StyledString("jmx", stylers.darkGreen());
+					JmxSshTunnelStatus tunnelState = cfApp.getJmxSshTunnelStatus().getValue();
+					if (tunnelState!=JmxSshTunnelStatus.DISABLED) {
+						styledLabel = new StyledString("jmx", tunnelState==JmxSshTunnelStatus.ACTIVE ? stylers.darkGreen() : stylers.darkGrey());
 					}
 				} else {
 					styledLabel = new StyledString();
