@@ -1094,7 +1094,7 @@ public class CloudFoundryBootDashModelMockingTest {
 			assertEquals(ImmutableSet.of(), tunnels.getUrls().getValues());
 		});
 		ACondition.waitFor("app restarted", 2_000, () -> {
-			assertEquals(runOrDebug, app.getRunState());
+			assertEquals(RunState.RUNNING, app.getRunState());
 		});
 
 		ACondition.waitFor("stop hammering", 2_000, () -> {
