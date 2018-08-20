@@ -73,10 +73,11 @@ public class JmxSupport {
 			protected Integer compute() {
 				RunState runState = app.getBaseRunStateExp().getValue();
 				if (runState == RunState.RUNNING || runState == RunState.DEBUGGING) {
-					return app.getCfJmxPort();
-				} else {
-					return -1;
+					if (app.getEnableJmxSshTunnel()) {
+						return app.getCfJmxPort();
+					}
 				}
+				return -1;
 			}
 		};
 
