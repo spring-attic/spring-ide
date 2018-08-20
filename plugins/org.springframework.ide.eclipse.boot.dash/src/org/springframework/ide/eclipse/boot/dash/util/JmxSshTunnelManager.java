@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.boot.dash.util;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 

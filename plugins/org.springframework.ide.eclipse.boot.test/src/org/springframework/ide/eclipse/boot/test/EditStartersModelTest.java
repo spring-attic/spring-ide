@@ -91,7 +91,7 @@ import org.w3c.dom.Element;
 @SuppressWarnings("restriction")
 public class EditStartersModelTest {
 
-	private static final String BOOT_2_0_X_RELEASE = "2.0.3.RELEASE";
+	private static final String BOOT_2_0_X_RELEASE = "2.0.4.RELEASE";
 	private static final String REPOSITORY = "repository";
 	private static final String REPOSITORIES = "repositories";
 	private MockInitializrService initializr = new MockInitializrService();
