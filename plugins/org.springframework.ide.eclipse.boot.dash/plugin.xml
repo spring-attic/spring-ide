@@ -218,6 +218,12 @@
          id="org.springframework.ide.eclipse.boot.dash.ngrok.NGROKInstallPreferencePage"
          name="ngrok">
    		</page>
+	 	<page
+         category="org.springframework.ide.eclipse.boot.ui.preferences.BootPreferencePage"
+         class="org.springframework.ide.eclipse.boot.dash.prefs.RemoteAppsPrefsPage"
+         id="org.springframework.ide.eclipse.boot.dash.prefs.RemoteAppsPrefsPage"
+         name="Remote Boot Apps">
+   		</page>
    	</extension>
 	<extension point="org.eclipse.debug.core.launchConfigurationTypes">
 	    <launchConfigurationType

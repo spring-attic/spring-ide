@@ -13,12 +13,15 @@ package org.springframework.ide.eclipse.boot.dash;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.core.net.proxy.IProxyService;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -40,6 +43,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultBootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
+import org.springframework.ide.eclipse.boot.dash.prefs.RemoteAppsPrefs;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestEditorActivator;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -191,13 +195,20 @@ public class BootDashActivator extends AbstractUIPlugin {
 //					System.out.println(url);
 //				}
 //				System.out.println("<<<<< jmx urls ===");
-				sendRemoteBootAppUrls(exp.getValue());
+				sendRemoteBootAppUrls();
 			});
+			RemoteAppsPrefs.addListener(this::sendRemoteBootAppUrls);
 		}
 		return model;
 	}
 
-	private void sendRemoteBootAppUrls(ImmutableSet<Pair<String, String>> immutableSet) {
+	private void sendRemoteBootAppUrls() {
+		ImmutableSet.Builder<Pair<String, String>> allRemoteApps = ImmutableSet.builder();
+		if (model!=null) {
+			allRemoteApps.addAll(model.getJmxSshTunnelManager().getUrls().getValue());
+		}
+		allRemoteApps.addAll(new RemoteAppsPrefs().getRemoteAppData());
+
 		try {
 			Bundle lsBundle = Platform.getBundle("org.springframework.tooling.boot.ls");
 			if (lsBundle != null && lsBundle.getState() != Bundle.INSTALLED) {
@@ -205,7 +216,7 @@ public class BootDashActivator extends AbstractUIPlugin {
 				Method lsMethod = lsClass.getMethod("getRemoteBootApps");
 				@SuppressWarnings("unchecked")
 				LiveSetVariable<Pair<String, String>> remoteBootAppsVar = (LiveSetVariable<Pair<String,String>>) lsMethod.invoke(null);
-				remoteBootAppsVar.replaceAll(immutableSet);
+				remoteBootAppsVar.replaceAll(allRemoteApps.build());
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -304,6 +315,10 @@ public class BootDashActivator extends AbstractUIPlugin {
 		reg.put(BOOT_ICON, getImageDescriptor("icons/boot-icon.png"));
 		reg.put(CHECK_ICON, getImageDescriptor("icons/check.png"));
 		reg.put(CHECK_GREYSCALE_ICON, getImageDescriptor("icons/check_greyedout.png"));
+	}
+
+	public static IEclipsePreferences getPreferences() {
+		return InstanceScope.INSTANCE.getNode(PLUGIN_ID);
 	}
 
 }
