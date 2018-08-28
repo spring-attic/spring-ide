@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.util;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
@@ -83,7 +84,13 @@ public class CancelationTokens {
 		}
 	}
 
-	public synchronized void cancelAll() {
+	public synchronized void cancelAllBefore(CancelationToken token) {
+		Assert.isLegal(token instanceof ManagedToken);
+		canceledAllBefore = Math.max(canceledAllBefore, ((ManagedToken)token).id);
+		debug("CancelationTokens < "+canceledAllBefore+" are Canceled");
+	}
+
+	public void cancelAll() {
 		canceledAllBefore = nextId;
 		debug("CancelationTokens < "+canceledAllBefore+" are Canceled");
 	}

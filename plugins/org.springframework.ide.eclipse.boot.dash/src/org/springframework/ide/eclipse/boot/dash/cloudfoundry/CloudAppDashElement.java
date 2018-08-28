@@ -38,6 +38,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement.CloudAppIdentity;
@@ -223,19 +224,36 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 
 	@Override
 	public void restart(RunState runningOrDebugging, UserInteractions ui) throws Exception {
-		cancelOperations();
-		CancelationToken cancelationToken = createCancelationToken();
-		if (getProject() != null) {
-			cloudModel.runAsynch("Restarting, goal state: " + runningOrDebugging, getName(), (IProgressMonitor monitor) -> {
-				// Let push and debug resolve deployment properties
-				CloudApplicationDeploymentProperties deploymentProperties = null;
-				pushAndDebug(deploymentProperties, runningOrDebugging, ui, cancelationToken, monitor);
-			}, ui);
-		} else {
-			cloudModel.runAsynch("Restarting, goal state: " + runningOrDebugging, getName(), (IProgressMonitor monitor) -> {
-				restartOnly(ui, cancelationToken, monitor);
-			}, ui);
-		}
+		Job job = new Job("Restarting " + getName()) {
+			@Override
+			protected IStatus run(IProgressMonitor _monitor) {
+				CancelationToken cancelationToken = cancelationTokens.create();
+				try {
+					startOperationTracker.whileExecuting(ui, cancelationToken, _monitor,  () -> {
+						cancelationTokens.cancelAllBefore(cancelationToken);
+						//Caution! It is important that canceling older tokens is done *inside* the 'whileExecuting'.
+						//Otherwise currently executing operations will exit before the restart operation is registered
+						//as 'in progress' which causes a brief flash in the runstate where it incorrectly registers as
+						// 'running' while it should be registering as 'starting'.
+						//See: https://www.pivotaltracker.com/story/show/159639098/comments/193569587
+						cloudModel.runSynch("Restarting, goal state: " + runningOrDebugging, getName(), (IProgressMonitor monitor) -> {
+							if (getProject() != null) {
+								// Let push and debug resolve deployment properties
+								CloudApplicationDeploymentProperties deploymentProperties = null;
+								pushAndDebug(deploymentProperties, runningOrDebugging, ui, cancelationToken, monitor);
+							} else {
+								restartOnly(ui, cancelationToken, monitor);
+							}
+						}, ui);
+					});
+				} catch (Exception e) {
+					Log.log(e);
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		job.setSystem(true);
+		job.schedule();
 	}
 
 	public DebugSupport getDebugSupport() {

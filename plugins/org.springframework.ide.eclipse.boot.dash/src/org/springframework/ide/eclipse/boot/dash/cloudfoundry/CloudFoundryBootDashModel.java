@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.compare.CompareConfiguration;
@@ -894,6 +895,19 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		getOperationsExecution().runAsynch(opName, appName, body, ui);
 	}
 
+	public void runSynch(String opName, String appName, JobBody body, UserInteractions ui) throws Exception {
+		CompletableFuture<Void> f = new CompletableFuture<>();
+		runAsynch(opName, appName, (mon) -> {
+			try {
+				body.run(mon);
+				f.complete(null);
+			} catch (Throwable e) {
+				f.completeExceptionally(e);
+			}
+		}, ui);
+		f.get();
+	}
+
 	public void runAsynch(Operation<?> op, UserInteractions ui) {
 		getOperationsExecution().runAsynch(op, ui);
 	}
@@ -909,4 +923,5 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	public void setBaseRefreshState(RefreshState newState) {
 		baseRefeshState.setValue(newState);
 	}
+
 }

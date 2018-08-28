@@ -14,6 +14,7 @@ import javax.inject.Provider;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.internal.codeassist.ThrownExceptionFinder;
@@ -91,7 +92,7 @@ public class OperationTracker {
 			// its errors should simply be ignored.
 			throw new OperationCanceledException();
 		}
-		if (level==0 && !(error instanceof OperationCanceledException)) {
+		if (level==0 && !(ExceptionUtil.isCancelation(error))) {
 			setError(error);
 		}
 		if (error != null) {
