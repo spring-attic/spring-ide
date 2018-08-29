@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2017 Pivotal Software, Inc.
+ *  Copyright (c) 2017, 2018 Pivotal Software, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -55,10 +55,10 @@ public class BootInstallUtils {
 		if (bootVersion == null) {
 			throw new IllegalArgumentException();
 		}
-		if (VersionRange.valueOf("1.5.3").includes(bootVersion)) {
+		if (VersionRange.valueOf("2.0.0").includes(bootVersion)) {
 			return Version.valueOf(StsProperties.getInstance().get("spring.boot.cloud.default.version"));
-		} else if (VersionRange.valueOf("[1.4.4,1.5.3)").includes(bootVersion)) {
-			return Version.valueOf("1.3.0.RELEASE");
+		} else if (VersionRange.valueOf("[1.4.4,2.0.0)").includes(bootVersion)) {
+			return Version.valueOf("1.3.2.RELEASE");
 		} else if (VersionRange.valueOf("[1.2.2,1.4.4)").includes(bootVersion)) {
 			return Version.valueOf("1.2.2.RELEASE");
 //		} else if (VersionRange.valueOf("[1.3.7, 1.4.1)").includes(bootVersion)) {
