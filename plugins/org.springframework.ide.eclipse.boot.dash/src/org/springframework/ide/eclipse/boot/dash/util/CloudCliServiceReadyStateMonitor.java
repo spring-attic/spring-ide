@@ -92,7 +92,23 @@ public class CloudCliServiceReadyStateMonitor extends AbstractPollingAppReadySta
 			if (connector != null) {
 				MBeanServerConnection connection = connector.getMBeanServerConnection();
 				try {
-					Set<ObjectName> queryNames = connection.queryNames(SpringApplicationLifecycleClient.toObjectName("launcher." + serviceId + ":type=Endpoint,name=healthEndpoint,identity=*"), null);
+					Set<ObjectName> queryNames = connection.queryNames(SpringApplicationLifecycleClient.toObjectName("launcher." + serviceId + ":type=Endpoint,name=Health"), null);
+					// Cloud CLI service 2.x
+					if (!queryNames.isEmpty()) {
+						if (queryNames.size() == 1) {
+							Object o = connection.invoke(queryNames.iterator().next(),"health",
+									new Object[0],
+									new String[0]);
+							if (o instanceof Map) {
+								return "UP".equals(((Map<?,?>)o).get("status"));
+							}
+//							return dataStr.contains("status=UP");
+						} else if (queryNames.size() > 1) {
+							throw new Exception("Too many beans matching search criteria: " + queryNames);
+						}
+					}
+					// Legacy Clod CLI service 1.x support
+					queryNames = connection.queryNames(SpringApplicationLifecycleClient.toObjectName("launcher." + serviceId + ":type=Endpoint,name=healthEndpoint,identity=*"), null);
 					if (queryNames.size() == 1) {
 						Object o = connection.invoke(queryNames.iterator().next(),"getData",
 								new Object[0],

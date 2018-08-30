@@ -227,7 +227,12 @@ public class LocalCloudServiceDashElement extends AbstractLaunchConfigurationsDa
 
 			for (ObjectName objectName : queryNames) {
 				if (objectName.toString().startsWith("Tomcat") && objectName.toString().contains("type=Connector")) {
-					Object result = connection.getAttribute(objectName, "localPort");
+					// Cloud CLI service 2.x Tomcat bean port value
+					Object result = connection.getAttribute(objectName, "port");
+					if (result == null) {
+						// Older Tomcat bean format for Cloud CLI 1.x
+						result = connection.getAttribute(objectName, "localPort");
+					}
 					if (result != null) {
 						return result.toString();
 					}
