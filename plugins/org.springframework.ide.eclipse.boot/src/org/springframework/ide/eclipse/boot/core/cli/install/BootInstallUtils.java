@@ -57,7 +57,9 @@ public class BootInstallUtils {
 		}
 		if (VersionRange.valueOf("2.0.0").includes(bootVersion)) {
 			return Version.valueOf(StsProperties.getInstance().get("spring.boot.cloud.default.version"));
-		} else if (VersionRange.valueOf("[1.4.4,2.0.0)").includes(bootVersion)) {
+		} else if (VersionRange.valueOf("[1.5.3,2.0.0)").includes(bootVersion)) {
+			return Version.valueOf("1.4.0.RELEASE");
+		} else if (VersionRange.valueOf("[1.4.4,1.5.3)").includes(bootVersion)) {
 			return Version.valueOf("1.3.2.RELEASE");
 		} else if (VersionRange.valueOf("[1.2.2,1.4.4)").includes(bootVersion)) {
 			return Version.valueOf("1.2.2.RELEASE");
