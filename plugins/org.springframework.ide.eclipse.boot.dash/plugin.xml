@@ -219,7 +219,7 @@
          name="ngrok">
    		</page>
 	 	<page
-         category="org.springframework.ide.eclipse.boot.ui.preferences.BootPreferencePage"
+         category="org.springframework.tooling.boot.java.ls.preferences"
          class="org.springframework.ide.eclipse.boot.dash.prefs.RemoteAppsPrefsPage"
          id="org.springframework.ide.eclipse.boot.dash.prefs.RemoteAppsPrefsPage"
          name="Remote Boot Apps">
