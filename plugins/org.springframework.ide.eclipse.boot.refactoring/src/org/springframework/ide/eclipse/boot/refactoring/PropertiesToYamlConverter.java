@@ -8,14 +8,13 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor.yaml.refactoring;
+package org.springframework.ide.eclipse.boot.refactoring;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Properties;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -24,35 +23,32 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPath;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPathSegment;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPathSegment.AtIndex;
-import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPathSegment.ValAtKey;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.nodes.ScalarNode;
-import org.yaml.snakeyaml.nodes.Tag;
 
 import com.google.common.collect.Multimap;
 
 /**
  * Helper class to convert (Spring Boot) .properties file content into equivalent
  * .yml file content.
- * 
+ *
  * @author Kris De Volder
  */
 public class PropertiesToYamlConverter {
-	
+
 	private RefactoringStatus status = new RefactoringStatus();
 	private String output;
-	
+
 	class YamlBuilder {
 		final YamlPath path;
 		final List<Object> scalars = new ArrayList<>();
 		final TreeMap<Integer, YamlBuilder> listItems = new TreeMap<>();
 		final TreeMap<String, YamlBuilder> mapEntries = new TreeMap<>();
-		
+
 		public YamlBuilder(YamlPath path) {
 			this.path = path;
 		}
-		
+
 		void addProperty(YamlPath path, String value) {
 			if (path.isEmpty()) {
 				scalars.add(objectify(value));
@@ -70,7 +66,7 @@ public class PropertiesToYamlConverter {
 
 		private Object objectify(String value) {
 			if (value != null) {
-				Object parsed = null; 
+				Object parsed = null;
 				try {
 					parsed = new BigInteger(value);
 				} catch (NumberFormatException e) {
@@ -111,13 +107,13 @@ public class PropertiesToYamlConverter {
 				} else {
 					if (!mapEntries.isEmpty()) {
 						status.addError(
-								"Direct assignment '"+path.toPropString()+"="+scalars.get(0)+"' can not be combined " + 
+								"Direct assignment '"+path.toPropString()+"="+scalars.get(0)+"' can not be combined " +
 								"with sub-property assignment '"+path.toPropString()+"." + mapEntries.keySet().iterator().next()+"...'. "+
 								"Direct assignment will be dropped!"
 						);
 					} else {
 						status.addError(
-								"Direct assignment '"+path.toPropString()+"="+scalars.get(0)+"' can not be combined " + 
+								"Direct assignment '"+path.toPropString()+"="+scalars.get(0)+"' can not be combined " +
 								"with sequence assignment '"+path.toPropString()+"[" + listItems.keySet().iterator().next()+"]...' "+
 								"Direct assignments will be dropped!"
 						);
@@ -147,7 +143,7 @@ public class PropertiesToYamlConverter {
 			}
 		}
 	}
-	
+
 	public PropertiesToYamlConverter(Multimap<String, String> properties) {
 		if (properties.isEmpty()) {
 			output = "";
@@ -158,7 +154,7 @@ public class PropertiesToYamlConverter {
 			root.addProperty(YamlPath.fromProperty(e.getKey()), e.getValue());
 		}
 		Object object = root.build();
-		
+
 		DumperOptions options = new DumperOptions();
 		options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 		options.setPrettyFlow(true);
@@ -166,7 +162,7 @@ public class PropertiesToYamlConverter {
 		Yaml yaml = new Yaml(options);
 		this.output = yaml.dump(object);
 	}
-	
+
 	public RefactoringStatus getStatus() {
 		return status;
 	}

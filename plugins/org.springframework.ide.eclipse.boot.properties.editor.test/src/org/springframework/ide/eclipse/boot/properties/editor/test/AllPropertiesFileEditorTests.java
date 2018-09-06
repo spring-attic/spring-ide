@@ -33,8 +33,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	DocumentEditsTest.class,
 	YamlStructureParserTest.class,
 	IndexNavigatorTest.class,
-	YamlEditorTests.class,
-	ConvertPropertiesToYamlTest.class
+	YamlEditorTests.class
 })
 public class AllPropertiesFileEditorTests {
 }

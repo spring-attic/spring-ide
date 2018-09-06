@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor.yaml.refactoring;
+package org.springframework.ide.eclipse.boot.refactoring;
 
 import java.io.IOException;
 import java.io.InputStream;

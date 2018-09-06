@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor.yaml.refactoring;
+package org.springframework.ide.eclipse.boot.refactoring;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -24,6 +24,7 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizardOpenOperation;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
+import org.eclipse.ltk.core.refactoring.RefactoringContext;
 
 public class ConvertPropertiesToYamlHandler extends AbstractHandler {
 
@@ -45,12 +46,12 @@ public class ConvertPropertiesToYamlHandler extends AbstractHandler {
 					dirtyBuffer.commit(null, true);
 				}
 				ConvertPropertiesToYamlRefactoring refactoring = new ConvertPropertiesToYamlRefactoring(file);
-				RefactoringWizard wizard = new RefactoringWizard(refactoring, 
-						RefactoringWizard.DIALOG_BASED_USER_INTERFACE | 
+				RefactoringWizard wizard = new RefactoringWizard(refactoring,
+						RefactoringWizard.DIALOG_BASED_USER_INTERFACE |
 						RefactoringWizard.CHECK_INITIAL_CONDITIONS_ON_OPEN |
 						RefactoringWizard.NO_BACK_BUTTON_ON_STATUS_DIALOG
 				) {
-					
+
 					@Override
 					protected void addUserInputPages() {
 						//no inputs required
