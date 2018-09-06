@@ -63,7 +63,6 @@ public abstract class ActuatorClient {
 			if (data != null) {
 				String json = data.left;
 				if (json!=null) {
-					System.out.println(json);
 					return parseRequestMappings(json, data.right);
 				}
 			}

@@ -27,13 +27,18 @@ public class Boot2RequestMappingsParser implements RequestMappingsParser {
 		for (String contextId : keys(contexts)) {
 			JSONObject mappings = contexts.getJSONObject(contextId).getJSONObject("mappings");
 
-			//Ignoring everything except 'dispatcherServlets' for the moment.
-			JSONObject dispatcherServlets = mappings.getJSONObject("dispatcherServlets");
-			System.out.println(dispatcherServlets);
-			for (String servletId : keys(dispatcherServlets)) {
-				JSONArray servlets = dispatcherServlets.getJSONArray(servletId);
-				for (int i = 0; i < servlets.length(); i++) {
-					JSONObject servlet = servlets.getJSONObject(i);
+			JSONArray rmArray = null;
+			if (mappings.has("dispatcherServlets")) {
+				// Regular Web starter endpoints RMs JMX beans format
+				rmArray = mappings.getJSONObject("dispatcherServlets").getJSONArray("dispatcherServlet");
+			} else if (mappings.has("dispatcherHandlers")) {
+				// WebFlux endpoints RMs JMX bean format
+				rmArray = mappings.getJSONObject("dispatcherHandlers").getJSONArray("webHandler");
+			}
+
+			if (rmArray != null) {
+				for (int i = 0; i < rmArray.length(); i++) {
+					JSONObject servlet = rmArray.getJSONObject(i);
 					JSONObject details = servlet.optJSONObject("details");
 					if (details == null) {
 						// Fall back to 1.x for missing "details" property, i.e. no method handler defined
@@ -43,9 +48,6 @@ public class Boot2RequestMappingsParser implements RequestMappingsParser {
 					}
 				}
 			}
-//			JSONObject value = obj.getJSONObject(rawKey);
-//			Collection<RequestMappingImpl> mappings = RequestMappingImpl.create(rawKey, value.optString("method"), typeLookup);
-//			result.addAll(mappings);
 
 		}
 		return result;
