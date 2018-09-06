@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.properties.editor.test;
+package org.springframework.ide.eclipse.boot.refactoring.test;
 
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
@@ -33,13 +33,13 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.ide.eclipse.boot.properties.editor.yaml.refactoring.ConvertPropertiesToYamlRefactoring;
+import org.springframework.ide.eclipse.boot.refactoring.ConvertPropertiesToYamlRefactoring;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 public class ConvertPropertiesToYamlTest {
-	
+
 	public interface Checker<T> {
 		void check(T it) throws Exception;
 	}
@@ -49,18 +49,18 @@ public class ConvertPropertiesToYamlTest {
 	protected IWorkspace getWorkspace() {
 		return ResourcesPlugin.getWorkspace();
 	}
-	
+
 	@Before public void setup() throws Exception {
 		StsTestUtil.deleteAllProjects();
 	}
-	
+
 	@Test public void fileIsInTheWay() throws Exception {
 		IProject project = projects.createBootProject("fileIsInTheWay");
 		createFile(project, "src/main/resources/application.yml", "someting: already-in-here");
 		IFile propsFile = project.getFile("src/main/resources/application.properties");
 		assertTrue(propsFile.exists());
 		ConvertPropertiesToYamlRefactoring refactoring = new ConvertPropertiesToYamlRefactoring(propsFile);
-		
+
 		RefactoringStatus status = refactoring.checkInitialConditions(new NullProgressMonitor());
 		assertStatus(status, RefactoringStatus.FATAL, "'/fileIsInTheWay/src/main/resources/application.yml' already exists");
 	}
@@ -71,7 +71,7 @@ public class ConvertPropertiesToYamlTest {
 		do_hasComments_test(project, "!comment");
 		do_hasComments_test(project, "    \t!comment");
 		ConvertPropertiesToYamlRefactoring refactoring = do_hasComments_test(project, "    #!comment");
-		
+
 		perform(refactoring); //Despite the warning, the refactoring should be executable.
 		assertFalse(project.getFile("src/main/resources/application.properties").exists());
 		assertFile(project, "src/main/resources/application.yml",
@@ -81,10 +81,10 @@ public class ConvertPropertiesToYamlTest {
 				"  property: somevalue\n"
 		);
 	}
-	
+
 	@Test public void almostHasComments() throws Exception {
 		do_conversionTest(
-			"my.hello=Good morning!\n" + 
+			"my.hello=Good morning!\n" +
 			"my.goodbye=See ya # later\n"
 			, // ==>
 			"my:\n" +
@@ -93,27 +93,27 @@ public class ConvertPropertiesToYamlTest {
 		);
 	}
 
-	
+
 	@Test public void conversionWithListItems() throws Exception {
 		do_conversionTest(
-				"some.thing[0].a=first-a\n" + 
-				"some.thing[0].b=first-b\n" + 
-				"some.thing[1].a=second-a\n" + 
+				"some.thing[0].a=first-a\n" +
+				"some.thing[0].b=first-b\n" +
+				"some.thing[1].a=second-a\n" +
 				"some.thing[1].b=second-b\n"
 				, // ==>
-				"some:\n" + 
-				"  thing:\n" + 
-				"  - a: first-a\n" + 
-				"    b: first-b\n" + 
-				"  - a: second-a\n" + 
+				"some:\n" +
+				"  thing:\n" +
+				"  - a: first-a\n" +
+				"    b: first-b\n" +
+				"  - a: second-a\n" +
 				"    b: second-b\n"
 		);
 	}
 
 	@Test public void simpleConversion() throws Exception {
 		do_conversionTest(
-				"some.thing=vvvv\n" + 
-				"some.other.thing=blah\n" 
+				"some.thing=vvvv\n" +
+				"some.other.thing=blah\n"
 				, // ==>
 				"some:\n" +
 				"  other:\n" +
@@ -142,7 +142,7 @@ public class ConvertPropertiesToYamlTest {
 				"largenumber: 989898989898989898989898989898989898989898989898989898989898\n" +
 				"longfractional: -0.989898989898989898989898989898989898989898989898989898989898\n" +
 				"server:\n" +
-				"  port: 8888\n" 
+				"  port: 8888\n"
 		);
 	}
 
@@ -156,7 +156,7 @@ public class ConvertPropertiesToYamlTest {
 
 	@Test public void unusualName() throws Exception {
 		IProject project = projects.createProject("unusualName");
-		IFile input = createFile(project, "no-extension", 
+		IFile input = createFile(project, "no-extension",
 				"server.port: 6789"
 		);
 		ConvertPropertiesToYamlRefactoring refactoring = new ConvertPropertiesToYamlRefactoring(input);
@@ -165,7 +165,7 @@ public class ConvertPropertiesToYamlTest {
 		assertEquals(
 			"server:\n" +
 			"  port: 6789\n"
-			, 
+			,
 			IOUtil.toString(project.getFile("no-extension.yml").getContents())
 		);
 	}
@@ -177,7 +177,7 @@ public class ConvertPropertiesToYamlTest {
 		assertStatus(refactoring.checkInitialConditions(new NullProgressMonitor()),
 				RefactoringStatus.FATAL, "is not accessible");
 	}
-	
+
 	@Test public void multipleAssignmentProblem() throws Exception {
 		do_conversionTest(
 				"some.property=something\n" +
@@ -192,12 +192,12 @@ public class ConvertPropertiesToYamlTest {
 				}
 		);
 	}
-	
+
 	@Test public void scalarAndMapConflict() throws Exception {
 		do_conversionTest(
 				"some.property=a-scalar\n" +
 				"some.property.sub=sub-value"
-				, 
+				,
 				"some:\n" +
 				"  property:\n" +
 				"    sub: sub-value\n"
@@ -212,7 +212,7 @@ public class ConvertPropertiesToYamlTest {
 				"some.property=a-scalar\n" +
 				"some.property[0]=zero\n" +
 				"some.property[1]=one\n"
-				, 
+				,
 				"some:\n" +
 				"  property:\n" +
 				"  - zero\n" +
@@ -229,19 +229,19 @@ public class ConvertPropertiesToYamlTest {
 				"some.property.def=val2\n" +
 				"some.property[0]=zero\n" +
 				"some.property[1]=one\n"
-				, 
+				,
 				"some:\n" +
 				"  property:\n" +
-				"    '0': zero\n" + 
-				"    '1': one\n" + 
-				"    abc: val1\n" + 
+				"    '0': zero\n" +
+				"    '1': one\n" +
+				"    abc: val1\n" +
 				"    def: val2\n"
 				, (status) -> {
 					assertStatus(status, RefactoringStatus.WARNING, "'some.property' has some entries that look like list items and others that look like map entries");
 				}
 		);
 	}
-	
+
 	@Test public void scalarAndMapAndSequenceConflict() throws Exception {
 		do_conversionTest(
 				"some.property=a-scalar\n" +
@@ -249,12 +249,12 @@ public class ConvertPropertiesToYamlTest {
 				"some.property.def=val2\n" +
 				"some.property[0]=zero\n" +
 				"some.property[1]=one\n"
-				, 
+				,
 				"some:\n" +
 				"  property:\n" +
-				"    '0': zero\n" + 
-				"    '1': one\n" + 
-				"    abc: val1\n" + 
+				"    '0': zero\n" +
+				"    '1': one\n" +
+				"    abc: val1\n" +
 				"    def: val2\n"
 				, (status) -> {
 					assertStatus(status, RefactoringStatus.ERROR, "Direct assignment 'some.property=a-scalar' can not be combined with sub-property assignment 'some.property.abc...'. ");
@@ -262,7 +262,7 @@ public class ConvertPropertiesToYamlTest {
 				}
 		);
 	}
-	
+
 	private void do_conversionTest(String input, String expectedOutput) throws Exception {
 		do_conversionTest(input, expectedOutput, (status) -> {
 			assertEquals(RefactoringStatus.OK, status.getSeverity());
@@ -275,11 +275,11 @@ public class ConvertPropertiesToYamlTest {
 		IFile yamlFile = project.getFile("application.yml");
 		assertTrue(propertiesFile.exists());
 		assertFalse(yamlFile.exists());
-		
+
 		ConvertPropertiesToYamlRefactoring refactoring = new ConvertPropertiesToYamlRefactoring(propertiesFile);
 		statusChecker.check(refactoring.checkAllConditions(new NullProgressMonitor()));
 		perform(refactoring);
-		
+
 		assertFalse(propertiesFile.exists());
 		assertTrue(yamlFile.exists());
 
@@ -295,9 +295,9 @@ public class ConvertPropertiesToYamlTest {
 	private void perform(ConvertPropertiesToYamlRefactoring refactoring) throws Exception {
 		Change change = refactoring.createChange(new NullProgressMonitor());
 		IWorkspace workspace = getWorkspace();
-		CompletableFuture<Void> result = new CompletableFuture<Void>();
+		CompletableFuture<Void> result = new CompletableFuture<>();
 		Job job = new Job(refactoring.getName()) {
-			
+
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
@@ -316,7 +316,7 @@ public class ConvertPropertiesToYamlTest {
 
 	private ConvertPropertiesToYamlRefactoring do_hasComments_test(IProject project, String comment) throws Exception {
 		IFile propsFile = createFile(project, "src/main/resources/application.properties",
-				"some.property=somevalue\n"+ 
+				"some.property=somevalue\n"+
 				comment +"\n" +
 				"other.property=othervalue"
 		);

@@ -29,6 +29,5 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.boot.properties.editor.yaml,
  org.springframework.ide.eclipse.boot.properties.editor.yaml.completions,
- org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile,
- org.springframework.ide.eclipse.boot.properties.editor.yaml.refactoring
+ org.springframework.ide.eclipse.boot.properties.editor.yaml.reconcile
 Bundle-Vendor: Pivotal Inc

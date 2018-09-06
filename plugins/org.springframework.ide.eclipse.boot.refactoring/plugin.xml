@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            categoryId="org.springframework.ide.eclipse.boot.commands.category"
+            defaultHandler="org.springframework.ide.eclipse.boot.refactoring.ConvertPropertiesToYamlHandler"
+            id="org.springframework.ide.eclipse.boot.properties.editor.convertPropertiesToYaml"
+            name="Convert .properties to .yaml">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="popup:#BootPropertiesEditorContext?after=additions">
+<!--         <menu
+               id="org.springframework.ide.eclipse.boot.properties.editor.menu"
+               label="Spring"> -->
+            <command
+                  icon="icons/boot-icon.png"
+                  commandId="org.springframework.ide.eclipse.boot.properties.editor.convertPropertiesToYaml">
+            </command>
+<!--         </menu> -->
+      </menuContribution>
+      <menuContribution
+          locationURI="popup:org.eclipse.ui.popup.any?after=additions">
+            <command
+                  icon="icons/boot-icon.png"
+                  commandId="org.springframework.ide.eclipse.boot.properties.editor.convertPropertiesToYaml">
+                <visibleWhen
+                       checkEnabled="false">
+                   <and>
+                       <count
+                             value="1">
+                       </count>
+                       <with variable="activeMenuSelection">
+                          <iterate
+                               ifEmpty="false">
+                             <adapt type="org.eclipse.core.resources.IResource">
+                                  <test property="org.eclipse.core.resources.extension" value="properties" />
+                             </adapt>
+                          </iterate>
+                       </with>
+                   </and>
+                </visibleWhen>
+            </command>
+            
+      </menuContribution>
+   </extension>
+
+</plugin>
