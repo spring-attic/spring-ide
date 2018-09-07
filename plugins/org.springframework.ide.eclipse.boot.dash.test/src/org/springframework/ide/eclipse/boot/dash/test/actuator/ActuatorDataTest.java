@@ -180,4 +180,21 @@ public class ActuatorDataTest {
 		);
 	}
 
+	@Test public void testRequestMappingsBoot2WebFluxFunctional() throws Exception {
+		TestActuatorClient client = new TestActuatorClient(null).version("2").requestMappingJson(ActuatorClientTest.getContents("requestmappings-boot2-webflux-functional.json"));
+		List<RequestMapping> mappings = client.getRequestMappings();
+		System.out.println(mappings);
+		ImmutableSet<String> expected = ImmutableSet.of(
+				"/actuator",
+				"/actuator/health",
+				"/actuator/info",
+				"/webjars/**",
+				"/**"
+		);
+		assertEquals(expected,
+				mappings.stream()
+				.map(RequestMapping::getPath)
+				.collect(Collectors.toSet())
+		);
+	}
 }

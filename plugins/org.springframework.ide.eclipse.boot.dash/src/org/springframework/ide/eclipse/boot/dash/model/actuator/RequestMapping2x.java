@@ -67,14 +67,29 @@ public class RequestMapping2x extends AbstractRequestMapping {
 	public static Collection<RequestMapping2x> create(TypeLookup typeLookup, String methodString, JSONObject details) {
 		try {
 			if (details != null) {
-				JSONObject requestMappingConditionals = details.getJSONObject("requestMappingConditions");
-				JSONObject handlerMethod = details.getJSONObject("handlerMethod");
-				String[] paths = extractPaths(requestMappingConditionals);
-				String fqClassName = handlerMethod.getString("className");
-				String methodName = handlerMethod.getString("name");
-				return Arrays.stream(paths)
-						.map(path -> new RequestMapping2x(typeLookup, path, fqClassName, methodName, methodString))
-						.collect(Collectors.toList());
+
+				JSONObject requestMappingConditionals = details.optJSONObject("requestMappingConditions");
+				if (requestMappingConditionals != null) {
+					String[] paths = extractPaths(requestMappingConditionals);
+					String fqClassName = null;
+					String methodName = null;
+					if (details.has("handlerMethod")) {
+						JSONObject handlerMethod = details.getJSONObject("handlerMethod");
+						fqClassName = handlerMethod.getString("className");
+						methodName = handlerMethod.getString("name");
+					} else if (details.has("handlerFunction")) {
+						fqClassName = details.getString("handlerFunction");
+						int idx = fqClassName.indexOf("$$");
+						if (idx >= 0) {
+							fqClassName = fqClassName.substring(0, idx);
+						}
+					}
+					final String clazz = fqClassName;
+					final String method = methodName;
+					return Arrays.stream(paths)
+							.map(path -> new RequestMapping2x(typeLookup, path, clazz, method, methodString))
+							.collect(Collectors.toList());
+				}
 			}
 		} catch (JSONException e) {
 			Log.log(e);
