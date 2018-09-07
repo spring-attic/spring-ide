@@ -48,7 +48,7 @@
   <extension
 	      point="org.eclipse.ui.preferencePages">
 	   <page
-	         name="Confguration Metadata Processing"
+	         name="Configuration Metadata Processing"
 	         category="org.springframework.ide.eclipse.boot.ui.preferences.BootPreferencePage"
 	         class="org.springframework.ide.eclipse.boot.properties.editor.preferences.AnotationProcessingPreferencesPage"
 	            id="org.springframework.ide.eclipse.boot.properties.editor.preferences.AnotationProcessingPreferencesPage">
