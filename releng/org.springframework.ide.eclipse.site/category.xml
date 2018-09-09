@@ -259,6 +259,8 @@
 		<bundle id="org.aspectj.weaver" version="0.0.0"/>
 <!--		<bundle id="org.eclipse.weaver.source" version="0.0.0"/> -->
 
+		<bundle id="javax.activation" version="0.0.0"/>
+		<bundle id="javax.activation.source" version="0.0.0"/>
 		<bundle id="javax.annotation" version="0.0.0"/>
 		<bundle id="javax.annotation.source" version="0.0.0"/>
 		<bundle id="javax.el" version="0.0.0"/>
@@ -269,8 +271,10 @@
 		<bundle id="javax.jms.source" version="0.0.0"/>
 		<bundle id="javax.xml.ws" version="0.0.0"/>
 		<bundle id="javax.xml.bind" version="0.0.0"/>
+		<bundle id="javax.xml.bind.source" version="0.0.0"/>
 		<bundle id="javax.xml.stream" version="0.0.0"/>
 		<bundle id="javax.validation" version="0.0.0"/>
+		<bundle id="javax.validation.source" version="0.0.0"/>
 		<bundle id="org.json" version="0.0.0"/>
 		<bundle id="edu.emory.mathcs.backport" version="0.0.0"/>
 		<bundle id="edu.emory.mathcs.backport.source" version="0.0.0"/>
