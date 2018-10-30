@@ -23,6 +23,10 @@ import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.boot.properties.editor.FuzzyMap;
@@ -49,6 +53,17 @@ public class SpringPropertiesIndexManager extends ListenerManager<Listener<Sprin
 
 	private Map<String, SpringPropertyIndex> indexes = null;
 	final private ValueProviderRegistry valueProviders;
+	final private Job refreshJob = new Job("Refresh SpringPropertiesIndexManager") {
+		{
+			setSystem(true);
+		}
+
+		@Override
+		protected IStatus run(IProgressMonitor arg0) {
+			clearAll();
+			return Status.OK_STATUS;
+		}
+	};
 
 	public SpringPropertiesIndexManager(ValueProviderRegistry valueProviders) {
 		this.valueProviders = valueProviders;
@@ -70,11 +85,11 @@ public class SpringPropertiesIndexManager extends ListenerManager<Listener<Sprin
 	}
 
 	@Override
-	public synchronized void classpathChanged(IJavaProject jp) {
-		clear();
+	public void classpathChanged(IJavaProject jp) {
+		refreshJob.schedule();
 	}
 
-	private void clear() {
+	private synchronized void clearAll() {
 		if (indexes!=null) {
 			indexes.clear();
 			for (Listener<SpringPropertiesIndexManager> l : getListeners()) {
@@ -91,8 +106,8 @@ public class SpringPropertiesIndexManager extends ListenerManager<Listener<Sprin
 	 * @param The project on which the metadata change was detected.
 	 * @param jsonFile The IFile in project's output folder that was changed.
 	 */
-	public synchronized void liveMetadataChanged(IJavaProject jp, IFile jsonFile) {
-		clear();
+	public void liveMetadataChanged(IJavaProject jp, IFile jsonFile) {
+		refreshJob.schedule();
 	}
 
 	private class LiveMetadataListener implements IResourceChangeListener, IResourceDeltaVisitor {
