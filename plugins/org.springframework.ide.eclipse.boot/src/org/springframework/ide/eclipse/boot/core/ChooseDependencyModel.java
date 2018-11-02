@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.boot.core;
 import java.util.Collection;
 
 import org.eclipse.core.runtime.Assert;
-import org.springsource.ide.eclipse.commons.completions.externaltype.ExternalType;
 import org.springsource.ide.eclipse.commons.livexp.core.BooleanFieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
