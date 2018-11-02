@@ -636,7 +636,7 @@
 			</properties>
 			<repositories>
 				<repository>
-					<id>platform-e47</id>
+					<id>platform-e48</id>
 					<layout>p2</layout>
 					<url>http://download.eclipse.org/eclipse/updates/4.8/</url>
 				</repository>
@@ -648,7 +648,7 @@
 				<repository>
 					<id>ajdt</id>
 					<layout>p2</layout>
-					<url>http://download.eclipse.org/tools/ajdt/47/dev/update</url>
+					<url>http://download.eclipse.org/tools/ajdt/48/dev/update</url>
 				</repository>
 				<repository>
 					<id>orbit-photon</id>
@@ -673,7 +673,115 @@
 				<repository>
 		  			<id>buildship-for-testing</id>
 		  			<layout>p2</layout>
-		  			<url>http://download.eclipse.org/buildship/updates/e46/releases/1.0/</url>
+		  			<url>http://download.eclipse.org/buildship/updates/e48/releases/</url>
+				</repository>
+				<repository>
+					<id>eclipse-integration-commons</id>
+					<layout>p2</layout>
+					<url>http://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}</url>
+				</repository>
+			</repositories>
+		</profile>
+
+		<profile>
+			<id>e49</id>
+			<properties>
+				<p2.repository.name>Spring IDE for Eclipse 4.9</p2.repository.name>
+			</properties>
+			<repositories>
+				<repository>
+					<id>platform-e49</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/eclipse/updates/4.9/</url>
+				</repository>
+				<repository>
+					<id>201809</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/releases/2018-09/</url>
+				</repository>
+				<repository>
+					<id>ajdt</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/tools/ajdt/48/dev/update</url>
+				</repository>
+				<repository>
+					<id>orbit</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/tools/orbit/downloads/drops/R20180905201904/repository</url>
+				</repository>
+				<repository>
+					<id>swtbot</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/technology/swtbot/releases/latest/</url>
+				</repository>
+				<repository>
+		  			<id>groovy</id>
+		  			<layout>p2</layout>
+		  			<url>http://dist.springsource.org/snapshot/GRECLIPSE/e4.7/</url>
+				</repository>
+				<repository>
+					<id>cft</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/cft/1.1.1/</url>
+				</repository>
+				<repository>
+		  			<id>buildship-for-testing</id>
+		  			<layout>p2</layout>
+		  			<url>http://download.eclipse.org/buildship/updates/e49/releases/</url>
+				</repository>
+				<repository>
+					<id>eclipse-integration-commons</id>
+					<layout>p2</layout>
+					<url>http://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}</url>
+				</repository>
+			</repositories>
+		</profile>
+
+		<profile>
+			<id>e410</id>
+			<properties>
+				<p2.repository.name>Spring IDE for Eclipse 4.10</p2.repository.name>
+			</properties>
+			<repositories>
+				<repository>
+					<id>platform-e47</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/eclipse/updates/4.10/</url>
+				</repository>
+				<repository>
+					<id>201812</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/releases/2018-12/</url>
+				</repository>
+				<repository>
+					<id>ajdt</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/tools/ajdt/48/dev/update</url>
+				</repository>
+				<repository>
+					<id>orbit</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/tools/orbit/downloads/drops/S20181031145145/repository</url>
+				</repository>
+				<repository>
+					<id>swtbot</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/technology/swtbot/releases/latest/</url>
+				</repository>
+				<repository>
+		  			<id>groovy</id>
+		  			<layout>p2</layout>
+		  			<url>http://dist.springsource.org/snapshot/GRECLIPSE/e4.7/</url>
+				</repository>
+				<repository>
+					<id>cft</id>
+					<layout>p2</layout>
+					<url>http://download.eclipse.org/cft/1.1.1/</url>
+				</repository>
+				<repository>
+		  			<id>buildship-for-testing</id>
+		  			<layout>p2</layout>
+		  			<url>http://download.eclipse.org/buildship/updates/e49/releases/</url>
 				</repository>
 				<repository>
 					<id>eclipse-integration-commons</id>
