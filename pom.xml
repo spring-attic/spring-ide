@@ -676,6 +676,11 @@
 		  			<url>http://download.eclipse.org/buildship/updates/e48/releases/</url>
 				</repository>
 				<repository>
+		  			<id>buildship-1-for-compatibility</id>
+		  			<layout>p2</layout>
+		  			<url>http://download.eclipse.org/buildship/updates/e46/releases/1.0/</url>
+				</repository>
+				<repository>
 					<id>eclipse-integration-commons</id>
 					<layout>p2</layout>
 					<url>http://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}</url>
@@ -730,6 +735,11 @@
 		  			<url>http://download.eclipse.org/buildship/updates/e49/releases/</url>
 				</repository>
 				<repository>
+		  			<id>buildship-1-for-compatibility</id>
+		  			<layout>p2</layout>
+		  			<url>http://download.eclipse.org/buildship/updates/e46/releases/1.0/</url>
+				</repository>
+				<repository>
 					<id>eclipse-integration-commons</id>
 					<layout>p2</layout>
 					<url>http://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}</url>
@@ -782,6 +792,11 @@
 		  			<id>buildship-for-testing</id>
 		  			<layout>p2</layout>
 		  			<url>http://download.eclipse.org/buildship/updates/e49/releases/</url>
+				</repository>
+				<repository>
+		  			<id>buildship-1-for-compatibility</id>
+		  			<layout>p2</layout>
+		  			<url>http://download.eclipse.org/buildship/updates/e46/releases/1.0/</url>
 				</repository>
 				<repository>
 					<id>eclipse-integration-commons</id>
