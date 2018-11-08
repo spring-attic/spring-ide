@@ -221,7 +221,6 @@
 		<bundle id="org.springsource.ide.eclipse.commons.configurator" version="0.0.0"/>
 		<bundle id="org.springsource.ide.eclipse.commons.ui" version="0.0.0"/>
 		<bundle id="org.springsource.ide.eclipse.commons.livexp" version="0.0.0"/>
-		<bundle id="org.springsource.ide.eclipse.commons.completions" version="0.0.0"/>
 		<bundle id="org.springsource.ide.eclipse.commons.jdk_tools" version="0.0.0"/>
 
 		<bundle id="org.springframework.ide.eclipse.beans.ui.live" version="0.0.0"/>
