@@ -22,7 +22,7 @@ import java.lang.invoke.MethodType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
-import java.util.List;
+import java.util.Properties;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -156,7 +156,7 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 
 	@Override
 	public String getProgramArguments(ILaunchConfiguration conf) throws CoreException {
-		List<PropVal> props = getProperties(conf);
+		Properties props = getApplicationProperties(conf);
 		String profile = getProfile(conf);
 		boolean debugOutput = getEnableDebugOutput(conf);
 		boolean enableAnsiConsole = supportsAnsiConsoleOutput() && getEnableAnsiConsoleOutput(conf);

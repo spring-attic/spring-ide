@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point id="org.springframework.ide.eclipse.boot.launch.property.proposals" name="org.springframework.ide.eclipse.boot.launch.property.proposals" schema="schema/org.springframework.ide.eclipse.boot.launch.property.proposals.exsd"/>
 
 
  <extension

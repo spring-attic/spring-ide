@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2017 Pivotal Software, Inc.
+ * Copyright (c) 2015, 2018 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,12 +16,13 @@ import java.io.File;
 import java.net.URL;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 import java.util.function.Predicate;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -32,7 +33,6 @@ import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.BootPreferences;
-import org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.PropVal;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport;
 import org.springframework.ide.eclipse.boot.launch.process.BootProcessFactory;
@@ -61,40 +61,49 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		BootActivator.getDefault().getPreferenceStore().setToDefault(BootPreferences.PREF_BOOT_FAST_STARTUP_DEFAULT);
 	}
 
+	@SafeVarargs
+	private static final Properties buildPropewrties(Pair<String, String>... pvs) {
+		Properties props = new Properties();
+		for (Pair<String, String> pv : pvs) {
+			props.setProperty(pv.getKey(), pv.getValue());
+		}
+		return props;
+	}
+
 	public void testGetSetProperties() throws Exception {
 		ILaunchConfigurationWorkingCopy wc = createWorkingCopy();
-		assertProperties(BootLaunchConfigurationDelegate.getProperties(wc)
-				/*empty*/
-		);
+		assertEquals("", BootLaunchConfigurationDelegate.getRawApplicationProperties(wc));
 
-		BootLaunchConfigurationDelegate.setProperties(wc, null); //accepts null in lieu of empty list,
-		assertProperties(BootLaunchConfigurationDelegate.getProperties(wc)
-				/*empty*/
-		);
+		BootLaunchConfigurationDelegate.setRawApplicationProperties(wc, null); //accepts null in lieu of empty list,
+		assertEquals("", BootLaunchConfigurationDelegate.getRawApplicationProperties(wc));
 
 		//store one single property
 		doGetAndSetProps(wc,
-				pv("foo", "Hello", true)
+				"foo=Hello",
+				buildPropewrties(Pair.of("foo", "Hello"))
 		);
 
 		//store empty property list
-		doGetAndSetProps(wc
-				/*empty*/
+		doGetAndSetProps(wc,
+				"",
+				buildPropewrties()
 		);
 
 		//store a few properties
 		doGetAndSetProps(wc,
-				pv("foo.bar", "snuffer.nazz", true),
-				pv("neala", "nolo", false),
-				pv("Hohoh", "Santa Claus", false)
+				"foo.bar: snuffer.nazz\n" +
+				"#neala: nolo\n" +
+				"#Hohoh: Santa Claus",
+				buildPropewrties(Pair.of("foo.bar", "snuffer.nazz"))
 		);
 
 		//store properties with identical keys
 		doGetAndSetProps(wc,
-				pv("foo", "snuffer.nazz", true),
-				pv("foo", "nolo", false),
-				pv("bar", "Santa Claus", false),
-				pv("bar", "Santkkk ", false)
+				"foo=snuffer.nazz\n" +
+				"#foo=nolo\n" +
+				"#bar=Santa Claus\n" +
+				"#bar=Santkkk ",
+				buildPropewrties(Pair.of("foo", "snuffer.nazz"))
 		);
 	}
 
@@ -102,14 +111,10 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		return createWorkingCopy(BootLaunchConfigurationDelegate.TYPE_ID);
 	}
 
-	private void doGetAndSetProps(ILaunchConfigurationWorkingCopy wc, PropVal... props) {
-		BootLaunchConfigurationDelegate.setProperties(wc, Arrays.asList(props));
-		List<PropVal> retrieved = BootLaunchConfigurationDelegate.getProperties(wc);
-		assertProperties(retrieved, props);
-	}
-
-	private PropVal pv(String name, String value, boolean isChecked) {
-		return new PropVal(name, value, isChecked);
+	private void doGetAndSetProps(ILaunchConfigurationWorkingCopy wc, String props, Properties expected) {
+		BootLaunchConfigurationDelegate.setRawApplicationProperties(wc, props);
+		Properties retrieved = BootLaunchConfigurationDelegate.getApplicationProperties(wc);
+		assertEquals(expected, retrieved);
 	}
 
 	public void testSetGetProject() throws Exception {
@@ -159,13 +164,13 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 
 	public void testClearProperties() throws Exception {
 		ILaunchConfigurationWorkingCopy wc = createWorkingCopy();
-		BootLaunchConfigurationDelegate.setProperties(wc, Arrays.asList(
-				pv("some", "thing", true),
-				pv("some.other", "thing", false)
-		));
-		assertFalse(BootLaunchConfigurationDelegate.getProperties(wc).isEmpty());
+		BootLaunchConfigurationDelegate.setRawApplicationProperties(wc,
+				"some=thing\n" +
+				"#some.other=thing"
+		);
+		assertFalse(BootLaunchConfigurationDelegate.getApplicationProperties(wc).isEmpty());
 		BootLaunchConfigurationDelegate.clearProperties(wc);
-		assertTrue(BootLaunchConfigurationDelegate.getProperties(wc).isEmpty());
+		assertTrue(BootLaunchConfigurationDelegate.getApplicationProperties(wc).isEmpty());
 	}
 
 	public void testGetSetDebug() throws Exception {
@@ -261,12 +266,12 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		createLaunchReadyProject(TEST_PROJECT);
 		ILaunchConfigurationWorkingCopy wc = createBaseWorkingCopy();
 
-		BootLaunchConfigurationDelegate.setProperties(wc, Arrays.asList(
-				pv("foo", "foo is enabled", true),
-				pv("bar", "bar is not enabled", false),
-				pv("zor", "zor enabled", true),
-				pv("zor", "zor disabled", false)
-		));
+		BootLaunchConfigurationDelegate.setRawApplicationProperties(wc,
+				"foo=foo is enabled\n" +
+				"#bar=bar is not enabled\n" +
+				"zor=zor enabled\n" +
+				"#zor=zor disabled"
+		);
 
 		int jmxPort = JmxBeanSupport.randomPort(); // must set or it will be generated randomly
 												   // and then we can't make the 'assert' below pass easily.
@@ -477,15 +482,11 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		BootLaunchConfigurationDelegate.setEnableLiveBeanSupport(wc, false);
 		BootLaunchConfigurationDelegate.setJMXPort(wc, "");
 		BootLaunchConfigurationDelegate.setProfile(wc, "");
-		BootLaunchConfigurationDelegate.setProperties(wc, null);
+		BootLaunchConfigurationDelegate.setRawApplicationProperties(wc, "");
 		return wc;
 	}
 
 	///////////////////////////////////////////////////////////////////////////////
-
-	public static void assertProperties(List<PropVal> actual, PropVal... expect) {
-		assertElements(actual, expect);
-	}
 
 	public void testFastStartupNoVmArgs() throws Exception {
 		createLaunchReadyProject(TEST_PROJECT);

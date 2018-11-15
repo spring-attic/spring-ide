@@ -109,12 +109,6 @@
       </initializer>
   </extension>
 <extension
-      point="org.springframework.ide.eclipse.boot.launch.property.proposals">
-   <provider
-         class="org.springframework.ide.eclipse.boot.launch.properties.editor.launch.SpringBootPropertyNameContentProposalProvider$Factory">
-   </provider>
-</extension>
-<extension
       point="org.eclipse.ui.commands">
 </extension>
 

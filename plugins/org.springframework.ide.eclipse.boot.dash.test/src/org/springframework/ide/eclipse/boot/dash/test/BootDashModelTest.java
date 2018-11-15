@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2017 Pivotal, Inc.
+ * Copyright (c) 2015, 2018 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,7 +42,6 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -103,7 +102,6 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetT
 import org.springframework.ide.eclipse.boot.dash.util.CollectionUtils;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashLabels;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
-import org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.PropVal;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.util.PortFinder;
 import org.springframework.ide.eclipse.boot.test.AutobuildingEnablement;
@@ -955,9 +953,7 @@ public class BootDashModelTest {
 			//Change port in launch conf and restart
 			ILaunchConfiguration conf = element.getActiveConfig();
 			ILaunchConfigurationWorkingCopy wc = conf.getWorkingCopy();
-			BootLaunchConfigurationDelegate.setProperties(wc, Collections.singletonList(
-					new PropVal("server.port", "6789", true)
-			));
+			BootLaunchConfigurationDelegate.setRawApplicationProperties(wc, "server.port=6789");
 			wc.doSave();
 			final BootDashElement childElement = getSingleValue(element.getCurrentChildren());
 
@@ -1640,9 +1636,8 @@ public class BootDashModelTest {
 
 	private void setPort(ILaunchConfiguration conf, int port) throws Exception {
 		ILaunchConfigurationWorkingCopy wc = conf.getWorkingCopy();
-		assertTrue("Only supported on 'empty' configs", BootLaunchConfigurationDelegate.getProperties(wc).isEmpty());
-		List<PropVal> props = Arrays.asList(new PropVal("server.port", ""+port, true));
-		BootLaunchConfigurationDelegate.setProperties(wc, props);
+		assertTrue("Only supported on 'empty' configs", BootLaunchConfigurationDelegate.getApplicationProperties(wc).isEmpty());
+		BootLaunchConfigurationDelegate.setRawApplicationProperties(wc, "server.port=" + port);
 		wc.doSave();
 	}
 

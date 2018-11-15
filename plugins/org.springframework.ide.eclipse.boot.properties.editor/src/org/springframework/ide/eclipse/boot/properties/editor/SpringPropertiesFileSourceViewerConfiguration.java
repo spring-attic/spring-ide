@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2017 Pivotal, Inc.
+ * Copyright (c) 2015, 2018 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,7 +16,6 @@ import java.util.Map;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.IColorManager;
@@ -36,7 +35,6 @@ import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.editors.text.EditorsPlugin;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -70,13 +68,13 @@ extends PropertiesFileSourceViewerConfiguration implements IReconcileTrigger {
 			return new SpringPropertiesReconcileEngine(e.getIndexProvider(), e.getTypeUtil());
 		}
 	};
-	private ITextEditor editor;
+	private IJavaProject jp;
 
 	public SpringPropertiesFileSourceViewerConfiguration(
 			IColorManager colorManager, IPreferenceStore preferenceStore,
-			ITextEditor editor, String partitioning) {
+			ITextEditor editor, String partitioning, IJavaProject jp) {
 		super(colorManager, preferenceStore, editor, partitioning);
-		this.editor = editor;
+		this.jp = jp;
 	}
 
 	@Override
@@ -101,18 +99,10 @@ extends PropertiesFileSourceViewerConfiguration implements IReconcileTrigger {
 
 	private SpringPropertiesCompletionEngine getEngine() throws Exception {
 		if (engine==null) {
-			ITextEditor editor = getEditor();
-			if (editor == null) {
-				throw ExceptionUtil.coreException("Text editor is missing for the viewer to be configured");
+			if (jp == null) {
+				throw ExceptionUtil.coreException("Java project is missing for the viewer to be configured");
 			} else {
-				IEditorInput editorInput = getEditor().getEditorInput();
-				IJavaProject jp = EditorUtility.getJavaProject(editorInput);
-				if (jp == null) {
-					throw ExceptionUtil.coreException("Unable to find Java project owning editor input: "
-							+ editorInput.getName() + " (Editor input: " + editorInput.getClass().getName() + ")");
-				} else {
-					engine = new SpringPropertiesCompletionEngine(jp);
-				}
+				engine = new SpringPropertiesCompletionEngine(jp);
 			}
 		}
 		return engine;
@@ -140,11 +130,7 @@ extends PropertiesFileSourceViewerConfiguration implements IReconcileTrigger {
 
 	protected QuickfixContext getQuickfixContext(ISourceViewer sourceViewer) {
 		return new DefaultQuickfixContext(SpringPropertiesEditorPlugin.PLUGIN_ID, getPreferencesStore(), sourceViewer,
-				new DefaultUserInteractions(getShell()));
-	}
-
-	protected Shell getShell() {
-		return editor.getSite().getShell();
+				new DefaultUserInteractions(sourceViewer.getTextWidget().getShell()));
 	}
 
 	private IDialogSettings getDialogSettings(ISourceViewer sourceViewer, String dialogSettingsKey) {
@@ -203,7 +189,7 @@ extends PropertiesFileSourceViewerConfiguration implements IReconcileTrigger {
 	@Override
 	public IQuickAssistAssistant getQuickAssistAssistant(ISourceViewer sourceViewer) {
 		QuickAssistAssistant assistant= new QuickAssistAssistant();
-		assistant.setQuickAssistProcessor(new SpringPropertyProblemQuickAssistProcessor(getPreferencesStore(), new DefaultUserInteractions(getShell())));
+		assistant.setQuickAssistProcessor(new SpringPropertyProblemQuickAssistProcessor(getPreferencesStore(), new DefaultUserInteractions(sourceViewer.getTextWidget().getShell())));
 		assistant.setRestoreCompletionProposalSize(EditorsPlugin.getDefault().getDialogSettingsSection("quick_assist_proposal_size")); //$NON-NLS-1$
 		assistant.setInformationControlCreator(getQuickAssistAssistantInformationControlCreator());
 		return assistant;

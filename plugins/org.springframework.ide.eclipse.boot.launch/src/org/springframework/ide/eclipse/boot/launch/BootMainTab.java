@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2017 Pivotal, Inc.
+ * Copyright (c) 2015, 2018 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,7 +21,7 @@ import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.ide.eclipse.boot.launch.livebean.EnableJmxSection;
 import org.springframework.ide.eclipse.boot.launch.profiles.ProfileHistory;
 import org.springframework.ide.eclipse.boot.launch.profiles.ProfileLaunchTabSection;
-import org.springframework.ide.eclipse.boot.launch.properties.PropertiesTableSection;
+import org.springframework.ide.eclipse.boot.launch.properties.PropertiesEditorSection;
 import org.springframework.ide.eclipse.boot.launch.util.DelegatingLaunchConfigurationTabSection;
 import org.springframework.ide.eclipse.boot.launch.util.GroupLaunchTabSection;
 import org.springframework.ide.eclipse.boot.launch.util.LaunchConfigurationTabWithSections;
@@ -73,7 +73,7 @@ public class BootMainTab extends LaunchConfigurationTabWithSections implements I
 				new GroupLaunchTabSection(this, null, jvmArgsSections.toArray(new WizardPageSection[jvmArgsSections.size()])).columns(2),
 				new EnableJmxSection(this, model.enableJmx),
 				new HLineSection(this),
-				new PropertiesTableSection(this, model.project.selection)
+				new PropertiesEditorSection(this, model.project.selection)
 		});
 	}
 

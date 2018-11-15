@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2018 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,8 +14,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -64,7 +64,7 @@ public class BootDevtoolsClientLaunchConfigurationDelegate extends AbstractBootL
 
 	@Override
 	public String getProgramArguments(ILaunchConfiguration conf) throws CoreException {
-		List<PropVal> props = getProperties(conf);
+		Properties props = getApplicationProperties(conf);
 		ArrayList<String> args = new ArrayList<>();
 		addPropertiesArguments(args, props);
 		String secret = getSecret(conf);

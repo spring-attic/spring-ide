@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014-2016 Pivotal, Inc.
+ * Copyright (c) 2014, 2018 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,9 @@ package org.springframework.ide.eclipse.boot.properties.editor;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.content.IContentType;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEditor;
 import org.eclipse.jdt.ui.text.JavaTextTools;
@@ -48,7 +50,10 @@ public class SpringPropertiesFileEditor extends PropertiesFileEditor implements 
 		//Override SourceViewerConfiguration with our own
 		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
 		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
-		setSourceViewerConfiguration(fSourceViewerConf = new SpringPropertiesFileSourceViewerConfiguration(textTools.getColorManager(), store, this, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING));
+
+		IJavaProject jp = EditorUtility.getJavaProject(getEditorInput());
+
+		setSourceViewerConfiguration(fSourceViewerConf = new SpringPropertiesFileSourceViewerConfiguration(textTools.getColorManager(), store, this, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, jp));
 		SpringPropertiesEditorPlugin.getIndexManager().addListener(this);
 		SpringPropertiesEditorPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 		setEditorContextMenuId("#BootPropertiesEditorContext");

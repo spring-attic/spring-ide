@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal Software, Inc.
+ * Copyright (c) 2015, 2018 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,7 +12,7 @@ package org.springframework.ide.eclipse.boot.launch.test;
 
 import static org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.DEFAULT_ENABLE_DEBUG_OUTPUT;
 import static org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.getEnableDebugOutput;
-import static org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.getProperties;
+import static org.springframework.ide.eclipse.boot.launch.AbstractBootLaunchConfigurationDelegate.getRawApplicationProperties;
 import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.DEFAULT_ENABLE_LIVE_BEAN_SUPPORT;
 import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.getEnableLiveBeanSupport;
 import static org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate.getJMXPort;
@@ -133,9 +133,7 @@ public class BootLaunchShortcutTest extends BootLaunchTestCase {
 		assertEquals(DEFAULT_ENABLE_LIVE_BEAN_SUPPORT(), getEnableLiveBeanSupport(conf));
 		int port = Integer.parseInt(getJMXPort(conf));
 		assertEquals(0, port); // 0 means 'allocate dynamically'
-		assertElements(getProperties(conf)
-				/*empty*/
-		);
+		assertEquals("", getRawApplicationProperties(conf));
 	}
 
 	public void testConfigurationDeletedWhenProjectDeleted() throws Exception {
@@ -149,6 +147,7 @@ public class BootLaunchShortcutTest extends BootLaunchTestCase {
 		//The delete fo launch conf happens in response to project delete, but
 		// its in a job so we don't know exactly when it will be done... so...
 		new ACondition() {
+			@Override
 			public boolean test() throws Exception {
 				assertFalse(conf.exists());
 				return true;
