@@ -14,17 +14,6 @@
    <extension
          point="org.eclipse.ui.menus">
       <menuContribution
-            locationURI="popup:#BootPropertiesEditorContext?after=additions">
-<!--         <menu
-               id="org.springframework.ide.eclipse.boot.properties.editor.menu"
-               label="Spring"> -->
-            <command
-                  icon="icons/boot-icon.png"
-                  commandId="org.springframework.ide.eclipse.boot.properties.editor.convertPropertiesToYaml">
-            </command>
-<!--         </menu> -->
-      </menuContribution>
-      <menuContribution
           locationURI="popup:org.eclipse.ui.popup.any?after=additions">
             <command
                   icon="icons/boot-icon.png"
@@ -35,14 +24,19 @@
                        <count
                              value="1">
                        </count>
-                       <with variable="activeMenuSelection">
+                       <or>
+                         <with variable="activeEditorId">
+                           <equals value="SpringBootPropertyEditor"/>
+                         </with>
+                         <with variable="activeMenuSelection">
                           <iterate
                                ifEmpty="false">
                              <adapt type="org.eclipse.core.resources.IResource">
                                   <test property="org.eclipse.core.resources.extension" value="properties" />
                              </adapt>
                           </iterate>
-                       </with>
+                         </with>
+                       </or>
                    </and>
                 </visibleWhen>
             </command>
