@@ -50,6 +50,8 @@ import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
+import com.google.common.base.Supplier;
+
 /**
  * An IPageSection that contains a table-based properties editor.
  *
@@ -120,9 +122,10 @@ public class PropertiesEditorSection extends WizardPageSection implements ILaunc
 						.loadClass(LEGACY_PROPERTIES_EDITOR_VIEWER_CONFIG_CLASS_NAME);
 				Constructor<SourceViewerConfiguration> constructor = (Constructor<SourceViewerConfiguration>) klass
 						.getConstructor(IColorManager.class, IPreferenceStore.class, ITextEditor.class, String.class,
-								IJavaProject.class);
+								Supplier.class);
+				Supplier<IJavaProject> jpSupplier = () -> jp;
 				return constructor.newInstance(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), prefStore,
-						editor, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, jp);
+						editor, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, jpSupplier);
 			} catch (Exception e) {
 				Log.log(e);
 			}

@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.boot.properties.editor;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.content.IContentType;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
@@ -50,10 +49,9 @@ public class SpringPropertiesFileEditor extends PropertiesFileEditor implements 
 		//Override SourceViewerConfiguration with our own
 		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
 		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
-
-		IJavaProject jp = EditorUtility.getJavaProject(getEditorInput());
-
-		setSourceViewerConfiguration(fSourceViewerConf = new SpringPropertiesFileSourceViewerConfiguration(textTools.getColorManager(), store, this, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, jp));
+		setSourceViewerConfiguration(fSourceViewerConf = new SpringPropertiesFileSourceViewerConfiguration(
+				textTools.getColorManager(), store, this, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING,
+				() -> EditorUtility.getJavaProject(getEditorInput())));
 		SpringPropertiesEditorPlugin.getIndexManager().addListener(this);
 		SpringPropertiesEditorPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 		setEditorContextMenuId("#BootPropertiesEditorContext");

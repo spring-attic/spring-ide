@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.properties.editor;
 import java.lang.reflect.Method;
 import java.util.Map;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -53,6 +54,8 @@ import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblem
 import org.springframework.ide.eclipse.editor.support.util.DefaultUserInteractions;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
+import com.google.common.base.Supplier;
+
 @SuppressWarnings("restriction")
 public class SpringPropertiesFileSourceViewerConfiguration
 extends PropertiesFileSourceViewerConfiguration implements IReconcileTrigger {
@@ -68,13 +71,14 @@ extends PropertiesFileSourceViewerConfiguration implements IReconcileTrigger {
 			return new SpringPropertiesReconcileEngine(e.getIndexProvider(), e.getTypeUtil());
 		}
 	};
-	private IJavaProject jp;
+	private Supplier<IJavaProject> jpSupplier;
 
 	public SpringPropertiesFileSourceViewerConfiguration(
 			IColorManager colorManager, IPreferenceStore preferenceStore,
-			ITextEditor editor, String partitioning, IJavaProject jp) {
+			ITextEditor editor, String partitioning, Supplier<IJavaProject> jpSupplier) {
 		super(colorManager, preferenceStore, editor, partitioning);
-		this.jp = jp;
+		Assert.isNotNull(jpSupplier);
+		this.jpSupplier = jpSupplier;
 	}
 
 	@Override
@@ -99,6 +103,7 @@ extends PropertiesFileSourceViewerConfiguration implements IReconcileTrigger {
 
 	private SpringPropertiesCompletionEngine getEngine() throws Exception {
 		if (engine==null) {
+			IJavaProject jp = jpSupplier.get();
 			if (jp == null) {
 				throw ExceptionUtil.coreException("Java project is missing for the viewer to be configured");
 			} else {
