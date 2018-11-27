@@ -103,18 +103,26 @@
    <extension
          point="org.eclipse.ui.propertyPages">
       <page
-            id="org.springframework.ide.eclipse.ui.projectPropertyPage"
-            name="%projectPropertyCategory"
-            class="org.springframework.ide.eclipse.ui.dialogs.ProjectPropertyPage"
             adaptable="true"
+            category="org.springsource.ide.eclipse.commons.projectPropertyPage"
+            class="org.springframework.ide.eclipse.ui.dialogs.ProjectPropertyPage"
+            id="org.springframework.ide.eclipse.ui.validationPropertyPage"
+            name="%projectPropertyPage"
             objectClass="org.eclipse.core.resources.IProject">
-         <filter
-               name="nature"
-               value="org.springframework.ide.eclipse.core.springnature">
-         </filter>
          <keywordReference
                id="org.springframework.ide.eclipse.ui.keywords">
          </keywordReference>
+         <enabledWhen>
+            <and>
+               <test
+                     property="org.eclipse.core.resources.projectNature"
+                     value="org.springframework.ide.eclipse.core.springnature">
+               </test>
+               <test
+                     property="org.springsource.ide.eclipse.commons.isSpringProject">
+               </test>
+            </and>
+         </enabledWhen>
       </page>
    </extension>
    

@@ -83,12 +83,18 @@
             id="com.springsource.sts.ide.maven.internal.ui.mavenPreferencePage"
             name="Dependency Management"
             class="org.springframework.ide.eclipse.maven.internal.ui.MavenPreferencePage"
-            category="org.springframework.ide.eclipse.ui.projectPropertyPage">
+            category="org.springsource.ide.eclipse.commons.projectPropertyPage">
            <enabledWhen>
                <adapt type="org.eclipse.core.resources.IProject">
-	                 <test property="org.eclipse.core.resources.projectNature"
-	                       value="org.springframework.ide.eclipse.core.springnature">
-	                 </test>
+                  <and>
+                     <test
+                           property="org.eclipse.core.resources.projectNature"
+                           value="org.springframework.ide.eclipse.core.springnature">
+                     </test>
+                     <test
+                           property="org.springsource.ide.eclipse.commons.isSpringProject">
+                     </test>
+                  </and>
                </adapt>
            </enabledWhen>
       </page>

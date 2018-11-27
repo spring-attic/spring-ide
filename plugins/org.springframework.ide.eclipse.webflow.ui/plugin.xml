@@ -43,14 +43,21 @@
             name="%configurationPropertyPage"
             objectClass="org.eclipse.core.resources.IProject"
             adaptable="true"
-            category="org.springframework.ide.eclipse.ui.projectPropertyPage">
-         <filter
-               name="nature"
-               value="org.springframework.ide.eclipse.core.springnature">
-         </filter>
+            category="org.springsource.ide.eclipse.commons.projectPropertyPage">
          <keywordReference
                id="org.springframework.ide.eclipse.webflow.ui.keywords">
          </keywordReference>
+         <enabledWhen>
+            <and>
+               <test
+                     property="org.eclipse.core.resources.projectNature"
+                     value="org.springframework.ide.eclipse.core.springnature">
+               </test>
+               <test
+                     property="org.springsource.ide.eclipse.commons.isSpringProject">
+               </test>
+            </and>
+         </enabledWhen>
       </page>
    </extension>
    

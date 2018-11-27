@@ -76,14 +76,15 @@
             class="org.springframework.ide.eclipse.boot.properties.editor.preferences.SpringPropertiesEditorPreferencesPage"
             adaptable="true"
             objectClass="org.eclipse.core.resources.IProject"
-            category="org.springframework.ide.eclipse.ui.projectPropertyPage">
-         <filter
-               name="nature"
-               value="org.springframework.ide.eclipse.core.springnature">
-         </filter>
+            category="org.springsource.ide.eclipse.commons.projectPropertyPage">
          <keywordReference
                id="org.springframework.ide.eclipse.ui.keywords">
          </keywordReference>
+         <enabledWhen>
+            <test
+                  property="org.springsource.ide.eclipse.boot.isBootProject">
+            </test>
+         </enabledWhen>
       </page>
       <page
             id="org.springframework.ide.eclipse.boot.properties.editor.preferences.SpringYamlEditorProjectPropertyPage"
@@ -91,14 +92,15 @@
             class="org.springframework.ide.eclipse.boot.properties.editor.preferences.SpringYamlEditorPreferencesPage"
             adaptable="true"
             objectClass="org.eclipse.core.resources.IProject"
-            category="org.springframework.ide.eclipse.ui.projectPropertyPage">
-         <filter
-               name="nature"
-               value="org.springframework.ide.eclipse.core.springnature">
-         </filter>
+            category="org.springsource.ide.eclipse.commons.projectPropertyPage">
          <keywordReference
                id="org.springframework.ide.eclipse.ui.keywords">
          </keywordReference>
+         <enabledWhen>
+            <test
+                  property="org.springsource.ide.eclipse.boot.isBootProject">
+            </test>
+         </enabledWhen>
       </page>
    </extension>
    
