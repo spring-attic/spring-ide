@@ -2,26 +2,58 @@
 <?eclipse version="3.4"?>
 <plugin>
     <extension
-         point="org.eclipse.ui.popupMenus">
-          <objectContribution
-            objectClass="org.eclipse.core.resources.IProject"
-            adaptable="true"
-            id="org.springframework.ide.eclipse.boot.launch.livebean.OpenLiveBeansGraphAction">
-         <visibility>
-             <!-- TODO: only allow this for spring boot projects? -->
-            <objectState
-                  name="nature"
-                  value="org.springframework.ide.eclipse.core.springnature">
-            </objectState>
-         </visibility>
-         <action
-                   class="org.springframework.ide.eclipse.boot.launch.livebean.OpenLiveBeansGraphAction"
-                   enablesFor="+"
-                   icon="resources/icons/live-beans-graph.png"
-                   id="org.springframework.ide.eclipse.boot.ui.OpenLiveBeansGraphAction"
-                   label="Open Live Beans Graph"
-                   menubarPath="org.springframework.ide.eclipse.ui.tools/group0">
-         </action>
-      </objectContribution>
+          point="org.eclipse.ui.handlers">
+       <handler
+             class="org.springframework.ide.eclipse.boot.launch.livebean.OpenLiveBeanGraphHandler"
+             commandId="org.springframework.ide.eclipse.boot.launch.livebean.OpenLiveBeanGraph">
+          <enabledWhen>
+             <and>
+                <count
+                      value="1">
+                </count>
+                <iterate>
+                   <adapt
+                         type="org.eclipse.core.resources.IProject">
+                      <test
+                            forcePluginActivation="true"
+                            property="org.springsource.ide.eclipse.boot.isBootProject">
+                      </test>
+                   </adapt>
+                </iterate>
+             </and>
+          </enabledWhen>
+       </handler>
+    </extension>
+    <extension
+          point="org.eclipse.ui.menus">
+       <menuContribution
+             allPopups="false"
+             locationURI="popup:org.springframework.ide.eclipse.ui.tools?after=boot">
+          <command
+                commandId="org.springframework.ide.eclipse.boot.launch.livebean.OpenLiveBeanGraph"
+                icon="platform:/plugin/org.springframework.ide.eclipse.beans.ui.livegraph/icons/live-beans-graph.png"
+                id="org.springframework.ide.eclipse.boot.launch.livebean.OpenLiveBeanGraph"
+                label="Open Live Beans Graph"
+                mnemonic="G"
+                style="push">
+             <visibleWhen
+                   checkEnabled="false">
+                <and>
+                   <count
+                         value="1">
+                   </count>
+                   <iterate>
+                      <adapt
+                            type="org.eclipse.core.resources.IProject">
+                         <test
+                               forcePluginActivation="true"
+                               property="org.springsource.ide.eclipse.boot.isBootProject">
+                         </test>
+                      </adapt>
+                   </iterate>
+                </and>
+             </visibleWhen>
+          </command>
+       </menuContribution>
     </extension>
 </plugin>

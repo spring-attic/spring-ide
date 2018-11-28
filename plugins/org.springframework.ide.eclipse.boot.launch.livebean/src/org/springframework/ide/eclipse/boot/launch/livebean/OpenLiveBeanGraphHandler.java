@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2017 Pivotal Software, Inc.
+ * Copyright (c) 2014, 2018 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,10 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.commands.IHandler;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.DebugPlugin;
@@ -22,80 +26,76 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.handlers.HandlerUtil;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModel;
 import org.springframework.ide.eclipse.beans.ui.livegraph.model.LiveBeansModelGenerator;
 import org.springframework.ide.eclipse.beans.ui.livegraph.views.LiveBeansGraphView;
-import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport.Feature;
-import org.springframework.ide.eclipse.boot.util.Log;
-import org.springsource.ide.eclipse.commons.frameworks.ui.internal.actions.AbstractActionDelegate;
+import org.springsource.ide.eclipse.commons.frameworks.ui.internal.utils.ProjectFilter;
+import org.springsource.ide.eclipse.commons.frameworks.ui.internal.utils.SelectionUtils;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
 
-public class OpenLiveBeansGraphAction extends AbstractActionDelegate {
-
+public class OpenLiveBeanGraphHandler extends AbstractHandler implements IHandler {
+	
 	private static final String HOST = "127.0.0.1";
 
 	@Override
-	public void selectionChanged(IAction action, ISelection sel) {
-		super.selectionChanged(action, sel);
-		action.setEnabled(BootPropertyTester.isBootProject(getSelectedProject()));
-	}
+	public Object execute(ExecutionEvent event) throws ExecutionException {
+		IProject project = getSelectedProject(event);
+		if (project == null) {
+			throw new ExecutionException("No selected project");
+		}
+		try {
+			connectToProject(project);
+		} catch (Exception e) {
+			Log.log(e);
+			MessageDialog.openError(HandlerUtil.getActiveShell(event), "Error", ExceptionUtil.getMessage(e)+"\n\n"
+					+ "Check the error log for more details");
 
-	/**
-	 * @return The first selected project or null if no project is selected.
-	 */
-	private IProject getSelectedProject() {
-		List<IProject> projects = getSelectedProjects();
-		if (projects!=null && !projects.isEmpty()) {
-			return projects.get(0);
+			throw new ExecutionException("Error occurred while opening Live Beans Graph for project " + project.getName(), e);
 		}
 		return null;
 	}
 
-	@Override
-	public void run(IAction action) {
-		try {
-			IProject project = getSelectedProject();
-			connectToProject(project);
-		} catch (Exception e) {
-			Log.log(e);
-			MessageDialog.openError(getShell(), "Error", ExceptionUtil.getMessage(e)+"\n\n"
-					+ "Check the error log for more details");
+
+	private IProject getSelectedProject(ExecutionEvent event) {
+		ISelection selection = HandlerUtil.getCurrentSelection(event);
+		if (selection!=null) {
+			List<IProject> projects = SelectionUtils.getProjects(selection, ProjectFilter.anyProject);
+			if (projects!=null && !projects.isEmpty()) {
+				return projects.get(0);
+			}
 		}
+		return null;
 	}
 
-	/**
-	 * Tries to open live beans view and connect it to a running process associated with the
-	 * project.
-	 */
-	private void connectToProject(IProject project) {
-		try {
-			String serviceUrl = getServiceUrl(project);
-			if (serviceUrl==null) {
-				throw ExceptionUtil.coreException("Didn't find a JMX-enabled process for project '"+project.getName()+"'\n"+
-						"To open the livebeans graph a process must be run with the following or similar VM arguments:\n\n"
-						+ JmxBeanSupport.jmxBeanVmArgs("${jmxPort}", EnumSet.of(Feature.LIVE_BEAN_GRAPH))
-				);
-			}
 
-			LiveBeansModel model = LiveBeansModelGenerator.connectToModel(serviceUrl, /*username*/null, /*password*/null, /*appName*/"", project);
-			IViewPart part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
-					.showView(LiveBeansGraphView.VIEW_ID);
-			if (part instanceof LiveBeansGraphView) {
-				((LiveBeansGraphView) part).setInput(model);
-			}
+	/**
+	 * Tries to open live beans view and connect it to a running process associated
+	 * with the project.
+	 */
+	private void connectToProject(IProject project) throws CoreException {
+		String serviceUrl = getServiceUrl(project);
+		if (serviceUrl == null) {
+			throw ExceptionUtil.coreException("Didn't find a JMX-enabled process for project '" + project.getName()
+					+ "'\n"
+					+ "To open the livebeans graph a process must be run with the following or similar VM arguments:\n\n"
+					+ JmxBeanSupport.jmxBeanVmArgs("${jmxPort}", EnumSet.of(Feature.LIVE_BEAN_GRAPH)));
 		}
-		catch (Exception e) {
-			Log.log(e);
-			MessageDialog.openError(getShell(), "Error", ExceptionUtil.getMessage(e)+"\n\n"
-					+ "Check the error log for more details");
+
+		LiveBeansModel model = LiveBeansModelGenerator.connectToModel(serviceUrl, /* username */null,
+				/* password */null, /* appName */"", project);
+		IViewPart part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
+				.showView(LiveBeansGraphView.VIEW_ID);
+		if (part instanceof LiveBeansGraphView) {
+			((LiveBeansGraphView) part).setInput(model);
 		}
 	}
 
@@ -204,4 +204,5 @@ public class OpenLiveBeansGraphAction extends AbstractActionDelegate {
 		}
 		return candidateConfigs;
 	}
+
 }

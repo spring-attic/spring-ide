@@ -138,10 +138,6 @@
                   <adapt
                         type="org.eclipse.core.resources.IResource">
                      <test
-                           property="org.eclipse.core.resources.name"
-                           value="pom.xml">
-                     </test>
-                     <test
                            forcePluginActivation="true"
                            property="org.springsource.ide.eclipse.boot.isBootResource"
                            value="true">
@@ -157,36 +153,42 @@
    <extension
          point="org.eclipse.ui.menus">
       <menuContribution
-            locationURI="popup:org.eclipse.ui.popup.any?after=additions">
-            <menu
-                  id="org.springsource.ide.eclipse.boot.pomMenu"
-                  label="Spring">
-                <visibleWhen
-                    checkEnabled="false">
-	              <and>
-		             <count value="1"/>
-		             <iterate>
-		           	   <adapt type="org.eclipse.core.resources.IResource">
-		           	      <test property="org.eclipse.core.resources.name"
-		           	            value="pom.xml"/>
-			       	      <test
-			                    forcePluginActivation="true"
-			                    property="org.springsource.ide.eclipse.boot.isBootResource"
-			                    value="true"/>
-		           	   </adapt>
-		             </iterate>
-	              </and>
-                </visibleWhen>
-	            <command
-	                  commandId="org.springframework.ide.eclipse.boot.commands.editStartersCommand"
-	                  id="org.springframework.ide.eclipse.boot.menus.editStarters"
-	                  label="Edit Starters"
-	                  mnemonic="S">
-	                  <visibleWhen
-	                        checkEnabled="true">
-	                  </visibleWhen>
-	            </command>
-            </menu>
+            allPopups="false"
+            locationURI="popup:org.springframework.ide.eclipse.ui.tools?after=boot">
+         <command
+               commandId="org.springframework.ide.eclipse.boot.commands.editStartersCommand"
+               icon="platform:/plugin/org.springframework.ide.eclipse.boot/resources/icons/boot-18x16.png"
+               id="org.springframework.ide.eclipse.boot.menus.editStarters"
+               label="Edit Starters"
+               mnemonic="S"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <and>
+                  <count
+                        value="1">
+                  </count>
+                  <iterate>
+                     <adapt
+                           type="org.eclipse.core.resources.IResource">
+                        <or>
+                           <adapt
+                                 type="org.eclipse.core.resources.IProject">
+                              <test
+                                    forcePluginActivation="true"
+                                    property="org.springsource.ide.eclipse.boot.isBootProject">
+                              </test>
+                           </adapt>
+                           <test
+                                 property="org.eclipse.core.resources.name"
+                                 value="pom.xml">
+                           </test>
+                        </or>
+                     </adapt>
+                  </iterate>
+               </and>
+            </visibleWhen>
+         </command>
       </menuContribution>
    </extension>
    <extension

@@ -19,7 +19,7 @@
                    enablesFor="1"
                    id="org.springframework.ide.eclipse.boot.ui.EnableDisableBootDevtools"
                    label="Add/Remove Boot Devtools"
-                   menubarPath="org.springframework.ide.eclipse.ui.tools/group0">
+                   menubarPath="org.springframework.ide.eclipse.ui.tools/boot">
          </action>
       </objectContribution>
    	</extension>
