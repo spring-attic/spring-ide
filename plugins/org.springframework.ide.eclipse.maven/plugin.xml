@@ -85,17 +85,32 @@
             class="org.springframework.ide.eclipse.maven.internal.ui.MavenPreferencePage"
             category="org.springsource.ide.eclipse.commons.projectPropertyPage">
            <enabledWhen>
-               <adapt type="org.eclipse.core.resources.IProject">
-                  <and>
-                     <test
-                           property="org.eclipse.core.resources.projectNature"
-                           value="org.springframework.ide.eclipse.core.springnature">
-                     </test>
-                     <test
-                           property="org.springsource.ide.eclipse.commons.isSpringProject">
-                     </test>
-                  </and>
-               </adapt>
+              <or>
+                 <and>
+                    <instanceof
+                          value="org.eclipse.core.resources.IProject">
+                    </instanceof>
+                    <test
+                          property="org.eclipse.core.resources.projectNature"
+                          value="org.springframework.ide.eclipse.core.springnature">
+                    </test>
+                    <test
+                          property="org.springsource.ide.eclipse.commons.isSpringProject">
+                    </test>
+                 </and>
+                 <and>
+                    <instanceof
+                          value="org.eclipse.jdt.core.IJavaProject">
+                    </instanceof>
+                    <test
+                          property="org.springsource.ide.eclipse.commons.java.isInSpringProject">
+                    </test>
+                    <test
+                          property="org.springsource.ide.eclipse.commons.java.projectNature"
+                          value="org.springframework.ide.eclipse.core.springnature">
+                    </test>
+                 </and>
+              </or>
            </enabledWhen>
       </page>
 	 </extension>

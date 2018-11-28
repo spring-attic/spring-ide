@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 GoPivotal, Inc.
+ * Copyright (c) 2013, 2018 GoPivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,13 +20,13 @@ public class BootJavaElementPropertyTester extends PropertyTester {
 	public BootJavaElementPropertyTester() {
 	}
 
-	//@Override
+	@Override
 	public boolean test(Object je, String property, Object[] args, Object expectedValue) {
 		if (je instanceof IJavaElement && "isInBootProject".equals(property)) {
 			return isInBootProject((IJavaElement) je);
 		}
 		if (je instanceof IResource && "isInBootProject".equals(property)) {
-			return expectedValue.equals(isInBootProject((IJavaElement) je));
+			return isInBootProject((IJavaElement) je);
 		}
 		return false;
 	}

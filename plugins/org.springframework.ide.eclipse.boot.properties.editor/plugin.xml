@@ -81,9 +81,24 @@
                id="org.springframework.ide.eclipse.ui.keywords">
          </keywordReference>
          <enabledWhen>
-            <test
-                  property="org.springsource.ide.eclipse.boot.isBootProject">
-            </test>
+            <or>
+               <and>
+                  <instanceof
+                        value="org.eclipse.core.resources.IProject">
+                  </instanceof>
+                  <test
+                        property="org.springsource.ide.eclipse.boot.isBootProject">
+                  </test>
+               </and>
+               <and>
+                  <instanceof
+                        value="org.eclipse.jdt.core.IJavaProject">
+                  </instanceof>
+                  <test
+                        property="org.springsource.ide.eclipse.boot.javaelement.isInBootProject">
+                  </test>
+               </and>
+            </or>
          </enabledWhen>
       </page>
       <page
@@ -97,9 +112,24 @@
                id="org.springframework.ide.eclipse.ui.keywords">
          </keywordReference>
          <enabledWhen>
-            <test
-                  property="org.springsource.ide.eclipse.boot.isBootProject">
-            </test>
+            <or>
+               <and>
+                  <instanceof
+                        value="org.eclipse.core.resources.IProject">
+                  </instanceof>
+                  <test
+                        property="org.springsource.ide.eclipse.boot.isBootProject">
+                  </test>
+               </and>
+               <and>
+                  <instanceof
+                        value="org.eclipse.jdt.core.IJavaProject">
+                  </instanceof>
+                  <test
+                        property="org.springsource.ide.eclipse.boot.javaelement.isInBootProject">
+                  </test>
+               </and>
+            </or>
          </enabledWhen>
       </page>
    </extension>

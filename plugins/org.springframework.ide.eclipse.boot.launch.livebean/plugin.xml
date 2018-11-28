@@ -2,6 +2,14 @@
 <?eclipse version="3.4"?>
 <plugin>
     <extension
+          point="org.eclipse.ui.commands">
+       <command
+             categoryId="org.springframework.ide.eclipse.boot.commands.category"
+             id="org.springframework.ide.eclipse.boot.launch.livebean.OpenLiveBeanGraph"
+             name="Edit Starters">
+       </command>
+    </extension>
+    <extension
           point="org.eclipse.ui.handlers">
        <handler
              class="org.springframework.ide.eclipse.boot.launch.livebean.OpenLiveBeanGraphHandler"
@@ -26,7 +34,7 @@
                          </instanceof>
                          <test
                                forcePluginActivation="true"
-                               property="org.springsource.ide.eclipse.boot.javaelement.isBootProject">
+                               property="org.springsource.ide.eclipse.boot.javaelement.isInBootProject">
                          </test>
                       </and>
                    </or>
@@ -68,7 +76,7 @@
                             </instanceof>
                             <test
                                   forcePluginActivation="true"
-                                  property="org.springsource.ide.eclipse.boot.javaelement.isBootProject">
+                                  property="org.springsource.ide.eclipse.boot.javaelement.isInBootProject">
                             </test>
                          </and>
                       </or>

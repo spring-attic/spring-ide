@@ -150,7 +150,7 @@
                         </instanceof>
                         <test
                               forcePluginActivation="true"
-                              property="org.springsource.ide.eclipse.boot.javaelement.isBootProject">
+                              property="org.springsource.ide.eclipse.boot.javaelement.isInBootProject">
                         </test>
                      </and>
                   </or>
@@ -203,7 +203,7 @@
                            </instanceof>
                            <test
                                  forcePluginActivation="true"
-                                 property="org.springsource.ide.eclipse.boot.javaelement.isBootProject">
+                                 property="org.springsource.ide.eclipse.boot.javaelement.isInBootProject">
                            </test>
                         </and>
                      </or>
