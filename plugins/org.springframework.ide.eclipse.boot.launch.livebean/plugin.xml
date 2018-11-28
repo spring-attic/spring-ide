@@ -12,13 +12,24 @@
                       value="1">
                 </count>
                 <iterate>
-                   <adapt
-                         type="org.eclipse.core.resources.IProject">
-                      <test
-                            forcePluginActivation="true"
-                            property="org.springsource.ide.eclipse.boot.isBootProject">
-                      </test>
-                   </adapt>
+                   <or>
+                      <adapt
+                            type="org.eclipse.core.resources.IProject">
+                         <test
+                               forcePluginActivation="true"
+                               property="org.springsource.ide.eclipse.boot.isBootProject">
+                         </test>
+                      </adapt>
+                      <and>
+                         <instanceof
+                               value="org.eclipse.jdt.core.IJavaProject">
+                         </instanceof>
+                         <test
+                               forcePluginActivation="true"
+                               property="org.springsource.ide.eclipse.boot.javaelement.isBootProject">
+                         </test>
+                      </and>
+                   </or>
                 </iterate>
              </and>
           </enabledWhen>
@@ -43,13 +54,24 @@
                          value="1">
                    </count>
                    <iterate>
-                      <adapt
-                            type="org.eclipse.core.resources.IProject">
-                         <test
-                               forcePluginActivation="true"
-                               property="org.springsource.ide.eclipse.boot.isBootProject">
-                         </test>
-                      </adapt>
+                      <or>
+                         <adapt
+                               type="org.eclipse.core.resources.IProject">
+                            <test
+                                  forcePluginActivation="true"
+                                  property="org.springsource.ide.eclipse.boot.isBootProject">
+                            </test>
+                         </adapt>
+                         <and>
+                            <instanceof
+                                  value="org.eclipse.jdt.core.IJavaProject">
+                            </instanceof>
+                            <test
+                                  forcePluginActivation="true"
+                                  property="org.springsource.ide.eclipse.boot.javaelement.isBootProject">
+                            </test>
+                         </and>
+                      </or>
                    </iterate>
                 </and>
              </visibleWhen>
