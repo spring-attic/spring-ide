@@ -76,6 +76,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.osgi.framework.Version;
+import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.core.IMavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.MavenId;
@@ -108,7 +109,6 @@ import org.springframework.ide.eclipse.boot.test.AutobuildingEnablement;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.WizardConfigurer;
 import org.springframework.ide.eclipse.boot.test.util.TestBracketter;
-import org.springframework.ide.eclipse.boot.ui.EnableDisableBootDevtools;
 import org.springsource.ide.eclipse.commons.core.ZipFileUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.maintype.MainTypeFinder;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
@@ -1644,8 +1644,8 @@ public class BootDashModelTest {
 	private IMavenCoordinates removeDevtools(IProject project) throws Exception {
 		ISpringBootProject bootProject = springBootCore.project(project);
 		MavenId devtoolsId = new MavenId(
-				EnableDisableBootDevtools.SPRING_BOOT_DEVTOOLS_GID,
-				EnableDisableBootDevtools.SPRING_BOOT_DEVTOOLS_AID
+				BootPropertyTester.SPRING_BOOT_DEVTOOLS_GID,
+				BootPropertyTester.SPRING_BOOT_DEVTOOLS_AID
 		);
 
 		IMavenCoordinates devtools = null;

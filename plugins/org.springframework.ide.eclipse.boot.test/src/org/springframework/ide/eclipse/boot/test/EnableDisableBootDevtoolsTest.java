@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2018 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,19 +11,18 @@
 package org.springframework.ide.eclipse.boot.test;
 
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.bootVersionAtLeast;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
 
+import java.util.List;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.core.IMavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
@@ -32,10 +31,6 @@ import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
 import org.springframework.ide.eclipse.boot.ui.EnableDisableBootDevtools;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
-
-import static org.springframework.ide.eclipse.boot.ui.EnableDisableBootDevtools.*;
-
-import java.util.List;
 
 public class EnableDisableBootDevtoolsTest {
 
@@ -60,8 +55,7 @@ public class EnableDisableBootDevtoolsTest {
 	};
 	private SpringBootCore springBootCore = new SpringBootCore(initializr);
 	private BootProjectTestHarness projects = new BootProjectTestHarness(ResourcesPlugin.getWorkspace());
-	private EnableDisableBootDevtools delegate = new EnableDisableBootDevtools(springBootCore);
-	private IAction action = mock(IAction.class);
+	private EnableDisableBootDevtools handler = new EnableDisableBootDevtools(springBootCore);
 
 	@Rule
 	public AutobuildingEnablement autobuilding = new AutobuildingEnablement(true);
@@ -76,23 +70,15 @@ public class EnableDisableBootDevtoolsTest {
 		final ISpringBootProject project = springBootCore.project(
 				projects.createBootWebProject("dev-starters-tester", bootVersionAtLeast("1.3.0")));
 
-		delegate.selectionChanged(action, selectionOf(project));
+		StructuredSelection selection = new StructuredSelection(new IProject[] {project.getProject() });
 
-		verify(action).setText("Add Boot Devtools");
-		verify(action).setEnabled(true);
+		assertNoDependency(project.getDependencies(), BootPropertyTester.SPRING_BOOT_DEVTOOLS_GID, BootPropertyTester.SPRING_BOOT_DEVTOOLS_AID);
 
-		assertNoDependency(project.getDependencies(), SPRING_BOOT_DEVTOOLS_GID, SPRING_BOOT_DEVTOOLS_AID);
+		handler.execute(selection, null);
 
-		delegate.run(action);
-
-		new ACondition("Wait for 'devtools' starter to be added") {
-			@Override
-			public boolean test() throws Exception {
-				assertDependency(project.getDependencies(), SPRING_BOOT_DEVTOOLS_GID, SPRING_BOOT_DEVTOOLS_AID);
-				return true;
-			}
-
-		}.waitFor(MAVEN_POM_REFRESH_TIMEOUT);
+		ACondition.waitFor("Wait for 'devtools' starter to be added", MAVEN_POM_REFRESH_TIMEOUT, () -> {
+			assertDependency(project.getDependencies(), BootPropertyTester.SPRING_BOOT_DEVTOOLS_GID, BootPropertyTester.SPRING_BOOT_DEVTOOLS_AID);
+		});
 
 	}
 
@@ -104,36 +90,18 @@ public class EnableDisableBootDevtoolsTest {
 						withStarters("devtools")
 				)
 		);
-		delegate.selectionChanged(action, selectionOf(project));
+		StructuredSelection selection = new StructuredSelection(new IProject[] {project.getProject() });
 
-		verify(action).setText("Remove Boot Devtools");
-		verify(action).setEnabled(true);
+		assertDependency(project.getDependencies(), BootPropertyTester.SPRING_BOOT_DEVTOOLS_GID, BootPropertyTester.SPRING_BOOT_DEVTOOLS_AID);
 
-		assertDependency(project.getDependencies(), SPRING_BOOT_DEVTOOLS_GID, SPRING_BOOT_DEVTOOLS_AID);
+		handler.execute(selection, null);
 
-		delegate.run(action);
-
-		new ACondition("Wait for 'devtools' starter to be removed") {
-			@Override
-			public boolean test() throws Exception {
-				assertNoDependency(project.getDependencies(), SPRING_BOOT_DEVTOOLS_GID, SPRING_BOOT_DEVTOOLS_AID);
-				return true;
-			}
-
-
-		}.waitFor(MAVEN_POM_REFRESH_TIMEOUT);
-
+		ACondition.waitFor("Wait for 'devtools' starter to be removed", MAVEN_POM_REFRESH_TIMEOUT, () -> {
+			assertNoDependency(project.getDependencies(), BootPropertyTester.SPRING_BOOT_DEVTOOLS_GID, BootPropertyTester.SPRING_BOOT_DEVTOOLS_AID);
+		});
 	}
 
 	///////////////////////////////////////////////////////////////////////////////
-
-	private ISelection selectionOf(ISpringBootProject project) {
-		return selectionOf(project.getProject());
-	}
-
-	private ISelection selectionOf(IProject project) {
-		return new StructuredSelection(new Object[] {project});
-	}
 
 	private void assertDependency(List<IMavenCoordinates> dependencies, String gid, String aid) {
 		for (IMavenCoordinates d : dependencies) {

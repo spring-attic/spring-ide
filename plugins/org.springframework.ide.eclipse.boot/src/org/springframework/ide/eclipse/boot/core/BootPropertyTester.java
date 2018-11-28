@@ -10,6 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.core;
 
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,15 +23,19 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 import org.osgi.framework.VersionRange;
-import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.internal.core.CorePlugin;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 /**
  * @author Kris De Volder
@@ -35,10 +44,14 @@ public class BootPropertyTester extends PropertyTester {
 
 	private static final Pattern JAR_VERSION_REGEXP = Pattern.compile(".*\\-([^.]+\\.[^.]+\\.[^.]+\\.[^.]+)\\.jar");
 
+	public static final String SPRING_BOOT_DEVTOOLS_AID = "spring-boot-devtools";
+	public static final String SPRING_BOOT_DEVTOOLS_GID = "org.springframework.boot";
+
 	public BootPropertyTester() {
 	}
 
 	//@Override
+	@Override
 	public boolean test(Object rsrc, String property, Object[] args, Object expectedValue) {
 		if (expectedValue==null) {
 			expectedValue = true;
@@ -52,6 +65,9 @@ public class BootPropertyTester extends PropertyTester {
 		}
 		if (rsrc instanceof IResource && "isBootResource".equals(property)) {
 			return expectedValue.equals(isBootResource((IResource) rsrc));
+		}
+		if (rsrc instanceof IResource && "hasBootDevTools".equals(property)) {
+			return hasBootDevTools(((IResource) rsrc).getProject());
 		}
 		return false;
 	}
@@ -111,6 +127,63 @@ public class BootPropertyTester extends PropertyTester {
 		return false;
 	}
 
+	public static boolean hasBootDevTools(IProject project) {
+		try {
+			ISpringBootProject bootProject = SpringBootCore.getDefault().project(project);
+			return fastHasDevTools(bootProject);
+		} catch (CoreException e) {
+			Log.log(e);
+		} catch (TimeoutException e) {
+			// ignore timeouts. Could lots of them while maven updates classpath
+		} catch (InterruptedException e) {
+			// ignore iterrupts?
+		} catch (ExecutionException e) {
+			Log.log(e);
+		}
+		return false;
+	}
+
+	/**
+	 * Like hasDevTools, but suitable for calling on the UI thread. This operation may fail
+	 * with a {@link TimeoutException} if it can not be readily determined whether a project
+	 * has dev tools as a dependency (this may happen, for example because m2e is still in the process of
+	 * resolving the dependencies). It would be undesirable to block on the UI thread to wait for this
+	 * process to complete.
+	 */
+	public static boolean fastHasDevTools(ISpringBootProject bootProject) throws TimeoutException, InterruptedException, ExecutionException {
+		CompletableFuture<Boolean> result = new CompletableFuture<>();
+		Job job = new Job("Check for devtools") {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					result.complete(hasDevTools(bootProject));
+				} catch (Throwable e) {
+					result.completeExceptionally(e);
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		job.setSystem(true);
+		job.schedule();
+		return result.get(100, TimeUnit.MILLISECONDS);
+	}
+
+	public static boolean hasDevTools(ISpringBootProject bootProject) {
+		try {
+			List<IMavenCoordinates> deps = bootProject.getDependencies();
+			if (deps!=null) {
+				for (IMavenCoordinates d : deps) {
+					if (SPRING_BOOT_DEVTOOLS_AID.equals(d.getArtifactId())) {
+						return true;
+					}
+				}
+			}
+		} catch (Exception e) {
+			Log.log(e);
+		}
+		return false;
+	}
+
 	private static boolean isExcludedProject(IProject project) {
 		Pattern exclusion = BootPreferences.getInstance().getProjectExclusion();
 		return exclusion.matcher(project.getName()).matches();
@@ -165,7 +238,7 @@ public class BootPropertyTester extends PropertyTester {
 				}
 			}
 		} catch (Exception error) {
-			BootActivator.log(error);
+			Log.log(error);
 		}
 		return null;
 	}
@@ -193,11 +266,11 @@ public class BootPropertyTester extends PropertyTester {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * this is a workaround for an initialization issue around m2e
 	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=479245
-	 * 
+	 *
 	 * this workaround tries to avoid very early m2e.jdt activation
 	 * and therefore tries to reduce the likelihood of running into
 	 * the issue.
@@ -214,7 +287,7 @@ public class BootPropertyTester extends PropertyTester {
 			}
 		} catch (CoreException e) {
 		}
-		
+
 		return false;
 	}
 

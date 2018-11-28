@@ -28,6 +28,9 @@ public class BootJavaElementPropertyTester extends PropertyTester {
 		if (je instanceof IResource && "isInBootProject".equals(property)) {
 			return isInBootProject((IJavaElement) je);
 		}
+		if (je instanceof IJavaElement && "isInBootProjectWithDevTools".equals(property)) {
+			return hasBootDevTools((IJavaElement) je);
+		}
 		return false;
 	}
 
@@ -40,4 +43,14 @@ public class BootJavaElementPropertyTester extends PropertyTester {
 		}
 		return false;
 	}
+
+	private static boolean hasBootDevTools(IJavaElement element) {
+		IJavaProject javaProject = element.getJavaProject();
+		if (javaProject != null) {
+			return BootPropertyTester.hasBootDevTools(javaProject.getProject());
+		}
+		return false;
+	}
+
+
 }

@@ -138,16 +138,34 @@
                   <or>
                      <adapt
                            type="org.eclipse.core.resources.IResource">
-                        <test
-                              forcePluginActivation="true"
-                              property="org.springsource.ide.eclipse.boot.isBootResource"
-                              value="true">
-                        </test>
+                        <or>
+                           <adapt
+                                 type="org.eclipse.core.resources.IProject">
+                              <and>
+                                 <test
+                                       property="org.eclipse.core.resources.projectNature"
+                                       value="org.eclipse.m2e.core.maven2Nature">
+                                 </test>
+                                 <test
+                                       forcePluginActivation="true"
+                                       property="org.springsource.ide.eclipse.boot.isBootProject">
+                                 </test>
+                              </and>
+                           </adapt>
+                           <test
+                                 property="org.eclipse.core.resources.name"
+                                 value="pom.xml">
+                           </test>
+                        </or>
                      </adapt>
                      <and>
                         <instanceof
                               value="org.eclipse.jdt.core.IJavaProject">
                         </instanceof>
+                        <test
+                              property="org.springsource.ide.eclipse.commons.java.projectNature"
+                              value="org.eclipse.m2e.core.maven2Nature">
+                        </test>
                         <test
                               forcePluginActivation="true"
                               property="org.springsource.ide.eclipse.boot.javaelement.isInBootProject">
@@ -186,10 +204,16 @@
                            <or>
                               <adapt
                                     type="org.eclipse.core.resources.IProject">
-                                 <test
-                                       forcePluginActivation="true"
-                                       property="org.springsource.ide.eclipse.boot.isBootProject">
-                                 </test>
+                                 <and>
+                                    <test
+                                          property="org.eclipse.core.resources.projectNature"
+                                          value="org.eclipse.m2e.core.maven2Nature">
+                                    </test>
+                                    <test
+                                          forcePluginActivation="true"
+                                          property="org.springsource.ide.eclipse.boot.isBootProject">
+                                    </test>
+                                 </and>
                               </adapt>
                               <test
                                     property="org.eclipse.core.resources.name"
@@ -201,6 +225,10 @@
                            <instanceof
                                  value="org.eclipse.jdt.core.IJavaProject">
                            </instanceof>
+                           <test
+                                 property="org.springsource.ide.eclipse.commons.java.projectNature"
+                                 value="org.eclipse.m2e.core.maven2Nature">
+                           </test>
                            <test
                                  forcePluginActivation="true"
                                  property="org.springsource.ide.eclipse.boot.javaelement.isInBootProject">
