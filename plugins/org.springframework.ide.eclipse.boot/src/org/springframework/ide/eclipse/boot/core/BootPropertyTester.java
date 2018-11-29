@@ -130,7 +130,9 @@ public class BootPropertyTester extends PropertyTester {
 	public static boolean hasBootDevTools(IProject project) {
 		try {
 			ISpringBootProject bootProject = SpringBootCore.getDefault().project(project);
-			return fastHasDevTools(bootProject);
+			if (bootProject != null) {
+				return fastHasDevTools(bootProject);
+			}
 		} catch (CoreException e) {
 			Log.log(e);
 		} catch (TimeoutException e) {
