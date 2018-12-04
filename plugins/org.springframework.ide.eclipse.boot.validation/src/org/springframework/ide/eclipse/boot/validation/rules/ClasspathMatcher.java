@@ -12,6 +12,8 @@ package org.springframework.ide.eclipse.boot.validation.rules;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 
+import com.google.common.collect.Multiset.Entry;
+
 import static org.eclipse.jdt.core.IClasspathEntry.*;
 
 /**
@@ -43,6 +45,20 @@ public abstract class ClasspathMatcher {
 	 */
 	protected abstract boolean doMatch(IClasspathEntry[] classpath);
 
+	
+	protected boolean isProjectWithName(IClasspathEntry entry, String name) {
+		if (entry.getEntryKind()==CPE_PROJECT) {
+			return name.equals(entry.getPath().segment(0));
+		}
+		return false;
+	}
+
+	protected boolean isSourceFolderInProject(IClasspathEntry e, String projectName) {
+		if (e.getEntryKind()==CPE_SOURCE) {
+			return projectName.equals(e.getPath().segment(0));
+		}
+		return false;
+	}
 
 	protected boolean isJarNameContaining(IClasspathEntry entry, String nameFragment) {
 		if (entry.getEntryKind()==CPE_LIBRARY) {

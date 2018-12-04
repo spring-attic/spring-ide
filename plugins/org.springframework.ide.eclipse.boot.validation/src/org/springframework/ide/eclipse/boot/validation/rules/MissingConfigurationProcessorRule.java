@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -52,12 +53,13 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
  */
 public class MissingConfigurationProcessorRule extends BootValidationRule {
 
+	private static final String SPRING_BOOT_CONFIGURATION_PROCESSOR = "spring-boot-configuration-processor";
 	public static final BootValidationProblemType PROBLEM_ID = new BootValidationProblemType("MISSING_CONFIGURATION_PROCESSOR", ProblemSeverity.WARNING, 
 			"Missing Configuration Processor",
-			"When using @ConfigurationProperties, it is recommended to add the Spring Boot Annotation Processor to a project's classpath"
+			"When using @ConfigurationProperties, it is recommended to add the Spring Boot Configuration Processor to a project's classpath"
 	);
 	private static final MavenCoordinates DEP_CONFIGURATION_PROCESSOR =
-			new MavenCoordinates("org.springframework.boot", "spring-boot-configuration-processor", null);
+			new MavenCoordinates("org.springframework.boot", SPRING_BOOT_CONFIGURATION_PROCESSOR, null);
 
 	private static final IMarkerResolutionGenerator2 QUICK_FIX = new IMarkerResolutionGenerator2() {
 
@@ -117,13 +119,18 @@ public class MissingConfigurationProcessorRule extends BootValidationRule {
 		@Override
 		protected boolean doMatch(IClasspathEntry[] classpath) {
 			for (IClasspathEntry e : classpath) {
-				if (isJarNameContaining(e, "spring-boot-configuration-processor")) {
+				if (
+						isJarNameContaining(e, SPRING_BOOT_CONFIGURATION_PROCESSOR) || 
+						isProjectWithName(e, SPRING_BOOT_CONFIGURATION_PROCESSOR) ||
+						isSourceFolderInProject(e, SPRING_BOOT_CONFIGURATION_PROCESSOR)
+				) {
 					//The rule is already satisfied so doesn't need to be checked
 					return false;
 				}
 			}
 			return true;
 		}
+
 	};
 	private static final String BUILDSHIP_NATURE = "org.eclipse.buildship.core.gradleprojectnature";
 
@@ -189,6 +196,19 @@ public class MissingConfigurationProcessorRule extends BootValidationRule {
 		}
 
 		private void visit(IAnnotation annot) throws Exception {
+			System.err.println("Resource: "+cu.getElementResource());
+			System.err.println("--- WARNED for classpath --- ");
+			for (IClasspathEntry e : cu.getClasspath()) {
+				if (e.getEntryKind()==IClasspathEntry.CPE_PROJECT) {
+					System.err.println(e);
+				}
+			}
+			System.err.println("--- all pfrs --- ");
+			for (IPackageFragmentRoot pfr : cu.getCompilationUnit().getJavaProject().getAllPackageFragmentRoots()) {
+				System.err.println(pfr.getKind()+" "+pfr.getPath() + " "+ pfr.isExternal());
+			}
+			System.err.println("---");
+			
 			warn("When using @ConfigurationProperties it is recommended to add 'spring-boot-configuration-processor' "
 					+ "to your classpath to generate configuration metadata", annot.getNameRange());
 		}
