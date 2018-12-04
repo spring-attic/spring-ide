@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.validation.rules;
 
+import static org.eclipse.jdt.core.IClasspathEntry.CPE_LIBRARY;
+import static org.eclipse.jdt.core.IClasspathEntry.CPE_PROJECT;
+import static org.eclipse.jdt.core.IClasspathEntry.CPE_SOURCE;
+
 import org.eclipse.jdt.core.IClasspathEntry;
-
-import com.google.common.collect.Multiset.Entry;
-
-import static org.eclipse.jdt.core.IClasspathEntry.*;
 
 /**
  * Abstraction for matcher that checks condition on a classpath.

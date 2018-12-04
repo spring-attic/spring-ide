@@ -21,7 +21,6 @@ import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -196,19 +195,6 @@ public class MissingConfigurationProcessorRule extends BootValidationRule {
 		}
 
 		private void visit(IAnnotation annot) throws Exception {
-			System.err.println("Resource: "+cu.getElementResource());
-			System.err.println("--- WARNED for classpath --- ");
-			for (IClasspathEntry e : cu.getClasspath()) {
-				if (e.getEntryKind()==IClasspathEntry.CPE_PROJECT) {
-					System.err.println(e);
-				}
-			}
-			System.err.println("--- all pfrs --- ");
-			for (IPackageFragmentRoot pfr : cu.getCompilationUnit().getJavaProject().getAllPackageFragmentRoots()) {
-				System.err.println(pfr.getKind()+" "+pfr.getPath() + " "+ pfr.isExternal());
-			}
-			System.err.println("---");
-			
 			warn("When using @ConfigurationProperties it is recommended to add 'spring-boot-configuration-processor' "
 					+ "to your classpath to generate configuration metadata", annot.getNameRange());
 		}
