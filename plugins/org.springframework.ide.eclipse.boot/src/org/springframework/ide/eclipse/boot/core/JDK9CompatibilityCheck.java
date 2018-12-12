@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Spring IDE Developers
+ * Copyright (c) 2017, 2018 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,20 +24,22 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 /**
  * Listen to the error log for errors that are indicative of JDK9 comaptibility issues. Show a warning to
  * the user if such messages are received.
- * 
+ *
  * See: https://www.pivotaltracker.com/story/show/146914165
- * 
+ *
  * @author Kris De Volder
  */
 public class JDK9CompatibilityCheck {
 
 	public static void initialize() {
 		String version = System.getProperty("java.version");
+		int major = getJavaMajorVersion(version);
+
 		//Unless IDE is running in java 9, there's no point in any of these checks!
-		if (isJava9(version)) {
+		if (major >= 9) {
 			//Schedule a job to avoid directly triggering lots of classloading during bundle activation.
-			Job job = new Job("Start JDK9 Compatibility Check") {
-				
+			Job job = new Job("Start JDK Compatibility Check") {
+
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					new Checker();
@@ -48,18 +50,19 @@ public class JDK9CompatibilityCheck {
 		}
 	}
 
-	private static boolean isJava9(String version) {
+
+
+	private static int getJavaMajorVersion(String version) {
 		try {
 			int major = Integer.parseInt(version.split("\\D")[0]);
-			return major>=9;
+			return major;
 		} catch (Exception e) {
-			//Couldn't parse version string.
-			return false;
+			return -1;
 		}
 	}
-	
+
 	private static class Checker implements ILogListener {
-		
+
 		private Disposable disposable = null;
 
 		public Checker() {
@@ -89,16 +92,22 @@ public class JDK9CompatibilityCheck {
 		}
 
 		private synchronized void showWarning(String indicativeErrorMessage) {
-			String title = "JDK 9 Compatibility Issue Detected";
-			String message = "STS is currently running with a JDK 9 (java.version="+System.getProperty("java.version")+").\n" + 
+			String version = System.getProperty("java.version");
+
+			// Show the accurate major version instead of a generic "JDK 9" message.
+			// See: PT 161750169
+			int major = getJavaMajorVersion(version);
+
+			String title = "JDK " + major + " Compatibility Issue Detected";
+			String message = "STS is currently running with a JDK " + major + " (java.version=" + version + ").\n" +
 			"\n" +
 			"An error was logged in the error log which is indicative of an incompatibility of the `plexus-archiver` maven plugin "+
-			"with JDK 9.\n" +
+			"with JDK " + major + ".\n" +
 			"\n" +
 			"The error message was: '"+indicativeErrorMessage+"'\n"+
 			"\n" +
-			"Note that Boot projects with version < 2.0 use an older `plexus-archiver` plugin. They will not build properly "+ 
-			"and may even cause STS itself to behave erratically (producing a continual stream of workspace build errors)\n" + 
+			"Note that Boot projects with version < 2.0 use an older `plexus-archiver` plugin. They will not build properly "+
+			"and may even cause STS itself to behave erratically (producing a continual stream of workspace build errors)\n" +
 			"\n" +
 			"Recommended action is to run STS with a JDK 8 by changing your `STS.ini` file.\n" +
 			"Alternatively, make sure none of your workspace projects use an outdated `plexus-archiver`. For boot projects, that means "+
