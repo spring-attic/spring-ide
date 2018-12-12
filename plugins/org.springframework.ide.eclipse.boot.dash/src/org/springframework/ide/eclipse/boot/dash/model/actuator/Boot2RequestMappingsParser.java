@@ -44,7 +44,11 @@ public class Boot2RequestMappingsParser implements RequestMappingsParser {
 						// Fall back to 1.x for missing "details" property, i.e. no method handler defined
 						result.addAll(RequestMapping1x.create(servlet.getString("predicate"), servlet.getString("handler"), typeLookup));
 					} else {
-						result.addAll(RequestMapping2x.create(typeLookup, servlet.getString("handler"), details));
+						if (details.optJSONObject("handlerFunction") != null) {
+							result.addAll(RequestMapping2x.createWebFlux(typeLookup, servlet.optString("predicate"), details));
+						} else {
+							result.addAll(RequestMapping2x.create(typeLookup, servlet.getString("handler"), details));
+						}
 					}
 				}
 			}

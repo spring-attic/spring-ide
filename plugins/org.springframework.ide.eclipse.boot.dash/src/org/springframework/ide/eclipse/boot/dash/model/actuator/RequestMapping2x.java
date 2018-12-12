@@ -10,9 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model.actuator;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.json.JSONArray;
@@ -62,6 +64,35 @@ public class RequestMapping2x extends AbstractRequestMapping {
 	@Override
 	public String getMethodString() {
 		return methodString;
+	}
+
+	public static Collection<RequestMapping2x> createWebFlux(TypeLookup typeLookup, String predicate, JSONObject details) {
+		try {
+			if (predicate != null) {
+				// Predicate is and/or string expression: ((GET && /hello) && Accept: [text/plain])
+				String[] tokens = predicate.split("\\w*(&&|\\|\\|)\\w*");
+				List<RequestMapping2x> rms = new ArrayList<>(tokens.length);
+				for (String t : tokens) {
+					// Remove leading `(`, trailing `)`
+					String token = removeLeadingAndTrailingParenthises(t);
+					if (!token.isEmpty() && token.charAt(0) == '/') {
+						rms.add(new RequestMapping2x(typeLookup, token, null, null, null));
+					}
+				}
+				return rms;
+			}
+		} catch (Exception e) {
+			Log.log(e);
+		}
+		return Collections.emptyList();
+	}
+
+	private static String removeLeadingAndTrailingParenthises(String s) {
+		int start = 0;
+		int end = s.length();
+		for(; start < s.length() && (s.charAt(start) == '(' || Character.isWhitespace(s.charAt(start))); start++);
+		for(; end > start && (s.charAt(end - 1) == ')' || Character.isWhitespace(s.charAt(end - 1))); end--);
+		return start <= end ? s.substring(start, end) : "";
 	}
 
 	public static Collection<RequestMapping2x> create(TypeLookup typeLookup, String methodString, JSONObject details) {
