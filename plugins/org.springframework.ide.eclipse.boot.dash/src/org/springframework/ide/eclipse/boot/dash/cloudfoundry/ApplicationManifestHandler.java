@@ -98,6 +98,8 @@ public class ApplicationManifestHandler {
 
 	public static final String BUILDPACK_PROP = "buildpack";
 
+	public static final String BUILDPACKS_PROP = "buildpacks";
+
 	public static final String ENV_PROP = "env";
 
 	public static final String DISK_QUOTA_PROP = "disk_quota";
@@ -295,6 +297,8 @@ public class ApplicationManifestHandler {
 		readApplicationURL(appMap, allResults, properties);
 
 		readBuildpack(appMap, allResults, properties);
+
+		readBuildpacks(appMap, allResults, properties);
 
 		readEnvVars(appMap, allResults, properties);
 
@@ -574,23 +578,41 @@ public class ApplicationManifestHandler {
 		List<String> cloudServices = new ArrayList<>();
 
 		if (yamlElementObj instanceof List<?>) {
-			addServices((List<?>) yamlElementObj, cloudServices);
+			addTo((List<?>) yamlElementObj, cloudServices);
 		}
 
 		yamlElementObj = application.get(SERVICES_PROP);
 		if (yamlElementObj instanceof List<?>) {
-			addServices((List<?>) yamlElementObj, cloudServices);
+			addTo((List<?>) yamlElementObj, cloudServices);
 		}
 
 		properties.setServices(cloudServices);
 	}
 
-	protected void addServices(List<?> servicesToAdd, List<String> cloudServices) {
+	protected void readBuildpacks(Map<?, ?> application, Map<Object, Object> allResults,
+			CloudApplicationDeploymentProperties properties) {
 
-		for (Object servNameObj : servicesToAdd) {
-			if (servNameObj instanceof String && !cloudServices.contains(servNameObj)) {
-				String serviceName = (String) servNameObj;
-				cloudServices.add(serviceName);
+		Object yamlElementObj = allResults.get(BUILDPACKS_PROP);
+		List<String> buildpacks = new ArrayList<>();
+
+		if (yamlElementObj instanceof List<?>) {
+			addTo((List<?>) yamlElementObj, buildpacks);
+		}
+
+		yamlElementObj = application.get(BUILDPACKS_PROP);
+		if (yamlElementObj instanceof List<?>) {
+			addTo((List<?>) yamlElementObj, buildpacks);
+		}
+
+		properties.setBuildpacks(buildpacks);
+	}
+
+	protected void addTo(List<?> from, List<String> to) {
+
+		for (Object obj : from) {
+			if (obj instanceof String && !to.contains(obj)) {
+				String val = (String) obj;
+				to.add(val);
 			}
 		}
 	}

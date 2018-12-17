@@ -77,6 +77,7 @@ import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDia
 import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel.ManifestType;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel.Result;
+import org.springframework.ide.eclipse.boot.dash.dialogs.UnsupportedPushProperties;
 import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
@@ -147,6 +148,8 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 	};
 
 	private CloudDashElementFactory elementFactory;
+
+	private UnsupportedPushProperties unsupportedPushProperties;
 
 	private final LiveSetVariable<CloudServiceInstanceDashElement> services = new LiveSetVariable<>(AsyncMode.SYNC);
 	private final CloudDashApplications applications = new CloudDashApplications(this);
@@ -286,6 +289,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		this.modelStore = PropertyStores.createSubStore(target.getId(), typeStore);
 		this.elementFactory = new CloudDashElementFactory(context, modelStore, this);
 		this.consoleManager = new CloudAppLogManager(target);
+		this.unsupportedPushProperties = new UnsupportedPushProperties();
 		this.debugTargetDisconnector = DevtoolsUtil.createDebugTargetDisconnector(this);
 		getRunTarget().addConnectionStateListener(RUN_TARGET_CONNECTION_LISTENER);
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_CHANGE);
@@ -743,6 +747,12 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 			addApplicationArchive(project, deploymentProperties, cloudData, ui, monitor);
 		}
 
+		// TODO: We need to clean up push and restart code. There are multiple paths that end up doing
+		// the same thing, so the check below is appearing in at least two different places.
+		// We should ideally only check for unsupported properties in one place: wherever we resolve
+		// deployment properties regardless of which path we take (either a project deployment or app restart)
+		getUnsupportedProperties().allowOrCancelIfFound(ui, deploymentProperties);
+
 		return deploymentProperties;
 	}
 
@@ -922,6 +932,10 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 
 	public void setBaseRefreshState(RefreshState newState) {
 		baseRefeshState.setValue(newState);
+	}
+
+	public UnsupportedPushProperties getUnsupportedProperties() {
+		return unsupportedPushProperties;
 	}
 
 }

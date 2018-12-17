@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Pivotal, Inc.
+ * Copyright (c) 2016, 2018 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1487,6 +1487,13 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 	public boolean getRawNoHost() {
 		Boolean v = getAbsoluteValue(ApplicationManifestHandler.NO_HOSTNAME_PROP, Boolean.class);
 		return v==null ? false : v;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<String> getBuildpacks() {
+		List<String> buildpacks = getAbsoluteValue(ApplicationManifestHandler.BUILDPACKS_PROP, List.class);
+		return buildpacks == null ? new ArrayList<>() : buildpacks;
 	}
 
 }

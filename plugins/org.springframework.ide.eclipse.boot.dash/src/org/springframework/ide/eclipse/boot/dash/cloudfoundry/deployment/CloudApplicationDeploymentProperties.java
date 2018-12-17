@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2016 Pivotal, Inc.
+ * Copyright (c) 2015, 2018 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,12 +29,15 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDoma
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFRoute;
 
+import com.google.common.collect.ImmutableList;
+
 public class CloudApplicationDeploymentProperties implements DeploymentProperties {
 
 	private boolean enableJmxSshTunnel;
 	private List<String> boundServices;
 	private Map<String, String> environmentVariables;
 	private String buildpack;
+	private List<String> buildpacks;
 
 	private int instances;
 
@@ -79,6 +82,7 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 		boundServices = new ArrayList<>();
 		environmentVariables = new HashMap<>();
 		buildpack = "";
+		buildpacks = new ArrayList<>();
 		instances = DeploymentProperties.DEFAULT_INSTANCES;
 		urls = new LinkedHashSet<>();
 		appName = null;
@@ -196,6 +200,10 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 		boundServices = services == null ? new ArrayList<>() : services;
 	}
 
+	public void setBuildpacks(List<String> buildpacks) {
+		this.buildpacks = buildpacks == null ? new ArrayList<>() : buildpacks;
+	}
+
 	public void setInstances(int instances) {
 		this.instances = instances;
 	}
@@ -218,6 +226,11 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 
 	public String getBuildpack() {
 		return buildpack == null || buildpack.isEmpty() ? null : buildpack;
+	}
+
+	@Override
+	public List<String> getBuildpacks() {
+		return ImmutableList.copyOf(buildpacks);
 	}
 
 	public int getInstances() {

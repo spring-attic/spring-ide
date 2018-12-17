@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2016 Pivotal, Inc.
+ * Copyright (c) 2015, 2018 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -90,6 +90,11 @@ public class ProjectsDeployer extends CloudOperation {
 		debug("deployProject["+project.getName()+"] starting");
 		CloudApplicationDeploymentProperties properties = model.createDeploymentProperties(project, ui, monitor);
 		debug("deployProject["+project.getName()+"] got deployment properties");
+
+		// IMPORTANT: We check for unsupported properties BEFORE creating the CDE, so that if operation is cancelled,
+		// the cde has not been created and it avoids having it appear in the boot dash view
+		model.getUnsupportedProperties().allowOrCancelIfFound(ui, properties);
+
 		CloudAppDashElement cde = model.ensureApplication(properties.getAppName());
 		debug("deployProject["+project.getName()+"] created cde: "+cde.getName());
 		model.runAsynch("Deploy project '"+project.getName()+"'", properties.getAppName(), (IProgressMonitor progressMonitor) -> {
