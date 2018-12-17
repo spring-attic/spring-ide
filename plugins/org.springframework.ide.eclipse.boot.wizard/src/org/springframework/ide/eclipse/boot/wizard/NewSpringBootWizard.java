@@ -60,6 +60,7 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 	}
 
 	//@Override
+	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		try {
 			model = NewSpringBootWizardFactoryModel.create(BootActivator.getUrlConnectionFactory(), BootActivator.getDefault().getPreferenceStore());
@@ -134,7 +135,7 @@ public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWi
 					if (radioGroup.getRadios().length>1) {
 						//Don't add a UI elements for something that offers no real choice
 						radioSections.add(
-							new ChooseOneSectionCombo<>(owner, radioGroup.getLabel(), radioGroup.getSelection(), radioGroup.getRadios())
+							new ChooseOneSectionCombo<>(owner, radioGroup.getLabel(), radioGroup.getSelection(), radioGroup.getRadios()).grabHorizontal(true)
 							//new ChooseOneSectionCombo<RadioInfo>(owner, radioGroup.getLabel(), radioGroup.getSelection(), radioGroup.getRadios())
 						);
 						notEmpty = true;
