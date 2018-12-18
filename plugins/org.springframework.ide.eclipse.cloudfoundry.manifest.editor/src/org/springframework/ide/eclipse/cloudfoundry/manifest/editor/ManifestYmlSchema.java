@@ -34,6 +34,7 @@ import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeFactory.Y
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YTypeUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YValueHint;
 import org.springframework.ide.eclipse.editor.support.yaml.schema.YamlSchema;
+import org.springframework.ide.eclipse.editor.support.yaml.schema.constraints.Constraints;
 import org.yaml.snakeyaml.nodes.Node;
 
 import com.google.common.collect.ImmutableSet;
@@ -69,13 +70,19 @@ public class ManifestYmlSchema implements YamlSchema {
 				ManifestConstraints.mutuallyExclusive("routes", "domain", "domains", "host", "hosts", "no-hostname"));
 		YAtomicType t_path = f.yatomic("Path");
 
-		YAtomicType t_buildpack = f.yatomic("Buildpack");
+		YAtomicType t_buildpack_entry = f.yatomic("Buildpack Entry");
 		if (buildpackProvider != null) {
-			t_buildpack.addHintProvider(buildpackProvider);
-//			t_buildpack.parseWith(ManifestYmlValueParsers.fromHints(t_buildpack.toString(), buildpackProvider));
+			t_buildpack_entry.addHintProvider(buildpackProvider);
+//			t_buildpack_entry.parseWith(ManifestYmlValueParsers.fromHints(t_buildpack_entry.toString(), buildpackProvider));
 		}
 
-		t_buildpack.addHintProvider(this.buildpackProvider);
+		// Deprecated. See: https://www.pivotaltracker.com/story/show/162499688
+		YAtomicType t_buildpack = f.yatomic("Buildpack");
+		if (t_buildpack != null) {
+			t_buildpack.addHintProvider(buildpackProvider);
+			t_buildpack.require(Constraints.deprecateProperty((name) ->
+								"Deprecated: Use `buildpacks` instead.", "buildpack"));
+		}
 
 		YAtomicType t_boolean = f.yenum("boolean", "true", "false");
 		YAtomicType t_ne_string = f.yatomic("String");
@@ -107,7 +114,8 @@ public class ManifestYmlSchema implements YamlSchema {
 		TOPLEVEL_TYPE.addProperty("inherit", t_string, descriptionFor("inherit"));
 
 		YTypedPropertyImpl[] props = {
-			f.yprop("buildpack", t_buildpack),
+			f.yprop("buildpack", t_buildpack), 
+			f.yprop("buildpacks", f.yseq(t_buildpack_entry)),
 			f.yprop("command", t_string),
 			f.yprop("disk_quota", t_memory),
 			f.yprop("domain", t_string),
