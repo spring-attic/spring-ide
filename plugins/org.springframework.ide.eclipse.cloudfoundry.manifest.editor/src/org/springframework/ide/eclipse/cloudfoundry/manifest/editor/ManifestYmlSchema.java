@@ -70,18 +70,9 @@ public class ManifestYmlSchema implements YamlSchema {
 				ManifestConstraints.mutuallyExclusive("routes", "domain", "domains", "host", "hosts", "no-hostname"));
 		YAtomicType t_path = f.yatomic("Path");
 
-		YAtomicType t_buildpack_entry = f.yatomic("Buildpack Entry");
-		if (buildpackProvider != null) {
-			t_buildpack_entry.addHintProvider(buildpackProvider);
-//			t_buildpack_entry.parseWith(ManifestYmlValueParsers.fromHints(t_buildpack_entry.toString(), buildpackProvider));
-		}
-
-		// Deprecated. See: https://www.pivotaltracker.com/story/show/162499688
 		YAtomicType t_buildpack = f.yatomic("Buildpack");
-		if (t_buildpack != null) {
+		if (buildpackProvider != null) {
 			t_buildpack.addHintProvider(buildpackProvider);
-			t_buildpack.require(Constraints.deprecateProperty((name) ->
-								"Deprecated: Use `buildpacks` instead.", "buildpack"));
 		}
 
 		YAtomicType t_boolean = f.yenum("boolean", "true", "false");
@@ -115,7 +106,7 @@ public class ManifestYmlSchema implements YamlSchema {
 
 		YTypedPropertyImpl[] props = {
 			f.yprop("buildpack", t_buildpack), 
-			f.yprop("buildpacks", f.yseq(t_buildpack_entry)),
+			f.yprop("buildpacks", f.yseq(t_buildpack)),
 			f.yprop("command", t_string),
 			f.yprop("disk_quota", t_memory),
 			f.yprop("domain", t_string),
