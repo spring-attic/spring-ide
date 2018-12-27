@@ -671,14 +671,19 @@
 					<url>http://download.eclipse.org/cft/1.1.1/</url>
 				</repository>
 				<repository>
-		  			<id>buildship-for-testing</id>
-		  			<layout>p2</layout>
-		  			<url>http://download.eclipse.org/buildship/updates/e48/releases/</url>
-				</repository>
-				<repository>
-		  			<id>buildship-1-for-compatibility</id>
+		  			<id>buildship1-for-testing</id>
 		  			<layout>p2</layout>
 		  			<url>http://download.eclipse.org/buildship/updates/e46/releases/1.0/</url>
+				</repository>
+				<repository>
+		  			<id>buildship2-for-testing</id>
+		  			<layout>p2</layout>
+		  			<url>http://download.eclipse.org/buildship/updates/e48/releases/2.x</url>
+				</repository>
+				<repository>
+		  			<id>buildship3-for-testing</id>
+		  			<layout>p2</layout>
+		  			<url>http://download.eclipse.org/buildship/updates/e49/releases/3.x</url>
 				</repository>
 				<repository>
 					<id>eclipse-integration-commons</id>
@@ -730,14 +735,19 @@
 					<url>http://download.eclipse.org/cft/1.1.1/</url>
 				</repository>
 				<repository>
-		  			<id>buildship-for-testing</id>
-		  			<layout>p2</layout>
-		  			<url>http://download.eclipse.org/buildship/updates/e49/releases/</url>
-				</repository>
-				<repository>
-		  			<id>buildship-1-for-compatibility</id>
+		  			<id>buildship1-for-testing</id>
 		  			<layout>p2</layout>
 		  			<url>http://download.eclipse.org/buildship/updates/e46/releases/1.0/</url>
+				</repository>
+				<repository>
+		  			<id>buildship2-for-testing</id>
+		  			<layout>p2</layout>
+		  			<url>http://download.eclipse.org/buildship/updates/e48/releases/2.x</url>
+				</repository>
+				<repository>
+		  			<id>buildship3-for-testing</id>
+		  			<layout>p2</layout>
+		  			<url>http://download.eclipse.org/buildship/updates/e49/releases/3.x</url>
 				</repository>
 				<repository>
 					<id>eclipse-integration-commons</id>
@@ -789,14 +799,19 @@
 					<url>http://download.eclipse.org/cft/1.1.1/</url>
 				</repository>
 				<repository>
-		  			<id>buildship-for-testing</id>
-		  			<layout>p2</layout>
-		  			<url>http://download.eclipse.org/buildship/updates/e49/releases/</url>
-				</repository>
-				<repository>
-		  			<id>buildship-1-for-compatibility</id>
+		  			<id>buildship1-for-testing</id>
 		  			<layout>p2</layout>
 		  			<url>http://download.eclipse.org/buildship/updates/e46/releases/1.0/</url>
+				</repository>
+				<repository>
+		  			<id>buildship2-for-testing</id>
+		  			<layout>p2</layout>
+		  			<url>http://download.eclipse.org/buildship/updates/e48/releases/2.x</url>
+				</repository>
+				<repository>
+		  			<id>buildship3-for-testing</id>
+		  			<layout>p2</layout>
+		  			<url>http://download.eclipse.org/buildship/updates/e49/releases/3.x</url>
 				</repository>
 				<repository>
 					<id>eclipse-integration-commons</id>
