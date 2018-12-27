@@ -771,7 +771,7 @@
 				<repository>
 					<id>orbit</id>
 					<layout>p2</layout>
-					<url>http://download.eclipse.org/tools/orbit/downloads/drops/S20181031145145/repository</url>
+					<url>https://download.eclipse.org/tools/orbit/downloads/drops/R20181128170323/repository</url>
 				</repository>
 				<repository>
 					<id>swtbot</id>
