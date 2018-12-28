@@ -305,6 +305,8 @@ public class ManifestYamlEditorTest {
 			"  name: foo\n" +
 			"  command: java main.java\n" +
 			"  disk_quota: 1024M\n" +
+			"  buildpacks:\n" +
+			"  - zbuildpack\n" +
 			"  domains:\n" +
 			"  - pivotal.io\n" +
 			"  - otherdomain.org\n" +
@@ -334,6 +336,7 @@ public class ManifestYamlEditorTest {
 		editor.assertIsHoverRegion("inherit");
 		editor.assertIsHoverRegion("applications");
 		editor.assertIsHoverRegion("buildpack");
+		editor.assertIsHoverRegion("buildpacks");
 		editor.assertIsHoverRegion("domain");
 		editor.assertIsHoverRegion("name");
 		editor.assertIsHoverRegion("command");
@@ -357,6 +360,7 @@ public class ManifestYamlEditorTest {
 		editor.assertHoverContains("1G", "Use the <code>memory</code> attribute to specify the memory limit");
 		editor.assertHoverContains("inherit", "For example, every child of a parent manifest called <code>base-manifest.yml</code> begins like this:");
 		editor.assertHoverContains("buildpack", "use the <code>buildpack</code> attribute to specify its URL or name");
+		editor.assertHoverContains("buildpacks", "<strong>Multiple buildpacks</strong>: If you are using multiple buildpacks, you can add an additional value to your manifest:");
 	    editor.assertHoverContains("name", "The <code>name</code> attribute is the only required attribute");
 	    editor.assertHoverContains("command", "On the command line, use the <code>-c</code> option to specify the custom start command as the following example shows");
 	    editor.assertHoverContains("disk_quota", "Use the <code>disk_quota</code> attribute to allocate the disk space for your app instance");
