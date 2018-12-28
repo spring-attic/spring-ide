@@ -29,6 +29,9 @@ public class ManifestYamlEditorTest {
 				// ---------------
 				"buildpack: <*>",
 				// ---------------
+				"buildpacks:\n"+
+				"- <*>",
+				// ---------------
 				"command: <*>",
 				// ---------------
 				"disk_quota: <*>",
@@ -94,6 +97,10 @@ public class ManifestYamlEditorTest {
 				// ---------------
 				"applications:\n" +
 				"- buildpack: <*>",
+				// ---------------
+				"applications:\n" +
+				"- buildpacks:\n"+
+				"  - <*>",
 				// ---------------
 				"applications:\n" +
 				"- command: <*>",
