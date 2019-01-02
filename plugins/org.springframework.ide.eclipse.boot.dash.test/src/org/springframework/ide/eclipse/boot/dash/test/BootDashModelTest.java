@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2018 Pivotal, Inc.
+ * Copyright (c) 2015, 2019 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -733,7 +733,6 @@ public class BootDashModelTest {
 			waitForState(project, RunState.INACTIVE);
 			System.out.println("Starting "+project);
 			project.restart(RunState.RUNNING, ui);
-			waitForState(project, RunState.STARTING);
 			waitForState(project, RunState.RUNNING);
 
 			BootDashElement launch = CollectionUtils.getSingle(project.getChildren().getValues());
@@ -757,7 +756,6 @@ public class BootDashModelTest {
 			//Now try that this also works in debug mode...
 			System.out.println("Restart project in DEBUG mode...");
 			project.restart(RunState.DEBUGGING, ui);
-			waitForState(project, RunState.STARTING);
 			waitForState(project, RunState.DEBUGGING);
 
 			waitForPort(project, changedPort);
@@ -801,13 +799,32 @@ public class BootDashModelTest {
 		try {
 			waitForState(element, RunState.INACTIVE);
 
+			RecordingElementChangedListener recordedChanges1 = new RecordingElementChangedListener();
+			model.addElementStateListener(recordedChanges1);
+
 			element.restart(RunState.RUNNING, ui);
-			waitForState(element, RunState.STARTING);
 			waitForState(element, RunState.RUNNING);
 
+			List<RunState> states1 = recordedChanges1.getRecordedRunStates();
+			assertEquals(4, states1.size());
+			assertEquals(RunState.STARTING, states1.get(0));
+			assertEquals(RunState.RUNNING, states1.get(1));
+
+			model.removeElementStateListener(recordedChanges1);
+
+			RecordingElementChangedListener recordedChanges2 = new RecordingElementChangedListener();
+			model.addElementStateListener(recordedChanges2);
+
 			element.restart(RunState.DEBUGGING, ui);
-			waitForState(element, RunState.STARTING);
 			waitForState(element, RunState.DEBUGGING);
+
+			List<RunState> states2 = recordedChanges2.getRecordedRunStates();
+			assertEquals(7, states2.size());
+			assertEquals(RunState.STARTING, states2.get(3));
+			assertEquals(RunState.DEBUGGING, states2.get(4));
+
+			model.removeElementStateListener(recordedChanges2);
+
 		} finally {
 			element.stopAsync(ui);
 			waitForState(element, RunState.INACTIVE);
@@ -940,7 +957,6 @@ public class BootDashModelTest {
 			waitForState(element, RunState.INACTIVE);
 
 			element.restart(RunState.RUNNING, ui);
-			waitForState(element, RunState.STARTING);
 			waitForState(element, RunState.RUNNING);
 
 			new ACondition(4000) {
@@ -966,7 +982,6 @@ public class BootDashModelTest {
 			};
 
 			element.restart(RunState.RUNNING, ui);
-			waitForState(element, RunState.STARTING);
 			waitForState(element, RunState.RUNNING);
 			new ACondition(4000) {
 				public boolean test() throws Exception {
