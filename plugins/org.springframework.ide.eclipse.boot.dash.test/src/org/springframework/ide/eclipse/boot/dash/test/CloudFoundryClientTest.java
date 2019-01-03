@@ -1001,7 +1001,7 @@ public class CloudFoundryClientTest {
 
 			long starting = System.currentTimeMillis();
 			System.out.println("Pushing...");
-			client.push(params, CancelationTokens.NULL);
+			push(params);
 			long duration = System.currentTimeMillis() - starting;
 			System.out.println("Pushing took: "+duration+ " ms");
 		}
