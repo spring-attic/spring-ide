@@ -1,12 +1,12 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2012, 2019 Pivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
- *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ * Contributors:
+ *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.quickfix.jdt.computers;
 
@@ -31,16 +31,17 @@ import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.manipulation.CoreASTProvider;
 import org.eclipse.jdt.internal.core.SourceMethod;
 import org.eclipse.jdt.internal.core.SourceRefElement;
 import org.eclipse.jdt.internal.core.SourceType;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
-import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.springframework.ide.eclipse.quickfix.jdt.proposals.RequestMappingVariableCompletionProposal;
+import org.springframework.ide.eclipse.quickfix.jdt.util.AssistContextUtil;
 import org.springframework.ide.eclipse.quickfix.jdt.util.ProposalCalculatorUtil;
 
 /**
@@ -99,8 +100,14 @@ public class RequestMappingVariableProposalComputer extends AnnotationProposalCo
 			ICompilationUnit cu = javaContext.getCompilationUnit();
 			SourceViewer sourceViewer = (SourceViewer) javaContext.getViewer();
 			int invocationOffset = javaContext.getInvocationOffset();
-			AssistContext assistContext = new AssistContext(cu, sourceViewer, invocationOffset, 0,
-					SharedASTProvider.WAIT_NO);
+			AssistContext assistContext = new AssistContext(cu, sourceViewer, invocationOffset, 0);
+
+			// PT 162858442 - Work-around: instead of passing a
+			// WAIT_NO flag when creating the AssistContext above
+			// create the AST root and set it when creating the AST
+			// Root
+			assistContext.setASTRoot(AssistContextUtil.getASTRoot(cu, CoreASTProvider.WAIT_NO));
+
 			ASTNode node = ((SourceRefElement) a).findNode(assistContext.getASTRoot());
 
 			if (node == null) {
@@ -161,9 +168,15 @@ public class RequestMappingVariableProposalComputer extends AnnotationProposalCo
 
 				if (found) {
 					ISourceRange sourceRange = element.getSourceRange();
-					//Now get the 'real' ast.
+					// Now get the 'real' ast.
 					assistContext = new AssistContext(javaContext.getCompilationUnit(), sourceViewer,
-							sourceRange.getOffset(), sourceRange.getLength(), SharedASTProvider.WAIT_YES);
+							sourceRange.getOffset(), sourceRange.getLength());
+
+					// PT 162858442 - Work-around: instead of passing a
+					// WAIT_YES flag when creating the AssistContext above
+					// create the AST root and set it when creating the AST
+					// Root
+					assistContext.setASTRoot(AssistContextUtil.getASTRoot(cu, CoreASTProvider.WAIT_YES));
 
 					node = assistContext.getCoveringNode();
 					Annotation annotation = (Annotation) ((SourceRefElement) a).findNode(assistContext.getASTRoot());

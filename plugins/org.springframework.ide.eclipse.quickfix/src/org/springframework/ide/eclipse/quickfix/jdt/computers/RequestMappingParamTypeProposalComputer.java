@@ -1,12 +1,12 @@
 /*******************************************************************************
- *  Copyright (c) 2012 VMware, Inc.
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2012, 2019 Pivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
- *  Contributors:
- *      VMware, Inc. - initial API and implementation
+ * Contributors:
+ *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.quickfix.jdt.computers;
 
@@ -39,10 +39,10 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.manipulation.CoreASTProvider;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComputer;
 import org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal;
-import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jface.text.BadLocationException;
@@ -51,6 +51,7 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.springframework.ide.eclipse.quickfix.Activator;
+import org.springframework.ide.eclipse.quickfix.jdt.util.AssistContextUtil;
 import org.springframework.ide.eclipse.quickfix.jdt.util.ProposalCalculatorUtil;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
@@ -100,7 +101,13 @@ public class RequestMappingParamTypeProposalComputer extends JavaCompletionPropo
 					if (viewer instanceof SourceViewer) {
 						SourceViewer sourceViewer = (SourceViewer) viewer;
 						int invocationOffset = context.getInvocationOffset();
-						AssistContext assistContext = new AssistContext(cu, sourceViewer, invocationOffset, 0, SharedASTProvider.WAIT_NO);
+						AssistContext assistContext = new AssistContext(cu, sourceViewer, invocationOffset, 0);
+						// PT 162858442 - Work-around: instead of passing a
+						// WAIT_NO flag when creating the AssistContext above
+						// create the AST root and set it when creating the AST
+						// Root
+						assistContext.setASTRoot(AssistContextUtil.getASTRoot(cu, CoreASTProvider.WAIT_NO));
+
 						ASTNode node = assistContext.getCoveringNode();
 						// cursor is at the beginning of an empty param list
 						// [method(^)}

@@ -30,7 +30,8 @@ Require-Bundle: org.eclipse.core.resources,
  org.springsource.ide.eclipse.commons.core,
  org.springframework.ide.eclipse.config.core,
  org.eclipse.ui.workbench.texteditor,
- org.springsource.ide.eclipse.commons.ui
+ org.springsource.ide.eclipse.commons.ui,
+ org.eclipse.core.runtime
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Activator: org.springframework.ide.eclipse.quickfix.Activator
