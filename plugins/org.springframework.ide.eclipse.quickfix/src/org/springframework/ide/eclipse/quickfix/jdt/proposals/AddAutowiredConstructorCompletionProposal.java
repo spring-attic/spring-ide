@@ -145,7 +145,12 @@ public class AddAutowiredConstructorCompletionProposal extends AnnotationComplet
 	private MethodDeclaration createNewConstructor(TypeDeclaration typeDecl2, AST ast) {
 		MethodDeclaration newConstructor = ast.newMethodDeclaration();
 		newConstructor.setConstructor(true);
-		newConstructor.setExtraDimensions(0);
+
+		// PT 162858442. Set extra dimensions deprecated in JLS8 or higher.
+		if (ast.apiLevel() < AST.JLS8) {
+			newConstructor.setExtraDimensions(0);
+		}
+
 		newConstructor.setJavadoc(null);
 		int modifier = Modifier.PUBLIC & Modifier.CONSTRUCTOR_INVOCATION;
 		newConstructor.modifiers().addAll(ASTNodeFactory.newModifiers(ast, modifier));
