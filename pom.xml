@@ -892,6 +892,17 @@
 			<layout>p2</layout>
 			<url>https://dl.bintray.com/jetbrains/kotlin/eclipse-plugin/last/</url>
 		</repository>
+
+        <!-- temporary to provide a older version of reactor-core bundle to cft.
+             Not sure how to properly handle this but CFT needs a old bundle while we need a newer one.
+             This site allows cft to find the dependency it needs.
+             If CFT is updated to use same version as us then we can remove this again -->
+ 		<repository>
+ 			<id>p2-thirdparty-bundles</id>
+ 			<layout>p2</layout>
+ 			<url>http://dist.springsource.com/release/TOOLS/third-party/misc-p2-repo/3.9.4.201805082144</url>
+ 		</repository>
+ 		
 <!-- 		<repository> -->
 <!-- 			<id>yedit</id> -->
 <!-- 			<layout>p2</layout> -->
