@@ -991,6 +991,7 @@ public class CloudFoundryClientTest {
 	@Test public void startCanBeCanceled() throws Exception {
 		IProject project = projects.createBootWebProject("slow-starter");
 		File jarFile = BootJarPackagingTest.packageAsJar(project, ui);
+		System.out.println();
 
 		String appName = appHarness.randomAppName();
 		try (CFPushArguments params = new CFPushArguments()) {
@@ -1096,7 +1097,7 @@ public class CloudFoundryClientTest {
 
 	private void push(CFPushArguments _params) throws Exception {
 		if (_params.getMemory() == null) {
-			_params.setMemory(256);
+			_params.setMemory(1024);
 		}
 		try (CFPushArguments params = _params) {
 			client.push(params, CancelationTokens.NULL);

@@ -120,7 +120,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	public static final Duration GET_SMALL_INFO_TIMEOUT = Duration.ofSeconds(20);
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder") || (""+Platform.getLocation()).contains("bamboo");
-//	private static final boolean DEBUG_REACTOR = false;//(""+Platform.getLocation()).contains("kdvolder")
+//	private static final boolean DEBUG_REACTOR = (""+Platform.getLocation()).contains("kdvolder");
 									//|| (""+Platform.getLocation()).contains("bamboo");
 
 
