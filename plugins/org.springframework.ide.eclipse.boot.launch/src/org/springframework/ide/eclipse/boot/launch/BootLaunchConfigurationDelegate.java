@@ -38,6 +38,7 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
@@ -335,7 +336,9 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		setProcessFactory(wc, BootProcessFactory.class);
 		setProject(wc, project);
 		if (project!=null && project.hasNature(SpringBootCore.M2E_NATURE)) {
-			enableClasspathProviders(wc);
+			enableMavenClasspathProviders(wc);
+		} else if (project!=null && project.hasNature(SpringBootCore.BUILDSHIP_NATURE)) {
+			enableGradleClasspathProviders(wc);
 		}
 		if (mainType!=null) {
 			setMainType(wc, mainType);
@@ -612,6 +615,21 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 			}
 			throw new IllegalArgumentException("No META-INF/MANIFEST.MF found in '"+thinWrapper+"'. Is it a proper 'thin boot wrapper' jar?");
 		}
+	}
+
+	/**
+	 * Copy a given launch config into a 'clone' that has all the same attributes but
+	 * a different type id.
+	 */
+	public static ILaunchConfigurationWorkingCopy copyAs(ILaunchConfiguration conf,
+			String newType) throws CoreException {
+		ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
+		ILaunchConfigurationType launchConfigurationType = launchManager
+				.getLaunchConfigurationType(newType);
+		ILaunchConfigurationWorkingCopy wc = launchConfigurationType.newInstance(null,
+				launchManager.generateLaunchConfigurationName(conf.getName()));
+		wc.setAttributes(conf.getAttributes());
+		return wc;
 	}
 
 	public static boolean useThinWrapper(ILaunchConfiguration conf) {

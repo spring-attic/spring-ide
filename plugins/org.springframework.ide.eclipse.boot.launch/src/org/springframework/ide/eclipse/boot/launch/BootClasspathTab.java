@@ -32,7 +32,7 @@ public class BootClasspathTab extends JavaClasspathTab implements ILaunchConfigu
 		try {
 			if (project!=null && project.hasNature(SpringBootCore.M2E_NATURE) && !conf.hasAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH_PROVIDER)) {
 				ILaunchConfigurationWorkingCopy wc = conf.getWorkingCopy();
-				BootLaunchConfigurationDelegate.enableClasspathProviders(wc);
+				BootLaunchConfigurationDelegate.enableMavenClasspathProviders(wc);
 				conf = wc;
 			}
 		} catch (CoreException e) {

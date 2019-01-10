@@ -11,36 +11,15 @@
 package org.springframework.ide.eclipse.boot.launch;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.ILaunchConfigurationType;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.m2e.jdt.internal.launch.MavenRuntimeClasspathProvider;
 
 @SuppressWarnings("restriction")
 public class BootMavenClassPathProvider extends MavenRuntimeClasspathProvider {
 
-	/**
-	 * Copy a given launch config into a 'clone' that has all the same attributes but
-	 * a different type id.
-	 */
-	private static ILaunchConfigurationWorkingCopy copyAs(ILaunchConfiguration conf,
-			String newType) throws CoreException {
-		ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
-		ILaunchConfigurationType launchConfigurationType = launchManager
-				.getLaunchConfigurationType(newType);
-		ILaunchConfigurationWorkingCopy wc = launchConfigurationType.newInstance(null,
-				launchManager.generateLaunchConfigurationName(conf.getName()));
-		wc.setAttributes(conf.getAttributes());
-		return wc;
-	}
-
-
-
 	@Override
 	protected int getArtifactScope(ILaunchConfiguration configuration) throws CoreException {
 		//Trick superclass in executing the right logic (i.e. as if this is a plain JDT launch config)
-		return super.getArtifactScope(copyAs(configuration, JDT_JAVA_APPLICATION));
+		return super.getArtifactScope(BootLaunchConfigurationDelegate.copyAs(configuration, JDT_JAVA_APPLICATION));
 	}
 }

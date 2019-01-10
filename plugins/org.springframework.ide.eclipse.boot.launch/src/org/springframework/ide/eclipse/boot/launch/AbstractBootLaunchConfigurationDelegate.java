@@ -48,6 +48,8 @@ import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 public abstract class AbstractBootLaunchConfigurationDelegate extends JavaLaunchDelegate {
 
+	private static final String JDT_JAVA_APPLICATION = "org.eclipse.jdt.launching.localJavaApplication";
+
 	private static final String SILENT_EXIT_EXCEPTION = "org.springframework.boot.devtools.restart.SilentExitExceptionHandler$SilentExitException";
 
 	private static final String M2E_CLASSPATH_PROVIDER = "org.eclipse.m2e.launchconfig.classpathProvider";
@@ -59,6 +61,7 @@ public abstract class AbstractBootLaunchConfigurationDelegate extends JavaLaunch
 
 	private static final String BOOT_MAVEN_SOURCE_PATH_PROVIDER = "org.springframework.ide.eclipse.boot.launch.BootMavenSourcePathProvider";
 	private static final String BOOT_MAVEN_CLASS_PATH_PROVIDER = "org.springframework.ide.eclipse.boot.launch.BootMavenClassPathProvider";
+	private static final String BUILDSHIP_CLASS_PATH_PROVIDER = "org.eclipse.buildship.core.classpathprovider";
 
 	/**
 	 * Spring boot properties are stored as launch confiuration properties with
@@ -369,15 +372,69 @@ public abstract class AbstractBootLaunchConfigurationDelegate extends JavaLaunch
 		IProject project = BootLaunchConfigurationDelegate.getProject(conf);
 		if (project.hasNature(SpringBootCore.M2E_NATURE)) {
 			conf = modify(conf, (ILaunchConfigurationWorkingCopy wc) -> {
-				enableClasspathProviders(wc);
+				enableMavenClasspathProviders(wc);
+			});
+		} else if (project.hasNature(SpringBootCore.BUILDSHIP_NATURE)) {
+			conf = modify(conf, wc -> {
+				enableGradleClasspathProviders(wc);
 			});
 		}
 		return conf;
 	}
 
-	public static void enableClasspathProviders(ILaunchConfigurationWorkingCopy wc) {
+	@Override
+	public String[][] getClasspathAndModulepath(ILaunchConfiguration configuration) throws CoreException {
+		if (configuration.hasAttribute(IJavaLaunchConfigurationConstants.ATTR_EXCLUDE_TEST_CODE)) {
+			//TODO: This is a dirty hack. We 'trick' BuildShip to treat our launch config as if it is a plain JDT launch by making
+			// a temporary copy of it.
+			//A request to make BuildShip provide a cleaner way to do this was filed here:
+			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=543328
+			//If that bug is resolved this code should be removed.
+			configuration = BootLaunchConfigurationDelegate.copyAs(configuration, JDT_JAVA_APPLICATION);
+		}
+		return super.getClasspathAndModulepath(configuration);
+	}
+
+	@Override
+	public String[] getClasspath(ILaunchConfiguration configuration) throws CoreException {
+		if (configuration.hasAttribute(IJavaLaunchConfigurationConstants.ATTR_EXCLUDE_TEST_CODE)) {
+			//TODO: This is a dirty hack. We 'trick' BuildShip to treat our launch config as if it is a plain JDT launch by making
+			// a temporary copy of it.
+			//A request to make BuildShip provide a cleaner way to do this was filed here:
+			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=543328
+			//If that bug is resolved this code should be removed.
+			configuration = BootLaunchConfigurationDelegate.copyAs(configuration, JDT_JAVA_APPLICATION);
+		}
+		return super.getClasspath(configuration);
+	}
+
+	@Override
+	public String[][] getBootpathExt(ILaunchConfiguration configuration) throws CoreException {
+		if (configuration.hasAttribute(IJavaLaunchConfigurationConstants.ATTR_EXCLUDE_TEST_CODE)) {
+			//TODO: This is a dirty hack. We 'trick' BuildShip to treat our launch config as if it is a plain JDT launch by making
+			// a temporary copy of it.
+			//A request to make BuildShip provide a cleaner way to do this was filed here:
+			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=543328
+			//If that bug is resolved this code should be removed.
+			configuration = BootLaunchConfigurationDelegate.copyAs(configuration, JDT_JAVA_APPLICATION);
+		}
+		return super.getBootpathExt(configuration);
+	}
+
+	public static void enableMavenClasspathProviders(ILaunchConfigurationWorkingCopy wc) {
 		setAttribute(wc, IJavaLaunchConfigurationConstants.ATTR_SOURCE_PATH_PROVIDER, BOOT_MAVEN_SOURCE_PATH_PROVIDER);
 		setAttribute(wc, IJavaLaunchConfigurationConstants.ATTR_CLASSPATH_PROVIDER, BOOT_MAVEN_CLASS_PATH_PROVIDER);
+	}
+
+	public static void enableGradleClasspathProviders(ILaunchConfigurationWorkingCopy wc) {
+		/* This is found in typical java launch config for buildship project. It plays a crucial role in
+		 * computing correct runtime classpath:
+		 *
+		 * <booleanAttribute key="org.eclipse.jdt.launching.ATTR_EXCLUDE_TEST_CODE" value="true"/>
+		 * <stringAttribute key="org.eclipse.jdt.launching.CLASSPATH_PROVIDER" value="org.eclipse.buildship.core.classpathprovider"/>
+		 */
+		setAttribute(wc, IJavaLaunchConfigurationConstants.ATTR_CLASSPATH_PROVIDER, BUILDSHIP_CLASS_PATH_PROVIDER);
+		setAttribute(wc, IJavaLaunchConfigurationConstants.ATTR_EXCLUDE_TEST_CODE, true);
 	}
 
 	private ILaunchConfiguration modify(ILaunchConfiguration conf, Consumer<ILaunchConfigurationWorkingCopy> mutator) throws CoreException {
@@ -390,6 +447,16 @@ public abstract class AbstractBootLaunchConfigurationDelegate extends JavaLaunch
 			}
 		}
 		return conf;
+	}
+
+	private static void setAttribute(ILaunchConfigurationWorkingCopy wc, String a, boolean v) {
+		try {
+			if (!wc.hasAttribute(a) || v != wc.getAttribute(a, false)) {
+				wc.setAttribute(a, v);
+			}
+		} catch (CoreException e) {
+			Log.log(e);
+		}
 	}
 
 	private static void setAttribute(ILaunchConfigurationWorkingCopy wc, String a, String v) {

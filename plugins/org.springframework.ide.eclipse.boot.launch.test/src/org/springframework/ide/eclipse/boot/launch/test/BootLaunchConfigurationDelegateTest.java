@@ -16,9 +16,12 @@ import java.io.File;
 import java.net.URL;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.function.Predicate;
+
+import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -38,6 +41,7 @@ import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport;
 import org.springframework.ide.eclipse.boot.launch.process.BootProcessFactory;
 import org.springframework.ide.eclipse.boot.test.util.LaunchResult;
 import org.springframework.ide.eclipse.boot.test.util.LaunchUtil;
+import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.Timewatch;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
@@ -372,6 +376,47 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		}
 	}
 
+	/**
+	 * Name fragments that, when seen in a dependency, probably mean the dependency is a test dependency
+	 */
+	private static final String[] testFragments = {
+			"test",
+			"junit",
+			"assertj",
+			"mockito",
+	};
+
+	private static boolean isTestClasspathEntry(String cpe) {
+		for (String testFrag : testFragments) {
+			String normalizedEntry = cpe.replace('\\', '/');
+			int slash = normalizedEntry.lastIndexOf('/');
+			if (slash>=0) {
+				normalizedEntry = normalizedEntry.substring(slash);
+			}
+			if (normalizedEntry.contains(testFrag)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+
+	public void testRuntimeClasspathNoTestStuffGradle() throws Exception {
+		IProject project = projects.createBootProject("gradle-test-project", withImportStrategy("GRADLE-Buildship 3.x"));
+		ILaunchConfigurationWorkingCopy wc = createBaseWorkingCopy(project.getName(), "com.example.demo.GradleTestProjectApplication");
+		String[] cp = getClasspath(new BootLaunchConfigurationDelegate(), wc);
+
+		ArrayList<String> testDependencies = new ArrayList<>();
+		for (String cpe : cp) {
+			if (isTestClasspathEntry(cpe)) {
+				testDependencies.add(cpe);
+			}
+		}
+		if (!testDependencies.isEmpty()) {
+			fail("Shouldn't have test dependencies but found: "+testDependencies);
+		}
+	}
+
 	public void testRuntimeClasspathNoTestStuff() throws Exception {
 		createLaunchReadyProject(TEST_PROJECT);
 		ILaunchConfigurationWorkingCopy wc = createBaseWorkingCopy();
@@ -443,7 +488,8 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 	private String[] getClasspath(JavaLaunchDelegate delegate,
 			ILaunchConfigurationWorkingCopy wc) throws CoreException {
 		System.out.println("\n====classpath according to "+delegate.getClass().getSimpleName());
-		String[] classpath = delegate.getClasspath(wc);
+		String[][] cpAndMp = delegate.getClasspathAndModulepath(wc);
+		String[] classpath = cpAndMp[0];
 		for (String element : classpath) {
 			int chop = element.lastIndexOf('/');
 			System.out.println('"'+element.substring(chop+1)+"\",");

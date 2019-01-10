@@ -20,6 +20,8 @@ import org.springsource.ide.eclipse.commons.core.preferences.StsProperties;
 public class SpringBootCore {
 
 	public static final String M2E_NATURE = "org.eclipse.m2e.core.maven2Nature";
+	public static final String BUILDSHIP_NATURE = "org.eclipse.buildship.core.gradleprojectnature";
+
 	private static final StsProperties stsProps = StsProperties.getInstance();
 	private InitializrService initializr;
 
