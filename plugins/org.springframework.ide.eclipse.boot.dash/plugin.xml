@@ -74,6 +74,12 @@
                id="org.springframework.ide.eclipse.boot.dash.Beans"
                label="Beans">
          </propertyTab>
+         <propertyTab
+               afterTab="org.springframework.ide.eclipse.boot.dash.Beans"
+               category="org.springframework.ide.eclipse.boot.dash"
+               id="org.springframework.ide.eclipse.boot.dash.Env"
+               label="Env">
+         </propertyTab>
       </propertyTabs>
    </extension>
    
@@ -135,6 +141,20 @@
                class="org.springframework.ide.eclipse.boot.dash.views.properties.BeansPropertiesSection"
                id="org.springframework.ide.eclipse.boot.dash.section.BeansSection"
                tab="org.springframework.ide.eclipse.boot.dash.Beans">
+            <input
+                  type="org.springframework.ide.eclipse.boot.dash.model.LaunchConfDashElement">
+            </input>
+            <input
+                  type="org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement">
+            </input>
+            <input
+                  type="org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement">
+            </input>
+         </propertySection>
+         <propertySection
+               class="org.springframework.ide.eclipse.boot.dash.views.properties.EnvPropertiesSection"
+               id="org.springframework.ide.eclipse.boot.dash.section.EnvSection"
+               tab="org.springframework.ide.eclipse.boot.dash.Env">
             <input
                   type="org.springframework.ide.eclipse.boot.dash.model.LaunchConfDashElement">
             </input>

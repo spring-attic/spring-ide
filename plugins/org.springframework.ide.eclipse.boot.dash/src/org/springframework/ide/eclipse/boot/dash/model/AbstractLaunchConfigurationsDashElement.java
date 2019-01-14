@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2017 Pivotal, Inc.
+ * Copyright (c) 2015, 2019 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,6 +57,7 @@ import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.boot.util.RetryUtil;
+import org.springframework.ide.eclipse.environment.ui.live.model.LiveEnvModel;
 import org.springsource.ide.eclipse.commons.frameworks.core.maintype.MainTypeFinder;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
@@ -100,6 +101,7 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 
 	private PollingLiveExp<List<RequestMapping>> liveRequestMappings;
 	private PollingLiveExp<LiveBeansModel> liveBeans;
+	private PollingLiveExp<LiveEnvModel> liveEnv;
 
 	public AbstractLaunchConfigurationsDashElement(LocalBootDashModel bootDashModel, T delegate) {
 		super(bootDashModel, delegate);
@@ -553,6 +555,27 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 				});
 			}
 			return liveBeans.getValue();
+		}
+	}
+
+	public LiveEnvModel getLiveEnv() {
+		synchronized (this) {
+			if (liveEnv == null) {
+				ActuatorClient client = getActuatorClient();
+				liveEnv = PollingLiveExp.create(client::getEnv);
+				addElementState(liveEnv);
+				addDisposableChild(liveEnv);
+				runState.addListener((e, runstate) -> {
+					if (READY_STATES.contains(runstate)) {
+						// After the app is running refresh for 2 minutes every 5 sec
+						liveEnv.sleepBetweenRefreshes(Duration.ofSeconds(5));
+						liveEnv.refreshFor(LIVE_DATA_REFRESH_TIMEOUT);
+					} else {
+						liveEnv.refreshOnce();
+					}
+				});
+			}
+			return liveEnv.getValue();
 		}
 	}
 

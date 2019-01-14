@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Pivotal, Inc.
+ * Copyright (c) 2017, 2019 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@ import org.springframework.ide.eclipse.boot.dash.model.WrappingBootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.ActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.RestActuatorClient;
+import org.springframework.ide.eclipse.environment.ui.live.model.LiveEnvModel;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
@@ -32,6 +33,7 @@ public abstract class CloudDashElement<T> extends WrappingBootDashElement<T> {
 
 	private LiveExpression<ImmutableList<RequestMapping>> liveRequestMappings;
 	private LiveExpression<LiveBeansModel> liveBeans;
+	private LiveExpression<LiveEnvModel> liveEnv;
 
 	protected ActuatorClient getActuatorClient(URI target) {
 		return new RestActuatorClient(target, getTypeLookup(), getRestClient());
@@ -85,6 +87,29 @@ public abstract class CloudDashElement<T> extends WrappingBootDashElement<T> {
 			}
 		}
 		return liveBeans.getValue();
+	}
+
+	public LiveEnvModel getLiveEnv() {
+		synchronized (this) {
+			if (liveEnv == null) {
+				final LiveExpression<URI> actuatorUrl = getActuatorUrl();
+				liveEnv = new AsyncLiveExpression<LiveEnvModel>(null, "Fetch env for '"+getName()+"'") {
+					protected LiveEnvModel compute() {
+						URI target = actuatorUrl.getValue();
+						if (target != null) {
+							ActuatorClient client = getActuatorClient(target);
+							return client.getEnv();
+						}
+						return null;
+					}
+
+				};
+				liveEnv.dependsOn(actuatorUrl);
+				addElementState(liveEnv);
+				addDisposableChild(liveEnv);
+			}
+		}
+		return liveEnv.getValue();
 	}
 
 	protected LiveExpression<URI> getActuatorUrl() {

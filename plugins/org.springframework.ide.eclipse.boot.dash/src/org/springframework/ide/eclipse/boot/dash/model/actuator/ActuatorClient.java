@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2018 Pivotal, Inc.
+ * Copyright (c) 2015, 2019 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,11 +17,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.osgi.framework.Version;
 import org.osgi.framework.VersionRange;
+import org.springframework.ide.eclipse.beans.ui.live.model.JsonParser;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansJsonParser;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansJsonParser2;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModel;
 import org.springframework.ide.eclipse.beans.ui.live.model.TypeLookup;
 import org.springframework.ide.eclipse.boot.util.Log;
+import org.springframework.ide.eclipse.environment.ui.live.model.LiveEnvJsonParser1x;
+import org.springframework.ide.eclipse.environment.ui.live.model.LiveEnvJsonParser2x;
+import org.springframework.ide.eclipse.environment.ui.live.model.LiveEnvModel;
 
 /**
  * Abstract implementation of a ActuatorClient. The actuar client connects
@@ -93,7 +97,37 @@ public abstract class ActuatorClient {
 		return null;
 	}
 
+	public LiveEnvModel getEnv() {
+		try {
+			ImmutablePair<String, String> data = getEnvData();
+			if (data != null) {
+				String json = data.left;
+				if (json!=null) {
+					return parseEnv(json, data.right);
+				}
+			}
+		} catch (Exception e) {
+			Log.log(e);
+		}
+		return null;
+	}
+
+	private LiveEnvModel parseEnv(String json, String version) throws Exception {
+		JsonParser<LiveEnvModel> parser = null;
+		if ("2".equals(version)) {
+			// Boot 2.x
+			parser = new LiveEnvJsonParser2x();
+		} else {
+			//Boot 1.x
+			parser = new LiveEnvJsonParser1x();
+		}
+		return parser.parse(json);
+	}
+
 	protected abstract ImmutablePair<String, String> getRequestMappingData() throws Exception;
 
 	protected abstract ImmutablePair<String, String> getBeansData() throws Exception;
+
+	protected abstract ImmutablePair<String, String> getEnvData() throws Exception;
+
 }

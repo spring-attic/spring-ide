@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2017 Pivotal, Inc.
+ * Copyright (c) 2015, 2019 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModel;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
+import org.springframework.ide.eclipse.environment.ui.live.model.LiveEnvModel;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 
 import com.google.common.collect.ImmutableSet;
@@ -58,6 +59,13 @@ public interface BootDashElement extends Nameable, Taggable {
 	 * means 'no beans')
 	 */
 	LiveBeansModel getLiveBeans();
+
+	/**
+	 * Get the env from a running process. May return null if env cannot be
+	 * determined. (Thus, <code>null</code> means unknown, whereas an empty list
+	 * means 'no env')
+	 */
+	LiveEnvModel getLiveEnv();
 
 	/**
 	 * Get the 'active' launch configuration. This may be null.

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Pivotal, Inc.
+ * Copyright (c) 2017, 2019 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,6 +52,11 @@ public class JMXActuatorClient extends ActuatorClient {
 	private static final OperationInfo[] BEANS_OPERATIONS = {
 			new OperationInfo("org.springframework.boot:type=Endpoint,name=Beans", "beans", "2"), //Boot 2.x
 			new OperationInfo("org.springframework.boot:type=Endpoint,name=beansEndpoint", "getData", "1") //Boot 1.x
+	};
+
+	private static final OperationInfo[] ENV_OPERATIONS = {
+			new OperationInfo("org.springframework.boot:type=Endpoint,name=Env", "environment", "2"), //Boot 2.x
+			new OperationInfo("org.springframework.boot:type=Endpoint,name=environmentEndpoint", "Data", "1") //Boot 1.x
 	};
 
 	private JMXClient client = null;
@@ -112,6 +117,31 @@ public class JMXActuatorClient extends ActuatorClient {
 		return null;
 	}
 
+	@Override
+	protected ImmutablePair<String, String> getEnvData() throws Exception {
+		try {
+			JMXClient client = getClient();
+			if (client!=null) {
+				for (OperationInfo op : ENV_OPERATIONS) {
+					try {
+						Object obj = client.callOperation(op.objectName, op.operationName);
+						if (obj!=null) {
+							return ImmutablePair.of(new ObjectMapper().writeValueAsString(obj), op.version);
+						}
+					} catch (InstanceNotFoundException e) {
+						//Ignore and try other mbean
+					}
+				}
+			}
+		} catch (Exception e) {
+			disposeClient(); //Client may be in broken state, do not reuse.
+			if (!isExpectedException(e)) {
+				throw e;
+			}
+		}
+		return null;
+	}
+
 	private static final Set<String> EXPECTED_EXCEPTIONS = ImmutableSet.of(
 			"ConnectException",
 			"InstanceNotFoundException"
@@ -141,5 +171,4 @@ public class JMXActuatorClient extends ActuatorClient {
 			client.dispose();
 		}
 	}
-
 }

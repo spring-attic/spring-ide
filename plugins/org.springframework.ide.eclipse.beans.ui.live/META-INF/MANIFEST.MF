@@ -7,7 +7,8 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: org.springframework.ide.eclipse.beans.ui.live,
  org.springframework.ide.eclipse.beans.ui.live.actions,
  org.springframework.ide.eclipse.beans.ui.live.model,
- org.springframework.ide.eclipse.beans.ui.live.tree
+ org.springframework.ide.eclipse.beans.ui.live.tree,
+ org.springframework.ide.eclipse.environment.ui.live.model
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui.views,
  org.json,

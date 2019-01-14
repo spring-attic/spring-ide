@@ -41,6 +41,8 @@ public class ActuatorDataTest {
 		private String version = null;
 		private String beansJson = "";
 		private String requestMappingsJson = "";
+		private String envJson = "";
+
 
 		public TestActuatorClient(TypeLookup typeLookup) {
 			super(typeLookup);
@@ -69,6 +71,11 @@ public class ActuatorDataTest {
 		@Override
 		protected ImmutablePair<String, String> getBeansData() throws Exception {
 			return ImmutablePair.of(beansJson, version);
+		}
+
+		@Override
+		protected ImmutablePair<String, String> getEnvData() throws Exception {
+			return ImmutablePair.of(envJson, version);
 		}
 
 	}
