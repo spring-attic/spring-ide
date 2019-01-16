@@ -22,10 +22,10 @@ import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansJsonParser;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansJsonParser2;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModel;
 import org.springframework.ide.eclipse.beans.ui.live.model.TypeLookup;
-import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.environment.ui.live.model.LiveEnvJsonParser1x;
 import org.springframework.ide.eclipse.environment.ui.live.model.LiveEnvJsonParser2x;
 import org.springframework.ide.eclipse.environment.ui.live.model.LiveEnvModel;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 /**
  * Abstract implementation of a ActuatorClient. The actuar client connects
