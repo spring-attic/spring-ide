@@ -39,13 +39,18 @@ public class LiveEnvJsonParser2x implements JsonParser<LiveEnvModel> {
 		return model;
 	}
 
+	/**
+	 * 
+	 * @param envObj
+	 * @return non-null Active profiles. Content in the active profiles may be empty
+	 *         if no profiles are found
+	 */
 	private ActiveProfiles parseActiveProfiles(JSONObject envObj) {
 		Object _profiles = envObj.opt("activeProfiles");
+		ImmutableList.Builder<Profile> list = ImmutableList.builder();
 
 		if (_profiles instanceof JSONArray) {
 			JSONArray profilesObj = (JSONArray) _profiles;
-
-			ImmutableList.Builder<Profile> list = ImmutableList.builder();
 
 			for (int i = 0; i < profilesObj.length(); i++) {
 				Object object = profilesObj.opt(i);
@@ -53,13 +58,18 @@ public class LiveEnvJsonParser2x implements JsonParser<LiveEnvModel> {
 					list.add(new Profile((String) object));
 				}
 			}
-			ImmutableList<Profile> profiles = list.build();
-			return !profiles.isEmpty() ? new ActiveProfiles(profiles) : null;
-
 		}
-		return null;
+		List<Profile> profiles = list.build();
+		return new ActiveProfiles(profiles);
 	}
 
+	/**
+	 * 
+	 * @param envObj
+	 * @return non-null PropertySources. Content in the PropertySources may be empty
+	 *         if no sources are found
+	 * @throws Exception
+	 */
 	private PropertySources parseProperties(JSONObject envObj) throws Exception {
 		ImmutableList.Builder<PropertySource> allSources = ImmutableList.builder();
 
@@ -84,7 +94,7 @@ public class LiveEnvJsonParser2x implements JsonParser<LiveEnvModel> {
 			}
 		}
 		ImmutableList<PropertySource> sources = allSources.build();
-		return !sources.isEmpty() ? new PropertySources(sources) : null;
+		return new PropertySources(sources);
 	}
 
 	private List<Property> parseProperties(Object opt2) {
@@ -94,7 +104,7 @@ public class LiveEnvJsonParser2x implements JsonParser<LiveEnvModel> {
 			JSONObject jsonObj = (JSONObject) opt2;
 			Iterator<?> keys = jsonObj.keys();
 			if (keys != null) {
-				while(keys.hasNext()) {
+				while (keys.hasNext()) {
 					Object key = keys.next();
 					if (key instanceof String) {
 						String propKey = (String) key;

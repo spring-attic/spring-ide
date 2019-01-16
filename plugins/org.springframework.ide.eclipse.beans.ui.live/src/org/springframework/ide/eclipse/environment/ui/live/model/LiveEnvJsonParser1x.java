@@ -29,14 +29,8 @@ public class LiveEnvJsonParser1x implements JsonParser<LiveEnvModel> {
 	
 	@Override
 	public LiveEnvModel parse(String jsonInput) throws Exception {
-		
-		JSONArray contextsArray = toJson(jsonInput);
-		
-		
 
-		LiveEnvModel model = new LiveEnvModel(null, null);
-
-		return model;
+		return null;
 	}
 	
 	protected JSONArray toJson(String json) throws JSONException {		

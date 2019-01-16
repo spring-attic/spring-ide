@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.environment.ui.live.model;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.ide.eclipse.beans.ui.live.model.DisplayName;
@@ -21,7 +22,7 @@ public class PropertySources implements DisplayName {
 	private final List<PropertySource> propertySources;
 
 	public PropertySources(List<PropertySource> propertySources) {
-		this.propertySources = propertySources;
+		this.propertySources = propertySources != null ? propertySources : Collections.emptyList();
 	}
 
 	public List<PropertySource> getPropertySources() {

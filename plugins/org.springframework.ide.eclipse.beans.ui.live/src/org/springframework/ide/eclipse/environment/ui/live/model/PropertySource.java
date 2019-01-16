@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.environment.ui.live.model;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.ide.eclipse.beans.ui.live.model.DisplayName;
@@ -19,7 +20,7 @@ import com.google.common.collect.ImmutableList;
 public class PropertySource implements DisplayName {
 
 	private final String name;
-	private List<Property> properties;
+	private List<Property> properties = Collections.emptyList();
 
 	public PropertySource(String name) {
 		this.name = name;
@@ -35,7 +36,7 @@ public class PropertySource implements DisplayName {
 	}
 
 	public void add(List<Property> properties) {
-		this.properties = (properties != null) ? properties : ImmutableList.of();
+		this.properties = properties != null ? properties : Collections.emptyList();
 	}
 
 	@Override

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.environment.ui.live.model;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.ide.eclipse.beans.ui.live.model.DisplayName;
@@ -21,7 +22,7 @@ public class ActiveProfiles implements DisplayName {
 	private final List<Profile> profiles;
 
 	public ActiveProfiles(List<Profile> profiles) {
-		this.profiles = ImmutableList.copyOf(profiles);
+		this.profiles = profiles != null ? profiles : Collections.emptyList();
 	}
 
 	@Override
@@ -30,7 +31,7 @@ public class ActiveProfiles implements DisplayName {
 	}
 
 	public List<Profile> getProfiles() {
-		return this.profiles;
+		return ImmutableList.copyOf(this.profiles);
 	}
 
 	@Override

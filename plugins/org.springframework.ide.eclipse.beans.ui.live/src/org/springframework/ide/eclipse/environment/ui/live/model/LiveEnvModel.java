@@ -10,12 +10,16 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.environment.ui.live.model;
 
+import org.eclipse.core.runtime.Assert;
+
 public class LiveEnvModel implements Comparable<LiveEnvModel> {
 
 	private final PropertySources propertySources;
 	private ActiveProfiles profiles;
 
 	public LiveEnvModel(ActiveProfiles profiles, PropertySources propertySources) {
+		Assert.isNotNull(profiles);
+		Assert.isNotNull(propertySources);
 		this.profiles = profiles;
 		this.propertySources = propertySources;
 	}
