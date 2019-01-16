@@ -93,7 +93,7 @@ public class LiveEnvJsonParser2x implements JsonParser<LiveEnvModel> {
 				}
 			}
 		}
-		ImmutableList<PropertySource> sources = allSources.build();
+		List<PropertySource> sources = allSources.build();
 		return new PropertySources(sources);
 	}
 
