@@ -69,60 +69,24 @@ public class JMXActuatorClient extends ActuatorClient {
 
 	@Override
 	protected ImmutablePair<String, String> getRequestMappingData() throws Exception {
-		try {
-			JMXClient client = getClient();
-			if (client!=null) {
-				for (OperationInfo op : REQUEST_MAPPINGS_OPERATIONS) {
-					try {
-						Object obj = client.callOperation(op.objectName, op.operationName);
-						if (obj!=null) {
-							return ImmutablePair.of(new ObjectMapper().writeValueAsString(obj), op.version);
-						}
-					} catch (InstanceNotFoundException e) {
-						//Ignore and try other mbean
-					}
-				}
-			}
-		} catch (Exception e) {
-			disposeClient(); //Client may be in broken state, do not reuse.
-			if (!isExpectedException(e)) {
-				throw e;
-			}
-		}
-		return null;
+		return getDataFrom(REQUEST_MAPPINGS_OPERATIONS);
 	}
 
 	@Override
 	protected ImmutablePair<String, String> getBeansData() throws Exception {
-		try {
-			JMXClient client = getClient();
-			if (client!=null) {
-				for (OperationInfo op : BEANS_OPERATIONS) {
-					try {
-						Object obj = client.callOperation(op.objectName, op.operationName);
-						if (obj!=null) {
-							return ImmutablePair.of(new ObjectMapper().writeValueAsString(obj), op.version);
-						}
-					} catch (InstanceNotFoundException e) {
-						//Ignore and try other mbean
-					}
-				}
-			}
-		} catch (Exception e) {
-			disposeClient(); //Client may be in broken state, do not reuse.
-			if (!isExpectedException(e)) {
-				throw e;
-			}
-		}
-		return null;
+		return getDataFrom(BEANS_OPERATIONS);
 	}
 
 	@Override
 	protected ImmutablePair<String, String> getEnvData() throws Exception {
+		return getDataFrom(ENV_OPERATIONS);
+	}
+
+	protected ImmutablePair<String, String> getDataFrom(OperationInfo[] infos) throws Exception {
 		try {
 			JMXClient client = getClient();
-			if (client!=null) {
-				for (OperationInfo op : ENV_OPERATIONS) {
+			if (client!=null && infos!=null) {
+				for (OperationInfo op : infos) {
 					try {
 						Object obj = client.callOperation(op.objectName, op.operationName);
 						if (obj!=null) {
