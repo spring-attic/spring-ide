@@ -88,7 +88,7 @@ public class EnvPropertiesSection extends AbstractBdePropertiesSection {
 		searchBox.addDisposeListener(de -> searchBoxModel.close());
 
 		treeViewer = new TreeViewer(treeViewerComposite /* , SWT.NO_SCROLL */);
-		// BootDashElement should be input rather than the LiveBeansModel. Due to
+		// BootDashElement should be input rather than the model. Due to
 		// polling the model often to show changes in the model it's best to refresh the
 		// tree viewer rather then set the whole input that would remove the selection
 		// and collapse expanded nodes
@@ -127,14 +127,14 @@ public class EnvPropertiesSection extends AbstractBdePropertiesSection {
 		BootDashElement bde = getBootDashElement();
 		if (bde == null) {
 			missingContentsLabel.setText("Select single element in Boot Dashboard to see live Env");
-		} else if (bde.getLiveBeans() == null) {
+		} else if (bde.getLiveEnv() == null) {
 			missingContentsLabel.setText("'" + bde.getName()
-					+ "' must be running with JMX enabled; and actuator 'environment' endpoint must be enabled to obtain environment properties.");
+					+ "' must be running with JMX enabled; and actuator environment endpoint must be enabled to obtain all properties.");
 		} else {
 			missingContentsLabel.setText("");
 		}
 		// No tree widgets means that BootDashElement probably wasn't "running" or had
-		// no beans
+		// no live info
 		boolean firstTimeTreePopulated = treeViewer.getTree().getItems().length == 0;
 		treeViewer.refresh();
 		if (firstTimeTreePopulated) {
