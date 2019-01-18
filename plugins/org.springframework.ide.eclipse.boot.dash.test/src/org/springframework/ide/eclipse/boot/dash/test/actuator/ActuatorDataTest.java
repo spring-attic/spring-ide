@@ -266,4 +266,43 @@ public class ActuatorDataTest {
 		assertEquals("hello.Application", property.getValue());
 		assertEquals("System Environment Property \"JAVA_MAIN_CLASS_43370\"", property.getOrigin().getOrigin());
 	}
+
+	@Test public void testEnvModelEqualityBoot1x() throws Exception {
+		TestActuatorClient client = new TestActuatorClient(null).envJson(ActuatorClientTest.getContents("env-sample-boot1.json")).version("1");
+		LiveEnvModel env = client.getEnv();
+		assertEquals(env, client.getEnv());
+	}
+
+	@Test public void testEnvModelContentBoot1x() throws Exception {
+		TestActuatorClient client = new TestActuatorClient(null)
+				.envJson(ActuatorClientTest.getContents("env-sample-boot1.json")).version("1");
+		LiveEnvModel env = client.getEnv();
+
+		PropertySource propertySource = env.getPropertySources().getPropertySources().stream()
+				.filter(propertysource -> "server.ports".equals(propertysource.getDisplayName())).findFirst()
+				.orElse(null);
+		assertNotNull(propertySource);
+		assertEquals(1, propertySource.getProperties().size());
+		assertEquals("local.server.port", propertySource.getProperties().get(0).getName());
+		assertEquals("8090", propertySource.getProperties().get(0).getValue());
+
+		propertySource = env.getPropertySources().getPropertySources().stream()
+				.filter(propertysource -> "commandLineArgs".equals(propertysource.getDisplayName())).findFirst()
+				.orElse(null);
+		assertNotNull(propertySource);
+		assertEquals(1, propertySource.getProperties().size());
+		assertEquals("spring.output.ansi.enabled", propertySource.getProperties().get(0).getName());
+		assertEquals("always", propertySource.getProperties().get(0).getValue());
+
+		propertySource = env.getPropertySources().getPropertySources().stream()
+				.filter(propertysource -> "systemProperties".equals(propertysource.getDisplayName())).findFirst()
+				.orElse(null);
+		assertNotNull(propertySource);
+
+		Property property = propertySource.getProperties().stream()
+				.filter(prop -> "file.encoding.pkg".equals(prop.getName())).findFirst().orElse(null);
+		assertNotNull(property);
+		assertEquals("sun.io", property.getValue());
+
+	}
 }

@@ -1,7 +1,7 @@
 {
 	"profiles": [],
 	"server.ports": {
-		"local.server.port": 8080
+		"local.server.port": 8090
 	},
 	"commandLineArgs": {
 		"spring.output.ansi.enabled": "always"
