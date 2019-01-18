@@ -40,7 +40,7 @@ public class LiveEnvJsonParser2x implements JsonParser<LiveEnvModel> {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param envObj
 	 * @return non-null Active profiles. Content in the active profiles may be empty
 	 *         if no profiles are found
@@ -64,7 +64,7 @@ public class LiveEnvJsonParser2x implements JsonParser<LiveEnvModel> {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param envObj
 	 * @return non-null PropertySources. Content in the PropertySources may be empty
 	 *         if no sources are found
@@ -98,7 +98,7 @@ public class LiveEnvJsonParser2x implements JsonParser<LiveEnvModel> {
 	}
 
 	private List<Property> parseProperties(Object opt2) {
-		List<Property> properties = new ArrayList<Property>();
+		List<Property> properties = new ArrayList<>();
 
 		if (opt2 instanceof JSONObject) {
 			JSONObject jsonObj = (JSONObject) opt2;
@@ -108,9 +108,9 @@ public class LiveEnvJsonParser2x implements JsonParser<LiveEnvModel> {
 					Object key = keys.next();
 					if (key instanceof String) {
 						String propKey = (String) key;
-						Object valueObj = jsonObj.opt(propKey);
-						if (valueObj != null) {
-							properties.add(new Property(propKey, getValue(valueObj)));
+						Object propContentObj = jsonObj.opt(propKey);
+						if (propContentObj != null) {
+							properties.add(new Property(propKey, getValue(propContentObj), getOrigin(propContentObj)));
 						}
 					}
 				}
@@ -119,10 +119,18 @@ public class LiveEnvJsonParser2x implements JsonParser<LiveEnvModel> {
 		return properties;
 	}
 
-	private String getValue(Object value) {
-		if (value instanceof JSONObject) {
-			JSONObject valObj = (JSONObject) value;
-			return valObj.optString("value");
+	private String getOrigin(Object propContentObj) {
+		if (propContentObj instanceof JSONObject) {
+			JSONObject jsonObj = (JSONObject) propContentObj;
+			return jsonObj.optString("origin");
+		}
+		return null;
+	}
+
+	private String getValue(Object propContentObj) {
+		if (propContentObj instanceof JSONObject) {
+			JSONObject jsonObj = (JSONObject) propContentObj;
+			return jsonObj.optString("value");
 		}
 		return null;
 	}
