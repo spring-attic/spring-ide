@@ -33,18 +33,20 @@ import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 import org.springsource.ide.eclipse.commons.livexp.util.Filters;
 
 /**
- * Tree property section with search box that searches for any text pattern in the tree.
+ * Tree viewer control with search box that searches for any text pattern in the
+ * tree. This control is specifically meant for a page container.
  *
  * <p/>
  *
- * Will switch between a message and the searchable tree controls if no content is found on refresh. There
- * a no-content message supplier is required.
+ * Will switch between a simple message label control and the searchable tree
+ * control if no content is found on refresh. Therefore a no-content message
+ * supplier is required.
  *
  * @author Alex Boyko
+ * @author Nieraj Singh
  *
  */
-public class SearchableTreePage {
-
+public class SearchableTreeControl {
 
 	private TreeViewer treeViewer;
 	private TabbedPropertySheetPage page;
@@ -53,17 +55,17 @@ public class SearchableTreePage {
 	private Composite treeViewerComposite;
 	private Label missingContentsLabel;
 
-
 	private final FormToolkit widgetFactory;
 	private final Supplier<String> missingContentSupplier;
-
 
 	/**
 	 *
 	 * @param widgetFactory
-	 * @param missingContentSupplier supplies a message if no content for tree is available. Supplier MUST return null if content is available.
+	 * @param missingContentSupplier supplies a message if no content for tree is
+	 *                               available. Supplier MUST return null if content
+	 *                               is available.
 	 */
-	public SearchableTreePage(FormToolkit widgetFactory, Supplier<String> missingContentSupplier) {
+	public SearchableTreeControl(FormToolkit widgetFactory, Supplier<String> missingContentSupplier) {
 		this.widgetFactory = widgetFactory;
 		this.missingContentSupplier = missingContentSupplier;
 	}

@@ -34,7 +34,7 @@ import org.springsource.ide.eclipse.commons.livexp.ui.util.TreeElementWrappingCo
  */
 public class EnvPropertiesSection extends AbstractBdePropertiesSection {
 
-	private SearchableTreePage treePage;
+	private SearchableTreeControl searchableTree;
 	private TabbedPropertySheetPage page;
 
 
@@ -46,7 +46,7 @@ public class EnvPropertiesSection extends AbstractBdePropertiesSection {
 		LabelProvider labelProvider = new LiveEnvLabelProvider();
 		ITreeContentProvider treeContentProvider = new TreeElementWrappingContentProvider(new LiveEnvContentProvider());
 
-		treePage = new SearchableTreePage(getWidgetFactory(), () ->  {
+		searchableTree = new SearchableTreeControl(getWidgetFactory(), () ->  {
 			BootDashElement bde = getBootDashElement();
 			if (bde == null) {
 				return "Select single element in Boot Dashboard to see live Env";
@@ -59,16 +59,16 @@ public class EnvPropertiesSection extends AbstractBdePropertiesSection {
 			}
 		});
 
-		treePage.createControls(parent, page, treeContentProvider, labelProvider);
+		searchableTree.createControls(parent, page, treeContentProvider, labelProvider);
 	}
 
 	public void setInput(IWorkbenchPart part, ISelection selection) {
 		super.setInput(part, selection);
-		treePage.getTreeViewer().setInput(getBootDashElement());
+		searchableTree.getTreeViewer().setInput(getBootDashElement());
 	}
 
 	public void refresh() {
-		treePage.refresh();
+		searchableTree.refresh();
 	}
 
 	private static class LiveEnvContentProvider implements ITreeContentProvider {

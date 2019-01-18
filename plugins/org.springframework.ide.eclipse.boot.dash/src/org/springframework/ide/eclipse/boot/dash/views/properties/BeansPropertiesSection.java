@@ -32,7 +32,7 @@ import org.springsource.ide.eclipse.commons.livexp.ui.util.TreeElementWrappingCo
 public class BeansPropertiesSection extends AbstractBdePropertiesSection {
 
 	private TabbedPropertySheetPage page;
-	private SearchableTreePage treePage;
+	private SearchableTreeControl searchableTree;
 
 
 	@Override
@@ -43,8 +43,8 @@ public class BeansPropertiesSection extends AbstractBdePropertiesSection {
 		ITreeContentProvider treeContent = new TreeElementWrappingContentProvider(new BeansContentProvider(ContextGroupedBeansContentProvider.INSTANCE));
 		LabelProvider labelProvider = LiveBeansTreeLabelProvider.INSTANCE;
 
-		treePage = new SearchableTreePage(getWidgetFactory(), getNoContentMessage());
-		treePage.createControls(parent, page, treeContent, labelProvider);
+		searchableTree = new SearchableTreeControl(getWidgetFactory(), getNoContentMessage());
+		searchableTree.createControls(parent, page, treeContent, labelProvider);
 	}
 
 	@Override
@@ -54,12 +54,12 @@ public class BeansPropertiesSection extends AbstractBdePropertiesSection {
 		// polling the model often to show changes in the model it's best to refresh the
 		// tree viewer rather then set the whole input that would remove the selection
 		// and collapse expanded nodes
-		treePage.getTreeViewer().setInput(getBootDashElement());
+		searchableTree.getTreeViewer().setInput(getBootDashElement());
 	}
 
 	@Override
 	public void refresh() {
-		treePage.refresh();
+		searchableTree.refresh();
 	}
 
 	private Supplier<String> getNoContentMessage() {
