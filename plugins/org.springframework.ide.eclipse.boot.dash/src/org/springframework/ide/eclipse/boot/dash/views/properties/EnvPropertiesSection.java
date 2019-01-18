@@ -22,7 +22,6 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.env.ActiveProfiles;
-import org.springframework.ide.eclipse.boot.dash.model.actuator.env.LiveEnvLabelProvider;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.env.LiveEnvModel;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.env.PropertySource;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.env.PropertySources;
