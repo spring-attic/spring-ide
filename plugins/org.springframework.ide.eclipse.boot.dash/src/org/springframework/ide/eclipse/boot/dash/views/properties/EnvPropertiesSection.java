@@ -23,6 +23,8 @@ import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.env.ActiveProfiles;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.env.LiveEnvModel;
+import org.springframework.ide.eclipse.boot.dash.model.actuator.env.Property;
+import org.springframework.ide.eclipse.boot.dash.model.actuator.env.PropertyOrigin;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.env.PropertySource;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.env.PropertySources;
 import org.springsource.ide.eclipse.commons.livexp.ui.util.TreeElementWrappingContentProvider;
@@ -106,7 +108,6 @@ public class EnvPropertiesSection extends AbstractBdePropertiesSection {
 
 		@Override
 		public Object[] getChildren(Object parentElement) {
-			List<Object> children = new ArrayList<>();
 
 			if (parentElement instanceof ActiveProfiles) {
 				return ((ActiveProfiles) parentElement).getProfiles().toArray();
@@ -114,8 +115,14 @@ public class EnvPropertiesSection extends AbstractBdePropertiesSection {
 				return ((PropertySources) parentElement).getPropertySources().toArray();
 			} else if (parentElement instanceof PropertySource) {
 				return ((PropertySource) parentElement).getProperties().toArray();
+			} else if (parentElement instanceof Property) {
+				Property property = (Property) parentElement;
+				PropertyOrigin origin = property.getOrigin();
+				if (origin != null) {
+					return new Object[] { origin };
+				}
 			}
-			return children.toArray();
+			return new Object[0];
 		}
 
 		@Override
