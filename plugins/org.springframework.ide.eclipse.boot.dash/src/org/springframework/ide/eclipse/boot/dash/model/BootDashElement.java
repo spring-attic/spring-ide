@@ -18,8 +18,8 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModel;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.RequestMapping;
+import org.springframework.ide.eclipse.boot.dash.model.actuator.env.LiveEnvModel;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
-import org.springframework.ide.eclipse.environment.ui.live.model.LiveEnvModel;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 
 import com.google.common.collect.ImmutableSet;

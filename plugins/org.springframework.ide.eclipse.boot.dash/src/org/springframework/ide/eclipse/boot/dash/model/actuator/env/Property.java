@@ -8,37 +8,39 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.environment.ui.live.model;
-
-import java.util.Collections;
-import java.util.List;
+package org.springframework.ide.eclipse.boot.dash.model.actuator.env;
 
 import org.springframework.ide.eclipse.beans.ui.live.model.DisplayName;
 
-import com.google.common.collect.ImmutableList;
+public class Property implements DisplayName {
 
-public class PropertySources implements DisplayName {
+	private final String name;
+	private final String value;
 
-	private final List<PropertySource> propertySources;
-
-	public PropertySources(List<PropertySource> propertySources) {
-		this.propertySources = propertySources != null ? propertySources : Collections.emptyList();
+	public Property(String name, String value) {
+		this.name = name;
+		this.value = value;
 	}
-
-	public List<PropertySource> getPropertySources() {
-		return ImmutableList.copyOf(propertySources);
+	
+	public String getName() {
+		return name;
 	}
 
 	@Override
 	public String getDisplayName() {
-		return "Property Sources";
+		return this.name + " = " + value;
+	}
+
+	public String getValue() {
+		return this.value;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((propertySources == null) ? 0 : propertySources.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((value == null) ? 0 : value.hashCode());
 		return result;
 	}
 
@@ -50,11 +52,16 @@ public class PropertySources implements DisplayName {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		PropertySources other = (PropertySources) obj;
-		if (propertySources == null) {
-			if (other.propertySources != null)
+		Property other = (Property) obj;
+		if (name == null) {
+			if (other.name != null)
 				return false;
-		} else if (!propertySources.equals(other.propertySources))
+		} else if (!name.equals(other.name))
+			return false;
+		if (value == null) {
+			if (other.value != null)
+				return false;
+		} else if (!value.equals(other.value))
 			return false;
 		return true;
 	}

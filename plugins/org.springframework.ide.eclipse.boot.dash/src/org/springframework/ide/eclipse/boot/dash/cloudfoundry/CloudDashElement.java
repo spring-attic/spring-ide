@@ -19,7 +19,7 @@ import org.springframework.ide.eclipse.boot.dash.model.WrappingBootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.ActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.RestActuatorClient;
-import org.springframework.ide.eclipse.environment.ui.live.model.LiveEnvModel;
+import org.springframework.ide.eclipse.boot.dash.model.actuator.env.LiveEnvModel;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 

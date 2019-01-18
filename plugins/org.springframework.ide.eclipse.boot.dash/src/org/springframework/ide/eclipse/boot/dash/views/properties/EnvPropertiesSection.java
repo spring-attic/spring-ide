@@ -21,11 +21,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springframework.ide.eclipse.environment.ui.live.model.ActiveProfiles;
-import org.springframework.ide.eclipse.environment.ui.live.model.LiveEnvLabelProvider;
-import org.springframework.ide.eclipse.environment.ui.live.model.LiveEnvModel;
-import org.springframework.ide.eclipse.environment.ui.live.model.PropertySource;
-import org.springframework.ide.eclipse.environment.ui.live.model.PropertySources;
+import org.springframework.ide.eclipse.boot.dash.model.actuator.env.ActiveProfiles;
+import org.springframework.ide.eclipse.boot.dash.model.actuator.env.LiveEnvLabelProvider;
+import org.springframework.ide.eclipse.boot.dash.model.actuator.env.LiveEnvModel;
+import org.springframework.ide.eclipse.boot.dash.model.actuator.env.PropertySource;
+import org.springframework.ide.eclipse.boot.dash.model.actuator.env.PropertySources;
 import org.springsource.ide.eclipse.commons.livexp.ui.util.TreeElementWrappingContentProvider;
 
 /**
