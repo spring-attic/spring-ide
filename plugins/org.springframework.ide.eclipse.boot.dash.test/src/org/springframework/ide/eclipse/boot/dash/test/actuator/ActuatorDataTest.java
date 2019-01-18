@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.test.actuator;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,6 +28,8 @@ import org.springframework.ide.eclipse.boot.dash.model.actuator.ActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.env.LiveEnvModel;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.env.Profile;
+import org.springframework.ide.eclipse.boot.dash.model.actuator.env.Property;
+import org.springframework.ide.eclipse.boot.dash.model.actuator.env.PropertySource;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -92,25 +95,6 @@ public class ActuatorDataTest {
 		TestActuatorClient client = new TestActuatorClient(null).beansJson(ActuatorClientTest.getContents("beans-sample.json")).version("1");
 		LiveBeansModel liveBeans = client.getBeans();
 		assertEquals(liveBeans, client.getBeans());
-	}
-
-	@Test public void testEnvModelEquality() throws Exception {
-		TestActuatorClient client = new TestActuatorClient(null).envJson(ActuatorClientTest.getContents("env-sample-boot2.json")).version("2");
-		LiveEnvModel env = client.getEnv();
-		assertEquals(env, client.getEnv());
-	}
-
-	@Test public void testEnvModelInequality() throws Exception {
-		TestActuatorClient client = new TestActuatorClient(null).envJson(ActuatorClientTest.getContents("env-sample-boot2.json")).version("2");
-		TestActuatorClient otherClient = new TestActuatorClient(null).envJson(ActuatorClientTest.getContents("env-sample-boot2-diff.json")).version("2");
-
-		LiveEnvModel env = client.getEnv();
-		LiveEnvModel otherEnv = otherClient.getEnv();
-		assertNotEquals(env, otherEnv);
-
-		// Check each has different active profiles
-		assertEquals(ImmutableList.of(new Profile("production"), new Profile("staging")), env.getActiveProfiles().getProfiles());
-		assertEquals(ImmutableList.of(new Profile("production"), new Profile("differentstaging")), otherEnv.getActiveProfiles().getProfiles());
 	}
 
 	@Test public void testModelIneuality_1() throws Exception {
@@ -231,5 +215,55 @@ public class ActuatorDataTest {
 				.map(RequestMapping::getPath)
 				.collect(Collectors.toSet())
 		);
+	}
+
+	@Test public void testEnvModelEquality() throws Exception {
+		TestActuatorClient client = new TestActuatorClient(null).envJson(ActuatorClientTest.getContents("env-sample-boot2.json")).version("2");
+		LiveEnvModel env = client.getEnv();
+		assertEquals(env, client.getEnv());
+	}
+
+	@Test public void testEnvModelInequality() throws Exception {
+		TestActuatorClient client = new TestActuatorClient(null)
+				.envJson(ActuatorClientTest.getContents("env-sample-boot2.json")).version("2");
+		TestActuatorClient otherClient = new TestActuatorClient(null)
+				.envJson(ActuatorClientTest.getContents("env-sample-boot2-diff.json")).version("2");
+
+		LiveEnvModel env = client.getEnv();
+		LiveEnvModel otherEnv = otherClient.getEnv();
+		assertNotEquals(env, otherEnv);
+
+		assertNotEquals(env.getActiveProfiles().getProfiles(), otherEnv.getActiveProfiles().getProfiles());
+		assertNotEquals(env.getPropertySources().getPropertySources(),
+				otherEnv.getPropertySources().getPropertySources());
+	}
+
+	@Test public void testEnvModelContent() throws Exception {
+		TestActuatorClient client = new TestActuatorClient(null)
+				.envJson(ActuatorClientTest.getContents("env-sample-boot2.json")).version("2");
+		LiveEnvModel env = client.getEnv();
+		assertEquals(ImmutableList.of(new Profile("production"), new Profile("staging")),
+				env.getActiveProfiles().getProfiles());
+
+		// Check a property source with no origin
+		PropertySource noOriginPropertySource = env.getPropertySources().getPropertySources().stream()
+				.filter(propertysource -> "server.ports".equals(propertysource.getDisplayName())).findFirst()
+				.orElse(null);
+		assertNotNull(noOriginPropertySource);
+		assertEquals(1, noOriginPropertySource.getProperties().size());
+		assertEquals("local.server.port", noOriginPropertySource.getProperties().get(0).getName());
+		assertEquals("8080", noOriginPropertySource.getProperties().get(0).getValue());
+		assertNull(noOriginPropertySource.getProperties().get(0).getOrigin());
+
+		// Check a property source with origin
+		PropertySource propertySource = env.getPropertySources().getPropertySources().stream()
+				.filter(propertysource -> "systemEnvironment".equals(propertysource.getDisplayName())).findFirst()
+				.orElse(null);
+		assertNotNull(propertySource);
+		Property property = propertySource.getProperties().stream()
+				.filter(prop -> "JAVA_MAIN_CLASS_43370".equals(prop.getName())).findFirst().orElse(null);
+		assertNotNull(property);
+		assertEquals("hello.Application", property.getValue());
+		assertEquals("System Environment Property \"JAVA_MAIN_CLASS_43370\"", property.getOrigin().getOrigin());
 	}
 }
