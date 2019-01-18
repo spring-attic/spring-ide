@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.views.properties;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -46,7 +47,13 @@ public class EnvPropertiesSection extends AbstractBdePropertiesSection {
 		LabelProvider labelProvider = new LiveEnvLabelProvider();
 		ITreeContentProvider treeContentProvider = new TreeElementWrappingContentProvider(new LiveEnvContentProvider());
 
-		searchableTree = new SearchableTreeControl(getWidgetFactory(), () ->  {
+		searchableTree = new SearchableTreeControl(getWidgetFactory(), getMissingContentHandler());
+
+		searchableTree.createControls(parent, page, treeContentProvider, labelProvider);
+	}
+
+	private Supplier<String> getMissingContentHandler() {
+		return () ->  {
 			BootDashElement bde = getBootDashElement();
 			if (bde == null) {
 				return "Select single element in Boot Dashboard to see live Env";
@@ -57,9 +64,7 @@ public class EnvPropertiesSection extends AbstractBdePropertiesSection {
 				// Must return null if there is content
 				return null;
 			}
-		});
-
-		searchableTree.createControls(parent, page, treeContentProvider, labelProvider);
+		};
 	}
 
 	public void setInput(IWorkbenchPart part, ISelection selection) {
@@ -122,7 +127,5 @@ public class EnvPropertiesSection extends AbstractBdePropertiesSection {
 			Object[] children = getChildren(element);
 			return children != null && children.length > 0;
 		}
-
 	}
-
 }
