@@ -56,10 +56,10 @@ public class EnvPropertiesSection extends AbstractBdePropertiesSection {
 		return () ->  {
 			BootDashElement bde = getBootDashElement();
 			if (bde == null) {
-				return "Select single element in Boot Dashboard to see live Env";
+				return "Select single element in Boot Dashboard to see live environment properties";
 			} else if (bde.getLiveEnv() == null) {
 				return "'" + bde.getName()
-						+ "' must be running with JMX enabled; and actuator environment endpoint must be enabled to obtain all properties.";
+						+ "' must be running with JMX enabled; and actuator 'env' endpoint must be enabled to obtain all properties.";
 			} else {
 				// Must return null if there is content
 				return null;
