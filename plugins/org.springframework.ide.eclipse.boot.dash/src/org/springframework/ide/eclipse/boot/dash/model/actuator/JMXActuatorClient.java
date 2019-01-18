@@ -56,7 +56,7 @@ public class JMXActuatorClient extends ActuatorClient {
 
 	private static final OperationInfo[] ENV_OPERATIONS = {
 			new OperationInfo("org.springframework.boot:type=Endpoint,name=Env", "environment", "2"), //Boot 2.x
-			new OperationInfo("org.springframework.boot:type=Endpoint,name=environmentEndpoint", "Data", "1") //Boot 1.x
+			new OperationInfo("org.springframework.boot:type=Endpoint,name=environmentEndpoint", "getData", "1") //Boot 1.x
 	};
 
 	private JMXClient client = null;
