@@ -18,6 +18,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.ide.eclipse.beans.ui.live.model.JsonParser;
+import org.springsource.ide.eclipse.commons.frameworks.core.util.StringUtils;
 
 import com.google.common.collect.ImmutableList;
 
@@ -119,10 +120,13 @@ public class LiveEnvJsonParser2x implements JsonParser<LiveEnvModel> {
 		return properties;
 	}
 
-	private String getOrigin(Object propContentObj) {
+	private PropertyOrigin getOrigin(Object propContentObj) {
 		if (propContentObj instanceof JSONObject) {
 			JSONObject jsonObj = (JSONObject) propContentObj;
-			return jsonObj.optString("origin");
+			String origin = jsonObj.optString("origin");
+			if (StringUtils.hasText(origin)) {
+				return new PropertyOrigin(origin);
+			}
 		}
 		return null;
 	}
