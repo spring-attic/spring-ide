@@ -67,11 +67,13 @@ public class EnvPropertiesSection extends AbstractBdePropertiesSection {
 		};
 	}
 
+	@Override
 	public void setInput(IWorkbenchPart part, ISelection selection) {
 		super.setInput(part, selection);
 		searchableTree.getTreeViewer().setInput(getBootDashElement());
 	}
 
+	@Override
 	public void refresh() {
 		searchableTree.refresh();
 	}
