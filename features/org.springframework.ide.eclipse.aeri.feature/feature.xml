@@ -30,8 +30,4 @@
       %license
    </license>
 
-   <requires>
-      <import feature="org.eclipse.epp.logging.aeri.feature" version="2.0.0" />
-   </requires>
-
 </feature>
