@@ -14,7 +14,7 @@ import java.util.List;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBean;
-import org.springframework.ide.eclipse.beans.ui.live.utils.LiveBeansUtil;
+import org.springframework.ide.eclipse.beans.ui.live.utils.LiveBeanUtil;
 
 /**
  * @author Leo Dos Santos
@@ -33,7 +33,7 @@ public class OpenBeanClassAction extends AbstractOpenResourceAction {
 		for (Object obj : elements) {
 			if (obj instanceof LiveBean) {
 				LiveBean bean = (LiveBean) obj;
-				LiveBeansUtil.openInEditor(bean);
+				LiveBeanUtil.openInEditor(bean);
 			}
 		}
 	}

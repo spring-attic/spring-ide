@@ -20,7 +20,7 @@ import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansGroup;
 import org.springframework.ide.eclipse.beans.ui.live.model.TypeLookup;
 import org.springsource.ide.eclipse.commons.ui.SpringUIUtils;
 
-public class LiveBeansUtil {
+public class LiveBeanUtil {
 	
 	public static void openInEditor(AbstractLiveBeansModelElement element) {
 		if (element instanceof LiveBean) {
@@ -61,9 +61,9 @@ public class LiveBeansUtil {
 		TypeLookup session = bean.getTypeLookup();
 		String resource = bean.getResource();
 		if (resource != null && resource.trim().length() > 0 && !resource.equalsIgnoreCase("null")) {
-			String resourcePath = LiveBeansUtil.extractResourcePath(resource);
+			String resourcePath = LiveBeanUtil.extractResourcePath(resource);
 			if (resourcePath.endsWith(".class")) {
-				LiveBeansUtil.openInEditor(session, LiveBeansUtil.extractClassName(resourcePath));
+				LiveBeanUtil.openInEditor(session, LiveBeanUtil.extractClassName(resourcePath));
 			}
 		}
 	}
