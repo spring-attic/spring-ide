@@ -12,16 +12,23 @@ package org.springframework.ide.eclipse.boot.dash.views.properties;
 
 import java.util.function.Supplier;
 
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
+import org.springframework.ide.eclipse.beans.ui.live.model.AbstractLiveBeansModelElement;
+import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeanType;
 import org.springframework.ide.eclipse.beans.ui.live.tree.ContextGroupedBeansContentProvider;
 import org.springframework.ide.eclipse.beans.ui.live.tree.LiveBeansTreeLabelProvider;
+import org.springframework.ide.eclipse.beans.ui.live.utils.LiveBeanUtil;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springsource.ide.eclipse.commons.livexp.ui.util.TreeElementWrappingContentProvider;
+import org.springsource.ide.eclipse.commons.livexp.ui.util.TreeElementWrappingContentProvider.TreeNode;
 
 /**
  * Live beans property section
@@ -45,6 +52,9 @@ public class BeansPropertiesSection extends AbstractBdePropertiesSection {
 
 		searchableTree = new SearchableTreeControl(getWidgetFactory(), getNoContentMessage());
 		searchableTree.createControls(parent, page, treeContent, labelProvider);
+
+		searchableTree.getTreeViewer().addDoubleClickListener(new DoubleClickListener() );
+
 	}
 
 	@Override
@@ -106,6 +116,27 @@ public class BeansPropertiesSection extends AbstractBdePropertiesSection {
 		@Override
 		public boolean hasChildren(Object element) {
 			return delegateContentProvider.hasChildren(element);
+		}
+	}
+
+	private class DoubleClickListener implements IDoubleClickListener {
+
+		@Override
+		public void doubleClick(DoubleClickEvent event) {
+			ISelection sel = event.getSelection();
+			if (sel instanceof IStructuredSelection) {
+				IStructuredSelection structuredSel = (IStructuredSelection) sel;
+				Object firstElement = structuredSel.getFirstElement();
+				if (firstElement instanceof TreeNode) {
+					TreeNode node = (TreeNode) firstElement;
+					Object wrappedValue = node.getWrappedValue();
+					if (wrappedValue instanceof AbstractLiveBeansModelElement) {
+						 LiveBeanUtil.openInEditor((AbstractLiveBeansModelElement) wrappedValue);
+					} else if (wrappedValue instanceof LiveBeanType) {
+						 LiveBeanUtil.openInEditor(((LiveBeanType) wrappedValue).getBean());
+					}
+				}
+			}
 		}
 	}
 }
