@@ -58,7 +58,13 @@ public class LiveBeanUtil {
 	
 	private static void openInEditorFromResource(LiveBeansResource resource) {
 		TypeLookup typeLookup = resource.getTypeLookup();
-		String resourceVal = resource.getAttributes() != null ? resource.getAttributes().get(LiveBean.ATTR_RESOURCE) : resource.getLabel();
+		String resourceVal = null;
+		if (resource.getAttributes() != null) {
+			resourceVal = resource.getAttributes().get(LiveBean.ATTR_RESOURCE);
+		}
+		if (resourceVal == null) {
+			resourceVal = resource.getLabel();
+		}
 		if (typeLookup != null && resourceVal != null) {
 			openInEditorFromResource(typeLookup, resourceVal);
 		}
