@@ -27,7 +27,7 @@ public class LiveBeanUtil {
 			openInEditor(((LiveBeanRelation) element).getBean());
 		} else if (element instanceof LiveBeansResource) {
 			LiveBeansResource resource = (LiveBeansResource) element;
-			openInEditorFromResource(resource.getTypeLookup(), resource.getLabel());
+			openInEditorFromResource(resource);
 		}
 	}
 
@@ -54,6 +54,14 @@ public class LiveBeanUtil {
 		TypeLookup session = bean.getTypeLookup();
 		String resource = bean.getResource();
 		openInEditorFromResource(session, resource);
+	}
+	
+	private static void openInEditorFromResource(LiveBeansResource resource) {
+		TypeLookup typeLookup = resource.getTypeLookup();
+		String resourceVal = resource.getAttributes() != null ? resource.getAttributes().get(LiveBean.ATTR_RESOURCE) : resource.getLabel();
+		if (typeLookup != null && resourceVal != null) {
+			openInEditorFromResource(typeLookup, resourceVal);
+		}
 	}
 
 	private static void openInEditorFromResource(TypeLookup session, String resource) {
