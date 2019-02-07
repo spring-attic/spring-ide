@@ -68,14 +68,14 @@ public class LiveBeansUtil {
 		}
 	}
 	
-	public static void openInEditor(TypeLookup workspaceContext, String className) {
+	private static void openInEditor(TypeLookup workspaceContext, String className) {
 		IType type = workspaceContext.findType(className);
 		if (type != null) {
 			SpringUIUtils.openInEditor(type);
 		}
 	}
 	
-	public static String extractClassName(String resourcePath) {
+	private static String extractClassName(String resourcePath) {
 		int index = resourcePath.lastIndexOf("/WEB-INF/classes/");
 		int length = "/WEB-INF/classes/".length();
 		if (index >= 0) {
@@ -86,7 +86,7 @@ public class LiveBeansUtil {
 		return resourcePath;
 	}
 	
-	public static String extractResourcePath(String resourceStr) {
+	private static String extractResourcePath(String resourceStr) {
 		// Extract the resource path out of the descriptive text
 		int indexStart = resourceStr.indexOf("[");
 		int indexEnd = resourceStr.indexOf("]");
