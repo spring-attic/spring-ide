@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2017 Pivotal, Inc.
+ * Copyright (c) 2012, 2019 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,7 +42,11 @@ public final class ContextGroupedBeansContentProvider extends AbstractLiveBeansT
 		List<Object> children = super.getBeanChildren(bean);
 		String resource = bean.getResource();
 		if (resource != null && !resource.isEmpty()) {
-			children.add(1, new LiveBeansResource(resource));
+			// Do not add the bean as a element to the resource, otherwise
+			// it will appear as a child and the tree will have an infinite
+			// deep livebean. However, we still need the type lookup in the bean
+			// to resolve the types in the resource
+			children.add(1, new LiveBeansResource(resource, bean.getTypeLookup()));
 		}
 		return children;
 	}

@@ -16,9 +16,16 @@ package org.springframework.ide.eclipse.beans.ui.live.model;
  */
 public class LiveBeansResource extends LiveBeansGroup<LiveBean> {
 
-	public LiveBeansResource(String label) {
+	private final TypeLookup lookupSession;
+
+	public LiveBeansResource(String label, TypeLookup lookupSession) {
 		super(label);
 		attributes.put(LiveBean.ATTR_RESOURCE, label);
+		this.lookupSession = lookupSession;
+	}
+	
+	public TypeLookup getTypeLookup() {
+		return this.lookupSession;
 	}
 
 	@Override
