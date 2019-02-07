@@ -53,8 +53,7 @@ public class BeansPropertiesSection extends AbstractBdePropertiesSection {
 		searchableTree = new SearchableTreeControl(getWidgetFactory(), getNoContentMessage());
 		searchableTree.createControls(parent, page, treeContent, labelProvider);
 
-		searchableTree.getTreeViewer().addDoubleClickListener(new DoubleClickListener() );
-
+		searchableTree.getTreeViewer().addDoubleClickListener(new DoubleClickListener());
 	}
 
 	@Override
