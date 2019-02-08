@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Pivotal, Inc.
+ * Copyright (c) 2017, 2019 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,6 +29,7 @@ import org.eclipse.jst.ws.internal.common.ResourceUtils;
 import org.springframework.ide.eclipse.beans.ui.live.actions.OpenBeanDefinitionAction;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBean;
 import org.springframework.ide.eclipse.beans.ui.live.model.TypeLookup;
+import org.springframework.ide.eclipse.beans.ui.live.utils.LiveBeanUtil;
 import org.springframework.ide.eclipse.beans.ui.livegraph.LiveGraphUiPlugin;
 import org.springsource.ide.eclipse.commons.core.StatusHandler;
 import org.springsource.ide.eclipse.commons.ui.SpringUIUtils;
@@ -82,7 +83,7 @@ public class OpenXmlBeanDefinitionAction extends OpenBeanDefinitionAction {
 				session = bean.getTypeLookup();
 				String resource = bean.getResource();
 				if (resource != null && resource.trim().length() > 0 && !resource.equalsIgnoreCase("null")) {
-					String resourcePath = extractResourcePath(resource);
+					String resourcePath = LiveBeanUtil.extractResourcePath(resource);
 					if (resourcePath.endsWith(".xml")) {
 						// Strip the path until we can map it properly to a
 						// project resource. For now we're going to traverse

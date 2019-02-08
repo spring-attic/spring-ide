@@ -115,7 +115,7 @@ public class LiveBeanUtil {
 		return resourcePath;
 	}
 
-	private static String extractResourcePath(String resourceStr) {
+	public static String extractResourcePath(String resourceStr) {
 		// Extract the resource path out of the descriptive text
 		int indexStart = resourceStr.indexOf("[");
 		int indexEnd = resourceStr.indexOf("]");
