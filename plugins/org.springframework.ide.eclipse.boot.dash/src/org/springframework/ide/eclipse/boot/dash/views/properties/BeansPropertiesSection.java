@@ -129,10 +129,14 @@ public class BeansPropertiesSection extends AbstractBdePropertiesSection {
 				if (firstElement instanceof TreeNode) {
 					TreeNode node = (TreeNode) firstElement;
 					Object wrappedValue = node.getWrappedValue();
+					// NOTE: navigate to bean type and navigate to resource definition are NOT
+					// always the same. Be sure to use the correct one given a tree node.
+					// For nodes that indicate bean Type, use "to type" navigation
+					// For all other nodes, use "to resource definition" navigation
 					if (wrappedValue instanceof AbstractLiveBeansModelElement) {
-						 LiveBeanUtil.openInEditor((AbstractLiveBeansModelElement) wrappedValue);
+						 LiveBeanUtil.navigateToResourceDefinition((AbstractLiveBeansModelElement) wrappedValue);
 					} else if (wrappedValue instanceof LiveBeanType) {
-						 LiveBeanUtil.openInEditor(((LiveBeanType) wrappedValue).getBean());
+						 LiveBeanUtil.navigateToBeanType(((LiveBeanType) wrappedValue).getBean());
 					}
 				}
 			}

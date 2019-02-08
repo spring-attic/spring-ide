@@ -20,18 +20,25 @@ import org.springsource.ide.eclipse.commons.ui.SpringUIUtils;
 
 public class LiveBeanUtil {
 
-	public static void openInEditor(AbstractLiveBeansModelElement element) {
+	public static void navigateToResourceDefinition(AbstractLiveBeansModelElement element) {
 		if (element instanceof LiveBean) {
-			openInEditor((LiveBean) element);
+			navigateToResourceDefinitionInBean((LiveBean) element);
 		} else if (element instanceof LiveBeanRelation) {
-			openInEditor(((LiveBeanRelation) element).getBean());
+			navigateToResourceDefinitionInBean(((LiveBeanRelation) element).getBean());
 		} else if (element instanceof LiveBeansResource) {
 			LiveBeansResource resource = (LiveBeansResource) element;
-			openInEditorFromResource(resource);
+			navigateToResourceDefinition(resource);
 		}
 	}
 
-	public static void openInEditor(LiveBean bean) {
+	/**
+	 * Navigates to the bean TYPE in the live bean. It does NOT look at the resource
+	 * definition, UNLESS the type happens to be a proxy. In this case, it will
+	 * navigate to the resource definition.
+	 * 
+	 * @param bean
+	 */
+	public static void navigateToBeanType(LiveBean bean) {
 		TypeLookup appName = bean.getTypeLookup();
 		String beanClass = bean.getBeanType();
 		if (appName != null) {
@@ -39,24 +46,18 @@ public class LiveBeanUtil {
 				if (beanClass.startsWith("com.sun.proxy")) {
 					// Special case for proxy beans, extract the type
 					// from the resource field
-					openInEditorFromResource(bean);
+					navigateToResourceDefinition(bean);
 				} else {
-					openInEditor(appName, beanClass);
+					navigateToBeanType(appName, beanClass);
 				}
 			} else {
 				// No type field, so infer class from bean ID
-				openInEditor(appName, bean.getId());
+				navigateToBeanType(appName, bean.getId());
 			}
 		}
 	}
 
-	public static void openInEditorFromResource(LiveBean bean) {
-		TypeLookup session = bean.getTypeLookup();
-		String resource = bean.getResource();
-		openInEditorFromResource(session, resource);
-	}
-	
-	private static void openInEditorFromResource(LiveBeansResource resource) {
+	private static void navigateToResourceDefinition(LiveBeansResource resource) {
 		TypeLookup typeLookup = resource.getTypeLookup();
 		String resourceVal = null;
 		if (resource.getAttributes() != null) {
@@ -66,20 +67,37 @@ public class LiveBeanUtil {
 			resourceVal = resource.getLabel();
 		}
 		if (typeLookup != null && resourceVal != null) {
-			openInEditorFromResource(typeLookup, resourceVal);
+			navigateToResourceDefinition(typeLookup, resourceVal);
 		}
 	}
 
-	private static void openInEditorFromResource(TypeLookup session, String resource) {
+	/**
+	 * Navigates to the resource definition in the bean, as opposed to the bean
+	 * type. Even if the live bean may contain the bean type, this method
+	 * specifically looks at the resource attribute in the live bean instead.
+	 * </p>
+	 * This is in contrast to {@link #navigateToBeanType(LiveBean)}, where
+	 * navigation occurs to the TYPE instead of the the resource. NOTE that these
+	 * two are not always the same.
+	 * 
+	 * @param bean
+	 */
+	public static void navigateToResourceDefinitionInBean(LiveBean bean) {
+		TypeLookup session = bean.getTypeLookup();
+		String resource = bean.getResource();
+		navigateToResourceDefinition(session, resource);
+	}
+
+	private static void navigateToResourceDefinition(TypeLookup session, String resource) {
 		if (resource != null && resource.trim().length() > 0 && !resource.equalsIgnoreCase("null")) {
-			String resourcePath = LiveBeanUtil.extractResourcePath(resource);
+			String resourcePath = extractResourcePath(resource);
 			if (resourcePath.endsWith(".class")) {
-				LiveBeanUtil.openInEditor(session, LiveBeanUtil.extractClassName(resourcePath));
+				navigateToBeanType(session, extractClassName(resourcePath));
 			}
 		}
 	}
 
-	private static void openInEditor(TypeLookup workspaceContext, String className) {
+	private static void navigateToBeanType(TypeLookup workspaceContext, String className) {
 		IType type = workspaceContext.findType(className);
 		if (type != null) {
 			SpringUIUtils.openInEditor(type);

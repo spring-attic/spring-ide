@@ -33,7 +33,7 @@ public class OpenBeanDefinitionAction extends AbstractOpenResourceAction {
 		for (Object obj : elements) {
 			if (obj instanceof LiveBean) {
 				LiveBean bean = (LiveBean) obj;
-				LiveBeanUtil.openInEditorFromResource(bean);
+				LiveBeanUtil.navigateToResourceDefinitionInBean(bean);
 			}
 		}
 	}
