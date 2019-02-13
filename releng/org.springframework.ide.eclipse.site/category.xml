@@ -230,6 +230,8 @@
 		<bundle id="org.reactivestreams.reactive-streams" version="0.0.0"/>
 		<bundle id="org.reactivestreams.reactive-streams.source" version="0.0.0"/>
 
+	    <bundle id="org.bouncycastle.bcpg" version="0.0.0"/>
+	    <bundle id="org.bouncycastle.bcpg.source" version="0.0.0"/>
 	    <bundle id="org.bouncycastle.bcpkix" version="0.0.0"/>
 	    <bundle id="org.bouncycastle.bcpkix.source" version="0.0.0"/>
 	    <bundle id="org.bouncycastle.bcprov" version="0.0.0"/>
