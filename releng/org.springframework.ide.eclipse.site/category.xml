@@ -230,10 +230,10 @@
 		<bundle id="org.reactivestreams.reactive-streams" version="0.0.0"/>
 		<bundle id="org.reactivestreams.reactive-streams.source" version="0.0.0"/>
 
-	    <bundle id="bcpkix" version="0.0.0"/>
-	    <bundle id="bcpkix.source" version="0.0.0"/>
-	    <bundle id="bcprov" version="0.0.0"/>
-	    <bundle id="bcprov.source" version="0.0.0"/>
+	    <bundle id="org.bouncycastle.bcpkix" version="0.0.0"/>
+	    <bundle id="org.bouncycastle.bcpkix.source" version="0.0.0"/>
+	    <bundle id="org.bouncycastle.bcprov" version="0.0.0"/>
+	    <bundle id="org.bouncycastle.bcprov.source" version="0.0.0"/>
 	    <bundle id="com.hierynomus.sshj" version="0.0.0"/>
 	    <bundle id="com.hierynomus.sshj.source" version="0.0.0"/>
 	    <bundle id="com.jcraft.jzlib" version="0.0.0"/>

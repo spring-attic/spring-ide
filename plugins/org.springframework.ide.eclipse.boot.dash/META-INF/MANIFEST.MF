@@ -51,11 +51,11 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.commands,
  com.hierynomus.sshj;bundle-version="0.24.0",
  com.jcraft.jzlib;bundle-version="1.1.3",
- bcpkix;bundle-version="1.57.0",
- bcprov;bundle-version="1.57.0",
  javax.xml.bind,
  javax.xml.stream,
- javax.activation
+ javax.activation,
+ org.bouncycastle.bcpkix;bundle-version="1.59.0",
+ org.bouncycastle.bcprov;bundle-version="1.59.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
