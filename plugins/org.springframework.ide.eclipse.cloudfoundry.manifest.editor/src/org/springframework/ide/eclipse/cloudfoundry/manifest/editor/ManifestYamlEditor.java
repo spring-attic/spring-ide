@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2017 Pivotal, Inc.
+ * Copyright (c) 2015, 2019 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,16 +11,16 @@
 package org.springframework.ide.eclipse.cloudfoundry.manifest.editor;
 
 import java.io.IOException;
+import java.util.Collection;
 
 import org.dadacoalition.yedit.editor.YEditSourceViewerConfiguration;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.lsp4e.LanguageServerWrapper;
 import org.eclipse.lsp4e.LanguageServersRegistry;
 import org.eclipse.lsp4e.LanguageServersRegistry.LanguageServerDefinition;
 import org.eclipse.lsp4e.LanguageServiceAccessor;
-import org.eclipse.lsp4e.ProjectSpecificLanguageServerWrapper;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.part.FileEditorInput;
 import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.lsp.LSBasedSourceViewerConfiguration;
@@ -48,13 +48,13 @@ public class ManifestYamlEditor extends AbstractYamlEditor {
 			FileEditorInput fileInput = (FileEditorInput) input;
 			
 			IFile file = fileInput.getFile();
-			IProject project = file.getProject();
 		
 			String languageServerId = "org.eclipse.languageserver.languages.cloudfoundrymanifest";
 			LanguageServerDefinition serverDefinition = LanguageServersRegistry.getInstance().getDefinition(languageServerId);
 			if (serverDefinition != null) {
 				try {
-					ProjectSpecificLanguageServerWrapper lsWrapperForConnection = LanguageServiceAccessor.getLSWrapperForConnection(project, serverDefinition);
+					Collection<LanguageServerWrapper> lsWrappers = LanguageServiceAccessor.getLSWrappers(file, null);
+					LanguageServerWrapper lsWrapperForConnection = lsWrappers.stream().filter(w -> serverDefinition.equals(w.serverDefinition)).findFirst().orElse(null);
 					if (lsWrapperForConnection != null) {
 						IPath fileLocation = file.getLocation();
 						if (fileLocation != null) {
