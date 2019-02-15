@@ -48,7 +48,7 @@ public class LiveBeanUtil {
 					// from the resource field
 					navigateToResourceDefinition(bean);
 				} else {
-					navigateToBeanType(appName, beanClass);
+					navigateToBeanType(appName, beanClass.replace('$', '.'));
 				}
 			} else {
 				// No type field, so infer class from bean ID
@@ -112,6 +112,7 @@ public class LiveBeanUtil {
 		}
 		resourcePath = resourcePath.substring(0, resourcePath.lastIndexOf(".class"));
 		resourcePath = resourcePath.replaceAll("\\\\|\\/", "."); // Tolerate both '/' and '\'.
+		resourcePath = resourcePath.replace('$', '.'); // Replace inner classes '$' with JDT's '.'
 		return resourcePath;
 	}
 
