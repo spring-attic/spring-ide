@@ -34,7 +34,8 @@ public class BeanResourceDefinitionParsingTests {
 	public void classPathResourceInnerClass() throws Exception {
 		String resourceDefinition = "class path resource [org/springframework/boot/actuate/autoconfigure/metrics/MetricsAutoConfiguration$MeterBindersConfiguration.class]";
 		String expectedPath = "org/springframework/boot/actuate/autoconfigure/metrics/MetricsAutoConfiguration$MeterBindersConfiguration.class";
-		String expectedFQType = "org.springframework.boot.actuate.autoconfigure.metrics.MetricsAutoConfiguration$MeterBindersConfiguration";
+		// Expected should be in JDT form using '.' to allow Inner Class navigation
+		String expectedFQType = "org.springframework.boot.actuate.autoconfigure.metrics.MetricsAutoConfiguration.MeterBindersConfiguration";
 		SpringResource parser = new SpringResource(resourceDefinition);
 		String actualPath = parser.getResourcePath();
 		String actualClassName = parser.getClassName();
