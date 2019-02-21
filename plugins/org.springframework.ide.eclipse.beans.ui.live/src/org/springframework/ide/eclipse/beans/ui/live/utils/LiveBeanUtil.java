@@ -90,9 +90,10 @@ public class LiveBeanUtil {
 
 	private static void navigateToResourceDefinition(TypeLookup session, String resource) {
 		if (resource != null && resource.trim().length() > 0 && !resource.equalsIgnoreCase("null")) {
-			String resourcePath = extractResourcePath(resource);
-			if (resourcePath.endsWith(".class")) {
-				navigateToBeanType(session, extractClassName(resourcePath));
+			SpringResource springResource = new SpringResource(resource);
+			String clsName = springResource.getClassName();
+			if (clsName != null) {
+				navigateToBeanType(session, clsName);
 			}
 		}
 	}
@@ -102,27 +103,5 @@ public class LiveBeanUtil {
 		if (type != null) {
 			SpringUIUtils.openInEditor(type);
 		}
-	}
-
-	private static String extractClassName(String resourcePath) {
-		int index = resourcePath.lastIndexOf("/WEB-INF/classes/");
-		int length = "/WEB-INF/classes/".length();
-		if (index >= 0) {
-			resourcePath = resourcePath.substring(index + length);
-		}
-		resourcePath = resourcePath.substring(0, resourcePath.lastIndexOf(".class"));
-		resourcePath = resourcePath.replaceAll("\\\\|\\/", "."); // Tolerate both '/' and '\'.
-		resourcePath = resourcePath.replace('$', '.'); // Replace inner classes '$' with JDT's '.'
-		return resourcePath;
-	}
-
-	public static String extractResourcePath(String resourceStr) {
-		// Extract the resource path out of the descriptive text
-		int indexStart = resourceStr.indexOf("[");
-		int indexEnd = resourceStr.indexOf("]");
-		if (indexStart > -1 && indexEnd > -1 && indexStart < indexEnd) {
-			resourceStr = resourceStr.substring(indexStart + 1, indexEnd);
-		}
-		return resourceStr;
 	}
 }

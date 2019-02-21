@@ -83,7 +83,7 @@ public class OpenXmlBeanDefinitionAction extends OpenBeanDefinitionAction {
 				session = bean.getTypeLookup();
 				String resource = bean.getResource();
 				if (resource != null && resource.trim().length() > 0 && !resource.equalsIgnoreCase("null")) {
-					String resourcePath = LiveBeanUtil.extractResourcePath(resource);
+					String resourcePath = extractResourcePath(resource);
 					if (resourcePath.endsWith(".xml")) {
 						// Strip the path until we can map it properly to a
 						// project resource. For now we're going to traverse
@@ -128,6 +128,14 @@ public class OpenXmlBeanDefinitionAction extends OpenBeanDefinitionAction {
 		}
 
 	}
-
-
+	
+	public static String extractResourcePath(String resourceStr) {
+		// Extract the resource path out of the descriptive text
+		int indexStart = resourceStr.indexOf("[");
+		int indexEnd = resourceStr.indexOf("]");
+		if (indexStart > -1 && indexEnd > -1 && indexStart < indexEnd) {
+			resourceStr = resourceStr.substring(indexStart + 1, indexEnd);
+		}
+		return resourceStr;
+	}
 }
