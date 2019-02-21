@@ -42,6 +42,8 @@ public class LiveBeanUtil {
 		TypeLookup appName = bean.getTypeLookup();
 		String beanClass = bean.getBeanType();
 		if (appName != null) {
+			// Remove $$EnhancerBySpringCGLIB$$
+			beanClass = stripCGLib(beanClass);
 			if (beanClass != null && beanClass.trim().length() > 0) {
 				if (beanClass.startsWith("com.sun.proxy")) {
 					// Special case for proxy beans, extract the type
@@ -55,6 +57,22 @@ public class LiveBeanUtil {
 				navigateToBeanType(appName, bean.getId());
 			}
 		}
+	}
+
+	private static String stripCGLib(String beanClass) {
+		if (beanClass != null) {
+			int chop = beanClass.indexOf("$$EnhancerBySpringCGLIB$$");
+			if (chop >= 0) {
+				beanClass = beanClass.substring(0, chop);
+			}
+
+			chop = beanClass.indexOf("$$Lambda$");
+			if (chop >= 0) {
+				beanClass = beanClass.substring(0, chop);
+			}
+		}
+
+		return beanClass;
 	}
 
 	private static void navigateToResourceDefinition(LiveBeansResource resource) {
