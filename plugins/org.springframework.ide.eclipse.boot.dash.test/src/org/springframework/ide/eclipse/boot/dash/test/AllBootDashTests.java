@@ -48,7 +48,7 @@ import org.springframework.ide.eclipse.boot.dash.test.yaml.Yaml2DeploymentProper
 	ActuatorClientTest.class,
 	ActuatorDataTest.class,
 	ToggleFiltersModelTest.class,
-	BeansResourceDefinitionParsingTests.class,
+	BeanResourceDefinitionParsingTests.class,
 
 	//Medium length (less than 30 seconds):
 	JarNameGeneratorTest.class,

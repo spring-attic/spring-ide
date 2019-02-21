@@ -16,7 +16,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.ide.eclipse.beans.ui.live.utils.SpringResource;
 
-public class BeansResourceDefinitionParsingTests {
+public class BeanResourceDefinitionParsingTests {
 
 	@Test
 	public void classPathResource() throws Exception {
