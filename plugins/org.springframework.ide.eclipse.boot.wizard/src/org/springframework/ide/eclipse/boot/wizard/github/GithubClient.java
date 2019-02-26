@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2013, 2016 GoPivotal, Inc.
+ *  Copyright (c) 2013, 2019 GoPivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -244,52 +244,69 @@ public class GithubClient {
 	}
 
 	private Client createRestClient() {
-		Client client = ClientBuilder.newClient();
-//		IProxyService proxyService = GettingStartedActivator.getDefault().getProxyService();
-//		if (proxyService!=null && proxyService.isProxiesEnabled()) {
-//			final IProxyData[] existingProxies = proxyService.getProxyData();
-//			if (existingProxies != null && existingProxies.length>0) {
-//				//TODO: Do some magic to configure proxies on the http request based on its url.
-//
-//				//some interesting code in here:
-//				//org.cloudfoundry.ide.eclipse.internal.server.core.CloudFoundryClientFactory.getProxy(URL)
-//			}
-//		}
+		ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
 
-		//Add authentication
-		client = credentials.apply(client);
+		try {
+			//
+			// ClientBuilder uses a simple Class.forName to instantiate the configured client builder
+			// (which is the one from Jersey glassfish), which results in the thread context class loader
+			// to be used to find that class instead of this bundles classloader.
+			// That could result in a linkage error if the jersey glassfish client builder gets found in a
+			// different bundle that we expect here (and which might not be wired to javax.ws.rs)
+			//
+			Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
 
-		//Add json parsing capability using Jackson mapper.
-		client.register(SimpleJacksonBodyReader.class);
+			Client client = ClientBuilder.newClient();
 
-		//Add rate limit logging
-//		if (LOG_GITHUB_RATE_LIMIT) {
-//	        rest.getInterceptors().add(new ClientHttpRequestInterceptor() {
-//
-//				//@Override
-//				@Override
-//				public ClientHttpResponse intercept(HttpRequest request,
-//						byte[] body, ClientHttpRequestExecution execution)
-//						throws IOException {
-//					ClientHttpResponse res = execution.execute(request, body);
-//					System.out.println("==== Github: "+request.getURI()+ "  =========");
-//					for (Entry<String, List<String>> header : res.getHeaders().entrySet()) {
-//						if (header.getKey().contains("RateLimit")) {
-//							System.out.print(header.getKey()+":");
-//							for (String value : header.getValue()) {
-//								System.out.print(" "+value);
-//							}
-//							System.out.println();
-//						}
-//					}
-//					System.out.println("======================= ");
-//					return res;
-//				}
-//			});
-//
-//		}
+			//		IProxyService proxyService = GettingStartedActivator.getDefault().getProxyService();
+			//		if (proxyService!=null && proxyService.isProxiesEnabled()) {
+			//			final IProxyData[] existingProxies = proxyService.getProxyData();
+			//			if (existingProxies != null && existingProxies.length>0) {
+			//				//TODO: Do some magic to configure proxies on the http request based on its url.
+			//
+			//				//some interesting code in here:
+			//				//org.cloudfoundry.ide.eclipse.internal.server.core.CloudFoundryClientFactory.getProxy(URL)
+			//			}
+			//		}
 
-		return client;
+			//Add authentication
+			client = credentials.apply(client);
+
+			//Add json parsing capability using Jackson mapper.
+			client.register(SimpleJacksonBodyReader.class);
+
+			//Add rate limit logging
+			//		if (LOG_GITHUB_RATE_LIMIT) {
+			//	        rest.getInterceptors().add(new ClientHttpRequestInterceptor() {
+			//
+			//				//@Override
+			//				@Override
+			//				public ClientHttpResponse intercept(HttpRequest request,
+			//						byte[] body, ClientHttpRequestExecution execution)
+			//						throws IOException {
+			//					ClientHttpResponse res = execution.execute(request, body);
+			//					System.out.println("==== Github: "+request.getURI()+ "  =========");
+			//					for (Entry<String, List<String>> header : res.getHeaders().entrySet()) {
+			//						if (header.getKey().contains("RateLimit")) {
+			//							System.out.print(header.getKey()+":");
+			//							for (String value : header.getValue()) {
+			//								System.out.print(" "+value);
+			//							}
+			//							System.out.println();
+			//						}
+			//					}
+			//					System.out.println("======================= ");
+			//					return res;
+			//				}
+			//			});
+			//
+			//		}
+
+			return client;
+		}
+		finally {
+			Thread.currentThread().setContextClassLoader(contextLoader);
+		}
 	}
 
 //	/**
