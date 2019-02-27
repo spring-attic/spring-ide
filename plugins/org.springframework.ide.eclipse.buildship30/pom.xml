@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="https://maven.apache.org/POM/4.0.0"
+	 xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+	 xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.ide.eclipse</groupId>
@@ -21,7 +21,7 @@
 				<repository>
 					<id>buildship3</id>
 					<layout>p2</layout>
-					<url>http://download.eclipse.org/buildship/updates/e45/snapshots/3.x</url>
+					<url>https://download.eclipse.org/buildship/updates/e45/snapshots/3.x</url>
 				</repository>
 			</repositories>
 		</profile>
@@ -31,7 +31,7 @@
 				<repository>
 					<id>buildship3</id>
 					<layout>p2</layout>
-					<url>http://download.eclipse.org/buildship/updates/e46/snapshots/3.x</url>
+					<url>https://download.eclipse.org/buildship/updates/e46/snapshots/3.x</url>
 				</repository>
 			</repositories>
 		</profile>
@@ -41,7 +41,7 @@
 				<repository>
 					<id>buildship3</id>
 					<layout>p2</layout>
-					<url>http://download.eclipse.org/buildship/updates/e47/snapshots/3.x</url>
+					<url>https://download.eclipse.org/buildship/updates/e47/snapshots/3.x</url>
 				</repository>
 			</repositories>
 		</profile>
@@ -51,7 +51,7 @@
 				<repository>
 					<id>buildship3</id>
 					<layout>p2</layout>
-					<url>http://download.eclipse.org/buildship/updates/e48/snapshots/3.x</url>
+					<url>https://download.eclipse.org/buildship/updates/e48/snapshots/3.x</url>
 				</repository>
 			</repositories>
 		</profile>

@@ -29,7 +29,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.wst.sse.ui,
  org.eclipse.jface.text,
  org.springframework.ide.eclipse.editor.support,
- javax.ws.rs;bundle-version="2.0.1",
  com.fasterxml.jackson.core.jackson-annotations;bundle-version="2.6.2",
  com.fasterxml.jackson.core.jackson-core;bundle-version="2.6.2",
  com.fasterxml.jackson.core.jackson-databind;bundle-version="2.6.2"
@@ -44,4 +43,8 @@ Export-Package: org.springframework.ide.eclipse.boot.wizard,
  org.springframework.ide.eclipse.boot.wizard.importing,
  org.springframework.ide.eclipse.boot.wizard.util
 Bundle-Vendor: Pivotal Inc.
-Import-Package: org.glassfish.jersey.client
+Import-Package: javax.ws.rs,
+ javax.ws.rs.client,
+ javax.ws.rs.core,
+ javax.ws.rs.ext,
+ org.glassfish.jersey.client

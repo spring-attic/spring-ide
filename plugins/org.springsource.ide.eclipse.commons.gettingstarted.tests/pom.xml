@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="https://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.ide.eclipse</groupId>
@@ -27,12 +27,12 @@
 				<repository>
 					<id>spring-ide</id>
 					<layout>p2</layout>
-					<url>http://dist.springframework.org/snapshot/IDE/nightly/</url>
+					<url>https://dist.springframework.org/snapshot/IDE/nightly/</url>
 				</repository>
 				<repository>
 					<id>greclipse</id>
 					<layout>p2</layout>
-					<url>http://dist.springsource.org/snapshot/GRECLIPSE/e4.3-j8/</url>
+					<url>https://dist.springsource.org/snapshot/GRECLIPSE/e4.3-j8/</url>
 				</repository>
 			</repositories>
 		</profile>
