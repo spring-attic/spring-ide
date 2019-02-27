@@ -43,8 +43,8 @@ Export-Package: org.springframework.ide.eclipse.boot.wizard,
  org.springframework.ide.eclipse.boot.wizard.importing,
  org.springframework.ide.eclipse.boot.wizard.util
 Bundle-Vendor: Pivotal Inc.
-Import-Package: javax.ws.rs,
- javax.ws.rs.client,
- javax.ws.rs.core,
- javax.ws.rs.ext,
- org.glassfish.jersey.client
+Import-Package: javax.ws.rs;version="2.0.1",
+ javax.ws.rs.client;version="2.0.1",
+ javax.ws.rs.core;version="2.0.1",
+ javax.ws.rs.ext;version="2.0.1",
+ org.glassfish.jersey.client;version="2.22.0"
