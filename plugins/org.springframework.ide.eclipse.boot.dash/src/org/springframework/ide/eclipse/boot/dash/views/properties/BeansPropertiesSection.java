@@ -134,9 +134,9 @@ public class BeansPropertiesSection extends AbstractBdePropertiesSection {
 					// For nodes that indicate bean Type, use "to type" navigation
 					// For all other nodes, use "to resource definition" navigation
 					if (wrappedValue instanceof AbstractLiveBeansModelElement) {
-						 LiveBeanUtil.navigateToResourceDefinition((AbstractLiveBeansModelElement) wrappedValue);
+						 LiveBeanUtil.navigateToResource((AbstractLiveBeansModelElement) wrappedValue);
 					} else if (wrappedValue instanceof LiveBeanType) {
-						 LiveBeanUtil.navigateToBeanType(((LiveBeanType) wrappedValue).getBean());
+						 LiveBeanUtil.navigateToType(((LiveBeanType) wrappedValue).getBean());
 					}
 				}
 			}

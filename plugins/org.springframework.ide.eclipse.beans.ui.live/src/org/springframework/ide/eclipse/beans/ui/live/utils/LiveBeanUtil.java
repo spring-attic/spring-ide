@@ -20,14 +20,49 @@ import org.springsource.ide.eclipse.commons.ui.SpringUIUtils;
 
 public class LiveBeanUtil {
 
-	public static void navigateToResourceDefinition(AbstractLiveBeansModelElement element) {
+	/**
+	 * Navigates to the type IN the resource definition of the bean, as opposed to actual bean
+	 * type.
+	 * <p/> 
+	 * This method specifically looks at the resource attribute in the live bean to obtain a type.
+	 * <p/>
+	 * This is in contrast to {@link #navigateToType(LiveBean)}, where navigation
+	 * occurs to the actual type of the bean. 
+	 * <p/>
+	 * Type of the Bean and the type in the Resource Definition of the Bean may NOT
+	 * necessarily be the same.
+	 * 
+	 * @param bean
+	 */
+	public static void navigateToResource(AbstractLiveBeansModelElement element) {
+		LiveBean liveBean = null;
+
 		if (element instanceof LiveBean) {
-			navigateToResourceDefinitionInBean((LiveBean) element);
+			liveBean = (LiveBean) element;
 		} else if (element instanceof LiveBeanRelation) {
-			navigateToResourceDefinitionInBean(((LiveBeanRelation) element).getBean());
+			liveBean = ((LiveBeanRelation) element).getBean();
+		}
+		
+		// Parse the type from the resource in the live bean and then navigate to that type
+		if (liveBean != null) {
+			TypeLookup typeLookup = liveBean.getTypeLookup();
+			String resource = liveBean.getResource();
+			String parsedType = parseType(resource);
+			openInEditor(typeLookup, parsedType);
 		} else if (element instanceof LiveBeansResource) {
 			LiveBeansResource resource = (LiveBeansResource) element;
-			navigateToResourceDefinition(resource);
+			TypeLookup typeLookup = resource.getTypeLookup();
+			String resourceVal = null;
+			if (resource.getAttributes() != null) {
+				resourceVal = resource.getAttributes().get(LiveBean.ATTR_RESOURCE);
+			}
+			if (resourceVal == null) {
+				resourceVal = resource.getLabel();
+			}
+			if (typeLookup != null && resourceVal != null) {
+				String parsedType = parseType(resourceVal);
+				openInEditor(typeLookup, parsedType);
+			}
 		}
 	}
 
@@ -38,7 +73,7 @@ public class LiveBeanUtil {
 	 * 
 	 * @param bean
 	 */
-	public static void navigateToBeanType(LiveBean bean) {
+	public static void navigateToType(LiveBean bean) {
 		TypeLookup appName = bean.getTypeLookup();
 		String beanClass = bean.getBeanType();
 		if (appName != null) {
@@ -48,13 +83,13 @@ public class LiveBeanUtil {
 				if (beanClass.startsWith("com.sun.proxy")) {
 					// Special case for proxy beans, extract the type
 					// from the resource field
-					navigateToResourceDefinition(bean);
+					navigateToResource(bean);
 				} else {
-					navigateToBeanType(appName, beanClass.replace('$', '.'));
+					openInEditor(appName, beanClass.replace('$', '.'));
 				}
 			} else {
 				// No type field, so infer class from bean ID
-				navigateToBeanType(appName, bean.getId());
+				openInEditor(appName, bean.getId());
 			}
 		}
 	}
@@ -75,51 +110,20 @@ public class LiveBeanUtil {
 		return beanClass;
 	}
 
-	private static void navigateToResourceDefinition(LiveBeansResource resource) {
-		TypeLookup typeLookup = resource.getTypeLookup();
-		String resourceVal = null;
-		if (resource.getAttributes() != null) {
-			resourceVal = resource.getAttributes().get(LiveBean.ATTR_RESOURCE);
-		}
-		if (resourceVal == null) {
-			resourceVal = resource.getLabel();
-		}
-		if (typeLookup != null && resourceVal != null) {
-			navigateToResourceDefinition(typeLookup, resourceVal);
-		}
-	}
-
-	/**
-	 * Navigates to the resource definition in the bean, as opposed to the bean
-	 * type. Even if the live bean may contain the bean type, this method
-	 * specifically looks at the resource attribute in the live bean instead.
-	 * </p>
-	 * This is in contrast to {@link #navigateToBeanType(LiveBean)}, where
-	 * navigation occurs to the TYPE instead of the the resource. NOTE that these
-	 * two are not always the same.
-	 * 
-	 * @param bean
-	 */
-	public static void navigateToResourceDefinitionInBean(LiveBean bean) {
-		TypeLookup session = bean.getTypeLookup();
-		String resource = bean.getResource();
-		navigateToResourceDefinition(session, resource);
-	}
-
-	private static void navigateToResourceDefinition(TypeLookup session, String resource) {
+	private static String parseType(String resource) {
 		if (resource != null && resource.trim().length() > 0 && !resource.equalsIgnoreCase("null")) {
 			SpringResource springResource = new SpringResource(resource);
-			String clsName = springResource.getClassName();
-			if (clsName != null) {
-				navigateToBeanType(session, clsName);
-			}
+			return springResource.getClassName();
 		}
+		return null;
 	}
 
-	private static void navigateToBeanType(TypeLookup workspaceContext, String className) {
-		IType type = workspaceContext.findType(className);
-		if (type != null) {
-			SpringUIUtils.openInEditor(type);
+	private static void openInEditor(TypeLookup workspaceContext, String className) {
+		if (className != null) {
+			IType type = workspaceContext.findType(className);
+			if (type != null) {
+				SpringUIUtils.openInEditor(type);
+			}
 		}
 	}
 }
