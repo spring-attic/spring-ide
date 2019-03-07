@@ -775,7 +775,7 @@
 				<repository>
 					<id>ajdt</id>
 					<layout>p2</layout>
-					<url>https://download.eclipse.org/tools/ajdt/48/dev/update</url>
+					<url>https://download.eclipse.org/tools/ajdt/410/dev/update</url>
 				</repository>
 				<repository>
 					<id>orbit</id>
@@ -837,14 +837,14 @@
 					<url>https://download.eclipse.org/releases/2019-03/</url>
 				</repository>
 				<repository>
-					<id>ajdt</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/tools/ajdt/48/dev/update</url>
-				</repository>
-				<repository>
 					<id>orbit</id>
 					<layout>p2</layout>
-					<url>https://download.eclipse.org/tools/orbit/downloads/drops/S20190108164448/repository</url>
+					<url>https://download.eclipse.org/tools/orbit/downloads/drops/R20190226160451/repository</url>
+				</repository>
+				<repository>
+					<id>ajdt</id>
+					<layout>p2</layout>
+					<url>https://download.eclipse.org/tools/ajdt/410/dev/update</url>
 				</repository>
 				<repository>
 					<id>swtbot</id>
