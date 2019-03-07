@@ -14,7 +14,7 @@ import java.time.Duration;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.ValueProviderRegistry.ValueProviderStrategy;
-import org.springframework.ide.eclipse.editor.support.util.FuzzyMatcher;
+import org.springsource.ide.eclipse.commons.core.util.FuzzyMatcher;
 import org.springsource.ide.eclipse.commons.frameworks.core.internal.cache.Cache;
 import org.springsource.ide.eclipse.commons.frameworks.core.internal.cache.LimitedTimeCache;
 
@@ -78,14 +78,14 @@ public abstract class CachingValueProvider implements ValueProviderStrategy {
 
 		public CacheEntry(String query, Flux<StsValueHint> producer) {
 			values = producer
-//			.doOnNext((e) -> {
-//				count++;
+			.doOnNext((e) -> {
+				count++;
 //				debug("onNext["+query+":"+count+"]: "+e.getValue().toString());
-//			})
-//			.doOnComplete(() -> {
+			})
+			.doOnComplete(() -> {
 //				debug("onComplete["+query+":"+count+"]");
-//				isComplete = true;
-//			})
+				isComplete = true;
+			})
 			.take(MAX_RESULTS)
 			.cache(MAX_RESULTS);
 			values.subscribe(); // create infinite demand so that we actually force cache entries to be fetched upto the max.
