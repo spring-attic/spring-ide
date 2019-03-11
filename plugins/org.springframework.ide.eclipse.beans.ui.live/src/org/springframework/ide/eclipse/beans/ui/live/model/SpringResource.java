@@ -80,13 +80,14 @@ public class SpringResource {
 	public String getClassName() {
 		if (path != null && path.endsWith(".class")) {
 			String clssName = path;
+			
+			// Check if the class name is relative to either WEB-INF or
+			// project path (e.g. the bean is defined in the project)
 			int index = clssName.lastIndexOf("/WEB-INF/classes/");
 			int length = "/WEB-INF/classes/".length();
 			if (index >= 0) {
 				clssName = clssName.substring(index + length);
-			}
-			
-			if (project != null) {
+			} else if (project != null) {
 				try {
 					String possibleType = typeFromProjectRelativePath(project, clssName);
 					if (possibleType != null) {
