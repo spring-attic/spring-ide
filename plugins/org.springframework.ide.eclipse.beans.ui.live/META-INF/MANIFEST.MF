@@ -20,7 +20,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.springsource.ide.eclipse.commons.ui,
  org.eclipse.jdt.ui,
  com.google.guava,
- org.springsource.ide.eclipse.commons.livexp
+ org.springsource.ide.eclipse.commons.livexp,
+ org.springsource.ide.eclipse.commons.frameworks.core
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: Spring IDE Developers
 Bundle-Activator: org.springframework.ide.eclipse.beans.ui.live.LiveBeansUiPlugin

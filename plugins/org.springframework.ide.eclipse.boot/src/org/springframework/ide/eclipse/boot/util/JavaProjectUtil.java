@@ -3,7 +3,7 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springsource.ide.eclipse.commons.frameworks.core.util.JavaTypeUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.FileUtil;
 
 public class JavaProjectUtil {
@@ -131,29 +132,10 @@ public class JavaProjectUtil {
 	}
 
 	public static Set<IContainer> getOutputFolders(IJavaProject jp) {
-		IContainer defaultOutput = getDefaultOutputFolder(jp);
-		if (defaultOutput!=null) {
-			return Collections.singleton(getDefaultOutputFolder(jp));
-		} else {
-			return Collections.emptySet();
-		}
-		//TODO: other output folders (i.e indivudla source folders can specifiy separate output folders)
+		return JavaTypeUtil.getOutputFolders(jp);
 	}
 
 	public static IContainer getDefaultOutputFolder(IJavaProject jp) {
-		try {
-			IPath loc = jp.getOutputLocation();
-			String pname = loc.segment(0);
-			if (loc.segmentCount()==1) {
-				//project is its own output folder. Discouraged... but possible
-				return ResourcesPlugin.getWorkspace().getRoot().getProject(pname);
-			} else {
-				return ResourcesPlugin.getWorkspace().getRoot().getProject(pname).getFolder(loc.removeFirstSegments(1));
-			}
-		} catch (Exception e) {
-			BootActivator.log(e);
-		}
-		return null;
+		return JavaTypeUtil.getDefaultOutputFolder(jp);
 	}
-
 }

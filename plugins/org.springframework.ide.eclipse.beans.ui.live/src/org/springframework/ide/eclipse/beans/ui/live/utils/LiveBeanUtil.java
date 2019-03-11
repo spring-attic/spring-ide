@@ -3,7 +3,7 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
@@ -19,7 +19,7 @@ import org.springframework.ide.eclipse.beans.ui.live.model.TypeLookup;
 import org.springsource.ide.eclipse.commons.ui.SpringUIUtils;
 
 public class LiveBeanUtil {
-
+	
 	/**
 	 * Navigates to the type IN the resource definition of the bean, as opposed to actual bean
 	 * type.
@@ -47,7 +47,7 @@ public class LiveBeanUtil {
 		if (liveBean != null) {
 			TypeLookup typeLookup = liveBean.getTypeLookup();
 			String resource = liveBean.getResource();
-			String parsedType = parseType(resource);
+			String parsedType = parseType(resource, typeLookup);
 			openInEditor(typeLookup, parsedType);
 		} else if (element instanceof LiveBeansResource) {
 			LiveBeansResource resource = (LiveBeansResource) element;
@@ -60,7 +60,7 @@ public class LiveBeanUtil {
 				resourceVal = resource.getLabel();
 			}
 			if (typeLookup != null && resourceVal != null) {
-				String parsedType = parseType(resourceVal);
+				String parsedType = parseType(resourceVal, typeLookup);
 				openInEditor(typeLookup, parsedType);
 			}
 		}
@@ -110,9 +110,9 @@ public class LiveBeanUtil {
 		return beanClass;
 	}
 
-	private static String parseType(String resource) {
+	private static String parseType(String resource, TypeLookup typeLookup) {
 		if (resource != null && resource.trim().length() > 0 && !resource.equalsIgnoreCase("null")) {
-			SpringResource springResource = new SpringResource(resource);
+			SpringResource springResource = new SpringResource(resource, typeLookup.getProject());
 			return springResource.getClassName();
 		}
 		return null;

@@ -3,7 +3,7 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
@@ -13,75 +13,107 @@ package org.springframework.ide.eclipse.beans.ui.live.utils;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.springsource.ide.eclipse.commons.frameworks.core.util.JavaTypeUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
+
 /**
  * Helper class, represents parsed info from a Resource, and provide method(s)
  * to display it somehow.
  */
 public class SpringResource {
 
-	public static final String FILE = "file";
-	public static final String CLASS_PATH_RESOURCE = "class path resource";
 	public static final String BEAN_DEFINITION_IN = "BeanDefinition defined in";
 	public static final String URL = "URL";
 	private static final String CF_CLASSPATH_PREFIX = "/home/vcap/app/";
 	private static final String CLASS = ".class";
 
-	private String type;
 	private String path;
+	private IProject project;
 
 	private static final Pattern BRACKETS = Pattern.compile("\\[[^\\]]*\\]");
 
 	private static final String ID_PATTERN = "\\p{javaJavaIdentifierStart}\\p{javaJavaIdentifierPart}*";
 	private static final String REGEX_FQCN = ID_PATTERN + "(\\." + ID_PATTERN + ")*";
 
-	public SpringResource(String resourceDefinition) {
+	public SpringResource(String resourceDefinition, IProject project) {
+		this.project = project;
 		parse(resourceDefinition);
 	}
 
 	private void parse(String resourceDefinition) {
 		Matcher matcher = BRACKETS.matcher(resourceDefinition);
 		if (matcher.find()) {
-			type = resourceDefinition.substring(0, matcher.start()).trim();
+			String type = resourceDefinition.substring(0, matcher.start()).trim();
 			path = resourceDefinition.substring(matcher.start() + 1, matcher.end() - 1);
 			if (type.equals("file") && path.startsWith(CF_CLASSPATH_PREFIX)) {
-				type = CLASS_PATH_RESOURCE;
 				path = path.substring(CF_CLASSPATH_PREFIX.length());
 			}
 		} else if (Pattern.matches(REGEX_FQCN, resourceDefinition)) {
 			// Resource is fully qualified Java type name
-			type = CLASS_PATH_RESOURCE;
 			path = resourceDefinition.replace('.', '/') + CLASS;
 		} else {
-			int beanDefInIndex = resourceDefinition.indexOf(BEAN_DEFINITION_IN);
-			if (beanDefInIndex >= 0 && beanDefInIndex + BEAN_DEFINITION_IN.length() + 1 < resourceDefinition.length()) {
-				String defInVal = resourceDefinition.substring(beanDefInIndex + BEAN_DEFINITION_IN.length() + 1);
-				if (Pattern.matches(REGEX_FQCN, defInVal)) {
-					// Resource is fully qualified Java type name
-					type = BEAN_DEFINITION_IN;
-					path = defInVal.replace('.', '/') + CLASS;
-				}
-			} else {
+			path = parseFromBeanDefIn(resourceDefinition);
+			if (path == null) {
 				path = resourceDefinition;
 			}
 		}
 	}
 
+	private String parseFromBeanDefIn(String resourceDefinition) {
+		int beanDefInIndex = resourceDefinition.indexOf(BEAN_DEFINITION_IN);
+		if (beanDefInIndex >= 0 && beanDefInIndex + BEAN_DEFINITION_IN.length() + 1 < resourceDefinition.length()) {
+			String defInVal = resourceDefinition.substring(beanDefInIndex + BEAN_DEFINITION_IN.length() + 1);
+			if (Pattern.matches(REGEX_FQCN, defInVal)) {
+				return defInVal.replace('.', '/') + CLASS;
+			}
+		} 
+		return null;
+	}
+	
 	public String getResourcePath() {
 		return path;
 	}
 	
 	public String getClassName() {
 		if (path != null && path.endsWith(".class")) {
-			int index = path.lastIndexOf("/WEB-INF/classes/");
+			String clssName = path;
+			int index = clssName.lastIndexOf("/WEB-INF/classes/");
 			int length = "/WEB-INF/classes/".length();
 			if (index >= 0) {
-				path = path.substring(index + length);
+				clssName = clssName.substring(index + length);
 			}
-			path = path.substring(0, path.lastIndexOf(".class"));
-			path = path.replaceAll("\\\\|\\/", "."); // Tolerate both '/' and '\'.
-			path = path.replace('$', '.'); // Replace inner classes '$' with JDT's '.'
+			
+			if (project != null) {
+				try {
+					String possibleType = typeFromProjectRelativePath(project, clssName);
+					if (possibleType != null) {
+						clssName = possibleType;
+					}
+				} catch (Exception e) {
+					Log.log(e);
+				}
+			}
+			
+			clssName = clssName.substring(0, clssName.lastIndexOf(".class"));
+			clssName = clssName.replaceAll("\\\\|\\/", "."); // Tolerate both '/' and '\'.
+			clssName = clssName.replace('$', '.'); // Replace inner classes '$' with JDT's '.'
 
-			return path;
+			return clssName;
+		}
+		return null;
+	}
+
+	protected String typeFromProjectRelativePath(IProject project, String fullPath) throws Exception {
+		IJavaProject javaProject = getJavaProject(project);
+		return javaProject != null ? JavaTypeUtil.getFQTypeName(javaProject, fullPath) : null;
+	}
+
+	protected IJavaProject getJavaProject(IProject project) throws Exception {
+		if (project != null && project.isAccessible() && project.hasNature(JavaCore.NATURE_ID)) {
+			return JavaCore.create(project);
 		}
 		return null;
 	}
