@@ -108,6 +108,30 @@ public class BeanResourceDefinitionParsingTests {
 	}
 
 	@Test
+	public void resourceDefinitionTypeOnly() throws Exception {
+		String resourceDefinition = "com/example/demo/HelloController.class";
+		String expectedPath = "com/example/demo/HelloController.class";
+		String expectedFQType = "com.example.demo.HelloController";
+		SpringResource parser = new SpringResource(resourceDefinition, null);
+		String actualPath = parser.getResourcePath();
+		String actualClassName = parser.getClassName();
+		assertEquals(expectedPath, actualPath);
+		assertEquals(expectedFQType, actualClassName);
+	}
+
+	@Test
+	public void resourceDefinitionTypeOnlyInnerClass() throws Exception {
+		String resourceDefinition = "com/example/demo/HelloController$InnerClass.class";
+		String expectedPath = "com/example/demo/HelloController$InnerClass.class";
+		String expectedFQType = "com.example.demo.HelloController.InnerClass";
+		SpringResource parser = new SpringResource(resourceDefinition, null);
+		String actualPath = parser.getResourcePath();
+		String actualClassName = parser.getClassName();
+		assertEquals(expectedPath, actualPath);
+		assertEquals(expectedFQType, actualClassName);
+	}
+
+	@Test
 	public void beanDefinitionIn() throws Exception {
 		String resourceDefinition = "BeanDefinition defined in org.springframework.security.oauth2.config.annotation.web.configuration.OAuth2ClientConfiguration";
 		String expectedPath = "org/springframework/security/oauth2/config/annotation/web/configuration/OAuth2ClientConfiguration.class";
@@ -151,7 +175,7 @@ public class BeanResourceDefinitionParsingTests {
 	}
 
 	@Test
-	public void fileDefinition2() throws Exception {
+	public void fileDefinitionInnerClassBean() throws Exception {
 		// To test this, we need to create a real project with an actual class file
 		IProject project = createBootProject("test-bean-resource-file",
 				"src/main/java/com/example/demo/HelloController.java", "package com.example.demo;\n" + //
@@ -166,16 +190,29 @@ public class BeanResourceDefinitionParsingTests {
 						"	public String hello() {\n" + //
 						"		return \"Hello, World!\";\n" + //
 						"	}\n" + //
+						"    @Component\n" + //
+						"    static public class InnerClass {\n" + //
 						"\n" + //
-						"}\n");
+						"        /**\n" + //
+						"         * \n" + //
+						"         */\n" + //
+						"        public InnerClass() {\n" + //
+						"            super();\n" + //
+						"        }\n" + //
+						"\n" + //
+						"    }\n" + //
+						"\n" + //
+						"    @Autowired private InnerClass innerclass;" + //
+						"\n" + //
+						"}\n");//
 
 		// To test a resource definition with a path to a bean type in a project, we need the absolute path
 		// of that type file, as that is what we'd get from "real" actuator info.
 		// However, we can't hardcode the absolute project path that would contain that type ahead of time as this test is run on different environments,
 		// so we have to construct a resource definition to test with the project path as shown below.
-		String resourceDefinition = project.getLocation() + "/target/classes/com/example/demo/HelloController.class";
+		String resourceDefinition = project.getLocation() + "/target/classes/com/example/demo/HelloController$InnerClass.class";
 
-		String expectedFQType = "com.example.demo.HelloController";
+		String expectedFQType = "com.example.demo.HelloController.InnerClass";
 		SpringResource parser = new SpringResource(resourceDefinition, project);
 		String actualClassName = parser.getClassName();
 		assertEquals(expectedFQType, actualClassName);
