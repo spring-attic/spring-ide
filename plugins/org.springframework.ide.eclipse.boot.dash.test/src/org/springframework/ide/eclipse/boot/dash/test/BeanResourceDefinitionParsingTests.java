@@ -61,6 +61,40 @@ public class BeanResourceDefinitionParsingTests {
 	}
 
 	@Test
+	public void classPathResourceWithProject() throws Exception {
+		// Tests parsing of type from a "class path resource" bean definition that is NOT in the project source, with a given project
+		// The purpose of this test is to ensure that passing a project to the parser does not affect
+		// parsing of type from "class path resource"
+		IProject project = createBootProject("test-bean-resource-file",
+				"src/main/java/com/example/demo/HelloController.java", "package com.example.demo;\n" + //
+						"\n" + //
+						"import org.springframework.web.bind.annotation.RequestMapping;\n" + //
+						"import org.springframework.web.bind.annotation.RestController;\n" + //
+						"\n" + //
+						"@RestController\n" + //
+						"public class HelloController {\n" + //
+						"\n" + //
+						"	@RequestMapping(\"/hello\")\n" + //
+						"	public String hello() {\n" + //
+						"		return \"Hello, World!\";\n" + //
+						"	}\n" + //
+						"\n" + //
+						"}\n");
+
+		// A resource definition that is NOT in the project source.
+		String resourceDefinition = "class path resource [org/springframework/boot/actuate/autoconfigure/audit/AuditAutoConfiguration.class]";
+		String expectedPath = "org/springframework/boot/actuate/autoconfigure/audit/AuditAutoConfiguration.class";
+		String expectedFQType = "org.springframework.boot.actuate.autoconfigure.audit.AuditAutoConfiguration";
+
+		SpringResource parser = new SpringResource(resourceDefinition, project);
+
+		String actualPath = parser.getResourcePath();
+		String actualClassName = parser.getClassName();
+		assertEquals(expectedPath, actualPath);
+		assertEquals(expectedFQType, actualClassName);
+	}
+
+	@Test
 	public void classPathResourceInnerClass() throws Exception {
 		String resourceDefinition = "class path resource [org/springframework/boot/actuate/autoconfigure/metrics/MetricsAutoConfiguration$MeterBindersConfiguration.class]";
 		String expectedPath = "org/springframework/boot/actuate/autoconfigure/metrics/MetricsAutoConfiguration$MeterBindersConfiguration.class";
