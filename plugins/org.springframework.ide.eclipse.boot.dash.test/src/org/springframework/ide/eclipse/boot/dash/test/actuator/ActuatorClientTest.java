@@ -3,7 +3,7 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
@@ -38,7 +38,7 @@ public class ActuatorClientTest {
 		Client rest = restClientReturning(getContents("sample.json"));
 
 		TypeLookup types = mock(TypeLookup.class);
-		RestActuatorClient client = new RestActuatorClient(new URI("http://sample"), types, rest);
+		RestActuatorClient client = new RestActuatorClient(new URI("https://sample"), types, rest);
 
 		List<RequestMapping> mappings = client.getRequestMappings();
 
@@ -51,7 +51,7 @@ public class ActuatorClientTest {
 		WebTarget target = mock(WebTarget.class);
 		WebTarget resource = mock(WebTarget.class);
 		Invocation.Builder requestBuilder = mock(Invocation.Builder.class);
-		when(rest.target(new URI("http://sample"))).thenReturn(target);
+		when(rest.target(new URI("https://sample"))).thenReturn(target);
 		when(target.path("/mappings")).thenReturn(resource);
 		when(resource.request()).thenReturn(requestBuilder);
 		when(requestBuilder.get(String.class)).thenReturn(contents);
@@ -63,7 +63,7 @@ public class ActuatorClientTest {
 		WebTarget target = mock(WebTarget.class);
 		WebTarget resource = mock(WebTarget.class);
 		Invocation.Builder requestBuilder = mock(Invocation.Builder.class);
-		when(rest.target(new URI("http://sample"))).thenReturn(target);
+		when(rest.target(new URI("https://sample"))).thenReturn(target);
 		when(target.path("/mappings")).thenReturn(resource);
 		when(resource.request()).thenReturn(requestBuilder);
 		when(requestBuilder.get(String.class)).thenThrow(exeption);
@@ -74,14 +74,14 @@ public class ActuatorClientTest {
 		Client rest = restClientThrowing(new RuntimeException("Something went wrong!"));
 		TypeLookup types = mock(TypeLookup.class);
 
-		RestActuatorClient client = new RestActuatorClient(new URI("http://sample"), types, rest);
+		RestActuatorClient client = new RestActuatorClient(new URI("https://sample"), types, rest);
 		assertNull(client.getRequestMappings());
 	}
 
 	@Test public void testUnparsableData() throws Exception {
 		Client rest = restClientReturning("{This is not json,,,");
 		TypeLookup types = mock(TypeLookup.class);
-		RestActuatorClient client = new RestActuatorClient(new URI("http://sample"), types, rest);
+		RestActuatorClient client = new RestActuatorClient(new URI("https://sample"), types, rest);
 
 		assertNull(client.getRequestMappings());
 	}
@@ -102,7 +102,7 @@ public class ActuatorClientTest {
 		String methodName = "invoke";
 
 		Client rest = restClientReturning(json);
-		RestActuatorClient client = new RestActuatorClient(new URI("http://sample"), types, rest);
+		RestActuatorClient client = new RestActuatorClient(new URI("https://sample"), types, rest);
 		when(types.findType(fqTypeName)).thenReturn(type);
 
 		RequestMapping rm = assertRequestMappingWithPath(client.getRequestMappings(), "/env");
@@ -130,7 +130,7 @@ public class ActuatorClientTest {
 		String methodName = "invoke";
 
 		Client rest = restClientReturning(json);
-		RestActuatorClient client = new RestActuatorClient(new URI("http://sample"), types, rest);
+		RestActuatorClient client = new RestActuatorClient(new URI("https://sample"), types, rest);
 		when(types.findType(fqTypeName)).thenReturn(type);
 
 		List<RequestMapping> requestMappings = client.getRequestMappings();

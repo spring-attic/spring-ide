@@ -3,7 +3,7 @@
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ *  https://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
  *      GoPivotal, Inc. - initial API and implementation
@@ -23,11 +23,11 @@ import org.springframework.ide.eclipse.config.ui.editors.AbstractNamespaceMaster
  */
 public class WebFlowConfigMasterDetailsBlock extends AbstractNamespaceMasterDetailsBlock {
 
-	public static final String DOCS_SPRINGWEBFLOW_10 = "http://static.springframework.org/spring-webflow/docs/1.0.x/reference/index.html"; //$NON-NLS-1$
+	public static final String DOCS_SPRINGWEBFLOW_10 = "https://static.springframework.org/spring-webflow/docs/1.0.x/reference/index.html"; //$NON-NLS-1$
 
-	public static final String DOCS_SPRINGWEBFLOW_20 = "http://static.springframework.org/spring-webflow/docs/2.0.x/reference/html/index.html"; //$NON-NLS-1$
+	public static final String DOCS_SPRINGWEBFLOW_20 = "https://static.springframework.org/spring-webflow/docs/2.0.x/reference/html/index.html"; //$NON-NLS-1$
 
-	public static final String DOCS_SPRINGWEBFLOW_21 = "http://static.springframework.org/spring-webflow/docs/2.1.x/reference/html/index.html"; //$NON-NLS-1$
+	public static final String DOCS_SPRINGWEBFLOW_21 = "https://static.springframework.org/spring-webflow/docs/2.1.x/reference/html/index.html"; //$NON-NLS-1$
 
 	public WebFlowConfigMasterDetailsBlock(AbstractConfigFormPage page) {
 		super(page);

@@ -3,7 +3,7 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
  *    Karl M. Davis (Knowledge Computing Corp.) - initial API and implementation
@@ -29,7 +29,7 @@ import java.util.jar.JarFile;
  * Please note that most of this code was copied from the <code>org.eclipse.jdt.apt.core</code> plugin's
  * <code>org.eclipse.jdt.apt.core.internal.JarFactoryContainer</code> class.
  * </p>
- * 
+ *
  * @author karldavis
  */
 public class AnnotationServiceLocator {
@@ -52,13 +52,13 @@ public class AnnotationServiceLocator {
   /**
    * Given a JAR file, get the names of any auto-loadable Java 5-style or Java 6-style annotation processor
    * implementations provided by the JAR. The information is based on the Sun <a
-   * href="http://java.sun.com/j2se/1.5.0/docs/guide/jar/jar.html#Service%20Provider"> Jar Service Provider spec</a>:
+   * href="https://java.sun.com/j2se/1.5.0/docs/guide/jar/jar.html#Service%20Provider"> Jar Service Provider spec</a>:
    * the jar file contains a META-INF/services directory; that directory contains text files named according to the
    * desired interfaces; and each file contains the names of the classes implementing the specified service. The files
    * may also contain whitespace (which is to be ignored). The '#' character indicates the beginning of a line comment,
    * also to be ignored. Implied but not stated in the spec is that this routine also ignores anything after the first
    * nonwhitespace token on a line.
-   * 
+   *
    * @param jar the <code>.jar</code> {@link File} to inspect for annotation processor services
    * @return the {@link Set} of auto-loadable Java 5-style or Java 6-style annotation processor {@link ServiceEntry}s
    *         provided by the specified JAR, or an empty {@link Set} if no such {@link ServiceEntry}s are found
@@ -72,7 +72,7 @@ public class AnnotationServiceLocator {
     if(!jar.canRead())
       throw new IllegalArgumentException(String.format("Specified file not readable: %s", jar.getAbsolutePath()));
 
-    Set<ServiceEntry> serviceEntries = new HashSet<ServiceEntry>();
+    Set<ServiceEntry> serviceEntries = new HashSet<>();
     JarFile jarFile = null;
 
     try {
@@ -105,17 +105,17 @@ public class AnnotationServiceLocator {
 
   /**
    * Read service classnames from a service provider definition.
-   * 
+   *
    * @param serviceName the name of the service that <code>servicesDeclarationFile</code> contains entries for
    * @param servicesDeclarationFile an {@link InputStream} for the <code>META-INF/services</code> file to load
    *          {@link ServiceEntry}s from
    * @return the {@link Set} of {@link ServiceEntry}s that were found in the specified <code>META-INF/services</code>
    *         file, or an empty {@link Set} if no entries were found in the file
-   * @see http://download.oracle.com/javase/1.4.2/docs/guide/sound/programmer_guide/chapter13.html
+   * @see https://download.oracle.com/javase/1.4.2/docs/guide/sound/programmer_guide/chapter13.html
    */
   private static Set<ServiceEntry> readServiceProvider(String serviceName, InputStream servicesDeclarationFile)
       throws IOException {
-    Set<ServiceEntry> serviceEntries = new HashSet<ServiceEntry>();
+    Set<ServiceEntry> serviceEntries = new HashSet<>();
     BufferedReader servicesReader = null;
 
     try {
@@ -155,7 +155,7 @@ public class AnnotationServiceLocator {
 
     /**
      * Constructs a new {@link ServiceEntry} instance.
-     * 
+     *
      * @param serviceName the name of the service that the provider implements
      * @param serviceProviderClassName the {@link Class} name of the service provider represented by this
      *          {@link ServiceEntry}

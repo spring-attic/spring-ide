@@ -51,7 +51,7 @@
 					"value": "Oracle Corporation"
 				},
 				"java.vendor.url": {
-					"value": "http://java.oracle.com/"
+					"value": "https://java.oracle.com/"
 				},
 				"java.rmi.server.randomIDs": {
 					"value": "true"
@@ -216,7 +216,7 @@
 					"value": "/"
 				},
 				"java.vendor.url.bug": {
-					"value": "http://bugreport.sun.com/bugreport/"
+					"value": "https://bugreport.sun.com/bugreport/"
 				},
 				"sun.io.unicode.encoding": {
 					"value": "UnicodeBig"

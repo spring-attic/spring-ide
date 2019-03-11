@@ -3,7 +3,7 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
@@ -501,7 +501,7 @@ public class CloudFoundryClientTest {
 		CFApplicationDetail app = client.getApplication(appName);
 		assertNotNull("Expected application to exist after push: " + appName, app);
 		ACondition.waitFor("app content to be availabe", 10_000, () -> {
-			String content = IOUtils.toString(new URI("http://" + appName + '.' + CFAPPS_IO() + "/test.txt"));
+			String content = IOUtils.toString(new URI("https://" + appName + '.' + CFAPPS_IO() + "/test.txt"));
 			assertTrue(content.length() > 0);
 			assertTrue(content.contains("content"));
 		});
@@ -985,7 +985,7 @@ public class CloudFoundryClientTest {
 		}
 		String dashUrl = service.getDashboardUrl();
 		assertNotNull(dashUrl);
-		assertTrue(dashUrl.startsWith("http"));
+		assertTrue(dashUrl.startsWith("https"));
 	}
 
 	@Test public void startCanBeCanceled() throws Exception {

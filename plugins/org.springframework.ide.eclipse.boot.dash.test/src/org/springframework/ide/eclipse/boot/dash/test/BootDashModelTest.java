@@ -3,7 +3,7 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
@@ -218,7 +218,7 @@ public class BootDashModelTest {
 		//We support installing spring-cloud CLI into a custom configured spring boot cli
 
 		String cliVersion = "1.5.6.RELEASE"; // consider updating once in a while to remain 'current'.
-		URL customZipUrl = new URL("http://repo.spring.io/release/org/springframework/boot/spring-boot-cli/"+cliVersion+"/spring-boot-cli-"+cliVersion+"-bin.zip");
+		URL customZipUrl = new URL("https://repo.spring.io/release/org/springframework/boot/spring-boot-cli/"+cliVersion+"/spring-boot-cli-"+cliVersion+"-bin.zip");
 		IBootInstall customCliInstall = performCustomCliInstall(customZipUrl);
 
 		//Some sanity checks... to see if performCustomCliInstall works as expected.
@@ -245,7 +245,7 @@ public class BootDashModelTest {
 		//Behaves reasonable with ancient versions of boot?
 
 		String cliVersion = "1.0.0.RELEASE"; // Deliberately ancient
-		URL customZipUrl = new URL("http://repo.spring.io/release/org/springframework/boot/spring-boot-cli/"+cliVersion+"/spring-boot-cli-"+cliVersion+"-bin.zip");
+		URL customZipUrl = new URL("https://repo.spring.io/release/org/springframework/boot/spring-boot-cli/"+cliVersion+"/spring-boot-cli-"+cliVersion+"-bin.zip");
 		IBootInstall customCliInstall = performCustomCliInstall(customZipUrl);
 
 		//Some sanity checks... to see if performCustomCliInstall works as expected.

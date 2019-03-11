@@ -6,7 +6,7 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-v10.html
  * 
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
@@ -78,7 +78,7 @@
             target="com.springsource.sts.config.ui.beanConfigFile">
       </contentOutlineConfiguration>
       <!-- The following extension definition should enable all XML contexts for all config files,
-      	   according to the documentation at http://wiki.eclipse.org/Table_of_WTP_IDs. For some 
+      	   according to the documentation at https://wiki.eclipse.org/Table_of_WTP_IDs. For some 
       	   reason this isn't working and so I've left it but commented it out.
       <provisionalDefinition
             target="com.springsource.sts.config.ui.configFile"

@@ -3,7 +3,7 @@
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ *  https://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
  *      VMware, Inc. - initial API and implementation
@@ -15,7 +15,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMElement;
 import org.springframework.ide.eclipse.config.core.contentassist.SpringConfigContentAssistProcessor;
-
 
 /**
  * This class is an extension to {@link AbstractConfigDetailsPart} that is
@@ -29,9 +28,9 @@ import org.springframework.ide.eclipse.config.core.contentassist.SpringConfigCon
 @SuppressWarnings("restriction")
 public class AbstractNamespaceDetailsPart extends AbstractConfigDetailsPart {
 
-	public static final String DOCS_SPRINGFRAMEWORK_25 = "http://static.springsource.org/spring/docs/2.5.x/reference/index.html"; //$NON-NLS-1$
+	public static final String DOCS_SPRINGFRAMEWORK_25 = "https://static.springsource.org/spring/docs/2.5.x/reference/index.html"; //$NON-NLS-1$
 
-	public static final String DOCS_SPRINGFRAMEWORK_30 = "http://static.springsource.org/spring/docs/3.0.x/spring-framework-reference/html/"; //$NON-NLS-1$
+	public static final String DOCS_SPRINGFRAMEWORK_30 = "https://static.springsource.org/spring/docs/3.0.x/spring-framework-reference/html/"; //$NON-NLS-1$
 
 	private final SpringConfigContentAssistProcessor processor;
 
@@ -41,7 +40,7 @@ public class AbstractNamespaceDetailsPart extends AbstractConfigDetailsPart {
 
 	/**
 	 * Constructs a details part with a reference to its master part.
-	 * 
+	 *
 	 * @param master the page's master part
 	 */
 	public AbstractNamespaceDetailsPart(AbstractConfigMasterPart master) {
@@ -81,7 +80,7 @@ public class AbstractNamespaceDetailsPart extends AbstractConfigDetailsPart {
 	/**
 	 * Creates the documentation section of the form part, pointing to the
 	 * Spring Core documentation. Clients may override if necessary.
-	 * 
+	 *
 	 * @param parent the parent composite
 	 */
 	protected void createDocumentationSection(Composite parent) {
@@ -117,7 +116,7 @@ public class AbstractNamespaceDetailsPart extends AbstractConfigDetailsPart {
 
 	/**
 	 * Returns the documentation section of the form part.
-	 * 
+	 *
 	 * @return documentation section
 	 */
 	public AbstractConfigSectionPart getDocumentationSection() {

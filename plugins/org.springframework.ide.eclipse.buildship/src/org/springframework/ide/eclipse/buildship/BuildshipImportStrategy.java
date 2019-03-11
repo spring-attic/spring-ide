@@ -3,7 +3,7 @@
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ *  https://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
  *      Pivotal, Inc. - initial API and implementation
@@ -47,7 +47,7 @@ public class BuildshipImportStrategy extends ImportStrategy {
 
 	//TODO: the way progress is reported with the sub-job / join is not very nice (a double progress popup appears)
 	// Perhaps this so post has the answer to doing it a better way:
-	//   http://stackoverflow.com/questions/14530200/eclipse-jobs-api-how-to-track-progress-for-job-scheduled-by-another-job
+	//   https://stackoverflow.com/questions/14530200/eclipse-jobs-api-how-to-track-progress-for-job-scheduled-by-another-job
 
 	public BuildshipImportStrategy(BuildType buildType, String name, String notInstalledMessage) {
 		super(buildType, name, notInstalledMessage);

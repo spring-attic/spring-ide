@@ -1,88 +1,88 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
-<toc label="Spring Documentation" topic="http://spring.io/docs">
-   <topic href="http://static.springsource.org/sts/nan/latest/NewAndNoteworthy.html" label="STS/GGTS - New and Noteworthy">
+<toc label="Spring Documentation" topic="https://spring.io/docs">
+   <topic href="https://static.springsource.org/sts/nan/latest/NewAndNoteworthy.html" label="STS/GGTS - New and Noteworthy">
    </topic>
 	<!-- 
 	<anchor id="spring_additions" />
 	<anchor id="additions" />
 	-->
-  <topic href="http://spring.io/guides" label="Getting Started Guides" />
-  <topic href="http://projects.spring.io/spring-framework" label="Spring Framework">
-    <topic href="http://docs.spring.io/spring/docs/current/spring-framework-reference/html/" label="Reference" />
-    <topic href="http://docs.spring.io/spring/docs/current/javadoc-api/" label="API" />
+  <topic href="https://spring.io/guides" label="Getting Started Guides" />
+  <topic href="https://projects.spring.io/spring-framework" label="Spring Framework">
+    <topic href="https://docs.spring.io/spring/docs/current/spring-framework-reference/html/" label="Reference" />
+    <topic href="https://docs.spring.io/spring/docs/current/javadoc-api/" label="API" />
   </topic>
-  <topic href="http://projects.spring.io/spring-batch" label="Spring Batch">
-     <topic href="http://docs.spring.io/spring-batch/reference/html/index.html" label="Reference" />
-     <topic href="http://docs.spring.io/spring-batch/apidocs/index.html" label="API" />
+  <topic href="https://projects.spring.io/spring-batch" label="Spring Batch">
+     <topic href="https://docs.spring.io/spring-batch/reference/html/index.html" label="Reference" />
+     <topic href="https://docs.spring.io/spring-batch/apidocs/index.html" label="API" />
   </topic>
-  <topic href="http://projects.spring.io/spring-boot" label="Spring Boot">
-     <topic href="http://projects.spring.io/spring-boot/docs/README.html" label="Reference" />
+  <topic href="https://projects.spring.io/spring-boot" label="Spring Boot">
+     <topic href="https://projects.spring.io/spring-boot/docs/README.html" label="Reference" />
   </topic>
-  <topic href="http://projects.spring.io/spring-data" label="Spring Data">
-     <topic href="http://projects.spring.io/spring-data-gemfire" label="Spring Data Gemfire">
-        <topic href="http://docs.spring.io/spring-data-gemfire/docs/current/reference/html" label="Reference" />
-        <topic href="http://docs.spring.io/spring-data-gemfire/docs/current/api/" label="API" />
+  <topic href="https://projects.spring.io/spring-data" label="Spring Data">
+     <topic href="https://projects.spring.io/spring-data-gemfire" label="Spring Data Gemfire">
+        <topic href="https://docs.spring.io/spring-data-gemfire/docs/current/reference/html" label="Reference" />
+        <topic href="https://docs.spring.io/spring-data-gemfire/docs/current/api/" label="API" />
      </topic>
-     <topic href="http://projects.spring.io/spring-data-jdbc-ext" label="Spring Data JDBC Extensions">
-        <topic href="http://docs.spring.io/spring-data/jdbc/docs/current/reference/html/" label="Reference" />
-        <topic href="http://docs.spring.io/spring-data/jdbc/docs/current/api/" label="API" />
+     <topic href="https://projects.spring.io/spring-data-jdbc-ext" label="Spring Data JDBC Extensions">
+        <topic href="https://docs.spring.io/spring-data/jdbc/docs/current/reference/html/" label="Reference" />
+        <topic href="https://docs.spring.io/spring-data/jdbc/docs/current/api/" label="API" />
      </topic>
-     <topic href="http://projects.spring.io/spring-data-jpa" label="Spring Data JPA">
-        <topic href="http://docs.spring.io/spring-data/jpa/docs/current/reference/html/" label="Reference" />
-        <topic href="http://docs.spring.io/spring-data/jpa/docs/current/api/" label="API" />
+     <topic href="https://projects.spring.io/spring-data-jpa" label="Spring Data JPA">
+        <topic href="https://docs.spring.io/spring-data/jpa/docs/current/reference/html/" label="Reference" />
+        <topic href="https://docs.spring.io/spring-data/jpa/docs/current/api/" label="API" />
      </topic>
-     <topic href="http://projects.spring.io/spring-data-mongodb" label="Spring Data MongoDB">
-        <topic href="http://docs.spring.io/spring-data/data-mongo/docs/current/reference/html/" label="Reference" />
-        <topic href="http://docs.spring.io/spring-data/data-mongo/docs/current/api/" label="API" />
+     <topic href="https://projects.spring.io/spring-data-mongodb" label="Spring Data MongoDB">
+        <topic href="https://docs.spring.io/spring-data/data-mongo/docs/current/reference/html/" label="Reference" />
+        <topic href="https://docs.spring.io/spring-data/data-mongo/docs/current/api/" label="API" />
      </topic>
-     <topic href="http://projects.spring.io/spring-data-neo4j" label="Spring Data Neo4j">
-        <topic href="http://docs.spring.io/spring-data/data-neo4j/docs/current/reference/html/" label="Reference" />
-        <topic href="http://docs.spring.io/spring-data/data-neo4j/docs/current/api/" label="API" />
+     <topic href="https://projects.spring.io/spring-data-neo4j" label="Spring Data Neo4j">
+        <topic href="https://docs.spring.io/spring-data/data-neo4j/docs/current/reference/html/" label="Reference" />
+        <topic href="https://docs.spring.io/spring-data/data-neo4j/docs/current/api/" label="API" />
      </topic>
-     <topic href="http://projects.spring.io/spring-data-redis" label="Spring Data Redis">
-        <topic href="http://docs.spring.io/spring-data/data-redis/docs/current/reference/html/" label="Reference" />
-        <topic href="http://docs.spring.io/spring-data/data-redis/docs/current/api/" label="API" />
+     <topic href="https://projects.spring.io/spring-data-redis" label="Spring Data Redis">
+        <topic href="https://docs.spring.io/spring-data/data-redis/docs/current/reference/html/" label="Reference" />
+        <topic href="https://docs.spring.io/spring-data/data-redis/docs/current/api/" label="API" />
      </topic>
-     <topic href="http://projects.spring.io/spring-hadoop" label="Spring for Hadoop">
-        <topic href="http://docs.spring.io/spring-hadoop/docs/current/reference/html" label="Reference" />
-        <topic href="http://docs.spring.io/spring-hadoop/docs/current/api/" label="API" />
-     </topic>
-  </topic>
-  <topic href="http://projects.spring.io/spring-integration" label="Spring Integration">
-     <topic href="http://docs.spring.io/spring-integration/reference/html/" label="Reference" />
-     <topic href="http://docs.spring.io/spring-integration/api/" label="API" />
-  </topic>
-  <topic href="http://projects.spring.io/spring-roo" label="Spring Roo">
-     <topic href="http://docs.spring.io/spring-roo/reference/html/" label="Reference" />
-  </topic>
-  <topic href="http://projects.spring.io/spring-security" label="Spring Security">
-     <topic href="http://docs.spring.io/spring-security/site/docs/current/reference/springsecurity.html" label="Reference" />
-     <topic href="http://docs.spring.io/spring-security/site/docs/current/apidocs/" label="API" />
-  </topic>
-  <topic href="http://projects.spring.io/spring-social" label="Spring Social">
-     <topic href="http://projects.spring.io/spring-social/core.html" label="Spring Social Core">
-        <topic href="http://docs.spring.io/spring-social/docs/current/reference/html" label="Reference" />
-         <topic href="http://docs.spring.io/spring-social/docs/current/api/" label="API" />
-     </topic>
-     <topic href="http://projects.spring.io/spring-social-facebook/" label="Spring Social Facebook">
-        <topic href="http://docs.spring.io/spring-social-facebook/docs/current/reference/html" label="Reference" />
-        <topic href="http://docs.spring.io/spring-social-facebook/docs/current/api/" label="API" />
-     </topic>
-     <topic href="http://projects.spring.io/spring-social-linkedin/" label="Spring Social LinkedIn">
-        <topic href="http://docs.spring.io/spring-social-linkedin/docs/1.0.x/reference/html" label="Reference" />
-        <topic href="http://docs.spring.io/spring-social-linkedin/docs/1.0.x/api/" label="API" />
-     </topic>
-     <topic href="http://projects.spring.io/spring-social-twitter/" label="Spring Social Twitter">
-        <topic href="http://docs.spring.io/spring-social-twitter/docs/current/reference/html" label="Reference" />
-        <topic href="http://docs.spring.io/spring-social-twitter/docs/current/api/" label="API" />
+     <topic href="https://projects.spring.io/spring-hadoop" label="Spring for Hadoop">
+        <topic href="https://docs.spring.io/spring-hadoop/docs/current/reference/html" label="Reference" />
+        <topic href="https://docs.spring.io/spring-hadoop/docs/current/api/" label="API" />
      </topic>
   </topic>
-  <topic href="http://projects.spring.io/spring-webflow" label="Spring Web Flow">
-     <topic href="http://docs.spring.io/spring-webflow/docs/current/reference/html/" label="Reference" />
-     <topic href="http://docs.spring.io/spring-webflow/docs/current/javadoc-api/" label="API" />
+  <topic href="https://projects.spring.io/spring-integration" label="Spring Integration">
+     <topic href="https://docs.spring.io/spring-integration/reference/html/" label="Reference" />
+     <topic href="https://docs.spring.io/spring-integration/api/" label="API" />
   </topic>
-  <topic href="http://projects.spring.io/spring-xd" label="Spring XD">
-     <topic href="http://docs.spring.io/spring-xd/docs/current-SNAPSHOT/reference/html" label="Reference" />
-     <topic href="http://docs.spring.io/spring-xd/docs/current-SNAPSHOT/api/" label="API" />
+  <topic href="https://projects.spring.io/spring-roo" label="Spring Roo">
+     <topic href="https://docs.spring.io/spring-roo/reference/html/" label="Reference" />
+  </topic>
+  <topic href="https://projects.spring.io/spring-security" label="Spring Security">
+     <topic href="https://docs.spring.io/spring-security/site/docs/current/reference/springsecurity.html" label="Reference" />
+     <topic href="https://docs.spring.io/spring-security/site/docs/current/apidocs/" label="API" />
+  </topic>
+  <topic href="https://projects.spring.io/spring-social" label="Spring Social">
+     <topic href="https://projects.spring.io/spring-social/core.html" label="Spring Social Core">
+        <topic href="https://docs.spring.io/spring-social/docs/current/reference/html" label="Reference" />
+         <topic href="https://docs.spring.io/spring-social/docs/current/api/" label="API" />
+     </topic>
+     <topic href="https://projects.spring.io/spring-social-facebook/" label="Spring Social Facebook">
+        <topic href="https://docs.spring.io/spring-social-facebook/docs/current/reference/html" label="Reference" />
+        <topic href="https://docs.spring.io/spring-social-facebook/docs/current/api/" label="API" />
+     </topic>
+     <topic href="https://projects.spring.io/spring-social-linkedin/" label="Spring Social LinkedIn">
+        <topic href="https://docs.spring.io/spring-social-linkedin/docs/1.0.x/reference/html" label="Reference" />
+        <topic href="https://docs.spring.io/spring-social-linkedin/docs/1.0.x/api/" label="API" />
+     </topic>
+     <topic href="https://projects.spring.io/spring-social-twitter/" label="Spring Social Twitter">
+        <topic href="https://docs.spring.io/spring-social-twitter/docs/current/reference/html" label="Reference" />
+        <topic href="https://docs.spring.io/spring-social-twitter/docs/current/api/" label="API" />
+     </topic>
+  </topic>
+  <topic href="https://projects.spring.io/spring-webflow" label="Spring Web Flow">
+     <topic href="https://docs.spring.io/spring-webflow/docs/current/reference/html/" label="Reference" />
+     <topic href="https://docs.spring.io/spring-webflow/docs/current/javadoc-api/" label="API" />
+  </topic>
+  <topic href="https://projects.spring.io/spring-xd" label="Spring XD">
+     <topic href="https://docs.spring.io/spring-xd/docs/current-SNAPSHOT/reference/html" label="Reference" />
+     <topic href="https://docs.spring.io/spring-xd/docs/current-SNAPSHOT/api/" label="API" />
   </topic>
 </toc>

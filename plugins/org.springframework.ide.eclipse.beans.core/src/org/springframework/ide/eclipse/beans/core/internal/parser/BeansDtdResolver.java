@@ -3,7 +3,7 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
@@ -25,7 +25,7 @@ import org.xml.sax.InputSource;
  * "/org/springframework/beans/factory/xml/spring-beans-2.0.dtd",
  * no matter whether specified as some local URL that includes "spring-beans"
  * in the DTD name or as
- * "http://www.springframework.org/dtd/spring-beans-2.0.dtd".
+ * "https://www.springframework.org/dtd/spring-beans-2.0.dtd".
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  * @author Juergen Hoeller

@@ -3,7 +3,7 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
@@ -736,7 +736,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		//Create targets in the boot dash that connect to these spaces:
 		for (String spaceName : spaceNames) {
 			CFClientParams params = new CFClientParams(
-					"http://api.run.cloud.mock.com",
+					"https://api.run.cloud.mock.com",
 					"some-user",  CFCredentials.fromPassword(MockCloudFoundryClientFactory.FAKE_PASSWORD),
 					false,
 					orgName,
@@ -783,7 +783,7 @@ public class CloudFoundryBootDashModelMockingTest {
 	public void appsManagerDefaultHost() throws Exception {
 		MockCFSpace space = clientFactory.defSpace("my-org", "foo");
 
-		String apiUrl = "http://api.some-cloud.com";
+		String apiUrl = "https://api.some-cloud.com";
 		String username = "freddy"; String password = MockCloudFoundryClientFactory.FAKE_PASSWORD;
 
 		CloudFoundryBootDashModel cfModel = harness.createCfTarget(new CFClientParams(
@@ -794,29 +794,29 @@ public class CloudFoundryBootDashModelMockingTest {
 				"foo",
 		false));
 
-		assertEquals("http://console.some-cloud.com", cfModel.getRunTarget().getAppsManagerHost());
-		assertEquals("http://console.some-cloud.com", cfModel.getRunTarget().getAppsManagerHostDefault());
+		assertEquals("https://console.some-cloud.com", cfModel.getRunTarget().getAppsManagerHost());
+		assertEquals("https://console.some-cloud.com", cfModel.getRunTarget().getAppsManagerHostDefault());
 
-		assertEquals("http://console.some-cloud.com/organizations/" + space.getOrganization().getGuid() + "/spaces/" + space.getGuid(), cfModel.getRunTarget().getAppsManagerURL());
+		assertEquals("https://console.some-cloud.com/organizations/" + space.getOrganization().getGuid() + "/spaces/" + space.getGuid(), cfModel.getRunTarget().getAppsManagerURL());
 	}
 
 	@Test
 	public void appsManagerCustomizedHost() throws Exception {
 		MockCFSpace space = clientFactory.defSpace("my-org", "foo");
 
-		String apiUrl = "http://api.some-cloud.com";
+		String apiUrl = "https://api.some-cloud.com";
 		String username = "freddy"; String password = MockCloudFoundryClientFactory.FAKE_PASSWORD;
 
 		CloudFoundryBootDashModel cfModel = harness.createCfTarget(new CFClientParams(apiUrl, username,
 				CFCredentials.fromPassword(password), false, "my-org", "foo", false
 		));
 
-		cfModel.getRunTarget().setAppsManagerHost("http://totallyDifferentHost.com");
+		cfModel.getRunTarget().setAppsManagerHost("https://totallyDifferentHost.com");
 
-		assertEquals("http://totallyDifferentHost.com", cfModel.getRunTarget().getAppsManagerHost());
-		assertEquals("http://console.some-cloud.com", cfModel.getRunTarget().getAppsManagerHostDefault());
+		assertEquals("https://totallyDifferentHost.com", cfModel.getRunTarget().getAppsManagerHost());
+		assertEquals("https://console.some-cloud.com", cfModel.getRunTarget().getAppsManagerHostDefault());
 
-		assertEquals("http://totallyDifferentHost.com/organizations/" + space.getOrganization().getGuid() + "/spaces/" + space.getGuid(), cfModel.getRunTarget().getAppsManagerURL());
+		assertEquals("https://totallyDifferentHost.com/organizations/" + space.getOrganization().getGuid() + "/spaces/" + space.getGuid(), cfModel.getRunTarget().getAppsManagerURL());
 	}
 
 	@Test
@@ -824,7 +824,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		clientFactory.defSpace("my-org", "foo");
 		clientFactory.defSpace("your-org", "bar");
 
-		String apiUrl = "http://api.some-cloud.com";
+		String apiUrl = "https://api.some-cloud.com";
 		String username = "freddy"; String password = MockCloudFoundryClientFactory.FAKE_PASSWORD;
 		AbstractBootDashModel fooSpace = harness.createCfTarget(new CFClientParams(apiUrl, username,
 				CFCredentials.fromPassword(password), false, "my-org", "foo", false));
@@ -832,15 +832,15 @@ public class CloudFoundryBootDashModelMockingTest {
 				CFCredentials.fromPassword(password), false, "your-org", "bar", false));
 
 		//check the default rendering is like it used to be before introducing templates.
-		assertEquals("my-org : foo - [http://api.some-cloud.com]", fooSpace.getDisplayName());
-		assertEquals("your-org : bar - [http://api.some-cloud.com]", barSpace.getDisplayName());
+		assertEquals("my-org : foo - [https://api.some-cloud.com]", fooSpace.getDisplayName());
+		assertEquals("your-org : bar - [https://api.some-cloud.com]", barSpace.getDisplayName());
 
 		RunTargetType targetType = fooSpace.getRunTarget().getType();
 
 		//Let's try switching the order of org and space
 		targetType.setNameTemplate("%s - %o @ %a");
-		assertEquals("foo - my-org @ http://api.some-cloud.com", fooSpace.getDisplayName());
-		assertEquals("bar - your-org @ http://api.some-cloud.com", barSpace.getDisplayName());
+		assertEquals("foo - my-org @ https://api.some-cloud.com", fooSpace.getDisplayName());
+		assertEquals("bar - your-org @ https://api.some-cloud.com", barSpace.getDisplayName());
 
 		//Let's try adding 'username' into the label
 		targetType.setNameTemplate("%u@%s");
@@ -850,7 +850,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 	@Test public void pushTcpRouteWithRandomPort() throws Exception {
 		String appName = "moriarty-app";
-		String apiUrl = "http://api.some-cloud.com";
+		String apiUrl = "https://api.some-cloud.com";
 		String username = "freddy"; String password = MockCloudFoundryClientFactory.FAKE_PASSWORD;
 
 		MockCFSpace space = clientFactory.defSpace("my-org", "my-space");
@@ -882,7 +882,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 	@Test public void redeploy_app_and_enable_ssh_tunnel() throws Exception {
 		String appName = "tunneled-jmx-app";
-		String apiUrl = "http://api.some-cloud.com";
+		String apiUrl = "https://api.some-cloud.com";
 		String username = "freddy"; String password = MockCloudFoundryClientFactory.FAKE_PASSWORD;
 
 		MockCFSpace space = clientFactory.defSpace("my-org", "my-space");
@@ -955,7 +955,7 @@ public class CloudFoundryBootDashModelMockingTest {
 	@Test public void enable_jmx_after_deploy_decline_restart() throws Exception {
 		//See: https://www.pivotaltracker.com/story/show/159349926
 		String appName = "tunneled-jmx-app";
-		String apiUrl = "http://api.some-cloud.com";
+		String apiUrl = "https://api.some-cloud.com";
 		String username = "freddy"; String password = MockCloudFoundryClientFactory.FAKE_PASSWORD;
 
 		MockCFSpace space = clientFactory.defSpace("my-org", "my-space");
@@ -1014,7 +1014,7 @@ public class CloudFoundryBootDashModelMockingTest {
 	@Test public void enable_and_disable_jmx_after_deploy() throws Exception {
 		//See: https://www.pivotaltracker.com/story/show/159349926
 		String appName = "tunneled-jmx-app";
-		String apiUrl = "http://api.some-cloud.com";
+		String apiUrl = "https://api.some-cloud.com";
 		String username = "freddy"; String password = MockCloudFoundryClientFactory.FAKE_PASSWORD;
 
 		MockCFSpace space = clientFactory.defSpace("my-org", "my-space");
@@ -1107,7 +1107,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 	@Test public void deploy_app_with_jmx_ssh_tunnel_enabled() throws Exception {
 		String appName = "tunneled-jmx-app";
-		String apiUrl = "http://api.some-cloud.com";
+		String apiUrl = "https://api.some-cloud.com";
 		String username = "freddy"; String password = MockCloudFoundryClientFactory.FAKE_PASSWORD;
 
 		MockCFSpace space = clientFactory.defSpace("my-org", "my-space");
@@ -1156,7 +1156,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 	@Test public void jmx_ssh_tunnel_created_on_eclipse_restart() throws Exception {
 		String appName = "tunneled-jmx-app";
-		String apiUrl = "http://api.some-cloud.com";
+		String apiUrl = "https://api.some-cloud.com";
 		String username = "freddy"; String password = MockCloudFoundryClientFactory.FAKE_PASSWORD;
 		IProject project = projects.createBootProject("to-deploy", withStarters("web", "actuator"));
 
@@ -1225,7 +1225,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 	@Test public void deploy_app_with_jmx_ssh_tunnel_disabled() throws Exception {
 		String appName = "tunneled-jmx-app";
-		String apiUrl = "http://api.some-cloud.com";
+		String apiUrl = "https://api.some-cloud.com";
 		String username = "freddy"; String password = MockCloudFoundryClientFactory.FAKE_PASSWORD;
 
 		MockCFSpace space = clientFactory.defSpace("my-org", "my-space");
@@ -1250,7 +1250,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 	@Test public void pushTcpRouteWithFixedPort() throws Exception {
 		String appName = "moriarty-app";
-		String apiUrl = "http://api.some-cloud.com";
+		String apiUrl = "https://api.some-cloud.com";
 		String username = "freddy"; String password = MockCloudFoundryClientFactory.FAKE_PASSWORD;
 
 		MockCFSpace space = clientFactory.defSpace("my-org", "my-space");
@@ -1281,7 +1281,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 	@Test public void pushHttpRouteWithRandomRoute() throws Exception {
 		String appName = "moriarty-app";
-		String apiUrl = "http://api.some-cloud.com";
+		String apiUrl = "https://api.some-cloud.com";
 		String username = "freddy"; String password = MockCloudFoundryClientFactory.FAKE_PASSWORD;
 
 		MockCFSpace space = clientFactory.defSpace("my-org", "my-space");
@@ -1317,7 +1317,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		clientFactory.defSpace("my-org", "foo");
 		clientFactory.defSpace("your-org", "bar");
 
-		String apiUrl = "http://api.some-cloud.com";
+		String apiUrl = "https://api.some-cloud.com";
 		String username = "freddy"; String password = MockCloudFoundryClientFactory.FAKE_PASSWORD;
 		LocalBootDashModel local = harness.getLocalModel();
 		AbstractBootDashModel fooSpace = harness.createCfTarget(new CFClientParams(apiUrl, username,
@@ -1351,8 +1351,8 @@ public class CloudFoundryBootDashModelMockingTest {
 		verify(modelStateListener).stateChanged(same(fooSpace));
 		verify(modelStateListener).stateChanged(same(barSpace));
 
-		assertEquals("foo - my-org @ http://api.some-cloud.com", fooSpace.getDisplayName());
-		assertEquals("bar - your-org @ http://api.some-cloud.com", barSpace.getDisplayName());
+		assertEquals("foo - my-org @ https://api.some-cloud.com", fooSpace.getDisplayName());
+		assertEquals("bar - your-org @ https://api.some-cloud.com", barSpace.getDisplayName());
 
 		//Let's also try a user interaction that involves the 'Restore Defaults' button...
 
@@ -1366,8 +1366,8 @@ public class CloudFoundryBootDashModelMockingTest {
 		verify(modelStateListener).stateChanged(same(fooSpace));
 		verify(modelStateListener).stateChanged(same(barSpace));
 
-		assertEquals("my-org : foo - [http://api.some-cloud.com]", fooSpace.getDisplayName());
-		assertEquals("your-org : bar - [http://api.some-cloud.com]", barSpace.getDisplayName());
+		assertEquals("my-org : foo - [https://api.some-cloud.com]", fooSpace.getDisplayName());
+		assertEquals("your-org : bar - [https://api.some-cloud.com]", barSpace.getDisplayName());
 	}
 
 	@Test
@@ -1376,7 +1376,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		clientFactory.defSpace("my-org", "foo");
 		clientFactory.defSpace("your-org", "bar");
 
-		String apiUrl = "http://api.some-cloud.com";
+		String apiUrl = "https://api.some-cloud.com";
 		String username = "freddy"; String password = MockCloudFoundryClientFactory.FAKE_PASSWORD;
 
 		AbstractBootDashModel fooSpace = harness.createCfTarget(new CFClientParams(apiUrl, username,
@@ -1400,7 +1400,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		dialog.performOk();
 
 		assertEquals("CHANGED foo -> my-org", fooSpace.getDisplayName());
-		assertEquals("your-org : bar - [http://api.some-cloud.com]", barSpace.getDisplayName());
+		assertEquals("your-org : bar - [https://api.some-cloud.com]", barSpace.getDisplayName());
 
 		verify(modelStateListener).stateChanged(same(fooSpace));
 		verify(modelStateListener, never()).stateChanged(same(barSpace));
@@ -2821,31 +2821,31 @@ public class CloudFoundryBootDashModelMockingTest {
 		CloudAppDashElement app = target.getApplication(appName);
 		ACondition.waitFor("uri update", 5_000, () -> {
 			assertEquals("foo-host.cfmockapps.io", app.getLiveHost());
-			assertEquals("http://foo-host.cfmockapps.io/the-path", app.getUrl());
+			assertEquals("https://foo-host.cfmockapps.io/the-path", app.getUrl());
 		});
 
 		app.setDefaultRequestMappingPath("/hello");
 		ACondition.waitFor("uri update", 5_000, () -> {
 			assertEquals("foo-host.cfmockapps.io", app.getLiveHost());
-			assertEquals("http://foo-host.cfmockapps.io/the-path/hello", app.getUrl());
+			assertEquals("https://foo-host.cfmockapps.io/the-path/hello", app.getUrl());
 		});
 
 		app.setDefaultRequestMappingPath("/");
 		ACondition.waitFor("uri update", 5_000, () -> {
 			assertEquals("foo-host.cfmockapps.io", app.getLiveHost());
-			assertEquals("http://foo-host.cfmockapps.io/the-path/", app.getUrl());
+			assertEquals("https://foo-host.cfmockapps.io/the-path/", app.getUrl());
 		});
 
 		app.setDefaultRequestMappingPath("hello");
 		ACondition.waitFor("uri update", 5_000, () -> {
 			assertEquals("foo-host.cfmockapps.io", app.getLiveHost());
-			assertEquals("http://foo-host.cfmockapps.io/the-path/hello", app.getUrl());
+			assertEquals("https://foo-host.cfmockapps.io/the-path/hello", app.getUrl());
 		});
 
 		app.setDefaultRequestMappingPath("");
 		ACondition.waitFor("uri update", 5_000, () -> {
 			assertEquals("foo-host.cfmockapps.io", app.getLiveHost());
-			assertEquals("http://foo-host.cfmockapps.io/the-path", app.getUrl());
+			assertEquals("https://foo-host.cfmockapps.io/the-path", app.getUrl());
 		});
 
 	}

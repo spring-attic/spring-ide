@@ -3,7 +3,7 @@
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ *  https://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
  *      GoPivotal, Inc. - initial API and implementation
@@ -23,9 +23,9 @@ import org.springframework.ide.eclipse.config.ui.editors.AbstractNamespaceMaster
  */
 public class OsgiMasterDetailsBlock extends AbstractNamespaceMasterDetailsBlock {
 
-	public static final String DOCS_SPRINGOSGI = "http://static.springsource.org/osgi/docs/current/reference/html/"; //$NON-NLS-1$ 
+	public static final String DOCS_SPRINGOSGI = "https://static.springsource.org/osgi/docs/current/reference/html/"; //$NON-NLS-1$ 
 
-	public static final String DOCS_SPRINGOSGI_20 = "http://static.springsource.org/osgi/docs/2.0.0.M1/reference/html/"; //$NON-NLS-1$ 
+	public static final String DOCS_SPRINGOSGI_20 = "https://static.springsource.org/osgi/docs/2.0.0.M1/reference/html/"; //$NON-NLS-1$ 
 
 	public OsgiMasterDetailsBlock(AbstractConfigFormPage page) {
 		super(page);

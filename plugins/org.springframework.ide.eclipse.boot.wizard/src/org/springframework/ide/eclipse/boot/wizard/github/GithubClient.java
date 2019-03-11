@@ -3,7 +3,7 @@
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ *  https://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
  *      GoPivotal, Inc. - initial API and implementation
@@ -162,7 +162,7 @@ public class GithubClient {
 		if (type.isArray()) {
 			Class<?> componentType = type.getComponentType();
 			//Assume this means we have to support response pagination as described in:
-			//http://developer.github.com/v3/#pagination
+			//https://developer.github.com/v3/#pagination
 			ArrayList<Object> results = new ArrayList<>();
 			WebTarget webtarget = client.target(url).resolveTemplates(vars);
 			do {
@@ -189,7 +189,7 @@ public class GithubClient {
 	 * Get the url of the next page in a paginated result.
 	 * May return null if there is no next page.
 	 * <p>
-	 * See http://developer.github.com/v3/#pagination
+	 * See https://developer.github.com/v3/#pagination
 	 */
 	private static <T> String getNextPageUrl(Response response) {
 		List<Object> linkHeader = response.getHeaders().get("Link");

@@ -3,7 +3,7 @@
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ *  https://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
  *      Pivotal Software Inc. - initial API and implementation
@@ -12,7 +12,7 @@ package org.springframework.ide.eclipse.config.core.schemas;
 
 /**
  * Integration Redis adapter schema derived from
- * <code>http://www.springframework.org/schema/integration/redis/spring-integration-redis-2.1.xsd</code>
+ * <code>https://www.springframework.org/schema/integration/redis/spring-integration-redis-2.1.xsd</code>
  * @author Leo Dos Santos
  * @since STS 2.9.0
  * @version Spring Integration 2.1

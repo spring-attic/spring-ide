@@ -3,7 +3,7 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
@@ -76,10 +76,10 @@ public class NewWebflowConfigFilePage extends WizardNewFileCreationPage {
 				"	xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"").append(lineSeparator).append(
 				"	xsi:schemaLocation=\"http://www.springframework.org/schema/webflow").append(lineSeparator);
 		if (swf2Button.getSelection()) {
-			builder.append("        http://www.springframework.org/schema/webflow/spring-webflow-2.0.xsd\">");
+			builder.append("        https://www.springframework.org/schema/webflow/spring-webflow-2.0.xsd\">");
 		}
 		else {
-			builder.append("        http://www.springframework.org/schema/webflow/spring-webflow-1.0.xsd\">");
+			builder.append("        https://www.springframework.org/schema/webflow/spring-webflow-1.0.xsd\">");
 		}
 		builder.append(lineSeparator).append(lineSeparator);
 		if (!swf2Button.getSelection()) {

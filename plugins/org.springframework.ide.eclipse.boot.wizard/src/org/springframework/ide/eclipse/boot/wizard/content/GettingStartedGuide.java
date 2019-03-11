@@ -3,7 +3,7 @@
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ *  https://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
  *      GoPivotal, Inc. - initial API and implementation
@@ -173,7 +173,7 @@ public class GettingStartedGuide extends GithubRepoContent {
 	@Override
 	public URL getHomePage() {
 		//Looks like this now:
-		//http://${spring.guides.url}/gs/spring-boot/
+		//https://${spring.guides.url}/gs/spring-boot/
 		try {
 			String gsGuideName = getName();
 			if (gsGuideName.startsWith("gs-")) {

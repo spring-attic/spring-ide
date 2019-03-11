@@ -3,7 +3,7 @@
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+ *  https://www.eclipse.org/legal/epl-v10.html
  *
  *  Contributors:
  *      VMware, Inc. - initial API and implementation
@@ -42,7 +42,7 @@ public class JndiObjectFactorySyntaxConverter {
 
 	private static final String SCHEMA_LOCATION_ATTRIBUTE_NAME = "xsi:schemaLocation";
 
-	private static final String SCHEMA_LOCATION = "http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd";
+	private static final String SCHEMA_LOCATION = "http://www.springframework.org/schema/jee https://www.springframework.org/schema/jee/spring-jee.xsd";
 
 	private static final String NAMESPACE_JNDI_ELEMENT_NAME = "jee:jndi-lookup";
 
@@ -56,8 +56,8 @@ public class JndiObjectFactorySyntaxConverter {
 
 			insertNamespaceDeclaration(model);
 
-			IBean jndiObjectFactoryBean = (IBean) BeansCorePlugin.getModel().getElement(
-					marker.getAttribute("elementId", ""));
+			IBean jndiObjectFactoryBean = (IBean) BeansCorePlugin.getModel()
+					.getElement(marker.getAttribute("elementId", ""));
 
 			Element namespaceJndiElement = createNamespaceSyntaxXmlElement(jndiObjectFactoryBean,
 					NAMESPACE_JNDI_ELEMENT_NAME, legacyXmlElement.getOwnerDocument());

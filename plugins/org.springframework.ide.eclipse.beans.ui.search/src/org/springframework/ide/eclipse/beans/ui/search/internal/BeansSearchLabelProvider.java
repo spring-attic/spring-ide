@@ -3,7 +3,7 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
@@ -17,7 +17,7 @@ import org.springframework.ide.eclipse.beans.ui.model.BeansModelLabelProvider;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 
 /**
- * This {@link ILabelProvider}Êdelegates to the {@link BeansModelLabelProvider}and appends the {@link IModelElement}'s path to the label.
+ * This {@link ILabelProvider}ï¿½delegates to the {@link BeansModelLabelProvider}and appends the {@link IModelElement}'s path to the label.
  * @author Torsten Juergeleit
  * @author Christian Dupuis
  * @since 2.0

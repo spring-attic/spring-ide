@@ -3,7 +3,7 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
  * GoPivotal, Inc. - initial API and implementation
@@ -216,13 +216,13 @@ public class AbstractLaunchConfigurationsDashElementTest extends Mocks {
 		ILaunchConfigurationWorkingCopy copyOfConf = mock(ILaunchConfigurationWorkingCopy.class);
 		IType type = mockType(javaProject, "demo", "FooApplication");
 		NGROKClient ngrokClient = mock(NGROKClient.class);
-		NGROKTunnel tunnel = new NGROKTunnel("foo-launch", "http", "publicURLTest", "8888");
+		NGROKTunnel tunnel = new NGROKTunnel("foo-launch", "https", "publicURLTest", "8888");
 
 		when(element.guessMainTypes()).thenReturn(new IType[] {type});
 		when(runTarget.createLaunchConfig(javaProject, type)).thenReturn(conf);
 		when(conf.getWorkingCopy()).thenReturn(copyOfConf);
 		when(element.getLivePort()).thenReturn(8888);
-		when(ngrokClient.startTunnel("http", "8888")).thenReturn(tunnel);
+		when(ngrokClient.startTunnel("https", "8888")).thenReturn(tunnel);
 		when(conf.getName()).thenReturn("foo-launch");
 		when(copyOfConf.getName()).thenReturn("foo-launch");
 		String eurekaInstance = "eureka instance somewhere";

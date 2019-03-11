@@ -3,7 +3,7 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
@@ -217,8 +217,8 @@ public class CFRouteTests {
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
 
 		// Test parsing around the first encountered ':'
-		route = CFRoute.builder().from("http://myapp.spring.io", SPRING_CLOUD_DOMAINS).build();
-		Assert.assertEquals("http://myapp.spring.io",route.getRoute());
+		route = CFRoute.builder().from("https://myapp.spring.io", SPRING_CLOUD_DOMAINS).build();
+		Assert.assertEquals("https://myapp.spring.io",route.getRoute());
 		Assert.assertEquals(CFRoute.NO_PORT, route.getPort());
 
 		route = CFRoute.builder().from("tcp.spring.io:8000:9000", SPRING_CLOUD_DOMAINS).build();

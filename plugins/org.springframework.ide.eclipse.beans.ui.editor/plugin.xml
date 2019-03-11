@@ -6,7 +6,7 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-v10.html
  * 
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
@@ -60,11 +60,11 @@
 			<public 
 				publicId="-//SPRING//DTD BEAN//EN"
 				uri="platform:/plugin/org.springframework.beans/org/springframework/beans/factory/xml/spring-beans.dtd"
-				webURL="http://www.springframework.org/dtd/spring-beans.dtd" />
+				webURL="https://www.springframework.org/dtd/spring-beans.dtd" />
 			<public 
 				publicId="-//SPRING//DTD BEAN 2.0//EN"
 				uri="platform:/plugin/org.springframework.beans/org/springframework/beans/factory/xml/spring-beans-2.0.dtd"
-				webURL="http://www.springframework.org/dtd/spring-beans-2.0.dtd" />
+				webURL="https://www.springframework.org/dtd/spring-beans-2.0.dtd" />
 		</catalogContribution>
 	</extension>
 

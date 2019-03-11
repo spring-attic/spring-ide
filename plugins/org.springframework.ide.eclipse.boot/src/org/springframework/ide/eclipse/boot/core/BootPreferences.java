@@ -3,7 +3,7 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
@@ -197,7 +197,7 @@ public class BootPreferences implements IPreferenceChangeListener {
 	private static String convertToHttps(String url) {
 		//This is a bit yuck, but it is the only sure way to catch old values of this
 		// that have gotten persisted somehow in user's old workspace state.
-		if (url.equals("http://start.spring.io")) {
+		if (url.equals("https://start.spring.io")) {
 			return StsProperties.getInstance().getInstance().get("spring.initializr.json.url");
 		}
 		return url;

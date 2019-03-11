@@ -1,19 +1,19 @@
 {
    "_links": {
       "maven-build": {
-         "href": "http://start.spring.io/pom.xml{?dependencies,type,packaging,javaVersion,language,bootVersion,groupId,artifactId,version,name,description,packageName}",
+         "href": "https://start.spring.io/pom.xml{?dependencies,type,packaging,javaVersion,language,bootVersion,groupId,artifactId,version,name,description,packageName}",
          "templated": true
       },
       "maven-project": {
-         "href": "http://start.spring.io/maven.zip{?dependencies,type,packaging,javaVersion,language,bootVersion,groupId,artifactId,version,name,description,packageName}",
+         "href": "https://start.spring.io/maven.zip{?dependencies,type,packaging,javaVersion,language,bootVersion,groupId,artifactId,version,name,description,packageName}",
          "templated": true
       },
       "gradle-build": {
-         "href": "http://start.spring.io/build.gradle{?dependencies,type,packaging,javaVersion,language,bootVersion,groupId,artifactId,version,name,description,packageName}",
+         "href": "https://start.spring.io/build.gradle{?dependencies,type,packaging,javaVersion,language,bootVersion,groupId,artifactId,version,name,description,packageName}",
          "templated": true
       },
       "gradle-project": {
-         "href": "http://start.spring.io/gradle.zip{?dependencies,type,packaging,javaVersion,language,bootVersion,groupId,artifactId,version,name,description,packageName}",
+         "href": "https://start.spring.io/gradle.zip{?dependencies,type,packaging,javaVersion,language,bootVersion,groupId,artifactId,version,name,description,packageName}",
          "templated": true
       }
    },

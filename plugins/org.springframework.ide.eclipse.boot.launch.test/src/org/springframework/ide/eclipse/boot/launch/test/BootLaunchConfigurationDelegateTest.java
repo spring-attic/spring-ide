@@ -3,7 +3,7 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
  *    Pivotal Software, Inc. - initial API and implementation
@@ -310,7 +310,7 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 	public void testLaunchWithThinWrapper() throws Exception {
 		BootProcessFactory.ENABLE_OUTPUT_DUMPING = true;
 		try {
-			URL thinWrapperUrl = new URL("http://repo1.maven.org/maven2/org/springframework/boot/experimental/spring-boot-thin-wrapper/1.0.9.RELEASE/spring-boot-thin-wrapper-1.0.9.RELEASE.jar");
+			URL thinWrapperUrl = new URL("https://repo1.maven.org/maven2/org/springframework/boot/experimental/spring-boot-thin-wrapper/1.0.9.RELEASE/spring-boot-thin-wrapper-1.0.9.RELEASE.jar");
 			File thinWrapper = File.createTempFile("thin-wrapper", ".jar");
 			try {
 				FileUtils.copyURLToFile(thinWrapperUrl, thinWrapper);
