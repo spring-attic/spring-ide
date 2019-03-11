@@ -15,6 +15,7 @@ import org.springframework.ide.eclipse.beans.ui.live.model.AbstractLiveBeansMode
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBean;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeanRelation;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansResource;
+import org.springframework.ide.eclipse.beans.ui.live.model.SpringResource;
 import org.springframework.ide.eclipse.beans.ui.live.model.TypeLookup;
 import org.springsource.ide.eclipse.commons.ui.SpringUIUtils;
 

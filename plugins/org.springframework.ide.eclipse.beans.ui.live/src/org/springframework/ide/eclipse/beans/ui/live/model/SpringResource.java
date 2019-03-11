@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.beans.ui.live.utils;
+package org.springframework.ide.eclipse.beans.ui.live.model;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

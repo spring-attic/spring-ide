@@ -23,7 +23,7 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.ide.eclipse.beans.ui.live.utils.SpringResource;
+import org.springframework.ide.eclipse.beans.ui.live.model.SpringResource;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
