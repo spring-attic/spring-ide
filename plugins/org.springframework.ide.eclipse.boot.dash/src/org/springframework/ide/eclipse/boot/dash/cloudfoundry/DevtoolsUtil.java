@@ -76,7 +76,7 @@ public class DevtoolsUtil {
 	}
 
 	public static String remoteUrl(String host) {
-		return "http://"+host;
+		return "https://"+host;
 	}
 
 	public static ILaunch launchDevtools(IProject project, String host, String debugSecret, CloudAppDashElement cde, String mode, IProgressMonitor monitor) throws CoreException {

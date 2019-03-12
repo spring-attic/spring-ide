@@ -495,7 +495,7 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 			if (uris != null) {
 				for (String uri : uris) {
 					if (StringUtil.hasText(uri)) {
-						return Utils.pathJoin("http://"+uri, getDefaultRequestMappingPath());
+						return Utils.pathJoin("https://"+uri, getDefaultRequestMappingPath());
 					}
 				}
 			}
