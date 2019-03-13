@@ -247,452 +247,6 @@
 	<profiles>
 
 		<profile>
-			<id>e34</id>
-			<properties>
-				<p2.repository.name>Spring IDE for Eclipse 3.4</p2.repository.name>
-			</properties>
-			<repositories>
-				<repository>
-					<id>platform-e34</id>
-					<url>https://download.eclipse.org/eclipse/updates/3.4</url>
-					<layout>p2</layout>
-				</repository>
-				<repository>
-					<id>ganymede</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/releases/ganymede/</url>
-				</repository>
-				<repository>
-					<id>ajdt-e34</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/tools/ajdt/34/dev/update/</url>
-				</repository>
-			</repositories>
-		</profile>
-
-		<profile>
-			<id>e35</id>
-			<properties>
-				<p2.repository.name>Spring IDE for Eclipse 3.5</p2.repository.name>
-			</properties>
-			<repositories>
-				<repository>
-					<id>platform-e35</id>
-					<url>https://download.eclipse.org/eclipse/updates/3.5/</url>
-					<layout>p2</layout>
-				</repository>
-				<repository>
-					<id>galileo</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/releases/galileo/</url>
-				</repository>
-				<repository>
-					<id>ajdt-e35</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/tools/ajdt/35/dev/update/</url>
-				</repository>
-			</repositories>
-		</profile>
-
-		<profile>
-			<id>e36</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<properties>
-				<p2.repository.name>Spring IDE for Eclipse 3.6</p2.repository.name>
-			</properties>
-			<repositories>
-				<repository>
-					<id>platform-e36</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/eclipse/updates/3.6/</url>
-				</repository>
-				<repository>
-					<id>helios</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/releases/helios/</url>
-				</repository>
-				<repository>
-					<id>ajdt-e36</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/tools/ajdt/36/milestone/</url>
-				</repository>
-				<repository>
-					<id>orbit</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/tools/orbit/downloads/drops/R20120526062928/repository/</url>
-				</repository>
-			</repositories>
-		</profile>
-
-		<profile>
-			<id>e37</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<properties>
-				<p2.repository.name>Spring IDE for Eclipse 3.7</p2.repository.name>
-			</properties>
-			<repositories>
-				<repository>
-					<id>platform-e37</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/eclipse/updates/3.7/</url>
-				</repository>
-				<repository>
-					<id>indigo</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/releases/indigo/</url>
-				</repository>
-				<repository>
-					<id>ajdt-e37</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/tools/ajdt/37/milestone/</url>
-				</repository>
-				<repository>
-					<id>orbit</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/tools/orbit/downloads/drops/R20120526062928/repository/</url>
-				</repository>
-				<repository>
-					<id>swtbot</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/technology/swtbot/releases/latest/</url>
-				</repository>
-				<repository>
-		  			<id>groovy</id>
-		  			<layout>p2</layout>
-		  			<url>https://dist.springsource.org/snapshot/GRECLIPSE/e3.7/</url>
-				</repository>
-				<repository>
-					<id>eclipse-integration-commons</id>
-					<layout>p2</layout>
-					<url>https://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}/e3.7/</url>
-				</repository>
-			</repositories>
-		</profile>
-
-		<profile>
-			<id>e43</id>
-			<properties>
-				<p2.repository.name>Spring IDE for Eclipse 4.3</p2.repository.name>
-			</properties>
-			<repositories>
-				<repository>
-					<id>platform-e43</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/eclipse/updates/4.3/</url>
-				</repository>
-				<repository>
-					<id>indigo</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/releases/kepler/</url>
-				</repository>
-				<repository>
-					<id>ajdt-e37</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/tools/ajdt/43/milestone/</url>
-				</repository>
-				<repository>
-					<id>orbit</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/tools/orbit/downloads/drops/R20120526062928/repository/</url>
-				</repository>
-				<repository>
-					<id>swtbot</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/technology/swtbot/releases/latest/</url>
-				</repository>
-				<repository>
-		  			<id>groovy</id>
-		  			<layout>p2</layout>
-		  			<url>https://dist.springsource.org/snapshot/GRECLIPSE/e4.3/</url>
-				</repository>
-				<repository>
-					<id>eclipse-integration-commons</id>
-					<layout>p2</layout>
-					<url>https://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}/e3.7/</url>
-				</repository>
-			</repositories>
-		</profile>
-
-		<profile>
-			<id>e44</id>
-			<properties>
-				<p2.repository.name>Spring IDE for Eclipse 4.4</p2.repository.name>
-			</properties>
-			<repositories>
-				<repository>
-					<id>platform-e44</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/eclipse/updates/4.4/</url>
-				</repository>
-				<repository>
-					<id>luna</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/releases/luna/</url>
-				</repository>
-				<repository>
-					<id>ajdt-e44</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/tools/ajdt/44/dev/update/</url>
-				</repository>
-				<repository>
-					<id>m2e-16</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/technology/m2e/releases/1.6/</url>
-				</repository>
-				<repository>
-					<id>orbit-luna-SR1</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/tools/orbit/downloads/drops/R20140525021250/repository/</url>
-				</repository>
-				<repository>
-					<id>swtbot</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/technology/swtbot/releases/latest/</url>
-				</repository>
-				<repository>
-		  			<id>groovy</id>
-		  			<layout>p2</layout>
-		  			<url>https://dist.springsource.org/snapshot/GRECLIPSE/e4.4/</url>
-				</repository>
-				<repository>
-					<id>eclipse-integration-commons</id>
-					<layout>p2</layout>
-					<url>https://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}/e4.4/</url>
-				</repository>
-			</repositories>
-		</profile>
-		
-		<profile>
-			<id>e45</id>
-			<properties>
-				<p2.repository.name>Spring IDE for Eclipse 4.5</p2.repository.name>
-			</properties>
-			<repositories>
-				<repository>
-					<id>platform-e45</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/eclipse/updates/4.5/</url>
-				</repository>
-				<repository>
-					<id>mars</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/releases/mars/</url>
-				</repository>
-				<repository>
-					<id>ajdt</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/tools/ajdt/45/dev/update</url>
-				</repository>
-				<repository>
-					<id>orbit-mars</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/tools/orbit/downloads/drops/R20150519210750/repository/</url>
-				</repository>
-				<repository>
-					<id>swtbot</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/technology/swtbot/releases/latest/</url>
-				</repository>
-				<repository>
-		  			<id>groovy</id>
-		  			<layout>p2</layout>
-		  			<url>https://dist.springsource.org/snapshot/GRECLIPSE/e4.5/</url>
-				</repository>
-				<repository>
-					<id>cft</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/cft/1.0.1.RC1/</url>
-				</repository>
-				<repository>
-					<id>eclipse-integration-commons</id>
-					<layout>p2</layout>
-					<url>https://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}</url>
-				</repository>
-			</repositories>
-		</profile>
-		
-		<profile>
-			<id>e46</id>
-			<properties>
-				<p2.repository.name>Spring IDE for Eclipse 4.6</p2.repository.name>
-			</properties>
-			<repositories>
-				<repository>
-					<id>platform-e46</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/eclipse/updates/4.6/</url>
-				</repository>
-				<repository>
-					<id>mars</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/releases/neon/</url>
-				</repository>
-				<repository>
-					<id>ajdt</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/tools/ajdt/46/dev/update</url>
-				</repository>
-				<repository>
-					<id>orbit-neon</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/tools/orbit/downloads/drops/R20170307180635/repository/</url>
-				</repository>
-				<repository>
-					<id>mylyn</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/mylyn/releases/latest</url>
-				</repository>
-				<repository>
-					<id>mylyn-docs</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/mylyn/docs/releases/3.0</url>
-				</repository>
-				<repository>
-					<id>swtbot</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/technology/swtbot/releases/latest/</url>
-				</repository>
-				<repository>
-		  			<id>groovy</id>
-		  			<layout>p2</layout>
-		  			<url>https://dist.springsource.org/snapshot/GRECLIPSE/e4.6/</url>
-				</repository>
-				<repository>
-					<id>cft</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/cft/1.1.0.RC2/</url>
-				</repository>
-				<repository>
-					<id>eclipse-integration-commons</id>
-					<layout>p2</layout>
-					<url>https://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}</url>
-				</repository>
-			</repositories>
-		</profile>
-		
-		<profile>
-			<id>e47</id>
-			<properties>
-				<p2.repository.name>Spring IDE for Eclipse 4.7</p2.repository.name>
-			</properties>
-			<repositories>
-				<repository>
-					<id>platform-e47</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/eclipse/updates/4.7/</url>
-				</repository>
-				<repository>
-					<id>oxygen</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/releases/oxygen/</url>
-				</repository>
-				<repository>
-					<id>ajdt</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/tools/ajdt/47/dev/update</url>
-				</repository>
-				<repository>
-					<id>orbit-oxygen</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/tools/orbit/downloads/drops/R20170919201930/repository/</url>
-				</repository>
-				<repository>
-					<id>swtbot</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/technology/swtbot/releases/latest/</url>
-				</repository>
-				<repository>
-		  			<id>groovy</id>
-		  			<layout>p2</layout>
-		  			<url>https://dist.springsource.org/snapshot/GRECLIPSE/e4.7/</url>
-				</repository>
-				<repository>
-					<id>cft</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/cft/1.1.0.RC2/</url>
-				</repository>
-				<repository>
-		  			<id>buildship-for-testing</id>
-		  			<layout>p2</layout>
-		  			<url>https://download.eclipse.org/buildship/updates/e46/releases/1.0/</url>
-				</repository>
-				<repository>
-					<id>eclipse-integration-commons</id>
-					<layout>p2</layout>
-					<url>https://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}</url>
-				</repository>
-			</repositories>
-		</profile>
-
-		<profile>
-			<id>e48</id>
-			<properties>
-				<p2.repository.name>Spring IDE for Eclipse 4.8</p2.repository.name>
-			</properties>
-			<repositories>
-				<repository>
-					<id>platform-e48</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/eclipse/updates/4.8/</url>
-				</repository>
-				<repository>
-					<id>photon</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/releases/photon/</url>
-				</repository>
-				<repository>
-					<id>ajdt</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/tools/ajdt/48/dev/update</url>
-				</repository>
-				<repository>
-					<id>orbit-photon</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/tools/orbit/downloads/drops/R20180606145124/repository</url>
-				</repository>
-				<repository>
-					<id>swtbot</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/technology/swtbot/releases/latest/</url>
-				</repository>
-				<repository>
-		  			<id>groovy</id>
-		  			<layout>p2</layout>
-		  			<url>https://dist.springsource.org/snapshot/GRECLIPSE/e4.7/</url>
-				</repository>
-				<repository>
-					<id>cft</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/cft/1.1.1/</url>
-				</repository>
-				<repository>
-		  			<id>buildship1-for-testing</id>
-		  			<layout>p2</layout>
-		  			<url>https://download.eclipse.org/buildship/updates/e46/releases/1.0/</url>
-				</repository>
-				<repository>
-		  			<id>buildship2-for-testing</id>
-		  			<layout>p2</layout>
-		  			<url>https://download.eclipse.org/buildship/updates/e48/releases/2.x</url>
-				</repository>
-				<repository>
-		  			<id>buildship3-for-testing</id>
-		  			<layout>p2</layout>
-		  			<url>https://download.eclipse.org/buildship/updates/e49/releases/3.x</url>
-				</repository>
-				<repository>
-					<id>eclipse-integration-commons</id>
-					<layout>p2</layout>
-					<url>https://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}</url>
-				</repository>
-			</repositories>
-		</profile>
-
-		<profile>
 			<id>e49</id>
 			<properties>
 				<p2.repository.name>Spring IDE for Eclipse 4.9</p2.repository.name>
@@ -703,11 +257,23 @@
 					<layout>p2</layout>
 					<url>https://download.eclipse.org/eclipse/updates/4.9/</url>
 				</repository>
-				<repository>
+				<!-- composite update site contains http references, using exact https urls instead -->
+<!--				<repository>
 					<id>2018-09</id>
 					<layout>p2</layout>
 					<url>https://download.eclipse.org/releases/2018-09/</url>
+				</repository> -->
+				<repository>
+					<id>2018-09</id>
+					<layout>p2</layout>
+					<url>https://download.eclipse.org/releases/2018-09/201809191002</url>
 				</repository>
+				<repository>
+					<id>2018-09-epp</id>
+					<layout>p2</layout>
+					<url>https://download.eclipse.org/technology/epp/packages/2018-09/</url>
+				</repository>
+
 				<repository>
 					<id>ajdt</id>
 					<layout>p2</layout>
@@ -767,11 +333,23 @@
 					<layout>p2</layout>
 					<url>https://download.eclipse.org/eclipse/updates/4.10/</url>
 				</repository>
-				<repository>
+				<!-- composite update site contains http references, using exact https urls instead -->
+<!--				<repository>
 					<id>2018-12</id>
 					<layout>p2</layout>
 					<url>https://download.eclipse.org/releases/2018-12/</url>
+				</repository> -->
+				<repository>
+					<id>2018-12</id>
+					<layout>p2</layout>
+					<url>https://download.eclipse.org/releases/2018-12/201812191000</url>
 				</repository>
+				<repository>
+					<id>2018-12-epp</id>
+					<layout>p2</layout>
+					<url>https://download.eclipse.org/technology/epp/packages/2018-12/</url>
+				</repository>
+
 				<repository>
 					<id>ajdt</id>
 					<layout>p2</layout>
@@ -831,11 +409,23 @@
 					<layout>p2</layout>
 					<url>https://download.eclipse.org/eclipse/updates/4.11/</url>
 				</repository>
-				<repository>
-					<id>2019-0milestone3</id>
+				<!-- composite update site contains http references, using exact https urls instead -->
+<!--				<repository>
+					<id>2019-03</id>
 					<layout>p2</layout>
 					<url>https://download.eclipse.org/releases/2019-03/</url>
+				</repository> -->
+				<repository>
+					<id>2019-03</id>
+					<layout>p2</layout>
+					<url>https://download.eclipse.org/releases/2019-03/201903081000</url>
 				</repository>
+				<repository>
+					<id>2019-03-epp</id>
+					<layout>p2</layout>
+					<url>https://download.eclipse.org/technology/epp/packages/2019-03/RC1</url>
+				</repository>
+
 				<repository>
 					<id>orbit</id>
 					<layout>p2</layout>
@@ -929,12 +519,6 @@
 			<layout>p2</layout> 
 			<url>https://download.eclipse.org/lsp4e/0.5.0milestone/</url> 
 		</repository> -->
-		<repository>
-			<!-- necessary for maven and ant AWS dependency -->
-			<id>springsource-maven-release</id>
-			<name>SpringSource Maven Release Repository</name>
-			<url>https://repository.springsource.com/maven/bundles/release</url>
-		</repository>
 		<repository>
 			<id>mylyn-37</id>
 			<layout>p2</layout>
