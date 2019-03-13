@@ -18,6 +18,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
+ * Parsing of Boot 1.x live beans. Differences between Boot 1.x and other Boot versions should be handled by protected API that can be overridden
+ * by more recent Boot version subclasses.
  * @author Leo Dos Santos
  * @author Alex Boyko
  */
@@ -107,7 +109,15 @@ public class LiveBeansJsonParser {
 		return bean;
 	}
 	
+	/**
+	 * IMPORTANT: "beans" structure in the context JSON DIFFERS between Boot 1.x and later Boot versions. It is important
+	 * to ALWAYS extract beans from a context using this method (for example, when creating the live beans initially, or separately, when
+	 * populating the dependencies for those live beans), as this method may be overridden for other boot versions
+	 * @param contextJson
+	 * @return
+	 */
 	protected JSONArray extractBeans(JSONObject contextJson) {
+		// Boot 1.x version
 		return contextJson.optJSONArray(LiveBeansContext.ATTR_BEANS);
 	}
 	
@@ -176,7 +186,12 @@ public class LiveBeansJsonParser {
 					}
 				}
 
-				JSONArray beansArray = contextJson.optJSONArray(LiveBeansContext.ATTR_BEANS);
+				// PT 164156323 - Extracting beans differs between Boot 1.x and Boot 2.x.
+				// Dependencies was not being populated for Boot 2.x because of a bug
+				// where, when populating the dependencies, beans were being extracted using Boot 1.x structure
+				// even for Boot 2.x. The way to fix this is to delegate to the method below which is
+				// overridden for Boot 2.x and handles the Boot 2.x case correctly
+				JSONArray beansArray = extractBeans(contextJson); // correct way
 				if (beansArray != null) {
 					populateBeanDependencies(beansArray);
 				}
