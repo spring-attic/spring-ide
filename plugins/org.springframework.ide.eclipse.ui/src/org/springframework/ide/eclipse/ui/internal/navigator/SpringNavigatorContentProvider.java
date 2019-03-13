@@ -72,9 +72,6 @@ public class SpringNavigatorContentProvider implements ICommonContentProvider,
 	}
 
 	public Object[] getElements(Object inputElement) {
-		if (inputElement instanceof IWorkingSet) {
-			return IModelElement.NO_CHILDREN;
-		}
 		return SpringCore.getModel().getProjects().toArray();
 	}
 
