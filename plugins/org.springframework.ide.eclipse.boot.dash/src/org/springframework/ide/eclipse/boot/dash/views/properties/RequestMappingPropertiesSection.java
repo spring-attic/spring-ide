@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2018 Pivotal, Inc.
+ * Copyright (c) 2015, 2019 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -37,6 +38,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.forms.events.HyperlinkAdapter;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.views.properties.tabbed.ITabbedPropertyConstants;
 import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -46,6 +50,7 @@ import org.springframework.ide.eclipse.boot.dash.views.RequestMappingLabelProvid
 import org.springframework.ide.eclipse.boot.dash.views.RequestMappingsColumn;
 import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 import org.springsource.ide.eclipse.commons.ui.SpringUIUtils;
+import org.springsource.ide.eclipse.commons.ui.UiUtil;
 
 /**
  * Tabbed properties view section for live request mappings
@@ -98,6 +103,9 @@ public class RequestMappingPropertiesSection extends AbstractBdePropertiesSectio
 	private static final Object[] NO_ELEMENTS = new Object[0];
 	private TabbedPropertySheetPage page;
 	private Composite composite;
+	private Composite missingInfoComp;
+	private Hyperlink externalDocLink;
+
 	private StackLayout layout;
 	private TableViewer tv;
 	private RequestMappingLabelProvider labelProvider;
@@ -142,7 +150,21 @@ public class RequestMappingPropertiesSection extends AbstractBdePropertiesSectio
 
 		page.getControl().setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_RED));
 
-		labelText = getWidgetFactory().createLabel(composite, "", SWT.WRAP); //$NON-NLS-1$
+		missingInfoComp = getWidgetFactory().createComposite(composite, SWT.NONE);
+		missingInfoComp.setLayout(GridLayoutFactory.fillDefaults().margins(0, 0).spacing(1, 1).numColumns(1).create());
+
+		labelText = getWidgetFactory().createLabel(missingInfoComp, "", SWT.WRAP);
+		externalDocLink = getWidgetFactory().createHyperlink(missingInfoComp, "", SWT.WRAP);
+
+		externalDocLink.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				if (!externalDocLink.getText().isEmpty()) {
+					UiUtil.openUrl(externalDocLink.getText());
+				}
+			}
+		});
+		externalDocLink.setText(MissingLiveInfoMessages.EXTERNAL_DOCUMENT_LINK);
 
 		this.tv = new TableViewer(composite, SWT.BORDER|SWT.FULL_SELECTION/*|SWT.NO_SCROLL*/);
 
@@ -177,9 +199,9 @@ public class RequestMappingPropertiesSection extends AbstractBdePropertiesSectio
 		refreshControlsVisibility();
 		BootDashElement bde = getBootDashElement();
 		if (bde == null) {
-			labelText.setText("Select single element in Boot Dashboard to see Request Mappings");
+			labelText.setText(MissingLiveInfoMessages.noSelectionMessage("Request Mappings"));
 		} else if (bde.getLiveRequestMappings() == null) {
-			labelText.setText("'" + bde.getName() + "' must be running with JMX enabled; and actuator 'mappings' endpoint must be enabled to obtain request mappings.");
+			labelText.setText(MissingLiveInfoMessages.getMissingInfoMessage(bde.getName(), "mappings"));
 		} else {
 			labelText.setText("");
 		}
@@ -190,7 +212,7 @@ public class RequestMappingPropertiesSection extends AbstractBdePropertiesSectio
 	private void refreshControlsVisibility() {
 		BootDashElement bde = getBootDashElement();
 		if (bde == null || bde.getLiveRequestMappings() == null) {
-			layout.topControl = labelText;
+			layout.topControl = missingInfoComp;
 		} else {
 			layout.topControl = tv.getControl();
 		}

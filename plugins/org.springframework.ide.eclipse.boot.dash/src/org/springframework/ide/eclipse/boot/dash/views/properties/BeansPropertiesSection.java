@@ -75,10 +75,9 @@ public class BeansPropertiesSection extends AbstractBdePropertiesSection {
 		return () -> {
 			BootDashElement bde = getBootDashElement();
 			if (bde == null) {
-				return "Select single element in Boot Dashboard to see live Beans";
+				return MissingLiveInfoMessages.noSelectionMessage("Beans");
 			} else if (bde.getLiveBeans() == null) {
-				return "'" + bde.getName()
-						+ "' must be running with JMX enabled; and actuator 'beans' endpoint must be enabled to obtain beans.";
+				return MissingLiveInfoMessages.getMissingInfoMessage(bde.getName(), "beans");
 			} else {
 				return null;
 			}

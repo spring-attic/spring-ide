@@ -24,13 +24,17 @@ import org.eclipse.swt.events.TreeListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.forms.events.HyperlinkAdapter;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.views.properties.tabbed.ITabbedPropertyConstants;
 import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
 import org.springsource.ide.eclipse.commons.livexp.core.FilterBoxModel;
 import org.springsource.ide.eclipse.commons.livexp.ui.util.SwtConnect;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 import org.springsource.ide.eclipse.commons.livexp.util.Filters;
+import org.springsource.ide.eclipse.commons.ui.UiUtil;
 
 /**
  * Tree viewer control with search box that searches for any text pattern in the
@@ -53,7 +57,9 @@ public class SearchableTreeControl {
 	private StackLayout layout;
 	private Text searchBox;
 	private Composite treeViewerComposite;
+	private Composite missingInfoComp;
 	private Label missingContentsLabel;
+	private Hyperlink externalDocLink;
 
 	private final FormToolkit widgetFactory;
 	private final Supplier<String> missingContentSupplier;
@@ -81,7 +87,22 @@ public class SearchableTreeControl {
 		layout.marginWidth = ITabbedPropertyConstants.HSPACE + 2;
 		layout.marginHeight = ITabbedPropertyConstants.VSPACE + 4;
 
-		missingContentsLabel = widgetFactory.createLabel(composite, "", SWT.WRAP);
+		missingInfoComp = widgetFactory.createComposite(composite, SWT.NONE);
+		missingInfoComp.setLayout(GridLayoutFactory.fillDefaults().margins(0, 0).spacing(1, 1).numColumns(1).create());
+
+		missingContentsLabel = widgetFactory.createLabel(missingInfoComp, "", SWT.WRAP);
+		externalDocLink = widgetFactory.createHyperlink(missingInfoComp, "", SWT.WRAP);
+
+		externalDocLink.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				if (!externalDocLink.getText().isEmpty()) {
+					UiUtil.openUrl(externalDocLink.getText());
+				}
+			}
+		});
+		externalDocLink.setText(MissingLiveInfoMessages.EXTERNAL_DOCUMENT_LINK);
+
 
 		treeViewerComposite = new Composite(composite, SWT.NONE);
 		treeViewerComposite
@@ -131,7 +152,7 @@ public class SearchableTreeControl {
 
 	private void refreshControlsVisibility() {
 		if (missingContentSupplier.get() != null) {
-			layout.topControl = missingContentsLabel;
+			layout.topControl = missingInfoComp;
 		} else {
 			layout.topControl = treeViewerComposite;
 		}
