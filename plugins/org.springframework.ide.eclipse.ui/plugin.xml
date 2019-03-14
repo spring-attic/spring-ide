@@ -250,6 +250,7 @@
             	<instanceof value="org.springframework.ide.eclipse.core.model.ISpringProject"/>	
             </enablement>
          </actionProvider>
+<!--
          <actionProvider
             class="org.springframework.ide.eclipse.ui.workingsets.actions.WorkingSetActionProvider"
             id="org.springframework.ide.eclipse.ui.navigator.springExplorerWorkingSetActions">
@@ -257,6 +258,7 @@
 				<adapt type="org.eclipse.core.resources.IResource" />	 
            </enablement>            
       	 </actionProvider>
+-->
          <dropAssistant
                class="org.springframework.ide.eclipse.ui.internal.navigator.SpringNavigatorDropAdapter"
                id="org.springframework.ide.eclipse.ui.navigator.springExplorerContent.dropAssistent">

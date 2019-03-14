@@ -253,7 +253,7 @@ public class WorkingSetActionProvider extends CommonActionProvider {
 				IWorkingSet lastWorkingSet = workingSetManager
 						.getWorkingSet(lastWorkingSetName);
 				if (showWorkingSets) {
-					viewer.setInput(lastWorkingSet);
+					viewer.setInput(lastWorkingSet == null ? ResourcesPlugin.getWorkspace().getRoot() : lastWorkingSet);
 				} else {
 					viewer.setInput(ResourcesPlugin.getWorkspace().getRoot());
 				}
