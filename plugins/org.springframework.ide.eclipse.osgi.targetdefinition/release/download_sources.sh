@@ -22,11 +22,11 @@ download_source() {
 }
 
 download_spring_source() {
-	download_source org/springframework $1 $SPRING_VERSION $2 $BUNDLE_SPRING_VERSION spring.source http://repository.springsource.com/maven/bundles/release
+	download_source org/springframework $1 $SPRING_VERSION $2 $BUNDLE_SPRING_VERSION spring.source https://repository.springsource.com/maven/bundles/release
 }
 
 download_osgi_source() {
-	download_source org/springframework/osgi $1 $OSGI_VERSION $2 $BUNDLE_OSGI_VERSION springdm.source http://repository.springsource.com/maven/bundles/release
+	download_source org/springframework/osgi $1 $OSGI_VERSION $2 $BUNDLE_OSGI_VERSION springdm.source https://repository.springsource.com/maven/bundles/release
 }
 
 download_spring_source org.springframework.aop org.springframework.aop 
