@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2014 Spring IDE Developers
+ * Copyright (c) 2011, 2019 Spring IDE Developers
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -68,19 +68,40 @@ public class ProjectClasspathUriResolver {
 			String systemId) {
 		ClassLoader classLoader = JdtUtils.getClassLoader(project, null);
 		Map<String, String> mappings = getSchemaMappings(classLoader);
-		if (mappings != null && systemId != null
-				&& mappings.containsKey(systemId)) {
-			String xsdPath = mappings.get(systemId);
-			return resolveXsdPathOnClasspath(xsdPath, classLoader);
+		
+		if (mappings != null && systemId != null) {
+			if (mappings.containsKey(systemId)) {
+				String xsdPath = mappings.get(systemId);
+				return resolveXsdPathOnClasspath(xsdPath, classLoader);
+			}
+			else if (mappings.containsKey(systemId.replace("https://", "http://"))) {
+				String xsdPath = mappings.get(systemId.replace("https://", "http://"));
+				return resolveXsdPathOnClasspath(xsdPath, classLoader);
+			}
+			else if (mappings.containsKey(systemId.replace("http://", "https://"))) {
+				String xsdPath = mappings.get(systemId.replace("http://", "https://"));
+				return resolveXsdPathOnClasspath(xsdPath, classLoader);
+			}
 		}
+
 		return null;
 	}
 
 	private String resolveOnClasspathOnly(String publicId, String systemId) {
 		String resolved = null;
+
 		if (systemId != null) {
 			resolved = typeUri.get(systemId);
 		}
+		
+		if (resolved == null && systemId != null && systemId.startsWith("https://")) {
+			resolved = typeUri.get(systemId.replace("https://", "http://"));
+		}
+		
+		if (resolved == null && systemId != null && systemId.startsWith("http://")) {
+			resolved = typeUri.get(systemId.replace("http://", "https://"));
+		}
+
 		if (resolved == null && publicId != null) {
 			if (!(systemId != null && systemId.endsWith(".xsd"))) {
 				resolved = typePublic.get(publicId);
