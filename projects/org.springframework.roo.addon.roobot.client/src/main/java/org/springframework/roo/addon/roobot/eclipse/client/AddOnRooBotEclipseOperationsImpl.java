@@ -76,7 +76,7 @@ public class AddOnRooBotEclipseOperationsImpl implements AddOnRooBotEclipseOpera
 	private static final Logger log = Logger.getLogger(AddOnRooBotEclipseOperationsImpl.class.getName());
 	private Properties props;
 	private ComponentContext context;
-	private static String ROOBOT_XML_URL = "http://spring-roo-repository.springsource.org/roobot/roobot.xml.zip";
+	private static String ROOBOT_XML_URL = "https://spring-roo-repository.springsource.org/roobot/roobot.xml.zip";
 	private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 	private final Class<AddOnRooBotEclipseOperationsImpl> mutex = AddOnRooBotEclipseOperationsImpl.class;
 //	private Preferences prefs;
@@ -119,7 +119,7 @@ public class AddOnRooBotEclipseOperationsImpl implements AddOnRooBotEclipseOpera
 		boolean success = true;	
 		int count = countBundles();
 		boolean requiresWrappedCoreDep = bundleVersion.getDescription().contains("#wrappedCoreDependency");
-		if (requiresWrappedCoreDep && !shell.executeCommand("osgi obr url add --url http://spring-roo-repository.springsource.org/repository.xml")) {
+		if (requiresWrappedCoreDep && !shell.executeCommand("osgi obr url add --url https://spring-roo-repository.springsource.org/repository.xml")) {
 			success = false;
 		}
 		if (!shell.executeCommand("osgi obr url add --url " + bundleVersion.getObrUrl())) {
@@ -131,7 +131,7 @@ public class AddOnRooBotEclipseOperationsImpl implements AddOnRooBotEclipseOpera
 		if (!shell.executeCommand("osgi obr url remove --url " + bundleVersion.getObrUrl())) {
 			success = false;
 		}
-		if (requiresWrappedCoreDep && !shell.executeCommand("osgi obr url remove --url http://spring-roo-repository.springsource.org/repository.xml")) {
+		if (requiresWrappedCoreDep && !shell.executeCommand("osgi obr url remove --url https://spring-roo-repository.springsource.org/repository.xml")) {
 			success = false;
 		}
 		if (install && count == countBundles()) {
@@ -325,7 +325,7 @@ public class AddOnRooBotEclipseOperationsImpl implements AddOnRooBotEclipseOpera
 				log.warning("Bundle properties could not be loaded");
 				return false;
 			}
-			if (url.startsWith("http://")) {
+			if (url.startsWith("http://") || url.startsWith("https://")) {
 				// Handle it as HTTP
 				URL httpUrl = new URL(url);
 				String failureMessage = urlInputStreamService.getUrlCannotBeOpenedMessage(httpUrl);
