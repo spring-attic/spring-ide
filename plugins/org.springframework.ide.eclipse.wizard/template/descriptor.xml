@@ -11,7 +11,7 @@
 		requiresbundle="org.eclipse.m2e.core"
 		springversion="3.2.3.RELEASE"
 		size="2973"
-		url="file:///template/simple-maven/org.springframework.templates.simple.spring.maven-1.0.1.zip">
+		url="file:///template/simple-maven/org.springframework.templates.simple.spring.maven-1.0.2.zip">
 		<description>Creates a simple Spring project using Maven that contains a basic set of Spring libraries.</description>
 	</descriptor>
 	<descriptor
@@ -25,7 +25,7 @@
 		requiresbundle="org.eclipse.m2e.core"
 		springversion="3.2.3.RELEASE"
 		size="6046"
-		url="file:///template/simple-maven/org.springframework.templates.simple.spring.web.maven-1.1.1.zip">
+		url="file:///template/simple-maven/org.springframework.templates.simple.spring.web.maven-1.1.2.zip">
 		<description>Creates a simple Spring web project using Maven that contains a basic set of Spring web libraries.</description>
 	</descriptor>
 	<descriptor
