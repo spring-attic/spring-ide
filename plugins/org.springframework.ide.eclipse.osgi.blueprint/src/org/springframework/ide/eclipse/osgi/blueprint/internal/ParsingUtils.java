@@ -120,7 +120,7 @@ public class ParsingUtils {
 			if (handler != null) {
 				return handler.decorate(node, originalDef,
 						new ParserContext(parserContext.getReaderContext(), parserContext.getDelegate()));
-			} else if (namespaceUri.startsWith("http://www.springframework.org/")) {
+			} else if (namespaceUri.startsWith("https://www.springframework.org/")) {
 				parserContext.getReaderContext().error(
 						"Unable to locate Spring NamespaceHandler for XML schema namespace [" + namespaceUri + "]",
 						node);

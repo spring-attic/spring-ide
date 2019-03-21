@@ -108,7 +108,7 @@
    class=&quot;com.xyz.FooWizard&quot;
    description=&quot;Add a standard foo configuration.&quot;
    id=&quot;com.xyz.foo&quot;
-   namespaceUri=&quot;http://www.xyz.org/schema/foo&quot;&gt;
+   namespaceUri=&quot;/PdmcZ/schema/foo&quot;&gt;
   &lt;/wizard&gt;
  &lt;/extension&gt;
 &lt;/pre&gt;

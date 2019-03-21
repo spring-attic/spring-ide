@@ -39,10 +39,10 @@ public class XercesDocumentLoader implements DocumentLoader {
 			// Setting this to true will trigger XSD downloads from the internet which will really slow down Spring in
 			// case of flaky internet connection
 			if (validationMode != XmlBeanDefinitionReader.VALIDATION_NONE) {
-				parser.setFeature("http://xml.org/sax/features/validation", false);
-				parser.setFeature("http://apache.org/xml/features/validation/dynamic", false);
+				parser.setFeature("http://www.xml.org/sax/features/validation", false);
+				parser.setFeature("https://apache.org/xml/features/validation/dynamic", false);
 				if (validationMode == XmlBeanDefinitionReader.VALIDATION_XSD) {
-					parser.setFeature("http://apache.org/xml/features/validation/schema", true);
+					parser.setFeature("https://apache.org/xml/features/validation/schema", true);
 				}
 			}
 			parser.parse(inputSource);

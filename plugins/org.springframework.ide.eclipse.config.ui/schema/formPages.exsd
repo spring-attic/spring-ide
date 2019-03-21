@@ -128,7 +128,7 @@ Please note that users will not be required to use the same prefix in their XML 
    id=&quot;com.xyz.foo&quot;
    name=&quot;Spring Foo&quot;
    namespacePrefix=&quot;foo&quot;
-   namespaceUri=&quot;http://www.xyz.org/schema/foo&quot;&gt;
+   namespaceUri=&quot;/PdmcZ/schema/foo&quot;&gt;
   &lt;/formPage&gt;
  &lt;/extension&gt;
 &lt;/pre&gt;

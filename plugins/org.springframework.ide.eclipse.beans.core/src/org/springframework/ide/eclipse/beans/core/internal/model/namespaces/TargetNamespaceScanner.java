@@ -45,10 +45,10 @@ public class TargetNamespaceScanner {
 			DocumentBuilderFactory factory = SpringCoreUtils.getDocumentBuilderFactory();
 			factory.setValidating(false);
 			
-			factory.setFeature("http://xml.org/sax/features/validation", false);
-			factory.setFeature("http://apache.org/xml/features/validation/dynamic", false);
-			factory.setFeature("http://apache.org/xml/features/validation/schema", false);
-			factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+			factory.setFeature("http://www.xml.org/sax/features/validation", false);
+			factory.setFeature("https://apache.org/xml/features/validation/dynamic", false);
+			factory.setFeature("https://apache.org/xml/features/validation/schema", false);
+			factory.setFeature("https://apache.org/xml/features/nonvalidating/load-external-dtd", false);
 			
 			DocumentBuilder docBuilder = factory.newDocumentBuilder();
 			Document doc = docBuilder.parse(url.openStream());
