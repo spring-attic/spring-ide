@@ -17,18 +17,18 @@
   First, you can install Spring IDE from the Eclipse Marketplace into your existing Eclipse installation.
   Second, you can install Spring IDE manually from this udpate site:
 
-  http://dist.springsource.com/release/TOOLS/update/e4.7 (for Eclipse Neon 4.7)
-  http://dist.springsource.com/release/TOOLS/update/e4.8 (for Eclipse Mars 4.8)
+  https://dist.springsource.com/release/TOOLS/update/e4.7 (for Eclipse Neon 4.7)
+  https://dist.springsource.com/release/TOOLS/update/e4.8 (for Eclipse Mars 4.8)
   
   The latest versions of Spring IDE support Eclipse Oxygen and Photon. Older versions of Spring IDE
   for older versions of Eclipse can be found here:
   
-  http://dist.springsource.com/release/TOOLS/update/e4.6 (for Eclipse 4.6)
-  http://dist.springsource.com/release/TOOLS/update/e4.5 (for Eclipse 4.5)
-  http://dist.springsource.com/release/TOOLS/update/e4.4 (for Eclipse 4.4)
-  http://dist.springsource.com/release/TOOLS/update/e4.3 (for Eclipse 4.3)
-  http://dist.springsource.com/release/TOOLS/update/e3.8 (for Eclipse 3.8)
-  http://dist.springsource.com/release/TOOLS/update/e3.7 (for Eclipse 3.7)
+  https://dist.springsource.com/release/TOOLS/update/e4.6 (for Eclipse 4.6)
+  https://dist.springsource.com/release/TOOLS/update/e4.5 (for Eclipse 4.5)
+  https://dist.springsource.com/release/TOOLS/update/e4.4 (for Eclipse 4.4)
+  https://dist.springsource.com/release/TOOLS/update/e4.3 (for Eclipse 4.3)
+  https://dist.springsource.com/release/TOOLS/update/e3.8 (for Eclipse 3.8)
+  https://dist.springsource.com/release/TOOLS/update/e3.7 (for Eclipse 3.7)
   
   However, we do not support those older versions of Spring IDE anymore.
 
@@ -43,7 +43,7 @@
   If you want to live on the bleading egde, you can also install always up-to-date continuous
   integration buids from this update site:
 
-  http://dist.springframework.org/snapshot/IDE/nightly/
+  https://dist.springframework.org/snapshot/IDE/nightly/
 
   But take care, those builds could be broken from time to time and might contain non-ship-ready
   features that might never appear in the milestone or release builds.
@@ -61,7 +61,7 @@
   If you have a question that Google can't answer, the best way is to go to the stackoverflow
   using the tag `spring-tool-suite`:
 
-  http://stackoverflow.com/tags/spring-tool-suite[`spring-tool-suite`]
+  https://stackoverflow.com/tags/spring-tool-suite[`spring-tool-suite`]
   
   Bug reports and enhancement requests are tracked using GitHub issues here:
   
