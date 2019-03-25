@@ -1,6 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
+Bundle-Localization: plugin
 Bundle-SymbolicName: org.springframework.ide.eclipse.boot.properties.editor;singleton:=true
 Bundle-Version: 3.9.8.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin
