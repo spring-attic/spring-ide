@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2013, 2016 Pivotal Software, Inc.
+ *  Copyright (c) 2013, 2019 Pivotal Software, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -15,7 +15,6 @@ import java.util.function.Predicate;
 
 import javax.inject.Provider;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -31,8 +30,6 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.Image;
@@ -41,8 +38,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.boot.wizard.BootWizardActivator;
+import org.springframework.ide.eclipse.boot.wizard.SearchBoxSection;
 import org.springframework.ide.eclipse.boot.wizard.content.ContentManager;
 import org.springframework.ide.eclipse.boot.wizard.content.ContentManager.DownloadState;
 import org.springframework.ide.eclipse.boot.wizard.content.ContentType;
@@ -69,7 +66,6 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
  *
  * @author Kris De Volder
  */
-@SuppressWarnings("restriction")
 public class ChooseTypedContentSection extends WizardPageSection {
 
 	private final PrefetchContentListener prefetchContentListener = new PrefetchContentListener();
@@ -178,8 +174,8 @@ public class ChooseTypedContentSection extends WizardPageSection {
 		private final HashMap<Object, Boolean> cache = new HashMap<>();
 
 		public ChoicesFilter() {
-			if (searchBox!=null) {
-				setSearchTerm(searchBox.getText());
+			if (searchBox!=null && searchModel.getValue() != null) {
+				setSearchTerm(searchModel.getValue());
 			}
 		}
 
@@ -244,7 +240,9 @@ public class ChooseTypedContentSection extends WizardPageSection {
 
 	private String sectionLabel;
 	private final SelectionModel<GSContent> selection;
-	private Text searchBox;
+	private SearchBoxSection searchBox;
+	private final LiveVariable<String> searchModel = new LiveVariable<String>("");
+
 	private ChoicesFilter filter;
 	private final ContentManager content;
 	private final ContentProvider contentProvider;
@@ -281,9 +279,18 @@ public class ChooseTypedContentSection extends WizardPageSection {
 		GridLayout layout = GridLayoutFactory.fillDefaults().numColumns(cols).create();
 		field.setLayout(layout);
 
+		// PT 164654725 - Replace old SWT Text control with this search box section
+		// that has "built in" focus handling
+		searchBox = new SearchBoxSection(owner, searchModel) {
+			@Override
+			protected String getSearchHint() {
+				return "Type pattern to match";
+			}
+		};
 
-		searchBox = new Text(field, SWT.SINGLE | SWT.BORDER | SWT.SEARCH | SWT.ICON_CANCEL);
-		searchBox.setMessage("Type pattern to match");
+		// PT 164654725 - IMPORTANT: set grab focus BEFORE creating content
+		searchBox.grabFocus(true);
+		searchBox.createContents(field);
 
 		Label fieldNameLabel = null;
 		if (sectionLabel!=null) {
@@ -302,7 +309,6 @@ public class ChooseTypedContentSection extends WizardPageSection {
 		GridDataFactory grabHor = GridDataFactory.fillDefaults().grab(true, false);
 		GridDataFactory fixHeight = GridDataFactory.fillDefaults().hint(SWT.DEFAULT, 200);
 		grabHor.applyTo(field);
-		grabHor.applyTo(searchBox);
 		fixHeight.applyTo(treeviewer.getControl());
 		if (fieldNameLabel!=null) {
 			GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.BEGINNING).applyTo(fieldNameLabel);
@@ -318,8 +324,7 @@ public class ChooseTypedContentSection extends WizardPageSection {
 					treeviewer.setSelection(StructuredSelection.EMPTY, true);
 				}
 				if (initialFilterText!=null) {
-					searchBox.setText(initialFilterText);
-					updateFilter();
+					searchModel.setValue(initialFilterText);
 				}
 				if (category!=null) {
 					//System.out.println(category);
@@ -366,11 +371,8 @@ public class ChooseTypedContentSection extends WizardPageSection {
 			}
 		});
 
-		searchBox.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				updateFilter();
-			}
+		searchModel.addListener((exp, val) -> {
+			updateFilter();
 		});
 	}
 
@@ -394,8 +396,12 @@ public class ChooseTypedContentSection extends WizardPageSection {
 
 	public void setFilterText(String text) {
 		if (searchBox!=null) {
-			searchBox.setText(text);
-			updateFilter();
+			// Don't set values into the search box directly. Do it
+			// through the model. However, guard this against checks on the search box
+			// existing, as no point in setting value in the model if there is
+			// no actual search box. In faft, setting values in the model without
+			// the search box existing probably will result in NPEs
+			searchModel.setValue(text);
 		} else {
 			//UI isn't there yet so remember the text as intial filter text to be set when
 			// ui is created later.
@@ -408,7 +414,7 @@ public class ChooseTypedContentSection extends WizardPageSection {
 	}
 
 	private void updateFilter() {
-		filter.setSearchTerm(searchBox.getText());
+		filter.setSearchTerm(searchModel.getValue());
 		treeviewer.refresh();
 		treeviewer.expandAll();
 	}
