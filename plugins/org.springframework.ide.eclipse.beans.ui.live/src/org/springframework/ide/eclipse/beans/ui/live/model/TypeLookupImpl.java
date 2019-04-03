@@ -13,6 +13,8 @@ package org.springframework.ide.eclipse.beans.ui.live.model;
 import java.util.Objects;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.jdt.core.IType;
 import org.springframework.ide.eclipse.beans.ui.live.utils.JdtUtils;
 
@@ -72,7 +74,11 @@ public class TypeLookupImpl implements TypeLookup {
 
 	@Override
 	public IProject[] relatedProjects() {
-		return new IProject[] { project };
+		if (project!=null) {
+			return new IProject[] { project };
+		} else {
+			return ResourcesPlugin.getWorkspace().getRoot().getProjects();
+		}
 	}
 
 	@Override
