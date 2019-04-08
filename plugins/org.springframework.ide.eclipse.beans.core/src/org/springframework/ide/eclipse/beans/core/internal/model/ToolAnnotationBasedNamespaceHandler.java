@@ -36,9 +36,9 @@ import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.xml.NamespaceHandler;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.core.SpringCorePreferences;
+import org.springframework.ide.eclipse.xml.namespaces.SpringXmlNamespacesPlugin;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -130,8 +130,8 @@ public class ToolAnnotationBasedNamespaceHandler implements NamespaceHandler {
 			// emit a warning that the NamespaceHandler cannot be found, only if the property is not
 			// set by the user
 			if (!SpringCorePreferences.getProjectPreferences(
-					beansConfig.getElementResource().getProject(), BeansCorePlugin.PLUGIN_ID)
-					.getBoolean(BeansCorePlugin.IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY, false)) {
+					beansConfig.getElementResource().getProject(), SpringXmlNamespacesPlugin.PLUGIN_ID)
+					.getBoolean(SpringXmlNamespacesPlugin.IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY, false)) {
 				parserContext.getReaderContext().warning(
 						"Unable to locate Spring NamespaceHandler for element '"
 								+ element.getNodeName() + "' of schema namespace '"

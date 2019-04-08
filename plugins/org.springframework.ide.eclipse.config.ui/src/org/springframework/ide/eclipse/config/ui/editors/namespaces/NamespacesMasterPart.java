@@ -36,11 +36,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.wst.sse.ui.internal.StructuredTextViewer;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMElement;
-import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinitionListener;
-import org.springframework.ide.eclipse.beans.ui.namespaces.DefaultNamespaceDefinition;
-import org.springframework.ide.eclipse.beans.ui.namespaces.INamespaceDefinition;
-import org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils;
+import org.springframework.ide.eclipse.beans.ui.namespaces.UiNamespaceUtils;
 import org.springframework.ide.eclipse.config.core.ConfigCoreUtils;
 import org.springframework.ide.eclipse.config.core.formatting.ShallowFormatProcessorXML;
 import org.springframework.ide.eclipse.config.core.preferences.SpringConfigPreferenceConstants;
@@ -50,6 +46,11 @@ import org.springframework.ide.eclipse.config.ui.editors.AbstractConfigFormPage;
 import org.springframework.ide.eclipse.config.ui.editors.AbstractConfigLabelProvider;
 import org.springframework.ide.eclipse.config.ui.editors.AbstractConfigMasterPart;
 import org.springframework.ide.eclipse.config.ui.editors.SpringConfigContentProvider;
+import org.springframework.ide.eclipse.xml.namespaces.manager.SpringXmlNamespacesManagerPlugin;
+import org.springframework.ide.eclipse.xml.namespaces.model.INamespaceDefinitionListener;
+import org.springframework.ide.eclipse.xml.namespaces.ui.DefaultNamespaceDefinition;
+import org.springframework.ide.eclipse.xml.namespaces.ui.INamespaceDefinition;
+import org.springframework.ide.eclipse.xml.namespaces.ui.XmlUiNamespaceUtils;
 import org.springsource.ide.eclipse.commons.ui.StsUiImages;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
@@ -123,7 +124,7 @@ public class NamespacesMasterPart extends AbstractConfigMasterPart implements IN
 		selectedVersions = new HashMap<INamespaceDefinition, String>();
 		formatProcessor = new ShallowFormatProcessorXML();
 		lazyInitializationLatch = new CountDownLatch(1);
-		BeansCorePlugin.registerNamespaceDefinitionListener(this);
+		SpringXmlNamespacesManagerPlugin.registerNamespaceDefinitionListener(this);
 		getNamespaceDefinitionList();
 	}
 
@@ -138,7 +139,7 @@ public class NamespacesMasterPart extends AbstractConfigMasterPart implements IN
 				rootElement = doc.createElement(BeansSchemaConstants.ELEM_BEANS);
 				doc.appendChild(rootElement);
 
-				INamespaceDefinition defNamespace = NamespaceUtils.getDefaultNamespaceDefinition();
+				INamespaceDefinition defNamespace = UiNamespaceUtils.getDefaultNamespaceDefinition();
 				if (defNamespace != null) {
 					if (!xsdViewer.getChecked(defNamespace)) {
 						xsdViewer.setChecked(defNamespace, true);
@@ -200,7 +201,7 @@ public class NamespacesMasterPart extends AbstractConfigMasterPart implements IN
 		if (xsdViewer != null && checkListener != null) {
 			xsdViewer.removeCheckStateListener(checkListener);
 		}
-		BeansCorePlugin.unregisterNamespaceDefinitionListener(this);
+		SpringXmlNamespacesManagerPlugin.unregisterNamespaceDefinitionListener(this);
 	}
 
 	/**
@@ -213,9 +214,8 @@ public class NamespacesMasterPart extends AbstractConfigMasterPart implements IN
 			for (int i = 0; i < attributeMap.getLength(); i++) {
 				Node currItem = attributeMap.item(i);
 				// Regular namespace case
-				if (currItem.getNodeName().equals(
-						ConfigCoreUtils.ATTR_NAMESPACE_PREFIX
-								+ namespaceDefinition.getNamespacePrefix(getConfigEditor().getResourceFile()))) {
+				if (currItem.getNodeName().equals(ConfigCoreUtils.ATTR_NAMESPACE_PREFIX
+						+ namespaceDefinition.getNamespacePrefix(getConfigEditor().getResourceFile()))) {
 					return true;
 				}
 				// Default namespace case
@@ -225,8 +225,8 @@ public class NamespacesMasterPart extends AbstractConfigMasterPart implements IN
 				}
 			}
 			// Special case
-			List<String> schemaLocationAttrs = ConfigCoreUtils.parseSchemaLocationAttr(getConfigEditor()
-					.getDomDocument());
+			List<String> schemaLocationAttrs = ConfigCoreUtils
+					.parseSchemaLocationAttr(getConfigEditor().getDomDocument());
 			if (schemaLocationAttrs != null && schemaLocationAttrs.contains(namespaceDefinition.getNamespaceURI())) {
 				return true;
 			}
@@ -248,16 +248,18 @@ public class NamespacesMasterPart extends AbstractConfigMasterPart implements IN
 		if ((namespaceDefinitionList == null || namespaceDefinitionList.size() == 0) && !loading) {
 			loading = true;
 			if (getConfigEditor().getResourceFile() != null) {
-				NamespaceUtils.getNamespaceDefinitions(getConfigEditor().getResourceFile().getProject(),
-						new NamespaceUtils.INamespaceDefinitionTemplate() {
+				XmlUiNamespaceUtils.getNamespaceDefinitions(getConfigEditor().getResourceFile().getProject(),
+						new XmlUiNamespaceUtils.INamespaceDefinitionTemplate() {
 							public void doWithNamespaceDefinitions(INamespaceDefinition[] namespaceDefinitions,
 									IProject project) {
 								List<INamespaceDefinition> newNamespaceDefinitions = new ArrayList<INamespaceDefinition>(
 										Arrays.asList(namespaceDefinitions));
-								NamespacesMasterPart.this.namespaceDefinitionList = triggerLoadNamespaceDefinitionList(newNamespaceDefinitions);
+								NamespacesMasterPart.this.namespaceDefinitionList = triggerLoadNamespaceDefinitionList(
+										newNamespaceDefinitions);
 								Display.getDefault().asyncExec(new Runnable() {
 									public void run() {
-										if (getViewer().getControl() != null && !getViewer().getControl().isDisposed()) {
+										if (getViewer().getControl() != null
+												&& !getViewer().getControl().isDisposed()) {
 											getViewer().setInput(getConfigEditor().getDomDocument());
 											refresh();
 										}
@@ -346,8 +348,8 @@ public class NamespacesMasterPart extends AbstractConfigMasterPart implements IN
 		String namespacePrefix = attributeNameToPrefix(attributeName, namespaceUri);
 		for (INamespaceDefinition namespaceDefinition : namespaces) {
 			INamespaceDefinition currNamespaceDefinition = namespaceDefinition;
-			if ((namespacePrefix != null && namespacePrefix.equals(currNamespaceDefinition
-					.getNamespacePrefix(getConfigEditor().getResourceFile())))
+			if ((namespacePrefix != null && namespacePrefix
+					.equals(currNamespaceDefinition.getNamespacePrefix(getConfigEditor().getResourceFile())))
 					|| namespaceUri.equalsIgnoreCase(currNamespaceDefinition.getNamespaceURI())) {
 				return true;
 			}
@@ -368,14 +370,13 @@ public class NamespacesMasterPart extends AbstractConfigMasterPart implements IN
 
 	private void openPontDialog() {
 		IPreferenceStore prefStore = ConfigUiPlugin.getDefault().getPreferenceStore();
-		if (prefStore.getString(SpringConfigPreferenceConstants.PREF_DISPLAY_TABS_DIALOG).equals(
-				MessageDialogWithToggle.PROMPT)) {
-			MessageDialogWithToggle
-					.openInformation(
-							getFormPage().getSite().getShell(),
-							Messages.getString("NamespacesMasterPart.PONT_DIALOG_TITLE"), //$NON-NLS-1$
-							Messages.getString("NamespacesMasterPart.PONT_DIALOG_MESSAGE"), //$NON-NLS-1$
-							Messages.getString("NamespacesMasterPart.PONT_DIALOG_CHECKBOX"), false, prefStore, SpringConfigPreferenceConstants.PREF_DISPLAY_TABS_DIALOG); //$NON-NLS-1$
+		if (prefStore.getString(SpringConfigPreferenceConstants.PREF_DISPLAY_TABS_DIALOG)
+				.equals(MessageDialogWithToggle.PROMPT)) {
+			MessageDialogWithToggle.openInformation(getFormPage().getSite().getShell(),
+					Messages.getString("NamespacesMasterPart.PONT_DIALOG_TITLE"), //$NON-NLS-1$
+					Messages.getString("NamespacesMasterPart.PONT_DIALOG_MESSAGE"), //$NON-NLS-1$
+					Messages.getString("NamespacesMasterPart.PONT_DIALOG_CHECKBOX"), false, prefStore, //$NON-NLS-1$
+					SpringConfigPreferenceConstants.PREF_DISPLAY_TABS_DIALOG);
 		}
 	}
 
@@ -433,10 +434,11 @@ public class NamespacesMasterPart extends AbstractConfigMasterPart implements IN
 				String currAttributeName = currAttributeNode.getNodeName();
 				String uri = currAttributeNode.getNodeValue();
 				if (isUnknownNamespace(currAttributeName, uri, namespaceDefinitionList)) {
-					String schemaVersion = ConfigCoreUtils.getSelectedSchemaLocation(
-							getConfigEditor().getDomDocument(), uri);
-					INamespaceDefinition namespaceDefinition = new DefaultNamespaceDefinition(attributeNameToPrefix(
-							currAttributeName, uri), uri, schemaVersion, StsUiImages.XML_FILE.createImage());
+					String schemaVersion = ConfigCoreUtils.getSelectedSchemaLocation(getConfigEditor().getDomDocument(),
+							uri);
+					INamespaceDefinition namespaceDefinition = new DefaultNamespaceDefinition(
+							attributeNameToPrefix(currAttributeName, uri), uri, schemaVersion,
+							StsUiImages.XML_FILE.createImage());
 					if (!"".equals(schemaVersion)) { //$NON-NLS-1$
 						this.selectedVersions.put(namespaceDefinition, schemaVersion);
 					}

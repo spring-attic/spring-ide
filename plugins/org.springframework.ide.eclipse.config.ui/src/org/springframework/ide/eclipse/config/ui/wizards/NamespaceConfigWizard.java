@@ -31,9 +31,9 @@ import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocumentReg
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
-import org.springframework.ide.eclipse.beans.ui.namespaces.INamespaceDefinition;
 import org.springframework.ide.eclipse.config.core.formatting.ShallowFormatProcessorXML;
 import org.springframework.ide.eclipse.config.ui.ConfigUiPlugin;
+import org.springframework.ide.eclipse.xml.namespaces.ui.INamespaceDefinition;
 import org.springsource.ide.eclipse.commons.ui.StsUiImages;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;

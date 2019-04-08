@@ -38,7 +38,7 @@ import org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataNode;
 import org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataReference;
 import org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataUtils;
 import org.springframework.ide.eclipse.beans.ui.namespaces.DefaultNamespaceContentProvider;
-import org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils;
+import org.springframework.ide.eclipse.beans.ui.namespaces.UiNamespaceUtils;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelChangeListener;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -95,7 +95,7 @@ public class BeansModelContentProvider implements ITreeContentProvider, ITreePat
 
 	public boolean hasChildren(Object element) {
 		if (element instanceof ISourceModelElement) {
-			ITreeContentProvider provider = NamespaceUtils
+			ITreeContentProvider provider = UiNamespaceUtils
 					.getContentProvider((ISourceModelElement) element);
 			if (provider != null) {
 				return provider.hasChildren(element);
@@ -150,7 +150,7 @@ public class BeansModelContentProvider implements ITreeContentProvider, ITreePat
 			return ((BeanMetadataNode) parentElement).getChildren();
 		}
 		else if (parentElement instanceof ISourceModelElement) {
-			ITreeContentProvider provider = NamespaceUtils
+			ITreeContentProvider provider = UiNamespaceUtils
 					.getContentProvider((ISourceModelElement) parentElement);
 			if (provider != null) {
 				return provider.getChildren(parentElement);
@@ -253,7 +253,7 @@ public class BeansModelContentProvider implements ITreeContentProvider, ITreePat
 
 	public Object getParent(Object element) {
 		if (element instanceof ISourceModelElement) {
-			ITreeContentProvider provider = NamespaceUtils
+			ITreeContentProvider provider = UiNamespaceUtils
 					.getContentProvider((ISourceModelElement) element);
 			if (provider != null) {
 				return provider.getParent(element);

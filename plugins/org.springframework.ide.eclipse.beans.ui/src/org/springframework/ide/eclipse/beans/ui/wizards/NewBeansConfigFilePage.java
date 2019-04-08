@@ -35,9 +35,9 @@ import org.eclipse.ui.dialogs.WizardNewFileCreationPage;
 import org.eclipse.wst.sse.core.internal.encoding.CommonEncodingPreferenceNames;
 import org.eclipse.wst.xml.core.internal.XMLCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
-import org.springframework.ide.eclipse.beans.ui.namespaces.INamespaceDefinition;
-import org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils;
+import org.springframework.ide.eclipse.beans.ui.namespaces.UiNamespaceUtils;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
+import org.springframework.ide.eclipse.xml.namespaces.ui.INamespaceDefinition;
 
 /**
  * {@link WizardNewFileCreationPage} that enables to select a folder and a name for the new
@@ -75,7 +75,7 @@ public class NewBeansConfigFilePage extends WizardNewFileCreationPage {
 
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		String charSet = getUserPreferredCharset();
-		INamespaceDefinition defaultXsd = NamespaceUtils.getDefaultNamespaceDefinition();
+		INamespaceDefinition defaultXsd = UiNamespaceUtils.getDefaultNamespaceDefinition();
 		PrintWriter writer = new PrintWriter(new OutputStreamWriter(outputStream, charSet));
 		writer.println("<?xml version=\"1.0\" encoding=\"" + charSet + "\"?>"); //$NON-NLS-1$ //$NON-NLS-2$
 		writer.println("<beans xmlns=\"" + defaultXsd.getNamespaceURI() + "\"" + lineSeparator
@@ -100,7 +100,7 @@ public class NewBeansConfigFilePage extends WizardNewFileCreationPage {
 	}
 
 	private String getNamespaceMappings(String lineSeparator, IFile file) {
-		INamespaceDefinition defaultXsd = NamespaceUtils.getDefaultNamespaceDefinition();
+		INamespaceDefinition defaultXsd = UiNamespaceUtils.getDefaultNamespaceDefinition();
 		StringBuilder builder = new StringBuilder();
 		for (INamespaceDefinition def : xmlSchemaDefinitions) {
 			if (!def.equals(defaultXsd)) {
@@ -119,7 +119,7 @@ public class NewBeansConfigFilePage extends WizardNewFileCreationPage {
 	private String getSchemaLocations(String lineSeparator, IFile file) {
 		StringBuilder builder = new StringBuilder();
 
-		INamespaceDefinition defaultXsd = NamespaceUtils.getDefaultNamespaceDefinition();
+		INamespaceDefinition defaultXsd = UiNamespaceUtils.getDefaultNamespaceDefinition();
 		builder.append("\t\t");
 		builder.append(defaultXsd.getNamespaceURI());
 		builder.append(" ");

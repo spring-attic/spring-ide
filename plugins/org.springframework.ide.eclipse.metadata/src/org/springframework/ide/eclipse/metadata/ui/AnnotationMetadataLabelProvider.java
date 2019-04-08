@@ -22,7 +22,7 @@ import org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataNode;
 import org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataReference;
 import org.springframework.ide.eclipse.beans.ui.model.metadata.IBeanMetadataLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.namespaces.INamespaceLabelProvider;
-import org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils;
+import org.springframework.ide.eclipse.beans.ui.namespaces.UiNamespaceUtils;
 import org.springframework.ide.eclipse.metadata.MetadataUIImages;
 import org.springframework.ide.eclipse.metadata.core.AspectAnnotationMetadata;
 import org.springframework.ide.eclipse.metadata.core.TransactionalAnnotationMetadata;
@@ -43,7 +43,7 @@ public class AnnotationMetadataLabelProvider extends LabelProvider implements IB
 			return Messages.AnnotationMetadataLabelProvider_DESCRIPTION_STEREOTYPE_ANNOTATION_GROUPING + key;
 		}
 		else if (element instanceof AbstractAnnotationMetadata) {
-			INamespaceLabelProvider provider = NamespaceUtils.getLabelProvider(((AbstractAnnotationMetadata) element)
+			INamespaceLabelProvider provider = UiNamespaceUtils.getLabelProvider(((AbstractAnnotationMetadata) element)
 					.getBean());
 			if (provider != null && provider instanceof IDescriptionProvider) {
 				return ((IDescriptionProvider) provider).getDescription(((AbstractAnnotationMetadata) element)
@@ -91,7 +91,7 @@ public class AnnotationMetadataLabelProvider extends LabelProvider implements IB
 			}
 		}
 		else if (element instanceof AbstractAnnotationMetadata) {
-			INamespaceLabelProvider provider = NamespaceUtils.getLabelProvider(((AbstractAnnotationMetadata) element)
+			INamespaceLabelProvider provider = UiNamespaceUtils.getLabelProvider(((AbstractAnnotationMetadata) element)
 					.getBean());
 			if (provider != null) {
 				return provider.getText(((AbstractAnnotationMetadata) element).getBean(), null, true);

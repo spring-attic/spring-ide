@@ -21,8 +21,6 @@ import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.swt.widgets.TableItem;
-import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.ui.namespaces.INamespaceDefinition;
 import org.springframework.ide.eclipse.config.core.extensions.FormPagesExtensionPointConstants;
 import org.springframework.ide.eclipse.config.core.preferences.SpringConfigPreferenceConstants;
 import org.springframework.ide.eclipse.config.core.schemas.AopSchemaConstants;
@@ -39,8 +37,9 @@ import org.springframework.ide.eclipse.config.ui.editors.AbstractConfigFormPage;
 import org.springframework.ide.eclipse.config.ui.editors.namespaces.NamespacesFormPage;
 import org.springframework.ide.eclipse.config.ui.editors.namespaces.NamespacesMasterPart;
 import org.springframework.ide.eclipse.config.ui.extensions.ConfigUiExtensionPointReader;
+import org.springframework.ide.eclipse.xml.namespaces.SpringXmlNamespacesPlugin;
+import org.springframework.ide.eclipse.xml.namespaces.ui.INamespaceDefinition;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
-
 
 /**
  * @author Leo Dos Santos
@@ -50,8 +49,8 @@ public class NamespacesMasterPartTest extends AbstractConfigTestCase {
 
 	@Override
 	protected void setUp() throws Exception {
-		IPreferenceStore prefs = BeansCorePlugin.getDefault().getPreferenceStore();
-		prefs.setValue(BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID, true);
+		IPreferenceStore prefs = SpringXmlNamespacesPlugin.getDefault().getPreferenceStore();
+		prefs.setValue(SpringXmlNamespacesPlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID, true);
 	}
 
 	public void testAddThenRemoveNamespaceBeansFile() throws Exception {
@@ -395,7 +394,8 @@ public class NamespacesMasterPartTest extends AbstractConfigTestCase {
 				assertNotNull(cEditor.getFormPageForUri(BatchSchemaConstants.URI));
 			}
 		}
-		assertTrue("Expected to find " + IntegrationSchemaConstants.URI + " but found " + uris + " instead.", foundItem);
+		assertTrue("Expected to find " + IntegrationSchemaConstants.URI + " but found " + uris + " instead.",
+				foundItem);
 	}
 
 	public void testUnselectedNamespacesForPageExistenceBeansFile() throws Exception {

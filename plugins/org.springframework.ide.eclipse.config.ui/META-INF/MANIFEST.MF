@@ -34,11 +34,14 @@ Require-Bundle: org.eclipse.ui,
  org.springframework.ide.eclipse.ui;bundle-version="2.8.0",
  org.springframework.ide.eclipse.config.core,
  org.springframework.ide.eclipse.config.graph,
+ org.springframework.ide.eclipse.xml.namespaces,
  org.springframework.ide.eclipse.wizard,
  org.springsource.ide.eclipse.commons.ui,
  org.springsource.ide.eclipse.commons.core,
  org.eclipse.ui.navigator,
- org.springframework.ide.eclipse.beans.ui.refactoring;bundle-version="2.8.0"
+ org.springframework.ide.eclipse.beans.ui.refactoring;bundle-version="2.8.0",
+ org.springframework.ide.eclipse.xml.namespaces,
+ org.springframework.ide.eclipse.xml.namespaces.manager
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: org.springframework.ide.eclipse.config.ui,

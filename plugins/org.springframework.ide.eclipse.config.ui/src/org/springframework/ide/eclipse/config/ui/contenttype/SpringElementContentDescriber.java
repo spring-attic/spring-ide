@@ -23,8 +23,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.content.IContentDescription;
 import org.eclipse.core.runtime.content.XMLContentDescriber;
-import org.springframework.ide.eclipse.beans.ui.namespaces.INamespaceDefinition;
-import org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils;
+import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
+import org.springframework.ide.eclipse.xml.namespaces.ui.INamespaceDefinition;
+import org.springframework.ide.eclipse.xml.namespaces.ui.XmlUiNamespaceUtils;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -61,12 +62,12 @@ public final class SpringElementContentDescriber extends XMLContentDescriber {
 
 		// Check to see if we matched our criteria.
 		String ns = xmlHandler.getRootNamespace();
-		if (ns.startsWith(org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils.DEFAULT_NAMESPACE_URI)) {
+		if (ns.startsWith(NamespaceUtils.DEFAULT_NAMESPACE_URI)) {
 			return VALID;
 		}
 
 		if (ns != null) {
-			for (INamespaceDefinition namespaceDefinition : NamespaceUtils.getNamespaceDefinitions()) {
+			for (INamespaceDefinition namespaceDefinition : XmlUiNamespaceUtils.getNamespaceDefinitions()) {
 				if (ns.equals(namespaceDefinition.getNamespaceURI())) {
 					return VALID;
 				}

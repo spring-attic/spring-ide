@@ -32,9 +32,9 @@ import org.eclipse.ui.forms.IFormPart;
 import org.eclipse.wst.sse.ui.internal.StructuredTextViewer;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
-import org.springframework.ide.eclipse.beans.ui.namespaces.INamespaceDefinition;
 import org.springframework.ide.eclipse.config.ui.editors.AbstractConfigDetailsPart;
 import org.springframework.ide.eclipse.config.ui.editors.AbstractConfigMasterPart;
+import org.springframework.ide.eclipse.xml.namespaces.ui.INamespaceDefinition;
 
 
 /**

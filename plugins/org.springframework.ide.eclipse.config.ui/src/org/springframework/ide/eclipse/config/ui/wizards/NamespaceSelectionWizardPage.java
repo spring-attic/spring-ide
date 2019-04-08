@@ -36,14 +36,13 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
-import org.springframework.ide.eclipse.beans.ui.namespaces.DefaultNamespaceDefinition;
-import org.springframework.ide.eclipse.beans.ui.namespaces.INamespaceDefinition;
-import org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils;
+import org.springframework.ide.eclipse.xml.namespaces.ui.DefaultNamespaceDefinition;
+import org.springframework.ide.eclipse.xml.namespaces.ui.INamespaceDefinition;
+import org.springframework.ide.eclipse.xml.namespaces.ui.XmlUiNamespaceUtils;
 import org.springsource.ide.eclipse.commons.ui.StsUiImages;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
-
 
 /**
  * {@link WizardPage} that displays a list of {@link INamespaceDefinition}s to
@@ -236,8 +235,8 @@ public class NamespaceSelectionWizardPage extends WizardPage {
 					selectedNamespaceDefinition = (INamespaceDefinition) obj;
 					versionViewer.setInput(obj);
 					if (selectedNamespaceVersionMap.containsKey(selectedNamespaceDefinition)) {
-						versionViewer.setCheckedElements(new Object[] { selectedNamespaceVersionMap.get(
-								selectedNamespaceDefinition).trim() });
+						versionViewer.setCheckedElements(
+								new Object[] { selectedNamespaceVersionMap.get(selectedNamespaceDefinition).trim() });
 					}
 					if (xsdViewer.getChecked(obj) && selectedNamespaceDefinition.getSchemaLocations().size() > 0) {
 						versionViewer.getControl().setEnabled(true);
@@ -258,8 +257,8 @@ public class NamespaceSelectionWizardPage extends WizardPage {
 				selectedNamespaceDefinition = (INamespaceDefinition) obj;
 				versionViewer.setInput(obj);
 				if (selectedNamespaceVersionMap.containsKey(selectedNamespaceDefinition)) {
-					versionViewer.setCheckedElements(new Object[] { selectedNamespaceVersionMap.get(
-							selectedNamespaceDefinition).trim() });
+					versionViewer.setCheckedElements(
+							new Object[] { selectedNamespaceVersionMap.get(selectedNamespaceDefinition).trim() });
 				}
 
 				if (event.getChecked() && selectedNamespaceDefinition != null
@@ -341,7 +340,7 @@ public class NamespaceSelectionWizardPage extends WizardPage {
 			namespaceDefinitionList = new ArrayList<INamespaceDefinition>();
 
 			// Add namespaces declared using the extension point
-			namespaceDefinitionList.addAll(NamespaceUtils.getNamespaceDefinitions());
+			namespaceDefinitionList.addAll(XmlUiNamespaceUtils.getNamespaceDefinitions());
 
 			// Add any namespaces that exist in the XML document but aren't
 			// already known to the tooling via the extension point
@@ -352,8 +351,9 @@ public class NamespaceSelectionWizardPage extends WizardPage {
 				String uri = currAttributeNode.getNodeValue();
 				if (isUnknownNamespace(currAttributeName, uri, namespaceDefinitionList)) {
 					String schemaVersion = getSchemaVersionFromXml(uri);
-					INamespaceDefinition namespaceDefinition = new DefaultNamespaceDefinition(attributeNameToPrefix(
-							currAttributeName, uri), uri, schemaVersion, StsUiImages.XML_FILE.createImage());
+					INamespaceDefinition namespaceDefinition = new DefaultNamespaceDefinition(
+							attributeNameToPrefix(currAttributeName, uri), uri, schemaVersion,
+							StsUiImages.XML_FILE.createImage());
 					if (!"".equals(schemaVersion)) {
 						this.selectedNamespaceVersionMap.put(namespaceDefinition, schemaVersion);
 					}

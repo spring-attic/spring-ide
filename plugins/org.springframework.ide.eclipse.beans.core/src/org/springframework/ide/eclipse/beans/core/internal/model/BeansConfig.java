@@ -85,7 +85,6 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.namespaces.DelegatingNamespaceHandlerResolver;
-import org.springframework.ide.eclipse.beans.core.internal.model.namespaces.DocumentAccessor;
 import org.springframework.ide.eclipse.beans.core.internal.model.namespaces.XmlCatalogDelegatingEntityResolver;
 import org.springframework.ide.eclipse.beans.core.internal.model.process.BeansConfigPostProcessorFactory;
 import org.springframework.ide.eclipse.beans.core.internal.parser.BeansDtdResolver;
@@ -98,8 +97,8 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansImport;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.core.model.IReloadableBeansConfig;
 import org.springframework.ide.eclipse.beans.core.model.process.IBeansConfigPostProcessor;
-import org.springframework.ide.eclipse.beans.core.namespaces.IModelElementProvider;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
+import org.springframework.ide.eclipse.beans.core.namespaces.IModelElementProvider;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.core.io.EclipsePathMatchingResourcePatternResolver;
@@ -118,6 +117,8 @@ import org.springframework.ide.eclipse.core.model.IResourceModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
 import org.springframework.ide.eclipse.core.model.validation.ValidationProblem;
 import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
+import org.springframework.ide.eclipse.xml.namespaces.XmlNamespaceUtils;
+import org.springframework.ide.eclipse.xml.namespaces.util.DocumentAccessor;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
@@ -360,7 +361,7 @@ public class BeansConfig extends AbstractBeansConfig implements IBeansConfig, IL
 
 					// Set up classloader to use for NamespaceHandler and XSD loading
 					ClassLoader namespaceResolvingClassloader = projectIncludingClassloader;
-					if (!NamespaceUtils.useNamespacesFromClasspath(file.getProject())) {
+					if (!XmlNamespaceUtils.useNamespacesFromClasspath(file.getProject())) {
 						 namespaceResolvingClassloader = BeansCorePlugin.getClassLoader();
 					}
 

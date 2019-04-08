@@ -111,4 +111,5 @@ Bundle-ActivationPolicy: lazy
 Require-Bundle: org.eclipse.jface,
  org.springframework.ide.eclipse.beans.core,
  org.springsource.ide.eclipse.commons.ui,
- org.springsource.ide.eclipse.commons.core
+ org.springsource.ide.eclipse.commons.core,
+ org.springframework.ide.eclipse.xml.namespaces

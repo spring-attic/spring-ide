@@ -122,6 +122,8 @@
 		<module>plugins/org.springframework.ide.eclipse.core</module>
 		<module>plugins/org.springframework.ide.eclipse.beans.core</module>
 		<module>plugins/org.springframework.ide.eclipse.beans.core.tests</module>
+		<module>plugins/org.springframework.ide.eclipse.xml.namespaces</module>
+		<module>plugins/org.springframework.ide.eclipse.xml.namespaces.manager</module>
 		<!--
 		<module>plugins/org.springframework.ide.eclipse.beans.core.groovy.tests</module>
 		 -->

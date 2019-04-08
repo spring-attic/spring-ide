@@ -23,7 +23,6 @@ import org.eclipse.wst.xml.core.internal.contentmodel.util.CMDocumentCacheListen
 import org.eclipse.wst.xml.core.internal.modelquery.ModelQueryUtil;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMElement;
-import org.springframework.ide.eclipse.beans.core.internal.model.namespaces.ProjectClasspathExtensibleUriResolver;
 import org.springframework.ide.eclipse.config.core.ConfigCoreUtils;
 import org.springframework.ide.eclipse.config.core.contentassist.SpringConfigContentAssistProcessor;
 import org.springframework.ide.eclipse.config.core.schemas.AopSchemaConstants;
@@ -38,8 +37,8 @@ import org.springframework.ide.eclipse.config.core.schemas.WebFlowConfigSchemaCo
 import org.springframework.ide.eclipse.config.tests.AbstractConfigTestCase;
 import org.springframework.ide.eclipse.config.ui.editors.AbstractConfigFormPage;
 import org.springframework.ide.eclipse.config.ui.editors.overview.OverviewFormPage;
+import org.springframework.ide.eclipse.xml.namespaces.internal.ProjectClasspathExtensibleUriResolver;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
-
 
 /**
  * @author Leo Dos Santos
@@ -65,20 +64,25 @@ public class SpringConfigContentAssistProcessorTest extends AbstractConfigTestCa
 		SpringConfigContentAssistProcessor xmlProcessor = page.getXmlProcessor();
 		List<String> children = xmlProcessor.getChildNames(node);
 
-		assertTrue(children.contains(ConfigCoreUtils.getPrefixForNamespaceUri(cEditor.getDomDocument(),
-				BeansSchemaConstants.URI) + ":" + BeansSchemaConstants.ELEM_ALIAS));
-		assertTrue(children.contains(ConfigCoreUtils.getPrefixForNamespaceUri(cEditor.getDomDocument(),
-				BeansSchemaConstants.URI) + ":" + BeansSchemaConstants.ELEM_BEAN));
-		assertFalse(children.contains(ConfigCoreUtils.getPrefixForNamespaceUri(cEditor.getDomDocument(),
-				BeansSchemaConstants.URI) + ":" + BeansSchemaConstants.ELEM_BEANS));
+		assertTrue(children
+				.contains(ConfigCoreUtils.getPrefixForNamespaceUri(cEditor.getDomDocument(), BeansSchemaConstants.URI)
+						+ ":" + BeansSchemaConstants.ELEM_ALIAS));
+		assertTrue(children
+				.contains(ConfigCoreUtils.getPrefixForNamespaceUri(cEditor.getDomDocument(), BeansSchemaConstants.URI)
+						+ ":" + BeansSchemaConstants.ELEM_BEAN));
+		assertFalse(children
+				.contains(ConfigCoreUtils.getPrefixForNamespaceUri(cEditor.getDomDocument(), BeansSchemaConstants.URI)
+						+ ":" + BeansSchemaConstants.ELEM_BEANS));
 
 		assertTrue(children.contains(AopSchemaConstants.ELEM_CONFIG));
 		assertFalse(children.contains(AopSchemaConstants.ELEM_POINTCUT));
 
-		assertTrue(children.contains(ConfigCoreUtils.getPrefixForNamespaceUri(cEditor.getDomDocument(),
-				TxSchemaConstants.URI) + ":" + TxSchemaConstants.ELEM_ADVICE));
-		assertFalse(children.contains(ConfigCoreUtils.getPrefixForNamespaceUri(cEditor.getDomDocument(),
-				TxSchemaConstants.URI) + ":" + TxSchemaConstants.ELEM_ATTRIBUTES));
+		assertTrue(children
+				.contains(ConfigCoreUtils.getPrefixForNamespaceUri(cEditor.getDomDocument(), TxSchemaConstants.URI)
+						+ ":" + TxSchemaConstants.ELEM_ADVICE));
+		assertFalse(children
+				.contains(ConfigCoreUtils.getPrefixForNamespaceUri(cEditor.getDomDocument(), TxSchemaConstants.URI)
+						+ ":" + TxSchemaConstants.ELEM_ATTRIBUTES));
 
 		assertFalse(children.contains(WebFlowConfigSchemaConstants.ELEM_FLOW_BUILDER_SERVICES));
 	}
@@ -102,15 +106,19 @@ public class SpringConfigContentAssistProcessorTest extends AbstractConfigTestCa
 		assertTrue(children.contains(BeansSchemaConstants.ELEM_BEAN));
 		assertFalse(children.contains(BeansSchemaConstants.ELEM_BEANS));
 
-		assertTrue(children.contains(ConfigCoreUtils.getPrefixForNamespaceUri(cEditor.getDomDocument(),
-				AopSchemaConstants.URI) + ":" + AopSchemaConstants.ELEM_CONFIG));
-		assertFalse(children.contains(ConfigCoreUtils.getPrefixForNamespaceUri(cEditor.getDomDocument(),
-				AopSchemaConstants.URI) + ":" + AopSchemaConstants.ELEM_POINTCUT));
+		assertTrue(children
+				.contains(ConfigCoreUtils.getPrefixForNamespaceUri(cEditor.getDomDocument(), AopSchemaConstants.URI)
+						+ ":" + AopSchemaConstants.ELEM_CONFIG));
+		assertFalse(children
+				.contains(ConfigCoreUtils.getPrefixForNamespaceUri(cEditor.getDomDocument(), AopSchemaConstants.URI)
+						+ ":" + AopSchemaConstants.ELEM_POINTCUT));
 
-		assertTrue(children.contains(ConfigCoreUtils.getPrefixForNamespaceUri(cEditor.getDomDocument(),
-				TxSchemaConstants.URI) + ":" + TxSchemaConstants.ELEM_ADVICE));
-		assertFalse(children.contains(ConfigCoreUtils.getPrefixForNamespaceUri(cEditor.getDomDocument(),
-				TxSchemaConstants.URI) + ":" + TxSchemaConstants.ELEM_ATTRIBUTES));
+		assertTrue(children
+				.contains(ConfigCoreUtils.getPrefixForNamespaceUri(cEditor.getDomDocument(), TxSchemaConstants.URI)
+						+ ":" + TxSchemaConstants.ELEM_ADVICE));
+		assertFalse(children
+				.contains(ConfigCoreUtils.getPrefixForNamespaceUri(cEditor.getDomDocument(), TxSchemaConstants.URI)
+						+ ":" + TxSchemaConstants.ELEM_ATTRIBUTES));
 
 		assertFalse(children.contains(WebFlowConfigSchemaConstants.ELEM_FLOW_BUILDER_SERVICES));
 	}
@@ -134,15 +142,19 @@ public class SpringConfigContentAssistProcessorTest extends AbstractConfigTestCa
 		assertTrue(children.contains(BeansSchemaConstants.ELEM_BEAN));
 		assertFalse(children.contains(BeansSchemaConstants.ELEM_BEANS));
 
-		assertFalse(children.contains(ConfigCoreUtils.getPrefixForNamespaceUri(cEditor.getDomDocument(),
-				AopSchemaConstants.URI) + ":" + AopSchemaConstants.ELEM_CONFIG));
-		assertFalse(children.contains(ConfigCoreUtils.getPrefixForNamespaceUri(cEditor.getDomDocument(),
-				AopSchemaConstants.URI) + ":" + AopSchemaConstants.ELEM_POINTCUT));
+		assertFalse(children
+				.contains(ConfigCoreUtils.getPrefixForNamespaceUri(cEditor.getDomDocument(), AopSchemaConstants.URI)
+						+ ":" + AopSchemaConstants.ELEM_CONFIG));
+		assertFalse(children
+				.contains(ConfigCoreUtils.getPrefixForNamespaceUri(cEditor.getDomDocument(), AopSchemaConstants.URI)
+						+ ":" + AopSchemaConstants.ELEM_POINTCUT));
 
-		assertFalse(children.contains(ConfigCoreUtils.getPrefixForNamespaceUri(cEditor.getDomDocument(),
-				TxSchemaConstants.URI) + ":" + TxSchemaConstants.ELEM_ADVICE));
-		assertFalse(children.contains(ConfigCoreUtils.getPrefixForNamespaceUri(cEditor.getDomDocument(),
-				TxSchemaConstants.URI) + ":" + TxSchemaConstants.ELEM_ATTRIBUTES));
+		assertFalse(children
+				.contains(ConfigCoreUtils.getPrefixForNamespaceUri(cEditor.getDomDocument(), TxSchemaConstants.URI)
+						+ ":" + TxSchemaConstants.ELEM_ADVICE));
+		assertFalse(children
+				.contains(ConfigCoreUtils.getPrefixForNamespaceUri(cEditor.getDomDocument(), TxSchemaConstants.URI)
+						+ ":" + TxSchemaConstants.ELEM_ATTRIBUTES));
 
 		assertFalse(children.contains(WebFlowConfigSchemaConstants.ELEM_FLOW_BUILDER_SERVICES));
 	}
@@ -204,13 +216,16 @@ public class SpringConfigContentAssistProcessorTest extends AbstractConfigTestCa
 
 		assertFalse(children.contains(IntFileSchemaConstants.ELEM_FILE_TO_BYTES_TRANSFORMER));
 
-		assertTrue(children.contains(ConfigCoreUtils.getPrefixForNamespaceUri(cEditor.getDomDocument(),
-				IntJmsSchemaConstants.URI) + ":" + IntJmsSchemaConstants.ELEM_CHANNEL));
-		assertFalse(children.contains(ConfigCoreUtils.getPrefixForNamespaceUri(cEditor.getDomDocument(),
-				IntJmsSchemaConstants.URI) + ":" + IntJmsSchemaConstants.ELEM_REPLY_TO));
+		assertTrue(children
+				.contains(ConfigCoreUtils.getPrefixForNamespaceUri(cEditor.getDomDocument(), IntJmsSchemaConstants.URI)
+						+ ":" + IntJmsSchemaConstants.ELEM_CHANNEL));
+		assertFalse(children
+				.contains(ConfigCoreUtils.getPrefixForNamespaceUri(cEditor.getDomDocument(), IntJmsSchemaConstants.URI)
+						+ ":" + IntJmsSchemaConstants.ELEM_REPLY_TO));
 
-		assertTrue(children.contains(ConfigCoreUtils.getPrefixForNamespaceUri(cEditor.getDomDocument(),
-				IntStreamSchemaConstants.URI) + ":" + IntStreamSchemaConstants.ELEM_STDIN_CHANNEL_ADAPTER));
+		assertTrue(children.contains(
+				ConfigCoreUtils.getPrefixForNamespaceUri(cEditor.getDomDocument(), IntStreamSchemaConstants.URI) + ":"
+						+ IntStreamSchemaConstants.ELEM_STDIN_CHANNEL_ADAPTER));
 	}
 
 	public void testScopedFileForBeansChildren() throws Exception {

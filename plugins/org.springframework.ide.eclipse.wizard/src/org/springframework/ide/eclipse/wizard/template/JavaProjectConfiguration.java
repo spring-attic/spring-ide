@@ -24,10 +24,11 @@ import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.SpringCorePreferences;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
+import org.springframework.ide.eclipse.xml.namespaces.SpringXmlNamespacesPlugin;
 
 /**
  * Creates and configures a Java based project.
- * 
+ *
  */
 public abstract class JavaProjectConfiguration extends ProjectConfiguration {
 
@@ -52,7 +53,7 @@ public abstract class JavaProjectConfiguration extends ProjectConfiguration {
 		}
 
 		final SpringCorePreferences prefs = SpringCorePreferences.getProjectPreferences(getProject(),
-				BeansCorePlugin.PLUGIN_ID);
+				SpringXmlNamespacesPlugin.PLUGIN_ID);
 
 		// get the data from the UI widgets
 		final Set<String> configExtensions = javaDescriptor.getConfigSuffixes();
@@ -69,12 +70,12 @@ public abstract class JavaProjectConfiguration extends ProjectConfiguration {
 		configureSpringProject(getProject(), configExtensions, enableImports, new SubProgressMonitor(monitor, 1000));
 
 		if (useProjectSettings) {
-			prefs.putBoolean(BeansCorePlugin.PROJECT_PROPERTY_ID, useProjectSettings);
-			prefs.putBoolean(BeansCorePlugin.NAMESPACE_DEFAULT_FROM_CLASSPATH_ID, useHighestXsdVersion);
-			prefs.putBoolean(BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID, loadHandlerFromClasspath);
-			prefs.putBoolean(BeansCorePlugin.DISABLE_CACHING_FOR_NAMESPACE_LOADING_ID, disableNamespaceCaching);
+			prefs.putBoolean(SpringXmlNamespacesPlugin.PROJECT_PROPERTY_ID, useProjectSettings);
+			prefs.putBoolean(SpringXmlNamespacesPlugin.NAMESPACE_DEFAULT_FROM_CLASSPATH_ID, useHighestXsdVersion);
+			prefs.putBoolean(SpringXmlNamespacesPlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID, loadHandlerFromClasspath);
+			prefs.putBoolean(SpringXmlNamespacesPlugin.DISABLE_CACHING_FOR_NAMESPACE_LOADING_ID, disableNamespaceCaching);
 		}
-		prefs.putBoolean(BeansCorePlugin.IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY, ignoreMissingNamespaceHandlers);
+		prefs.putBoolean(SpringXmlNamespacesPlugin.IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY, ignoreMissingNamespaceHandlers);
 
 		// add project facet nature to enable corresponding
 		// functionality
@@ -87,7 +88,7 @@ public abstract class JavaProjectConfiguration extends ProjectConfiguration {
 	/**
 	 * Configures the given project with a Spring nature and other Spring
 	 * related properties.
-	 * 
+	 *
 	 * @param projectHandle the project handle to create a project resource for
 	 * @param monitor the progress monitor to show visual progress with
 	 * @exception CoreException if the operation fails

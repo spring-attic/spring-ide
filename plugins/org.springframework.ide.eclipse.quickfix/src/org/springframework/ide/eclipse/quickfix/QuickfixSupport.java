@@ -18,7 +18,6 @@ import org.springframework.ide.eclipse.quickfix.validator.BeanValidator;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Node;
 
-
 /**
  * Abstract support class for getting the right validator for an attribute of a
  * bean configuration. Subclasses need to specify the initiation of the

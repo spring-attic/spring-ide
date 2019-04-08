@@ -22,10 +22,11 @@ import org.springframework.beans.factory.xml.NamespaceHandlerResolver;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.ToolAnnotationBasedNamespaceHandler;
-import org.springframework.ide.eclipse.beans.core.internal.model.namespaces.DocumentAccessor.SchemaLocations;
 import org.springframework.ide.eclipse.beans.core.model.IBeansConfig;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils.NamespaceHandlerDescriptor;
+import org.springframework.ide.eclipse.xml.namespaces.util.DocumentAccessor;
+import org.springframework.ide.eclipse.xml.namespaces.util.DocumentAccessor.SchemaLocations;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 

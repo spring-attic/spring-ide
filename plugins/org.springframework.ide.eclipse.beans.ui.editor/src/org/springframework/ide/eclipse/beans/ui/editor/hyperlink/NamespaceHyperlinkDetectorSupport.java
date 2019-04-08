@@ -44,6 +44,7 @@ import org.springframework.ide.eclipse.beans.core.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.contentassist.IContentAssistCalculator;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
 import org.springframework.ide.eclipse.core.java.JdtUtils;
+import org.springframework.ide.eclipse.xml.namespaces.XmlNamespaceUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Attr;
@@ -195,7 +196,7 @@ public class NamespaceHyperlinkDetectorSupport extends AbstractHyperlinkDetector
 		if (config != null && namespaceUri != null && !namespaceUri.equals(NamespaceUtils.DEFAULT_NAMESPACE_URI)) {
 			
 			ClassLoader cl = BeansCorePlugin.getClassLoader();
-			if (NamespaceUtils.useNamespacesFromClasspath(file.getProject())) {
+			if (XmlNamespaceUtils.useNamespacesFromClasspath(file.getProject())) {
 				cl = JdtUtils.getClassLoader(file.getProject(), cl);
 			}
 			

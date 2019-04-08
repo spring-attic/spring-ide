@@ -34,7 +34,7 @@ import org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataRefer
 import org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataUtils;
 import org.springframework.ide.eclipse.beans.ui.model.metadata.IBeanMetadataLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.namespaces.INamespaceLabelProvider;
-import org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils;
+import org.springframework.ide.eclipse.beans.ui.namespaces.UiNamespaceUtils;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.ILazyInitializedModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElement;
@@ -84,7 +84,7 @@ public class BeansNavigatorLabelProvider extends BeansModelLabelProvider impleme
 					+ " - " + ((IBeansProject) element).getProject().getName();
 		}
 		else if (element instanceof ISourceModelElement) {
-			INamespaceLabelProvider provider = NamespaceUtils.getLabelProvider((ISourceModelElement) element);
+			INamespaceLabelProvider provider = UiNamespaceUtils.getLabelProvider((ISourceModelElement) element);
 			if (provider != null && provider instanceof IDescriptionProvider) {
 				return ((IDescriptionProvider) provider).getDescription(element);
 			}

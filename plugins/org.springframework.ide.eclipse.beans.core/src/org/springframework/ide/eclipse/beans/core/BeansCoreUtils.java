@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.beans.core;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import static org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil.lightRule;
 
 /**
  * Some helper methods for the Spring IDE core model.
@@ -52,24 +53,5 @@ public class BeansCoreUtils {
 			return BeansCorePlugin.getModel().isConfig((IFile) resource, includeImported);
 		}
 		return false;
-	}
-	
-	private static ISchedulingRule lightRule(final String name) {
-		return new ISchedulingRule() {
-			
-			public boolean contains(ISchedulingRule rule) {
-				return rule == this;
-			}
-
-			public boolean isConflicting(ISchedulingRule rule) {
-				return rule == this || rule.contains(this);
-			}
-			
-			@Override
-			public String toString() {
-				return name;
-			}
-			
-		};
 	}
 }

@@ -101,13 +101,10 @@ public class UseBeanInheritance implements IValidationRule<IBean, IBeansValidati
 		// one of the similar ones
 		if (similarBeanList.size() + 1 >= minNumSimilarBeanDefs) {
 			String similarBeanNames = getBeanNamesString(similarBeanList);
-			validationContext
-					.info(bean,
-							ERROR_ID,
-							"Consider using bean inheritance to simplify configuration of the "
-									+ bean.getElementName()
-									+ " bean. It may be possible to use a parent bean to share configuration with the the following beans: "
-									+ similarBeanNames);
+			validationContext.info(bean, ERROR_ID, "Consider using bean inheritance to simplify configuration of the "
+					+ bean.getElementName()
+					+ " bean. It may be possible to use a parent bean to share configuration with the the following beans: "
+					+ similarBeanNames);
 		}
 	}
 
@@ -173,9 +170,8 @@ public class UseBeanInheritance implements IValidationRule<IBean, IBeansValidati
 	}
 
 	private boolean isBeanSupported(IBean bean) {
-		if (bean.getElementSourceLocation() instanceof XmlSourceLocation
-				&& !NamespaceUtils.DEFAULT_NAMESPACE_URI.equals(((XmlSourceLocation) bean.getElementSourceLocation())
-						.getNamespaceURI())) {
+		if (bean.getElementSourceLocation() instanceof XmlSourceLocation && !NamespaceUtils.DEFAULT_NAMESPACE_URI
+				.equals(((XmlSourceLocation) bean.getElementSourceLocation()).getNamespaceURI())) {
 			return false;
 		}
 		return true;

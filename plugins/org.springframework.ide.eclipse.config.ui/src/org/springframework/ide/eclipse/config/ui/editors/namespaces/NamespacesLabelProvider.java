@@ -14,8 +14,8 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
-import org.springframework.ide.eclipse.beans.ui.namespaces.INamespaceDefinition;
 import org.springframework.ide.eclipse.config.ui.editors.AbstractConfigLabelProvider;
+import org.springframework.ide.eclipse.xml.namespaces.ui.INamespaceDefinition;
 
 
 /**

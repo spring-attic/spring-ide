@@ -47,6 +47,7 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
  * @since 2.0.2
  */
 @SuppressWarnings("restriction")
+@Deprecated //moved to commons.ui bundle
 public abstract class ProjectAndPreferencePage extends PreferencePage implements
 		IWorkbenchPreferencePage, IWorkbenchPropertyPage {
 

@@ -38,11 +38,11 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.model.IBeansProject;
 import org.springframework.ide.eclipse.beans.ui.BeansUIPlugin;
 import org.springframework.ide.eclipse.core.StringUtils;
 import org.springframework.ide.eclipse.ui.SpringUIUtils;
+import org.springframework.ide.eclipse.xml.namespaces.SpringXmlNamespacesPlugin;
 
 /**
  * @author Torsten Juergeleit
@@ -141,7 +141,7 @@ public class NewSpringProjectCreationPage extends NewJavaProjectWizardPageOne {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param parent whose font should be applied to all of its children.
 	 */
 	protected void applyParentFont(Composite parent) {
@@ -259,7 +259,7 @@ public class NewSpringProjectCreationPage extends NewJavaProjectWizardPageOne {
 		ignoreMissingNamespaceHandlerButton = SpringUIUtils.createCheckBox(springGroup,
 				BeansUIPlugin.getResourceString(IGNORE_MISSING_NAMESPACEHANDLER_LABEL));
 		ignoreMissingNamespaceHandlerButton
-				.setSelection(ignoreMissingNamespaceHandlers = BeansCorePlugin.IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY_DEFAULT);
+				.setSelection(ignoreMissingNamespaceHandlers = SpringXmlNamespacesPlugin.IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY_DEFAULT);
 		ignoreMissingNamespaceHandlerButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -326,10 +326,10 @@ public class NewSpringProjectCreationPage extends NewJavaProjectWizardPageOne {
 		horizontalLine.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false));
 		horizontalLine.setFont(namespacesGroup.getFont());
 
-		Preferences prefs = BeansCorePlugin.getDefault().getPluginPreferences();
-		useHighestXsdVersion = prefs.getBoolean(BeansCorePlugin.NAMESPACE_DEFAULT_FROM_CLASSPATH_ID);
-		loadHandlerFromClasspath = prefs.getBoolean(BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID);
-		disableNamespaceCaching = prefs.getBoolean(BeansCorePlugin.DISABLE_CACHING_FOR_NAMESPACE_LOADING_ID);
+		Preferences prefs = SpringXmlNamespacesPlugin.getDefault().getPluginPreferences();
+		useHighestXsdVersion = prefs.getBoolean(SpringXmlNamespacesPlugin.NAMESPACE_DEFAULT_FROM_CLASSPATH_ID);
+		loadHandlerFromClasspath = prefs.getBoolean(SpringXmlNamespacesPlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID);
+		disableNamespaceCaching = prefs.getBoolean(SpringXmlNamespacesPlugin.DISABLE_CACHING_FOR_NAMESPACE_LOADING_ID);
 
 		versionCheckbox = createButton(namespacesGroup, SWT.CHECK, 1, convertHorizontalDLUsToPixels(5));
 		versionCheckbox.setText(NewSpringProjectWizardMessages.NewProjectPage_highestXsdVersion);

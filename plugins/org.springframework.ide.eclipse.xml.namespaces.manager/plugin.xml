@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.springframework.ide.eclipse.xml.namespaces.namespacemanager">
+      <namespacemanager
+            class="org.springframework.ide.eclipse.xml.namespaces.manager.NamespaceManagerContribution">
+      </namespacemanager>
+   </extension>
+
+</plugin>

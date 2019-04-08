@@ -23,7 +23,7 @@ import org.springframework.ide.eclipse.beans.ui.model.metadata.BeanMetadataUtils
 import org.springframework.ide.eclipse.beans.ui.model.metadata.IBeanMetadataLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.namespaces.DefaultNamespaceLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.namespaces.INamespaceLabelProvider;
-import org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils;
+import org.springframework.ide.eclipse.beans.ui.namespaces.UiNamespaceUtils;
 import org.springframework.ide.eclipse.core.io.ZipEntryStorage;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
@@ -60,7 +60,7 @@ public class BeansModelLabelProvider extends DecoratingWorkbenchTreePathLabelPro
 			return ((BeanMetadataNode) element).getImage();
 		}
 		else if (element instanceof ISourceModelElement) {
-			INamespaceLabelProvider provider = NamespaceUtils.getLabelProvider((ISourceModelElement) element);
+			INamespaceLabelProvider provider = UiNamespaceUtils.getLabelProvider((ISourceModelElement) element);
 			IModelElement context = (parentElement instanceof IModelElement ? (IModelElement) parentElement : null);
 			if (provider != null) {
 				image = provider.getImage((ISourceModelElement) element, context, isDecorating());
@@ -112,7 +112,7 @@ public class BeansModelLabelProvider extends DecoratingWorkbenchTreePathLabelPro
 			return ((BeanMetadataNode) element).getLabel();
 		}
 		else if (element instanceof ISourceModelElement) {
-			INamespaceLabelProvider provider = NamespaceUtils.getLabelProvider((ISourceModelElement) element);
+			INamespaceLabelProvider provider = UiNamespaceUtils.getLabelProvider((ISourceModelElement) element);
 			IModelElement context = (parentElement instanceof IModelElement ? (IModelElement) parentElement : null);
 			if (provider != null) {
 				return provider.getText((ISourceModelElement) element, context, isDecorating());

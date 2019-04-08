@@ -44,7 +44,8 @@ Require-Bundle: org.eclipse.ui,
  org.springframework.ide.eclipse.quickfix,
  org.apache.commons.compress;bundle-version="1.6.0",
  com.google.guava,
- org.eclipse.jdt.core.manipulation
+ org.eclipse.jdt.core.manipulation,
+ org.springframework.ide.eclipse.xml.namespaces
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Eclipse-LazyStart: true
 Bundle-ClassPath: .,

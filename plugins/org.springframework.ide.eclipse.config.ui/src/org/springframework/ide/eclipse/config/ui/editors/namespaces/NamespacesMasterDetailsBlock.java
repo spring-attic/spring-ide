@@ -11,11 +11,11 @@
 package org.springframework.ide.eclipse.config.ui.editors.namespaces;
 
 import org.eclipse.swt.widgets.Composite;
-import org.springframework.ide.eclipse.beans.ui.namespaces.INamespaceDefinition;
 import org.springframework.ide.eclipse.config.ui.editors.AbstractConfigDetailsPart;
 import org.springframework.ide.eclipse.config.ui.editors.AbstractConfigFormPage;
 import org.springframework.ide.eclipse.config.ui.editors.AbstractConfigMasterDetailsBlock;
 import org.springframework.ide.eclipse.config.ui.editors.AbstractConfigMasterPart;
+import org.springframework.ide.eclipse.xml.namespaces.ui.INamespaceDefinition;
 
 
 /**

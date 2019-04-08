@@ -37,8 +37,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.springframework.ide.eclipse.beans.ui.BeansUIImages;
-import org.springframework.ide.eclipse.beans.ui.namespaces.INamespaceDefinition;
-import org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils;
+import org.springframework.ide.eclipse.beans.ui.namespaces.UiNamespaceUtils;
+import org.springframework.ide.eclipse.xml.namespaces.ui.INamespaceDefinition;
+import org.springframework.ide.eclipse.xml.namespaces.ui.XmlUiNamespaceUtils;
 
 /**
  * {@link WizardPage} that displays a list of {@link INamespaceDefinition}s to the user in order to allow for selecting
@@ -95,7 +96,7 @@ public class NamespaceSelectionWizardPage extends WizardPage {
 
 			if (namespaceDefinitionList.size() == 0 && !loading) {
 				activeProject = project;
-				NamespaceUtils.getNamespaceDefinitions(project, new NamespaceUtils.INamespaceDefinitionTemplate() {
+				XmlUiNamespaceUtils.getNamespaceDefinitions(project, new XmlUiNamespaceUtils.INamespaceDefinitionTemplate() {
 
 					public void doWithNamespaceDefinitions(INamespaceDefinition[] namespaceDefinitions,
 							final IProject project) {
@@ -194,7 +195,7 @@ public class NamespaceSelectionWizardPage extends WizardPage {
 		xsdViewer.setContentProvider(new XsdConfigContentProvider());
 		xsdViewer.setLabelProvider(new XsdLabelProvider());
 		xsdViewer.setInput(this); // activate content provider
-		INamespaceDefinition defaultDefinition = NamespaceUtils.getDefaultNamespaceDefinition();
+		INamespaceDefinition defaultDefinition = UiNamespaceUtils.getDefaultNamespaceDefinition();
 		if (defaultDefinition != null) {
 			xsdViewer.setGrayedElements(new Object[] { defaultDefinition });
 			xsdViewer.setCheckedElements(new Object[] { defaultDefinition });

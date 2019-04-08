@@ -25,14 +25,13 @@ import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.wst.xml.core.internal.contentmodel.util.NamespaceTable;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.osgi.framework.Version;
-import org.springframework.ide.eclipse.beans.ui.namespaces.INamespaceDefinition;
-import org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.config.core.contentassist.Messages;
+import org.springframework.ide.eclipse.xml.namespaces.ui.INamespaceDefinition;
+import org.springframework.ide.eclipse.xml.namespaces.ui.XmlUiNamespaceUtils;
 import org.springsource.ide.eclipse.commons.core.StatusHandler;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
-
 
 /**
  * Static utilities of use throughout the configuration editor.
@@ -54,7 +53,7 @@ public class ConfigCoreUtils {
 	/**
 	 * Returns the default namespace URI by searching the document for the
 	 * namespace declaration, or null if none found.
-	 * 
+	 *
 	 * @param doc document object model of the XML source file
 	 * @return default namespace URI of the given document
 	 */
@@ -77,7 +76,7 @@ public class ConfigCoreUtils {
 
 	/**
 	 * Returns the namespace prefix for the given URI.
-	 * 
+	 *
 	 * @param doc document object model of the XML source file
 	 * @param namespaceUri namespace URI to examine
 	 * @return namespace prefix for the given URI
@@ -94,7 +93,7 @@ public class ConfigCoreUtils {
 
 	/**
 	 * Returns the selected schema version for the given URI.
-	 * 
+	 *
 	 * @param doc document object model of the XML source file
 	 * @param namespaceUri namespace URI to examine
 	 * @return selected schema version for the given URI
@@ -106,7 +105,7 @@ public class ConfigCoreUtils {
 			return new Version(matcher.group(1));
 		}
 		else {
-			List<INamespaceDefinition> defs = NamespaceUtils.getNamespaceDefinitions();
+			List<INamespaceDefinition> defs = XmlUiNamespaceUtils.getNamespaceDefinitions();
 			for (INamespaceDefinition def : defs) {
 				Version version = Version.emptyVersion;
 				if (namespaceUri.equals(def.getNamespaceURI())) {
@@ -129,7 +128,7 @@ public class ConfigCoreUtils {
 
 	/**
 	 * Returns the selected schema version location for the given URI.
-	 * 
+	 *
 	 * @param doc document object model of the XML source file
 	 * @param namespaceUri namespace URI to examine
 	 * @return selected schema version location for the given URI
@@ -152,7 +151,7 @@ public class ConfigCoreUtils {
 	/**
 	 * Parses the XML document for schema information and returns it as an
 	 * array, paired by namespace URI and schema version.
-	 * 
+	 *
 	 * @param doc document object model of the XML source file
 	 * @return array of paired namespace URIs and schema versions for the given
 	 * document
@@ -179,7 +178,7 @@ public class ConfigCoreUtils {
 
 	/**
 	 * Strips text content of all HTML tags and formatting information.
-	 * 
+	 *
 	 * @param html text content containing HTML tags
 	 * @return the given content stripped of HTML tags
 	 */

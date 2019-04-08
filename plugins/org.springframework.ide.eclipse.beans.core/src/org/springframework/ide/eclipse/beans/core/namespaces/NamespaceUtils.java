@@ -30,10 +30,13 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.xml.NamespaceHandler;
 import org.springframework.beans.factory.xml.NamespaceHandlerResolver;
 import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.core.SpringCorePreferences;
 import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.ModelUtils;
 import org.springframework.ide.eclipse.core.model.xml.XmlSourceLocation;
+import org.springframework.ide.eclipse.xml.namespaces.INamespaceManager;
+import org.springframework.ide.eclipse.xml.namespaces.NamespaceManagerProvider;
+import org.springframework.ide.eclipse.xml.namespaces.SpringXmlNamespacesPlugin;
+import org.springframework.ide.eclipse.xml.namespaces.manager.INamespaceHandlerManager;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.xml.sax.EntityResolver;
@@ -195,7 +198,10 @@ public class NamespaceUtils {
 				}
 			}
 			// Add the OSGi-based namespace handler resolver
-			handlers.add(BeansCorePlugin.getNamespaceHandlerResolver());
+			INamespaceManager nsMan = NamespaceManagerProvider.get();
+			if (nsMan instanceof INamespaceHandlerManager) {
+				handlers.add(((INamespaceHandlerManager) nsMan).getNamespaceHandlerResolver());
+			}
 			namespaceHandlerResolvers = handlers;
 		}
 		return namespaceHandlerResolvers;
@@ -231,40 +237,6 @@ public class NamespaceUtils {
 		}
 		return entityResolvers;
 	}
-
-	/**
-	 * Checks if a project should load namespace handlers from the classpath or use the global catalog.
-	 */
-	@SuppressWarnings("deprecation")
-	public static boolean useNamespacesFromClasspath(IProject project) {
-		if (project == null) {
-			return false;
-		}
-
-		if (SpringCorePreferences.getProjectPreferences(project, BeansCorePlugin.PLUGIN_ID).getBoolean(
-				BeansCorePlugin.PROJECT_PROPERTY_ID, false)) {
-			return SpringCorePreferences.getProjectPreferences(project, BeansCorePlugin.PLUGIN_ID).getBoolean(
-					BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID, false);
-		}
-		return BeansCorePlugin.getDefault().getPluginPreferences().getBoolean(
-				BeansCorePlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID);
-	}
-	
-	@SuppressWarnings("deprecation")
-	public static boolean disableCachingForNamespaceLoadingFromClasspath(IProject project) {
-		if (project == null) {
-			return false;
-		}
-		
-		if (SpringCorePreferences.getProjectPreferences(project, BeansCorePlugin.PLUGIN_ID).getBoolean(
-				BeansCorePlugin.PROJECT_PROPERTY_ID, false)) {
-			return SpringCorePreferences.getProjectPreferences(project, BeansCorePlugin.PLUGIN_ID).getBoolean(
-					BeansCorePlugin.DISABLE_CACHING_FOR_NAMESPACE_LOADING_ID, false);
-		}
-		return BeansCorePlugin.getDefault().getPluginPreferences().getBoolean(
-				BeansCorePlugin.DISABLE_CACHING_FOR_NAMESPACE_LOADING_ID);
-	}
-
 
 	private static Object loadHandler(String providerBundle, String handlerClassName) {
 		Bundle bundle = Platform.getBundle(providerBundle);

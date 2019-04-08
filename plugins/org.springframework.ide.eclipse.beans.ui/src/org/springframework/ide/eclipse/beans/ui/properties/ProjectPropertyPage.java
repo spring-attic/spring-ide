@@ -45,6 +45,7 @@ import org.springframework.ide.eclipse.beans.ui.properties.model.PropertiesProje
 import org.springframework.ide.eclipse.core.MarkerUtils;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.model.IModelElement;
+import org.springframework.ide.eclipse.xml.namespaces.SpringXmlNamespacesPlugin;
 import org.springsource.ide.eclipse.commons.core.SpringCorePreferences;
 
 /**
@@ -256,8 +257,8 @@ public class ProjectPropertyPage extends PropertyPage {
 
 			// Now save modified project description
 			if (userMadeChanges) {
-				SpringCorePreferences.getProjectPreferences(project.getProject(), BeansCorePlugin.PLUGIN_ID).putBoolean(
-						BeansCorePlugin.IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY,
+				SpringCorePreferences.getProjectPreferences(project.getProject(), SpringXmlNamespacesPlugin.PLUGIN_ID).putBoolean(
+						SpringXmlNamespacesPlugin.IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY,
 						configFilesTab.shouldIgnoreMissingNamespaceHandler());
 				newProject.saveDescription();
 			}

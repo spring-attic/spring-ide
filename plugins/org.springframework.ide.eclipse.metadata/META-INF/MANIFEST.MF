@@ -22,7 +22,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.wst.server.core,
  org.springsource.ide.eclipse.commons.core,
  org.eclipse.ui.ide,
- org.apache.commons.io
+ org.apache.commons.io,
+ org.springframework.ide.eclipse.xml.namespaces
 Import-Package: org.aspectj.lang.annotation,
  org.eclipse.core.runtime,
  org.eclipse.core.runtime.jobs,

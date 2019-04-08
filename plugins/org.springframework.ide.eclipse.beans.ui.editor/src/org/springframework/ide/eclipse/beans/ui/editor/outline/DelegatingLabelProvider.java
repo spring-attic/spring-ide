@@ -14,10 +14,10 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.wst.xml.ui.views.contentoutline.XMLContentOutlineConfiguration;
-import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
-import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinition;
 import org.springframework.ide.eclipse.beans.ui.editor.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
+import org.springframework.ide.eclipse.xml.namespaces.SpringXmlNamespacesPlugin;
+import org.springframework.ide.eclipse.xml.namespaces.ui.XmlUiNamespaceUtils;
 import org.w3c.dom.Node;
 
 /**
@@ -58,10 +58,10 @@ public class DelegatingLabelProvider extends LabelProvider {
 			}
 		}
 
-		INamespaceDefinition namespaceDefinition = BeansCorePlugin.getNamespaceDefinitionResolver(null)
+		org.springframework.ide.eclipse.xml.namespaces.model.INamespaceDefinition namespaceDefinition = SpringXmlNamespacesPlugin.getNamespaceDefinitionResolver(null)
 				.resolveNamespaceDefinition(namespace);
 		if (namespaceDefinition != null) {
-			return org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils.getImage(namespaceDefinition);
+			return XmlUiNamespaceUtils.getImage(namespaceDefinition);
 		}
 
 		return xmlProvider.getImage(object);

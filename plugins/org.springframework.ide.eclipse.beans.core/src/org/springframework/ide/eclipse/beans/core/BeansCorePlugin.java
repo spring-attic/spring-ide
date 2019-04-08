@@ -10,21 +10,16 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.beans.core;
 
-import java.util.Collections;
 import java.util.Dictionary;
-import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProduct;
@@ -40,18 +35,12 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
 import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.Version;
-import org.osgi.service.url.URLConstants;
-import org.osgi.service.url.URLStreamHandlerService;
-import org.springframework.beans.factory.xml.NamespaceHandlerResolver;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModel;
-import org.springframework.ide.eclipse.beans.core.internal.model.namespaces.NamespaceManager;
-import org.springframework.ide.eclipse.beans.core.internal.model.namespaces.ProjectClasspathNamespaceDefinitionResolverCache;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModel;
-import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinitionListener;
-import org.springframework.ide.eclipse.beans.core.model.INamespaceDefinitionResolver;
 import org.springframework.ide.eclipse.core.MessageUtils;
+import org.springframework.ide.eclipse.xml.namespaces.NamespaceManagerProvider;
+import org.springframework.ide.eclipse.xml.namespaces.SpringXmlNamespacesPlugin;
 
 /**
  * Central access point for the Spring Framework Core plug-in (id
@@ -71,44 +60,17 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 
 	private static final String RESOURCE_NAME = PLUGIN_ID + ".messages";
 
-	/** preference key to suppress missing namespace handler warnings */
-	public static final String IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY = "ignoreMissingNamespaceHandler";
-
-	public static final boolean IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY_DEFAULT = false;
-
-	/** preference key to load namespace handler from classpath */
-	public static final String LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID = "loadNamespaceHandlerFromClasspath";
-	
-	/** preference key to load namespace handler by searching source folders */
-	public static final String DISABLE_CACHING_FOR_NAMESPACE_LOADING_ID = "disableCachingForNamespaceLoadingFromClasspath";
-
 	/** preference key for defining the parsing timeout */
 	public static final String TIMEOUT_CONFIG_LOADING_PREFERENCE_ID = PLUGIN_ID + ".timeoutConfigLoading";
 
 	/** preference key to enable namespace versions per namespace */
 	public static final String PROJECT_PROPERTY_ID = "enable.project.preferences";
 
-	/** preference key to specify the default namespace version */
-	public static final String NAMESPACE_DEFAULT_VERSION_PREFERENCE_ID = "default.version.";
-
-	/** preference key to specify the default namespace version */
-	public static final String NAMESPACE_PREFIX_PREFERENCE_ID = "prefix.";
-
-	/** preference key to specify if versions should be taken from the classpath */
-	public static final String NAMESPACE_DEFAULT_FROM_CLASSPATH_ID = "default.version.check.classpath";
-
 	/** The shared instance */
 	private static BeansCorePlugin plugin;
 
 	/** The singleton beans model */
 	private BeansModel model;
-
-	/** Spring namespace/resolver manager */
-	private NamespaceManager nsManager;
-
-	private NamespaceBundleLister nsListener;
-	
-	private ServiceRegistration<?> projectAwareUrlService = null;
 
 	/** Internal executor service */
 	private ExecutorService executorService;
@@ -122,10 +84,6 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 
 	/** Resource bundle */
 	private ResourceBundle resourceBundle;
-
-	/** Listeners to inform about namespace changes */
-	private volatile Set<INamespaceDefinitionListener> namespaceDefinitionListeners = Collections
-			.synchronizedSet(new HashSet<INamespaceDefinitionListener>());
 
 	/**
 	 * flag indicating whether the context is down or not - useful during shutdown
@@ -158,12 +116,12 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	public void start(final BundleContext context) throws Exception {
 		super.start(context);
 		
-		Hashtable<String, String> properties = new Hashtable<String, String>();
-		properties.put(URLConstants.URL_HANDLER_PROTOCOL,
-				ProjectAwareUrlStreamHandlerService.PROJECT_AWARE_PROTOCOL);
-		projectAwareUrlService = context.registerService(
-				URLStreamHandlerService.class.getName(),
-				new ProjectAwareUrlStreamHandlerService(), properties);
+//		Hashtable<String, String> properties = new Hashtable<String, String>();
+//		properties.put(URLConstants.URL_HANDLER_PROTOCOL,
+//				ProjectAwareUrlStreamHandlerService.PROJECT_AWARE_PROTOCOL);
+//		projectAwareUrlService = context.registerService(
+//				URLStreamHandlerService.class.getName(),
+//				new ProjectAwareUrlStreamHandlerService(), properties);
 		
 		executorService = Executors.newCachedThreadPool(new ThreadFactory() {
 			
@@ -181,24 +139,22 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 		});
 
 		
-		nsManager = new NamespaceManager(context);
+//		nsManager = new NamespaceManager(context);
 		getPreferenceStore().setDefault(TIMEOUT_CONFIG_LOADING_PREFERENCE_ID, 60);
-		getPreferenceStore().setDefault(NAMESPACE_DEFAULT_FROM_CLASSPATH_ID, true);
-		getPreferenceStore().setDefault(LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID, true);
+//		getPreferenceStore().setDefault(NAMESPACE_DEFAULT_FROM_CLASSPATH_ID, true);
 
 		Job modelJob = new Job("Initializing Spring Tooling") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				initNamespaceHandlers(context);
 				model.start();
 				return Status.OK_STATUS;
 			}
 		};
 		modelJob.setRule(MultiRule.combine(ResourcesPlugin.getWorkspace().getRoot(), BeansCoreUtils.BEANS_MODEL_INIT_RULE));
-		// modelJob.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
-		// modelJob.setSystem(true);
 		modelJob.setPriority(Job.DECORATE);
-		modelJob.schedule();
+		NamespaceManagerProvider.get().nameSpaceHandlersReady().thenAccept(_void_ -> {
+			modelJob.schedule();
+		});
 	}
 
 	@Override
@@ -211,9 +167,9 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 			isClosed = true;
 		}
 		model.stop();
-		if (projectAwareUrlService != null) {
-			projectAwareUrlService.unregister();
-		}
+//		if (projectAwareUrlService != null) {
+//			projectAwareUrlService.unregister();
+//		}
 		super.stop(context);
 	}
 
@@ -238,40 +194,8 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 		getDefault().model = model;
 	}
 
-	public static NamespaceHandlerResolver getNamespaceHandlerResolver() {
-		return getDefault().nsManager.getNamespacePlugins();
-	}
-
-	public static INamespaceDefinitionResolver getNamespaceDefinitionResolver() {
-		return getDefault().nsManager.getNamespacePlugins();
-	}
-
-	public static INamespaceDefinitionResolver getNamespaceDefinitionResolver(IProject project) {
-		if (project != null) {
-			return ProjectClasspathNamespaceDefinitionResolverCache.getResolver(project);
-		}
-		return getDefault().nsManager.getNamespacePlugins();
-	}
-
 	public static ExecutorService getExecutorService() {
 		return getDefault().executorService;
-	}
-
-	public static void notifyNamespaceDefinitionListeners(IProject project) {
-		for (INamespaceDefinitionListener listener : getDefault().namespaceDefinitionListeners) {
-			listener.onNamespaceDefinitionRegistered(new INamespaceDefinitionListener.NamespaceDefinitionChangeEvent(
-					null, project));
-		}
-	}
-
-	public static void registerNamespaceDefinitionListener(INamespaceDefinitionListener listener) {
-		getDefault().nsManager.getNamespacePlugins().registerNamespaceDefinitionListener(listener);
-		getDefault().namespaceDefinitionListeners.add(listener);
-	}
-
-	public static void unregisterNamespaceDefinitionListener(INamespaceDefinitionListener listener) {
-		getDefault().nsManager.getNamespacePlugins().unregisterNamespaceDefinitionListener(listener);
-		getDefault().namespaceDefinitionListeners.remove(listener);
 	}
 
 	/**
@@ -354,137 +278,6 @@ public class BeansCorePlugin extends AbstractUIPlugin {
 	public static String getPluginVersion() {
 		Bundle bundle = getDefault().getBundle();
 		return bundle.getHeaders().get(Constants.BUNDLE_VERSION);
-	}
-
-	protected void maybeAddNamespaceHandlerFor(Bundle bundle, boolean isLazy) {
-		nsManager.maybeAddNamespaceHandlerFor(bundle, isLazy);
-	}
-
-	protected void maybeRemoveNameSpaceHandlerFor(Bundle bundle) {
-		nsManager.maybeRemoveNameSpaceHandlerFor(bundle);
-	}
-
-	protected void initNamespaceHandlers(BundleContext context) {
-
-		// register listener first to make sure any bundles in INSTALLED state
-		// are not lost
-		nsListener = new NamespaceBundleLister();
-		context.addBundleListener(nsListener);
-
-		Bundle[] previousBundles = context.getBundles();
-
-		for (int i = 0; i < previousBundles.length; i++) {
-			Bundle bundle = previousBundles[i];
-			if (isBundleResolved(bundle)) {
-				nsManager.maybeAddNamespaceHandlerFor(bundle, false);
-			}
-			else if (isBundleLazyActivated(bundle)) {
-				nsManager.maybeAddNamespaceHandlerFor(bundle, true);
-			}
-		}
-
-		// discovery finished, publish the resolvers/parsers in the OSGi space
-		nsManager.afterPropertiesSet();
-	}
-
-	public boolean isBundleResolved(Bundle bundle) {
-		return (bundle.getState() >= Bundle.RESOLVED);
-	}
-
-	public boolean isBundleLazyActivated(Bundle bundle) {
-		if (bundle.getState() == Bundle.STARTING) {
-			Dictionary<String, String> headers = bundle.getHeaders();
-			if (headers != null && headers.get(Constants.BUNDLE_ACTIVATIONPOLICY) != null) {
-				String value = headers.get(Constants.BUNDLE_ACTIVATIONPOLICY).trim();
-				return (value.startsWith(Constants.ACTIVATION_LAZY));
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Common base class for {@link ContextLoaderListener} listeners.
-	 */
-	private abstract class BaseListener implements BundleListener {
-
-		/**
-		 * common cache used for tracking down bundles started lazily so they don't get processed twice (once when
-		 * started lazy, once when started fully)
-		 */
-		protected Map<Bundle, Object> lazyBundleCache = new WeakHashMap<Bundle, Object>();
-
-		/** dummy value for the bundle cache */
-		private final Object VALUE = new Object();
-
-		// caches the bundle
-		protected void push(Bundle bundle) {
-			synchronized (lazyBundleCache) {
-				lazyBundleCache.put(bundle, VALUE);
-			}
-		}
-
-		// checks the presence of the bundle as well as removing it
-		protected boolean pop(Bundle bundle) {
-			synchronized (lazyBundleCache) {
-				return (lazyBundleCache.remove(bundle) != null);
-			}
-		}
-
-		/**
-		 * A bundle has been started, stopped, resolved, or unresolved. This method is a synchronous callback, do not do
-		 * any long-running work in this thread.
-		 * 
-		 * @see org.osgi.framework.SynchronousBundleListener#bundleChanged
-		 */
-		public void bundleChanged(BundleEvent event) {
-
-			// check if the listener is still alive
-			if (isClosed) {
-				return;
-			}
-			try {
-				handleEvent(event);
-			}
-			catch (Exception ex) {
-				log(ex);
-			}
-		}
-
-		protected abstract void handleEvent(BundleEvent event);
-	}
-
-	/**
-	 * Bundle listener used for detecting namespace handler/resolvers. Exists as a separate listener so that it can be
-	 * registered early to avoid race conditions with bundles in INSTALLING state but still to avoid premature context
-	 * creation before the Spring {@link ContextLoaderListener} is not fully initialized.
-	 */
-	private class NamespaceBundleLister extends BaseListener {
-
-		@Override
-		protected void handleEvent(final BundleEvent event) {
-			Bundle bundle = event.getBundle();
-
-			switch (event.getType()) {
-			case BundleEvent.LAZY_ACTIVATION: {
-				push(bundle);
-				maybeAddNamespaceHandlerFor(bundle, true);
-				break;
-			}
-			case BundleEvent.RESOLVED: {
-				if (!pop(bundle)) {
-					maybeAddNamespaceHandlerFor(bundle, false);
-				}
-				break;
-			}
-			case BundleEvent.STOPPED: {
-				pop(bundle);
-				maybeRemoveNameSpaceHandlerFor(bundle);
-				break;
-			}
-			default:
-				break;
-			}
-		}
 	}
 
 	public boolean isAutoDetectionEnabled() {

@@ -95,6 +95,7 @@ import org.springframework.ide.eclipse.core.model.ModelChangeEvent;
 import org.springframework.ide.eclipse.ui.dialogs.FilteredElementTreeSelectionDialog;
 import org.springframework.ide.eclipse.ui.dialogs.StorageSelectionValidator;
 import org.springframework.ide.eclipse.ui.viewers.JavaFileSuffixFilter;
+import org.springframework.ide.eclipse.xml.namespaces.SpringXmlNamespacesPlugin;
 import org.springsource.ide.eclipse.commons.core.JdtUtils;
 import org.springsource.ide.eclipse.commons.core.SpringCorePreferences;
 import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
@@ -263,9 +264,9 @@ public class ConfigFilesTab {
 		ignoreMissingNamespaceHandlerText = SpringUIUtils.createCheckBox(composite,
 				BeansUIPlugin.getResourceString(IGNORE_MISSING_NAMESPACEHANDLER_LABEL));
 		ignoreMissingNamespaceHandlerText.setSelection(SpringCorePreferences.getProjectPreferences(
-				project.getProject(), BeansCorePlugin.PLUGIN_ID).getBoolean(
-				BeansCorePlugin.IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY,
-				BeansCorePlugin.IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY_DEFAULT));
+				project.getProject(), SpringXmlNamespacesPlugin.PLUGIN_ID).getBoolean(
+						SpringXmlNamespacesPlugin.IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY,
+						SpringXmlNamespacesPlugin.IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY_DEFAULT));
 		ignoreMissingNamespaceHandlerText.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {

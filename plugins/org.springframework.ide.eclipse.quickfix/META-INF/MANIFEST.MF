@@ -48,9 +48,10 @@ Export-Package: org.springframework.ide.eclipse.quickfix,
  org.springframework.ide.eclipse.quickfix.rename,
  org.springframework.ide.eclipse.quickfix.validator,
  org.springframework.ide.eclipse.quickfix.validator.helper
-Import-Package: org.eclipse.core.runtime,
+Import-Package: javax.servlet;version="3.1.0",
+ javax.servlet.http;version="3.1.0",
+ org.eclipse.core.runtime,
  org.eclipse.core.runtime.jobs,
  org.eclipse.osgi.util,
- javax.servlet;version="3.1.0",
- javax.servlet.http;version="3.1.0",
- org.osgi.framework
+ org.osgi.framework,
+ org.springframework.ide.eclipse.xml.namespaces.ui

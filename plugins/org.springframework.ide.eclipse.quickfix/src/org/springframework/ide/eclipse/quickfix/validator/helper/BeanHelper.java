@@ -33,7 +33,6 @@ import org.springframework.ide.eclipse.beans.core.model.IBeanMethodOverride;
 import org.springframework.ide.eclipse.beans.core.model.IBeanProperty;
 import org.springframework.ide.eclipse.beans.core.model.IBeansModelElementTypes;
 import org.springframework.ide.eclipse.beans.ui.editor.util.BeansEditorUtils;
-import org.springframework.ide.eclipse.beans.ui.namespaces.NamespaceUtils;
 import org.springframework.ide.eclipse.config.core.schemas.BeansSchemaConstants;
 import org.springframework.ide.eclipse.core.SpringCore;
 import org.springframework.ide.eclipse.core.internal.model.SpringProject;
@@ -42,6 +41,7 @@ import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.IModelElementVisitor;
 import org.springframework.ide.eclipse.core.model.IModelSourceLocation;
 import org.springframework.ide.eclipse.core.model.IResourceModelElement;
+import org.springframework.ide.eclipse.xml.namespaces.ui.XmlUiNamespaceUtils;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -155,7 +155,7 @@ public class BeanHelper extends Bean implements IBean {
 		if (counter == 0 && arguments.isEmpty() && attrs != null) {
 			for (int i = 0; i < attrs.getLength(); i++) {
 				Node child = attrs.item(i);
-				if (NamespaceUtils.C_NAMESPACE_URI.equals(child.getNamespaceURI())) {
+				if (XmlUiNamespaceUtils.C_NAMESPACE_URI.equals(child.getNamespaceURI())) {
 					String localName = child.getLocalName();
 					if (localName != null) {
 						String name = null;

@@ -16,7 +16,6 @@ import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.ViewerLabel;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.navigator.IDescriptionProvider;
-import org.springframework.ide.eclipse.beans.core.BeansCorePlugin;
 import org.springframework.ide.eclipse.beans.core.internal.model.BeansModelUtils;
 import org.springframework.ide.eclipse.beans.core.model.IBean;
 import org.springframework.ide.eclipse.beans.core.model.IBeansComponent;
@@ -26,6 +25,8 @@ import org.springframework.ide.eclipse.beans.ui.BeansUILabels;
 import org.springframework.ide.eclipse.beans.ui.model.BeansModelImages;
 import org.springframework.ide.eclipse.core.model.IModelElement;
 import org.springframework.ide.eclipse.core.model.ISourceModelElement;
+import org.springframework.ide.eclipse.xml.namespaces.SpringXmlNamespacesPlugin;
+import org.springframework.ide.eclipse.xml.namespaces.ui.XmlUiNamespaceUtils;
 
 /**
  * This class is a label provider which knows about the beans core model's {@link ISourceModelElement source elements}which belong to a namespace.
@@ -36,17 +37,17 @@ public class DefaultNamespaceLabelProvider implements INamespaceLabelProvider, I
 		IDescriptionProvider {
 
 	public Image getImage(ISourceModelElement element, IModelElement context, boolean isDecorating) {
-		String namespaceUri = NamespaceUtils.getNameSpaceURI(element);
+		String namespaceUri = UiNamespaceUtils.getNameSpaceURI(element);
 
-		if (element instanceof IBean && !NamespaceUtils.DEFAULT_NAMESPACE_URI.equals(namespaceUri)
+		if (element instanceof IBean && !XmlUiNamespaceUtils.DEFAULT_NAMESPACE_URI.equals(namespaceUri)
 				&& !BeansModelUtils.isInnerBean((IBean) element)) {
 			Image image = null;
 
-			org.springframework.ide.eclipse.beans.core.model.INamespaceDefinition namespaceDefinition = BeansCorePlugin
+			org.springframework.ide.eclipse.xml.namespaces.model.INamespaceDefinition namespaceDefinition = SpringXmlNamespacesPlugin
 					.getNamespaceDefinitionResolver(BeansModelUtils.getProject(element).getProject())
 					.resolveNamespaceDefinition(namespaceUri);
 			if (namespaceDefinition != null && namespaceDefinition.getIconPath() != null) {
-				image = NamespaceUtils.getImage(namespaceDefinition);
+				image = XmlUiNamespaceUtils.getImage(namespaceDefinition);
 			}
 			else {
 				image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_NAMESPACE_BEAN);
@@ -66,11 +67,11 @@ public class DefaultNamespaceLabelProvider implements INamespaceLabelProvider, I
 		else if (element instanceof IBeansComponent) {
 			Image image = null;
 
-			org.springframework.ide.eclipse.beans.core.model.INamespaceDefinition namespaceDefinition = BeansCorePlugin
+			org.springframework.ide.eclipse.xml.namespaces.model.INamespaceDefinition namespaceDefinition = SpringXmlNamespacesPlugin
 					.getNamespaceDefinitionResolver(BeansModelUtils.getProject(element).getProject())
 					.resolveNamespaceDefinition(namespaceUri);
 			if (namespaceDefinition != null && namespaceDefinition.getIconPath() != null) {
-				image = NamespaceUtils.getImage(namespaceDefinition);
+				image = XmlUiNamespaceUtils.getImage(namespaceDefinition);
 			}
 			else {
 				image = BeansUIImages.getImage(BeansUIImages.IMG_OBJS_NAMESPACE_COMPONENT);
