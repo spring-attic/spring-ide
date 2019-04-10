@@ -227,7 +227,7 @@ public class GSGWizardModelTest {
 
 	/**
 	 * Check github api rate limit has some requests available.
-	 * @return true if there's not enough requests limit available to run the test.
+	 * @return true if there's enough requests limit available to run the test.
 	 */
 	private boolean isEnoughRateLimitAvailable() throws IOException {
 		GithubClient github = new GithubClient();

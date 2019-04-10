@@ -89,7 +89,7 @@ import org.w3c.dom.Element;
 @SuppressWarnings("restriction")
 public class EditStartersModelTest {
 
-	private static final String BOOT_2_0_X_RELEASE = "2.0.8.RELEASE";
+	private static final String BOOT_CURRENT_RELEASE = "2.1.4.RELEASE";
 	private static final String REPOSITORY = "repository";
 	private static final String REPOSITORIES = "repositories";
 	private MockInitializrService initializr = new MockInitializrService();
@@ -283,7 +283,7 @@ public class EditStartersModelTest {
 	public void addMultipleStartersWithSameBom() throws Exception {
 		//This test uses more 'controlled' parameters:
 		IProject project = harness.createBootProject("addMultipleStartersWithSameBom",
-				bootVersion(BOOT_2_0_X_RELEASE), // boot version fixed
+				bootVersion(BOOT_CURRENT_RELEASE), // boot version fixed
 				withStarters("web")
 		);
 		initializr.setInputs("sample"); // sample intializr json captured for this version
@@ -323,7 +323,7 @@ public class EditStartersModelTest {
 	public void addMultipleStartersWithDifferentBom() throws Exception {
 		//This test uses more 'controlled' parameters:
 		IProject project = harness.createBootProject("addMultipleStartersWithDifferentBom",
-				bootVersion(BOOT_2_0_X_RELEASE), // boot version fixed
+				bootVersion(BOOT_CURRENT_RELEASE), // boot version fixed
 				withStarters("web")
 		);
 		initializr.setInputs("sample"); // sample intializr json captured for this version
@@ -373,7 +373,7 @@ public class EditStartersModelTest {
 	@Test
 	public void addBomWithSubsetOfRepos() throws Exception {
 		//This test uses more 'controlled' parameters:
-		String bootVersion = BOOT_2_0_X_RELEASE;
+		String bootVersion = BOOT_CURRENT_RELEASE;
 		IProject project = harness.createBootProject("addBomWithSubsetOfRepos",
 				bootVersion(bootVersion), // boot version fixed
 				withStarters("web")
@@ -417,7 +417,7 @@ public class EditStartersModelTest {
 	@Test
 	public void addDependencyWithRepo() throws Exception {
 		//This test uses more 'controlled' parameters:
-		String bootVersion = BOOT_2_0_X_RELEASE;
+		String bootVersion = BOOT_CURRENT_RELEASE;
 		IProject project = harness.createBootProject("addDependencyWithRepo",
 				bootVersion(bootVersion), // boot version fixed
 				withStarters("web")
