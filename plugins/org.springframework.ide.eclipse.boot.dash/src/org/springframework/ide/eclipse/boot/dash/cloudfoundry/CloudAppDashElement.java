@@ -283,7 +283,7 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 					"Local project not associated to CF app '" + getName() + "'"));
 		}
 
-		new SetHealthCheckOperation(this, HealthChecks.HC_NONE, ui, /* confirmChange */true, cancelationToken)
+		new SetHealthCheckOperation(this, HealthChecks.HC_PROCESS, ui, /* confirmChange */true, cancelationToken)
 				.run(monitor);
 
 		if (!DevtoolsUtil.isEnvVarSetupForRemoteClient(envVars, DevtoolsUtil.getSecret(getProject()))) {
