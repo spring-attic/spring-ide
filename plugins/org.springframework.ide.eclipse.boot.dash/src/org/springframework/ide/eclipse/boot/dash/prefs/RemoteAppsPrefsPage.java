@@ -30,14 +30,14 @@ public class RemoteAppsPrefsPage extends PreferencePageWithSections {
 						"   {\n" +
 						"       \"jmxurl\" : \"service:jmx:rmi://localhost:44251/jndi/rmi://localhost:44251/jmxrmi\",\n" +
 						"       \"host\" : \"my-remote-app.cfapps.io\"\n" +
+						"       \"urlScheme\": \"http\", //optional, defaults to 'https'\n" +
+						"       \"port\": 80 //optional, defaults to '443'\n" +
 						"   }\n" +
 						"]\n"
 				),
 				new RemoteAppsSection(this)
 		);
 	}
-
-
 }
 
 

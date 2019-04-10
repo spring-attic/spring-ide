@@ -11,9 +11,11 @@
 
 package org.springframework.ide.eclipse.boot.dash.prefs;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -39,7 +41,7 @@ public class RemoteAppsPrefs {
 		return prefs.get(REMOTE_APPS_KEY, "");
 	}
 
-	public List<Pair<String,String>> getRemoteAppData() {
+	public List<List<String>> getRemoteAppData() {
 		String json = getRawJson();
 		try {
 			return parse(json);
@@ -49,16 +51,29 @@ public class RemoteAppsPrefs {
 		}
 	}
 
-	public static List<Pair<String, String>> parse(String json) throws JSONException {
-		Builder<Pair<String,String>> buider = ImmutableList.builder();
+	public static List<List<String>> parse(String json) throws JSONException {
+		Builder<List<String>> buider = ImmutableList.builder();
 		if (!json.trim().equals("")) {
 			JSONArray remoteApps = new JSONArray(json);
 			for (int i = 0; i < remoteApps.length(); i++) {
 				JSONObject app = remoteApps.getJSONObject(i);
 				String host = app.getString("host");
 				String jmxUrl = app.getString("jmxurl");
+				String port = app.optString("port");
+				String urlScheme = app.optString("urlScheme");
 				if (host!=null && jmxUrl!=null) {
-					buider.add(Pair.of(jmxUrl, host));
+					//Not using ImmutableList because it doesn't allow null values in elements.
+					ArrayList<String> remoteApp = new ArrayList<>(4);
+					remoteApp.add(jmxUrl);
+					remoteApp.add(host);
+					if (urlScheme!=null) {
+						remoteApp.add(port); //could be null!
+						remoteApp.add(urlScheme);
+					} else if (host!=null) {
+						remoteApp.add(port);
+						//don't need to add urlScheme because we know it is null
+					}
+					buider.add(remoteApp);
 				}
 			}
 		}

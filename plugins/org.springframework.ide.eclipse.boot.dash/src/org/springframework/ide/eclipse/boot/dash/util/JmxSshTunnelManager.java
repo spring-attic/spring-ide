@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.util;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -22,6 +23,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.Asyn
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 
@@ -34,19 +36,19 @@ public class JmxSshTunnelManager {
 
 	private Map<SshTunnel, CloudAppDashElement> tunnels = new HashMap<>();
 
-	private ObservableSet<Pair<String,String>> jmxUrls = ObservableSet.<Pair<String,String>>builder()
+	private ObservableSet<List<String>> jmxUrls = ObservableSet.<List<String>>builder()
 			.refresh(AsyncMode.ASYNC)
 			.compute(this::collectUrls)
 			.build();
 
-	private synchronized ImmutableSet<Pair<String,String>> collectUrls() {
-		Builder<Pair<String,String>> builder = ImmutableSet.builder();
+	private synchronized ImmutableSet<List<String>> collectUrls() {
+		Builder<List<String>> builder = ImmutableSet.builder();
 		for (Entry<SshTunnel, CloudAppDashElement> entry : tunnels.entrySet()) {
 			SshTunnel tunnel = entry.getKey();
 			CloudAppDashElement app = entry.getValue();
 			int port = tunnel.getLocalPort();
 			if (port>0) {
-				builder.add(Pair.of(JmxSupport.getJmxUrl(port), app.getLiveHost()));
+				builder.add(ImmutableList.of(JmxSupport.getJmxUrl(port), app.getLiveHost()));
 			}
 		}
 		return builder.build();
@@ -68,7 +70,7 @@ public class JmxSshTunnelManager {
 	/**
 	 * LiveSet of pairs containing a url (left value) + corresponding cf app's host name (rigt value) in each pair.
 	 */
-	public ObservableSet<Pair<String,String>> getUrls() {
+	public ObservableSet<List<String>> getUrls() {
 		return jmxUrls;
 	}
 

@@ -203,7 +203,7 @@ public class BootDashActivator extends AbstractUIPlugin {
 	}
 
 	private void sendRemoteBootAppUrls() {
-		ImmutableSet.Builder<Pair<String, String>> allRemoteApps = ImmutableSet.builder();
+		ImmutableSet.Builder<List<String>> allRemoteApps = ImmutableSet.builder();
 		if (model!=null) {
 			allRemoteApps.addAll(model.getJmxSshTunnelManager().getUrls().getValue());
 		}
@@ -215,7 +215,7 @@ public class BootDashActivator extends AbstractUIPlugin {
 				Class<?> lsClass = lsBundle.loadClass("org.springframework.tooling.boot.ls.BootLanguageServerPlugin");
 				Method lsMethod = lsClass.getMethod("getRemoteBootApps");
 				@SuppressWarnings("unchecked")
-				LiveSetVariable<Pair<String, String>> remoteBootAppsVar = (LiveSetVariable<Pair<String,String>>) lsMethod.invoke(null);
+				LiveSetVariable<List<String>> remoteBootAppsVar = (LiveSetVariable<List<String>>) lsMethod.invoke(null);
 				remoteBootAppsVar.replaceAll(allRemoteApps.build());
 			}
 		} catch (Exception e) {
