@@ -91,8 +91,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientReque
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.HealthChecks;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFDomainStatus;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ReactorUtils;
-import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel;
-import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel.ManifestType;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel;
@@ -737,7 +736,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		for (String spaceName : spaceNames) {
 			CFClientParams params = new CFClientParams(
 					"https://api.run.cloud.mock.com",
-					"some-user",  CFCredentials.fromPassword(MockCloudFoundryClientFactory.FAKE_PASSWORD),
+					"some-user",  CFCredentials.fromLogin(LoginMethod.PASSWORD, MockCloudFoundryClientFactory.FAKE_PASSWORD),
 					false,
 					orgName,
 					spaceName,
@@ -788,7 +787,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		CloudFoundryBootDashModel cfModel = harness.createCfTarget(new CFClientParams(
 				apiUrl,
-				username, CFCredentials.fromPassword(password),
+				username, CFCredentials.fromLogin(LoginMethod.PASSWORD, password),
 				false,
 				"my-org",
 				"foo",
@@ -808,7 +807,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		String username = "freddy"; String password = MockCloudFoundryClientFactory.FAKE_PASSWORD;
 
 		CloudFoundryBootDashModel cfModel = harness.createCfTarget(new CFClientParams(apiUrl, username,
-				CFCredentials.fromPassword(password), false, "my-org", "foo", false
+				CFCredentials.fromLogin(LoginMethod.PASSWORD, password), false, "my-org", "foo", false
 		));
 
 		cfModel.getRunTarget().setAppsManagerHost("https://totallyDifferentHost.com");
@@ -827,9 +826,9 @@ public class CloudFoundryBootDashModelMockingTest {
 		String apiUrl = "https://api.some-cloud.com";
 		String username = "freddy"; String password = MockCloudFoundryClientFactory.FAKE_PASSWORD;
 		AbstractBootDashModel fooSpace = harness.createCfTarget(new CFClientParams(apiUrl, username,
-				CFCredentials.fromPassword(password), false, "my-org", "foo", false));
+				CFCredentials.fromLogin(LoginMethod.PASSWORD, password), false, "my-org", "foo", false));
 		AbstractBootDashModel barSpace = harness.createCfTarget(new CFClientParams(apiUrl, username,
-				CFCredentials.fromPassword(password), false, "your-org", "bar", false));
+				CFCredentials.fromLogin(LoginMethod.PASSWORD, password), false, "your-org", "bar", false));
 
 		//check the default rendering is like it used to be before introducing templates.
 		assertEquals("my-org : foo - [https://api.some-cloud.com]", fooSpace.getDisplayName());
@@ -859,7 +858,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertEquals("cfmockapps.io", clientFactory.getDefaultDomain());
 
 		CloudFoundryBootDashModel target = harness.createCfTarget(new CFClientParams(apiUrl, username,
-				CFCredentials.fromPassword(password), false, "my-org", "my-space", false));
+				CFCredentials.fromLogin(LoginMethod.PASSWORD, password), false, "my-org", "my-space", false));
 		IProject project = projects.createBootProject("to-deploy", withStarters("web", "actuator"));
 		IFile manifest = createFile(project, "manifest.yml",
 				"applications:\n" +
@@ -887,19 +886,16 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		MockCFSpace space = clientFactory.defSpace("my-org", "my-space");
 		CloudFoundryBootDashModel target = harness.createCfTarget(new CFClientParams(apiUrl, username,
-				CFCredentials.fromPassword(password), false, "my-org", "my-space", false));
+				CFCredentials.fromLogin(LoginMethod.PASSWORD, password), false, "my-org", "my-space", false));
 		IProject project = projects.createBootProject("to-deploy", withStarters("web", "actuator"));
-		IFile manifest = createFile(project, "manifest.yml",
-				"applications:\n" +
-				"- name: "+appName+"\n"
-		);
-		harness.answerDeploymentPrompt(ui, new DeploymentAnswerer() {
+		String yaml = "applications:\n" +
+					  "- name: "+appName+"\n";
+		IFile manifest = createFile(project, "manifest.yml", yaml);
+		harness.answerDeploymentPrompt(ui, new DeploymentAnswerer(yaml) {
 			@Override
-			public void apply(DeploymentPropertiesDialogModel dialog) throws Exception {
-				dialog.enableJmxSshTunnel.setValue(false);
-				dialog.type.setValue(ManifestType.FILE);
-				dialog.setSelectedManifest(manifest);
-				dialog.okPressed();
+			public void apply(CloudApplicationDeploymentProperties properties) throws Exception {
+				properties.setManifestFile(manifest);
+				properties.setEnableJmxSshTunnel(false);
 			}
 		});
 		target.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
@@ -915,13 +911,11 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		//Now... redeploy and overwrite, cahning ssh enablement
 		reset(ui);
-		harness.answerDeploymentPrompt(ui, new DeploymentAnswerer() {
+		harness.answerDeploymentPrompt(ui, new DeploymentAnswerer(yaml) {
 			@Override
-			public void apply(DeploymentPropertiesDialogModel dialog) throws Exception {
-				dialog.enableJmxSshTunnel.setValue(true);
-				dialog.type.setValue(ManifestType.FILE);
-				dialog.setSelectedManifest(manifest);
-				dialog.okPressed();
+			public void apply(CloudApplicationDeploymentProperties properties) throws Exception {
+				properties.setManifestFile(manifest);
+				properties.setEnableJmxSshTunnel(true);
 			}
 		});
 
@@ -963,19 +957,16 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		MockCFSpace space = clientFactory.defSpace("my-org", "my-space");
 		CloudFoundryBootDashModel target = harness.createCfTarget(new CFClientParams(apiUrl, username,
-				CFCredentials.fromPassword(password), false, "my-org", "my-space", false));
+				CFCredentials.fromLogin(LoginMethod.PASSWORD, password), false, "my-org", "my-space", false));
 		IProject project = projects.createBootProject("to-deploy", withStarters("web", "actuator"));
-		IFile manifest = createFile(project, "manifest.yml",
-				"applications:\n" +
-				"- name: "+appName+"\n"
-		);
-		harness.answerDeploymentPrompt(ui, new DeploymentAnswerer() {
+		String yaml = "applications:\n" +
+					  "- name: "+appName+"\n";
+		IFile manifest = createFile(project, "manifest.yml", yaml);
+		harness.answerDeploymentPrompt(ui, new DeploymentAnswerer(yaml) {
 			@Override
-			public void apply(DeploymentPropertiesDialogModel dialog) throws Exception {
-				dialog.enableJmxSshTunnel.setValue(false);
-				dialog.type.setValue(ManifestType.FILE);
-				dialog.setSelectedManifest(manifest);
-				dialog.okPressed();
+			public void apply(CloudApplicationDeploymentProperties properties) throws Exception {
+				properties.setManifestFile(manifest);
+				properties.setEnableJmxSshTunnel(false);
 			}
 		});
 		target.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
@@ -1022,19 +1013,16 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		MockCFSpace space = clientFactory.defSpace("my-org", "my-space");
 		CloudFoundryBootDashModel target = harness.createCfTarget(new CFClientParams(apiUrl, username,
-				CFCredentials.fromPassword(password), false, "my-org", "my-space", false));
+				CFCredentials.fromLogin(LoginMethod.PASSWORD, password), false, "my-org", "my-space", false));
 		IProject project = projects.createBootProject("to-deploy", withStarters("web", "actuator"));
-		IFile manifest = createFile(project, "manifest.yml",
-				"applications:\n" +
-				"- name: "+appName+"\n"
-		);
-		harness.answerDeploymentPrompt(ui, new DeploymentAnswerer() {
+		String yaml = "applications:\n" +
+		"- name: "+appName+"\n";
+		IFile manifest = createFile(project, "manifest.yml", yaml);
+		harness.answerDeploymentPrompt(ui, new DeploymentAnswerer(yaml) {
 			@Override
-			public void apply(DeploymentPropertiesDialogModel dialog) throws Exception {
-				dialog.enableJmxSshTunnel.setValue(false);
-				dialog.type.setValue(ManifestType.FILE);
-				dialog.setSelectedManifest(manifest);
-				dialog.okPressed();
+			public void apply(CloudApplicationDeploymentProperties properties) throws Exception {
+				properties.setEnableJmxSshTunnel(false);
+				properties.setManifestFile(manifest);
 			}
 		});
 		target.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
@@ -1120,19 +1108,16 @@ public class CloudFoundryBootDashModelMockingTest {
 		clientFactory.defDomain("tcp.domain.com", CFDomainType.TCP, CFDomainStatus.SHARED);
 
 		CloudFoundryBootDashModel target = harness.createCfTarget(new CFClientParams(apiUrl, username,
-				CFCredentials.fromPassword(password), false, "my-org", "my-space", false));
+				CFCredentials.fromLogin(LoginMethod.PASSWORD, password), false, "my-org", "my-space", false));
 		IProject project = projects.createBootProject("to-deploy", withStarters("web", "actuator"));
-		IFile manifest = createFile(project, "manifest.yml",
-				"applications:\n" +
-				"- name: "+appName+"\n"
-		);
-		harness.answerDeploymentPrompt(ui, new DeploymentAnswerer() {
+		final String yaml = "applications:\n" +
+				"- name: "+appName+"\n";
+		IFile manifest = createFile(project, "manifest.yml", yaml);
+		harness.answerDeploymentPrompt(ui, new DeploymentAnswerer(yaml) {
 			@Override
-			public void apply(DeploymentPropertiesDialogModel dialog) throws Exception {
-				dialog.enableJmxSshTunnel.setValue(true);
-				dialog.type.setValue(ManifestType.FILE);
-				dialog.setSelectedManifest(manifest);
-				dialog.okPressed();
+			public void apply(CloudApplicationDeploymentProperties properties) throws Exception {
+				properties.setManifestFile(manifest);
+				properties.setEnableJmxSshTunnel(true);
 			}
 		});
 		target.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
@@ -1174,18 +1159,15 @@ public class CloudFoundryBootDashModelMockingTest {
 			clientFactory.defDomain("tcp.domain.com", CFDomainType.TCP, CFDomainStatus.SHARED);
 
 			CloudFoundryBootDashModel target = harness.createCfTarget(new CFClientParams(apiUrl, username,
-					CFCredentials.fromPassword(password), false, "my-org", "my-space", false));
-			IFile manifest = createFile(project, "manifest.yml",
-					"applications:\n" +
-					"- name: "+appName+"\n"
-			);
-			harness.answerDeploymentPrompt(ui, new DeploymentAnswerer() {
+					CFCredentials.fromLogin(LoginMethod.PASSWORD, password), false, "my-org", "my-space", false));
+			String yaml = "applications:\n" +
+						  "- name: "+appName+"\n";
+			IFile manifest = createFile(project, "manifest.yml", yaml);
+			harness.answerDeploymentPrompt(ui, new DeploymentAnswerer(yaml) {
 				@Override
-				public void apply(DeploymentPropertiesDialogModel dialog) throws Exception {
-					dialog.enableJmxSshTunnel.setValue(true);
-					dialog.type.setValue(ManifestType.FILE);
-					dialog.setSelectedManifest(manifest);
-					dialog.okPressed();
+				public void apply(CloudApplicationDeploymentProperties properties) throws Exception {
+					properties.setManifestFile(manifest);
+					properties.setEnableJmxSshTunnel(true);
 				}
 			});
 			target.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
@@ -1247,7 +1229,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		clientFactory.defDomain("tcp.domain.com", CFDomainType.TCP, CFDomainStatus.SHARED);
 
 		CloudFoundryBootDashModel target = harness.createCfTarget(new CFClientParams(apiUrl, username,
-				CFCredentials.fromPassword(password), false, "my-org", "my-space", false));
+				CFCredentials.fromLogin(LoginMethod.PASSWORD, password), false, "my-org", "my-space", false));
 		IProject project = projects.createBootProject("to-deploy", withStarters("web", "actuator"));
 		IFile manifest = createFile(project, "manifest.yml",
 				"applications:\n" +
@@ -1272,7 +1254,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		clientFactory.defDomain("tcp.domain.com", CFDomainType.TCP, CFDomainStatus.SHARED);
 
 		CloudFoundryBootDashModel target = harness.createCfTarget(new CFClientParams(apiUrl, username,
-				CFCredentials.fromPassword(password), false, "my-org", "my-space", false));
+				CFCredentials.fromLogin(LoginMethod.PASSWORD, password), false, "my-org", "my-space", false));
 		IProject project = projects.createBootProject("to-deploy", withStarters("web", "actuator"));
 		IFile manifest = createFile(project, "manifest.yml",
 				"applications:\n" +
@@ -1305,7 +1287,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertEquals("cfmockapps.io", clientFactory.getDefaultDomain());
 
 		CloudFoundryBootDashModel target = harness.createCfTarget(new CFClientParams(apiUrl, username,
-				CFCredentials.fromPassword(password), false, "my-org", "my-space", false));
+				CFCredentials.fromLogin(LoginMethod.PASSWORD, password), false, "my-org", "my-space", false));
 		IProject project = projects.createBootProject("to-deploy", withStarters("web", "actuator"));
 		IFile manifest = createFile(project, "manifest.yml",
 				"applications:\n" +
@@ -1336,9 +1318,9 @@ public class CloudFoundryBootDashModelMockingTest {
 		String username = "freddy"; String password = MockCloudFoundryClientFactory.FAKE_PASSWORD;
 		LocalBootDashModel local = harness.getLocalModel();
 		AbstractBootDashModel fooSpace = harness.createCfTarget(new CFClientParams(apiUrl, username,
-				CFCredentials.fromPassword(password), false, "my-org", "foo", false));
+				CFCredentials.fromLogin(LoginMethod.PASSWORD, password), false, "my-org", "foo", false));
 		AbstractBootDashModel barSpace = harness.createCfTarget(new CFClientParams(apiUrl, username,
-				CFCredentials.fromPassword(password), false, "your-org", "bar", false));
+				CFCredentials.fromLogin(LoginMethod.PASSWORD, password), false, "your-org", "bar", false));
 		CustmomizeTargetLabelAction action = actions.getCustomizeTargetLabelAction();
 
 		//////////// not applicable for local targets:
@@ -1395,9 +1377,9 @@ public class CloudFoundryBootDashModelMockingTest {
 		String username = "freddy"; String password = MockCloudFoundryClientFactory.FAKE_PASSWORD;
 
 		AbstractBootDashModel fooSpace = harness.createCfTarget(new CFClientParams(apiUrl, username,
-				CFCredentials.fromPassword(password), false, "my-org", "foo", false));
+				CFCredentials.fromLogin(LoginMethod.PASSWORD, password), false, "my-org", "foo", false));
 		AbstractBootDashModel barSpace = harness.createCfTarget(new CFClientParams(apiUrl, username,
-				CFCredentials.fromPassword(password), false, "your-org", "bar", false));
+				CFCredentials.fromLogin(LoginMethod.PASSWORD, password), false, "your-org", "bar", false));
 
 		ModelStateListener modelStateListener = mock(ModelStateListener.class);
 		fooSpace.addModelStateListener(modelStateListener);
@@ -1700,15 +1682,12 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		final String appName = appHarness.randomAppName();
 
-		IFile manifestFile = createFile(project, "manifest.yml",
-				"applications:\n" +
-				"- name: "+appName+"\n" +
-				"  memory: 512M\n"
-		);
+		String yaml = "applications:\n" +
+					  "- name: "+appName+"\n" +
+					  "  memory: 512M\n";
+		IFile manifestFile = createFile(project, "manifest.yml", yaml);
 
-		harness.answerDeploymentPrompt(ui, (dialog) -> {
-			dialog.okPressed();
-		});
+		harness.answerDeploymentPrompt(ui, manifestFile);
 
 		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
 
@@ -1778,9 +1757,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		final String appName = project.getName();
 
-		harness.answerDeploymentPrompt(ui, (dialog) -> {
-			dialog.okPressed();
-		});
+		harness.answerDeploymentPrompt(ui, new DeploymentAnswerer());
 
 		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
 
@@ -1813,9 +1790,7 @@ public class CloudFoundryBootDashModelMockingTest {
 			assertEquals("war", springBootCore.project(project).getPackaging());
 
 			String appName = project.getName();
-			harness.answerDeploymentPrompt(ui, (dialog) -> {
-				dialog.okPressed();
-			});
+			harness.answerDeploymentPrompt(ui, new DeploymentAnswerer());
 
 			model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
 			waitForApps(model, appName);
@@ -2386,15 +2361,11 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		CloudFoundryBootDashModel model = harness.createCfTarget(targetParams);
 
-		harness.answerDeploymentPrompt(ui, (dialog) -> {
-			dialog.setManifestType(ManifestType.MANUAL);
-			dialog.setManualManifest(
-					"applications:\n" +
-					"- name: "+appName+"\n" +
-					(specified==null?"":"  health-check-type: "+specified+"\n")
-			);
-			dialog.okPressed();
-		});
+		final String yaml = "applications:\n" +
+							"- name: "+appName+"\n" +
+							(specified==null?"":"  health-check-type: "+specified+"\n");
+
+		harness.answerDeploymentPrompt(ui, new DeploymentAnswerer(yaml));
 		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
 		waitForApps(model, appName);
 		waitForState(model.getApplication(appName), RunState.RUNNING, 4000);

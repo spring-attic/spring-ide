@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Pivotal, Inc.
+ * Copyright (c) 2016, 2019 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,8 +34,8 @@ import org.yaml.snakeyaml.Yaml;
 public class AppNameReconcilerTest {
 
 	private void testAppNames(String manifest, String...expectedAppNames) throws Exception {
-		AppNameReconciler reconciler = new AppNameReconciler(new YamlASTProvider(new Yaml()), "test");
-		AppNameAnnotationModel annotationModel = new AppNameAnnotationModel();
+		AppNameReconciler reconciler = new AppNameReconciler(new YamlASTProvider(new Yaml()));
+		AppNameAnnotationModel annotationModel = new AppNameAnnotationModel("test");
 		Document doc = new Document(manifest);
 		reconciler.reconcile(doc, annotationModel, new NullProgressMonitor());
 		HashSet<String> actualAppNames = new HashSet<>();

@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2016, 2019 Pivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Pivotal, Inc. - initial API and implementation
+ *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.dialogs;
 
 import java.io.ByteArrayInputStream;
@@ -5,52 +15,59 @@ import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.Annotation;
-import org.eclipse.jface.text.source.AnnotationModel;
 import org.eclipse.jface.text.source.AnnotationModelEvent;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelListener;
 import org.eclipse.jface.text.source.IAnnotationModelListenerExtension;
-import org.eclipse.ui.editors.text.TextFileDocumentProvider;
+import org.eclipse.lsp4e.LanguageServiceAccessor;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IPropertyListener;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.internal.genericeditor.ExtensionBasedTextViewerConfiguration;
 import org.eclipse.ui.part.FileEditorInput;
-import org.eclipse.ui.texteditor.DocumentProviderRegistry;
-import org.eclipse.ui.texteditor.IDocumentProvider;
-import org.eclipse.ui.texteditor.IElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudData;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.AppNameAnnotation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.AppNameAnnotationModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.AppNameAnnotationSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
-import org.springframework.ide.eclipse.boot.util.Log;
-import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblemAnnotation;
+import org.springframework.ide.eclipse.boot.launch.properties.EmbeddedEditor;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.Yaml;
 
+@SuppressWarnings("restriction")
 public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
+	public static final String LSP_ERROR_ANNOTATION_TYPE = "org.eclipse.ui.workbench.texteditor.error";
+
+	public static final String DUMMY_FILE_MANIFEST_YML = ".file-manifest.yml";
+	public static final String DUMMY_MANUAL_MANIFEST_YML = ".manual-manifest.yml";
 	public static final String UNKNOWN_DEPLOYMENT_MANIFEST_TYPE_MUST_BE_EITHER_FILE_OR_MANUAL = "Unknown deployment manifest type. Must be either 'File' or 'Manual'.";
 	public static final String NO_SUPPORT_TO_DETERMINE_APP_NAMES = "Support for determining application names is unavailable";
 	public static final String MANIFEST_DOES_NOT_CONTAIN_DEPLOYMENT_PROPERTIES_FOR_APPLICATION_WITH_NAME = "Manifest does not contain deployment properties for application with name ''{0}''.";
@@ -69,165 +86,52 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 	private UserInteractions ui;
 
-	private abstract class AbstractSubModel {
+	private abstract class AbstractSubModel extends AbstractDisposable {
 
-		LiveVariable<AppNameAnnotationModel> appNameAnnotationModel = new LiveVariable<>();
+		EmbeddedEditor editor;
 
-		LiveVariable<IAnnotationModel> resourceAnnotationModel = new LiveVariable<>();
+		AppNameAnnotationSupport appNameAnnotationSupport;
 
-		LiveExpression<List<String>> applicationNames = new LiveExpression<List<String>>() {
+		final LiveVariable<Boolean> editorControlCreated;
 
-			private AppNameAnnotationModel attachedTo = null;
-			private AnnotationModelListener listener = new AnnotationModelListener() {
-				public void modelChanged(AnnotationModelEvent event) {
-					refresh();
-				}
-			};
+		final LiveVariable<IResource> selectedFile;
 
-			{
-				dependsOn(appNameAnnotationModel);
+		final LiveExpression<FileEditorInput> editorInput;
+
+		LiveExpression<AppNameAnnotationModel> appNameAnnotationModel;
+
+		LiveExpression<IAnnotationModel> resourceAnnotationModel;
+
+		LiveExpression<List<String>> applicationNames;
+
+		LiveExpression<Boolean> errorsInYaml;
+
+		LiveExpression<String> selectedAppName;
+
+		/**
+		 * When dialog closed and viewer disposed live expression would still keep the document which will be used to detrmine DeploymentProperties
+		 */
+		final LiveExpression<IDocument> document;
+
+		protected IFile getFile() {
+			IResource r = selectedFile.getValue();
+			return r instanceof IFile ? (IFile) r : null;
+		}
+
+		protected void saveOrDiscardIfNeeded() {
+			FileEditorInput input = editorInput.getValue();
+			if (input != null) {
+				saveOrDiscardIfNeeded(input);
 			}
+		}
 
-			@Override
-			protected List<String> compute() {
-				AppNameAnnotationModel annotationModel = appNameAnnotationModel.getValue();
-				attachListener(annotationModel);
-				if (annotationModel != null) {
-					List<String> applicationNames = new ArrayList<>();
-					for (Iterator<Annotation> itr = annotationModel.getAnnotationIterator(); itr.hasNext();) {
-						Annotation next = itr.next();
-						if (next instanceof AppNameAnnotation) {
-							AppNameAnnotation a = (AppNameAnnotation) next;
-							applicationNames.add(a.getText());
-						}
-					}
-					return applicationNames;
+		protected void saveOrDiscardIfNeeded(FileEditorInput file) {
+			if (editor.isDirty()) {
+				if (ui.confirmOperation("Changes Detected", "Manifest file '" + file.getFile().getFullPath().toOSString()
+								+ "' has been changed. Do you want to save changes or discard them?", new String[] {"Save", "Don't Save"}, 0) == 0) {
+					editor.doSave(new NullProgressMonitor());
 				}
-				return Collections.emptyList();
 			}
-
-			synchronized private void attachListener(AppNameAnnotationModel annotationModel) {
-				if (attachedTo == annotationModel) {
-					return;
-				}
-				if (attachedTo != null) {
-					attachedTo.removeAnnotationModelListener(listener);
-				}
-				if (annotationModel != null) {
-					annotationModel.addAnnotationModelListener(listener);
-				}
-				attachedTo = annotationModel;
-			}
-
-		};
-
-		LiveExpression<Boolean> errorsInYaml = new LiveExpression<Boolean>() {
-
-			private IAnnotationModel attachedTo = null;
-			private AnnotationModelListener listener = new AnnotationModelListener() {
-				public void modelChanged(AnnotationModelEvent event) {
-					refresh();
-				}
-			};
-
-			{
-				dependsOn(resourceAnnotationModel);
-			}
-
-			{
-				onDispose((d) -> {
-					if (attachedTo != null) {
-						attachedTo.removeAnnotationModelListener(listener);
-					}
-				});
-			}
-
-			@Override
-			protected Boolean compute() {
-				IAnnotationModel annotationModel = resourceAnnotationModel.getValue();
-				attachListener(annotationModel);
-				if (annotationModel != null) {
-					for (Iterator<Annotation> itr = annotationModel.getAnnotationIterator(); itr.hasNext();) {
-						Annotation next = itr.next();
-						if (ReconcileProblemAnnotation.ERROR_ANNOTATION_TYPE == next.getType()) {
-							return Boolean.TRUE;
-						}
-					}
-				}
-				return Boolean.FALSE;
-			}
-
-			synchronized private void attachListener(IAnnotationModel annotationModel) {
-				if (attachedTo == annotationModel) {
-					return;
-				}
-				if (attachedTo != null) {
-					attachedTo.removeAnnotationModelListener(listener);
-				}
-				if (annotationModel != null) {
-					annotationModel.addAnnotationModelListener(listener);
-				}
-				attachedTo = annotationModel;
-			}
-		};
-
-		LiveExpression<String> selectedAppName = new LiveExpression<String>() {
-
-			private AppNameAnnotationModel attachedTo = null;
-			private AnnotationModelListener listener = new AnnotationModelListener() {
-				public void modelChanged(AnnotationModelEvent event) {
-					refresh();
-				}
-			};
-
-			{
-				dependsOn(appNameAnnotationModel);
-			}
-
-			{
-				onDispose((d) -> {
-					if (attachedTo != null) {
-						attachedTo.removeAnnotationModelListener(listener);
-					}
-				});
-			}
-
-			@Override
-			protected String compute() {
-				AppNameAnnotationModel annotationModel = appNameAnnotationModel.getValue();
-				attachListener(annotationModel);
-				if (annotationModel != null) {
-					AppNameAnnotation a = annotationModel.getSelectedAppAnnotation();
-					if (a != null) {
-						return a.getText();
-					}
-				}
-				return null;
-			}
-
-			synchronized private void attachListener(AppNameAnnotationModel annotationModel) {
-				if (attachedTo == annotationModel) {
-					return;
-				}
-				if (attachedTo != null) {
-					attachedTo.removeAnnotationModelListener(listener);
-				}
-				if (annotationModel != null) {
-					annotationModel.addAnnotationModelListener(listener);
-				}
-				attachedTo = annotationModel;
-			}
-
-		};
-
-		{
-			onDispose((d) -> {
-				applicationNames.dispose();
-				appNameAnnotationModel.dispose();
-				errorsInYaml.dispose();
-				resourceAnnotationModel.dispose();
-				selectedAppName.dispose();
-			});
 		}
 
 		abstract String getManifestContents();
@@ -240,87 +144,270 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 		abstract IFile getManifest();
 
 		CloudApplicationDeploymentProperties getDeploymentProperties() throws Exception {
-			List<CloudApplicationDeploymentProperties> propsList = new ApplicationManifestHandler(project, cloudData, getManifest()) {
+			return toDeploymentProperties(cloudData, getManifestContents(), project, deployedApp == null ? selectedAppName.getValue() : getDeployedAppName());
+		}
+
+		protected AbstractSubModel(String fixedAppName) {
+			IPreferenceStore preferenceStore = JavaPlugin.getDefault().getCombinedPreferenceStore();
+			this.editor = new EmbeddedEditor(editor -> new ExtensionBasedTextViewerConfiguration(editor, preferenceStore), preferenceStore, false);
+
+			editorControlCreated = new LiveVariable<>(false);
+
+			selectedFile = new LiveVariable<>();
+
+			editorControlCreated.addListener((exp, value) -> {
+				if (appNameAnnotationSupport == null && value != null && value.booleanValue()) {
+					appNameAnnotationSupport = new AppNameAnnotationSupport(editor.getViewer(),
+							editor.getAnnotationAccess(), editor.getSharedColors(), fixedAppName);
+				}
+			});
+
+			editorInput = new LiveExpression<FileEditorInput>() {
+
+				{
+					dependsOn(selectedFile);
+				}
+
 				@Override
-				protected InputStream getInputStream() throws Exception {
-					return new ByteArrayInputStream(getManifestContents().getBytes());
-				}
-			}.load(new NullProgressMonitor());
-			/*
-			 * If "Select Manifest..." action is invoked appName is not null,
-			 * but we should allow for any manifest file selected for now. Hence
-			 * set the applicationName var to null in that case
-			 */
-			CloudApplicationDeploymentProperties deploymentProperties = null;
-			String applicationName = deployedApp == null ? selectedAppName.getValue() : getDeployedAppName();
-			if (applicationName == null) {
-				deploymentProperties = propsList.get(0);
-			} else {
-				for (CloudApplicationDeploymentProperties p : propsList) {
-					if (applicationName.equals(p.getAppName())) {
-						deploymentProperties = p;
-						break;
+				protected FileEditorInput compute() {
+					if (editor != null) {
+						IFile file = getFile();
+						FileEditorInput currentInput = getValue();
+						boolean changed = currentInput == null || !currentInput.getFile().equals(file);
+						if (changed) {
+							if (currentInput != null) {
+								saveOrDiscardIfNeeded(currentInput);
+							}
+							try {
+								if (file != null) {
+									FileEditorInput input = new FileEditorInput(file);
+									editor.setInput(input);
+									return input;
+								} else {
+									editor.setInput(null);
+									return null;
+								}
+							} catch (CoreException e) {
+								Log.log(e);
+							}
+						}
 					}
+					return null;
 				}
-			}
-			return deploymentProperties;
+
+			};
+
+			appNameAnnotationModel = new LiveExpression<AppNameAnnotationModel>() {
+				{
+					dependsOn(editorControlCreated);
+					dependsOn(editorInput);
+				}
+
+				@Override
+				protected AppNameAnnotationModel compute() {
+					if (editor != null && editor.getViewer() != null) {
+						return AppNameAnnotationSupport.getAppNameAnnotationModel(editor.getViewer());
+					}
+					return null;
+				}
+
+			};
+
+			resourceAnnotationModel = new LiveExpression<IAnnotationModel>() {
+
+				{
+					dependsOn(editorControlCreated);
+					dependsOn(editorInput);
+				}
+
+				@Override
+				protected IAnnotationModel compute() {
+					if (editor != null && editor.getViewer() != null) {
+						return editor.getViewer().getAnnotationModel();
+					}
+					return null;
+				}
+
+			};
+
+			applicationNames = new LiveExpression<List<String>>() {
+
+				private AppNameAnnotationModel attachedTo = null;
+				private AnnotationModelListener listener = new AnnotationModelListener() {
+					public void modelChanged(AnnotationModelEvent event) {
+						refresh();
+					}
+				};
+
+				{
+					dependsOn(appNameAnnotationModel);
+				}
+
+				@Override
+				protected List<String> compute() {
+					AppNameAnnotationModel annotationModel = appNameAnnotationModel.getValue();
+					if (annotationModel != null) {
+						attachListener(annotationModel);
+						List<String> applicationNames = new ArrayList<>();
+						for (Iterator<Annotation> itr = annotationModel.getAnnotationIterator(); itr.hasNext();) {
+							Annotation next = itr.next();
+							if (next instanceof AppNameAnnotation) {
+								AppNameAnnotation a = (AppNameAnnotation) next;
+								applicationNames.add(a.getText());
+							}
+						}
+						return applicationNames;
+					}
+					return Collections.emptyList();
+				}
+
+				synchronized private void attachListener(AppNameAnnotationModel annotationModel) {
+					if (attachedTo == annotationModel) {
+						return;
+					}
+					if (attachedTo != null) {
+						attachedTo.removeAnnotationModelListener(listener);
+					}
+					if (annotationModel != null) {
+						annotationModel.addAnnotationModelListener(listener);
+					}
+					attachedTo = annotationModel;
+				}
+
+			};
+
+			errorsInYaml = new LiveExpression<Boolean>() {
+
+				private IAnnotationModel attachedTo = null;
+				private AnnotationModelListener listener = new AnnotationModelListener() {
+					public void modelChanged(AnnotationModelEvent event) {
+						refresh();
+					}
+				};
+
+				{
+					dependsOn(resourceAnnotationModel);
+				}
+
+				{
+					onDispose((d) -> {
+						if (attachedTo != null) {
+							attachedTo.removeAnnotationModelListener(listener);
+						}
+					});
+				}
+
+				@Override
+				protected Boolean compute() {
+					IAnnotationModel annotationModel = resourceAnnotationModel.getValue();
+					if (annotationModel != null) {
+						attachListener(annotationModel);
+						for (Iterator<Annotation> itr = annotationModel.getAnnotationIterator(); itr.hasNext();) {
+							Annotation next = itr.next();
+							if (LSP_ERROR_ANNOTATION_TYPE.equals(next.getType())) {
+								return Boolean.TRUE;
+							}
+						}
+					}
+					return Boolean.FALSE;
+				}
+
+				synchronized private void attachListener(IAnnotationModel annotationModel) {
+					if (attachedTo == annotationModel) {
+						return;
+					}
+					if (attachedTo != null) {
+						attachedTo.removeAnnotationModelListener(listener);
+					}
+					if (annotationModel != null) {
+						annotationModel.addAnnotationModelListener(listener);
+					}
+					attachedTo = annotationModel;
+				}
+			};
+
+			selectedAppName = new LiveExpression<String>() {
+
+				private AppNameAnnotationModel attachedTo = null;
+				private AnnotationModelListener listener = new AnnotationModelListener() {
+					public void modelChanged(AnnotationModelEvent event) {
+						refresh();
+					}
+				};
+
+				{
+					dependsOn(appNameAnnotationModel);
+				}
+
+				{
+					onDispose((d) -> {
+						if (attachedTo != null) {
+							attachedTo.removeAnnotationModelListener(listener);
+						}
+					});
+				}
+
+				@Override
+				protected String compute() {
+					AppNameAnnotationModel annotationModel = appNameAnnotationModel.getValue();
+					if (annotationModel != null) {
+						attachListener(annotationModel);
+						AppNameAnnotation a = annotationModel.getSelectedAppAnnotation();
+						if (a != null) {
+							return a.getText();
+						}
+					}
+					return null;
+				}
+
+				synchronized private void attachListener(AppNameAnnotationModel annotationModel) {
+					if (attachedTo == annotationModel) {
+						return;
+					}
+					if (attachedTo != null) {
+						attachedTo.removeAnnotationModelListener(listener);
+					}
+					if (annotationModel != null) {
+						annotationModel.addAnnotationModelListener(listener);
+					}
+					attachedTo = annotationModel;
+				}
+
+			};
+
+			document = new LiveExpression<IDocument>(new Document("")) {
+				{
+					dependsOn(editorInput);
+					dependsOn(editorControlCreated);
+				}
+
+				@Override
+				protected IDocument compute() {
+					IDocument doc = editor == null || editor.getViewer() == null ? null : editor.getViewer().getDocument();
+					if (doc != null) {
+						LanguageServiceAccessor.getLanguageServers(doc, cap -> true);
+					}
+					return doc;
+				}
+			};
+
+			onDispose((d) -> {
+				appNameAnnotationSupport.dispose();
+				editorControlCreated.dispose();
+				editorInput.dispose();
+				applicationNames.dispose();
+				appNameAnnotationModel.dispose();
+				errorsInYaml.dispose();
+				resourceAnnotationModel.dispose();
+				selectedAppName.dispose();
+				document.dispose();
+				editor.dispose();
+			});
 		}
 
 	}
 
 	public class FileDeploymentPropertiesDialogModel extends AbstractSubModel {
-
-		private boolean inputConnected = false;
-
-		private final Set<TextFileDocumentProvider> docProviders = new HashSet<>();
-
-		private final LiveVariable<IResource> selectedFile = new LiveVariable<>();
-
-		private final LiveExpression<FileEditorInput> editorInput = new LiveExpression<FileEditorInput>() {
-
-			{
-				dependsOn(selectedFile);
-			}
-
-			@Override
-			protected FileEditorInput compute() {
-				IFile file = getFile();
-				FileEditorInput currentInput = getValue();
-				boolean changed = currentInput == null || !currentInput.getFile().equals(file);
-				if (changed) {
-					saveOrDiscardIfNeeded(currentInput);
-					if (file != null) {
-						FileEditorInput input = new FileEditorInput(file);
-						// Connect input to doc provider here when editor input has changed
-						TextFileDocumentProvider provider = getTextDocumentProvider(input);
-						if (provider != null) {
-							connect(provider, input);
-						}
-						return input;
-					}
-				}
-				return null;
-			}
-
-		};
-
-		private final LiveExpression<IDocument> document = new LiveExpression<IDocument>(new Document("")) {
-			{
-				dependsOn(editorInput);
-			}
-
-			@Override
-			protected IDocument compute() {
-				FileEditorInput input = editorInput.getValue();
-				if (input != null) {
-					TextFileDocumentProvider provider = getTextDocumentProvider(input);
-					if (provider != null) {
-						return provider.getDocument(input);
-					}
-				}
-				return new Document("");
-			}
-		};
 
 		final private LiveExpression<String> fileLabel = new LiveExpression<String>() {
 			{
@@ -331,12 +418,17 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 			protected String compute() {
 				FileEditorInput input = editorInput.getValue();
 				if (input != null) {
-					boolean dirty = getTextDocumentProvider(input).canSaveDocument(input);
-					return editorInput.getValue().getFile().getFullPath().toOSString() + (dirty ? "*" : "");
+					return editorInput.getValue().getFile().getFullPath().toOSString() + (editor.isDirty() ? "*" : "");
 				}
 				return "";
 			}
 
+		};
+
+		private final IPropertyListener editorListener = (Object source, int propId) -> {
+			if (propId == IEditorPart.PROP_DIRTY) {
+				fileLabel.refresh();
+			}
 		};
 
 		Validator validator = new Validator() {
@@ -396,101 +488,44 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 		};
 
-		private IElementStateListener dirtyStateListener = new IElementStateListener() {
-
-			@Override
-			public void elementMoved(Object arg0, Object arg1) {
-			}
-
-			@Override
-			public void elementDirtyStateChanged(final Object file, final boolean dirty) {
-				FileEditorInput editorInputValue = editorInput.getValue();
-				if (editorInputValue != null && editorInputValue.equals(file)) {
-					fileLabel.refresh();
-				}
-			}
-
-			@Override
-			public void elementDeleted(Object arg0) {
-			}
-
-			@Override
-			public void elementContentReplaced(Object file) {
-				if (file.equals(editorInput.getValue())) {
-					document.refresh();
-				}
-			}
-
-			@Override
-			public void elementContentAboutToBeReplaced(Object arg0) {
-			}
-		};
+		private IFile tempFile;
 
 		{
 			onDispose((d) -> {
-				saveOrDiscardIfNeeded();
+				if (tempFile != null && tempFile.exists()) {
+					try {
+						tempFile.delete(true, new NullProgressMonitor());
+					} catch (CoreException e) {
+						Log.log(e);
+					}
+				}
+				editor.removePropertyListener(editorListener);
 				validator.dispose();
-				document.dispose();
-				editorInput.dispose();
 				fileLabel.dispose();
-				selectedFile.dispose();
 			});
 		}
 
-		private void saveOrDiscardIfNeeded() {
-			FileEditorInput input = editorInput.getValue();
-			if (input != null) {
-				saveOrDiscardIfNeeded(input);
-			}
+		FileDeploymentPropertiesDialogModel(String fixedAppName) {
+			super(fixedAppName);
+			editor.addPropertyListener(editorListener);
 		}
 
-		private void saveOrDiscardIfNeeded(FileEditorInput file) {
-			TextFileDocumentProvider docProvider = file == null ? null : getTextDocumentProvider(file);
-			if (docProvider != null && file != null && file.exists() && inputConnected) {
-				if (docProvider.canSaveDocument(file) && ui.confirmOperation("Changes Detected", "Manifest file '" + file.getFile().getFullPath().toOSString()
-								+ "' has been changed. Do you want to save changes or discard them?", new String[] {"Save", "Don't Save"}, 0) == 0) {
-					try {
-						docProvider.saveDocument(new NullProgressMonitor(), file, docProvider.getDocument(file), true);
-					} catch (CoreException e) {
-						Log.log(e);
-						ui.errorPopup("Failed Saving File", ExceptionUtil.getMessage(e));
-					}
-//				} else {
-//					try {
-//						docProvider.resetDocument(file);
-//					} catch (CoreException e) {
-//						Log.log(e);
-//					}
+		public void init(IFile tempFile) {
+			this.tempFile = tempFile;
+			if (getManifest() == null) {
+				// No manifest file? Generate dumb empty manifest YAML to get proper Manifest LS
+				// based reconciler, CA etc
+				try {
+					generateTempManifestFile(tempFile, "");
+					editor.init(null, new FileEditorInput(tempFile));
+				} catch (CoreException e) {
+					Log.log(e);
 				}
-				disconnect(docProvider, file);
 			}
-		}
-
-		private TextFileDocumentProvider getTextDocumentProvider(FileEditorInput input) {
-			IDocumentProvider docProvider = DocumentProviderRegistry.getDefault().getDocumentProvider(input);
-			if (docProvider instanceof TextFileDocumentProvider) {
-				TextFileDocumentProvider textDocProvider = (TextFileDocumentProvider) docProvider;
-				if (!docProviders.contains(textDocProvider)) {
-					textDocProvider.addElementStateListener(dirtyStateListener);
-					onDispose((d) -> {
-						textDocProvider.removeElementStateListener(dirtyStateListener);
-					});
-					docProviders.add(textDocProvider);
-				}
-				return textDocProvider;
-			}
-			return null;
 		}
 
 		public IAnnotationModel getAnnotationModel() {
-			FileEditorInput input = editorInput.getValue();
-			if (input != null) {
-				TextFileDocumentProvider provider = getTextDocumentProvider(input);
-				if (provider != null) {
-					return provider.getAnnotationModel(input);
-				}
-			}
-			return null;
+			return editor.getViewer().getAnnotationModel();
 		}
 
 		@Override
@@ -498,63 +533,22 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 			return document.getValue().get();
 		}
 
-		private IFile getFile() {
-			IResource r = selectedFile.getValue();
-			return r instanceof IFile ? (IFile) r : null;
-		}
-
 		@Override
 		IFile getManifest() {
 			return getFile();
 		}
 
-		private void connect(TextFileDocumentProvider provider, FileEditorInput input) {
-			if (!inputConnected) {
-				try {
-					provider.connect(input);
-					inputConnected = true;
-				} catch (CoreException e) {
-					Log.log(e);
-				}
-			} else {
-				throw new IllegalStateException("Attempting to connect input '" + input.getFile().getName() + "' while previous input is still connected.");
-			}
-		}
-
-		private void disconnect(TextFileDocumentProvider provider, FileEditorInput input) {
-			if (inputConnected) {
-				provider.disconnect(input);
-				inputConnected = false;
-			} else {
-				throw new IllegalStateException("Attempting to disconnect input '" + input.getFile().getName() + "' while no inputs are connected");
-			}
-		}
-
 		void reopenSameFile() {
-			try {
-				FileEditorInput input = editorInput.getValue();
-				if (input != null) {
-					TextFileDocumentProvider provider = getTextDocumentProvider(input);
-					if (provider != null) {
-						connect(provider, input);
-					}
-				}
-				// Update the document such that it's the document coming from the doc provider
-				document.refresh();
-			} catch (Exception e) {
-				Log.log(e);
-			}
+			document.refresh();
 		}
 
 	}
 
 	public class ManualDeploymentPropertiesDialogModel extends AbstractSubModel {
 
-		private IDocument document;
+		private IFile tempFile;
 
 		private boolean readOnly;
-
-		private IAnnotationModel annotationModel = new AnnotationModel();
 
 		Validator validator = new Validator() {
 
@@ -608,29 +602,59 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 		{
 			onDispose((d) -> {
 				validator.dispose();
+				try {
+					if (tempFile != null) {
+						if (tempFile.exists()) {
+							tempFile.delete(true, new NullProgressMonitor());
+						}
+						tempFile = null;
+					}
+				} catch (CoreException e) {
+					e.printStackTrace();
+				}
 			});
 		}
 
 
-		ManualDeploymentPropertiesDialogModel(boolean readOnly) {
-			super();
+		ManualDeploymentPropertiesDialogModel(String fixedAppName, boolean readOnly) {
+			super(fixedAppName);
 			this.readOnly = readOnly;
-			this.document = new Document(generateDefaultContent());
+		}
+
+		public void init(IFile tempFile) {
+			this.tempFile = tempFile;
+			try {
+				generateTempManifestFile(tempFile, generateDefaultContent());
+			} catch (CoreException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			try {
+				editor.init(null, new FileEditorInput(tempFile));
+				selectedFile.setValue(tempFile);
+			} catch (PartInitException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 
 		public void setText(String s) {
 			if (readOnly) {
 				throw new IllegalStateException("The model is read-only!");
 			}
-			document.set(s);
+			IDocument doc = document.getValue();
+			if (doc != null) {
+				doc.set(s);
+			}
 		}
 
 		public String getText() {
-			return document.get();
+			IDocument doc = document.getValue();
+			return doc == null ? null : doc.get();
 		}
 
 		public IAnnotationModel getAnnotationModel() {
-			return annotationModel;
+			return editor.getViewer().getAnnotationModel();
 		}
 
 		@Override
@@ -641,18 +665,6 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 		@Override
 		IFile getManifest() {
 			return null;
-		}
-
-		private String generateDefaultContent() {
-			CloudApplicationDeploymentProperties props = CloudApplicationDeploymentProperties.getFor(project, cloudData,
-					getDeployedApp());
-			Map<Object, Object> yaml = ApplicationManifestHandler.toYaml(props, cloudData);
-			DumperOptions options = new DumperOptions();
-			options.setExplicitStart(true);
-			options.setCanonical(false);
-			options.setPrettyFlow(true);
-			options.setDefaultFlowStyle(FlowStyle.BLOCK);
-			return new Yaml(options).dump(yaml);
 		}
 
 	}
@@ -693,8 +705,8 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 		this.deployedApp = deployedApp;
 		this.cloudData = cloudData;
 		this.project = project;
-		this.manualModel = new ManualDeploymentPropertiesDialogModel(deployedApp != null);
-		this.fileModel = new FileDeploymentPropertiesDialogModel();
+		this.manualModel = new ManualDeploymentPropertiesDialogModel(getDeployedAppName(), deployedApp != null);
+		this.fileModel = new FileDeploymentPropertiesDialogModel(getDeployedAppName());
 
 		this.validator = new Validator() {
 
@@ -716,6 +728,20 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 			}
 
 		};
+
+		onDispose((d) -> {
+			fileModel.dispose();
+			manualModel.dispose();
+		});
+
+	}
+
+	public void initFileModel() {
+		fileModel.init(project.getFolder(".settings").getFile(DUMMY_FILE_MANIFEST_YML));
+	}
+
+	public void initManualModel() {
+		manualModel.init(project.getFolder(".settings").getFile(DUMMY_MANUAL_MANIFEST_YML));
 	}
 
 	public CloudApplicationDeploymentProperties getDeploymentProperties() throws Exception {
@@ -745,13 +771,22 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 	public void cancelPressed() {
 		fileModel.saveOrDiscardIfNeeded();
 		isCancelled = true;
+//		try {
+//			fileModel.editor.setInput(null);
+//			manualModel.editor.setInput(null);
+//		} catch (CoreException e) {
+//			Log.log(e);
+//		}
 	}
 
 	public boolean okPressed() {
 		fileModel.saveOrDiscardIfNeeded();
 		isCancelled = false;
 		try {
-			return getDeploymentProperties()!=null;
+			CloudApplicationDeploymentProperties deploymentProperties = getDeploymentProperties();
+//			fileModel.editor.setInput(null);
+//			manualModel.editor.setInput(null);
+			return deploymentProperties != null;
 		} catch (Exception e) {
 			fileModel.reopenSameFile();
 			ui.errorPopup("Invalid YAML content", ExceptionUtil.getMessage(e));
@@ -771,12 +806,12 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 		this.type.setValue(type);
 	}
 
-	public LiveVariable<IResource> getSelectedManifestVar() {
-		return fileModel.selectedFile;
-	}
-
 	public String getProjectName() {
 		return project.getName();
+	}
+
+	public IProject getProject() {
+		return project;
 	}
 
 	public boolean isFileManifestType() {
@@ -788,31 +823,35 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 	}
 
 	public IResource getSelectedManifest() {
-		return getSelectedManifestVar().getValue();
+		return fileModel.selectedFile.getValue();
 	}
 
 	public String getDeployedAppName() {
 		return deployedApp == null ? null : deployedApp.getName();
 	}
 
-	public IDocument getManualDocument() {
-		return manualModel.document;
+	public EmbeddedEditor getFileYamlEditor() {
+		return fileModel.editor;
 	}
 
-	public IAnnotationModel getManualAnnotationModel() {
-		return manualModel.annotationModel;
+	public EmbeddedEditor getManualYamlEditor() {
+		return manualModel.editor;
+	}
+
+	public IDocument getManualDocument() {
+		return manualModel.document.getValue();
 	}
 
 	public boolean isManualManifestReadOnly() {
 		return deployedApp!=null;
 	}
 
-	public LiveExpression<IDocument> getFileDocument() {
-		return fileModel.document;
+	public IDocument getFileDocument() {
+		return fileModel.document.getValue();
 	}
 
-	public IAnnotationModel getFileAnnotationModel() {
-		return fileModel.getAnnotationModel();
+	public LiveExpression<FileEditorInput> getFileEditorInput() {
+		return fileModel.editorInput;
 	}
 
 	public LiveExpression<String> getFileLabel() {
@@ -821,14 +860,6 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 	private CFApplication getDeployedApp() {
 		return deployedApp;
-	}
-
-	public void setFileAppNameAnnotationModel(AppNameAnnotationModel appNameAnnotationModel) {
-		fileModel.appNameAnnotationModel.setValue(appNameAnnotationModel);
-	}
-
-	public void setManualAppNameAnnotationModel(AppNameAnnotationModel appNameAnnotationModel) {
-		manualModel.appNameAnnotationModel.setValue(appNameAnnotationModel);
 	}
 
 	public boolean isCanceled() {
@@ -847,12 +878,12 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 		return fileModel.appNameAnnotationModel;
 	}
 
-	public void setFileResourceAnnotationModel(IAnnotationModel annotationModel) {
-		fileModel.resourceAnnotationModel.setValue(annotationModel);
+	public void fileYamlEditorControlCreated() {
+		fileModel.editorControlCreated.setValue(true);
 	}
 
-	public void setManualResourceAnnotationModel(IAnnotationModel annotationModel) {
-		manualModel.resourceAnnotationModel.setValue(annotationModel);
+	public void manualYamlEditorControlCreated() {
+		manualModel.editorControlCreated.setValue(true);
 	}
 
 	public IAnnotationModel getManualResourceAnnotationModel() {
@@ -861,6 +892,72 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 	public IAnnotationModel getFileResourceAnnotationModel() {
 		return fileModel.resourceAnnotationModel.getValue();
+	}
+
+	public String getFileSelectedAppName() {
+		return fileModel.selectedAppName.getValue();
+	}
+
+	public String getManualSelectedAppName() {
+		return manualModel.selectedAppName.getValue();
+	}
+
+	private String generateDefaultContent() {
+		CloudApplicationDeploymentProperties props = CloudApplicationDeploymentProperties.getFor(project, cloudData,
+				getDeployedApp());
+		Map<Object, Object> yaml = ApplicationManifestHandler.toYaml(props, cloudData);
+		DumperOptions options = new DumperOptions();
+		options.setExplicitStart(true);
+		options.setCanonical(false);
+		options.setPrettyFlow(true);
+		options.setDefaultFlowStyle(FlowStyle.BLOCK);
+		return new Yaml(options).dump(yaml);
+	}
+
+
+	private static IFile generateTempManifestFile(IFile manifestFile, String content) throws CoreException {
+		if (manifestFile.exists()) {
+			manifestFile.setContents(new ByteArrayInputStream(content.getBytes()), true, false, new NullProgressMonitor());
+		} else {
+			if (!manifestFile.getParent().exists()) {
+				((IFolder)manifestFile.getParent()).create(true, true, new NullProgressMonitor());
+			}
+			manifestFile.create(new ByteArrayInputStream(content.getBytes()), true, new NullProgressMonitor());
+		}
+		return manifestFile;
+	}
+
+	public static CloudApplicationDeploymentProperties toDeploymentProperties(CloudData cloudData, String yaml, IProject project, String applicationName) throws Exception {
+		List<CloudApplicationDeploymentProperties> propsList = new ApplicationManifestHandler(project, cloudData, null) {
+			@Override
+			protected InputStream getInputStream() throws Exception {
+				return new ByteArrayInputStream(yaml.getBytes());
+			}
+		}.load(new NullProgressMonitor());
+		/*
+		 * If "Select Manifest..." action is invoked appName is not null,
+		 * but we should allow for any manifest file selected for now. Hence
+		 * set the applicationName var to null in that case
+		 */
+		CloudApplicationDeploymentProperties deploymentProperties = null;
+		if (applicationName == null) {
+			deploymentProperties = propsList.get(0);
+		} else {
+			for (CloudApplicationDeploymentProperties p : propsList) {
+				if (applicationName.equals(p.getAppName())) {
+					deploymentProperties = p;
+					break;
+				}
+			}
+		}
+		return deploymentProperties;
+	}
+
+	public CloudApplicationDeploymentProperties getDeploymentProperties(String yaml, String appName) throws Exception {
+		if (yaml == null) {
+			yaml = generateDefaultContent();
+		}
+		return toDeploymentProperties(cloudData, yaml, project, appName);
 	}
 
 }

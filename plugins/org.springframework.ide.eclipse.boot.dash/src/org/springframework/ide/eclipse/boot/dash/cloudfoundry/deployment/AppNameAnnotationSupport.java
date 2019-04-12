@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Pivotal, Inc.
+ * Copyright (c) 2016, 2019 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,7 +32,7 @@ import org.eclipse.swt.custom.StyledTextContent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.RGB;
-import org.springframework.ide.eclipse.boot.util.Log;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 /**
  * Application name annotation support for the {@link ISourceViewer}
@@ -78,6 +78,8 @@ public class AppNameAnnotationSupport {
 	 */
 	private ISharedTextColors fColorsCache;
 
+	private final String fixedAppName;
+
 	/**
 	 * Listen to viewer input changes to attach the application name annotations model if necessary
 	 */
@@ -88,20 +90,25 @@ public class AppNameAnnotationSupport {
 
 		@Override
 		public void inputDocumentChanged(IDocument oldInput, IDocument newInput) {
-			IAnnotationModel annotationModel = fViewer.getVisualAnnotationModel();
-			if (annotationModel instanceof IAnnotationModelExtension) {
-				IAnnotationModelExtension extension = (IAnnotationModelExtension) annotationModel;
-				if (extension.getAnnotationModel(AppNameAnnotationModel.APP_NAME_MODEL_KEY) == null) {
-					extension.addAnnotationModel(AppNameAnnotationModel.APP_NAME_MODEL_KEY, new AppNameAnnotationModel());
-				}
-			}
-			fColumn.setModel(annotationModel);
+			initAppAnnotationModel();
 		}
 
 	};
 
-	public AppNameAnnotationSupport(SourceViewer viewer, IAnnotationAccess annotationAccess, ISharedTextColors colorsCache) {
+	private void initAppAnnotationModel() {
+		IAnnotationModel annotationModel = fViewer.getVisualAnnotationModel();
+		if (annotationModel instanceof IAnnotationModelExtension) {
+			IAnnotationModelExtension extension = (IAnnotationModelExtension) annotationModel;
+			if (extension.getAnnotationModel(AppNameAnnotationModel.APP_NAME_MODEL_KEY) == null) {
+				extension.addAnnotationModel(AppNameAnnotationModel.APP_NAME_MODEL_KEY, new AppNameAnnotationModel(fixedAppName));
+			}
+		}
+		fColumn.setModel(annotationModel);
+	}
+
+	public AppNameAnnotationSupport(SourceViewer viewer, IAnnotationAccess annotationAccess, ISharedTextColors colorsCache, String fixedAppName) {
 		super();
+		this.fixedAppName = fixedAppName;
 		fViewer = viewer;
 		fViewer.addTextInputListener(textInputListener);
 
@@ -145,12 +152,15 @@ public class AppNameAnnotationSupport {
 		annotationPainter.addDrawingStrategy(AppNameAnnotationModel.APP_NAME_MODEL_KEY, new AppNameDrawingStrategy());
 		annotationPainter.addAnnotationType(AppNameAnnotation.TYPE, AppNameAnnotationModel.APP_NAME_MODEL_KEY);
 		annotationPainter.setAnnotationTypeColor(AppNameAnnotation.TYPE, fViewer.getControl().getDisplay().getSystemColor(SWT.COLOR_GRAY));
+		initAppAnnotationModel();
 		fViewer.addPainter(annotationPainter);
 
 		/*
 		 * Attach application annotations ruler to the viewer
 		 */
-		fViewer.addVerticalRulerColumn(fColumn);
+		if (fixedAppName == null) {
+			fViewer.addVerticalRulerColumn(fColumn);
+		}
 	}
 
 	public void dispose() {

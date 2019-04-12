@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Pivotal, Inc.
+ * Copyright (c) 2016, 2019 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,9 +22,9 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModelExtension;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
-import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlASTProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlFileAST;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.ScalarNode;
 import org.yaml.snakeyaml.nodes.SequenceNode;
@@ -45,14 +45,8 @@ public class AppNameReconciler {
 	 */
 	private YamlASTProvider fParser;
 
-	/**
-	 * Constant application name. If not <code>null</code> then corresponding annotation must be selected
-	 */
-	final private String fAppName;
-
-	public AppNameReconciler(YamlASTProvider parser, String appName) {
+	public AppNameReconciler(YamlASTProvider parser) {
 		fParser = parser;
-		fAppName = appName;
 	}
 
 	/**
@@ -145,7 +139,7 @@ public class AppNameReconciler {
 				}
 				monitor.worked(20);
 				if (!annotationsMap.isEmpty()) {
-					if (fAppName == null) {
+					if (annotationModel.fixedAppName == null) {
 						/*
 						 * Select either previously selected app name annotation or the first found
 						 */
@@ -154,7 +148,7 @@ public class AppNameReconciler {
 						/*
 						 * Select annotation corresponding to application name == to fAppName
 						 */
-						selectAnnotationByAppName(annotationsMap);
+						selectAnnotationByAppName(annotationsMap, annotationModel.fixedAppName);
 					}
 					monitor.worked(10);
 				}
@@ -215,9 +209,9 @@ public class AppNameReconciler {
 	 *
 	 * @param annotationsMap Map of application name annotations to positions
 	 */
-	private void selectAnnotationByAppName(Map<AppNameAnnotation, Position> annotationsMap) {
+	private void selectAnnotationByAppName(Map<AppNameAnnotation, Position> annotationsMap, String appName) {
 		for (Map.Entry<AppNameAnnotation, Position> entry : annotationsMap.entrySet()) {
-			if (entry.getKey().getText().equals(fAppName)) {
+			if (entry.getKey().getText().equals(appName)) {
 				entry.getKey().markSelected();
 				return;
 			}

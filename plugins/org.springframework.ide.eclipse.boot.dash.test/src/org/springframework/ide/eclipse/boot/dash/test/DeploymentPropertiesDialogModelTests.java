@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Pivotal, Inc.
+ * Copyright (c) 2016, 2019 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,33 +19,44 @@ import static org.mockito.Mockito.mock;
 import static org.springframework.ide.eclipse.boot.dash.test.BootDashModelTest.waitForJobsToComplete;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.createFile;
 
+import java.io.ByteArrayInputStream;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.filebuffers.LocationKind;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
-import org.eclipse.jface.text.source.AnnotationModel;
+import org.eclipse.lsp4e.LanguageServerWrapper;
+import org.eclipse.lsp4e.LanguageServiceAccessor;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.editors.text.TextFileDocumentProvider;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.DocumentProviderRegistry;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestName;
 import org.mockito.Mockito;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudData;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFAppState;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
@@ -53,22 +64,18 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDoma
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFDomainType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFCloudDomainData;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFDomainStatus;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.AppNameAnnotationModel;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.AppNameReconciler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentPropertiesDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel.ManifestType;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
-import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileProblemAnnotation;
-import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlASTProvider;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
-import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
-import org.yaml.snakeyaml.Yaml;
 
 import com.google.common.collect.ImmutableList;
 
@@ -78,14 +85,18 @@ import com.google.common.collect.ImmutableList;
  * @author Alex Boyko
  *
  */
+@SuppressWarnings("restriction")
 public class DeploymentPropertiesDialogModelTests {
+
+	private static final long DISCONNECT_TIMEOUT = 10000;
+
+	private static final long TIMEOUT = 3000;
 
 	private static final int DONT_SAVE_BUTTON_ID = 1;
 
 	private static final int SAVE_BUTTON_ID = 0;
 
 	private static final String UNKNOWN_DEPLOYMENT_MANIFEST_TYPE_MUST_BE_EITHER_FILE_OR_MANUAL = "Unknown deployment manifest type. Must be either 'File' or 'Manual'.";
-	private static final String NO_SUPPORT_TO_DETERMINE_APP_NAMES = "Support for determining application names is unavailable";
 	private static final String MANIFEST_DOES_NOT_CONTAIN_DEPLOYMENT_PROPERTIES_FOR_APPLICATION_WITH_NAME = "Manifest does not contain deployment properties for application with name ''{0}''.";
 	private static final String MANIFEST_DOES_NOT_HAVE_ANY_APPLICATION_DEFINED = "Manifest does not have any application defined.";
 	private static final String ENTER_DEPLOYMENT_MANIFEST_YAML_MANUALLY = "Enter deployment manifest YAML manually.";
@@ -102,73 +113,127 @@ public class DeploymentPropertiesDialogModelTests {
 		return new CloudData(SPRING_CLOUD_DOMAINS, DEFAULT_BUILDPACK, ImmutableList.of());
 	}
 
-	private BootProjectTestHarness projects;
+	private static BootProjectTestHarness projects;
+	private static IProject dumbProject;
 	private UserInteractions ui;
 	private DeploymentPropertiesDialogModel model;
-	private AppNameReconciler reconciler;
+
+	private Shell shell;
 
 	////////////////////////////////////////////////////////////
 
+	@Rule public TestName name = new TestName();
+
+	@BeforeClass
+	public static void beforeAll() throws Exception {
+		StsTestUtil.deleteAllProjects();
+		waitForJobsToComplete();
+		projects = new BootProjectTestHarness(ResourcesPlugin.getWorkspace());
+		dumbProject = projects.createProject("dumbProject");
+		IFile manifest = dumbProject.getFile("manifest.yml");
+		manifest.create(new ByteArrayInputStream(new byte[0]), true, new NullProgressMonitor());
+		IEditorPart part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(new FileEditorInput(manifest), "CfManifestYMLEditor");
+		waitForJobsToComplete();
+		// Wait for LS to start
+		LanguageServiceAccessor.getLanguageServers(part.getAdapter(ITextViewer.class).getDocument(), cap -> true).get();
+	}
+
+	@AfterClass
+	public static void afterAll() throws Exception {
+		StsTestUtil.deleteAllProjects();
+		waitForJobsToComplete();
+	}
+
 	@Before
 	public void setup() throws Exception {
-		StsTestUtil.deleteAllProjects();
-		this.projects = new BootProjectTestHarness(ResourcesPlugin.getWorkspace());
+		Log.info("STARTED test: " + name.getMethodName());
+		StsTestUtil.deleteAllProjectsExcept(dumbProject.getName());
+//		StsTestUtil.deleteAllProjects();
 		this.ui = mock(UserInteractions.class);
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		if (model != null) {
-			model.dispose();
-			model = null;
+		if (shell != null) {
+			shell.dispose();
 		}
-		if (reconciler != null) {
-			reconciler = null;
+		waitForJobsToComplete();
+		disposeModel();
+//		LanguageServiceAccessor.clearStartedServers();
+		waitForJobsToComplete();
+//		Thread.sleep(3000);
+		Log.info("FINISHED test: " + name.getMethodName());
+	}
+
+	private void disposeModel() throws Exception {
+		if (model != null) {
+			IEditorInput fileInput = model.getFileYamlEditor().getEditorInput();
+			IEditorInput manualInput = model.getManualYamlEditor().getEditorInput();
+			model.dispose();
+			if (fileInput instanceof IFileEditorInput) {
+				waitUntilFileDisconnedted(((IFileEditorInput)fileInput).getFile());
+			}
+			if (manualInput instanceof IFileEditorInput) {
+				waitUntilFileDisconnedted(((IFileEditorInput)manualInput).getFile());
+			}
+			model = null;
+			waitForJobsToComplete();
+		}
+	}
+
+	private void waitUntilFileDisconnedted(IFile file) throws Exception {
+		waitForJobsToComplete();
+		if (file.exists()) {
+			for (LanguageServerWrapper wrapper : LanguageServiceAccessor.getLSWrappers(file, cap -> true)) {
+				ACondition.waitFor(file.toString() + " disconnected from LS", DISCONNECT_TIMEOUT, () -> assertFalse(wrapper.isConnectedTo(file.getLocation())));
+			}
+		}
+		FileEditorInput editorInput = new FileEditorInput(file);
+		TextFileDocumentProvider docProvider = (TextFileDocumentProvider) DocumentProviderRegistry.getDefault().getDocumentProvider(editorInput);
+		assertNull(docProvider.getDocument(editorInput));
+		waitForJobsToComplete();
+		ITextFileBufferManager textFileBufferManager = FileBuffers.getTextFileBufferManager();
+//		textFileBufferManager.disconnect(file.getFullPath(), LocationKind.LOCATION, new NullProgressMonitor());
+		assertNull(textFileBufferManager.getFileBuffer(file.getFullPath(), LocationKind.LOCATION));
+		waitForJobsToComplete();
+	}
+
+	private void waitUntilFileConnected(IFile file) throws Exception {
+		waitForJobsToComplete();
+		for (LanguageServerWrapper wrapper : LanguageServiceAccessor.getLSWrappers(file, cap -> true)) {
+			ACondition.waitFor(file.toString() + " connected to LS", DISCONNECT_TIMEOUT, () -> assertTrue(wrapper.isConnectedTo(file.getLocation())));
 		}
 		waitForJobsToComplete();
 	}
 
-	private AppNameReconciler addAppNameReconcilingFeature(final DeploymentPropertiesDialogModel model) {
-		final AppNameReconciler appNameReconciler = new AppNameReconciler(new YamlASTProvider(new Yaml()), model.getDeployedAppName()) {
-
-			@Override
-			public void reconcile(IDocument document, AppNameAnnotationModel annotationModel,
-					IProgressMonitor monitor) {
-				try {
-					waitForJobsToComplete();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				super.reconcile(document, annotationModel, monitor);
-			}
-
-		};
-
-		// File manifest
-		model.getFileDocument().addListener(new ValueListener<IDocument>() {
-			@Override
-			public void gotValue(LiveExpression<IDocument> exp, IDocument value) {
-				if (value == null) {
-					model.setFileAppNameAnnotationModel(null);
-				} else {
-					AppNameAnnotationModel appNameAnnotationModel = new AppNameAnnotationModel();
-					model.setFileAppNameAnnotationModel(appNameAnnotationModel);
-					appNameReconciler.reconcile(value, appNameAnnotationModel, new NullProgressMonitor());
-				}
-			}
-		});
-
-		// Manual manifest
-		AppNameAnnotationModel appNameAnnotationModel = new AppNameAnnotationModel();
-		model.setManualAppNameAnnotationModel(appNameAnnotationModel);
-		appNameReconciler.reconcile(model.getManualDocument(), appNameAnnotationModel, new NullProgressMonitor());
-
-		return appNameReconciler;
-	}
-
-	private void createDialogModel(IProject project, CFApplication deployedApp) {
+	private void createDialogModel(IProject project, CFApplication deployedApp) throws Exception {
 		model = new DeploymentPropertiesDialogModel(ui, createCloudData(), project, deployedApp);
-		reconciler = addAppNameReconcilingFeature(model);
+		model.initFileModel();
+		model.initManualModel();
+		shell = new Shell(PlatformUI.getWorkbench().getDisplay());
+		shell.setSize(400, 400);
+		shell.open();
+		try {
+			model.getFileYamlEditor().setContext(DeploymentPropertiesDialog.CONTEXT_DEPLOYMENT_PROPERTIES_DIALOG);
+			model.getManualYamlEditor().setContext(DeploymentPropertiesDialog.CONTEXT_DEPLOYMENT_PROPERTIES_DIALOG);
+			model.getFileYamlEditor().createControl(shell);
+			model.fileYamlEditorControlCreated();
+			model.getManualYamlEditor().createControl(shell);
+			model.manualYamlEditorControlCreated();
+			model.getFileEditorInput().onChange((exp, input) -> {
+				if (input != null && model.getFileYamlEditor().getViewer() != null) {
+					try {
+						waitUntilFileConnected(input.getFile());
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				}
+			});
+			waitUntilFileConnected(project.getFolder(".settings").getFile(DeploymentPropertiesDialogModel.DUMMY_FILE_MANIFEST_YML));
+			waitUntilFileConnected(project.getFolder(".settings").getFile(DeploymentPropertiesDialogModel.DUMMY_MANUAL_MANIFEST_YML));
+		} catch (CoreException e) {
+			Log.log(e);
+		}
 	}
 
 	private static CFApplication createCfApp(String name, int memory) {
@@ -186,7 +251,7 @@ public class DeploymentPropertiesDialogModelTests {
 		Mockito.when(cfApp.getStack()).thenReturn(null);
 		Mockito.when(cfApp.getState()).thenReturn(CFAppState.STARTED);
 		Mockito.when(cfApp.getTimeout()).thenReturn(null);
-		Mockito.when(cfApp.getUris()).thenReturn(Arrays.asList(new String[] {"myapp." + SPRING_CLOUD_DOMAINS.get(0)}));
+		Mockito.when(cfApp.getUris()).thenReturn(Arrays.asList(new String[] {"myapp." + SPRING_CLOUD_DOMAINS.get(0).getName()}));
 		return cfApp;
 	}
 
@@ -213,10 +278,12 @@ public class DeploymentPropertiesDialogModelTests {
 		assertTrue(model.isManualManifestType());
 		assertFalse(model.isManualManifestReadOnly());
 
-		ValidationResult validationResult = model.getValidator().getValue();
-		assertEquals(IStatus.INFO, validationResult.status);
-		assertEquals(ENTER_DEPLOYMENT_MANIFEST_YAML_MANUALLY, validationResult.msg);
-		assertNotNull(model.getManualAnnotationModel());
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(IStatus.INFO, validationResult.status);
+			assertEquals(ENTER_DEPLOYMENT_MANIFEST_YAML_MANUALLY, validationResult.msg);
+		});
+		ACondition.waitFor("app name reconcile", TIMEOUT, () -> assertEquals(project.getName(), model.getManualSelectedAppName()));
 
 		CloudApplicationDeploymentProperties deploymentProperties = model.getDeploymentProperties();
 		assertNotNull(deploymentProperties);
@@ -232,11 +299,13 @@ public class DeploymentPropertiesDialogModelTests {
 
 		assertTrue(model.isManualManifestType());
 		assertTrue(model.isManualManifestReadOnly());
-		assertNotNull(model.getManualAnnotationModel());
 
-		ValidationResult validationResult = model.getValidator().getValue();
-		assertEquals(IStatus.INFO, validationResult.status);
-		assertEquals(CURRENT_GENERATED_DEPLOYMENT_MANIFEST, validationResult.msg);
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(IStatus.INFO, validationResult.status);
+			assertEquals(CURRENT_GENERATED_DEPLOYMENT_MANIFEST, validationResult.msg);
+		});
+		ACondition.waitFor("app name reconcile", TIMEOUT, () -> assertEquals(deployedApp.getName(), model.getManualSelectedAppName()));
 
 		CloudApplicationDeploymentProperties deploymentProperties = model.getDeploymentProperties();
 		assertNotNull(deploymentProperties);
@@ -266,9 +335,12 @@ public class DeploymentPropertiesDialogModelTests {
 		assertTrue(model.isManualManifestType());
 		assertFalse(model.isManualManifestReadOnly());
 
-		ValidationResult validationResult = model.getValidator().getValue();
-		assertEquals(IStatus.INFO, validationResult.status);
-		assertEquals(ENTER_DEPLOYMENT_MANIFEST_YAML_MANUALLY, validationResult.msg);
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(IStatus.INFO, validationResult.status);
+			assertEquals(ENTER_DEPLOYMENT_MANIFEST_YAML_MANUALLY, validationResult.msg);
+		});
+		ACondition.waitFor("app name reconcile", TIMEOUT, () -> assertEquals(project.getName(), model.getManualSelectedAppName()));
 
 		CloudApplicationDeploymentProperties deploymentProperties = model.getDeploymentProperties();
 		assertNotNull(deploymentProperties);
@@ -277,43 +349,25 @@ public class DeploymentPropertiesDialogModelTests {
 		String newText = "Some text";
 		model.setManualManifest(newText);
 		assertEquals(newText, model.getManualDocument().get());
-		reconciler.reconcile(model.getManualDocument(), model.getManualAppNameAnnotationModel().getValue(), new NullProgressMonitor());
 
-		validationResult = model.getValidator().getValue();
-		assertEquals(IStatus.ERROR, validationResult.status);
-		assertEquals(MANIFEST_DOES_NOT_HAVE_ANY_APPLICATION_DEFINED, validationResult.msg);
-	}
-
-	@Test public void testNoAppNameAnnotationModel() throws Exception {
-		IProject project = projects.createProject("p1");
-		IFile file = createFile(project, "manifest.yml",
-				"applications:\n" +
-				"- name: " + project.getName() + "\n" +
-				"  memory: 512M\n"
-		);
-		model = new DeploymentPropertiesDialogModel(ui, createCloudData(), project, null);
-		model.setSelectedManifest(file);
-		model.type.setValue(ManifestType.MANUAL);
-
-		ValidationResult validationResult = model.getValidator().getValue();
-		assertEquals(IStatus.ERROR, validationResult.status);
-		assertEquals(NO_SUPPORT_TO_DETERMINE_APP_NAMES, validationResult.msg);
-
-		model.type.setValue(ManifestType.FILE);
-		validationResult = model.getValidator().getValue();
-		assertEquals(IStatus.ERROR, validationResult.status);
-		assertEquals(NO_SUPPORT_TO_DETERMINE_APP_NAMES, validationResult.msg);
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(IStatus.ERROR, validationResult.status);
+			assertEquals(MANIFEST_DOES_NOT_HAVE_ANY_APPLICATION_DEFINED, validationResult.msg);
+		});
 	}
 
 	@Test public void testFileManifestFileNotSelected() throws Exception {
 		IProject project = projects.createProject("p1");
 		createDialogModel(project, null);
 		model.type.setValue(ManifestType.FILE);
-		assertEquals(null, model.getFileAnnotationModel());
+		// With LS approach there would be annotation model for dumb manifest yaml file
 
-		ValidationResult validationResult = model.getValidator().getValue();
-		assertEquals(IStatus.ERROR, validationResult.status);
-		assertEquals(DEPLOYMENT_MANIFEST_FILE_NOT_SELECTED, validationResult.msg);
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(IStatus.ERROR, validationResult.status);
+			assertEquals(DEPLOYMENT_MANIFEST_FILE_NOT_SELECTED, validationResult.msg);
+		});
 	}
 
 	@Test public void testFileManifestNonYamlFileSelected() throws Exception {
@@ -322,12 +376,13 @@ public class DeploymentPropertiesDialogModelTests {
 		createDialogModel(project, null);
 		model.type.setValue(ManifestType.FILE);
 		model.setSelectedManifest(file);
+		waitUntilFileDisconnedted(project.getFolder(".settings").getFile(DeploymentPropertiesDialogModel.DUMMY_FILE_MANIFEST_YML));
 
-		assertNotNull(model.getFileAnnotationModel());
-
-		ValidationResult validationResult = model.getValidator().getValue();
-		assertEquals(IStatus.ERROR, validationResult.status);
-		assertEquals(MANIFEST_DOES_NOT_HAVE_ANY_APPLICATION_DEFINED, validationResult.msg);
+		ACondition.waitFor("reconcile to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(IStatus.ERROR, validationResult.status);
+			assertEquals(MANIFEST_DOES_NOT_HAVE_ANY_APPLICATION_DEFINED, validationResult.msg);
+		});
 	}
 
 	@Test public void testFileManifestFolderSelected() throws Exception {
@@ -336,11 +391,11 @@ public class DeploymentPropertiesDialogModelTests {
 		model.type.setValue(ManifestType.FILE);
 		model.setSelectedManifest(project);
 
-		assertEquals(null, model.getFileAnnotationModel());
-
-		ValidationResult validationResult = model.getValidator().getValue();
-		assertEquals(IStatus.ERROR, validationResult.status);
-		assertEquals(DEPLOYMENT_MANIFEST_FILE_NOT_SELECTED, validationResult.msg);
+		ACondition.waitFor("reconcile to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(IStatus.ERROR, validationResult.status);
+			assertEquals(DEPLOYMENT_MANIFEST_FILE_NOT_SELECTED, validationResult.msg);
+		});
 	}
 
 	@Test public void testFileManifestFileSelected() throws Exception {
@@ -353,13 +408,16 @@ public class DeploymentPropertiesDialogModelTests {
 		);
 		createDialogModel(project, null);
 		model.setSelectedManifest(file);
+		waitUntilFileDisconnedted(project.getFolder(".settings").getFile(DeploymentPropertiesDialogModel.DUMMY_FILE_MANIFEST_YML));
 		model.type.setValue(ManifestType.FILE);
 
-		assertNotNull(model.getFileAnnotationModel());
-
-		ValidationResult validationResult = model.getValidator().getValue();
-		assertEquals(IStatus.INFO, validationResult.status);
-		assertEquals(CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
+		ACondition.waitFor("reconcile to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			System.out.println("DOC: " + model.getFileDocument().get());
+			assertEquals(CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
+			assertEquals(IStatus.INFO, validationResult.status);
+		});
+		ACondition.waitFor("app name reconcile", TIMEOUT, () -> assertEquals(appNameFromFile, model.getFileSelectedAppName()));
 
 		CloudApplicationDeploymentProperties deploymentProperties = model.getDeploymentProperties();
 		assertNotNull(deploymentProperties);
@@ -378,40 +436,67 @@ public class DeploymentPropertiesDialogModelTests {
 
 		createDialogModel(project, null);
 		model.type.setValue(ManifestType.MANUAL);
+		waitForJobsToComplete();
 
-		ValidationResult validationResult = model.getValidator().getValue();
-		assertEquals(IStatus.INFO, validationResult.status);
-		assertEquals(ENTER_DEPLOYMENT_MANIFEST_YAML_MANUALLY, validationResult.msg);
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(IStatus.INFO, validationResult.status);
+			assertEquals(ENTER_DEPLOYMENT_MANIFEST_YAML_MANUALLY, validationResult.msg);
+		});
 
 		model.type.setValue(ManifestType.FILE);
-		validationResult = model.getValidator().getValue();
-		assertEquals(IStatus.ERROR, validationResult.status);
-		assertEquals(DEPLOYMENT_MANIFEST_FILE_NOT_SELECTED, validationResult.msg);
+		waitForJobsToComplete();
+
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(IStatus.ERROR, validationResult.status);
+			assertEquals(DEPLOYMENT_MANIFEST_FILE_NOT_SELECTED, validationResult.msg);
+		});
 
 		model.setSelectedManifest(validFile);
-		validationResult = model.getValidator().getValue();
-		assertEquals(IStatus.INFO, validationResult.status);
-		assertEquals(CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
+		waitForJobsToComplete();
+		System.out.println("New manifest set");
+		System.out.println(model.getFileYamlEditor().getViewer().getDocument().get());
+		System.out.println("Before conditional wait");
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			System.out.println(model.getFileYamlEditor().getViewer().getDocument().get());
+			assertEquals(IStatus.INFO, validationResult.status);
+			assertEquals(CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
+		});
 
 		model.type.setValue(ManifestType.MANUAL);
-		validationResult = model.getValidator().getValue();
-		assertEquals(IStatus.INFO, validationResult.status);
-		assertEquals(ENTER_DEPLOYMENT_MANIFEST_YAML_MANUALLY, validationResult.msg);
+		waitForJobsToComplete();
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(IStatus.INFO, validationResult.status);
+			assertEquals(ENTER_DEPLOYMENT_MANIFEST_YAML_MANUALLY, validationResult.msg);
+		});
 
 		model.type.setValue(ManifestType.FILE);
-		validationResult = model.getValidator().getValue();
-		assertEquals(IStatus.INFO, validationResult.status);
-		assertEquals(CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
+		waitForJobsToComplete();
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(IStatus.INFO, validationResult.status);
+			assertEquals(CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
+		});
 
 		model.setSelectedManifest(project);
-		validationResult = model.getValidator().getValue();
-		assertEquals(IStatus.ERROR, validationResult.status);
-		assertEquals(DEPLOYMENT_MANIFEST_FILE_NOT_SELECTED, validationResult.msg);
+		waitForJobsToComplete();
+		waitUntilFileDisconnedted(validFile);
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(IStatus.ERROR, validationResult.status);
+			assertEquals(DEPLOYMENT_MANIFEST_FILE_NOT_SELECTED, validationResult.msg);
+		});
 
 		model.setSelectedManifest(invalidFile);
-		validationResult = model.getValidator().getValue();
-		assertEquals(IStatus.ERROR, validationResult.status);
-		assertEquals(MANIFEST_DOES_NOT_HAVE_ANY_APPLICATION_DEFINED, validationResult.msg);
+		waitForJobsToComplete();
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(IStatus.ERROR, validationResult.status);
+			assertEquals(MANIFEST_DOES_NOT_HAVE_ANY_APPLICATION_DEFINED, validationResult.msg);
+		});
 	}
 
 	@Test public void testValidSingleAppFileSelectedForDeployedApp() throws Exception {
@@ -427,12 +512,16 @@ public class DeploymentPropertiesDialogModelTests {
 
 		createDialogModel(project, deployedApp);
 		model.type.setValue(ManifestType.FILE);
+		waitForJobsToComplete();
 
 		model.setSelectedManifest(validFileSingleName);
+		waitForJobsToComplete();
 
-		ValidationResult validationResult = model.getValidator().getValue();
-		assertEquals(IStatus.INFO, validationResult.status);
-		assertEquals(CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(IStatus.INFO, validationResult.status);
+			assertEquals(CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
+		});
 	}
 
 	@Test public void testInvalidSingleAppFileSelectedForDeployedApp() throws Exception {
@@ -451,9 +540,11 @@ public class DeploymentPropertiesDialogModelTests {
 
 		model.setSelectedManifest(invalidFileSingleName);
 
-		ValidationResult validationResult = model.getValidator().getValue();
-		assertEquals(IStatus.ERROR, validationResult.status);
-		assertEquals(MessageFormat.format(MANIFEST_DOES_NOT_CONTAIN_DEPLOYMENT_PROPERTIES_FOR_APPLICATION_WITH_NAME, appName), validationResult.msg);
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(IStatus.ERROR, validationResult.status);
+			assertEquals(MessageFormat.format(MANIFEST_DOES_NOT_CONTAIN_DEPLOYMENT_PROPERTIES_FOR_APPLICATION_WITH_NAME, appName), validationResult.msg);
+		});
 	}
 
 	@Test public void testValidMultiAppFileSelectedForDeployedApp() throws Exception {
@@ -476,9 +567,12 @@ public class DeploymentPropertiesDialogModelTests {
 
 		model.setSelectedManifest(validFileMultiName);
 
-		ValidationResult validationResult = model.getValidator().getValue();
-		assertEquals(IStatus.INFO, validationResult.status);
-		assertEquals(CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(IStatus.INFO, validationResult.status);
+			assertEquals(CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
+		});
+		ACondition.waitFor("app name reconcile", TIMEOUT, () -> assertEquals(deployedApp.getName(), model.getFileSelectedAppName()));
 
 		CloudApplicationDeploymentProperties deploymentProperties = model.getDeploymentProperties();
 		assertNotNull(deploymentProperties);
@@ -505,9 +599,12 @@ public class DeploymentPropertiesDialogModelTests {
 
 		model.setSelectedManifest(invalidFileMultiName);
 
-		ValidationResult validationResult = model.getValidator().getValue();
-		assertEquals(IStatus.ERROR, validationResult.status);
-		assertEquals(MessageFormat.format(MANIFEST_DOES_NOT_CONTAIN_DEPLOYMENT_PROPERTIES_FOR_APPLICATION_WITH_NAME, appName), validationResult.msg);
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(IStatus.ERROR, validationResult.status);
+			assertEquals(MessageFormat.format(MANIFEST_DOES_NOT_CONTAIN_DEPLOYMENT_PROPERTIES_FOR_APPLICATION_WITH_NAME, appName), validationResult.msg);
+		});
+		ACondition.waitFor("app name reconcile", TIMEOUT, () -> assertEquals(null, model.getFileSelectedAppName()));
 
 		CloudApplicationDeploymentProperties deploymentProperties = model.getDeploymentProperties();
 		assertEquals(null, deploymentProperties);
@@ -542,36 +639,53 @@ public class DeploymentPropertiesDialogModelTests {
 
 		model.type.setValue(ManifestType.FILE);
 		model.setSelectedManifest(validFileMultiName);
-
-		ValidationResult validationResult = model.getValidator().getValue();
-		assertEquals(IStatus.INFO, validationResult.status);
-		assertEquals(CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
+		ACondition.waitFor("app name reconcile", TIMEOUT, () -> assertEquals(appName, model.getFileSelectedAppName()));
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(IStatus.INFO, validationResult.status);
+			assertEquals(CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
+		});
 
 		model.setSelectedManifest(invalidFileMultiName);
-		validationResult = model.getValidator().getValue();
-		assertEquals(IStatus.ERROR, validationResult.status);
-		assertEquals(MessageFormat.format(MANIFEST_DOES_NOT_CONTAIN_DEPLOYMENT_PROPERTIES_FOR_APPLICATION_WITH_NAME, appName), validationResult.msg);
+		ACondition.waitFor("app name reconcile", TIMEOUT, () -> assertEquals(null, model.getFileSelectedAppName()));
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(IStatus.ERROR, validationResult.status);
+			assertEquals(MessageFormat.format(MANIFEST_DOES_NOT_CONTAIN_DEPLOYMENT_PROPERTIES_FOR_APPLICATION_WITH_NAME, appName), validationResult.msg);
+		});
 
 		model.setSelectedManifest(project);
-		validationResult = model.getValidator().getValue();
-		assertEquals(IStatus.ERROR, validationResult.status);
-		assertEquals(DEPLOYMENT_MANIFEST_FILE_NOT_SELECTED, validationResult.msg);
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(IStatus.ERROR, validationResult.status);
+			assertEquals(DEPLOYMENT_MANIFEST_FILE_NOT_SELECTED, validationResult.msg);
+		});
+		ACondition.waitFor("app name reconcile", TIMEOUT, () -> assertEquals(null, model.getFileSelectedAppName()));
 
 		model.type.setValue(ManifestType.MANUAL);
 		assertTrue(model.isManualManifestReadOnly());
-		validationResult = model.getValidator().getValue();
-		assertEquals(IStatus.INFO, validationResult.status);
-		assertEquals(CURRENT_GENERATED_DEPLOYMENT_MANIFEST, validationResult.msg);
+		ACondition.waitFor("app name reconcile", TIMEOUT, () -> assertEquals(appName, model.getManualSelectedAppName()));
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(IStatus.INFO, validationResult.status);
+			assertEquals(CURRENT_GENERATED_DEPLOYMENT_MANIFEST, validationResult.msg);
+		});
 
 		model.setSelectedManifest(invalidFileMultiName);
-		validationResult = model.getValidator().getValue();
-		assertEquals(IStatus.INFO, validationResult.status);
-		assertEquals(CURRENT_GENERATED_DEPLOYMENT_MANIFEST, validationResult.msg);
+		ACondition.waitFor("app name reconcile", TIMEOUT, () -> assertEquals(null, model.getFileSelectedAppName()));
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(IStatus.INFO, validationResult.status);
+			assertEquals(CURRENT_GENERATED_DEPLOYMENT_MANIFEST, validationResult.msg);
+		});
 
 		model.type.setValue(ManifestType.FILE);
-		validationResult = model.getValidator().getValue();
-		assertEquals(IStatus.ERROR, validationResult.status);
-		assertEquals(MessageFormat.format(MANIFEST_DOES_NOT_CONTAIN_DEPLOYMENT_PROPERTIES_FOR_APPLICATION_WITH_NAME, appName), validationResult.msg);
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(IStatus.ERROR, validationResult.status);
+			assertEquals(MessageFormat.format(MANIFEST_DOES_NOT_CONTAIN_DEPLOYMENT_PROPERTIES_FOR_APPLICATION_WITH_NAME, appName), validationResult.msg);
+		});
+		ACondition.waitFor("app name reconcile", TIMEOUT, () -> assertEquals(null, model.getFileSelectedAppName()));
 	}
 
 	@Test(expected = OperationCanceledException.class)
@@ -580,9 +694,11 @@ public class DeploymentPropertiesDialogModelTests {
 		createDialogModel(project, null);
 		model.type.setValue(ManifestType.MANUAL);
 
-		ValidationResult validationResult = model.getValidator().getValue();
-		assertEquals(IStatus.INFO, validationResult.status);
-		assertEquals(ENTER_DEPLOYMENT_MANIFEST_YAML_MANUALLY, validationResult.msg);
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(IStatus.INFO, validationResult.status);
+			assertEquals(ENTER_DEPLOYMENT_MANIFEST_YAML_MANUALLY, validationResult.msg);
+		});
 
 		model.cancelPressed();
 
@@ -601,11 +717,12 @@ public class DeploymentPropertiesDialogModelTests {
 		);
 		createDialogModel(project, null);
 		model.setSelectedManifest(file);
+		waitUntilFileDisconnedted(project.getFolder(".settings").getFile(DeploymentPropertiesDialogModel.DUMMY_FILE_MANIFEST_YML));
 		model.setManifestType(ManifestType.FILE);
 
 		assertEquals(file.getFullPath().toOSString(), model.getFileLabel().getValue());
 
-		model.getFileDocument().getValue().set("some text");
+		model.getFileDocument().set("some text");
 
 		assertEquals(file.getFullPath().toOSString() + "*", model.getFileLabel().getValue());
 	}
@@ -619,13 +736,22 @@ public class DeploymentPropertiesDialogModelTests {
 		IFile file = createFile(project, "manifest.yml", text);
 		createDialogModel(project, null);
 		model.setSelectedManifest(file);
+		waitUntilFileDisconnedted(project.getFolder(".settings").getFile(DeploymentPropertiesDialogModel.DUMMY_FILE_MANIFEST_YML));
+
 		model.setManifestType(ManifestType.FILE);
 
-		model.getFileDocument().getValue().set("some text");
+		model.getFileDocument().set("some text");
+
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(IStatus.ERROR, validationResult.status);
+			assertEquals(MANIFEST_DOES_NOT_HAVE_ANY_APPLICATION_DEFINED, validationResult.msg);
+		});
 
 		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(DONT_SAVE_BUTTON_ID);
 
 		model.cancelPressed();
+		waitForJobsToComplete();
 
 		assertTrue(model.isCanceled());
 		assertEquals(text, IOUtil.toString(file.getContents()));
@@ -633,9 +759,40 @@ public class DeploymentPropertiesDialogModelTests {
 		/*
 		 * Test document provider is not connected to the file input anymore
 		 */
-		FileEditorInput editorInput = new FileEditorInput(file);
-		TextFileDocumentProvider docProvider = (TextFileDocumentProvider) DocumentProviderRegistry.getDefault().getDocumentProvider(editorInput);
-		assertNull(docProvider.getDocument(editorInput));
+//		disposeModel();
+//		FileEditorInput editorInput = new FileEditorInput(file);
+//		TextFileDocumentProvider docProvider = (TextFileDocumentProvider) DocumentProviderRegistry.getDefault().getDocumentProvider(editorInput);
+//		assertNull(docProvider.getDocument(editorInput));
+	}
+
+	@Test public void testErrorsInYaml() throws Exception {
+		IProject project = projects.createProject("p1");
+		String appNameFromFile = "app-name-from-file";
+		String text = "applications:\n" +
+				"- name: " + appNameFromFile + "\n" +
+				"  memory: 512M\n";
+		IFile file = createFile(project, "manifest.yml", text);
+		createDialogModel(project, null);
+		model.setSelectedManifest(file);
+		waitUntilFileDisconnedted(project.getFolder(".settings").getFile(DeploymentPropertiesDialogModel.DUMMY_FILE_MANIFEST_YML));
+		model.setManifestType(ManifestType.FILE);
+
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(IStatus.INFO, validationResult.status);
+			assertEquals(CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
+		});
+
+		model.getFileDocument().set("applications:\n" +
+				"- name: " + appNameFromFile + "\n" +
+				"  memory: 512MXX\n");
+
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(IStatus.ERROR, validationResult.status);
+			assertEquals(MANIFEST_YAML_ERRORS, validationResult.msg);
+		});
+
 	}
 
 	@Test public void testSaveCancelWithDirtyManifestFile() throws Exception {
@@ -647,10 +804,16 @@ public class DeploymentPropertiesDialogModelTests {
 		IFile file = createFile(project, "manifest.yml", text);
 		createDialogModel(project, null);
 		model.setSelectedManifest(file);
+		waitUntilFileDisconnedted(project.getFolder(".settings").getFile(DeploymentPropertiesDialogModel.DUMMY_FILE_MANIFEST_YML));
 		model.setManifestType(ManifestType.FILE);
 
 		String newText = "some text";
-		model.getFileDocument().getValue().set(newText);
+		model.getFileDocument().set(newText);
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(MANIFEST_DOES_NOT_HAVE_ANY_APPLICATION_DEFINED, validationResult.msg);
+			assertEquals(IStatus.ERROR, validationResult.status);
+		});
 
 		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(SAVE_BUTTON_ID);
 
@@ -662,9 +825,10 @@ public class DeploymentPropertiesDialogModelTests {
 		/*
 		 * Test document provider is not connected to the file input anymore
 		 */
-		FileEditorInput editorInput = new FileEditorInput(file);
-		TextFileDocumentProvider docProvider = (TextFileDocumentProvider) DocumentProviderRegistry.getDefault().getDocumentProvider(editorInput);
-		assertNull(docProvider.getDocument(editorInput));
+//		disposeModel();
+//		FileEditorInput editorInput = new FileEditorInput(file);
+//		TextFileDocumentProvider docProvider = (TextFileDocumentProvider) DocumentProviderRegistry.getDefault().getDocumentProvider(editorInput);
+//		assertNull(docProvider.getDocument(editorInput));
 	}
 
 	@Test public void testDiscardOkWithDirtyManifestFile() throws Exception {
@@ -673,17 +837,25 @@ public class DeploymentPropertiesDialogModelTests {
 		int memory = 512;
 		String text = "applications:\n" +
 				"- name: " + appNameFromFile + "\n" +
-				"  memory: " + memory + "\n";
+				"  memory: " + memory + "M\n";
 		IFile file = createFile(project, "manifest.yml", text);
 		createDialogModel(project, null);
 		model.setSelectedManifest(file);
+		waitUntilFileDisconnedted(project.getFolder(".settings").getFile(DeploymentPropertiesDialogModel.DUMMY_FILE_MANIFEST_YML));
 		model.setManifestType(ManifestType.FILE);
 
 		int newMemory = 256;
 		String newText = "applications:\n" +
 				"- name: " + appNameFromFile + "\n" +
-				"  memory: " + newMemory + "\n";
-		model.getFileDocument().getValue().set(newText);
+				"  memory: " + newMemory + "M\n";
+		model.getFileDocument().set(newText);
+
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
+			assertEquals(IStatus.INFO, validationResult.status);
+		});
+		ACondition.waitFor("app name reconcile", TIMEOUT, () -> assertEquals(appNameFromFile, model.getFileSelectedAppName()));
 
 		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(DONT_SAVE_BUTTON_ID);
 
@@ -697,12 +869,14 @@ public class DeploymentPropertiesDialogModelTests {
 		assertEquals(appNameFromFile, deploymentProperties.getAppName());
 		assertEquals(newMemory, deploymentProperties.getMemory());
 
+
 		/*
 		 * Test document provider is not connected to the file input anymore
 		 */
-		FileEditorInput editorInput = new FileEditorInput(file);
-		TextFileDocumentProvider docProvider = (TextFileDocumentProvider) DocumentProviderRegistry.getDefault().getDocumentProvider(editorInput);
-		assertNull(docProvider.getDocument(editorInput));
+//		disposeModel();
+//		FileEditorInput editorInput = new FileEditorInput(file);
+//		TextFileDocumentProvider docProvider = (TextFileDocumentProvider) DocumentProviderRegistry.getDefault().getDocumentProvider(editorInput);
+//		assertNull(docProvider.getDocument(editorInput));
 	}
 
 	@Test public void testSaveOkWithDirtyManifestFile() throws Exception {
@@ -711,21 +885,27 @@ public class DeploymentPropertiesDialogModelTests {
 		int memory = 512;
 		String text = "applications:\n" +
 				"- name: " + appName + "\n" +
-				"  memory: " + memory + "\n";
+				"  memory: " + memory + "M\n";
 		String newAppName = "new-app";
 		int newMemory = 768;
 		String newText = "applications:\n" +
 				"- name: " + newAppName + "\n" +
-				"  memory: " + newMemory + "\n";
+				"  memory: " + newMemory + "M\n";
 
 		IFile file = createFile(project, "manifest.yml", text);
 		createDialogModel(project, null);
 		model.setSelectedManifest(file);
+		waitUntilFileDisconnedted(project.getFolder(".settings").getFile(DeploymentPropertiesDialogModel.DUMMY_FILE_MANIFEST_YML));
 		model.setManifestType(ManifestType.FILE);
 
-		model.getFileDocument().getValue().set(newText);
-		// Reconcile to pick the new app name (Simulate what happens in the editor)
-		reconciler.reconcile(model.getFileDocument().getValue(), model.getFileAppNameAnnotationModel().getValue(), new NullProgressMonitor());
+		model.getFileDocument().set(newText);
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
+			assertEquals(IStatus.INFO, validationResult.status);
+		});
+
+		ACondition.waitFor("app name reconcile", TIMEOUT, () -> assertEquals(newAppName, model.getFileSelectedAppName()));
 
 		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(SAVE_BUTTON_ID);
 
@@ -742,9 +922,10 @@ public class DeploymentPropertiesDialogModelTests {
 		/*
 		 * Test document provider is not connected to the file input anymore
 		 */
-		FileEditorInput editorInput = new FileEditorInput(file);
-		TextFileDocumentProvider docProvider = (TextFileDocumentProvider) DocumentProviderRegistry.getDefault().getDocumentProvider(editorInput);
-		assertNull(docProvider.getDocument(editorInput));
+//		disposeModel();
+//		FileEditorInput editorInput = new FileEditorInput(file);
+//		TextFileDocumentProvider docProvider = (TextFileDocumentProvider) DocumentProviderRegistry.getDefault().getDocumentProvider(editorInput);
+//		assertNull(docProvider.getDocument(editorInput));
 
 	}
 
@@ -754,23 +935,43 @@ public class DeploymentPropertiesDialogModelTests {
 		int memory = 512;
 		String text = "applications:\n" +
 				"- name: " + appNameFromFile + "\n" +
-				"  memory: " + memory + "\n";
+				"  memory: " + memory + "M\n";
 		IFile file = createFile(project, "manifest.yml", text);
 		createDialogModel(project, null);
 		model.setSelectedManifest(file);
+		waitUntilFileDisconnedted(project.getFolder(".settings").getFile(DeploymentPropertiesDialogModel.DUMMY_FILE_MANIFEST_YML));
 		model.setManifestType(ManifestType.FILE);
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
+			assertEquals(IStatus.INFO, validationResult.status);
+		});
+		ACondition.waitFor("app name reconcile", TIMEOUT, () -> assertEquals(appNameFromFile, model.getFileSelectedAppName()));
 
-		model.getFileDocument().getValue().set("some text");
+		model.getFileDocument().set("some text");
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(MANIFEST_DOES_NOT_HAVE_ANY_APPLICATION_DEFINED, validationResult.msg);
+			assertEquals(IStatus.ERROR, validationResult.status);
+		});
+		ACondition.waitFor("app name reconcile", TIMEOUT, () -> assertEquals(null, model.getFileSelectedAppName()));
 
 		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(DONT_SAVE_BUTTON_ID);
 
 		model.setSelectedManifest(project);
+		waitUntilFileDisconnedted(file);
 
 		assertEquals(text, IOUtil.toString(file.getContents()));
 
 		model.setSelectedManifest(file);
+		ACondition.waitFor("app name reconcile", TIMEOUT, () -> assertEquals(appNameFromFile, model.getFileSelectedAppName()));
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
+			assertEquals(IStatus.INFO, validationResult.status);
+		});
 
-		assertEquals(text, model.getFileDocument().getValue().get());
+		assertEquals(text, model.getFileDocument().get());
 
 		CloudApplicationDeploymentProperties deploymentProperties = model.getDeploymentProperties();
 		assertNotNull(deploymentProperties);
@@ -784,31 +985,43 @@ public class DeploymentPropertiesDialogModelTests {
 		int memory = 512;
 		String text = "applications:\n" +
 				"- name: " + appName + "\n" +
-				"  memory: " + memory + "\n";
+				"  memory: " + memory + "M\n";
 		String newAppName = "new-app";
 		int newMemory = 768;
 		String newText = "applications:\n" +
 				"- name: " + newAppName + "\n" +
-				"  memory: " + newMemory + "\n";
+				"  memory: " + newMemory + "M\n";
 
 		IFile file = createFile(project, "manifest.yml", text);
 		createDialogModel(project, null);
 		model.setSelectedManifest(file);
+		waitUntilFileDisconnedted(project.getFolder(".settings").getFile(DeploymentPropertiesDialogModel.DUMMY_FILE_MANIFEST_YML));
 		model.setManifestType(ManifestType.FILE);
 
-		model.getFileDocument().getValue().set(newText);
-		// Reconcile to pick the new app name (Simulate what happens in the editor)
-		reconciler.reconcile(model.getFileDocument().getValue(), model.getFileAppNameAnnotationModel().getValue(), new NullProgressMonitor());
+		model.getFileDocument().set(newText);
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
+			assertEquals(IStatus.INFO, validationResult.status);
+		});
 
 		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(SAVE_BUTTON_ID);
 
 		model.setSelectedManifest(project);
+		waitUntilFileDisconnedted(file);
 
 		assertEquals(newText, IOUtil.toString(file.getContents()));
 
 		model.setSelectedManifest(file);
 
-		assertEquals(newText, model.getFileDocument().getValue().get());
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
+			assertEquals(IStatus.INFO, validationResult.status);
+		});
+		ACondition.waitFor("app name reconcile", TIMEOUT, () -> assertEquals(newAppName, model.getFileSelectedAppName()));
+
+		assertEquals(newText, model.getFileDocument().get());
 
 		CloudApplicationDeploymentProperties deploymentProperties = model.getDeploymentProperties();
 		assertNotNull(deploymentProperties);
@@ -822,18 +1035,21 @@ public class DeploymentPropertiesDialogModelTests {
 		int newMemory = 768;
 		String newText = "applications:\n" +
 				"- name: " + newAppName + "\n" +
-				"  memory: " + newMemory + "\n";
+				"  memory: " + newMemory + "M\n";
 
 		IFile file = createFile(project, "manifest.yml", "");
 		createDialogModel(project, null);
 		model.setSelectedManifest(file);
+		waitUntilFileDisconnedted(project.getFolder(".settings").getFile(DeploymentPropertiesDialogModel.DUMMY_FILE_MANIFEST_YML));
 		model.setManifestType(ManifestType.FILE);
 
-		model.getFileDocument().getValue().set(newText);
+		model.getFileDocument().set(newText);
 		assertTrue(model.getFileLabel().getValue().endsWith("*"));
-
-		// Reconcile to pick the new app name (Simulate what happens in the editor)
-		reconciler.reconcile(model.getFileDocument().getValue(), model.getFileAppNameAnnotationModel().getValue(), new NullProgressMonitor());
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
+			assertEquals(IStatus.INFO, validationResult.status);
+		});
 
 		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(DONT_SAVE_BUTTON_ID);
 
@@ -843,11 +1059,19 @@ public class DeploymentPropertiesDialogModelTests {
 		assertEquals("", IOUtil.toString(file.getContents()));
 		assertTrue(model.getFileLabel().getValue().endsWith("*"));
 
+
 		// Input disconnect at this point - needs to be reset as well.
 		model.setSelectedManifest(null);
+		waitUntilFileDisconnedted(file);
 		model.setSelectedManifest(file);
-		model.getFileDocument().getValue().set(newText);
+		model.getFileDocument().set(newText);
 		assertTrue(model.getFileLabel().getValue().endsWith("*"));
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
+			assertEquals(IStatus.INFO, validationResult.status);
+		});
+		ACondition.waitFor("app name reconcile", TIMEOUT, () -> assertEquals(newAppName, model.getFileSelectedAppName()));
 
 		Mockito.reset(ui);
 		Mockito.when(ui.confirmOperation(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyInt())).thenReturn(SAVE_BUTTON_ID);
@@ -864,9 +1088,10 @@ public class DeploymentPropertiesDialogModelTests {
 		/*
 		 * Test document provider is not connected to the file input anymore
 		 */
-		FileEditorInput editorInput = new FileEditorInput(file);
-		TextFileDocumentProvider docProvider = (TextFileDocumentProvider) DocumentProviderRegistry.getDefault().getDocumentProvider(editorInput);
-		assertNull(docProvider.getDocument(editorInput));
+//		disposeModel();
+//		FileEditorInput editorInput = new FileEditorInput(file);
+//		TextFileDocumentProvider docProvider = (TextFileDocumentProvider) DocumentProviderRegistry.getDefault().getDocumentProvider(editorInput);
+//		assertNull(docProvider.getDocument(editorInput));
 
 	}
 
@@ -874,30 +1099,34 @@ public class DeploymentPropertiesDialogModelTests {
 		IProject project = projects.createProject("p1");
 		createDialogModel(project, null);
 		// Set resource annotation model
-		model.setManualResourceAnnotationModel(new AnnotationModel());
+//		model.setManualResourceAnnotationModel(new AnnotationModel());
 		model.type.setValue(ManifestType.MANUAL);
 
 		assertTrue(model.isManualManifestType());
 		assertFalse(model.isManualManifestReadOnly());
 
-		assertNotNull(model.getManualAnnotationModel());
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(IStatus.INFO, validationResult.status);
+			assertEquals(ENTER_DEPLOYMENT_MANIFEST_YAML_MANUALLY, validationResult.msg);
+		});
 
-		ValidationResult validationResult = model.getValidator().getValue();
-		assertEquals(IStatus.INFO, validationResult.status);
-		assertEquals(ENTER_DEPLOYMENT_MANIFEST_YAML_MANUALLY, validationResult.msg);
-
-		Annotation resourceAnnotation = new Annotation(ReconcileProblemAnnotation.ERROR_ANNOTATION_TYPE, false, "Some error");
+		Annotation resourceAnnotation = new Annotation(DeploymentPropertiesDialogModel.LSP_ERROR_ANNOTATION_TYPE, false, "Some error");
 		model.getManualResourceAnnotationModel().addAnnotation(resourceAnnotation, new Position(0,0));
 
-		validationResult = model.getValidator().getValue();
-		assertEquals(IStatus.ERROR, validationResult.status);
-		assertEquals(MANIFEST_YAML_ERRORS, validationResult.msg);
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(IStatus.ERROR, validationResult.status);
+			assertEquals(MANIFEST_YAML_ERRORS, validationResult.msg);
+		});
 
 		model.getManualResourceAnnotationModel().removeAnnotation(resourceAnnotation);
 
-		validationResult = model.getValidator().getValue();
-		assertEquals(IStatus.INFO, validationResult.status);
-		assertEquals(ENTER_DEPLOYMENT_MANIFEST_YAML_MANUALLY, validationResult.msg);
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(IStatus.INFO, validationResult.status);
+			assertEquals(ENTER_DEPLOYMENT_MANIFEST_YAML_MANUALLY, validationResult.msg);
+		});
 	}
 
 	@Test public void testFileManifestYamlError() throws Exception {
@@ -910,28 +1139,32 @@ public class DeploymentPropertiesDialogModelTests {
 		);
 		createDialogModel(project, null);
 		// Set resource annotation model
-		model.setFileResourceAnnotationModel(new AnnotationModel());
 		model.setSelectedManifest(file);
+		waitUntilFileDisconnedted(project.getFolder(".settings").getFile(DeploymentPropertiesDialogModel.DUMMY_FILE_MANIFEST_YML));
 		model.type.setValue(ManifestType.FILE);
 
-		assertNotNull(model.getFileAnnotationModel());
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(IStatus.INFO, validationResult.status);
+			assertEquals(CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
+		});
 
-		ValidationResult validationResult = model.getValidator().getValue();
-		assertEquals(IStatus.INFO, validationResult.status);
-		assertEquals(CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
-
-		Annotation resourceAnnotation = new Annotation(ReconcileProblemAnnotation.ERROR_ANNOTATION_TYPE, false, "Some error");
+		Annotation resourceAnnotation = new Annotation(DeploymentPropertiesDialogModel.LSP_ERROR_ANNOTATION_TYPE, false, "Some error");
 		model.getFileResourceAnnotationModel().addAnnotation(resourceAnnotation, new Position(0,0));
 
-		validationResult = model.getValidator().getValue();
-		assertEquals(IStatus.ERROR, validationResult.status);
-		assertEquals(MANIFEST_YAML_ERRORS, validationResult.msg);
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(IStatus.ERROR, validationResult.status);
+			assertEquals(MANIFEST_YAML_ERRORS, validationResult.msg);
+		});
 
 		model.getFileResourceAnnotationModel().removeAnnotation(resourceAnnotation);
 
-		validationResult = model.getValidator().getValue();
-		assertEquals(IStatus.INFO, validationResult.status);
-		assertEquals(CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(IStatus.INFO, validationResult.status);
+			assertEquals(CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
+		});
 	}
 
 }

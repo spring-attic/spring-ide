@@ -254,4 +254,14 @@
 	         </enablement>
    		</consolePageParticipant>
  	</extension>
+     <extension
+           point="org.eclipse.core.expressions.propertyTesters">
+        <propertyTester
+              class="org.springframework.ide.eclipse.boot.launch.properties.EmbeddedEditorPropertyTester"
+              id="org.springframework.ide.eclipse.boot.EmbeddedEditor"
+              namespace="org.springframework.ide.eclipse.boot.EmbeddedEditor"
+              properties="context"
+              type="java.lang.Object">
+        </propertyTester>
+     </extension>
 </plugin>

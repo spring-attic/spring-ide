@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2016 Pivotal, Inc.
+ * Copyright (c) 2015, 2019 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,9 +12,9 @@ package org.springframework.ide.eclipse.boot.dash.test;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -23,9 +23,9 @@ import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
+import org.apache.commons.io.IOUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.jface.text.IDocument;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
@@ -38,7 +38,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundr
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultCloudFoundryClientFactoryV2;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel;
-import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel.ManifestType;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.StoreCredentialsMode;
@@ -49,7 +48,6 @@ import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
-import org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.MultipleChoiceAnswerer;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockRunnableContext;
 import org.springframework.ide.eclipse.boot.dash.util.JmxSshTunnelManager;
 import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
@@ -68,9 +66,24 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 		int apply(String title, String msg, String[] choices, int defaultIndex);
 	}
 
-	@FunctionalInterface
-	public interface DeploymentAnswerer {
-		void apply(DeploymentPropertiesDialogModel model) throws Exception;
+	public static class DeploymentAnswerer {
+		String yaml;
+		String appName;
+
+		public DeploymentAnswerer(String yaml, String appName) {
+			this.yaml = yaml;
+			this.appName = appName;
+		}
+
+		public DeploymentAnswerer(String yaml) {
+			this(yaml, null);
+		}
+
+		public DeploymentAnswerer() {
+			this(null, null);
+		}
+
+		public void apply(CloudApplicationDeploymentProperties deploymentProperties) throws Exception {};
 	}
 
 	@FunctionalInterface
@@ -195,21 +208,11 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 	}
 
 	public void answerDeploymentPrompt(UserInteractions ui, final String appName, final String hostName) throws Exception {
-		when(ui.promptApplicationDeploymentProperties(any(DeploymentPropertiesDialogModel.class)))
-		.thenAnswer(new Answer<CloudApplicationDeploymentProperties>() {
-			@Override
-			public CloudApplicationDeploymentProperties answer(InvocationOnMock invocation) throws Throwable {
-				DeploymentPropertiesDialogModel dialog = (DeploymentPropertiesDialogModel) invocation.getArguments()[0];
-				dialog.setManifestType(ManifestType.MANUAL);
-				dialog.setManualManifest(
-						"applications:\n" +
-						"- name: "+appName+"\n" +
-						"  host: "+hostName+"\n"
-				);
-				dialog.okPressed();
-				return dialog.getDeploymentProperties();
-			}
-		});
+		final String yaml = "applications:\n" +
+				"- name: "+appName+"\n" +
+				"  host: "+hostName+"\n";
+
+		answerDeploymentPrompt(ui, new DeploymentAnswerer(yaml));
 	}
 
 	public void answerConfirmationMultipleChoice(UserInteractions ui, MultipleChoiceAnswerer answerer) {
@@ -233,16 +236,12 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 	public void answerDeploymentPrompt(UserInteractions ui, final String appName, final String hostName, final List<String> bindServices) throws Exception {
 		//TODO: replace this method with something more 'generic' that accepts a function which is passed the deploymentProperties
 		// so that it can add additional infos to it.
-		answerDeploymentPrompt(ui, (dialog) -> {
-			dialog.setManifestType(ManifestType.MANUAL);
-			dialog.setManualManifest(
-					"applications:\n" +
-					"- name: "+appName+"\n" +
-					"  host: "+hostName+"\n" +
-					createServicesBlock(bindServices)
-			);
-			dialog.okPressed();
-		});
+		final String yaml = "applications:\n" +
+				"- name: "+appName+"\n" +
+				"  host: "+hostName+"\n" +
+				createServicesBlock(bindServices);
+
+		answerDeploymentPrompt(ui, new DeploymentAnswerer(yaml));
 	}
 
 	private String createServicesBlock(List<String> bindServices) {
@@ -256,34 +255,23 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 		return buf.toString();
 	}
 
-	public void answerDeploymentPrompt(UserInteractions ui, final String appName, final String hostName, final Map<String,String> env) throws Exception {
-		when(ui.promptApplicationDeploymentProperties(any(DeploymentPropertiesDialogModel.class)))
-		.thenAnswer(new Answer<CloudApplicationDeploymentProperties>() {
-			@Override
-			public CloudApplicationDeploymentProperties answer(InvocationOnMock invocation) throws Throwable {
-				DeploymentPropertiesDialogModel dialog = (DeploymentPropertiesDialogModel) invocation.getArguments()[0];
-				dialog.setManifestType(ManifestType.MANUAL);
-				dialog.setManualManifest(
-						"applications:\n" +
-						"- name: "+appName+"\n" +
-						"  host: "+hostName+"\n" +
-						createEnvBlock(env)
-				);
-				dialog.okPressed();
-				return dialog.getDeploymentProperties();
-			}
+	private String createEnvBlock(Map<String, String> env) {
+		if (env==null || env.isEmpty()) {
+			return "";
+		}
+		StringBuilder buf = new StringBuilder("  env:\n");
+		for (Entry<String, String> e : env.entrySet()) {
+			buf.append("    "+e.getKey()+": "+e.getValue());
+		}
+		return buf.toString();
+	}
 
-			private String createEnvBlock(Map<String, String> env) {
-				if (env==null || env.isEmpty()) {
-					return "";
-				}
-				StringBuilder buf = new StringBuilder("  env:\n");
-				for (Entry<String, String> e : env.entrySet()) {
-					buf.append("    "+e.getKey()+": "+e.getValue());
-				}
-				return buf.toString();
-			}
-		});
+	public void answerDeploymentPrompt(UserInteractions ui, final String appName, final String hostName, final Map<String,String> env) throws Exception {
+		String yaml = "applications:\n" +
+					  "- name: "+appName+"\n" +
+					  "  host: "+hostName+"\n" +
+					  createEnvBlock(env);
+		answerDeploymentPrompt(ui, new DeploymentAnswerer(yaml));
 	}
 
 	/**
@@ -291,17 +279,14 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 	 * existing manifest file.
 	 */
 	public void answerDeploymentPrompt(UserInteractions ui, IFile manifestToSelect) throws Exception {
-		when(ui.promptApplicationDeploymentProperties(any(DeploymentPropertiesDialogModel.class)))
-		.thenAnswer(new Answer<CloudApplicationDeploymentProperties>() {
+		String yaml = IOUtils.toString(manifestToSelect.getContents(), manifestToSelect.getCharset());
+		answerDeploymentPrompt(ui, new DeploymentAnswerer(yaml) {
 			@Override
-			public CloudApplicationDeploymentProperties answer(InvocationOnMock invocation) throws Throwable {
-				DeploymentPropertiesDialogModel dialog = (DeploymentPropertiesDialogModel) invocation.getArguments()[0];
-				dialog.setManifestType(ManifestType.FILE);
-				dialog.setSelectedManifest(manifestToSelect);
-				dialog.okPressed();
-				return dialog.getDeploymentProperties();
+			public void apply(CloudApplicationDeploymentProperties properties) throws Exception {
+				properties.setManifestFile(manifestToSelect);
 			}
 		});
+
 	}
 
 	public void answerDeploymentPrompt(UserInteractions ui, DeploymentAnswerer answerer) throws Exception {
@@ -310,20 +295,9 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 			@Override
 			public CloudApplicationDeploymentProperties answer(InvocationOnMock invocation) throws Throwable {
 				DeploymentPropertiesDialogModel dialog = (DeploymentPropertiesDialogModel) invocation.getArguments()[0];
-				System.out.println(">>>>>>> Opening DeploymentPropertiesDialog");
-				System.out.println("TYPE: " + dialog.type.getValue());
-				System.out.println("MANUAL MANIFEST: \n" + dialog.getManualDocument().get());
-				System.out.println("FILE MANIFEST: "+dialog.getFileLabel().getValue() +"\n");
-				System.out.println(getFileContent(dialog));
-				answerer.apply(dialog);
-
-				System.out.println(">>>>>>> Closed DeploymentPropertiesDialog: "+(dialog.isCanceled()?"CANCEL":"OK"));
-				System.out.println("TYPE: " + dialog.type.getValue());
-				System.out.println("MANUAL MANIFEST: \n" + dialog.getManualDocument().get());
-				System.out.println("FILE MANIFEST: "+dialog.getFileLabel().getValue() +"\n");
-				System.out.println(getFileContent(dialog));
-
-				return dialog.getDeploymentProperties();
+				CloudApplicationDeploymentProperties deploymentProperties = dialog.getDeploymentProperties(answerer.yaml, answerer.appName);
+				answerer.apply(deploymentProperties);
+				return deploymentProperties;
 			}
 
 		});
@@ -346,14 +320,6 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 				return dialog.isOk();
 			}
 		}).when(ui).openPasswordDialog(any(PasswordDialogModel.class));
-	}
-
-	private String getFileContent(DeploymentPropertiesDialogModel dialog) {
-		IDocument doc = dialog.getFileDocument().getValue();
-		if (doc!=null) {
-			return doc.get();
-		}
-		return null;
 	}
 
 	public List<BootDashModel> getCfRunTargetModels() {

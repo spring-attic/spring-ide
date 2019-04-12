@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 Pivotal, Inc.
+ * Copyright (c) 2016, 2019 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,15 +11,14 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -28,21 +27,16 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
-import org.eclipse.jface.text.source.CompositeRuler;
-import org.eclipse.jface.text.source.ISharedTextColors;
-import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.jface.text.source.IVerticalRuler;
-import org.eclipse.jface.text.source.OverviewRuler;
 import org.eclipse.jface.text.source.SourceViewer;
-import org.eclipse.jface.text.source.SourceViewerConfiguration;
+import org.eclipse.jface.text.source.projection.ProjectionViewer;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -55,9 +49,7 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -70,29 +62,20 @@ import org.eclipse.swt.widgets.Sash;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchCommandConstants;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.handlers.IHandlerActivation;
 import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.model.BaseWorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
-import org.eclipse.ui.texteditor.AnnotationPreference;
-import org.eclipse.ui.texteditor.DefaultMarkerAnnotationAccess;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
-import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
-import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel.ManifestType;
-import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestEditorActivator;
-import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestYamlSourceViewerConfiguration;
-import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.lsp.LSBasedSourceViewerConfiguration;
-import org.springframework.ide.eclipse.editor.support.ForceableReconciler;
-import org.springframework.ide.eclipse.editor.support.util.ShellProviders;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.util.SwtConnect;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 /**
  * Cloud Foundry Application deployment properties dialog. Allows user to select
@@ -102,6 +85,8 @@ import org.springsource.ide.eclipse.commons.livexp.ui.util.SwtConnect;
  *
  */
 public class DeploymentPropertiesDialog extends TitleAreaDialog {
+
+	public static final String CONTEXT_DEPLOYMENT_PROPERTIES_DIALOG = "deployment-properties-dialog";
 
 	final static private String DIALOG_LIST_HEIGHT_SETTING = "ManifestFileDialog.listHeight"; //$NON-NLS-1$
 	final static private String YML_EXTENSION = "yml"; //$NON-NLS-1$
@@ -163,14 +148,8 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 	final static private int DEFAULT_WORKSPACE_GROUP_HEIGHT = 200;
 
-	private SourceViewerDecorationSupport fileYamlDecorationSupport;
-	private SourceViewerDecorationSupport manualYamlDecorationSupport;
 	private Label fileLabel;
 	private Sash resizeSash;
-	private SourceViewer fileYamlViewer;
-	private SourceViewer manualYamlViewer;
-	private AppNameAnnotationSupport fileYamlAppNameAnnotationSupport;
-	private AppNameAnnotationSupport manualYamlAppNameAnnotationSupport;
 	private TreeViewer workspaceViewer;
 	private Button refreshButton;
 	private Button buttonFileManifest;
@@ -186,32 +165,6 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 			new EditorActionHandler(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS, SourceViewer.CONTENTASSIST_PROPOSALS),
 			new EditorActionHandler(IWorkbenchCommandConstants.EDIT_UNDO, SourceViewer.UNDO),
 			new EditorActionHandler(IWorkbenchCommandConstants.EDIT_REDO, SourceViewer.REDO),
-	};
-
-	private ISharedTextColors colorsCache = new ISharedTextColors() {
-
-		private Map<RGB, Color> colors = new HashMap<>();
-
-		@Override
-		public Color getColor(RGB rgb) {
-			Color color = colors.get(rgb);
-			if (color == null) {
-				color = new Color(getShell().getDisplay(), rgb);
-				colors.put(rgb, color);
-			}
-			return color;
-		}
-
-		@Override
-		public void dispose() {
-			for (Color color : colors.values()) {
-				if (!color.isDisposed()) {
-					color.dispose();
-				}
-			}
-			colors.clear();
-		}
-
 	};
 
 	private ISelectionChangedListener selectionListener = new ISelectionChangedListener() {
@@ -250,7 +203,7 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 		createJmxSshOptionsGroup(composite);
 
-		activateHanlders();
+		activateHandlers();
 
 		model.type.addListener(new ValueListener<ManifestType>() {
 			@Override
@@ -369,7 +322,52 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		fileGroup.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).hint(SWT.DEFAULT, height).create());
 
 		workspaceViewer = new TreeViewer(fileGroup);
-		workspaceViewer.setContentProvider(new BaseWorkbenchContentProvider());
+		workspaceViewer.setContentProvider(new BaseWorkbenchContentProvider() {
+
+			@Override
+			public Object[] getChildren(Object element) {
+				Object[] children = super.getChildren(element);
+				if (element instanceof IFolder) {
+					IFolder folder = (IFolder) element;
+					if (folder.getParent() instanceof IProject) {
+						if (".settings".equals(folder.getName())) {
+							List<Object> filtered = new ArrayList<>();
+							for (Object child : children) {
+								if (child instanceof IFile) {
+									// Skip the temporary manifest file for manual mode
+									IFile f = (IFile) child;
+									if (DeploymentPropertiesDialogModel.DUMMY_MANUAL_MANIFEST_YML.equals(f.getName())
+											|| DeploymentPropertiesDialogModel.DUMMY_FILE_MANIFEST_YML.equals(f.getName())) {
+										continue;
+									}
+								}
+								filtered.add(child);
+							}
+							children = filtered.toArray(new Object[filtered.size()]);
+						}
+					}
+				}
+				if (element instanceof IProject) {
+					IJavaProject javaProject = JavaCore.create((IProject)element);
+					if (javaProject != null) {
+						List<Object> filtered = new ArrayList<>();
+						for (Object child : children) {
+							// Filter out obvious output folders
+							if (child instanceof IFolder) {
+								IFolder folder = (IFolder) child;
+								if ("target".equals(folder.getName()) || "bin".equals(folder.getName())) {
+									continue;
+								}
+							}
+							filtered.add(child);
+						}
+						children = filtered.toArray(new Object[filtered.size()]);
+					}
+				}
+				return children;
+			}
+
+		});
 		workspaceViewer.setLabelProvider(new WorkbenchLabelProvider());
 		workspaceViewer.setInput(ResourcesPlugin.getWorkspace().getRoot());
 		workspaceViewer.getControl().setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
@@ -482,61 +480,15 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 			}
 		});
 
-		DefaultMarkerAnnotationAccess fileMarkerAnnotationAccess = new DefaultMarkerAnnotationAccess();
-		OverviewRuler fileOverviewRuler = new OverviewRuler(fileMarkerAnnotationAccess, 10, colorsCache);
-		String appName = model.getDeployedAppName();
-		IVerticalRuler fileVerticalRuler = appName == null ? new CompositeRuler() : /*new VerticalRuler(16, fileMarkerAnnotationAccess)*/ null;
-		fileYamlViewer = new SourceViewer(fileYamlComposite, fileVerticalRuler, fileOverviewRuler, true,
-				SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
-
-		SourceViewerConfiguration fileYamlSourceViewerConfiguration = null;
-
-		if (ManifestEditorActivator.getDefault().isLanguageServerEnabled()) {
-			fileYamlSourceViewerConfiguration = new LSBasedSourceViewerConfiguration(ShellProviders.from(composite)) {
-
-				@Override
-				protected IReconcilingStrategy createReconcilerStrategy(ISourceViewer viewer) {
-					return new AppNameReconcilingStrategy(viewer, getAstProvider(), appName);
-				}
-			};
+		model.getFileYamlEditor().setContext(CONTEXT_DEPLOYMENT_PROPERTIES_DIALOG);
+		try {
+			model.getFileYamlEditor().createControl(fileYamlComposite);
+		} catch (CoreException e) {
+			Log.log(e);
 		}
-		else {
-			fileYamlSourceViewerConfiguration = new ManifestYamlSourceViewerConfiguration(ShellProviders.from(composite)) {
+		model.getFileYamlEditor().getViewer().getControl().setLayoutData(GridDataFactory.fillDefaults().grab(true, true).hint(SWT.DEFAULT, 200).create());
+		model.fileYamlEditorControlCreated();
 
-				@Override
-				protected IReconcilingStrategy createReconcilerStrategy(ISourceViewer viewer) {
-					CompositeReconcilingStrategy strategy = new CompositeReconcilingStrategy();
-					strategy.setReconcilingStrategies(new IReconcilingStrategy[] { super.createReconcilerStrategy(viewer),
-							new AppNameReconcilingStrategy(viewer, getAstProvider(), appName) });
-					return strategy;
-				}
-
-				@Override
-				protected ForceableReconciler createReconciler(ISourceViewer sourceViewer) {
-					IReconcilingStrategy strategy = createReconcilerStrategy(sourceViewer);
-					if (strategy!=null) {
-						InstantForceableReconciler reconciler = new InstantForceableReconciler(strategy);
-						reconciler.setDelay(500);
-						return reconciler;
-					}
-					return null;
-				}
-
-			};
-
-		}
-
-		fileYamlViewer.configure(fileYamlSourceViewerConfiguration);
-		fileYamlViewer.getControl().setLayoutData(GridDataFactory.fillDefaults().grab(true, true).hint(SWT.DEFAULT, 200).create());
-
-		fileYamlDecorationSupport = new SourceViewerDecorationSupport(fileYamlViewer, fileOverviewRuler, fileMarkerAnnotationAccess, colorsCache);
-		fileYamlAppNameAnnotationSupport = new AppNameAnnotationSupport(fileYamlViewer, fileMarkerAnnotationAccess, colorsCache);
-
-		model.getFileDocument().addListener(new UIValueListener<IDocument>() {
-			protected void uiGotValue(LiveExpression<IDocument> exp, IDocument value) {
-				updateManifestFile();
-			}
-		});
 
 		manualYamlComposite = new Composite(yamlGroup, SWT.NONE);
 		manualYamlComposite.setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
@@ -549,78 +501,29 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		manualYamlDescriptionLabel.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
 
 
-		DefaultMarkerAnnotationAccess manualMarkerAnnotationAccess = new DefaultMarkerAnnotationAccess();
-		OverviewRuler manualOverviewRuler = new OverviewRuler(manualMarkerAnnotationAccess, 10, colorsCache);
-		IVerticalRuler manualVerticalRuler = appName == null ? new CompositeRuler() : /*new VerticalRuler(16, manualMarkerAnnotationAccess)*/ null;
-		manualYamlViewer = new SourceViewer(manualYamlComposite, manualVerticalRuler,
-				manualOverviewRuler, true,
-				SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
-
-		SourceViewerConfiguration manualSourceViewerConfiguration = null;
-//		if (ManifestEditorActivator.getDefault().isLanguageServerEnabled()) {
-//			manualSourceViewerConfiguration = new LSBasedSourceViewerConfiguration(ShellProviders.from(composite)) {
-//
-//				@Override
-//				protected IReconcilingStrategy createReconcilerStrategy(ISourceViewer viewer) {
-//					return new AppNameReconcilingStrategy(viewer, getAstProvider(), appName);
-//				}
-//			};
-//		}
-//		else {
-			manualSourceViewerConfiguration = new ManifestYamlSourceViewerConfiguration(ShellProviders.from(composite)) {
-
-				@Override
-				protected IReconcilingStrategy createReconcilerStrategy(ISourceViewer viewer) {
-					CompositeReconcilingStrategy strategy = new CompositeReconcilingStrategy();
-					strategy.setReconcilingStrategies(new IReconcilingStrategy[] { super.createReconcilerStrategy(viewer),
-							new AppNameReconcilingStrategy(viewer, getAstProvider(), appName) });
-					return strategy;
-				}
-
-			};
-//		}
-
-		manualYamlViewer.configure(manualSourceViewerConfiguration);
-		manualYamlViewer.getControl().setLayoutData(GridDataFactory.fillDefaults().grab(true, true).hint(SWT.DEFAULT, 200).create());
-
+		model.getManualYamlEditor().setContext(CONTEXT_DEPLOYMENT_PROPERTIES_DIALOG);
+		try {
+			model.getManualYamlEditor().createControl(manualYamlComposite);
+		} catch (CoreException e) {
+			Log.log(e);
+		}
+		model.getManualYamlEditor().getViewer().getControl().setLayoutData(GridDataFactory.fillDefaults().grab(true, true).hint(SWT.DEFAULT, 200).create());
+		ProjectionViewer manualYamlViewer = model.getManualYamlEditor().getViewer();
 		if (model.isManualManifestReadOnly()) {
 			manualYamlViewer.setEditable(false);
 			manualYamlViewer.getTextWidget().setCaret(null);
 			manualYamlViewer.getTextWidget().setCursor(getShell().getDisplay().getSystemCursor(SWT.CURSOR_ARROW));
 		}
-		manualYamlDecorationSupport = new SourceViewerDecorationSupport(manualYamlViewer, manualOverviewRuler, manualMarkerAnnotationAccess, colorsCache);
-		manualYamlAppNameAnnotationSupport = new AppNameAnnotationSupport(manualYamlViewer, manualMarkerAnnotationAccess, colorsCache);
-
-		manualYamlViewer.setDocument(model.getManualDocument(), model.getManualAnnotationModel());
-
-		/*
-		 * Set preferences for viewers decoration support
-		 */
-		for (AnnotationPreference preference : (List<AnnotationPreference>) new MarkerAnnotationPreferences().getAnnotationPreferences()) {
-			manualYamlDecorationSupport.setAnnotationPreference(preference);
-			fileYamlDecorationSupport.setAnnotationPreference(preference);
-		}
-		manualYamlDecorationSupport.install(EditorsUI.getPreferenceStore());
-		fileYamlDecorationSupport.install(EditorsUI.getPreferenceStore());
+		model.manualYamlEditorControlCreated();
 
 		/*
 		 * Set the proper Font on the YAML viewers
 		 */
-		fileYamlViewer.getTextWidget().setFont(JFaceResources.getTextFont());
+		model.getFileYamlEditor().getViewer().getTextWidget().setFont(JFaceResources.getTextFont());
 		manualYamlViewer.getTextWidget().setFont(JFaceResources.getTextFont());
-
-		/*
-		 * Set App Name annotation model on the dialog's model
-		 */
-		model.setManualAppNameAnnotationModel(AppNameAnnotationSupport.getAppNameAnnotationModel(manualYamlViewer));
-
-		/*
-		 * Set YAML validation annotation model (resource marker annotation model)
-		 */
-		model.setManualResourceAnnotationModel(manualYamlViewer.getAnnotationModel());
 	}
 
-	private void activateHanlders() {
+	private void activateHandlers() {
 		if (service != null) {
 			for (EditorActionHandler handler : handlers) {
 				activations.add(service.activateHandler(handler.getActionId(), handler));
@@ -655,7 +558,6 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 						// Remove selection listener to set selection from current pathModel value
 						workspaceViewer.removeSelectionChangedListener(selectionListener);
 						workspaceViewer.refresh(resourceToRefresh);
-						updateManifestFile();
 						// Add the selection listener back after the initial value has been set
 						workspaceViewer.addSelectionChangedListener(selectionListener);
 					}
@@ -665,21 +567,6 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 		};
 		job.setRule(resourceToRefresh);
 		job.schedule();
-	}
-
-	private void updateManifestFile() {
-		IDocument document = model.getFileDocument().getValue();
-		fileYamlViewer.getControl().setEnabled(document!=null);
-		fileYamlViewer.setDocument(document, model.getFileAnnotationModel());
-		/*
-		 * Set New App Name annotation model on the dialog's model
-		 */
-		model.setFileAppNameAnnotationModel(AppNameAnnotationSupport.getAppNameAnnotationModel(fileYamlViewer));
-
-		/*
-		 * Set YAML validation annotation model (resource marker annotation model)
-		 */
-		model.setFileResourceAnnotationModel(fileYamlViewer.getAnnotationModel());
 	}
 
 	@Override
@@ -708,29 +595,12 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 	}
 
 	protected void dispose() {
-		model.dispose();
-
 		/*
 		 * Deactivate handlers for key bindings
 		 */
 		deactivateHandlers();
 
-		/*
-		 * dispose SWT and JFace resources
-		 */
-		colorsCache.dispose();
-		if (manualYamlDecorationSupport != null) {
-			manualYamlDecorationSupport.dispose();
-		}
-		if (fileYamlDecorationSupport != null) {
-			fileYamlDecorationSupport.dispose();
-		}
-		if (manualYamlAppNameAnnotationSupport != null) {
-			manualYamlAppNameAnnotationSupport.dispose();
-		}
-		if (fileYamlAppNameAnnotationSupport != null) {
-			fileYamlAppNameAnnotationSupport.dispose();
-		}
+		model.dispose();
 	}
 
 	// TODO: this should be replaced with TreeViewer.getStructuredSelection once we drop support for Eclipse 4.4
@@ -792,6 +662,8 @@ public class DeploymentPropertiesDialog extends TitleAreaDialog {
 
 		@Override
 		public Object execute(ExecutionEvent arg0) throws ExecutionException {
+			ProjectionViewer manualYamlViewer = model.getManualYamlEditor().getViewer();
+			ProjectionViewer fileYamlViewer = model.getFileYamlEditor().getViewer();
 			if (manualYamlViewer.isEditable() && manualYamlViewer.getControl().isVisible()
 					&& manualYamlViewer.getTextWidget().isFocusControl()) {
 				manualYamlViewer.doOperation(operationId);

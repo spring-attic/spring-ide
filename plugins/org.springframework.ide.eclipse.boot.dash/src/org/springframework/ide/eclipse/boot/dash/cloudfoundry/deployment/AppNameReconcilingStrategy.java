@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Pivotal, Inc.
+ * Copyright (c) 2016, 2019 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -60,9 +60,8 @@ public class AppNameReconcilingStrategy implements IReconcilingStrategy, IReconc
 	 * @param parser YAML parser
 	 * @param appName Application name to keep selected all the time
 	 */
-	public AppNameReconcilingStrategy(ISourceViewer viewer, YamlASTProvider parser, String appName) {
-		fViewer = viewer;
-		fReconciler = new AppNameReconciler(parser, appName);
+	public AppNameReconcilingStrategy(YamlASTProvider parser) {
+		fReconciler = new AppNameReconciler(parser);
 	}
 
 	/*
@@ -113,6 +112,14 @@ public class AppNameReconcilingStrategy implements IReconcilingStrategy, IReconc
 	@Override
 	public void setDocument(IDocument document) {
 		fDocument= document;
+	}
+
+	public void install(ISourceViewer viewer) {
+		fViewer = viewer;
+	}
+
+	public void uninstall() {
+		fViewer = null;
 	}
 
 }

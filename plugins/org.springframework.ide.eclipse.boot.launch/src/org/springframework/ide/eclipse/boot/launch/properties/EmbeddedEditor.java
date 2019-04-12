@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Pivotal, Inc.
+ * Copyright (c) 2018, 2019 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -114,6 +114,8 @@ public class EmbeddedEditor implements ITextEditor {
 			new EditorActionHandler(IWorkbenchCommandConstants.EDIT_REDO, SourceViewer.REDO)
 	};
 
+	private final boolean withHandlers;
+
 	private final ViewerConfigurationFactory viewerConfigFactory;
 
 	private ProjectionViewer viewer;
@@ -134,14 +136,23 @@ public class EmbeddedEditor implements ITextEditor {
 
 	private final IElementStateListener elementStateListener = new ElementStateListener();
 
-	public EmbeddedEditor(ViewerConfigurationFactory viewerConfigFactory, IPreferenceStore prefStore) {
+	private String context;
+
+	private DefaultMarkerAnnotationAccess fileMarkerAnnotationAccess;
+
+	public EmbeddedEditor(ViewerConfigurationFactory viewerConfigFactory, IPreferenceStore prefStore, boolean withHandlers) {
 		this.viewerConfigFactory = viewerConfigFactory;
 		this.prefStore = prefStore;
+		this.withHandlers = withHandlers;
+	}
+
+	public EmbeddedEditor(ViewerConfigurationFactory viewerConfigFactory, IPreferenceStore prefStore) {
+		this(viewerConfigFactory, prefStore, true);
 	}
 
 	public Control createControl(Composite parent) throws CoreException {
 		verticalRuler = new CompositeRuler();
-		DefaultMarkerAnnotationAccess fileMarkerAnnotationAccess = new DefaultMarkerAnnotationAccess();
+		fileMarkerAnnotationAccess = new DefaultMarkerAnnotationAccess();
 		OverviewRuler overviewRuler = new OverviewRuler(fileMarkerAnnotationAccess, 10, getSharedColors());
 		viewer = new ProjectionViewer(parent, verticalRuler, overviewRuler, true,
 				SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
@@ -157,7 +168,9 @@ public class EmbeddedEditor implements ITextEditor {
 		}
 		decorationSupport.install(prefStore);
 
-		activateHandlers();
+		if (withHandlers) {
+			activateHandlers();
+		}
 
 		initViewer();
 
@@ -168,7 +181,11 @@ public class EmbeddedEditor implements ITextEditor {
 		return viewer;
 	}
 
-	private ISharedTextColors getSharedColors() {
+	public DefaultMarkerAnnotationAccess getAnnotationAccess() {
+		return fileMarkerAnnotationAccess;
+	}
+
+	public ISharedTextColors getSharedColors() {
 		return EditorsPlugin.getDefault().getSharedTextColors();
 	}
 
@@ -276,10 +293,17 @@ public class EmbeddedEditor implements ITextEditor {
 
 	@Override
 	public void dispose() {
-		deactivateHandlers();
-		getDocumentProvider().disconnect(editorInput);
-		decorationSupport.dispose();
-		if (!viewer.getControl().isDisposed()) {
+		if (withHandlers) {
+			deactivateHandlers();
+		}
+		if (editorInput != null) {
+			getDocumentProvider().disconnect(editorInput);
+			editorInput = null;
+		}
+		if (decorationSupport != null) {
+			decorationSupport.dispose();
+		}
+		if (viewer != null && !viewer.getControl().isDisposed()) {
 			viewer.getControl().dispose();
 		}
 	}
@@ -464,6 +488,22 @@ public class EmbeddedEditor implements ITextEditor {
 	@Override
 	public void selectAndReveal(int offset, int length) {
 	}
+
+	public String getContext() {
+		return context;
+	}
+
+	public void setContext(String context) {
+		this.context = context;
+	}
+
+//	public void onPreCreateControl(Runnable preCreateControlRunnable) {
+//		this.preCreateControlRunnable = preCreateControlRunnable;
+//	}
+//
+//	public void onPostCreateControl(Runnable postCreateControlRunnable) {
+//		this.postCreateControlRunnable  = postCreateControlRunnable;
+//	}
 
 	private static final Document NULL_DOCUMENT = new Document("");
 

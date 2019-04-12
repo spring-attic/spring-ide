@@ -230,6 +230,8 @@ public class DefaultUserInteractions implements UserInteractions {
 		final Shell shell = getShell();
 
 		if (shell != null) {
+			model.initFileModel();
+			model.initManualModel();
 			shell.getDisplay().syncExec(new Runnable() {
 				@Override
 				public void run() {
