@@ -444,7 +444,6 @@ public class CloudFoundryClientTest {
 		String appName = appHarness.randomAppName();
 
 		String[] HC_TYPES = {
-				HealthChecks.HC_HTTP,
 				HealthChecks.HC_PORT,
 				HealthChecks.HC_PROCESS
 		};

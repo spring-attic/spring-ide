@@ -935,7 +935,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		ACondition.waitFor("sshtunnel creation", 2_000, () -> {
 			int jmxPort = app.getCfJmxPort();
 			assertEquals(
-				ImmutableSet.of(Pair.of(
+				ImmutableSet.of(ImmutableList.of(
 					"service:jmx:rmi://localhost:"+jmxPort+"/jndi/rmi://localhost:"+jmxPort+"/jmxrmi",
 					"tunneled-jmx-app.cfmockapps.io"
 				)),
@@ -1063,7 +1063,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		ACondition.waitFor("sshtunnel creation", 2_000, () -> {
 			int jmxPort = app.getCfJmxPort();
 			assertEquals(
-				ImmutableSet.of(Pair.of(
+				ImmutableSet.of(ImmutableList.of(
 					"service:jmx:rmi://localhost:"+jmxPort+"/jndi/rmi://localhost:"+jmxPort+"/jmxrmi",
 					"tunneled-jmx-app.cfmockapps.io"
 				)),
@@ -1140,7 +1140,7 @@ public class CloudFoundryBootDashModelMockingTest {
 			int jmxPort = app.getCfJmxPort();
 			assertTrue(jmxPort>0);
 			assertEquals(
-				ImmutableSet.of(Pair.of(
+				ImmutableSet.of(ImmutableList.of(
 					"service:jmx:rmi://localhost:"+jmxPort+"/jndi/rmi://localhost:"+jmxPort+"/jmxrmi",
 					"tunneled-jmx-app.cfmockapps.io"
 				)),
@@ -1189,7 +1189,7 @@ public class CloudFoundryBootDashModelMockingTest {
 			JmxSshTunnelManager tunnels = harness.getJmxSshTunnelManager();
 			ACondition.waitFor("sshtunnel creation", 2_000, () -> {
 				assertEquals(
-						ImmutableSet.of(Pair.of(
+						ImmutableSet.of(ImmutableList.of(
 							"service:jmx:rmi://localhost:"+jmxPort+"/jndi/rmi://localhost:"+jmxPort+"/jmxrmi",
 							"tunneled-jmx-app.cfmockapps.io"
 						)),
@@ -1211,7 +1211,7 @@ public class CloudFoundryBootDashModelMockingTest {
 			JmxSshTunnelManager tunnels = harness.getJmxSshTunnelManager();
 			ACondition.waitFor("sshtunnel creation", 2_000, () -> {
 				assertEquals(
-						ImmutableSet.of(Pair.of(
+						ImmutableSet.of(ImmutableList.of(
 							"service:jmx:rmi://localhost:"+jmxPort+"/jndi/rmi://localhost:"+jmxPort+"/jmxrmi",
 							"tunneled-jmx-app.cfmockapps.io"
 						)),
@@ -2351,8 +2351,8 @@ public class CloudFoundryBootDashModelMockingTest {
 
 	}
 
-	@Test public void pushWithHealthCheckNone() throws Exception {
-		doPushWithHealthCheckType("none", "none");
+	@Test public void pushWithHealthCheckProcess() throws Exception {
+		doPushWithHealthCheckType("process", "process");
 	}
 
 	@Test public void pushWithHealthCheckDefault() throws Exception {
