@@ -258,7 +258,7 @@ public abstract class AbstractBootLaunchConfigurationDelegate extends JavaLaunch
 			String name = (String) e.getKey();
 			String value = (String) e.getValue();
 			//spring boot doesn't like empty option keys/values so skip those.
-			if (!name.isEmpty() && !value.isEmpty()) {
+			if (!name.isEmpty()) {
 				args.add(propertyAssignmentArgument(name, value));
 			}
 		}
@@ -270,7 +270,11 @@ public abstract class AbstractBootLaunchConfigurationDelegate extends JavaLaunch
 			//so we cannot represent keys containing '='.
 			throw new IllegalArgumentException("property name shouldn't contain '=':"+name);
 		}
-		return "--"+name + "=" +value;
+		if (value.isEmpty()) {
+			return "--"+name;
+		} else {
+			return "--"+name + "=" +value;
+		}
 	}
 
 

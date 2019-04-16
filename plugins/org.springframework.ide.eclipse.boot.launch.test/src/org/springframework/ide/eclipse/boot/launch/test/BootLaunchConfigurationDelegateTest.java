@@ -294,6 +294,33 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		assertOk(result);
 	}
 
+	public void testLaunchWithEmptyProperties() throws Exception {
+		createLaunchReadyProject(TEST_PROJECT);
+		ILaunchConfigurationWorkingCopy wc = createBaseWorkingCopy();
+
+		BootLaunchConfigurationDelegate.setRawApplicationProperties(wc,
+				"foo=\n" +
+				"#bar=bar is not enabled\n"
+		);
+
+		int jmxPort = JmxBeanSupport.randomPort(); // must set or it will be generated randomly
+												   // and then we can't make the 'assert' below pass easily.
+		BootLaunchConfigurationDelegate.setJMXPort(wc, ""+jmxPort);
+
+		LaunchResult result = LaunchUtil.synchLaunch(wc);
+
+		assertContains(":: Spring Boot ::", result.out);
+		assertPropertyDump(result.out,
+				"debug=null\n" +
+				"zor=null\n" +
+				"foo=''\n" +
+				"bar=null\n" +
+				"com.sun.management.jmxremote.port='"+jmxPort+"'"
+		);
+		assertOk(result);
+	}
+
+
 	public void testLaunchWithProfile() throws Exception {
 		createLaunchReadyProject(TEST_PROJECT);
 		ILaunchConfigurationWorkingCopy wc = createBaseWorkingCopy();
