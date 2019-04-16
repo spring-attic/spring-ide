@@ -10,12 +10,12 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.util;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.JmxSupport;
@@ -48,7 +48,13 @@ public class JmxSshTunnelManager {
 			CloudAppDashElement app = entry.getValue();
 			int port = tunnel.getLocalPort();
 			if (port>0) {
-				builder.add(ImmutableList.of(JmxSupport.getJmxUrl(port), app.getLiveHost()));
+				builder.add(Arrays.asList(
+						/*url*/ JmxSupport.getJmxUrl(port),
+						/*host*/ app.getLiveHost(),
+						/*port*/ null,
+						/*urlScheme*/ null,
+						/*keepChecking*/ "false"
+				));
 			}
 		}
 		return builder.build();
