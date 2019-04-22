@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.config.ui.wizards;
 
+import static org.springframework.ide.eclipse.xml.namespaces.XmlNamespaceUtils.convertToHttps;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +41,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
 
 /**
  * Wizard that displays the namespace configuration page.
@@ -168,17 +169,17 @@ public class NamespaceConfigWizard extends Wizard implements INewWizard {
 			model = modelManager.getModelForEdit(xmlConfigFile);
 		}
 		catch (CoreException e) {
-			throw new CoreException(new Status(Status.ERROR, ConfigUiPlugin.PLUGIN_ID,
-					"Could not open model for editing"));
+			throw new CoreException(
+					new Status(Status.ERROR, ConfigUiPlugin.PLUGIN_ID, "Could not open model for editing"));
 		}
 		catch (IOException e) {
-			throw new CoreException(new Status(Status.ERROR, ConfigUiPlugin.PLUGIN_ID,
-					"Could not open model for editing"));
+			throw new CoreException(
+					new Status(Status.ERROR, ConfigUiPlugin.PLUGIN_ID, "Could not open model for editing"));
 		}
 
 		if (model == null) {
-			throw new CoreException(new Status(Status.ERROR, ConfigUiPlugin.PLUGIN_ID,
-					"Could not open model for editing"));
+			throw new CoreException(
+					new Status(Status.ERROR, ConfigUiPlugin.PLUGIN_ID, "Could not open model for editing"));
 		}
 
 		IStructuredDocumentRegion beansRegion = null;
@@ -191,15 +192,15 @@ public class NamespaceConfigWizard extends Wizard implements INewWizard {
 		}
 
 		if (beansRegion == null) {
-			throw new CoreException(new Status(Status.ERROR, ConfigUiPlugin.PLUGIN_ID,
-					"Could not open model for editing"));
+			throw new CoreException(
+					new Status(Status.ERROR, ConfigUiPlugin.PLUGIN_ID, "Could not open model for editing"));
 		}
 
 		Element beansXmlElement = (Element) model.getIndexedRegion(beansRegion.getStartOffset());
 
 		if (beansXmlElement == null || !beansXmlElement.getNodeName().startsWith("beans")) {
-			throw new CoreException(new Status(Status.ERROR, ConfigUiPlugin.PLUGIN_ID,
-					"Could not open model for editing"));
+			throw new CoreException(
+					new Status(Status.ERROR, ConfigUiPlugin.PLUGIN_ID, "Could not open model for editing"));
 		}
 
 		return beansXmlElement;
@@ -212,7 +213,8 @@ public class NamespaceConfigWizard extends Wizard implements INewWizard {
 		if (schemaVersion == null) {
 			schemaVersion = namespaceDefinition.getDefaultSchemaLocation(file);
 		}
-		return namespaceDefinition.getNamespaceURI() + " " + schemaVersion;
+		schemaVersion = convertToHttps(file.getProject(), schemaVersion);
+		return namespaceDefinition.getNamespaceURI() + " " + schemaVersion; //$NON-NLS-1$
 	}
 
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
@@ -224,7 +226,7 @@ public class NamespaceConfigWizard extends Wizard implements INewWizard {
 	@Override
 	public boolean performFinish() {
 		if (editor != null && editor.getAdapter(StructuredTextEditor.class) != null) {
-			StructuredTextEditor textEditor = (StructuredTextEditor) editor.getAdapter(StructuredTextEditor.class);
+			StructuredTextEditor textEditor = editor.getAdapter(StructuredTextEditor.class);
 			textEditor.getTextViewer().setRedraw(false);
 			performFinishHelper();
 			textEditor.getTextViewer().setRedraw(true);

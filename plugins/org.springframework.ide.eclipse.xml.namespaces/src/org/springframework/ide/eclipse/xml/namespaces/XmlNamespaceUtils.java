@@ -14,6 +14,26 @@ import org.eclipse.core.resources.IProject;
 import org.springsource.ide.eclipse.commons.core.SpringCorePreferences;
 
 public class XmlNamespaceUtils {
+	
+	public static boolean convertNamespaceLocationsToHttps(IProject project) {
+		if (SpringCorePreferences.getProjectPreferences(project, SpringXmlNamespacesPlugin.PLUGIN_ID).getBoolean(
+				SpringXmlNamespacesPlugin.PROJECT_PROPERTY_ID, false)) {
+			return SpringCorePreferences.getProjectPreferences(project, SpringXmlNamespacesPlugin.PLUGIN_ID).getBoolean(
+					SpringXmlNamespacesPlugin.USE_HTTPS_FOR_SCHEMA_LOCATIONS, false);
+		}
+		return SpringXmlNamespacesPlugin.getDefault().getPluginPreferences().getBoolean(
+				SpringXmlNamespacesPlugin.USE_HTTPS_FOR_SCHEMA_LOCATIONS);
+	}
+
+	/**
+	 * Converts a given XSD schema location to https if the preference is enabled.
+	 */
+	public static String convertToHttps(IProject project, String schemaLocation) {
+		if (convertNamespaceLocationsToHttps(project) && schemaLocation.startsWith("http:")) {
+			return "https"+schemaLocation.substring(4);
+		}
+		return schemaLocation;
+	}
 
 	/**
 	 * Checks if a project should load namespace handlers from the classpath or use the global catalog.

@@ -57,6 +57,10 @@ public class SpringXmlNamespacesPlugin extends AbstractUIPlugin {
 	/** preference key to specify the default namespace version */
 	public static final String NAMESPACE_PREFIX_PREFERENCE_ID = "prefix.";
 
+	/** preference key to specify whether wizards automatically convert all newly inserted namespace 
+	 *  locations into https */
+	public static final String USE_HTTPS_FOR_SCHEMA_LOCATIONS = "use.https.for.new.namespace.locations";
+
 	/** preference key to enable namespace versions per namespace */
 	public static final String PROJECT_PROPERTY_ID = "enable.project.preferences";
 
@@ -64,6 +68,7 @@ public class SpringXmlNamespacesPlugin extends AbstractUIPlugin {
 	public static final String IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY = "ignoreMissingNamespaceHandler";
 
 	public static final boolean IGNORE_MISSING_NAMESPACEHANDLER_PROPERTY_DEFAULT = false;
+
 
 	/** The shared instance */
 	private static SpringXmlNamespacesPlugin plugin;

@@ -39,6 +39,8 @@ import org.springframework.ide.eclipse.beans.ui.namespaces.UiNamespaceUtils;
 import org.springframework.ide.eclipse.core.SpringCoreUtils;
 import org.springframework.ide.eclipse.xml.namespaces.ui.INamespaceDefinition;
 
+import static org.springframework.ide.eclipse.xml.namespaces.XmlNamespaceUtils.convertToHttps;
+
 /**
  * {@link WizardNewFileCreationPage} that enables to select a folder and a name for the new
  * {@link IBeansConfig}.
@@ -124,7 +126,7 @@ public class NewBeansConfigFilePage extends WizardNewFileCreationPage {
 		builder.append(defaultXsd.getNamespaceURI());
 		builder.append(" ");
 		if (schemaVersions.containsKey(defaultXsd)) {
-			builder.append(schemaVersions.get(defaultXsd));
+			builder.append(convertToHttps(file.getProject(), schemaVersions.get(defaultXsd)));
 		}
 		else {
 			builder.append(defaultXsd.getDefaultSchemaLocation(file));
@@ -137,10 +139,9 @@ public class NewBeansConfigFilePage extends WizardNewFileCreationPage {
 				builder.append(def.getNamespaceURI());
 				builder.append(" ");
 				if (schemaVersions.containsKey(def)) {
-					builder.append(schemaVersions.get(def));
-				}
-				else {
-					builder.append(def.getDefaultSchemaLocation(file));
+					builder.append(convertToHttps(file.getProject(), schemaVersions.get(def)));
+				} else {
+					builder.append(convertToHttps(file.getProject(), def.getDefaultSchemaLocation(file)));
 				}
 				builder.append(lineSeparator);
 			}

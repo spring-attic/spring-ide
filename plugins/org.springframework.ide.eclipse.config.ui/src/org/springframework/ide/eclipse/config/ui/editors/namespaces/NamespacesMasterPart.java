@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.config.ui.editors.namespaces;
 
+import static org.springframework.ide.eclipse.xml.namespaces.XmlNamespaceUtils.convertToHttps;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -248,7 +250,7 @@ public class NamespacesMasterPart extends AbstractConfigMasterPart implements IN
 		if ((namespaceDefinitionList == null || namespaceDefinitionList.size() == 0) && !loading) {
 			loading = true;
 			if (getConfigEditor().getResourceFile() != null) {
-				XmlUiNamespaceUtils.getNamespaceDefinitions(getConfigEditor().getResourceFile().getProject(),
+				XmlUiNamespaceUtils.getNamespaceDefinitions(getProject(),
 						new XmlUiNamespaceUtils.INamespaceDefinitionTemplate() {
 							public void doWithNamespaceDefinitions(INamespaceDefinition[] namespaceDefinitions,
 									IProject project) {
@@ -272,6 +274,10 @@ public class NamespacesMasterPart extends AbstractConfigMasterPart implements IN
 			}
 		}
 		return namespaceDefinitionList;
+	}
+
+	private IProject getProject() {
+		return getConfigEditor().getResourceFile().getProject();
 	}
 
 	/**
@@ -304,6 +310,7 @@ public class NamespacesMasterPart extends AbstractConfigMasterPart implements IN
 		if (schemaVersion == null) {
 			schemaVersion = namespaceDefinition.getDefaultSchemaLocation(getConfigEditor().getResourceFile());
 		}
+		schemaVersion = convertToHttps(getProject(), schemaVersion);
 		return namespaceDefinition.getNamespaceURI() + " " + schemaVersion; //$NON-NLS-1$
 	}
 
@@ -416,8 +423,7 @@ public class NamespacesMasterPart extends AbstractConfigMasterPart implements IN
 	}
 
 	private boolean shouldRefresh(INamespaceDefinitionListener.NamespaceDefinitionChangeEvent event) {
-		return event.getProject() == null
-				|| event.getProject().equals(getConfigEditor().getResourceFile().getProject());
+		return event.getProject() == null || event.getProject().equals(getProject());
 	}
 
 	private List<INamespaceDefinition> triggerLoadNamespaceDefinitionList(
@@ -481,6 +487,17 @@ public class NamespacesMasterPart extends AbstractConfigMasterPart implements IN
 	}
 
 	protected void updateXsdVersion() {
+//		String _origSchemaLocations = rootElement.getAttribute(ConfigCoreUtils.ATTR_SCHEMA_LOCATION);
+//		Map<String, String> origSchemaLocations = new HashMap<>();
+//		if (_origSchemaLocations != null) {
+//			String[] pieces = _origSchemaLocations.split("\\s+");
+//			int i = 0;
+//			while (i < pieces.length / 2) {
+//				origSchemaLocations.put(pieces[i * 2], pieces[i * 2 + 1]);
+//				i++;
+//			}
+//		}
+
 		rootElement.removeAttribute(ConfigCoreUtils.ATTR_SCHEMA_LOCATION);
 		Set<INamespaceDefinition> namespaces = selectedNamespaces;
 		Map<INamespaceDefinition, String> schemaVersions = getSchemaVersions();

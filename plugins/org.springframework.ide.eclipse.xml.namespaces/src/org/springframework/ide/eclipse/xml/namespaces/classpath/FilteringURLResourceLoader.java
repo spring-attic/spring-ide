@@ -40,7 +40,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 
 public class FilteringURLResourceLoader implements ResourceLoader {
-
+	
 	private URL[] urls;
 	private ResourceLoader parent;
 	private Cache<String, Collection<String>> getResourcesCache = CacheBuilder.newBuilder().expireAfterAccess(2, TimeUnit.HOURS).build();
@@ -176,7 +176,7 @@ public class FilteringURLResourceLoader implements ResourceLoader {
 				while (ze!=null) {
 					if (resourceName.equals(ze.getName())) {
 						//Example url: jar:file:/home/kdvolder/.m2/repository/org/springframework/boot/spring-boot/2.1.4.RELEASE/spring-boot-2.1.4.RELEASE.jar!/META-INF/spring.factories
-						System.out.println("FOUND "+resourceName+" in "+url);
+//						System.out.println("FOUND "+resourceName+" in "+url);
 						requestor.add("jar:"+url+"!/"+ze);
 						return;
 //					} else {

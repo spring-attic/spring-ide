@@ -138,10 +138,9 @@ public class NamespaceVersionPreferencePage extends ProjectAndPreferencePage {
 
 	private CheckboxTableViewer versionViewer;
 
+	private Button useHttpsCheckbox;
 	private Button versionCheckbox;
-
 	private Button classpathCheckbox;
-	
 	private Button disableNamespaceCachingCheckbox;
 
 	private Map<INamespaceDefinition, String> versions = new ConcurrentHashMap<INamespaceDefinition, String>();
@@ -155,6 +154,7 @@ public class NamespaceVersionPreferencePage extends ProjectAndPreferencePage {
 	private volatile List<INamespaceDefinition> namespaceDefinitionList = new CopyOnWriteArrayList<INamespaceDefinition>();
 
 	private volatile boolean loading = false;
+
 
 	private synchronized List<INamespaceDefinition> getNamespaceDefinitionList() {
 		if ((namespaceDefinitionList == null || namespaceDefinitionList.size() == 0) && !loading) {
@@ -213,18 +213,22 @@ public class NamespaceVersionPreferencePage extends ProjectAndPreferencePage {
 		boolean versionClasspath = true;
 		boolean useClasspath = true;
 		boolean disableCachingNamespaces = false;
+		boolean useHttps = false;
+		
 		if (isProjectPreferencePage()) {
 			SpringCorePreferences prefs = SpringCorePreferences.getProjectPreferences(getProject(),
 					SpringXmlNamespacesPlugin.PLUGIN_ID);
 			versionClasspath = prefs.getBoolean(SpringXmlNamespacesPlugin.NAMESPACE_DEFAULT_FROM_CLASSPATH_ID, true);
 			useClasspath = prefs.getBoolean(SpringXmlNamespacesPlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID, true);
 			disableCachingNamespaces = prefs.getBoolean(SpringXmlNamespacesPlugin.DISABLE_CACHING_FOR_NAMESPACE_LOADING_ID, false);
+			useHttps = prefs.getBoolean(SpringXmlNamespacesPlugin.USE_HTTPS_FOR_SCHEMA_LOCATIONS, false);
 		}
 		else {
 			Preferences prefs = SpringXmlNamespacesPlugin.getDefault().getPluginPreferences();
 			versionClasspath = prefs.getBoolean(SpringXmlNamespacesPlugin.NAMESPACE_DEFAULT_FROM_CLASSPATH_ID);
 			useClasspath = prefs.getBoolean(SpringXmlNamespacesPlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID);
 			disableCachingNamespaces = prefs.getBoolean(SpringXmlNamespacesPlugin.DISABLE_CACHING_FOR_NAMESPACE_LOADING_ID);
+			useHttps = prefs.getBoolean(SpringXmlNamespacesPlugin.USE_HTTPS_FOR_SCHEMA_LOCATIONS);
 		}
 
 		initializeDialogUnits(parent);
@@ -234,6 +238,10 @@ public class NamespaceVersionPreferencePage extends ProjectAndPreferencePage {
 		composite.setLayout(layout);
 		composite.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
 		composite.setFont(parent.getFont());
+		
+		useHttpsCheckbox = new Button(composite, SWT.CHECK);
+		useHttpsCheckbox.setText("Use 'https' by default for namespace schema locations");
+		useHttpsCheckbox.setSelection(useHttps);
 
 		versionCheckbox = new Button(composite, SWT.CHECK);
 		versionCheckbox.setText("Use highest XSD version that is available on the project's classpath");
@@ -439,6 +447,8 @@ public class NamespaceVersionPreferencePage extends ProjectAndPreferencePage {
 					SpringXmlNamespacesPlugin.NAMESPACE_DEFAULT_FROM_CLASSPATH_ID, versionCheckbox.getSelection());
 			SpringCorePreferences.getProjectPreferences(getProject(), SpringXmlNamespacesPlugin.PLUGIN_ID).putBoolean(
 					SpringXmlNamespacesPlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID, classpathCheckbox.getSelection());
+			SpringCorePreferences.getProjectPreferences(getProject(), SpringXmlNamespacesPlugin.PLUGIN_ID).putBoolean(
+					SpringXmlNamespacesPlugin.USE_HTTPS_FOR_SCHEMA_LOCATIONS, useHttpsCheckbox.getSelection());
 		}
 		else {
 			for (Map.Entry<INamespaceDefinition, String> entry : versions.entrySet()) {
@@ -455,6 +465,8 @@ public class NamespaceVersionPreferencePage extends ProjectAndPreferencePage {
 					SpringXmlNamespacesPlugin.NAMESPACE_DEFAULT_FROM_CLASSPATH_ID, versionCheckbox.getSelection());
 			SpringXmlNamespacesPlugin.getDefault().getPluginPreferences().setValue(
 					SpringXmlNamespacesPlugin.LOAD_NAMESPACEHANDLER_FROM_CLASSPATH_ID, classpathCheckbox.getSelection());
+			SpringXmlNamespacesPlugin.getDefault().getPluginPreferences().setValue(
+					SpringXmlNamespacesPlugin.USE_HTTPS_FOR_SCHEMA_LOCATIONS, useHttpsCheckbox.getSelection());
 
 			SpringXmlNamespacesPlugin.getDefault().savePluginPreferences();
 		}
