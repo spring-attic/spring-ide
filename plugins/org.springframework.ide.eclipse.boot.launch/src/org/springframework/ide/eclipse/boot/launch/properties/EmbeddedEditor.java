@@ -116,6 +116,8 @@ public class EmbeddedEditor implements ITextEditor {
 
 	private final boolean withHandlers;
 
+	private final boolean withDecorations;
+
 	private final ViewerConfigurationFactory viewerConfigFactory;
 
 	private ProjectionViewer viewer;
@@ -140,14 +142,15 @@ public class EmbeddedEditor implements ITextEditor {
 
 	private DefaultMarkerAnnotationAccess fileMarkerAnnotationAccess;
 
-	public EmbeddedEditor(ViewerConfigurationFactory viewerConfigFactory, IPreferenceStore prefStore, boolean withHandlers) {
+	public EmbeddedEditor(ViewerConfigurationFactory viewerConfigFactory, IPreferenceStore prefStore, boolean withHandlers, boolean withDecorations) {
 		this.viewerConfigFactory = viewerConfigFactory;
 		this.prefStore = prefStore;
 		this.withHandlers = withHandlers;
+		this.withDecorations = withDecorations;
 	}
 
 	public EmbeddedEditor(ViewerConfigurationFactory viewerConfigFactory, IPreferenceStore prefStore) {
-		this(viewerConfigFactory, prefStore, true);
+		this(viewerConfigFactory, prefStore, true, true);
 	}
 
 	public Control createControl(Composite parent) throws CoreException {
@@ -159,14 +162,16 @@ public class EmbeddedEditor implements ITextEditor {
 
 		viewer.configure(viewerConfigFactory.create(this));
 
-		decorationSupport = new SourceViewerDecorationSupport(viewer, overviewRuler,
-				fileMarkerAnnotationAccess, getSharedColors());
+		if (withDecorations) {
+			decorationSupport = new SourceViewerDecorationSupport(viewer, overviewRuler,
+					fileMarkerAnnotationAccess, getSharedColors());
 
-		for (AnnotationPreference preference : new MarkerAnnotationPreferences()
-				.getAnnotationPreferences()) {
-			decorationSupport.setAnnotationPreference(preference);
+			for (AnnotationPreference preference : new MarkerAnnotationPreferences()
+					.getAnnotationPreferences()) {
+				decorationSupport.setAnnotationPreference(preference);
+			}
+			decorationSupport.install(prefStore);
 		}
-		decorationSupport.install(prefStore);
 
 		if (withHandlers) {
 			activateHandlers();

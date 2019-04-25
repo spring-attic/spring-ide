@@ -41,8 +41,6 @@ import org.springframework.ide.eclipse.boot.dash.test.yaml.Yaml2DeploymentProper
 	JLRMethodParserTest.class,
 	OrderBasedComparatorTest.class,
 	ManifestCompareMergeTests.class,
-	ManifestYmlSchemaTest.class,
-	ManifestYamlEditorTest.class,
 	AbstractLaunchConfigurationsDashElementTest.class,
 	BootDashElementTagsTests.class,
 	ActuatorClientTest.class,

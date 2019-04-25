@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2018 Pivotal, Inc.
+ * Copyright (c) 2015, 2019 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -678,6 +678,7 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 					config.setRightLabel(right.getName());
 					config.setRightImage(right.getImage());
 					config.setLeftEditable(true);
+					config.setProperty("manifest", manifestFile);
 
 					final String message = errorMessage;
 

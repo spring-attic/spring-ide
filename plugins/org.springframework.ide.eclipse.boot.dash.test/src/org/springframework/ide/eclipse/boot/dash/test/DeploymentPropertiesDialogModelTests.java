@@ -345,6 +345,7 @@ public class DeploymentPropertiesDialogModelTests {
 		CloudApplicationDeploymentProperties deploymentProperties = model.getDeploymentProperties();
 		assertNotNull(deploymentProperties);
 		assertEquals(project.getName(), deploymentProperties.getAppName());
+		assertNull(deploymentProperties.getManifestFile());
 
 		String newText = "Some text";
 		model.setManualManifest(newText);
@@ -422,6 +423,9 @@ public class DeploymentPropertiesDialogModelTests {
 		CloudApplicationDeploymentProperties deploymentProperties = model.getDeploymentProperties();
 		assertNotNull(deploymentProperties);
 		assertEquals(appNameFromFile, deploymentProperties.getAppName());
+		IFile manifestFile = deploymentProperties.getManifestFile();
+		assertNotNull(manifestFile);
+		assertEquals("manifest.yml", manifestFile.getName());
 	}
 
 	@Test public void testSwitchingManifestTypeAndFiles() throws Exception {
@@ -607,7 +611,7 @@ public class DeploymentPropertiesDialogModelTests {
 		ACondition.waitFor("app name reconcile", TIMEOUT, () -> assertEquals(null, model.getFileSelectedAppName()));
 
 		CloudApplicationDeploymentProperties deploymentProperties = model.getDeploymentProperties();
-		assertEquals(null, deploymentProperties);
+		assertNull(deploymentProperties);
 	}
 
 	@Test public void testSwitchingWithDeployedApp() throws Exception {

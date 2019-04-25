@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2018 Pivotal, Inc.
+ * Copyright (c) 2015, 2019 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,11 +13,9 @@ package org.springframework.ide.eclipse.boot.dash;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.core.net.proxy.IProxyService;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -28,8 +26,6 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.BootDashBuildpackHintProvider;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.BuildpackHintGenerator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CfTargetsInfo;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CfTargetsInfo.Target;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CfTargetsInfo.TargetDiagnosticMessages;
@@ -44,11 +40,11 @@ import org.springframework.ide.eclipse.boot.dash.model.DefaultBootDashModelConte
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.prefs.RemoteAppsPrefs;
-import org.springframework.ide.eclipse.boot.util.Log;
-import org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestEditorActivator;
+import org.springframework.tooling.cloudfoundry.manifest.ls.CloudFoundryManifestLanguageServer;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -175,7 +171,6 @@ public class BootDashActivator extends AbstractUIPlugin {
 					new CloudFoundryRunTargetType(context, DefaultCloudFoundryClientFactoryV2.INSTANCE)
 					// RunTargetTypes.LATTICE
 			);
-			ManifestEditorActivator.getDefault().setBuildpackProvider(new BootDashBuildpackHintProvider(model, new BuildpackHintGenerator()));
 
 			model.getRunTargets().addListener(new ValueListener<ImmutableSet<RunTarget>>() {
 
@@ -227,7 +222,7 @@ public class BootDashActivator extends AbstractUIPlugin {
 		Set<RunTarget> toUpdate = value == null ? ImmutableSet.of() : value;
 
 		CfTargetsInfo targetsInfo = asTargetsInfo(toUpdate);
-		ManifestEditorActivator.getDefault().setCfTargetsInfo(targetsInfo);
+		CloudFoundryManifestLanguageServer.setCfTargetLoginOptions(targetsInfo);
 	}
 
 	/**
@@ -320,5 +315,19 @@ public class BootDashActivator extends AbstractUIPlugin {
 	public static IEclipsePreferences getPreferences() {
 		return InstanceScope.INSTANCE.getNode(PLUGIN_ID);
 	}
+
+//	private void setCfTargetsInfo(Object targetsInfo) {
+//		try {
+//			Bundle lsBundle = Platform.getBundle("org.springframework.tooling.cloudfoundry.manifest.ls");
+//			if (lsBundle != null && lsBundle.getState() != Bundle.INSTALLED) {
+//				Class<?> lsClass = lsBundle.loadClass("org.springframework.tooling.cloudfoundry.manifest.ls.CloudFoundryManifestLanguageServer");
+//				Method lsMethod = lsClass.getMethod("setCfTargetLoginOptions", Object.class);
+//				lsMethod.invoke(null, targetsInfo);
+//			}
+//		}
+//		catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//	}
 
 }

@@ -276,7 +276,7 @@
       point="org.eclipse.compare.contentMergeViewers">
    <contentTypeBinding
          contentMergeViewerId="org.springframework.ide.eclipse.boot.dash.yamlMergeViewer"
-         contentTypeId="org.dadacoalition.yedit.yamlsource">
+         contentTypeId="org.springframework.ide.eclipse.manifest.yml">
    </contentTypeBinding>
    <viewer
          class="org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlMergeViewerCreator"

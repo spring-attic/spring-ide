@@ -144,12 +144,18 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 		abstract IFile getManifest();
 
 		CloudApplicationDeploymentProperties getDeploymentProperties() throws Exception {
-			return toDeploymentProperties(cloudData, getManifestContents(), project, deployedApp == null ? selectedAppName.getValue() : getDeployedAppName());
+			CloudApplicationDeploymentProperties deploymentProperties = toDeploymentProperties(cloudData,
+					getManifestContents(), project,
+					deployedApp == null ? selectedAppName.getValue() : getDeployedAppName());
+			if (deploymentProperties != null) {
+				deploymentProperties.setManifestFile(getManifest());
+			}
+			return deploymentProperties;
 		}
 
 		protected AbstractSubModel(String fixedAppName) {
 			IPreferenceStore preferenceStore = JavaPlugin.getDefault().getCombinedPreferenceStore();
-			this.editor = new EmbeddedEditor(editor -> new ExtensionBasedTextViewerConfiguration(editor, preferenceStore), preferenceStore, false);
+			this.editor = new EmbeddedEditor(editor -> new ExtensionBasedTextViewerConfiguration(editor, preferenceStore), preferenceStore, false, true);
 
 			editorControlCreated = new LiveVariable<>(false);
 
