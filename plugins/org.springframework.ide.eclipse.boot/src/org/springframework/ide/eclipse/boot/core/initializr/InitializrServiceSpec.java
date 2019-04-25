@@ -38,7 +38,7 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 /**
  * This class is the 'parsed' form of the json metadata for spring intializr service.
  *
- * See: https://github.com/spring-io/initializr/wiki/Initializr-metadata-json-format
+ * See: https://docs.spring.io/initializr/docs/current-SNAPSHOT/reference/html/#metadata-format
  *
  * @author Kris De Volder
  */

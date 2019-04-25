@@ -35,11 +35,8 @@ import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.performOnDOMDocu
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -101,10 +98,6 @@ import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSet.Builder;
-
 /**
  * @author Kris De Volder
  */
@@ -118,9 +111,6 @@ public class MavenSpringBootProject extends SpringBootProject {
 	public static boolean DUMP_MAVEN_OUTPUT = false;
 
 	private static final String MVN_LAUNCH_MODE = "run";
-
-	//TODO: properly handle pom manipulation when pom file is open / dirty in an editor.
-	// minimum requirement: detect and prohibit by throwing an error.
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 
