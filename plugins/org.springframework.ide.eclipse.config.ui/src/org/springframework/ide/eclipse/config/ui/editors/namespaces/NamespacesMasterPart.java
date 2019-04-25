@@ -44,6 +44,7 @@ import org.springframework.ide.eclipse.config.core.formatting.ShallowFormatProce
 import org.springframework.ide.eclipse.config.core.preferences.SpringConfigPreferenceConstants;
 import org.springframework.ide.eclipse.config.core.schemas.BeansSchemaConstants;
 import org.springframework.ide.eclipse.config.ui.ConfigUiPlugin;
+import org.springframework.ide.eclipse.config.ui.editors.AbstractConfigEditor;
 import org.springframework.ide.eclipse.config.ui.editors.AbstractConfigFormPage;
 import org.springframework.ide.eclipse.config.ui.editors.AbstractConfigLabelProvider;
 import org.springframework.ide.eclipse.config.ui.editors.AbstractConfigMasterPart;
@@ -431,7 +432,13 @@ public class NamespacesMasterPart extends AbstractConfigMasterPart implements IN
 		// Add any namespaces that exist in the XML document but aren't
 		// already known to the tooling via the extension point
 		if (rootElement == null) {
-			rootElement = getConfigEditor().getDomDocument().getDocumentElement();
+			AbstractConfigEditor ce = getConfigEditor();
+			if (ce != null) {
+				IDOMDocument dd = ce.getDomDocument();
+				if (dd != null) {
+					rootElement = dd.getDocumentElement();
+				}
+			}
 		}
 		if (rootElement != null) {
 			NamedNodeMap beanAttributes = rootElement.getAttributes();
