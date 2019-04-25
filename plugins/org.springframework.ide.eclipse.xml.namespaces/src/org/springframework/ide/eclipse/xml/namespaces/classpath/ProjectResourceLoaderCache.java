@@ -36,6 +36,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Preferences.IPropertyChangeListener;
 import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElementDelta;
@@ -55,7 +56,7 @@ import org.springsource.ide.eclipse.commons.core.JdtUtils;
 public class ProjectResourceLoaderCache {
 
 	private static final String FILE_SCHEME = "file";
-	private static final int CACHE_SIZE = 12;
+	private static final int CACHE_SIZE = 200;
 	private static final List<ResourceLoaderCacheEntry> RESOURCELOADER_CACHE = new ArrayList<ResourceLoaderCacheEntry>(CACHE_SIZE);
 
 	private static final String DEBUG_OPTION = SpringXmlNamespacesPlugin.PLUGIN_ID + "/java/resourceloader/debug";

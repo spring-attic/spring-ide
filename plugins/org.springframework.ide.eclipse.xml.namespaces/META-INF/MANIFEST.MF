@@ -37,4 +37,6 @@ Export-Package: org.springframework.ide.eclipse.xml.namespaces,
  org.springframework.ide.eclipse.xml.namespaces.ui,
  org.springframework.ide.eclipse.xml.namespaces.util
 Bundle-ActivationPolicy: lazy
-Require-Bundle: com.google.guava
+Require-Bundle: com.google.guava,
+ io.projectreactor.reactor-core;bundle-version="3.1.9",
+ org.reactivestreams.reactive-streams;bundle-version="1.0.2"

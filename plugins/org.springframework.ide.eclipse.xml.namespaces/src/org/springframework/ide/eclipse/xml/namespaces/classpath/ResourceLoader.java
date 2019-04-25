@@ -10,9 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.xml.namespaces.classpath;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.stream.Stream;
+
+import reactor.core.publisher.Flux;
 
 /**
  * Subset of {@link ClassLoader} interface. Mimicks behavior of
@@ -20,30 +22,32 @@ import java.util.stream.Stream;
  * 
  * @author Kris De Volder
  */
-public interface ResourceLoader {
+public abstract class ResourceLoader {
 
-	ResourceLoader NULL = new ResourceLoader() {
+	public static final ResourceLoader NULL = new ResourceLoader() {
 		@Override
-		public URL getResource(String resourceId) {
-			return null;
+		public Flux<URL> getResources(String resourceName) {
+			return Flux.empty();
 		}
 
-		@Override
-		public Stream<URL> getResources(String resourceName) {
-			return Stream.empty();
-		}
-
-		@Override
-		public InputStream getResourceAsStream(String icon) {
-			return null;
-		}
 		@Override
 		public String toString() {
 			return "ResourceLoader.NULL";
 		}
 	};
 
-	URL getResource(String resourceId);
-	Stream<URL> getResources(String resourceName);
-	InputStream getResourceAsStream(String icon);
+	public final URL getResource(String resourceName) {
+		return getResources(resourceName).blockFirst();
+	}
+	protected abstract Flux<URL> getResources(String resourceName);
+	
+	public final InputStream getResourceAsStream(String name) {
+		URL url = getResource(name);
+		try {
+			return url != null ? url.openStream() : null;
+		} catch (IOException e) {
+			return null;
+		}
+		
+	}
 }
