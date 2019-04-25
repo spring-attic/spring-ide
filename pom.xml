@@ -124,6 +124,7 @@
 		<module>plugins/org.springframework.ide.eclipse.beans.core.tests</module>
 		<module>plugins/org.springframework.ide.eclipse.xml.namespaces</module>
 		<module>plugins/org.springframework.ide.eclipse.xml.namespaces.manager</module>
+        <module>features/org.springframework.ide.eclipse.xml.namespaces.feature</module>
 		<!--
 		<module>plugins/org.springframework.ide.eclipse.beans.core.groovy.tests</module>
 		 -->
@@ -241,6 +242,7 @@
         <module>features/org.springframework.ide.eclipse.boot.dash.feature.source</module>
         <module>features/org.springframework.ide.eclipse.cft.feature.source</module>
         <module>features/org.springframework.ide.eclipse.aeri.feature.source</module>
+        <module>features/org.springframework.ide.eclipse.xml.namespaces.feature.source</module>
         
 		<!-- site -->
 		<module>releng/org.springframework.ide.eclipse.site</module>

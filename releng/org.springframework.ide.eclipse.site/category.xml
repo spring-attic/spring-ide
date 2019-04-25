@@ -22,6 +22,12 @@
 		</feature>
 		
 		<feature
+			url="features/org.springframework.ide.eclipse.xml.namespaces.feature_3.9.9.qualifier.jar"
+			id="org.springframework.ide.eclipse.xml.namespaces.feature" version="3.9.9.qualifier">
+			<category name="Extensions / Spring IDE" />
+		</feature>
+		
+		<feature
 			url="features/org.springframework.ide.eclipse.aop.feature_3.9.9.qualifier.jar"
 			id="org.springframework.ide.eclipse.aop.feature" version="3.9.9.qualifier">
 			<category name="Extensions / Spring IDE" />
@@ -125,6 +131,12 @@
 			<category name="Resources / Spring IDE" />
 		</feature>
 
+		<feature
+			url="features/org.springframework.ide.eclipse.xml.namespaces.feature.source_3.9.9.qualifier.jar"
+			id="org.springframework.ide.eclipse.xml.namespaces.feature.source" version="3.9.9.qualifier">
+			<category name="Extensions / Spring IDE" />
+		</feature>
+		
 		<feature
 			url="features/org.springframework.ide.eclipse.aop.feature.source_3.9.9.qualifier.jar"
 			id="org.springframework.ide.eclipse.aop.feature.source" version="3.9.9.qualifier">
