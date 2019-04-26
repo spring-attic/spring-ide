@@ -25,6 +25,7 @@ public interface DeploymentProperties {
 	int DEFAULT_MEMORY = 1024;
 	int DEFAULT_INSTANCES = 1;
 	String DEFAULT_HEALTH_CHECK_TYPE = "port";
+	String DEFAULT_HEALTH_CHECK_HTTP_ENDPOINT = "/";
 
 	String getAppName();
 

@@ -311,7 +311,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 
 			if (!Objects.equal(getHealthCheckHttpEndpoint(), props.getHealthCheckHttpEndpoint())) {
 				getDifferenceForEntry(edits, ApplicationManifestHandler.HEALTH_CHECK_HTTP_ENDPOINT_PROP, props.getHealthCheckHttpEndpoint(),
-						null, String.class);
+						DeploymentProperties.DEFAULT_HEALTH_CHECK_HTTP_ENDPOINT, String.class);
 			}
 
 			if (!Objects.equal(getCommand(), props.getCommand())) {
