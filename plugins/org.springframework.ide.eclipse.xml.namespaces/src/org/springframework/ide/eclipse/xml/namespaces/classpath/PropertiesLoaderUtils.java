@@ -21,10 +21,12 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Properties;
-import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.Assert;
 import org.springframework.ide.eclipse.xml.namespaces.SpringXmlNamespacesPlugin;
+
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 /**
  * Convenient utility methods for loading of {@code java.util.Properties},
@@ -59,29 +61,31 @@ public abstract class PropertiesLoaderUtils {
 		if (classLoaderToUse == null) {
 			classLoaderToUse = ResourceLoader.NULL;
 		}
-		Stream<URL> urls = classLoaderToUse.getResources(resourceName);
-		Properties props = new Properties();
-		urls.forEach(url -> {
-			try {
-				URLConnection con = url.openConnection();
-				useCachesIfNecessary(con);
-				InputStream is = con.getInputStream();
-				try {
-					if (resourceName.endsWith(XML_FILE_EXTENSION)) {
-						props.loadFromXML(is);
+		Flux<URL> urls = classLoaderToUse.getResources(resourceName);
+		Mono<Properties> propsMono = urls.reduceWith(Properties::new, 
+				(props, url) -> {
+					try {
+						URLConnection con = url.openConnection();
+						useCachesIfNecessary(con);
+						InputStream is = con.getInputStream();
+						try {
+							if (resourceName.endsWith(XML_FILE_EXTENSION)) {
+								props.loadFromXML(is);
+							}
+							else {
+								props.load(is);
+							}
+						}
+						finally {
+							is.close();
+						}
+					} catch (Exception e) {
+						SpringXmlNamespacesPlugin.log(e);
 					}
-					else {
-						props.load(is);
-					}
+					return props;
 				}
-				finally {
-					is.close();
-				}
-			} catch (Exception e) {
-				SpringXmlNamespacesPlugin.log(e);
-			}
-		});
-		return props;
+		);
+		return propsMono.block();
 	}
 	
 	/**

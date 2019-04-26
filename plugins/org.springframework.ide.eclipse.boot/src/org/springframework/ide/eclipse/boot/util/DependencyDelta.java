@@ -15,7 +15,6 @@ import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.DEPENDENCY;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.findChilds;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.getChild;
 
-import java.io.IOException;
 import java.io.StringReader;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -27,10 +26,6 @@ import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.wst.sse.core.StructuredModelManager;
-import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
-import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 import org.springframework.ide.eclipse.boot.core.MavenId;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
