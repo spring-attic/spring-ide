@@ -325,6 +325,13 @@ public class DeploymentPropertiesDialogModelTests {
 		assertTrue(model.isManualManifestReadOnly());
 
 		model.setManualManifest("some text");
+
+		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
+			ValidationResult validationResult = model.getValidator().getValue();
+			assertEquals(MANIFEST_DOES_NOT_HAVE_ANY_APPLICATION_DEFINED, validationResult.msg);
+			assertEquals(IStatus.ERROR, validationResult.status);
+		});
+		ACondition.waitFor("app name reconcile", TIMEOUT, () -> assertEquals(null, model.getManualSelectedAppName()));
 	}
 
 	@Test public void testManualTypeSetManifestText() throws Exception {
