@@ -749,7 +749,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 					.disk(params.getDiskQuota())
 					.timeout(params.getTimeout())
 					.healthCheckType(resolveHealthCheckType(params.getHealthCheckType()).orElse(null))
-					.healthCheckHttpEndpoint(params.getHealthCheckHttpEndpoint())
+					.healthCheckHttpEndpoint(params.getHealthCheckHttpEndpoint()==null?"/":params.getHealthCheckHttpEndpoint())
 					.buildpack(params.getBuildpack())
 					.command(params.getCommand())
 					.stack(params.getStack())
