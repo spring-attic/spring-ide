@@ -40,6 +40,7 @@ import org.springframework.ide.eclipse.boot.dash.model.DefaultBootDashModelConte
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.prefs.RemoteAppsPrefs;
+import org.springframework.tooling.cloudfoundry.manifest.ls.CloudFoundryManifestLanguageServer;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
@@ -221,7 +222,7 @@ public class BootDashActivator extends AbstractUIPlugin {
 		Set<RunTarget> toUpdate = value == null ? ImmutableSet.of() : value;
 
 		CfTargetsInfo targetsInfo = asTargetsInfo(toUpdate);
-		setCfTargetsInfo(targetsInfo);
+		CloudFoundryManifestLanguageServer.setCfTargetLoginOptions(targetsInfo);
 	}
 
 	/**
@@ -313,21 +314,6 @@ public class BootDashActivator extends AbstractUIPlugin {
 
 	public static IEclipsePreferences getPreferences() {
 		return InstanceScope.INSTANCE.getNode(PLUGIN_ID);
-	}
-
-	private void setCfTargetsInfo(Object targetsInfo) {
-//		CloudFoundryManifestLanguageServer.setCfTargetLoginOptions(targetsInfo);
-		try {
-			Bundle lsBundle = Platform.getBundle("org.springframework.tooling.cloudfoundry.manifest.ls");
-			if (lsBundle != null && lsBundle.getState() != Bundle.INSTALLED) {
-				Class<?> lsClass = lsBundle.loadClass("org.springframework.tooling.cloudfoundry.manifest.ls.CloudFoundryManifestLanguageServer");
-				Method lsMethod = lsClass.getMethod("setCfTargetLoginOptions", Object.class);
-				lsMethod.invoke(null, targetsInfo);
-			}
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 
 }
