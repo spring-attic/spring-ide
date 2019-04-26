@@ -61,7 +61,7 @@ public class FilteringURLResourceLoader extends ResourceLoader {
 
 	public FilteringURLResourceLoader(URL[] directories, ResourceLoader parent) {
 		this.urls = directories;
-		this.parent = parent;
+		this.parent = parent == null ? ResourceLoader.NULL : parent;
 	}
 	
 	private static AtomicLong timeUsed = new AtomicLong();
