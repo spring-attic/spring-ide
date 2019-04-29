@@ -1,0 +1,4 @@
+requires.0.namespace=org.eclipse.equinox.p2.iu
+requires.0.name=javax.xml.ws
+requires.0.greedy=true
+requires.0.optional=true
