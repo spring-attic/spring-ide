@@ -89,7 +89,6 @@
 	<modules>
 
 		<!-- gradle -->
-		<module>plugins/org.springframework.ide.eclipse.buildship</module>
 		<module>plugins/org.springframework.ide.eclipse.buildship20</module>
 		<module>plugins/org.springframework.ide.eclipse.buildship30</module>
 
@@ -304,11 +303,6 @@
 					<url>https://download.eclipse.org/cft/1.1.1/</url>
 				</repository>
 				<repository>
-		  			<id>buildship1-for-testing</id>
-		  			<layout>p2</layout>
-		  			<url>https://download.eclipse.org/buildship/updates/e46/releases/1.0/</url>
-				</repository>
-				<repository>
 		  			<id>buildship2-for-testing</id>
 		  			<layout>p2</layout>
 		  			<url>https://download.eclipse.org/buildship/updates/e48/releases/2.x</url>
@@ -380,11 +374,6 @@
 					<url>https://download.eclipse.org/cft/1.1.1/</url>
 				</repository>
 				<repository>
-		  			<id>buildship1-for-testing</id>
-		  			<layout>p2</layout>
-		  			<url>https://download.eclipse.org/buildship/updates/e46/releases/1.0/</url>
-				</repository>
-				<repository>
 		  			<id>buildship2-for-testing</id>
 		  			<layout>p2</layout>
 		  			<url>https://download.eclipse.org/buildship/updates/e48/releases/2.x</url>
@@ -442,11 +431,6 @@
 					<id>cft</id>
 					<layout>p2</layout>
 					<url>https://download.eclipse.org/cft/1.1.1/</url>
-				</repository>
-				<repository>
-		  			<id>buildship1-for-testing</id>
-		  			<layout>p2</layout>
-		  			<url>https://download.eclipse.org/buildship/updates/e46/releases/1.0/</url>
 				</repository>
 				<repository>
 		  			<id>buildship2-for-testing</id>
