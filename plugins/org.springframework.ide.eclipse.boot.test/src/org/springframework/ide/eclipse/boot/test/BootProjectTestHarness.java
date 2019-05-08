@@ -86,7 +86,7 @@ public class BootProjectTestHarness {
 
 	public static WizardConfigurer withImportStrategy(final String id) {
 		final ImportStrategy is = ImportStrategies.withId(id);
-		Assert.isNotNull(is);
+		Assert.isNotNull(is, "Import strategy not found: "+id+ " in "+ImportStrategies.all());
 		return new WizardConfigurer() {
 			@Override
 			public void apply(NewSpringBootWizardModel wizard) {
