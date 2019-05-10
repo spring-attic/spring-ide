@@ -76,16 +76,7 @@ public class SearchBoxSection extends WizardPageSection implements Disposable {
 			}
 		});
 		if (grabFocus) {
-			if (!searchBox.setFocus()) {
-				searchBox.addPaintListener(new PaintListener() {
-					@Override
-					public void paintControl(PaintEvent e) {
-						if (searchBox.setFocus()) {
-							searchBox.removePaintListener(this);
-						}
-					}
-				});
-			}
+			focusControl();
 		}
 //		IContentProposalProvider proposalProvider = new TagContentProposalProvider(viewModel);
 //		ContentProposalAdapter caAdapter = new ContentProposalAdapter(searchBox, new TextContentAdapter(), proposalProvider, UIUtils.CTRL_SPACE, null);
@@ -112,6 +103,21 @@ public class SearchBoxSection extends WizardPageSection implements Disposable {
 	public SearchBoxSection grabFocus(boolean grab) {
 		this.grabFocus = grab;
 		return this;
+	}
+
+	public void focusControl() {
+		if (searchBox != null) {
+			if (!searchBox.setFocus()) {
+				searchBox.addPaintListener(new PaintListener() {
+					@Override
+					public void paintControl(PaintEvent e) {
+						if (searchBox.setFocus()) {
+							searchBox.removePaintListener(this);
+						}
+					}
+				});
+			}
+		}
 	}
 
 }

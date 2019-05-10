@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.boot.livexp.ui.DynamicSection;
 import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
@@ -112,14 +113,14 @@ public  class MultipleViewsDependencyPage extends WizardPageWithSections {
 	}
 
 	protected WizardPageSection getSearchSection(final NewSpringBootWizardModel model) {
-		return new GroupSection(this, null,
-				new SearchBoxSection(this, model.getDependencyFilterBoxText()) {
-					@Override
-						protected String getSearchHint() {
-							return "Type to search dependencies";
-						}
-				}.grabFocus(true)
-		);
+		final SearchBoxSection searchBoxSection = new SearchBoxSection(this, model.getDependencyFilterBoxText()) {
+			@Override
+				protected String getSearchHint() {
+					return "Type to search dependencies";
+				}
+		};
+		PlatformUI.getWorkbench().getDisplay().asyncExec(() -> getControl().addListener(SWT.Show, event -> searchBoxSection.focusControl()));
+		return new GroupSection(this, null, searchBoxSection.grabFocus(true));
 	}
 
 	protected WizardPageSection createFrequentlyUsedSection(NewSpringBootWizardModel model) {
