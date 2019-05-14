@@ -118,8 +118,20 @@ public class ManifestCompareMergeTests {
 		props.setMemory(1024);
 		props.setBuildpack("java_buildpack");
 		props.setUris(ImmutableList.of("chatter-web-ui.springsource.org"));
-
 		performMergeTest(props, manifest, manifest);
+
+		props.setInstances(2);
+		performMergeTest(props, manifest,
+				"defaults: &defaults\n" +
+				"  services:\n" +
+				"  - my-rabbit\n" +
+				"  memory: 1G\n" +
+				"  instances: 2\n" +
+				"applications:\n" +
+				"- name: chatter-web-ui\n" +
+				"  <<: *defaults\n" +
+				"  buildpack: java_buildpack"
+		);
 	}
 
 	@Test
