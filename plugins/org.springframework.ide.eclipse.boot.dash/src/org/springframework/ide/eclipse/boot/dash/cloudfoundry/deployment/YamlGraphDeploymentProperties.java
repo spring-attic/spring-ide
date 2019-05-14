@@ -34,6 +34,9 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudData;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFRoute;
 import org.springframework.ide.eclipse.boot.util.Log;
+import org.springframework.ide.eclipse.editor.support.reconcile.IProblemCollector;
+import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeMergeSupport;
+import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeUtil;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.DumperOptions.LineBreak;
@@ -84,6 +87,9 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 	private void initializeYaml(String appName) {
 		Composer composer = new Composer(new ParserImpl(new StreamReader(new InputStreamReader(new ByteArrayInputStream(content.getBytes())))), new Resolver());
 		root = composer.getSingleNode();
+
+		NodeMergeSupport mergeSupport = new NodeMergeSupport(IProblemCollector.NULL);
+		mergeSupport.mergeAll(root);
 
 		Node apps = YamlGraphDeploymentProperties.findValueNode(root, "applications");
 		if (apps instanceof SequenceNode) {
@@ -208,18 +214,7 @@ public class YamlGraphDeploymentProperties implements DeploymentProperties {
 	}
 
 	public static Node findValueNode(Node node, String key) {
-		if (node instanceof MappingNode) {
-			MappingNode mapping = (MappingNode) node;
-			for (NodeTuple tuple : mapping.getValue()) {
-				if (tuple.getKeyNode() instanceof ScalarNode) {
-					ScalarNode scalar = (ScalarNode) tuple.getKeyNode();
-					if (key.equals(scalar.getValue())) {
-						return tuple.getValueNode();
-					}
-				}
-			}
-		}
-		return null;
+		return NodeUtil.getProperty(node, key);
 	}
 
 	public static NodeTuple findNodeTuple(MappingNode mapping, String key) {

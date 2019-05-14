@@ -40,6 +40,8 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlGra
 import org.springframework.ide.eclipse.boot.dash.test.AllBootDashTests;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 
+import com.google.common.collect.ImmutableList;
+
 /**
  * Manifest YAML file and Deployment properties compare and merge tests.
  *
@@ -80,7 +82,9 @@ public class ManifestCompareMergeTests {
 			assertEquals(null, edit);
 		} else {
 			Document doc = new Document(manifest);
-			edit.apply(doc);
+			if (edit!=null) {
+				edit.apply(doc);
+			}
 			assertEquals(expectText.trim(), doc.get().trim());
 		}
 	}
@@ -91,6 +95,31 @@ public class ManifestCompareMergeTests {
 		Assert.assertNotNull(bundleFile);
 		Assert.assertTrue("The bundle "+bundle.getBundleId()+" must be unpacked to allow using the embedded test resources", bundleFile.isDirectory());
 		return new File(bundleFile, path);
+	}
+
+	@Test
+	public void anchorReferenceAndExtend() throws Exception {
+		String manifest =
+				"defaults: &defaults\n" +
+				"  services:\n" +
+				"  - my-rabbit\n" +
+				"  memory: 1G\n" +
+				"  instances: 3\n" +
+				"applications:\n" +
+				"- name: chatter-web-ui\n" +
+				"  <<: *defaults\n" +
+				"  buildpack: java_buildpack";
+
+		CloudApplicationDeploymentProperties props = new CloudApplicationDeploymentProperties();
+		props.setAppName("chatter-web-ui");
+		props.setServices(ImmutableList.of("my-rabbit"));
+		props.setMemory(1024);
+		props.setInstances(3);
+		props.setMemory(1024);
+		props.setBuildpack("java_buildpack");
+		props.setUris(ImmutableList.of("chatter-web-ui.springsource.org"));
+
+		performMergeTest(props, manifest, manifest);
 	}
 
 	@Test
