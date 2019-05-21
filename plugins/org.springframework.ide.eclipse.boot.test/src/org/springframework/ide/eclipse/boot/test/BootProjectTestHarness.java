@@ -14,7 +14,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.springsource.ide.eclipse.commons.livexp.ui.ProjectLocationSection.getDefaultProjectLocation;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -46,6 +48,7 @@ import org.springframework.ide.eclipse.boot.wizard.content.CodeSet;
 import org.springframework.ide.eclipse.boot.wizard.importing.ImportConfiguration;
 import org.springframework.ide.eclipse.boot.wizard.importing.ImportStrategies;
 import org.springframework.ide.eclipse.boot.wizard.importing.ImportStrategy;
+import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
@@ -228,42 +231,52 @@ public class BootProjectTestHarness {
 	}
 
 	public IProject createBootProject(final String projectName, final WizardConfigurer... extraConfs) throws Exception {
-		RetryUtil.retryWhen("createBootProject("+projectName+")", 3, RetryUtil.errorWithMsg("Read timed out"), () -> {
-			final Job job = new Job("Create boot project '"+projectName+"'") {
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					try {
-						//No point doing a retry if we will just fail because project already exists!
-						IProject p = getProject(projectName);
-						if (p.exists()) {
-							p.delete(true, true, new NullProgressMonitor());
+		CodeSet.afterCreateHook = (File location) -> {
+			//This is a workaround for this bug: https://bugs.eclipse.org/bugs/show_bug.cgi?id=547409
+			File pom = new File(location, "pom.xml");
+			String pomCotents = IOUtil.toString(new FileInputStream(pom)).replace("2.1.5.RELEASE", "2.1.4.RELEASE");
+			IOUtil.pipe(new ByteArrayInputStream(pomCotents.getBytes("UTF8")), pom);
+		};
+		try {
+			RetryUtil.retryWhen("createBootProject("+projectName+")", 3, RetryUtil.errorWithMsg("Read timed out"), () -> {
+				final Job job = new Job("Create boot project '"+projectName+"'") {
+					@Override
+					protected IStatus run(IProgressMonitor monitor) {
+						try {
+							//No point doing a retry if we will just fail because project already exists!
+							IProject p = getProject(projectName);
+							if (p.exists()) {
+								p.delete(true, true, new NullProgressMonitor());
+							}
+							NewSpringBootWizardModel wizard = new NewSpringBootWizardModel(new MockPrefsStore());
+							wizard.allowUIThread(true);
+							wizard.getProjectName().setValue(projectName);
+							wizard.getArtifactId().setValue(projectName);
+							//Note: unlike most of the rest of the wizard's behavior, the 'use default location'
+							//  checkbox and its effect is not part of the model but part of the GUI code (this is
+							//  wrong, really, but that's how it is, so we have to explictly set the project
+							//  location in the model.
+							wizard.getLocation().setValue(getDefaultProjectLocation(projectName));
+							for (WizardConfigurer extraConf : extraConfs) {
+								extraConf.apply(wizard);
+							}
+							wizard.performFinish(new NullProgressMonitor()/*new SysOutProgressMonitor()*/);
+							return Status.OK_STATUS;
+						} catch (Throwable e) {
+							return ExceptionUtil.status(e);
 						}
-						NewSpringBootWizardModel wizard = new NewSpringBootWizardModel(new MockPrefsStore());
-						wizard.allowUIThread(true);
-						wizard.getProjectName().setValue(projectName);
-						wizard.getArtifactId().setValue(projectName);
-						//Note: unlike most of the rest of the wizard's behavior, the 'use default location'
-						//  checkbox and its effect is not part of the model but part of the GUI code (this is
-						//  wrong, really, but that's how it is, so we have to explictly set the project
-						//  location in the model.
-						wizard.getLocation().setValue(getDefaultProjectLocation(projectName));
-						for (WizardConfigurer extraConf : extraConfs) {
-							extraConf.apply(wizard);
-						}
-						wizard.performFinish(new NullProgressMonitor()/*new SysOutProgressMonitor()*/);
-						return Status.OK_STATUS;
-					} catch (Throwable e) {
-						return ExceptionUtil.status(e);
 					}
-				}
-			};
-			//job.setRule(workspace.getRuleFactory().buildRule());
-			job.schedule();
+				};
+				//job.setRule(workspace.getRuleFactory().buildRule());
+				job.schedule();
 
-			waitForImportJob(getProject(projectName), job);
+				waitForImportJob(getProject(projectName), job);
 
-		});
-		return getProject(projectName);
+			});
+			return getProject(projectName);
+		} finally {
+			CodeSet.afterCreateHook = null;
+		}
 	}
 
 	public static void waitForImportJob(final IProject project, final Job job) throws Exception {

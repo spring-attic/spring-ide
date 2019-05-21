@@ -42,6 +42,12 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
  */
 public abstract class CodeSet {
 
+	public interface AfterCreateHook {
+		void afterCreateAt(final File location) throws Exception;
+	}
+
+	public static AfterCreateHook afterCreateHook = null;
+
 	private static final boolean IS_WINDOWS = OsUtils.isWindows();
 
 	/**
@@ -186,6 +192,9 @@ public abstract class CodeSet {
 				return null;
 			}
 		});
+		if (afterCreateHook!=null) {
+			afterCreateHook.afterCreateAt(location);
+		}
 	}
 
 	/**
