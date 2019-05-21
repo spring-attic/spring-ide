@@ -13,7 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.views.properties;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.beans.ui.live.model.DisplayName;
-import org.springsource.ide.eclipse.commons.livexp.ui.util.TreeElementWrappingContentProvider;
+import org.springsource.ide.eclipse.commons.livexp.ui.util.WrappingTreeNode;
 
 public class LiveEnvLabelProvider extends LabelProvider {
 
@@ -24,8 +24,8 @@ public class LiveEnvLabelProvider extends LabelProvider {
 
 	@Override
 	public String getText(Object element) {
-		if (element instanceof TreeElementWrappingContentProvider.TreeNode) {
-			return getText(((TreeElementWrappingContentProvider.TreeNode) element).getWrappedValue());
+		if (element instanceof WrappingTreeNode) {
+			return getText(((WrappingTreeNode) element).getWrappedValue());
 		} else if (element instanceof DisplayName) {
 			return ((DisplayName) element).getDisplayName();
 		}

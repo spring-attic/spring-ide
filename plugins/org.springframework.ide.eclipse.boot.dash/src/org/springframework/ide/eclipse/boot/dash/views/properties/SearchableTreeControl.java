@@ -30,8 +30,12 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.views.properties.tabbed.ITabbedPropertyConstants;
 import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springsource.ide.eclipse.commons.livexp.core.FilterBoxModel;
+import org.springsource.ide.eclipse.commons.livexp.ui.util.TreeNodeFilter;
+import org.springsource.ide.eclipse.commons.livexp.ui.util.UpdateExpansionStates;
 import org.springsource.ide.eclipse.commons.livexp.ui.util.SwtConnect;
+import org.springsource.ide.eclipse.commons.livexp.ui.util.FilteringLazyTreeContentProvider;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 import org.springsource.ide.eclipse.commons.livexp.util.Filters;
 import org.springsource.ide.eclipse.commons.ui.UiUtil;
@@ -63,6 +67,7 @@ public class SearchableTreeControl {
 
 	private final FormToolkit widgetFactory;
 	private final Supplier<String> missingContentSupplier;
+	private FilteringLazyTreeContentProvider wrappedContentProvider;
 
 	/**
 	 *
@@ -77,7 +82,7 @@ public class SearchableTreeControl {
 	}
 
 	public void createControls(Composite parent, TabbedPropertySheetPage aTabbedPropertySheetPage,
-			ITreeContentProvider treeContentProvider, LabelProvider labelProvider) {
+			ITreeContentProvider baseContentProvider, LabelProvider labelProvider) {
 		page = aTabbedPropertySheetPage;
 
 		Composite composite = widgetFactory.createComposite(parent, SWT.NONE);
@@ -121,11 +126,18 @@ public class SearchableTreeControl {
 		SwtConnect.connect(searchBox, searchBoxModel.getText());
 		searchBox.addDisposeListener(de -> searchBoxModel.close());
 
-		treeViewer = new TreeViewer(treeViewerComposite /* , SWT.NO_SCROLL */);
+		treeViewer = new TreeViewer(treeViewerComposite, SWT.VIRTUAL);
 
-		treeViewer.setContentProvider(treeContentProvider);
+		UpdateExpansionStates expansionStates = new UpdateExpansionStates(treeViewer);
+
+		TreeNodeFilter viewerFilter = new TreeNodeFilter(Filters.acceptAll(), labelProvider, expansionStates);
+
+		wrappedContentProvider = new FilteringLazyTreeContentProvider(treeViewer, viewerFilter, baseContentProvider);
+
+		treeViewer.setContentProvider(wrappedContentProvider);
 		treeViewer.setLabelProvider(labelProvider);
 		treeViewer.setAutoExpandLevel(2);
+		treeViewer.setUseHashlookup(true);
 
 		treeViewer.getTree().addTreeListener(new TreeListener() {
 			@Override
@@ -139,7 +151,7 @@ public class SearchableTreeControl {
 			}
 		});
 
-		SwtConnect.connectTextBasedFilter(treeViewer, searchBoxModel.getFilter(), labelProvider, treeContentProvider);
+		SwtConnect.connectTextToLazy(treeViewer, searchBoxModel.getFilter(), labelProvider, wrappedContentProvider, expansionStates);
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(treeViewer.getTree());
 
 		refreshControlsVisibility();
@@ -166,14 +178,15 @@ public class SearchableTreeControl {
 		}
 		missingContentsLabel.setText(message);
 
-		// If tree is populated for the first time then auto expand to level 2 manually
-		// because new input is not set in this case
-		boolean firstTimeTreePopulated = treeViewer.getTree().getItems().length == 0;
 		treeViewer.refresh();
 
-		if (firstTimeTreePopulated) {
-			treeViewer.expandToLevel(2);
-		}
 		SectionStackLayout.reflow(page);
 	}
+
+	public void setInput(BootDashElement bootDashElement) {
+		if (wrappedContentProvider != null) {
+			wrappedContentProvider.setInput(bootDashElement);
+		}
+	}
+
 }

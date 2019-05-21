@@ -21,7 +21,7 @@ import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeanRelation;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeanType;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansGroup;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansResource;
-import org.springsource.ide.eclipse.commons.livexp.ui.util.TreeElementWrappingContentProvider;
+import org.springsource.ide.eclipse.commons.livexp.ui.util.WrappingTreeNode;
 
 /**
  * A label provider for the Live Beans tree display
@@ -46,8 +46,8 @@ public class LiveBeansTreeLabelProvider extends LabelProvider {
 
 	@Override
 	public Image getImage(Object element) {
-		if (element instanceof TreeElementWrappingContentProvider.TreeNode) {
-			return getImage(((TreeElementWrappingContentProvider.TreeNode)element).getWrappedValue());
+		if (element instanceof WrappingTreeNode) {
+			return getImage(((WrappingTreeNode)element).getWrappedValue());
 		} else if (element instanceof LiveBean) {
 			return LiveBeansUiPlugin.getDefault().getImageRegistry().get(LiveBeansUiPlugin.IMG_OBJS_BEAN);
 		} else if (element instanceof LiveBeansResource) {
@@ -70,8 +70,8 @@ public class LiveBeansTreeLabelProvider extends LabelProvider {
 
 	@Override
 	public String getText(Object element) {
-		if (element instanceof TreeElementWrappingContentProvider.TreeNode) {
-			return getText(((TreeElementWrappingContentProvider.TreeNode) element).getWrappedValue());
+		if (element instanceof WrappingTreeNode) {
+			return getText(((WrappingTreeNode) element).getWrappedValue());
 		} else if (element instanceof DisplayName) {
 			return ((DisplayName) element).getDisplayName();
 		}

@@ -27,7 +27,7 @@ import org.springframework.ide.eclipse.boot.dash.model.actuator.env.Property;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.env.PropertyOrigin;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.env.PropertySource;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.env.PropertySources;
-import org.springsource.ide.eclipse.commons.livexp.ui.util.TreeElementWrappingContentProvider;
+import org.springsource.ide.eclipse.commons.livexp.ui.util.FilteringLazyTreeContentProvider;
 
 /**
  * Live env property section
@@ -46,7 +46,7 @@ public class EnvPropertiesSection extends AbstractBdePropertiesSection {
 		page = aTabbedPropertySheetPage;
 
 		LabelProvider labelProvider = new LiveEnvLabelProvider();
-		ITreeContentProvider treeContentProvider = new TreeElementWrappingContentProvider(new LiveEnvContentProvider());
+		ITreeContentProvider treeContentProvider = new LiveEnvContentProvider();
 
 		searchableTree = new SearchableTreeControl(getWidgetFactory(), getMissingContentHandler());
 
@@ -70,7 +70,7 @@ public class EnvPropertiesSection extends AbstractBdePropertiesSection {
 	@Override
 	public void setInput(IWorkbenchPart part, ISelection selection) {
 		super.setInput(part, selection);
-		searchableTree.getTreeViewer().setInput(getBootDashElement());
+		searchableTree.setInput(getBootDashElement());
 	}
 
 	@Override

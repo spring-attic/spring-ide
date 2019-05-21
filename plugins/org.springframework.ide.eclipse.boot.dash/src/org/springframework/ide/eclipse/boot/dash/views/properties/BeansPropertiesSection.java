@@ -27,8 +27,7 @@ import org.springframework.ide.eclipse.beans.ui.live.tree.ContextGroupedBeansCon
 import org.springframework.ide.eclipse.beans.ui.live.tree.LiveBeansTreeLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.live.utils.LiveBeanUtil;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springsource.ide.eclipse.commons.livexp.ui.util.TreeElementWrappingContentProvider;
-import org.springsource.ide.eclipse.commons.livexp.ui.util.TreeElementWrappingContentProvider.TreeNode;
+import org.springsource.ide.eclipse.commons.livexp.ui.util.WrappingTreeNode;
 
 /**
  * Live beans property section
@@ -47,7 +46,7 @@ public class BeansPropertiesSection extends AbstractBdePropertiesSection {
 		super.createControls(parent, aTabbedPropertySheetPage);
 		page = aTabbedPropertySheetPage;
 
-		ITreeContentProvider treeContent = new TreeElementWrappingContentProvider(new BeansContentProvider(ContextGroupedBeansContentProvider.INSTANCE));
+		ITreeContentProvider treeContent = new BeansContentProvider(ContextGroupedBeansContentProvider.INSTANCE);
 		LabelProvider labelProvider = LiveBeansTreeLabelProvider.INSTANCE;
 
 		searchableTree = new SearchableTreeControl(getWidgetFactory(), getNoContentMessage());
@@ -63,7 +62,7 @@ public class BeansPropertiesSection extends AbstractBdePropertiesSection {
 		// polling the model often to show changes in the model it's best to refresh the
 		// tree viewer rather then set the whole input that would remove the selection
 		// and collapse expanded nodes
-		searchableTree.getTreeViewer().setInput(getBootDashElement());
+		searchableTree.setInput(getBootDashElement());
 	}
 
 	@Override
@@ -125,8 +124,8 @@ public class BeansPropertiesSection extends AbstractBdePropertiesSection {
 			if (sel instanceof IStructuredSelection) {
 				IStructuredSelection structuredSel = (IStructuredSelection) sel;
 				Object firstElement = structuredSel.getFirstElement();
-				if (firstElement instanceof TreeNode) {
-					TreeNode node = (TreeNode) firstElement;
+				if (firstElement instanceof WrappingTreeNode) {
+					WrappingTreeNode node = (WrappingTreeNode) firstElement;
 					Object wrappedValue = node.getWrappedValue();
 					// NOTE: navigate to bean type and navigate to resource definition are NOT
 					// always the same. Be sure to use the correct one given a tree node.
