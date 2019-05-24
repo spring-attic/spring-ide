@@ -114,6 +114,7 @@ public class BootDashActivator extends AbstractUIPlugin {
 		plugin = this;
 		// Initialize config for manifest YAML LS
 		updateCloudTargetsInManifestEditor(getModel().getRunTargets().getValues());
+		new M2ELogbackCustomizer().schedule();
 	}
 
 	/*
