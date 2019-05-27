@@ -12,6 +12,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.osgi.framework.Bundle;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 public class M2ELogbackCustomizer extends Job {
 
@@ -42,22 +43,35 @@ public class M2ELogbackCustomizer extends Job {
 
 	@Override
 	protected IStatus run(IProgressMonitor arg0) {
+//		Log.info("M2ELogbackCustomizer starting...");
 		try {
-			if (isStateLocationInitialized()) {
+			if (!isStateLocationInitialized()) {
+//				Log.info("M2ELogbackCustomizer state location not initalized...");
+			} else {
 				Bundle logbackConfigBundle = Platform.getBundle("org.eclipse.m2e.logback.configuration");
+//				Log.info("M2ELogbackCustomizer logbackConfigBundle = "+logbackConfigBundle);
 				String version = logbackConfigBundle.getVersion().toString();
+				Log.info("M2ELogbackCustomizer version = "+version);
 				IPath statelocationPath = Platform.getStateLocation(logbackConfigBundle);
+//				Log.info("M2ELogbackCustomizer statelocationPath = "+statelocationPath);
+
 				if (statelocationPath!=null) {
 					File stateDir = statelocationPath.toFile();
 					File logbackFile = new File(stateDir, "logback."+version+".xml");
-					if (logbackFile.isFile()) {
+					Log.info("M2ELogbackCustomizer logbackFile = "+logbackFile);
+					if (!logbackFile.isFile()) {
+//						Log.info("M2ELogbackCustomizer logbackFile is not a file");
+					} else {
 						String logbackConf = IOUtil.toString(new FileInputStream(logbackFile));
 						int insertionPoint = logbackConf.indexOf("</configuration>");
+//						Log.info("M2ELogbackCustomizer inseertionPoint = "+insertionPoint);
 						if (insertionPoint>=0) {
 							if (logbackConf.contains(SNIPPET)) {
 								//nothing to do
+//								Log.info("M2ELogbackCustomizer snippet already present, DONE");
 								return Status.OK_STATUS;
 							} else {
+//								Log.info("M2ELogbackCustomizer inserting snippet");
 								logbackConf = logbackConf.substring(0, insertionPoint)
 										+SNIPPET+"\n" + logbackConf.substring(insertionPoint);
 								IOUtil.pipe(new ByteArrayInputStream(logbackConf.getBytes("UTF8")), logbackFile);
@@ -65,9 +79,9 @@ public class M2ELogbackCustomizer extends Job {
 						}
 					}
 				}
-				System.out.println(statelocationPath);
 			}
 		}catch (Exception e) {
+//			Log.warn(e);
 			//ignore
 		}
 		retry();
@@ -76,7 +90,10 @@ public class M2ELogbackCustomizer extends Job {
 
 	private void retry() {
 		if (retries-- > 0) {
+//			Log.info("M2ELogbackCustomizer will try again later");
 			this.schedule(1000);
+		} else {
+//			Log.info("M2ELogbackCustomizer no more retry attempts left");
 		}
 	}
 
