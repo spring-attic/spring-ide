@@ -17,8 +17,8 @@
   First, you can install Spring IDE from the Eclipse Marketplace into your existing Eclipse installation.
   Second, you can install Spring IDE manually from this udpate site:
 
-  https://dist.springsource.com/release/TOOLS/update/e4.7 (for Eclipse Neon 4.7)
-  https://dist.springsource.com/release/TOOLS/update/e4.8 (for Eclipse Mars 4.8)
+  https://dist.springsource.com/release/TOOLS/update/e4.7 (for Eclipse Oxygen 4.7)
+  https://dist.springsource.com/release/TOOLS/update/e4.8 (for Eclipse Photon 4.8)
   
   The latest versions of Spring IDE support Eclipse Oxygen and Photon. Older versions of Spring IDE
   for older versions of Eclipse can be found here:
