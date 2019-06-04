@@ -39,7 +39,6 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultBootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
-import org.springframework.ide.eclipse.boot.dash.prefs.RemoteAppsPrefs;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
@@ -192,7 +191,7 @@ public class BootDashActivator extends AbstractUIPlugin {
 //				System.out.println("<<<<< jmx urls ===");
 				sendRemoteBootAppUrls();
 			});
-			RemoteAppsPrefs.addListener(this::sendRemoteBootAppUrls);
+//			RemoteAppsPrefs.addListener(this::sendRemoteBootAppUrls);
 		}
 		return model;
 	}
@@ -202,7 +201,7 @@ public class BootDashActivator extends AbstractUIPlugin {
 		if (model!=null) {
 			allRemoteApps.addAll(model.getJmxSshTunnelManager().getUrls().getValue());
 		}
-		allRemoteApps.addAll(new RemoteAppsPrefs().getRemoteAppData());
+//		allRemoteApps.addAll(new RemoteAppsPrefs().getRemoteAppData());
 
 		try {
 			Bundle lsBundle = Platform.getBundle("org.springframework.tooling.boot.ls");
