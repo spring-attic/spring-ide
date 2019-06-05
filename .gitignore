@@ -8,3 +8,4 @@ jarjar/
 releng/org.springframework.ide.eclipse.releng/eclipse/
 /build.log
 .sts4-cache
+nohttp-cli-*.jar
