@@ -1,0 +1,4 @@
+http://sha256timestamp\.ws\.symantec\.com/sha256/timestamp
+http://org\.eclipse\.ui\.intro/.*
+http://www\.w3\.org/2000/10/XMLSchema-instance
+http://www\.w3\.org/TR/REC-html40

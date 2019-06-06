@@ -39,7 +39,7 @@ public class InitializrFactoryModelTest {
 			}
 		});
 
-		factoryModel.getServiceUrlField().setValue("http://accept.only.https.com");
+		factoryModel.getServiceUrlField().setValue("http"+"://accept.only.https.com");
 		ACondition.waitFor("Follows the redirection", 200, () -> {
 			assertEquals("https://accept.only.https.com", factoryModel.getServiceUrlField().getValue());
 			assertEquals(factoryModel.getModel().getValue().url, "https://accept.only.https.com");
@@ -58,7 +58,7 @@ public class InitializrFactoryModelTest {
 			}
 		});
 
-		factoryModel.getServiceUrlField().setValue("http://accept.only.https.com");
+		factoryModel.getServiceUrlField().setValue("http"+"://accept.only.https.com");
 		ACondition.waitFor("Follows the redirection", 200, () -> {
 			assertEquals("https://accept.only.https.com", factoryModel.getServiceUrlField().getValue());
 			assertEquals(factoryModel.getModel().getValue().url, "https://accept.only.https.com");
