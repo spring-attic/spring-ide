@@ -27,6 +27,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -77,7 +78,8 @@ public class AbstractLaunchConfigurationsDashElementTest extends Mocks {
 		}
 
 		@Override
-		public void launch(String runMode, ILaunchConfiguration conf) {
+		public CompletableFuture<Void> launch(String runMode, ILaunchConfiguration conf) {
+			return CompletableFuture.completedFuture(null);
 		}
 
 		@Override
