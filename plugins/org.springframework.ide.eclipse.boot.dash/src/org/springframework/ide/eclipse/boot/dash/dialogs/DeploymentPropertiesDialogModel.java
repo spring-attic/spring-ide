@@ -391,7 +391,8 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 				protected IDocument compute() {
 					IDocument doc = editor == null || editor.getViewer() == null ? null : editor.getViewer().getDocument();
 					if (doc != null) {
-						LanguageServiceAccessor.getLanguageServers(doc, cap -> true);
+						//Make sure ls is started and connected to document.
+						LanguageServiceAccessor.getLSPDocumentInfosFor(doc, cap -> true);
 					}
 					return doc;
 				}
