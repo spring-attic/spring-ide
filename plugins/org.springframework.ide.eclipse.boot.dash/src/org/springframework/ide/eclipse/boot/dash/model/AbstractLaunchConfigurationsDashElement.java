@@ -286,7 +286,7 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 
 	protected CompletableFuture<Void> launch(final String runMode, final ILaunchConfiguration conf) {
 		AtomicReference<CompletableFuture<Void>> done = new AtomicReference<>();
-		Display.getDefault().syncExec(new Runnable() {
+		Display.getDefault().asyncExec(new Runnable() {
 			public void run() {
 				done.set(BootDebugUITools.launchInBackground(conf, runMode));
 			}
