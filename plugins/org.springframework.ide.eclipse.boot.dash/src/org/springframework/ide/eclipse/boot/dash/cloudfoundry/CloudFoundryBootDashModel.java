@@ -27,11 +27,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.cloudfoundry.util.JobUtils;
 import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.compare.CompareEditorInput;
 import org.eclipse.compare.structuremergeviewer.DiffNode;
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.LocationKind;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -39,10 +44,14 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -98,6 +107,7 @@ import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
+import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
@@ -607,6 +617,14 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		return this.consoleManager;
 	}
 
+	private static ITextFileBuffer getDirtyBuffer(IFile file) {
+		ITextFileBuffer buffer = FileBuffers.getTextFileBufferManager().getTextFileBuffer(file.getFullPath(), LocationKind.IFILE);
+		if (buffer!=null && buffer.isDirty()) {
+			return buffer;
+		}
+		return null;
+	}
+
 	/**
 	 *
 	 * @param project
@@ -633,112 +651,115 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 
 			// Check if file exists in case the stored file is obsolete (e.g. no longer exists)
 			if (manifestFile.exists()) {
-				final String yamlContents = IOUtil.toString(manifestFile.getContents());
-				String errorMessage = null;
-				TextEdit edit = null;
-				try {
-					YamlGraphDeploymentProperties yamlGraph = new YamlGraphDeploymentProperties(yamlContents, deploymentProperties.getAppName(), cloudData);
-					MultiTextEdit me = yamlGraph.getDifferences(deploymentProperties);
-					edit = me != null && me.hasChildren() ? me : null;
-					if (yamlGraph.getInheritFilePath() != null) {
-						errorMessage = "'inherit' attribute is present in the manifest but is not supported. Merge with caution.";
-					}
-				} catch (MalformedTreeException e) {
-					Log.log(e);
-					errorMessage = "Failed to create text differences between local manifest file and deployment properties on CF. Merge with caution.";
-					edit = new ReplaceEdit(0, yamlContents.length(),
-							new Yaml(YamlGraphDeploymentProperties.createDumperOptions())
-									.dump(ApplicationManifestHandler.toYaml(deploymentProperties, cloudData)));
-				} catch (Throwable t) {
-					Log.log(t);
-					errorMessage = "Failed to parse local manifest file YAML contents. Merge with caution.";
-					edit = new ReplaceEdit(0, yamlContents.length(),
-							new Yaml(YamlGraphDeploymentProperties.createDumperOptions())
-									.dump(ApplicationManifestHandler.toYaml(deploymentProperties, cloudData)));
-				}
-
-				/*
-				 * If UI is available and there differences between manifest and
-				 * current deployment properties on CF then prompt the user to
-				 * perform the merge
-				 */
-				if (edit != null && ui != null) {
-					final IDocument doc = new Document(yamlContents);
-					edit.apply(doc);
-
-					final YamlFileInput left = new YamlFileInput(manifestFile,
-							BootDashActivator.getDefault().getImageRegistry().get(BootDashActivator.CLOUD_ICON));
-					final YamlInput right = new YamlInput("Current deployment properties from Cloud Foundry",
-							BootDashActivator.getDefault().getImageRegistry().get(BootDashActivator.CLOUD_ICON),
-							doc.get());
-
-					CompareConfiguration config = new CompareConfiguration();
-					config.setLeftLabel(left.getName());
-					config.setLeftImage(left.getImage());
-					config.setRightLabel(right.getName());
-					config.setRightImage(right.getImage());
-					config.setLeftEditable(true);
-					config.setProperty("manifest", manifestFile);
-
-					final String message = errorMessage;
-
-					final CompareEditorInput input = new CompareEditorInput(config) {
-						@Override
-						protected Object prepareInput(IProgressMonitor arg0)
-								throws InvocationTargetException, InterruptedException {
-							setMessage(message);
-							return new DiffNode(left, right);
+				if (!saveManifestBeforePush(manifestFile, ui)) {
+					throw new OperationCanceledException();
+				} else {
+					final String yamlContents = IOUtil.toString(manifestFile.getContents());
+					String errorMessage = null;
+					TextEdit edit = null;
+					try {
+						YamlGraphDeploymentProperties yamlGraph = new YamlGraphDeploymentProperties(yamlContents, deploymentProperties.getAppName(), cloudData);
+						MultiTextEdit me = yamlGraph.getDifferences(deploymentProperties);
+						edit = me != null && me.hasChildren() ? me : null;
+						if (yamlGraph.getInheritFilePath() != null) {
+							errorMessage = "'inherit' attribute is present in the manifest but is not supported. Merge with caution.";
 						}
-					};
-					input.setTitle("Merge Local Deployment Manifest File");
+					} catch (MalformedTreeException e) {
+						Log.log(e);
+						errorMessage = "Failed to create text differences between local manifest file and deployment properties on CF. Merge with caution.";
+						edit = new ReplaceEdit(0, yamlContents.length(),
+								new Yaml(YamlGraphDeploymentProperties.createDumperOptions())
+										.dump(ApplicationManifestHandler.toYaml(deploymentProperties, cloudData)));
+					} catch (Throwable t) {
+						Log.log(t);
+						errorMessage = "Failed to parse local manifest file YAML contents. Merge with caution.";
+						edit = new ReplaceEdit(0, yamlContents.length(),
+								new Yaml(YamlGraphDeploymentProperties.createDumperOptions())
+										.dump(ApplicationManifestHandler.toYaml(deploymentProperties, cloudData)));
+					}
 
-					input.run(monitor);
-					ManifestDiffDialogModel model = new ManifestDiffDialogModel(input);
-					Result result = ui.openManifestDiffDialog(model);
-					switch (result) {
-					case CANCELED:
-						throw new OperationCanceledException();
-					case FORGET_MANIFEST:
-						element.setDeploymentManifestFile(null);
-						/*
-						 * Use the current CF deployment properties, hence just break out of the switch
-						 */
-						break;
-					case USE_MANIFEST:
-						/*
-						 * Load deployment properties from YAML text content
-						 */
-						final byte[] yamlBytes = left.getContent();
-						List<CloudApplicationDeploymentProperties> props = new ApplicationManifestHandler(project,
-								cloudData, manifestFile) {
+					/*
+					 * If UI is available and there differences between manifest and
+					 * current deployment properties on CF then prompt the user to
+					 * perform the merge
+					 */
+					if (edit != null && ui != null) {
+						final IDocument doc = new Document(yamlContents);
+						edit.apply(doc);
+
+						final YamlFileInput left = new YamlFileInput(manifestFile,
+								BootDashActivator.getDefault().getImageRegistry().get(BootDashActivator.CLOUD_ICON));
+						final YamlInput right = new YamlInput("Current deployment properties from Cloud Foundry",
+								BootDashActivator.getDefault().getImageRegistry().get(BootDashActivator.CLOUD_ICON),
+								doc.get());
+
+						CompareConfiguration config = new CompareConfiguration();
+						config.setLeftLabel(left.getName());
+						config.setLeftImage(left.getImage());
+						config.setRightLabel(right.getName());
+						config.setRightImage(right.getImage());
+						config.setLeftEditable(true);
+						config.setProperty("manifest", manifestFile);
+
+						final String message = errorMessage;
+
+						final CompareEditorInput input = new CompareEditorInput(config) {
 							@Override
-							protected InputStream getInputStream() throws Exception {
-								return new ByteArrayInputStream(yamlBytes);
+							protected Object prepareInput(IProgressMonitor arg0)
+									throws InvocationTargetException, InterruptedException {
+								setMessage(message);
+								return new DiffNode(left, right);
 							}
-						}.load(monitor);
-						CloudApplicationDeploymentProperties found = null;
-						for (CloudApplicationDeploymentProperties p : props) {
-							if (deploymentProperties.getAppName().equals(p.getAppName())) {
-								found = p;
-								break;
-							}
-						}
-						if (found == null) {
-							throw ExceptionUtil.coreException(
-									"Cannot load deployment properties for application '" + deploymentProperties.getAppName()
-											+ "' from the manifest file '" + manifestFile.getFullPath() + "'");
-						} else {
-							deploymentProperties = found;
-						}
-						break;
-						default:
-					}
-				}
-				// TODO: refactor so that adding archive only gets called once for all properties resolving and creating cases.
-				// Reason to call multiple times in different conditions is to retain the old logic when
-				// switching to v2 usage and not introduce regressions with manifest diffing
-				addApplicationArchive(project, deploymentProperties, cloudData, ui, monitor);
+						};
+						input.setTitle("Merge Local Deployment Manifest File");
 
+						input.run(monitor);
+						ManifestDiffDialogModel model = new ManifestDiffDialogModel(input);
+						Result result = ui.openManifestDiffDialog(model);
+						switch (result) {
+						case CANCELED:
+							throw new OperationCanceledException();
+						case FORGET_MANIFEST:
+							element.setDeploymentManifestFile(null);
+							/*
+							 * Use the current CF deployment properties, hence just break out of the switch
+							 */
+							break;
+						case USE_MANIFEST:
+							/*
+							 * Load deployment properties from YAML text content
+							 */
+							final byte[] yamlBytes = left.getContent();
+							List<CloudApplicationDeploymentProperties> props = new ApplicationManifestHandler(project,
+									cloudData, manifestFile) {
+								@Override
+								protected InputStream getInputStream() throws Exception {
+									return new ByteArrayInputStream(yamlBytes);
+								}
+							}.load(monitor);
+							CloudApplicationDeploymentProperties found = null;
+							for (CloudApplicationDeploymentProperties p : props) {
+								if (deploymentProperties.getAppName().equals(p.getAppName())) {
+									found = p;
+									break;
+								}
+							}
+							if (found == null) {
+								throw ExceptionUtil.coreException(
+										"Cannot load deployment properties for application '" + deploymentProperties.getAppName()
+												+ "' from the manifest file '" + manifestFile.getFullPath() + "'");
+							} else {
+								deploymentProperties = found;
+							}
+							break;
+							default:
+						}
+					}
+					// TODO: refactor so that adding archive only gets called once for all properties resolving and creating cases.
+					// Reason to call multiple times in different conditions is to retain the old logic when
+					// switching to v2 usage and not introduce regressions with manifest diffing
+					addApplicationArchive(project, deploymentProperties, cloudData, ui, monitor);
+				}
 			} else {
 				// Still in manifest file deployment mode, but manifest file does not exist anymore therefore create properties
 				deploymentProperties = createDeploymentProperties(project, ui, monitor);
@@ -755,6 +776,32 @@ public class CloudFoundryBootDashModel extends AbstractBootDashModel implements 
 		getUnsupportedProperties().allowOrCancelIfFound(ui, deploymentProperties);
 
 		return deploymentProperties;
+	}
+
+	/**
+	 * Check for dirty manifest. If manifest is dirty, ask user if it is okay to save.
+	 * If they say yes do it.
+	 * @return Whether push operation is okay to proceed. (Manifest is not dirty at the end).
+	 * @throws ExecutionException
+	 * @throws InterruptedException
+	 */
+	private boolean saveManifestBeforePush(IFile manifestFile, UserInteractions ui) throws Exception {
+		ITextFileBuffer dirtyManifest = getDirtyBuffer(manifestFile);
+		if (dirtyManifest==null) {
+			return true;
+		} else {
+			boolean save = ui.confirmOperation("Save Cf Manifest?",
+					"The CF manifest at `"+manifestFile.getFullPath()+"' has unsaved changes.\n\n" +
+					"Do you want to save it now?",
+					new String[] {
+							"Save", "Cancel"
+					}, 0
+			) == 0;
+			if (save) {
+				JobUtil.runInJob("Save dirty manifest", (progres) -> dirtyManifest.commit(progres, true)).get();
+			}
+			return save;
+		}
 	}
 
 	/**

@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.views;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.compare.CompareEditorInput;
@@ -331,8 +332,13 @@ public class DefaultUserInteractions implements UserInteractions {
 
 	@Override
 	public int confirmOperation(String title, String message, String[] buttonLabels, int defaultButtonIndex) {
-		return new MessageDialog(getShell(), title, null, message,
-				MessageDialog.QUESTION, buttonLabels, defaultButtonIndex).open();
+		AtomicInteger answer = new AtomicInteger();
+		getShell().getDisplay().syncExec(() -> {
+			answer.set(new MessageDialog(getShell(), title, null, message,
+					MessageDialog.QUESTION, buttonLabels, defaultButtonIndex).open()
+			);
+		});
+		return answer.get();
 	}
 
 	@Override
