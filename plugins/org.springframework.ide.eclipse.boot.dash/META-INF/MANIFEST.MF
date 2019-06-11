@@ -55,9 +55,7 @@ Require-Bundle: org.eclipse.ui,
  javax.activation,
  org.bouncycastle.bcpkix;bundle-version="1.59.0",
  org.bouncycastle.bcprov;bundle-version="1.59.0",
- org.eclipse.ui.genericeditor,
- org.eclipse.lsp4e,
- org.eclipse.lsp4j
+ org.eclipse.ui.genericeditor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,

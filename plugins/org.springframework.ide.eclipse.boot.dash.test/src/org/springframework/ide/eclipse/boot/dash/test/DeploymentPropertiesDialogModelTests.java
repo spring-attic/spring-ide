@@ -36,14 +36,12 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.lsp4e.LanguageServerWrapper;
 import org.eclipse.lsp4e.LanguageServiceAccessor;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.editors.text.TextFileDocumentProvider;
@@ -132,10 +130,9 @@ public class DeploymentPropertiesDialogModelTests {
 		dumbProject = projects.createProject("dumbProject");
 		IFile manifest = dumbProject.getFile("manifest.yml");
 		manifest.create(new ByteArrayInputStream(new byte[0]), true, new NullProgressMonitor());
-		IEditorPart part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(new FileEditorInput(manifest), "CfManifestYMLEditor");
+		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(new FileEditorInput(manifest), "CfManifestYMLEditor");
 		waitForJobsToComplete();
-		// Wait for LS to start
-		LanguageServiceAccessor.getLanguageServers(part.getAdapter(ITextViewer.class).getDocument(), cap -> true).get();
+		waitUntilFileConnected(manifest);
 	}
 
 	@AfterClass
@@ -198,7 +195,7 @@ public class DeploymentPropertiesDialogModelTests {
 		waitForJobsToComplete();
 	}
 
-	private void waitUntilFileConnected(IFile file) throws Exception {
+	private static void waitUntilFileConnected(IFile file) throws Exception {
 		waitForJobsToComplete();
 		for (LanguageServerWrapper wrapper : LanguageServiceAccessor.getLSWrappers(file, cap -> true)) {
 			ACondition.waitFor(file.toString() + " connected to LS", DISCONNECT_TIMEOUT, () -> assertTrue(wrapper.isConnectedTo(file.getLocation())));

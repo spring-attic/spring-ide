@@ -35,7 +35,6 @@ import org.eclipse.jface.text.source.AnnotationModelEvent;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelListener;
 import org.eclipse.jface.text.source.IAnnotationModelListenerExtension;
-import org.eclipse.lsp4e.LanguageServiceAccessor;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPropertyListener;
 import org.eclipse.ui.PartInitException;
@@ -390,10 +389,6 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 				@Override
 				protected IDocument compute() {
 					IDocument doc = editor == null || editor.getViewer() == null ? null : editor.getViewer().getDocument();
-					if (doc != null) {
-						//Make sure ls is started and connected to document.
-						LanguageServiceAccessor.getLSPDocumentInfosFor(doc, cap -> true);
-					}
 					return doc;
 				}
 			};
