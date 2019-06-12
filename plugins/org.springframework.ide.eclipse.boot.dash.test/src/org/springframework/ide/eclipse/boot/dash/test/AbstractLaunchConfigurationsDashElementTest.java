@@ -78,8 +78,7 @@ public class AbstractLaunchConfigurationsDashElementTest extends Mocks {
 		}
 
 		@Override
-		public CompletableFuture<Void> launch(String runMode, ILaunchConfiguration conf) {
-			return CompletableFuture.completedFuture(null);
+		public void launch(String runMode, ILaunchConfiguration conf) {
 		}
 
 		@Override
