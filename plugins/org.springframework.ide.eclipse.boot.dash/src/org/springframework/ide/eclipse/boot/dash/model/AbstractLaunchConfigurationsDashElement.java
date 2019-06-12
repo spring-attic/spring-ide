@@ -98,8 +98,6 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 
 	private PropertyStoreApi persistentProperties;
 
-	private LiveExpression<URI> actuatorUrl;
-
 	private PollingLiveExp<List<RequestMapping>> liveRequestMappings;
 	private PollingLiveExp<LiveBeansModel> liveBeans;
 	private PollingLiveExp<LiveEnvModel> liveEnv;
