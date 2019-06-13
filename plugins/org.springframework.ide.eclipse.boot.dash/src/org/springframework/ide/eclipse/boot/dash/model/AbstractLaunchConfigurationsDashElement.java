@@ -98,8 +98,6 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 
 	private PropertyStoreApi persistentProperties;
 
-	private LiveExpression<URI> actuatorUrl;
-
 	private PollingLiveExp<List<RequestMapping>> liveRequestMappings;
 	private PollingLiveExp<LiveBeansModel> liveBeans;
 	private PollingLiveExp<LiveEnvModel> liveEnv;
@@ -243,7 +241,7 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 		try {
 			ILaunchConfiguration conf = getOrCreateLaunchConfig(ui);
 			if (conf!=null) {
-				launch(runMode, conf).get();
+				launch(runMode, conf);
 			}
 		} catch (Exception e) {
 			Log.log(e);
@@ -284,14 +282,29 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 		return MainTypeFinder.guessMainTypes(getJavaProject(), new NullProgressMonitor());
 	}
 
-	protected CompletableFuture<Void> launch(final String runMode, final ILaunchConfiguration conf) {
-		AtomicReference<CompletableFuture<Void>> done = new AtomicReference<>();
-		Display.getDefault().asyncExec(new Runnable() {
+	protected void launch(final String runMode, final ILaunchConfiguration conf) throws Exception {
+		CompletableFuture<Void> done = new CompletableFuture<>();
+		Display.getDefault().syncExec(new Runnable() {
 			public void run() {
-				done.set(BootDebugUITools.launchInBackground(conf, runMode));
+				try {
+					BootDebugUITools.launchInBackground(conf, runMode, done);
+				} catch (Throwable e) {
+					done.completeExceptionally(e);
+				}
 			}
 		});
-		return done.get();
+		Display display = Display.getCurrent();
+		if (display!=null) {
+			//Blocking the ui thread is iffy. It has a tendency to deadlock when
+			// work you are waiting for is actually using 'syncExec or asyncExec' somewhere inside.
+			//We can avoid this deadlock by calling on display.readAndDispatch to allow other stuff to run in
+			//the ui thread while we are waiting.
+			while (!done.isDone() ) {
+				while (display.readAndDispatch()) {}
+				done.get(100, TimeUnit.MILLISECONDS);
+			}
+		}
+		done.get();
 	}
 
 	@Override

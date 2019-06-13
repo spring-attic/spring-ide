@@ -67,10 +67,11 @@ public class BootDebugUITools {
 	 *
 	 * @param configuration the configuration to launch
 	 * @param mode launch mode
+	 * @param done
 	 * @return CompletableFuture that is completed when the background job finishes.
 	 * @since 3.0
 	 */
-	public static CompletableFuture<Void> launchInBackground(final ILaunchConfiguration configuration, final String mode) {
+	public static void launchInBackground(final ILaunchConfiguration configuration, final String mode, CompletableFuture<Void> done) {
 		final IJobManager jobManager = Job.getJobManager();
 		IPreferenceStore store = DebugUIPlugin.getDefault().getPreferenceStore();
 		boolean wait = (jobManager.find(ResourcesPlugin.FAMILY_AUTO_BUILD).length > 0 && ResourcesPlugin.getWorkspace().isAutoBuilding())
@@ -81,7 +82,8 @@ public class BootDebugUITools {
 				MessageDialogWithToggle dialog = MessageDialogWithToggle.openYesNoCancelQuestion(DebugUIPlugin.getShell(), DebugUIMessages.DebugUIPlugin_23, DebugUIMessages.DebugUIPlugin_24, null, false, store, IInternalDebugUIConstants.PREF_WAIT_FOR_BUILD); //
 				switch (dialog.getReturnCode()) {
 					case IDialogConstants.CANCEL_ID:
-						return CompletableFuture.completedFuture(null);
+						done.complete(null);
+						return;
 					case IDialogConstants.YES_ID:
 						wait = true;
 						break;
@@ -97,7 +99,6 @@ public class BootDebugUITools {
 			}
 		}
 		final boolean waitInJob = wait;
-		CompletableFuture<Void> done = new CompletableFuture<>();
 		Job job = new Job(MessageFormat.format(DebugUIMessages.DebugUIPlugin_25, new Object[] {configuration.getName()})) {
 			@Override
 			public IStatus run(final IProgressMonitor monitor) {
@@ -164,7 +165,6 @@ public class BootDebugUITools {
 					monitor.done();
 					done.complete(null);
 				}
-
 				return Status.OK_STATUS;
 			}
 		};
@@ -180,7 +180,6 @@ public class BootDebugUITools {
 			progressService.showInDialog(workbench.getActiveWorkbenchWindow().getShell(), job);
 		}
 		job.schedule();
-		return done;
 	}
 
 }

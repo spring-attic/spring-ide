@@ -234,8 +234,10 @@ public class BootProjectTestHarness {
 		CodeSet.afterCreateHook = (File location) -> {
 			//This is a workaround for this bug: https://bugs.eclipse.org/bugs/show_bug.cgi?id=547409
 			File pom = new File(location, "pom.xml");
-			String pomCotents = IOUtil.toString(new FileInputStream(pom)).replace("2.1.5.RELEASE", "2.1.4.RELEASE");
-			IOUtil.pipe(new ByteArrayInputStream(pomCotents.getBytes("UTF8")), pom);
+			if (pom.exists()) {
+				String pomCotents = IOUtil.toString(new FileInputStream(pom)).replace("2.1.5.RELEASE", "2.1.4.RELEASE");
+				IOUtil.pipe(new ByteArrayInputStream(pomCotents.getBytes("UTF8")), pom);
+			}
 		};
 		try {
 			RetryUtil.retryWhen("createBootProject("+projectName+")", 3, RetryUtil.errorWithMsg("Read timed out"), () -> {
