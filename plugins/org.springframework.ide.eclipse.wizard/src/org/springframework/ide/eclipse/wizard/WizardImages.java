@@ -32,7 +32,7 @@ public class WizardImages {
 
 	public static final ImageDescriptor TEMPLATE_ICON = create(OBJ, "template_project.png");
 
-	public static final ImageDescriptor REFRESH_ICON = create(OBJ, "refresh.gif");
+	public static final ImageDescriptor REFRESH_ICON = create(OBJ, "refresh.png");
 
 	public static final ImageDescriptor TEMPLATE_CATEGORY_ICON = create(OBJ, "category.png");
 
