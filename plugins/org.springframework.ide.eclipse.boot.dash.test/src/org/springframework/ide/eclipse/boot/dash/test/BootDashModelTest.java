@@ -214,6 +214,7 @@ public class BootDashModelTest {
 		verifyNoMoreInteractions(ui);
 	}
 
+	@Ignore
 	@Test public void testAutoInstallSpringCloudCLICustom() throws Exception {
 		//We support installing spring-cloud CLI into a custom configured spring boot cli
 
