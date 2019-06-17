@@ -61,14 +61,14 @@ public class M2ELogbackCustomizer extends Job {
 				Bundle logbackConfigBundle = Platform.getBundle("org.eclipse.m2e.logback.configuration");
 //				Log.info("M2ELogbackCustomizer logbackConfigBundle = "+logbackConfigBundle);
 				String version = logbackConfigBundle.getVersion().toString();
-				Log.info("M2ELogbackCustomizer version = "+version);
+//				Log.info("M2ELogbackCustomizer version = "+version);
 				IPath statelocationPath = Platform.getStateLocation(logbackConfigBundle);
 //				Log.info("M2ELogbackCustomizer statelocationPath = "+statelocationPath);
 
 				if (statelocationPath!=null) {
 					File stateDir = statelocationPath.toFile();
 					File logbackFile = new File(stateDir, "logback."+version+".xml");
-					Log.info("M2ELogbackCustomizer logbackFile = "+logbackFile);
+//					Log.info("M2ELogbackCustomizer logbackFile = "+logbackFile);
 					if (!logbackFile.isFile()) {
 //						Log.info("M2ELogbackCustomizer logbackFile is not a file");
 					} else {
