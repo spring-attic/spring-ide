@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.springframework.ide.eclipse.boot.launch.livebean
 Bundle-SymbolicName: org.springframework.ide.eclipse.boot.launch.livebean;singleton:=true
-Bundle-Version: 3.9.9.qualifier
+Bundle-Version: 3.9.10.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.boot.launch.livebean.BootLiveBeanActivator
 Bundle-Vendor: Pivotal Inc.
 Require-Bundle: org.eclipse.ui,
