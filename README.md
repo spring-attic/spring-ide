@@ -19,6 +19,9 @@
 
   https://dist.springsource.com/release/TOOLS/update/e4.7 (for Eclipse Oxygen 4.7)
   https://dist.springsource.com/release/TOOLS/update/e4.8 (for Eclipse Photon 4.8)
+  https://dist.springsource.com/release/TOOLS/update/e4.9 (for Eclipse 2018-09 4.9)
+  https://dist.springsource.com/release/TOOLS/update/e4.10 (for Eclipse 2018-12 4.10)
+  https://dist.springsource.com/release/TOOLS/update/e4.11 (for Eclipse 2019-03 4.11)
   
   The latest versions of Spring IDE support Eclipse Oxygen and Photon. Older versions of Spring IDE
   for older versions of Eclipse can be found here:
