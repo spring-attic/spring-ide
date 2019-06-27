@@ -56,6 +56,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.debug.core.DebugPlugin;
@@ -214,8 +215,10 @@ public class BootDashModelTest {
 		verifyNoMoreInteractions(ui);
 	}
 
-	@Ignore
 	@Test public void testAutoInstallSpringCloudCLICustom() throws Exception {
+		if ((""+Platform.getLocation()).contains("bamboo")) {
+			return;
+		}
 		//We support installing spring-cloud CLI into a custom configured spring boot cli
 
 		String cliVersion = "1.5.6.RELEASE"; // consider updating once in a while to remain 'current'.
