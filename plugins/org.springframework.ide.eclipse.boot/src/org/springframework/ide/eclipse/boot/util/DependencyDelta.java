@@ -10,10 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.util;
 
-import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.DEPENDENCIES;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.*;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.DEPENDENCY;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.findChilds;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.getChild;
+import static org.springframework.ide.eclipse.boot.util.PomUtils.*;
 
 import java.io.StringReader;
 import java.util.HashSet;
@@ -32,20 +33,28 @@ import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
 @SuppressWarnings("restriction")
 public class DependencyDelta {
 
 	private final Set<MavenId> removed;
 	public final Map<MavenId, Optional<String>> added; // mavenId -> scope mapping
+	public final Set<MavenId> removedBoms;
+	public final Set<MavenId> addedBoms;
 
-	public DependencyDelta(Set<MavenId> removed, Map<MavenId, Optional<String>> added) {
+	public DependencyDelta(Set<MavenId> removed, Map<MavenId, Optional<String>> added,
+			Set<MavenId> removedBom, Set<MavenId> addedBom) {
 		super();
 		this.removed = removed;
 		this.added = added;
+		this.removedBoms = removedBom;
+		this.addedBoms = addedBom;
 	}
 
-	public static DependencyDelta create(String referencePom, String targetPom) throws Exception {
+	public static DependencyDelta create(String referencePomString, String targetPomString) throws Exception {
+		Document referencePom = parsePom(referencePomString);
+		Document targetPom = parsePom(targetPomString);
 		Map<MavenId, Optional<String>> referenceDeps = parseDependencies(referencePom);
 		Map<MavenId, Optional<String>> targetDeps = parseDependencies(targetPom);
 		Set<MavenId> removed = new HashSet<>();
@@ -64,12 +73,53 @@ public class DependencyDelta {
 				added.put(newDep.getKey(), newDep.getValue());
 			}
 		}
-		return new DependencyDelta(removed, added);
+
+		Set<MavenId> referenceBoms = parseBoms(referencePom);
+		Set<MavenId> targetBoms = parseBoms(targetPom);
+		ImmutableSet.Builder<MavenId> addedBoms = ImmutableSet.builder();
+		ImmutableSet.Builder<MavenId> removedBoms = ImmutableSet.builder();
+		for (MavenId oldDep : referenceBoms) {
+			if (!targetBoms.contains(oldDep)) {
+				removedBoms.add(oldDep);
+			}
+		}
+		for (MavenId newDep : targetBoms) {
+			if (!referenceBoms.contains(newDep)) {
+				addedBoms.add(newDep);
+			}
+		}
+
+		return new DependencyDelta(removed, added, removedBoms.build(), addedBoms.build());
 	}
 
-	private static Map<MavenId, Optional<String>> parseDependencies(String pomContents) throws Exception {
+	private static Set<MavenId> parseBoms(Document pom) {
+		ImmutableSet.Builder<MavenId> boms = ImmutableSet.builder();
+		try {
+			Element depsEl = getChild(pom.getDocumentElement(), DEPENDENCY_MANAGEMENT, DEPENDENCIES);
+			List<Element> deps = findChilds(depsEl, DEPENDENCY);
+			for (Element bom : deps) {
+
+				if (
+						"import".equals(getScope(bom)) &&
+						"pom".equals(getType(bom))
+				) {
+					String gid = getGroupId(bom);
+					String aid = getArtifactId(bom);
+					if (gid!=null && aid!=null) {
+						boms.add(new MavenId(gid, aid));
+					}
+				}
+			}
+		} catch (Exception e) {
+			//some issue with the pom structure, probably no DEPENDENCY_MANAGEMENT section.
+			//This is sort of expected as not every pom has such a section,
+			//So just ignore.
+		}
+		return boms.build();
+	}
+
+	private static Map<MavenId, Optional<String>> parseDependencies(Document pom) throws Exception {
 		ImmutableMap.Builder<MavenId, Optional<String>> builder = ImmutableMap.builder();
-		Document pom = parsePom(pomContents);
 		Element depsEl = getChild(
 				pom.getDocumentElement(), DEPENDENCIES);
 		List<Element> deps = findChilds(depsEl, DEPENDENCY);
@@ -90,6 +140,28 @@ public class DependencyDelta {
 
 	public boolean isRemoved(MavenId id) {
 		return removed.contains(id);
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder("DependencyDelta(");
+		for (MavenId mavenId : removed) {
+			builder.append(" -"+mavenId.getGroupId()+":"+mavenId.getArtifactId());
+		}
+		for (MavenId mavenId : added.keySet()) {
+			builder.append(" +"+mavenId.getGroupId()+":"+mavenId.getArtifactId());
+		}
+		if (!addedBoms.isEmpty() || !removedBoms.isEmpty()) {
+			builder.append(" boms:");
+			for (MavenId mavenId : removedBoms) {
+				builder.append(" -"+mavenId.getGroupId()+":"+mavenId.getArtifactId());
+			}
+			for (MavenId mavenId : addedBoms) {
+				builder.append(" +"+mavenId.getGroupId()+":"+mavenId.getArtifactId());
+			}
+		}
+		builder.append(" )");
+		return builder.toString();
 	}
 
 }

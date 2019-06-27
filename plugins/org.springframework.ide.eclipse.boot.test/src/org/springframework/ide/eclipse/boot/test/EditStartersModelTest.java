@@ -18,7 +18,7 @@ import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.GROUP_ID;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.SCOPE;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.TYPE;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.VERSION;
-import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.childEquals;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.*;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.findChild;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.findChilds;
 import static org.junit.Assert.assertEquals;
@@ -89,7 +89,7 @@ import org.w3c.dom.Element;
 @SuppressWarnings("restriction")
 public class EditStartersModelTest {
 
-	private static final String BOOT_CURRENT_RELEASE = "2.1.5.RELEASE";
+	private static final String BOOT_CURRENT_RELEASE = "2.1.6.RELEASE";
 	private static final String REPOSITORY = "repository";
 	private static final String REPOSITORIES = "repositories";
 	private MockInitializrService initializr = new MockInitializrService();
@@ -200,7 +200,37 @@ public class EditStartersModelTest {
 					"org.springframework.cloud:spring-cloud-stream-binder-rabbit" // cross-selection from rabbit + spring-cloud-stream
 			);
 		}
+	}
 
+	@Test
+	public void addCloudFunctionWebDependency() throws Exception {
+		//Test case derived from bug report: https://github.com/spring-projects/sts4/issues/313
+		IProject project = harness.createBootProject("web-function", withStarters("webflux"));
+		assertMavenDeps(project,
+				"io.projectreactor:reactor-test@test",
+				"org.springframework.boot:spring-boot-starter-test@test",
+				"org.springframework.boot:spring-boot-starter-webflux"
+		);
+		assertBoms(project /*NONE*/);
+
+		EditStartersModel wizard = createWizard(project);
+		wizard.addDependency("cloud-function");
+		performOk(wizard);
+
+		System.out.println(">>> pom.xml (after dialog closed)");
+		System.out.println(IOUtil.toString(project.getFile("pom.xml").getContents()));
+		System.out.println("<<< pom.xml (after dialog closed)");
+
+		StsTestUtil.assertNoErrors(project); //force project build
+
+		assertMavenDeps(project,
+				"io.projectreactor:reactor-test@test",
+				"org.springframework.boot:spring-boot-starter-test@test",
+				"org.springframework.boot:spring-boot-starter-webflux",
+				"org.springframework.cloud:spring-cloud-function-web"
+		);
+
+		assertBoms(project, "org.springframework.cloud:spring-cloud-dependencies");
 	}
 
 	/**
@@ -763,6 +793,25 @@ public class EditStartersModelTest {
 			tf.transform(new DOMSource(pom), new StreamResult(stringWriter));
 			return stringWriter.toString();
 		}
+	}
+
+	private void assertBoms(IProject project, String... _expectedDeps) throws IOException, CoreException {
+		IDOMDocument pom = parsePom(project);
+		Element depsEl = getChild(pom.getDocumentElement(), DEPENDENCY_MANAGEMENT, DEPENDENCIES);
+		List<Element> depNodes = findChilds(depsEl, DEPENDENCY);
+		List<String> actualDeps = new ArrayList<>();
+		for (Element depEl : depNodes) {
+			String dep = getGroupId(depEl) + ":" + getArtifactId(depEl);
+			if ("import".equals(getTextChild(depEl, "scope")) && "pom".equals(getTextChild(depEl, "type"))) {
+				actualDeps.add(dep);
+			}
+		}
+		Collections.sort(actualDeps);
+		List<String> expectedDeps = new ArrayList<>(Arrays.asList(_expectedDeps));
+		Collections.sort(expectedDeps);
+
+		assertEquals(onePerLine(expectedDeps), onePerLine(actualDeps));
+
 	}
 
 	/**

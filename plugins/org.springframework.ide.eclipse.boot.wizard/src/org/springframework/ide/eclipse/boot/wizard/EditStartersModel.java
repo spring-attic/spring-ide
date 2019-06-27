@@ -19,11 +19,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -47,6 +49,14 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
  * @author Kris De Volder
  */
 public class EditStartersModel implements OkButtonHandler {
+
+	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+
+	private void debug(String string) {
+		if (DEBUG) {
+			System.out.println(string);
+		}
+	}
 
 	public static final Object JOB_FAMILY = "EditStartersModel.JOB_FAMILY";
 
@@ -90,9 +100,14 @@ public class EditStartersModel implements OkButtonHandler {
 	}
 
 	protected DependencyDelta getDelta() throws Exception {
+		debug("Computing dependency delta...");
+		debug("   intial dependencies = "+initialDependencies.stream().map(d -> d.getId()).collect(Collectors.toList()));
+		debug("   selected dependencies = "+dependencies.getCurrentSelection().stream().map(d -> d.getId()).collect(Collectors.toList()));
 		String referencePom = project.generatePom(initialDependencies);
 		String targetPom = project.generatePom(dependencies.getCurrentSelection());
-		return DependencyDelta.create(referencePom, targetPom);
+		DependencyDelta delta = DependencyDelta.create(referencePom, targetPom);
+		debug(""+delta);
+		return delta;
 	}
 
 	@Override

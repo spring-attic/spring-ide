@@ -70,7 +70,7 @@ public class MavenId {
 
 	@Override
 	public String toString() {
-		return "StarterId [groupId=" + groupId + ", artifactId=" + artifactId + "]";
+		return "MavenId [groupId=" + groupId + ", artifactId=" + artifactId + "]";
 	}
 
 }

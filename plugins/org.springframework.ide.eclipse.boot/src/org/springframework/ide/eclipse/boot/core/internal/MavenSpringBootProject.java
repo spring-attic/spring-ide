@@ -37,6 +37,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -89,11 +90,12 @@ import org.springframework.ide.eclipse.boot.core.Repo;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarters;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrDependencySpec.BomInfo;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
 import org.springframework.ide.eclipse.boot.util.DependencyDelta;
 import org.springframework.ide.eclipse.boot.util.DumpOutput;
-import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -268,7 +270,7 @@ public class MavenSpringBootProject extends SpringBootProject {
 						}
 					}
 
-					//
+					//Add dependencies delta says should be added
 					for (Entry<MavenId, Optional<String>> added : delta.added.entrySet()) {
 						MavenId mid = added.getKey();
 						String scope = added.getValue().orElse(null);
@@ -279,6 +281,21 @@ public class MavenSpringBootProject extends SpringBootProject {
 							createRepoIfNeeded(pom, starter.getRepo());
 						}
 					}
+
+					//Add boms delta says should be added
+					try {
+						for (MavenId bomMavenId : delta.addedBoms) {
+							Bom bom = getStarterInfos().getBom(bomMavenId);
+							if (bom!=null) {
+								createBomIfNeeded(pom, bom);
+							}
+						}
+					} catch (Exception e) {
+						// troubles reading bom infos from initializer?
+						Log.log(e);
+					}
+
+					//TODO: remove boms delta says should be removed?
 				}
 			}));
 		} catch (Throwable e) {

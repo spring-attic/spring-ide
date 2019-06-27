@@ -42,6 +42,7 @@ public class SpringBootStarters {
 	private InitializrServiceSpec initializrSpec;
 	private HashMap<String, SpringBootStarter> byId;
 	private HashMap<MavenId, SpringBootStarter> byMavenId;
+	private HashMap<MavenId, Bom> bomsByMavenId;
 
 	public SpringBootStarters(InitializrServiceSpec initializrSpec, InitializrDependencySpec dependencySpec) {
 		this.dependencySpec = dependencySpec;
@@ -80,36 +81,39 @@ public class SpringBootStarters {
 	 * one of the indexes should call this method first.
 	 */
 	private synchronized void ensureIndexes() {
-		HashMap<String, Repo> reposById = new HashMap<>();
-		for (Entry<String, RepoInfo> e : dependencySpec.getRepositories().entrySet()) {
-			String id = e.getKey();
-			RepoInfo repo = e.getValue();
-			reposById.put(id, new Repo(id, repo));
-		}
-		HashMap<String, Bom> bomsById = new HashMap<>();
-		for (Entry<String, BomInfo> e : dependencySpec.getBoms().entrySet()) {
-			String id = e.getKey();
-			BomInfo bomInfo = e.getValue();
-			List<Repo> repos = new ArrayList<>();
-			String[] repoIds = bomInfo.getRepositories();
-			if (repoIds!=null) {
-				for (String repoId : repoIds) {
-					Repo repo = reposById.get(repoId);
-					if (repo!=null) {
-						repos.add(repo);
-					}
-				}
-			}
-			Bom bom = new Bom(id,
-					new MavenCoordinates(bomInfo.getGroupId(), bomInfo.getArtifactId(), bomInfo.getClassifier(), bomInfo.getVersion()),
-					repos
-			);
-			bomsById.put(e.getKey(), bom);
-		}
-
 		if (byId==null) {
 			byId = new HashMap<>();
 			byMavenId = new HashMap<>();
+			bomsByMavenId = new HashMap<>();
+
+			HashMap<String, Repo> reposById = new HashMap<>();
+			for (Entry<String, RepoInfo> e : dependencySpec.getRepositories().entrySet()) {
+				String id = e.getKey();
+				RepoInfo repo = e.getValue();
+				reposById.put(id, new Repo(id, repo));
+			}
+			HashMap<String, Bom> bomsById = new HashMap<>();
+			for (Entry<String, BomInfo> e : dependencySpec.getBoms().entrySet()) {
+				String id = e.getKey();
+				BomInfo bomInfo = e.getValue();
+				List<Repo> repos = new ArrayList<>();
+				String[] repoIds = bomInfo.getRepositories();
+				if (repoIds!=null) {
+					for (String repoId : repoIds) {
+						Repo repo = reposById.get(repoId);
+						if (repo!=null) {
+							repos.add(repo);
+						}
+					}
+				}
+				Bom bom = new Bom(id,
+						new MavenCoordinates(bomInfo.getGroupId(), bomInfo.getArtifactId(), bomInfo.getClassifier(), bomInfo.getVersion()),
+						repos
+				);
+				bomsById.put(e.getKey(), bom);
+				bomsByMavenId.put(new MavenId(bom.getGroupId(), bom.getArtifactId()), bom);
+			}
+
 			for (Entry<String, DependencyInfo> e : dependencySpec.getDependencies().entrySet()) {
 				String id = e.getKey();
 				DependencyInfo dep = e.getValue();
@@ -121,6 +125,7 @@ public class SpringBootStarters {
 				if (id!=null && groupId!=null && artifactId!=null) {
 					//ignore invalid looking entries. Should at least have an id, aid and gid
 					SpringBootStarter starter = new SpringBootStarter(id, new MavenCoordinates(dep), scope, bomsById.get(bom), reposById.get(repo));
+//					debug(id + " => "+groupId + ":"+artifactId);
 					byId.put(id, starter);
 					byMavenId.put(new MavenId(groupId, artifactId), starter);
 				}
@@ -162,6 +167,11 @@ public class SpringBootStarters {
 
 	public Map<String, RepoInfo> getRepos() {
 		return dependencySpec.getRepositories();
+	}
+
+	public Bom getBom(MavenId bomMavenId) {
+		ensureIndexes();
+		return bomsByMavenId.get(bomMavenId);
 	}
 
 }

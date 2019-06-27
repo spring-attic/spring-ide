@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.util;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.ARTIFACT_ID;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.GROUP_ID;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.SCOPE;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.TYPE;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.findChild;
 
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits;
@@ -20,6 +21,10 @@ import org.w3c.dom.Element;
 
 @SuppressWarnings("restriction")
 public class PomUtils {
+
+	public static String getType(Element depEl) {
+		return getTextChild(depEl, TYPE);
+	}
 
 	public static String getScope(Element depEl) {
 		return getTextChild(depEl, SCOPE);
