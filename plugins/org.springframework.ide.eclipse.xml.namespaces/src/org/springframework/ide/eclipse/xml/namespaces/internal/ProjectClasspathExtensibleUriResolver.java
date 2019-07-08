@@ -158,6 +158,13 @@ public class ProjectClasspathExtensibleUriResolver implements
 			return null;
 		}
 
+		// Special case for 'pom.xml'. We can skip it entirely because it is not used to define spring beans.
+		// Also... m2e apparantly causes this to be called directly from the UI thread causing major hangs / annoyance.
+		// See: https://github.com/spring-projects/sts4/issues/318
+		if (file != null && "pom.xml".equals(file.getName())) {
+			return null;
+		}
+
 		while (true) {
 			Future<ProjectClasspathUriResolver> future = projectResolvers.get(project);
 			if (future == null) {
