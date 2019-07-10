@@ -54,7 +54,7 @@ public interface InitializrService {
 
 			@Override
 			public String getPom(String bootVersion, List<String> starters) throws Exception {
-				//EXample uri:
+				//Example uri:
 				//https://start-development.cfapps.io/starter.zip
 				//	?name=demo&groupId=com.example&artifactId=demo
 				//  &version=0.0.1-SNAPSHOT

@@ -184,7 +184,7 @@ public class NewSpringBootWizardModelTest extends TestCase {
 		}
 	}
 
-	private <T> Collection<T> getAllChoices(
+	public static <T> Collection<T> getAllChoices(
 			HierarchicalMultiSelectionFieldModel<T> dependencies) {
 		ArrayList<T> choices = new ArrayList<>();
 		for (String catName : dependencies.getCategories()) {

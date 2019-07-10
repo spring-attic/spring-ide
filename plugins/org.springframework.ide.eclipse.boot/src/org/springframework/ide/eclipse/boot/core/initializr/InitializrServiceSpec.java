@@ -196,7 +196,7 @@ public class InitializrServiceSpec {
 
 		@Override
 		public String toString() {
-			return "Dep("+id+","+description+","+versionRange+")";
+			return "Dep("+id+","+getName()+","+versionRange+")";
 		}
 
 		public boolean isSupportedFor(String bootVersion) {

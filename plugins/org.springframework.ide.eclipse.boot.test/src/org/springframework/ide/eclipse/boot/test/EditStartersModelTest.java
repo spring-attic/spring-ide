@@ -39,12 +39,14 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Transformer;
@@ -63,6 +65,7 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
@@ -75,7 +78,9 @@ import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.boot.test.util.TestBracketter;
+import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
 import org.springframework.ide.eclipse.boot.wizard.EditStartersModel;
+import org.springframework.ide.eclipse.boot.wizard.NewSpringBootWizardModel;
 import org.springframework.ide.eclipse.boot.wizard.PopularityTracker;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
@@ -231,6 +236,55 @@ public class EditStartersModelTest {
 		);
 
 		assertBoms(project, "org.springframework.cloud:spring-cloud-dependencies");
+	}
+
+	@Ignore //Unfortunately this test takes much too long to run. There's 6961 pairs to check,
+	// each pair creates and imports the project to verify the 'reverse' pom analysis returns
+	// the initial selection. This takes 3 to 4 seconds each. So to this test would take around
+	// 6 to 7 hours to run.
+	// If we want to make this test more practical we would have to try and implement it more directly
+	// (using only the pom and metadata from initializer app) and not do a full on maven project
+	// creation (this is what takes most of the time).
+	@Test
+	public void exhaustiveCrossSelectionTest() throws Exception {
+		//Creates a project for every possible pairs of two dependencies. Then verifies whether we
+		//EditStartersModel correctly detects that pair as 'selected'.
+		NewSpringBootWizardModel newWizard = new NewSpringBootWizardModel(new MockPrefsStore());
+		Collection<CheckBoxModel<Dependency>> allDependencies = newWizard.dependencies.getAllBoxes();
+		int testCount = 0;
+		int totalPairs = allDependencies.size() * allDependencies.size() / 2 + allDependencies.size();
+		for (CheckBoxModel<Dependency> cb1 : allDependencies) {
+			for (CheckBoxModel<Dependency> cb2 : allDependencies) {
+				Dependency d1 = cb1.getValue();
+				Dependency d2 = cb2.getValue();
+				//Assuming that it doesn't matter what order two deps are selected so
+				//only test one of a pairs (d1,d2) and (d2,d1)
+				String projectName = "test-"+d1.getId()+"-"+d2.getId();
+				if (d1.getId().compareTo(d2.getId())<=0) {
+					System.out.println((++testCount) + "/"+totalPairs + ": Testing dependency pair "+d1+" + "+d2);
+					if (!cb1.getEnablement().getValue()) {
+						System.out.println("Skipping because "+d1+" is not enabled");
+						continue;
+					}
+					if (!cb2.getEnablement().getValue()) {
+						System.out.println("Skipping because "+d2+" is not enabled");
+						continue;
+					}
+					try {
+						Set<String> starters = new HashSet<>(Arrays.asList(d1.getId(), d2.getId()));
+						IProject project = harness.createBootProject(projectName, withStarters(starters.toArray(new String[starters.size()])));
+						EditStartersModel wizard = createWizard(project);
+						Set<String> selectedDeps = wizard.dependencies.getCurrentSelection().stream().map(d -> d.getId()).collect(Collectors.toSet());
+						if (!starters.equals(selectedDeps)) {
+							fail(d1 +" + "+d2);
+						}
+						System.out.println("OK");
+					} finally {
+						StsTestUtil.deleteAllProjects();
+					}
+				}
+			}
+		}
 	}
 
 	/**

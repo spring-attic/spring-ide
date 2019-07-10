@@ -64,11 +64,11 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 		super(context, project);
 		this.projectProperties = projectProperties;
 		this.childFactory = childFactory;
-		if (DEBUG) {
-			onDispose((e) -> {
-				debug("disposed: "+this);
-			});
-		}
+//		if (DEBUG) {
+//			onDispose((e) -> {
+//				debug("disposed: "+this);
+//			});
+//		}
 	}
 
 	@Override
