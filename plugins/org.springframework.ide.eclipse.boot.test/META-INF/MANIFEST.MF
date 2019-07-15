@@ -30,7 +30,9 @@ Require-Bundle: org.eclipse.ui,
  org.glassfish.jersey.core.jersey-common;bundle-version="2.22.1",
  org.springframework.ide.eclipse.boot.validation,
  org.springframework.ide.eclipse.boot.launch,
- org.hamcrest;bundle-version="[1.1.0,1.2.0)"
+ org.hamcrest;bundle-version="[1.1.0,1.2.0)",
+ org.apache.commons.lang3,
+ com.google.guava
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: Pivotal Inc.

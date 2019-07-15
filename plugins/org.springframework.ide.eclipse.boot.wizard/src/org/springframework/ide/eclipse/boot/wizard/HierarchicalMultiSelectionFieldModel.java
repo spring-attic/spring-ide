@@ -114,5 +114,4 @@ public class HierarchicalMultiSelectionFieldModel<T> {
 	public void clearSelection() {
 		categories.values().forEach(MultiSelectionFieldModel::clearSelection);
 	}
-
 }

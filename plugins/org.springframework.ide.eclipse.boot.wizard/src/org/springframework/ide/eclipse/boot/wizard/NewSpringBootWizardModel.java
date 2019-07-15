@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -608,6 +609,21 @@ public class NewSpringBootWizardModel {
 			}
 		}
 		throw new IllegalArgumentException("No such dependency: "+dependencyId);
+	}
+
+	/**
+	 * Get the checkbox model for a dependency by its id.
+	 * <p>
+	 * This is meant for making scripting of test code against the wizard model easier. It is not
+	 * used in production code.
+	 */
+	public CheckBoxModel<Dependency> getDependencyBox(String id) {
+		for (CheckBoxModel<Dependency> d : dependencies.getAllBoxes()) {
+			if (d.getValue().getId().equals(id)) {
+				return d;
+			}
+		}
+		throw new NoSuchElementException("No dependency with id: "+id);
 	}
 
 

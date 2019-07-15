@@ -68,7 +68,7 @@ public class BootProjectTestHarness {
 	}
 
 
-	public static final long BOOT_PROJECT_CREATION_TIMEOUT = 10*60*1000; // long, may download maven dependencies
+	public static final long BOOT_PROJECT_CREATION_TIMEOUT = 2*60*1000; // long, may download maven dependencies
 
 	private IWorkspace workspace;
 
@@ -300,7 +300,7 @@ public class BootProjectTestHarness {
 	}
 
 	public static void updateMavenProjectDependencies(IProject project) throws InterruptedException {
-		debug("updateMavenProjectDependencies("+project.getName()+") ...");
+//		debug("updateMavenProjectDependencies("+project.getName()+") ...");
 		boolean refreshFromLocal = true;
 		boolean cleanProjects = true;
 		boolean updateConfig = true;
@@ -311,7 +311,7 @@ public class BootProjectTestHarness {
 				updateConfig, cleanProjects, refreshFromLocal);
 		job.schedule();
 		job.join();
-		debug("updateMavenProjectDependencies("+project.getName()+") DONE");
+//		debug("updateMavenProjectDependencies("+project.getName()+") DONE");
 	}
 
 	public static IProject createPredefinedMavenProject(final String projectName, final String bundleName)

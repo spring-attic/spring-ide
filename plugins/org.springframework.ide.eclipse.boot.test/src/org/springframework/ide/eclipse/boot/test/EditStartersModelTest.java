@@ -18,9 +18,10 @@ import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.GROUP_ID;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.SCOPE;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.TYPE;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.VERSION;
-import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.*;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.childEquals;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.findChild;
 import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.findChilds;
+import static org.eclipse.m2e.core.ui.internal.editing.PomEdits.getChild;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -45,8 +46,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Transformer;
@@ -54,6 +58,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -83,10 +88,16 @@ import org.springframework.ide.eclipse.boot.wizard.EditStartersModel;
 import org.springframework.ide.eclipse.boot.wizard.NewSpringBootWizardModel;
 import org.springframework.ide.eclipse.boot.wizard.PopularityTracker;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+
+import junit.framework.AssertionFailedError;
 
 /**
  * @author Kris De Volder
@@ -210,7 +221,9 @@ public class EditStartersModelTest {
 	@Test
 	public void addCloudFunctionWebDependency() throws Exception {
 		//Test case derived from bug report: https://github.com/spring-projects/sts4/issues/313
-		IProject project = harness.createBootProject("web-function", withStarters("webflux"));
+		IProject project;
+
+		project = harness.createBootProject("web-function", withStarters("webflux"));
 		assertMavenDeps(project,
 				"io.projectreactor:reactor-test@test",
 				"org.springframework.boot:spring-boot-starter-test@test",
@@ -238,53 +251,154 @@ public class EditStartersModelTest {
 		assertBoms(project, "org.springframework.cloud:spring-cloud-dependencies");
 	}
 
-	@Ignore //Unfortunately this test takes much too long to run. There's 6961 pairs to check,
+	//Unfortunately this test takes much too long to run to be practical. There's 6961 pairs to check,
 	// each pair creates and imports the project to verify the 'reverse' pom analysis returns
 	// the initial selection. This takes 3 to 4 seconds each. So to this test would take around
 	// 6 to 7 hours to run.
 	// If we want to make this test more practical we would have to try and implement it more directly
 	// (using only the pom and metadata from initializer app) and not do a full on maven project
 	// creation (this is what takes most of the time).
+	// In the mean time this test has been replaced with a more focussed test, see focussedCrossSelectionTest
+	// below.
 	@Test
+	@Ignore
 	public void exhaustiveCrossSelectionTest() throws Exception {
 		//Creates a project for every possible pairs of two dependencies. Then verifies whether we
 		//EditStartersModel correctly detects that pair as 'selected'.
+		List<Pair<CheckBoxModel<Dependency>, CheckBoxModel<Dependency>>> allPairs = allDependencyPairs();
+		doMultiplCrossSelectionTests(allPairs);
+	}
+
+	private List<Pair<CheckBoxModel<Dependency>, CheckBoxModel<Dependency>>> allDependencyPairs() throws Exception {
 		NewSpringBootWizardModel newWizard = new NewSpringBootWizardModel(new MockPrefsStore());
 		Collection<CheckBoxModel<Dependency>> allDependencies = newWizard.dependencies.getAllBoxes();
-		int testCount = 0;
-		int totalPairs = allDependencies.size() * allDependencies.size() / 2 + allDependencies.size();
+		List<Pair<CheckBoxModel<Dependency>, CheckBoxModel<Dependency>>> allPairs = new ArrayList<>();
 		for (CheckBoxModel<Dependency> cb1 : allDependencies) {
 			for (CheckBoxModel<Dependency> cb2 : allDependencies) {
 				Dependency d1 = cb1.getValue();
 				Dependency d2 = cb2.getValue();
-				//Assuming that it doesn't matter what order two deps are selected so
-				//only test one of a pairs (d1,d2) and (d2,d1)
-				String projectName = "test-"+d1.getId()+"-"+d2.getId();
 				if (d1.getId().compareTo(d2.getId())<=0) {
-					System.out.println((++testCount) + "/"+totalPairs + ": Testing dependency pair "+d1+" + "+d2);
-					if (!cb1.getEnablement().getValue()) {
-						System.out.println("Skipping because "+d1+" is not enabled");
-						continue;
-					}
-					if (!cb2.getEnablement().getValue()) {
-						System.out.println("Skipping because "+d2+" is not enabled");
-						continue;
-					}
-					try {
-						Set<String> starters = new HashSet<>(Arrays.asList(d1.getId(), d2.getId()));
-						IProject project = harness.createBootProject(projectName, withStarters(starters.toArray(new String[starters.size()])));
-						EditStartersModel wizard = createWizard(project);
-						Set<String> selectedDeps = wizard.dependencies.getCurrentSelection().stream().map(d -> d.getId()).collect(Collectors.toSet());
-						if (!starters.equals(selectedDeps)) {
-							fail(d1 +" + "+d2);
-						}
-						System.out.println("OK");
-					} finally {
-						StsTestUtil.deleteAllProjects();
-					}
+					allPairs.add(Pair.of(cb1, cb2));
 				}
 			}
 		}
+		return allPairs;
+	}
+
+	@Test
+	@Ignore //Not normally run during builds to save some time. You can run it manually
+	// to determine the values of the 'badIds' in 'focussedCrossSelectionTest'.
+	// If this test passes then the badIds is empty. Otherwise, you can chech the failure message
+	// to see which ids result in project import issues, if they are not already on the list
+	// report them to the intializer team.
+	public void isolatedDependencies() throws Exception {
+		doMultiplCrossSelectionTests(allDependencyPairs().stream().filter(pair -> pair.getLeft().equals(pair.getRight())).collect(Collectors.toList()));
+	}
+
+	@Test
+	public void webAndFunctionCrossSelectionTest() throws Exception {
+		NewSpringBootWizardModel newWizard = new NewSpringBootWizardModel(new MockPrefsStore());
+		doSingleCrossSelectionTest(newWizard.getDependencyBox("cloud-function"), newWizard.getDependencyBox("web"));
+	}
+
+	@Test
+	public void focussedCrossSelectionTest() throws Exception {
+		ImmutableSet<String> badIds = ImmutableSet.of(
+				//See: https://github.com/spring-io/start.spring.io/issues/191
+				//TODO: remove this 'bad list' from the test case when the problem with these dependencies
+				// has been addressed by their owners.
+				"cloud-starter-zookeeper-config", "cloud-starter-consul-config", "data-rest-hal"
+		);
+		ImmutableSet<String> interestingIds = ImmutableSet.of(
+				"cloud-function", "session" //, "web"
+		);
+
+		Stream<Pair<CheckBoxModel<Dependency>, CheckBoxModel<Dependency>>> webPairs = allDependencyPairs().stream()
+		.filter(pair ->
+			interestingIds.contains(pair.getLeft().getValue().getId()) ||
+			interestingIds.contains(pair.getRight().getValue().getId())
+		)
+//		.filter(pair ->
+//			!badIds.contains(pair.getLeft().getValue().getId()) &&
+//			!badIds.contains(pair.getRight().getValue().getId())
+//		)
+		;
+		doMultiplCrossSelectionTests(webPairs.collect(Collectors.toList()), badIds);
+	}
+
+	private void doMultiplCrossSelectionTests(Collection<Pair<CheckBoxModel<Dependency>,CheckBoxModel<Dependency>>> pairs) {
+		doMultiplCrossSelectionTests(pairs, ImmutableSet.of());
+	}
+
+	private void doMultiplCrossSelectionTests(Collection<Pair<CheckBoxModel<Dependency>,CheckBoxModel<Dependency>>> pairs, ImmutableSet<String> expectedBadIds) {
+		Map<Pair<Dependency, Dependency>, String> badPairs = new HashMap<>();
+		Set<String> actualBadIds = new HashSet<>();
+		System.out.println("Number of pairs to test: "+pairs.size());
+		int testedPairs = 0;
+		for (Pair<CheckBoxModel<Dependency>, CheckBoxModel<Dependency>> pair : pairs) {
+			try {
+				testedPairs++;
+				System.out.println(testedPairs+"/"+pairs.size()+": "+describe(pair.getLeft().getValue())+" + "+describe(pair.getRight().getValue()));
+				doSingleCrossSelectionTest(pair.getLeft(), pair.getRight());
+			} catch (Throwable e) {
+				System.err.println(ExceptionUtil.getMessage(e));
+				if (pair.getLeft().getValue().getId().equals(pair.getLeft().getValue().getId())) {
+					actualBadIds.add(pair.getLeft().getValue().getId());
+				}
+				boolean expectedProblem = expectedBadIds.contains(pair.getLeft().getValue().getId()) ||
+						expectedBadIds.contains(pair.getRight().getValue().getId());
+				if (!expectedProblem) {
+					badPairs.put(Pair.of(pair.getLeft().getValue(), pair.getRight().getValue()), ExceptionUtil.getMessage(e));
+				}
+			}
+		}
+		if (!badPairs.isEmpty()) {
+			StringBuilder message = new StringBuilder("--- Problem summary ----\n");
+			for (Entry<Pair<Dependency, Dependency>, String> badEndtry : badPairs.entrySet()) {
+				Pair<Dependency, Dependency> pair = badEndtry.getKey();
+				message.append(describe(pair.getLeft()) +" + "+describe(pair.getRight())+": "+badEndtry.getValue());
+				message.append("\n");
+			}
+			fail(message.toString());
+		}
+		assertEquals(expectedBadIds, actualBadIds);
+	}
+
+	private void doSingleCrossSelectionTest(
+			CheckBoxModel<Dependency> cb1,
+			CheckBoxModel<Dependency> cb2) throws Exception {
+		Dependency d1 = cb1.getValue();
+		Dependency d2 = cb2.getValue();
+		String projectName = "test-"+d1.getId()+"-"+d2.getId();
+		//Assuming that it doesn't matter what order two deps are selected so
+		//only test one of a pairs (d1,d2) and (d2,d1)
+		if (!cb1.getEnablement().getValue()) {
+			System.out.println("Skipping because "+d1+" is not enabled");
+			return;
+		}
+		if (!cb2.getEnablement().getValue()) {
+			System.out.println("Skipping because "+d2+" is not enabled");
+			return;
+		}
+		Set<String> starters = new HashSet<>(Arrays.asList(d1.getId(), d2.getId()));
+		try {
+			IProject project;
+			try {
+				project = harness.createBootProject(projectName, withStarters(starters.toArray(new String[starters.size()])));
+			} catch (Throwable e) {
+				throw new AssertionFailedError("Project creation failed");
+			}
+			EditStartersModel wizard = createWizard(project);
+			Set<String> selectedDeps = wizard.dependencies.getCurrentSelection().stream().map(d -> d.getId()).collect(Collectors.toSet());
+			assertEquals(starters, selectedDeps);
+			System.out.println("OK");
+		} finally {
+			StsTestUtil.deleteAllProjects();
+		}
+	}
+
+	private String describe(Dependency d) {
+		return d.getId() +"["+d.getName()+"]";
 	}
 
 	/**

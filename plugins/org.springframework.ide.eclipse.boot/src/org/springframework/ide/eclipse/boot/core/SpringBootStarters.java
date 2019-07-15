@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.Platform;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrDependencySpec;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrDependencySpec.BomInfo;
@@ -130,6 +131,22 @@ public class SpringBootStarters {
 					byMavenId.put(new MavenId(groupId, artifactId), starter);
 				}
 			}
+
+			//'extraBackmappings' below are a hacky workaround for https://github.com/spring-projects/sts4/issues/315
+			//Basically, we add some additional 'back mappings' from mavenId to starter here that are missing from
+			//the metadata.
+			extraBackMapping("cloud-function", "org.springframework.cloud", "spring-cloud-function-web");
+			extraBackMapping("session", "org.springframework.session", "spring-session-data-redis");
+			extraBackMapping("session", "org.springframework.session", "spring-session-jdbc");
+		}
+	}
+
+	private void extraBackMapping(String starterId, String gid, String aid) {
+		SpringBootStarter starter = byId.get(starterId);
+		if (starter!=null) {
+			MavenId mid = new MavenId(gid, aid);
+			Assert.isTrue(!byMavenId.containsKey(mid));
+			byMavenId.put(mid, starter);
 		}
 	}
 

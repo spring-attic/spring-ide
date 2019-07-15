@@ -45,6 +45,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.ui.OkButtonHandler;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
+import com.google.common.collect.ImmutableSet;
+
 /**
  * @author Kris De Volder
  */
@@ -152,7 +154,7 @@ public class EditStartersModel implements OkButtonHandler {
 	private void discoverOptions(HierarchicalMultiSelectionFieldModel<Dependency> dependencies) throws Exception {
 		starters = project.getStarterInfos();
 
-		Set<MavenId> activeStarters = getActiveStarters();
+		Set<String> activeStarters = getActiveStarters();
 
 		if (starters!=null) {
 			for (DependencyGroup dgroup : starters.getDependencyGroups()) {
@@ -162,6 +164,7 @@ public class EditStartersModel implements OkButtonHandler {
 				Map<String, String> variables = new HashMap<>();
 				variables.put(InitializrServiceSpec.BOOT_VERSION_LINK_TEMPLATE_VARIABLE, starters.getBootVersion());
 
+				//Create all dependency boxes
 				for (Dependency dep : dgroup.getContent()) {
 					if (starters.contains(dep.getId())) {
 						dependencies.choice(catName, dep.getName(), dep,
@@ -169,8 +172,7 @@ public class EditStartersModel implements OkButtonHandler {
 								DependencyTooltipContent.generateRequirements(dep),
 								LiveExpression.constant(true)
 						);
-						MavenId mavenId = starters.getMavenId(dep.getId());
-						boolean selected = activeStarters.contains(mavenId);
+						boolean selected = activeStarters.contains(dep.getId());
 						if (selected) {
 							initialDependencies.add(dep);
 						}
@@ -182,7 +184,19 @@ public class EditStartersModel implements OkButtonHandler {
 
 	}
 
-	private Set<MavenId> getActiveStarters() throws Exception {
+	private Set<String> getActiveStarters() throws Exception {
+		Set<MavenId> deps = getActiveDependencies();
+		ImmutableSet.Builder<String> activeStarters = ImmutableSet.builder();
+		for (MavenId mavenId : deps) {
+			String starter = starters.getId(mavenId);
+			if (starter!=null) {
+				activeStarters.add(starter);
+			}
+		}
+		return activeStarters.build();
+	}
+
+	private Set<MavenId> getActiveDependencies() throws Exception {
 		if (this.activeStarters==null) {
 			this.activeStarters = new HashSet<>();
 			List<IMavenCoordinates> deps = project.getDependencies();

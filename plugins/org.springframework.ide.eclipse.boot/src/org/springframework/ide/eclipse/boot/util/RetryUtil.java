@@ -36,9 +36,13 @@ public class RetryUtil {
 			} catch (Throwable e) {
 				error = e;
 				if (name!=null) {
-					if (tries>0 && when.test(e)) {
-						System.out.println(name+" failed: "+ExceptionUtil.getMessage(e));
-						System.out.println("Retrying!");
+					if (tries>0) {
+						if (when.test(e)) {
+							System.out.println(name+" failed: "+ExceptionUtil.getMessage(e));
+							System.out.println("Retrying!");
+						} else {
+							tries = 0;
+						}
 					}
 				}
 			}
@@ -112,5 +116,5 @@ public class RetryUtil {
 		return result;
 	}
 
-	
+
 }

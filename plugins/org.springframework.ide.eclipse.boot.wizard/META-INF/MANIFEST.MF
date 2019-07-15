@@ -48,5 +48,6 @@ Import-Package: javax.ws.rs;version="2.0.1",
  javax.ws.rs.ext;version="2.0.1",
  org.eclipse.core.runtime,
  org.eclipse.core.runtime.jobs,
+ org.eclipse.osgi.util,
  org.glassfish.jersey.client;version="2.22.0",
  org.osgi.framework
