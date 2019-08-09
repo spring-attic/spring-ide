@@ -72,5 +72,6 @@ Export-Package: org.springframework.ide.eclipse.boot.dash,
  org.springframework.ide.eclipse.boot.dash.util,
  org.springframework.ide.eclipse.boot.dash.views,
  org.springframework.ide.eclipse.boot.dash.views.sections
-Import-Package: org.yaml.snakeyaml,
- org.glassfish.jersey.client
+Import-Package: javax.inject,
+ org.glassfish.jersey.client,
+ org.yaml.snakeyaml
