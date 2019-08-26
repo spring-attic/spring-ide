@@ -121,7 +121,7 @@ public class SelectedButtonSection<T> extends WizardPageSection {
 		xButton.setToolTipText("Click to remove the dependency");
 
 		Label label = new Label(buttonComp, SWT.NONE);
-		GridDataFactory.fillDefaults().grab(false, false).align(SWT.BEGINNING, SWT.CENTER).hint(170, SWT.DEFAULT)
+		GridDataFactory.fillDefaults().grab(false, false).align(SWT.BEGINNING, SWT.CENTER)
 				.applyTo(label);
 
 		label.setText(model.getLabel());
