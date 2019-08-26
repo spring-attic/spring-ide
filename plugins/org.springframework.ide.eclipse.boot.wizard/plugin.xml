@@ -25,7 +25,7 @@
          id="org.springsource.ide.eclipse.commons.gettingstarted.wizard.boot.NewSpringBootWizard"
          name="Spring Starter Project"
          project="true">
-       <description>Create new Spring Starter Project via the Spring Initializr Web Service</description>
+       <description>Create new Spring Starter Project</description>
    </wizard>
       
       <wizard
@@ -35,9 +35,7 @@
             id="org.springsource.ide.eclipse.gettingstarted.wizards.import.generic.newalias"
             name="Import Spring Getting Started Content"
             project="true"> 
-         <description> 
-            An import wizards that imports code associated with a Spring Getting Started Guide
-         </description> 
+         <description>Import Spring Getting Started Content</description> 
          <selection class="org.eclipse.core.resources.IResource"/> 
       </wizard>
       
