@@ -38,6 +38,7 @@ import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assert
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.createFile;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.setContents;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
@@ -111,6 +112,7 @@ import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.WizardCo
 import org.springframework.ide.eclipse.boot.test.util.TestBracketter;
 import org.springsource.ide.eclipse.commons.core.ZipFileUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.maintype.MainTypeFinder;
+import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -1002,10 +1004,18 @@ public class BootDashModelTest {
 		// Just having the 2_x version of this test should then be adequate
 		String projectName = "actuated-project";
 		IProject project = createBootProject(projectName,
-				bootVersionAtLeast("[1.3.0,2.0)"),   //1.3 is required for us to be able to determine the actuator port
+//				bootVersionAtLeast("[1.3.0,2.0)"),   //1.3 is required for us to be able to determine the actuator port
 				withStarters("web", "actuator"),     //required to actually *have* an actuator
 				setPackage("com.example.demo")
 		);
+
+		IFile pom = project.getFile("pom.xml");
+		if (pom.exists()) {
+			String pomCotents = IOUtil.toString(pom.getContents()).replaceAll("2\\.\\d+\\.\\d+.RELEASE", "1.5.18.RELEASE");
+			pom.setContents(new ByteArrayInputStream(pomCotents.getBytes("UTF8")), true, false, new NullProgressMonitor());
+			BootProjectTestHarness.buildMavenProject(project);
+		}
+
 		createFile(project, "src/main/java/com/example/demo/HelloController.java",
 				"package com.example.demo;\n" +
 				"\n" +
