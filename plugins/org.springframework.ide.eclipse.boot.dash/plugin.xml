@@ -322,5 +322,38 @@
       </enabledWhen>
    </reconciler>
 </extension>
+<extension
+      point="org.eclipse.ui.themes">
+   <colorDefinition
+         categoryId="org.springsource.ide.eclipse.commons.ui"
+         id="org.springframework.ide.eclipse.boot.dash.TextDecorColor"
+         isEditable="false"
+         label="Text Decoration Color"
+         value="0,100,0">
+   </colorDefinition>
+   <colorDefinition
+         categoryId="org.springsource.ide.eclipse.commons.ui"
+         id="org.springframework.ide.eclipse.boot.dash.AltTextDecorColor"
+         isEditable="false"
+         label="Alternative Text Decoration Color"
+         value="0,0,139">
+   </colorDefinition>
+   <colorDefinition
+         categoryId="org.springsource.ide.eclipse.commons.ui"
+         id="org.springframework.ide.eclipse.boot.dash.MutedTextDecorColor"
+         isEditable="false"
+         label="Muted Text Decoration Color"
+         value="169,169,169">
+   </colorDefinition>
+</extension>
+<extension
+      point="org.eclipse.e4.ui.css.swt.theme">
+   <stylesheet
+         uri="css/dark-theme.css">
+      <themeid
+            refid="org.eclipse.e4.ui.css.theme.e4_dark">
+      </themeid>
+   </stylesheet>
+</extension>
 
 </plugin>

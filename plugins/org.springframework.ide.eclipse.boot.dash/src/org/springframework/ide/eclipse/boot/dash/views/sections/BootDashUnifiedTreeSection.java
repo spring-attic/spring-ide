@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2016 Pivotal, Inc.
+ * Copyright (c) 2015, 2019 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,7 +27,9 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.LocalSelectionTransfer;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -62,6 +64,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
+import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.livexp.ElementwiseListener;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
@@ -79,6 +82,7 @@ import org.springframework.ide.eclipse.boot.dash.util.HiddenElementsLabel;
 import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashAction;
 import org.springframework.ide.eclipse.boot.dash.views.AddRunTargetAction;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
+import org.springframework.ide.eclipse.boot.dash.views.BootDashLabels;
 import org.springframework.ide.eclipse.boot.dash.views.RunStateAction;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -128,6 +132,22 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 	private UserInteractions ui;
 	private LiveExpression<Filter<BootDashElement>> searchFilterModel;
 	private Stylers stylers;
+
+	private final IPropertyChangeListener THEME_LISTENER = new IPropertyChangeListener() {
+
+		@Override
+		public void propertyChange(PropertyChangeEvent event) {
+			switch (event.getProperty()) {
+			case BootDashLabels.TEXT_DECORATION_COLOR_THEME:
+			case BootDashLabels.ALT_TEXT_DECORATION_COLOR_THEME:
+			case BootDashLabels.MUTED_TEXT_DECORATION_COLOR_THEME:
+				if (!tv.getTree().isDisposed()) {
+					tv.refresh(true);
+				}
+				break;
+			}
+		}
+	};
 
 	public static class BootModelViewerSorter extends ViewerSorter {
 
@@ -418,11 +438,16 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 					stylers.dispose();
 					stylers = null;
 				}
+
+				PlatformUI.getWorkbench().getThemeManager().removePropertyChangeListener(THEME_LISTENER);
 			}
 		});
 
+		PlatformUI.getWorkbench().getThemeManager().addPropertyChangeListener(THEME_LISTENER);
+
 		addDragSupport(tv);
 		addDropSupport(tv);
+
 	}
 
 	private LiveExpression<BootDashModel> getSectionSelection() {

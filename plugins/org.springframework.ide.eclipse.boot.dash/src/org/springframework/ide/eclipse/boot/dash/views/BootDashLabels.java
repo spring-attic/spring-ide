@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2017 Pivotal, Inc.
+ * Copyright (c) 2015, 2019 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,7 +24,9 @@ import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.StyledString.Styler;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
@@ -42,9 +44,9 @@ import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKClient;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKLaunchTracker;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
-import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -64,6 +66,11 @@ import com.google.common.collect.ImmutableSet;
  */
 @SuppressWarnings("restriction")
 public class BootDashLabels implements Disposable {
+
+	public static final String TEXT_DECORATION_COLOR_THEME = "org.springframework.ide.eclipse.boot.dash.TextDecorColor";
+	public static final String ALT_TEXT_DECORATION_COLOR_THEME = "org.springframework.ide.eclipse.boot.dash.AltTextDecorColor";
+	public static final String MUTED_TEXT_DECORATION_COLOR_THEME = "org.springframework.ide.eclipse.boot.dash.MutedTextDecorColor";
+
 
 	private static final String UNKNOWN_LABEL = "???";
 
@@ -243,7 +250,8 @@ public class BootDashLabels implements Disposable {
 				if (element.getRefreshState().isLoading()) {
 					StyledString prefix = new StyledString();
 					if (element.getRefreshState().getMessage() != null) {
-						prefix = new StyledString(element.getRefreshState().getMessage() + " - ", stylers.italicColoured(SWT.COLOR_DARK_GRAY));
+						Color color = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry().get(MUTED_TEXT_DECORATION_COLOR_THEME);
+						prefix = new StyledString(element.getRefreshState().getMessage() + " - ", stylers.italicColoured(color));
 					}
 					return prefix.append(new StyledString(element.getRunTarget().getDisplayName(), stylers.italic()));
 				} else {
@@ -269,9 +277,11 @@ public class BootDashLabels implements Disposable {
 		case TAGS:
 			return stylers.tagBrackets();
 		case LIVE_PORT:
-			return stylers.darkGreen();
+			Color portColor = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry().get(TEXT_DECORATION_COLOR_THEME);
+			return stylers.color(portColor);
 		case INSTANCES:
-			return stylers.darkBlue();
+			Color instancesColor = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry().get(ALT_TEXT_DECORATION_COLOR_THEME);
+			return stylers.color(instancesColor);
 		case NAME:
 		case PROJECT:
 //			return null;
@@ -316,7 +326,8 @@ public class BootDashLabels implements Disposable {
 					// yet on CF elements.
 					boolean devtools = BootPropertyTester.hasDevtools(element.getProject());
 					if (devtools) {
-						StyledString devtoolsDecoration = new StyledString(" [devtools]", stylers.darkGreen());
+						Color color = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry().get(TEXT_DECORATION_COLOR_THEME);
+						StyledString devtoolsDecoration = new StyledString(" [devtools]", stylers.color(color));
 						styledLabel.append(devtoolsDecoration);
 					}
 				}
@@ -366,7 +377,8 @@ public class BootDashLabels implements Disposable {
 				break;
 			case DEVTOOLS:
 				if (element.hasDevtools()) {
-					styledLabel = new StyledString("devtools", stylers.darkGreen());
+					Color color = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry().get(TEXT_DECORATION_COLOR_THEME);
+					styledLabel = new StyledString("devtools", stylers.color(color));
 				} else {
 					styledLabel = new StyledString();
 				}
@@ -376,7 +388,9 @@ public class BootDashLabels implements Disposable {
 					CloudAppDashElement cfApp = (CloudAppDashElement) element;
 					JmxSshTunnelStatus tunnelState = cfApp.getJmxSshTunnelStatus().getValue();
 					if (tunnelState!=JmxSshTunnelStatus.DISABLED) {
-						styledLabel = new StyledString("jmx", tunnelState==JmxSshTunnelStatus.ACTIVE ? stylers.darkGreen() : stylers.darkGrey());
+						Color activeColor = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry().get(TEXT_DECORATION_COLOR_THEME);
+						Color notActiveColor = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry().get(MUTED_TEXT_DECORATION_COLOR_THEME);
+						styledLabel = new StyledString("jmx", tunnelState==JmxSshTunnelStatus.ACTIVE ? stylers.color(activeColor) : stylers.color(notActiveColor));
 					}
 				} else {
 					styledLabel = new StyledString();
@@ -407,7 +421,8 @@ public class BootDashLabels implements Disposable {
 					if (stylers == null) {
 						label = textLabel;
 					} else {
-						styledLabel = new StyledString(textLabel, stylers.darkGreen());
+						Color color = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry().get(TEXT_DECORATION_COLOR_THEME);
+						styledLabel = new StyledString(textLabel, stylers.color(color));
 					}
 				}
 				break;
@@ -416,7 +431,8 @@ public class BootDashLabels implements Disposable {
 				if (stylers == null) {
 					label = path == null ? "" : path;
 				} else {
-					styledLabel = new StyledString(path == null ? "" : path, stylers.darkGrey());
+					Color color = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry().get(MUTED_TEXT_DECORATION_COLOR_THEME);
+					styledLabel = new StyledString(path == null ? "" : path, stylers.color(color));
 				}
 				break;
 			case INSTANCES:
@@ -426,7 +442,8 @@ public class BootDashLabels implements Disposable {
 					if (stylers == null) {
 						label = actual + "/" + desired;
 					} else {
-						styledLabel = new StyledString(actual+"/"+desired,stylers.darkBlue());
+						Color instancesColor = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry().get(ALT_TEXT_DECORATION_COLOR_THEME);
+						styledLabel = new StyledString(actual+"/"+desired,stylers.color(instancesColor));
 					}
 				}
 				break;
@@ -444,11 +461,12 @@ public class BootDashLabels implements Disposable {
 					for (String tunnelName : tunnelNames) {
 						NGROKClient ngrokClient = NGROKLaunchTracker.get(tunnelName);
 						if (ngrokClient != null) {
+							Color color = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry().get(ALT_TEXT_DECORATION_COLOR_THEME);
 							if (styledLabel == null) {
-								styledLabel = new StyledString("\u27A4 " + ngrokClient.getTunnel().getPublic_url(),stylers.darkBlue());
+								styledLabel = new StyledString("\u27A4 " + ngrokClient.getTunnel().getPublic_url(),stylers.color(color));
 							}
 							else {
-								styledLabel.append(new StyledString(" / \u27A4 " + ngrokClient.getTunnel().getPublic_url(),stylers.darkBlue()));
+								styledLabel.append(new StyledString(" / \u27A4 " + ngrokClient.getTunnel().getPublic_url(),stylers.color(color)));
 							}
 						}
 					}
