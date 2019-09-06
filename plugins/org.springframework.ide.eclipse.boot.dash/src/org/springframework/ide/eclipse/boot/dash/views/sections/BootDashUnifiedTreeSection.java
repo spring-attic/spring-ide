@@ -26,6 +26,7 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.preference.JFacePreferences;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.LocalSelectionTransfer;
@@ -141,6 +142,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 			case BootDashLabels.TEXT_DECORATION_COLOR_THEME:
 			case BootDashLabels.ALT_TEXT_DECORATION_COLOR_THEME:
 			case BootDashLabels.MUTED_TEXT_DECORATION_COLOR_THEME:
+			case JFacePreferences.HYPERLINK_COLOR:
 				if (!tv.getTree().isDisposed()) {
 					tv.refresh(true);
 				}
