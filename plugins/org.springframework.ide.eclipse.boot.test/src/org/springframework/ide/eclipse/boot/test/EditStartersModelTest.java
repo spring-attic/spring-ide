@@ -305,9 +305,7 @@ public class EditStartersModelTest {
 	public void focussedCrossSelectionTest() throws Exception {
 		ImmutableSet<String> badIds = ImmutableSet.of(
 				//See: https://github.com/spring-io/start.spring.io/issues/191
-				//TODO: remove this 'bad list' from the test case when the problem with these dependencies
-				// has been addressed by their owners.
-				"cloud-starter-zookeeper-config", "cloud-starter-consul-config", "data-rest-hal"
+				//"cloud-starter-zookeeper-config", "cloud-starter-consul-config", "data-rest-hal"
 		);
 		ImmutableSet<String> interestingIds = ImmutableSet.of(
 				"cloud-function", "session" //, "web"
