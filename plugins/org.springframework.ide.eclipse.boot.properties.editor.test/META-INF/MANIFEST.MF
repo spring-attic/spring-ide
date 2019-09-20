@@ -3,7 +3,7 @@ Eclipse-BundleShape: dir
 Bundle-ManifestVersion: 2
 Bundle-Name: Test
 Bundle-SymbolicName: org.springframework.ide.eclipse.boot.properties.editor.test
-Bundle-Version: 3.9.10.qualifier
+Bundle-Version: 3.9.11.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.boot.properties.editor.test.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
