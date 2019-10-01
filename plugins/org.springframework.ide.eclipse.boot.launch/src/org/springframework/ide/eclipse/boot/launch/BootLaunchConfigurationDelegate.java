@@ -131,6 +131,8 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 	public static final String USE_THIN_WRAPPER = "spring.boot.thinwrapper.enable";
 	public static final boolean DEFAULT_USE_THIN_WRAPPER = false;
 
+	public static final String SPRING_PROJECT_NAME_ATTRIBUTE = "spring.boot.project.name";
+
 	private ProfileHistory profileHistory = new ProfileHistory();
 
 	/**
@@ -236,6 +238,11 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 				vmArgs.append('\n');
 				vmArgs.append(fastStartupArgs);
 			}
+
+			String projectName = AbstractBootLaunchConfigurationDelegate.getProjectName(conf);
+			vmArgs.append('\n');
+			vmArgs.append("-D" + SPRING_PROJECT_NAME_ATTRIBUTE + "=" + projectName);
+
 			return vmArgs.toString();
 		} catch (Exception e) {
 			Log.log(e);
