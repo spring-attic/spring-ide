@@ -24,7 +24,8 @@ Require-Bundle: org.eclipse.ui,
  org.springsource.ide.eclipse.commons.livexp,
  org.springsource.ide.eclipse.commons.frameworks.core,
  org.eclipse.ui.ide,
- org.eclipse.ltk.ui.refactoring
+ org.eclipse.ltk.ui.refactoring,
+ javax.inject
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.boot.properties.editor.yaml,

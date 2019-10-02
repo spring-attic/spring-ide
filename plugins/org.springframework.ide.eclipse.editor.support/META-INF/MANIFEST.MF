@@ -25,7 +25,8 @@ Require-Bundle: org.eclipse.ui,
  io.projectreactor.reactor-core;bundle-version="[3.1.9,3.1.10)",
  org.reactivestreams.reactive-streams;bundle-version="1.0.0",
  org.apache.commons.lang3,
- org.springsource.ide.eclipse.commons.ui
+ org.springsource.ide.eclipse.commons.ui,
+ javax.inject
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.editor.support,
  org.springframework.ide.eclipse.editor.support.completions,

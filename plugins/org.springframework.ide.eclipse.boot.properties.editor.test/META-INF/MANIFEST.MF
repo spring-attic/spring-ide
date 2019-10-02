@@ -30,7 +30,8 @@ Require-Bundle: org.eclipse.ui,
  com.google.guava,
  org.eclipse.m2e.jdt,
  org.springsource.ide.eclipse.commons.core,
- org.eclipse.ltk.core.refactoring
+ org.eclipse.ltk.core.refactoring,
+ javax.inject
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.boot.properties.editor.test
