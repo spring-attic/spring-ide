@@ -4,7 +4,6 @@ Bundle-Name: Boot Tests
 Bundle-SymbolicName: org.springframework.ide.eclipse.boot.test
 Bundle-Version: 3.9.11.qualifier
 Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime,
  org.junit,
  org.springsource.ide.eclipse.commons.livexp,
  org.springframework.ide.eclipse.boot,
@@ -38,3 +37,6 @@ Bundle-ActivationPolicy: lazy
 Bundle-Vendor: Pivotal Inc.
 Export-Package: org.springframework.ide.eclipse.boot.test,
  org.springframework.ide.eclipse.boot.test.util
+Import-Package: org.eclipse.core.runtime,
+ org.eclipse.core.runtime.jobs,
+ org.osgi.framework
