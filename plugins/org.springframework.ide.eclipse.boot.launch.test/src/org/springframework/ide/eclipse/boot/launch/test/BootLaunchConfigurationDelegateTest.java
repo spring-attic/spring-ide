@@ -574,7 +574,7 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		String fastStartupArgs = BootActivator.getDefault().getPreferenceStore().getDefaultString(BootPreferences.PREF_BOOT_FAST_STARTUP_JVM_ARGS);
 		assertTrue(!fastStartupArgs.trim().isEmpty());
 		String vmArgs = new BootLaunchConfigurationDelegate().getVMArguments(wc);
-		assertTrue(vmArgs.endsWith("\n" + fastStartupArgs));
+		assertTrue(vmArgs.contains("\n" + fastStartupArgs+"\n"));
 
 		LaunchResult result = LaunchUtil.synchLaunch(wc);
 		assertOk(result);
@@ -595,7 +595,7 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		String fastStartupArgs = BootActivator.getDefault().getPreferenceStore().getDefaultString(BootPreferences.PREF_BOOT_FAST_STARTUP_JVM_ARGS);
 		assertTrue(!fastStartupArgs.trim().isEmpty());
 		String vmArgs = new BootLaunchConfigurationDelegate().getVMArguments(wc);
-		assertTrue(vmArgs.endsWith("\n" + fastStartupArgs));
+		assertTrue(vmArgs.contains("\n" + fastStartupArgs+"\n"));
 
 		// Also try live beans/JMX arguments
 		BootLaunchConfigurationDelegate.setEnableLifeCycle(wc, true);
@@ -622,7 +622,7 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		String fastStartupArgs = BootActivator.getDefault().getPreferenceStore().getString(BootPreferences.PREF_BOOT_FAST_STARTUP_JVM_ARGS);
 		assertTrue(!fastStartupArgs.isEmpty() && fastStartupArgs.trim().isEmpty());
 		String actualArgs = new BootLaunchConfigurationDelegate().getVMArguments(wc);
-		assertEquals(vmArgs, actualArgs);
+		assertEquals(vmArgs+"\n-Dspring.boot.project.name="+TEST_PROJECT, actualArgs);
 
 		LaunchResult result = LaunchUtil.synchLaunch(wc);
 		assertOk(result);
