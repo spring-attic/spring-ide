@@ -213,6 +213,7 @@ public class EditStartersModelTest {
 					"org.springframework.cloud:spring-cloud-stream-test-support@test",
 					//added:
 					"org.springframework.boot:spring-boot-starter-amqp", //by user selection (amqp)
+					"org.springframework.amqp:spring-rabbit-test@test", //by user selection (amqp)
 					"org.springframework.cloud:spring-cloud-stream-binder-rabbit" // cross-selection from rabbit + spring-cloud-stream
 			);
 		}
