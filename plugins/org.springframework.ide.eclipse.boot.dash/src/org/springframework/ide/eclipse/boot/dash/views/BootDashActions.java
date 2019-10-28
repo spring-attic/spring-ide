@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -94,7 +95,7 @@ public class BootDashActions {
 	private DisposingFactory<RunTarget, AbstractBootDashAction> runOnTargetActions;
 
 	private Map<String, IAction> defIdToActions = new HashMap<>();
-
+	public LiveDataConnectionManagementActions liveDataConnectionManagement;
 
 	public BootDashActions(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
 		this(
@@ -225,6 +226,7 @@ public class BootDashActions {
 		runOnTargetActions = createDeployOnTargetActions(RunState.RUNNING);
 
 		openFilterPreferencesAction = new OpenFilterPreferencesAction(ui);
+		liveDataConnectionManagement = new LiveDataConnectionManagementActions(defaultActionParams());
 	}
 
 	private AddRunTargetAction[] createAddTargetActions() {

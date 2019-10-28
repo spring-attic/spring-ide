@@ -128,6 +128,9 @@ public class AbstractBootDashElementsAction extends AbstractBootDashAction {
 			this.model = model;
 			return this;
 		}
+		public MultiSelection<BootDashElement> getSelection() {
+			return selection;
+		}
 		public Params setSelection(MultiSelection<BootDashElement> selection) {
 			this.selection = selection;
 			return this;

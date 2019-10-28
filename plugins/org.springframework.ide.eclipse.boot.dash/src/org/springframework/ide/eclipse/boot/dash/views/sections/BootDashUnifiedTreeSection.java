@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.views.sections;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -58,13 +59,11 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
-import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.livexp.ElementwiseListener;
@@ -537,7 +536,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		addVisible(manager, actions.getExposeDebugAppAction());
 		addSubmenu(manager, "Deploy and Run On...", BootDashActivator.getImageDescriptor("icons/run-on-cloud.png"), actions.getRunOnTargetActions());
 		addSubmenu(manager, "Deploy and Debug On...", BootDashActivator.getImageDescriptor("icons/debug-on-cloud.png"), actions.getDebugOnTargetActions());
-
+		addDynamicSubmenu(manager, "Live Data Connections...", BootDashActivator.getImageDescriptor("icons/light-bulb.png"), actions.liveDataConnectionManagement);
 		manager.add(new Separator());
 
 		for (AddRunTargetAction a : actions.getAddRunTargetActions()) {
@@ -589,6 +588,25 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 				submenu.setImageDescriptor(imageDescriptor);
 				parent.add(submenu);
 			}
+		}
+	}
+
+	/**
+	 * Adds a submenu containing a dynamically computed list of actions. The list of actions
+	 * is computed on demand when the submenu is about to show.
+	 */
+	private void addDynamicSubmenu(IMenuManager parent, String label, ImageDescriptor imageDescriptor, DynamicSubMenuSupplier lazyActions) {
+		if (lazyActions!=null && lazyActions.isVisible()) {
+			MenuManager submenu = new MenuManager(label);
+			submenu.setRemoveAllWhenShown(true);
+			submenu.addMenuListener(menuAboutToShow -> {
+				List<IAction> actions = lazyActions.get();
+				for (IAction a : actions) {
+					menuAboutToShow.add(a);
+				}
+			});
+			submenu.setImageDescriptor(imageDescriptor);
+			parent.add(submenu);
 		}
 	}
 
