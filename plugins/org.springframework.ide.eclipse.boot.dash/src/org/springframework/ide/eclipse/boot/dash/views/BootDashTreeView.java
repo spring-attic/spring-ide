@@ -13,14 +13,18 @@ package org.springframework.ide.eclipse.boot.dash.views;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuCreator;
+import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -38,6 +42,8 @@ import org.eclipse.ui.views.properties.IPropertySheetPage;
 import org.eclipse.ui.views.properties.tabbed.ITabbedPropertySheetPageContributor;
 import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveDataConnectionManagementActions;
+import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveProcessCommandsExecutor;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -117,7 +123,7 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 		// Create the help context id for the viewer's control
 		// PlatformUI.getWorkbench().getHelpSystem().setHelp(tv.getControl(),
 		// "org.springframework.ide.eclipse.boot.dash.viewer");
-		actions = new BootDashActions(model, getRawSelection(), ui);
+		actions = new BootDashActions(model, getRawSelection(), ui, LiveProcessCommandsExecutor.getDefault());
 		// hookContextMenu();
 		// hookDoubleClickAction();
 		contributeToActionBars();
@@ -206,6 +212,7 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 		manager.add(actions.getOpenConsoleAction());
 		manager.add(actions.getOpenConfigAction());
 		manager.add(actions.getShowPropertiesViewAction());
+		addDynamicSubmenu(manager, "Live Data Connections...", BootDashActivator.getImageDescriptor("icons/light-bulb.png"), actions.getLiveDataConnectionManagement());
 		manager.add(actions.getToggleFiltersDialogAction());
 
 // This ought to work, but it doesn't.
@@ -214,6 +221,53 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 		createAddRunTargetPulldown(manager);
 		// manager.add(refreshAction);
 		// manager.add(action2);
+	}
+
+	private void addDynamicSubmenu(IToolBarManager toolbar, String label, ImageDescriptor imageDescriptor, Supplier<List<IAction>> lazyActions) {
+		if (lazyActions!=null) {
+			Action dropdownAction=new Action(label, SWT.DROP_DOWN){};
+			dropdownAction.setImageDescriptor(imageDescriptor);
+			dropdownAction.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/add_target_disabled.png"));
+			dropdownAction.setMenuCreator(new IMenuCreator() {
+				Menu theMenu;
+
+				@Override
+				public Menu getMenu(Menu parent) {
+					return null;
+				}
+
+				@Override
+				public Menu getMenu(Control parent) {
+					if (theMenu==null) {
+						final MenuManager menu = createDynamicPulldownMenuManager(label, imageDescriptor, lazyActions);
+						theMenu = menu.createContextMenu(parent);
+						theMenu.addDisposeListener(new DisposeListener() {
+							public void widgetDisposed(DisposeEvent e) {
+								menu.dispose();
+							}
+						});
+					}
+					return theMenu;
+				}
+
+				@Override
+				public void dispose() {
+				}
+			});
+
+			toolbar.add(new ToolbarPulldownContributionItem(dropdownAction));
+		}
+	}
+
+	protected MenuManager createDynamicPulldownMenuManager(String label, ImageDescriptor imageDescriptor, Supplier<List<IAction>> actionSupplier) {
+		final MenuManager menu = new MenuManager(label, imageDescriptor, null);
+		menu.setRemoveAllWhenShown(true);
+		menu.addMenuListener((IMenuManager manager) -> {
+			for (IAction a : actionSupplier.get()) {
+				menu.add(a);
+			}
+		});
+		return menu;
 	}
 
 	private void addAddRunTargetMenuActions(IMenuManager manager) {

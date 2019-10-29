@@ -28,6 +28,8 @@ import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeployToCloudFoundryTargetAction;
+import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveDataConnectionManagementActions;
+import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveProcessCommandsExecutor;
 import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -56,6 +58,7 @@ public class BootDashActions {
 	private MultiSelection<BootDashElement> elementsSelection;
 	private UserInteractions ui;
 	private LiveExpression<BootDashModel> sectionSelection;
+	private LiveProcessCommandsExecutor liveProcessCmds;
 
 	///// actions ///////////////////
 	private RunStateAction[] runStateActions;
@@ -95,18 +98,21 @@ public class BootDashActions {
 	private DisposingFactory<RunTarget, AbstractBootDashAction> runOnTargetActions;
 
 	private Map<String, IAction> defIdToActions = new HashMap<>();
-	public LiveDataConnectionManagementActions liveDataConnectionManagement;
 
-	public BootDashActions(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
+	private LiveDataConnectionManagementActions liveDataConnectionManagement;
+
+	public BootDashActions(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui,  LiveProcessCommandsExecutor liveProcessCmds) {
 		this(
 				model,
 				selection,
 				null,
-				ui
+				ui,
+				liveProcessCmds
 		);
 	}
 
-	public BootDashActions(BootDashViewModel model, MultiSelection<BootDashElement> selection, LiveExpression<BootDashModel> section, UserInteractions ui) {
+	public BootDashActions(BootDashViewModel model, MultiSelection<BootDashElement> selection, LiveExpression<BootDashModel> section, UserInteractions ui, LiveProcessCommandsExecutor liveProcessCmds) {
+		this.liveProcessCmds = liveProcessCmds;
 		Assert.isNotNull(ui);
 		this.model = model;
 		this.elementsSelection = selection;
@@ -117,7 +123,11 @@ public class BootDashActions {
 	}
 
 	private Params defaultActionParams() {
-		return new Params(this).setModel(model).setSelection(elementsSelection).setUi(ui);
+		return new Params(this)
+				.setModel(model)
+				.setSelection(elementsSelection)
+				.setUi(ui)
+				.setLiveProcessCmds(liveProcessCmds);
 	}
 
 	protected void makeActions() {
@@ -531,6 +541,10 @@ public class BootDashActions {
 
 	public EnableJmxSshTunnelAction getEnableJmxSshTunnel() {
 		return enableJmxSshTunnel;
+	}
+
+	public LiveDataConnectionManagementActions getLiveDataConnectionManagement() {
+		return liveDataConnectionManagement;
 	}
 
 }

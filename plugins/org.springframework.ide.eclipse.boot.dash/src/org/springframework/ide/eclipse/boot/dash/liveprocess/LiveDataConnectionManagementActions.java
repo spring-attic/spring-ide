@@ -8,23 +8,19 @@
  * Contributors:
  *     Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.views;
+package org.springframework.ide.eclipse.boot.dash.liveprocess;
 
-import java.util.Collections;
+import java.time.Duration;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.lsp4e.LanguageServiceAccessor;
-import org.eclipse.lsp4j.ExecuteCommandOptions;
-import org.eclipse.lsp4j.ExecuteCommandParams;
-import org.eclipse.lsp4j.services.LanguageServer;
+import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveProcessCommandsExecutor.Server;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
+import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashElementsAction;
 import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashElementsAction.Params;
 import org.springframework.ide.eclipse.boot.dash.views.sections.DynamicSubMenuSupplier;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
@@ -32,42 +28,38 @@ import org.springsource.ide.eclipse.commons.livexp.util.Log;
 import com.google.common.collect.ImmutableList;
 
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
-@SuppressWarnings("restriction")
 public class LiveDataConnectionManagementActions implements DynamicSubMenuSupplier {
 
-	private static final String CMD_LIST_PROCESSES = "sts/livedata/listProcesses";
 	private static final IAction DUMMY_ACTION = new Action("No matching processes") {
 		{
 			setEnabled(false);
 		}
 	};
-	private Params params;
+	private final Params params;
+	private LiveProcessCommandsExecutor liveProcessCmds;
 
 	@Override
 	public boolean isVisible() {
-		return params.getSelection().getSingle() instanceof BootProjectDashElement;
+		return liveProcessCmds!=null && params.getSelection().getSingle() instanceof BootProjectDashElement;
 	}
 
 	class ExecuteCommandAction extends AbstractBootDashElementsAction {
-		private String command;
 		private String projectName;
 		private String label;
-		private LanguageServer server;
-		private Map<String, String> commandInfo;
+		private Server server;
+		private CommandInfo commandInfo;
 
-		@SuppressWarnings("unchecked")
-		public ExecuteCommandAction(LanguageServer server, Object _commandInfo) {
+		public ExecuteCommandAction(Server server, CommandInfo commandInfo) {
 			super(params);
 			this.server = server;
-			commandInfo = (Map<String, String>) _commandInfo;
-			this.command = commandInfo.get("action");
+			this.commandInfo = commandInfo;
+			String command = commandInfo.command;
 			int lastSlash = command.lastIndexOf("/");
 			String humanReadableCommand = command.substring(lastSlash+1);
 			humanReadableCommand = humanReadableCommand.substring(0, 1).toUpperCase() + humanReadableCommand.substring(1);
-			this.projectName = commandInfo.get("projectName");
-			label = humanReadableCommand + " "+commandInfo.get("label");
+			this.projectName = commandInfo.info.get("projectName");
+			label = humanReadableCommand + " "+commandInfo.info.get("label");
 			this.setText(label);
 		}
 
@@ -77,13 +69,13 @@ public class LiveDataConnectionManagementActions implements DynamicSubMenuSuppli
 
 		@Override
 		public String toString() {
-			return "ExecuteCommandAction [command=" + command + ", projectName=" + projectName +", label="+label+"]";
+			return "ExecuteCommandAction [projectName=" + projectName +", label="+label+"]";
 		}
 
 		@Override
 		public void run() {
 			try {
-				server.getWorkspaceService().executeCommand(new ExecuteCommandParams(command, ImmutableList.of(commandInfo))).get(2, TimeUnit.SECONDS);
+				server.executeCommand(commandInfo).block(Duration.ofSeconds(2));
 			} catch (Exception e) {
 				Log.log(e);
 			}
@@ -92,6 +84,7 @@ public class LiveDataConnectionManagementActions implements DynamicSubMenuSuppli
 
 	public LiveDataConnectionManagementActions(Params params) {
 		this.params = params;
+		this.liveProcessCmds = params.getLiveProcessCmds();
 	}
 
 	@Override
@@ -102,20 +95,11 @@ public class LiveDataConnectionManagementActions implements DynamicSubMenuSuppli
 				IProject project = bde.getProject();
 				if (project!=null) {
 					String projectName = project.getName();
-					List<LanguageServer> servers = LanguageServiceAccessor.getActiveLanguageServers(cap -> {
-						ExecuteCommandOptions commandCap = cap.getExecuteCommandProvider();
-						if (commandCap!=null) {
-							List<String> supportedCommands = commandCap.getCommands();
-							return supportedCommands!=null && supportedCommands.contains(CMD_LIST_PROCESSES);
-						}
-						return false;
-					});
-					ExecuteCommandParams params = new ExecuteCommandParams(CMD_LIST_PROCESSES, Collections.emptyList());
+					List<LiveProcessCommandsExecutor.Server> servers = liveProcessCmds.getLanguageServers();
 					return Flux.fromIterable(servers)
-					.flatMap((LanguageServer server) ->
-						Mono.fromFuture(server.getWorkspaceService().executeCommand(params))
-						.flatMapMany(commandList -> Flux.fromIterable((List<?>)commandList))
-						.map(cmd -> new ExecuteCommandAction(server, cmd))
+					.flatMap((Server server) ->
+						server.listCommands()
+						.map(cmdInfo -> new ExecuteCommandAction(server, cmdInfo))
 					)
 					.filter(action -> projectName.equals(action.getProjectName()))
 					.cast(IAction.class)
@@ -132,7 +116,7 @@ public class LiveDataConnectionManagementActions implements DynamicSubMenuSuppli
 		} catch (Exception e) {
 			Log.log(e);
 		}
-		return ImmutableList.of();
+		return ImmutableList.of(DUMMY_ACTION);
 	}
 
 }

@@ -624,7 +624,7 @@ public class BootDashActionTests {
 		);
 		this.harness = new BootDashViewModelHarness(context, RunTargetTypes.LOCAL);
 		this.projects = new BootProjectTestHarness(context.getWorkspace());
-		this.actions = new BootDashActions(harness.model, harness.selection.forReading(), ui);
+		this.actions = new BootDashActions(harness.model, harness.selection.forReading(), ui, null);
 	}
 
 	@After

@@ -66,6 +66,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveProcessCommandsExecutor;
 import org.springframework.ide.eclipse.boot.dash.livexp.ElementwiseListener;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
@@ -343,7 +344,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 			}
 		});
 
-		actions = new BootDashActions(model, getSelection(), getSectionSelection(), ui);
+		actions = new BootDashActions(model, getSelection(), getSectionSelection(), ui, LiveProcessCommandsExecutor.getDefault());
 		hookContextMenu();
 
 		// Careful, either selection or tableviewer might be created first.
@@ -523,6 +524,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		addVisible(manager, actions.getOpenConsoleAction());
 		addVisible(manager, actions.getOpenInPackageExplorerAction());
 		addVisible(manager, actions.getShowPropertiesViewAction());
+		addDynamicSubmenu(manager, "Live Data Connections...", BootDashActivator.getImageDescriptor("icons/light-bulb.png"), actions.getLiveDataConnectionManagement());
 
 		manager.add(new Separator());
 
@@ -536,7 +538,6 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		addVisible(manager, actions.getExposeDebugAppAction());
 		addSubmenu(manager, "Deploy and Run On...", BootDashActivator.getImageDescriptor("icons/run-on-cloud.png"), actions.getRunOnTargetActions());
 		addSubmenu(manager, "Deploy and Debug On...", BootDashActivator.getImageDescriptor("icons/debug-on-cloud.png"), actions.getDebugOnTargetActions());
-		addDynamicSubmenu(manager, "Live Data Connections...", BootDashActivator.getImageDescriptor("icons/light-bulb.png"), actions.liveDataConnectionManagement);
 		manager.add(new Separator());
 
 		for (AddRunTargetAction a : actions.getAddRunTargetActions()) {

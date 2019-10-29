@@ -176,7 +176,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		this.clientFactory = new MockCloudFoundryClientFactory();
 		this.harness = CloudFoundryTestHarness.create(context, clientFactory);
 		this.projects = new BootProjectTestHarness(context.getWorkspace());
-		this.actions = new BootDashActions(harness.model, harness.selection.forReading(), harness.sectionSelection, ui);
+		this.actions = new BootDashActions(harness.model, harness.selection.forReading(), harness.sectionSelection, ui, null);
 	}
 
 	@After

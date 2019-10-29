@@ -14,6 +14,7 @@ import java.util.Collection;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.ui.PlatformUI;
+import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveProcessCommandsExecutor;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
@@ -119,11 +120,11 @@ public class AbstractBootDashElementsAction extends AbstractBootDashAction {
 		private UserInteractions ui;
 		private int style = IAction.AS_UNSPECIFIED;
 		private String definitionId;
+		private LiveProcessCommandsExecutor liveProcessCmds;
 
 		public Params(BootDashActions actions) {
 			this.actions = actions;
 		}
-
 		public Params setModel(BootDashViewModel model) {
 			this.model = model;
 			return this;
@@ -145,6 +146,13 @@ public class AbstractBootDashElementsAction extends AbstractBootDashAction {
 		}
 		public Params setDefinitionId(String definitionId) {
 			this.definitionId = definitionId;
+			return this;
+		}
+		public LiveProcessCommandsExecutor getLiveProcessCmds() {
+			return liveProcessCmds;
+		}
+		public Params setLiveProcessCmds(LiveProcessCommandsExecutor liveProcessCmds) {
+			this.liveProcessCmds = liveProcessCmds;
 			return this;
 		}
 	}
