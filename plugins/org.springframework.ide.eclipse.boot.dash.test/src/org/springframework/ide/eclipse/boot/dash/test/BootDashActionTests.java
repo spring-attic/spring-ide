@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2017 Pivotal, Inc.
+ * Copyright (c) 2015-2019 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,7 +18,14 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -33,6 +40,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveDataConnectionManagementActions;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractLaunchConfigurationsDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -40,6 +48,8 @@ import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargets;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
+import org.springframework.ide.eclipse.boot.dash.test.mocks.MockLiveProcesses;
+import org.springframework.ide.eclipse.boot.dash.test.mocks.MockLiveProcesses.MockProcess;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockMultiSelection;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions.RunOrDebugStateAction;
@@ -61,6 +71,135 @@ import com.google.common.collect.ImmutableSet;
  * @author Kris De Volder
  */
 public class BootDashActionTests {
+
+	@Test
+	public void liveProcessManagementVisibilityForLocalElements() throws Exception {
+		String projectName = "santa-baby";
+		IProject project = createBootProject(projectName);
+		IJavaProject javaProject = JavaCore.create(project);
+		AbstractLaunchConfigurationsDashElement<?> projectElement = (AbstractLaunchConfigurationsDashElement<?>) harness.getElementWithName(projectName);
+		BootDashElement launchConfElement = harness.getElementFor(BootLaunchConfigurationDelegate.createConf(javaProject));
+		LiveDataConnectionManagementActions liveActionsMenu = actions.getLiveDataConnectionManagement();
+
+		MockMultiSelection<BootDashElement> selection = harness.selection;
+
+		assertTrue(selection.getElements().isEmpty());
+		assertFalse(liveActionsMenu.isVisible());
+
+		selection.setElements(projectElement);
+		assertTrue(liveActionsMenu.isVisible());
+
+		selection.setElements(launchConfElement);
+		assertFalse(liveActionsMenu.isVisible());
+	}
+
+	@Test
+	public void liveProcessManagementSingleProjectSelection() throws Exception {
+		//setup:
+		String[] projectNames = { "a", "b", "c" };
+		int[] processCounts = {1, 2, 0};
+		List<List<MockProcess>> mockProcesses = new ArrayList<>();
+
+		for (int i = 0; i < projectNames.length; i++) {
+			String projectName = projectNames[i];
+			IProject project = createBootProject(projectName);
+			ArrayList<MockProcess> list = new ArrayList<>();
+			mockProcesses.add(list);
+			for (int p = 0; p < processCounts[i]; p++) {
+				list.add(processes.newProcess(projectName+":"+p, project));
+			}
+		}
+
+		LiveDataConnectionManagementActions liveActionsMenu = actions.getLiveDataConnectionManagement();
+		MockMultiSelection<BootDashElement> selection = harness.selection;
+
+		//test:
+		for (int i = 0; i < projectNames.length; i++) {
+			BootDashElement projectElement = harness.getElementWithName(projectNames[i]);
+			selection.setElements(projectElement);
+			int numprocs = processCounts[i];
+			if (numprocs==0) {
+				List<IAction> actions = liveActionsMenu.get();
+				assertEquals(1, actions.size());
+				IAction action = actions.get(0);
+				assertEquals("No matching processes", action.getText());
+				assertFalse(action.isEnabled());
+			} else {
+				Stream<String> processNames = mockProcesses.get(i).stream().map(MockProcess::getProcessKey);
+				List<IAction> actions = liveActionsMenu.get();
+				assertEquals(processCounts[i], actions.size());
+
+				Set<String> expectedLabels = processNames.map(name -> "Connect "+name+" lbl").collect(Collectors.toSet());
+				Set<String> actualLabels = actions.stream().map(a -> a.getText()).collect(Collectors.toSet());
+				assertEquals(expectedLabels, actualLabels);
+			}
+		}
+	}
+
+	@Test
+	public void liveProcessManagementProcessWithoutProjectName() throws Exception {
+		IProject project = createBootProject("a");
+		processes.newProcess("whatever", null);
+		processes.newProcess("a-process", project);
+
+
+		harness.selection.setElements(harness.getElementFor(project));
+		Set<String> labels = actions.getLiveDataConnectionManagement().get().stream().map(a -> a.getText()).collect(Collectors.toSet());
+		assertEquals(ImmutableSet.of("Connect a-process lbl"), labels);
+	}
+
+	@Test
+	public void liveProcessManagementScenario() throws Exception {
+		IProject project = createBootProject("a");
+		MockProcess process = processes.newProcess("a-process", project);
+
+		LiveDataConnectionManagementActions actionProvider = actions.getLiveDataConnectionManagement();
+		harness.selection.setElements(harness.getElementFor(project));
+
+		assertFalse(process.isConnected());
+		process.assertRefreshed(0);
+
+		IAction action = assertSingleEnabledActionWithLabel(actionProvider.get(), "Connect a-process lbl");
+		action.run();
+		assertTrue(process.isConnected());
+		process.assertRefreshed(0);
+
+		{
+			List<IAction> actions = actionProvider.get();
+			assertEquals(2, actions.size());
+			IAction refreshAction = assertActionWithLabel(actions, "Refresh a-process lbl");
+			IAction disconnectAction = assertActionWithLabel(actions, "Disconnect a-process lbl");
+			refreshAction.run();
+
+			assertTrue(process.isConnected());
+			process.assertRefreshed(1);
+		}
+
+		{
+			List<IAction> actions = actionProvider.get();
+			assertEquals(2, actions.size());
+			IAction refreshAction = assertActionWithLabel(actions, "Refresh a-process lbl");
+			IAction disconnectAction = assertActionWithLabel(actions, "Disconnect a-process lbl");
+			disconnectAction.run();
+
+			assertFalse(process.isConnected());
+		}
+
+		assertSingleEnabledActionWithLabel(actionProvider.get(), "Connect a-process lbl");
+	}
+
+	private IAction assertActionWithLabel(List<IAction> actions, String expectedLabel) {
+		Optional<IAction> found = actions.stream().filter(a -> expectedLabel.equals(a.getText())).findFirst();
+		assertTrue(found.isPresent());
+		return found.get();
+	}
+
+	private IAction assertSingleEnabledActionWithLabel(List<IAction> list, String expectedLabel) {
+		assertEquals(1, list.size());
+		IAction action = list.get(0);
+		assertEquals(expectedLabel, action.getText());
+		return action;
+	}
 
 	@Test
 	public void deleteConfigActionEnablementForProject() throws Exception {
@@ -613,6 +752,8 @@ public class BootDashActionTests {
 	@Rule
 	public LaunchCleanups launchCleanups = new LaunchCleanups();
 
+	private MockLiveProcesses processes;
+
 	@Before
 	public void setup() throws Exception {
 		StsTestUtil.deleteAllProjects();
@@ -622,9 +763,10 @@ public class BootDashActionTests {
 				DebugPlugin.getDefault().getLaunchManager(),
 				ui
 		);
+		this.processes = new MockLiveProcesses();
 		this.harness = new BootDashViewModelHarness(context, RunTargetTypes.LOCAL);
 		this.projects = new BootProjectTestHarness(context.getWorkspace());
-		this.actions = new BootDashActions(harness.model, harness.selection.forReading(), ui, null);
+		this.actions = new BootDashActions(harness.model, harness.selection.forReading(), ui, processes.commandExecutor);
 	}
 
 	@After
