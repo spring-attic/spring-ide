@@ -87,6 +87,16 @@ public class LiveDataConnectionManagementActions extends AbstractDisposable impl
 		}
 
 		@Override
+		public void updateVisibility() {
+			this.setVisible(true);
+		}
+
+		@Override
+		public void updateEnablement() {
+			this.setEnabled(true);
+		}
+
+		@Override
 		public void run() {
 			try {
 				server.executeCommand(commandInfo).block(Duration.ofSeconds(2));
