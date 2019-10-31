@@ -11,25 +11,34 @@
 package org.springframework.ide.eclipse.boot.dash.liveprocess;
 
 import java.time.Duration;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveProcessCommandsExecutor.Server;
+import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashElementsAction;
 import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashElementsAction.Params;
 import org.springframework.ide.eclipse.boot.dash.views.sections.DynamicSubMenuSupplier;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 
 import reactor.core.publisher.Flux;
 
-public class LiveDataConnectionManagementActions implements DynamicSubMenuSupplier {
+public class LiveDataConnectionManagementActions extends AbstractDisposable implements DynamicSubMenuSupplier {
 
 	private static final IAction DUMMY_ACTION = new Action("No matching processes") {
 		{
@@ -38,10 +47,15 @@ public class LiveDataConnectionManagementActions implements DynamicSubMenuSuppli
 	};
 	private final Params params;
 	private LiveProcessCommandsExecutor liveProcessCmds;
+	private final LiveExpression<Boolean> isEnabled;
 
 	@Override
 	public boolean isVisible() {
-		return liveProcessCmds!=null && params.getSelection().getSingle() instanceof BootProjectDashElement;
+		if (liveProcessCmds!=null) {
+			Set<BootDashElement> selection = params.getSelection().getValue();
+			return selection.isEmpty() || selection.stream().anyMatch(x -> x instanceof BootProjectDashElement);
+		}
+		return false;
 	}
 
 	class ExecuteCommandAction extends AbstractBootDashElementsAction {
@@ -85,38 +99,80 @@ public class LiveDataConnectionManagementActions implements DynamicSubMenuSuppli
 	public LiveDataConnectionManagementActions(Params params) {
 		this.params = params;
 		this.liveProcessCmds = params.getLiveProcessCmds();
+		ObservableSet<BootDashElement> selection = params.getSelection().getElements();
+		this.isEnabled = addDisposableChild(new LiveExpression<Boolean>(false) {
+
+			ElementStateListener elementStateListener = (BootDashElement e) -> {
+				refresh();
+			};
+
+			{
+				dependsOn(selection);
+				params.getModel().addElementStateListener(elementStateListener);
+			}
+
+			@Override
+			protected Boolean compute() {
+				ImmutableSet<BootDashElement> els = selection.getValues();
+				if (els.isEmpty()) {
+					return true;
+				} else {
+					for (BootDashElement bde : els) {
+						if (bde instanceof BootProjectDashElement) {
+							RunState s = bde.getRunState();
+							if (s == RunState.RUNNING || s ==RunState.DEBUGGING) {
+								return true;
+							}
+						}
+					}
+					return false;
+				}
+			}
+		});
 	}
 
 	@Override
 	public List<IAction> get() {
-		BootDashElement bde = params.getSelection().getSingle();
-		try {
-			if (bde!=null) {
+		Set<BootDashElement> bdes = params.getSelection().getValue();
+		Predicate<ExecuteCommandAction> filter;
+		if (bdes.isEmpty()) {
+			filter = x -> true;
+		} else {
+			Set<String> projectNames = new HashSet<>(bdes.size());
+			for (BootDashElement bde : bdes) {
 				IProject project = bde.getProject();
 				if (project!=null) {
-					String projectName = project.getName();
-					List<LiveProcessCommandsExecutor.Server> servers = liveProcessCmds.getLanguageServers();
-					return Flux.fromIterable(servers)
-					.flatMap((Server server) ->
-						server.listCommands()
-						.map(cmdInfo -> new ExecuteCommandAction(server, cmdInfo))
-					)
-					.filter(action -> projectName.equals(action.getProjectName()))
-					.cast(IAction.class)
-					.collect(Collectors.toList())
-					.map(actions -> {
-						if (actions.isEmpty()) {
-							return ImmutableList.of(DUMMY_ACTION);
-						}
-						return actions;
-					})
-					.block();
+					projectNames.add(project.getName());
 				}
 			}
+			filter = action -> projectNames.contains(action.getProjectName());
+		}
+		try {
+			List<LiveProcessCommandsExecutor.Server> servers = liveProcessCmds.getLanguageServers();
+			return Flux.fromIterable(servers)
+			.flatMap((Server server) ->
+				server.listCommands()
+				.map(cmdInfo -> new ExecuteCommandAction(server, cmdInfo))
+			)
+			.filter(filter)
+			.cast(IAction.class)
+			.collect(Collectors.toList())
+			.map(actions -> {
+				if (actions.isEmpty()) {
+					return ImmutableList.of(DUMMY_ACTION);
+				}
+				return actions;
+			})
+			.block();
 		} catch (Exception e) {
 			Log.log(e);
 		}
 		return ImmutableList.of(DUMMY_ACTION);
+	}
+
+	@Override
+	public LiveExpression<Boolean> isEnabled() {
+		return isEnabled;
 	}
 
 }

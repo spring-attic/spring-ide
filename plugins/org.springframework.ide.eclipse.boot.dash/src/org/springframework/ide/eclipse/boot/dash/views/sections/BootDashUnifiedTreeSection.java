@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views.sections;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -61,8 +62,10 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
@@ -85,7 +88,6 @@ import org.springframework.ide.eclipse.boot.dash.views.AddRunTargetAction;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashLabels;
 import org.springframework.ide.eclipse.boot.dash.views.RunStateAction;
-import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
@@ -93,11 +95,13 @@ import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.Validator;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
+import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.PageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 import org.springsource.ide.eclipse.commons.livexp.ui.util.ReflowUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 import org.springsource.ide.eclipse.commons.ui.UiUtil;
 
 import com.google.common.collect.ImmutableList;
@@ -598,7 +602,27 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 	 */
 	private void addDynamicSubmenu(IMenuManager parent, String label, ImageDescriptor imageDescriptor, DynamicSubMenuSupplier lazyActions) {
 		if (lazyActions!=null && lazyActions.isVisible()) {
-			MenuManager submenu = new MenuManager(label);
+			MenuManager submenu = new MenuManager(label) {
+				public boolean isEnabled() {
+					return lazyActions.isEnabled().getValue();
+				}
+
+				@Override
+				public void fill(Menu parent, int index) {
+					super.fill(parent, index);
+					try {
+						Field f = MenuManager.class.getDeclaredField("menuItem");
+						f.setAccessible(true);
+						MenuItem mi = (MenuItem) f.get(this);
+						if (mi!=null) {
+							mi.setEnabled(isEnabled());
+						}
+						getMenu().setEnabled(isEnabled());
+					} catch (Exception e) {
+						Log.log(e);
+					}
+				}
+			};
 			submenu.setRemoveAllWhenShown(true);
 			submenu.addMenuListener(menuAboutToShow -> {
 				List<IAction> actions = lazyActions.get();

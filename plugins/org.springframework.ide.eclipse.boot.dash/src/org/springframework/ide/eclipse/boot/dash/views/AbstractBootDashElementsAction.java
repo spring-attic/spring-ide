@@ -155,5 +155,8 @@ public class AbstractBootDashElementsAction extends AbstractBootDashAction {
 			this.liveProcessCmds = liveProcessCmds;
 			return this;
 		}
+		public BootDashViewModel getModel() {
+			return model;
+		}
 	}
 }

@@ -14,7 +14,9 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import org.eclipse.jface.action.IAction;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 public interface DynamicSubMenuSupplier extends Supplier<List<IAction>> {
 	default boolean isVisible() { return true; }
+	default LiveExpression<Boolean> isEnabled() { return LiveExpression.constant(true); }
 }

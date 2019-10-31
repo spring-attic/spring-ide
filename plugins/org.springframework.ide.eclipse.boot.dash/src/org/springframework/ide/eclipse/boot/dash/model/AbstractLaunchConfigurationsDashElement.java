@@ -129,6 +129,10 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 		return runState.getValue();
 	}
 
+	public LiveExpression<RunState> getRunStateExp() {
+		return runState;
+	}
+
 	@Override
 	public String toString() {
 		return this.getClass().getSimpleName()+"("+getName()+")";
@@ -422,7 +426,7 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 		return actuatorPort.getValue();
 	}
 
-	private LiveExpression<RunState> createRunStateExp() {
+	protected LiveExpression<RunState> createRunStateExp() {
 		final LaunchConfRunStateTracker tracker = runStateTracker();
 		final LiveExpression<RunState> exp = new LiveExpression<RunState>() {
 			protected RunState compute() {
@@ -466,7 +470,7 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 		return exp;
 	}
 
-	private LiveExpression<Integer> createActualInstancesExp() {
+	protected LiveExpression<Integer> createActualInstancesExp() {
 		final LaunchConfRunStateTracker tracker = runStateTracker();
 		final LiveExpression<Integer> exp = new LiveExpression<Integer>(0) {
 			@Override

@@ -31,6 +31,7 @@ import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargets;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockMultiSelection;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashLabels;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
@@ -144,6 +145,10 @@ public class BootDashViewModelHarness {
 		List<BootDashModel> models = getRunTargetModels(type);
 		Assert.assertEquals(1, models.size());
 		return models.get(0);
+	}
+
+	public LocalBootDashModel getLocalTargetModel() {
+		return (LocalBootDashModel) getRunTargetModel(RunTargetTypes.LOCAL);
 	}
 
 	public List<BootDashModel> getRunTargetModels(RunTargetType type) {

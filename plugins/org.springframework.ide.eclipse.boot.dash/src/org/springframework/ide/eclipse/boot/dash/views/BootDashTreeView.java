@@ -51,10 +51,13 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.util.ToolbarPulldownContributionItem;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashUnifiedTreeSection;
+import org.springframework.ide.eclipse.boot.dash.views.sections.DynamicSubMenuSupplier;
 import org.springframework.ide.eclipse.boot.dash.views.sections.TagSearchSection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.ViewPartWithSections;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
+import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageSection;
 
 import com.google.common.collect.ImmutableSet;
@@ -223,7 +226,7 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 		// manager.add(action2);
 	}
 
-	private void addDynamicSubmenu(IToolBarManager toolbar, String label, ImageDescriptor imageDescriptor, Supplier<List<IAction>> lazyActions) {
+	private void addDynamicSubmenu(IToolBarManager toolbar, String label, ImageDescriptor imageDescriptor, DynamicSubMenuSupplier lazyActions) {
 		if (lazyActions!=null) {
 			Action dropdownAction=new Action(label, SWT.DROP_DOWN){};
 			dropdownAction.setImageDescriptor(imageDescriptor);
@@ -254,6 +257,10 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 				public void dispose() {
 				}
 			});
+
+			lazyActions.isEnabled().onChange(UIValueListener.from((e, v) -> {
+				dropdownAction.setEnabled(e.getValue());
+			}));
 
 			toolbar.add(new ToolbarPulldownContributionItem(dropdownAction));
 		}

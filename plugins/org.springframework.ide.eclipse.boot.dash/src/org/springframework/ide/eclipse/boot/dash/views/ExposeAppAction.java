@@ -44,7 +44,7 @@ public class ExposeAppAction extends RunStateAction {
 		model.addElementStateListener(new ElementStateListener() {
 			@Override
 			public void stateChanged(BootDashElement e) {
-				if (e instanceof AbstractLaunchConfigurationsDashElement<?> && e.getRunState().equals(RunState.INACTIVE)) {
+				if (e instanceof AbstractLaunchConfigurationsDashElement<?> && RunState.INACTIVE.equals(e.getRunState())) {
 					try {
 						AbstractLaunchConfigurationsDashElement<?> localDashProject = (AbstractLaunchConfigurationsDashElement<?>) e;
 						localDashProject.shutdownExpose();

@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -20,7 +21,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -43,10 +43,14 @@ import org.junit.Test;
 import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveDataConnectionManagementActions;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractLaunchConfigurationsDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.LocalRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargets;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockLiveProcesses;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockLiveProcesses.MockProcess;
@@ -58,11 +62,15 @@ import org.springframework.ide.eclipse.boot.dash.views.OpenLaunchConfigAction;
 import org.springframework.ide.eclipse.boot.dash.views.RunStateAction;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport;
+import org.springframework.ide.eclipse.boot.pstore.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.test.AutobuildingEnablement;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.WizardConfigurer;
 import org.springframework.ide.eclipse.boot.test.util.TestBracketter;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 import com.google.common.collect.ImmutableSet;
@@ -84,13 +92,94 @@ public class BootDashActionTests {
 		MockMultiSelection<BootDashElement> selection = harness.selection;
 
 		assertTrue(selection.getElements().isEmpty());
-		assertFalse(liveActionsMenu.isVisible());
+		assertTrue(liveActionsMenu.isVisible());
 
 		selection.setElements(projectElement);
 		assertTrue(liveActionsMenu.isVisible());
 
 		selection.setElements(launchConfElement);
 		assertFalse(liveActionsMenu.isVisible());
+	}
+
+	@Test
+	public void liveProcessManagementEnablementForSingleLocalElement() throws Exception {
+		LiveVariable<RunState> runState = new LiveVariable<>(RunState.INACTIVE);
+//		runState.onChange((e, s) -> {
+//			harness.model.notify();
+//		});
+		LiveDataConnectionManagementActions liveActionsMenu = actions.getLiveDataConnectionManagement();
+
+		String projectName = "santa-baby";
+		IProject project = mock(IProject.class);
+		when(project.getName()).thenReturn(projectName);
+
+		RunTarget runTarget = LocalRunTarget.INSTANCE;
+
+		LocalBootDashModel bdm = mock(LocalBootDashModel.class);
+		when(bdm.getRunTarget()).thenReturn(runTarget);
+
+		//mocked BootProjectDashElement where we can easily control the runstate from the test case:
+		BootProjectDashElement element = mockRunnableProjectElement(project, runState);
+
+		harness.selection.setElements(element);
+
+
+		for (RunState state : RunState.values()) {
+			System.out.println("RunState = "+state);
+			runState.setValue(state);
+			Boolean enabled = liveActionsMenu.isEnabled().getValue();
+			System.out.println("Enabled = "+enabled);
+			assertEquals(state, element.getRunState());
+			assertEquals(state==RunState.RUNNING || state==RunState.DEBUGGING, enabled);
+		}
+	}
+
+	private BootProjectDashElement mockRunnableProjectElement(IProject project, LiveVariable<RunState> runState) {
+		return new BootProjectDashElement(project, harness.getLocalTargetModel(), context.getProjectProperties(), null, null) {
+			//This is what we care about really:
+			protected LiveExpression<RunState> createRunStateExp() {
+				return runState;
+			}
+		};
+	}
+
+	@Test
+	public void liveProcessManagementEnablementForMultipleLocalElement() throws Exception {
+		//setup:
+		String projectName = "santa";
+		IProject project = mock(IProject.class);
+		when(project.getName()).thenReturn(projectName);
+
+		String otherProjectName = "baby";
+		IProject otherProject = mock(IProject.class);
+		when(otherProject.getName()).thenReturn(otherProjectName);
+
+		LiveVariable<RunState> elementState = new LiveVariable<>(RunState.INACTIVE);
+		BootProjectDashElement element = mockRunnableProjectElement(project, elementState);
+
+		LiveVariable<RunState> otherElementState = new LiveVariable<>(RunState.INACTIVE);
+		BootProjectDashElement otherElement = mockRunnableProjectElement(otherProject, otherElementState);
+
+		LiveDataConnectionManagementActions liveActionsMenu = actions.getLiveDataConnectionManagement();
+
+		//test: two elements:
+		harness.selection.setElements(element, otherElement);
+		assertTrue(liveActionsMenu.isVisible());
+		for (RunState s1 : RunState.values()) {
+			for (RunState s2 : RunState.values()) {
+				boolean expectEnabled = s1==RunState.RUNNING || s2==RunState.RUNNING || s1==RunState.DEBUGGING || s2==RunState.DEBUGGING;
+				elementState.setValue(s1);
+				otherElementState.setValue(s2);
+				assertEquals(expectEnabled, liveActionsMenu.isEnabled().getValue());
+			}
+		}
+
+		//test: no elements
+		elementState.setValue(RunState.RUNNING);
+		otherElementState.setValue(RunState.DEBUGGING);
+		harness.selection.setElements(/*none*/);
+		assertTrue(liveActionsMenu.isVisible());
+		assertEquals(true, liveActionsMenu.isEnabled().getValue());
 	}
 
 	@Test
@@ -127,11 +216,72 @@ public class BootDashActionTests {
 			} else {
 				Stream<String> processNames = mockProcesses.get(i).stream().map(MockProcess::getProcessKey);
 				List<IAction> actions = liveActionsMenu.get();
+				for (IAction a : actions) {
+					assertTrue(a.isEnabled());
+				}
 				assertEquals(processCounts[i], actions.size());
 
 				Set<String> expectedLabels = processNames.map(name -> "Connect "+name+" lbl").collect(Collectors.toSet());
 				Set<String> actualLabels = actions.stream().map(a -> a.getText()).collect(Collectors.toSet());
 				assertEquals(expectedLabels, actualLabels);
+			}
+		}
+	}
+
+	@Test
+	public void liveProcessManagementMultipleOrEmptyProjectSelection() throws Exception {
+		//setup:
+		String[] projectNames = { "a", "b", "c" };
+		int[] processCounts = {1, 2, 1};
+		List<List<MockProcess>> mockProcesses = new ArrayList<>();
+
+		for (int i = 0; i < projectNames.length; i++) {
+			String projectName = projectNames[i];
+			IProject project = createBootProject(projectName);
+			ArrayList<MockProcess> list = new ArrayList<>();
+			mockProcesses.add(list);
+			for (int p = 0; p < processCounts[i]; p++) {
+				list.add(processes.newProcess(projectName+":"+p, project));
+			}
+		}
+
+		LiveDataConnectionManagementActions liveActionsMenu = actions.getLiveDataConnectionManagement();
+		MockMultiSelection<BootDashElement> selection = harness.selection;
+
+		BootDashElement a = harness.getElementWithName("a");
+		BootDashElement b = harness.getElementWithName("b");
+		BootDashElement c = harness.getElementWithName("c");
+
+		//test a and b selected
+		{
+			selection.setElements(a, b);
+			List<IAction> actions = liveActionsMenu.get();
+			Set<String> actualLabels = actions.stream().map(IAction::getText).collect(Collectors.toSet());
+			assertEquals(ImmutableSet.of("Connect a:0 lbl", "Connect b:0 lbl", "Connect b:1 lbl"), actualLabels);
+			for (IAction ac : actions) {
+				assertTrue(ac.isEnabled());
+			}
+		}
+
+		//test b and c selected
+		{
+			selection.setElements(b, c);
+			List<IAction> actions = liveActionsMenu.get();
+			Set<String> actualLabels = actions.stream().map(IAction::getText).collect(Collectors.toSet());
+			assertEquals(ImmutableSet.of("Connect c:0 lbl", "Connect b:0 lbl", "Connect b:1 lbl"), actualLabels);
+			for (IAction ac : actions) {
+				assertTrue(ac.isEnabled());
+			}
+		}
+
+		//no elements selected
+		{
+			selection.setElements(/*none*/);
+			List<IAction> actions = liveActionsMenu.get();
+			Set<String> actualLabels = actions.stream().map(IAction::getText).collect(Collectors.toSet());
+			assertEquals(ImmutableSet.of("Connect a:0 lbl", "Connect c:0 lbl", "Connect b:0 lbl", "Connect b:1 lbl"), actualLabels);
+			for (IAction ac : actions) {
+				assertTrue(ac.isEnabled());
 			}
 		}
 	}

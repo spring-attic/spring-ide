@@ -469,6 +469,7 @@ public class BootDashActions {
 		}
 		debugOnTargetActions.dispose();
 		runOnTargetActions.dispose();
+		liveDataConnectionManagement.dispose();
 	}
 
 	public IAction getToggleFiltersDialogAction() {
