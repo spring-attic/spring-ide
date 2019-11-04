@@ -52,7 +52,7 @@ public final class DefaultLiveProcessCommandExecutor implements LiveProcessComma
 		public Mono<Void> executeCommand(CommandInfo cmd) {
 			return Mono.fromFuture(ls.getWorkspaceService().executeCommand(new ExecuteCommandParams(
 						cmd.command,
-						ImmutableList.of(cmd)
+						ImmutableList.of(cmd.info)
 			)))
 			.then();
 		}
