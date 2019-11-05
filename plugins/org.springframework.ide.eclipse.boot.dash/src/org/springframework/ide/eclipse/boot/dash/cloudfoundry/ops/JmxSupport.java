@@ -40,7 +40,7 @@ public class JmxSupport {
 	private static final String JAVA_OPTS = "JAVA_OPTS";
 
 	private static final String JMX_OPTION_PAT =
-			"-D(com\\.sun\\.management\\.jmxremote|java\\.rmi\\.server)\\.[a-z\\.]*=\\S*\\s*";
+			"-D(com\\.sun\\.management\\.jmxremote|java\\.rmi\\.server|spring\\.jmx)\\.[a-z\\.]*=\\S*\\s*";
 
 	private static final String JMX_ARGS(int port) {
 		return "-Dcom.sun.management.jmxremote.ssl=false " +
@@ -48,7 +48,8 @@ public class JmxSupport {
 			   "-Dcom.sun.management.jmxremote.port="+port+" " +
 			   "-Dcom.sun.management.jmxremote.rmi.port="+port+" " +
 			   "-Djava.rmi.server.hostname=localhost " +
-			   "-Dcom.sun.management.jmxremote.local.only=false";
+			   "-Dcom.sun.management.jmxremote.local.only=false "+
+			   "-Dspring.jmx.enabled=true";
 	}
 
 	private CloudAppDashElement app;
