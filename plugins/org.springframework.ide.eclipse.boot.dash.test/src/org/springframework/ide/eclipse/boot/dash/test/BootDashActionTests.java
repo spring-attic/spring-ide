@@ -23,6 +23,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -39,6 +40,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveDataConnectionManagementActions;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractLaunchConfigurationsDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -49,6 +53,7 @@ import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargets;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockLiveProcesses;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockLiveProcesses.MockProcess;
@@ -69,6 +74,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 /**
@@ -191,7 +197,7 @@ public class BootDashActionTests {
 			ArrayList<MockProcess> list = new ArrayList<>();
 			mockProcesses.add(list);
 			for (int p = 0; p < processCounts[i]; p++) {
-				list.add(processes.newProcess(projectName+":"+p, project));
+				list.add(processes.newLocalProcess(projectName+":"+p, project, p));
 			}
 		}
 
@@ -237,7 +243,7 @@ public class BootDashActionTests {
 			ArrayList<MockProcess> list = new ArrayList<>();
 			mockProcesses.add(list);
 			for (int p = 0; p < processCounts[i]; p++) {
-				list.add(processes.newProcess(projectName+":"+p, project));
+				list.add(processes.newLocalProcess(projectName+":"+p, project, p));
 			}
 		}
 
@@ -285,8 +291,8 @@ public class BootDashActionTests {
 	@Test
 	public void liveProcessManagementProcessWithoutProjectName() throws Exception {
 		IProject project = createBootProject("a");
-		processes.newProcess("whatever", null);
-		processes.newProcess("a-process", project);
+		processes.newLocalProcess("whatever", null, 1);
+		processes.newLocalProcess("a-process", project, 2);
 
 
 		harness.selection.setElements(harness.getElementFor(project));
@@ -297,7 +303,7 @@ public class BootDashActionTests {
 	@Test
 	public void liveProcessManagementScenario() throws Exception {
 		IProject project = createBootProject("a");
-		MockProcess process = processes.newProcess("a-process", project);
+		MockProcess process = processes.newLocalProcess("a-process", project, 1);
 
 		LiveDataConnectionManagementActions actionProvider = actions.getLiveDataConnectionManagement();
 		harness.selection.setElements(harness.getElementFor(project));
@@ -332,6 +338,62 @@ public class BootDashActionTests {
 		}
 
 		assertSingleEnabledActionWithLabel(actionProvider.get(), "Connect a-process lbl");
+	}
+
+	@Test
+	public void liveProcessManagementMixedLocalAndRemoteProcesses() throws Exception {
+		BootProjectDashElement localEl = harness.getElementFor(projects.createBootProject("webaaa"));
+
+		String appGuid = "7957d372-d68b-4233-aebc-41f94cdab318";
+		MockProcess remoteApp = processes.newProcess(ImmutableMap.of(
+				"processKey", "remote process 1",
+				"label", "remote process 1 (lbl)",
+				"processId", appGuid
+		));
+
+		MockProcess localApp = processes.newProcess(ImmutableMap.of(
+			"processKey", "4433 - com.example.demo.WebaaaApplication",
+			"label", "4433 (com.example.demo.WebaaaApplication)",
+			"projectName", "webaaa",
+			"processId", "4433"
+		));
+
+		LiveDataConnectionManagementActions liveActionsMenu = actions.getLiveDataConnectionManagement();
+
+		MockMultiSelection<BootDashElement> selection = harness.selection;
+
+		//no elements selected
+		{
+			selection.setElements(/*none*/);
+			List<IAction> actions = liveActionsMenu.get();
+			Set<String> actualLabels = actions.stream().map(IAction::getText).collect(Collectors.toSet());
+			assertEquals(ImmutableSet.of("Connect remote process 1 (lbl)", "Connect 4433 (com.example.demo.WebaaaApplication)"), actualLabels);
+			for (IAction ac : actions) {
+				assertTrue(ac.isEnabled());
+			}
+		}
+
+		//local element selected
+		{
+			selection.setElements(localEl);
+			List<IAction> actions = liveActionsMenu.get();
+			Set<String> actualLabels = actions.stream().map(IAction::getText).collect(Collectors.toSet());
+			assertEquals(ImmutableSet.of("Connect 4433 (com.example.demo.WebaaaApplication)"), actualLabels);
+			for (IAction ac : actions) {
+				assertTrue(ac.isEnabled());
+			}
+		}
+
+		{
+			CloudAppDashElement cfElement = mockCfElement(appGuid);
+			selection.setElements(cfElement);
+			List<IAction> actions = liveActionsMenu.get();
+			Set<String> actualLabels = actions.stream().map(IAction::getText).collect(Collectors.toSet());
+			assertEquals(ImmutableSet.of("Connect remote process 1 (lbl)"), actualLabels);
+			for (IAction ac : actions) {
+				assertTrue(ac.isEnabled());
+			}
+		}
 	}
 
 	private IAction assertActionWithLabel(List<IAction> actions, String expectedLabel) {
@@ -944,6 +1006,17 @@ public class BootDashActionTests {
 		return element;
 	}
 
+	private CloudAppDashElement mockCfElement(String appGuid) {
+		CloudFoundryRunTarget cfTarget = mock(CloudFoundryRunTarget.class);
+		RunTargetType cfType = mock(CloudFoundryRunTargetType.class);
+		when(cfTarget.getType()).thenReturn(cfType);
+
+		CloudAppDashElement element = mock(CloudAppDashElement.class);
+		when(element.getAppGuid()).thenReturn(UUID.fromString(appGuid));
+		when(element.supportedGoalStates()).thenReturn(CloudFoundryRunTarget.RUN_GOAL_STATES);
+		when(element.getTarget()).thenReturn(cfTarget);
+		return element;
+	}
 
 
 }

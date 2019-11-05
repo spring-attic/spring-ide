@@ -22,4 +22,9 @@ public class CommandInfo {
 		this.command = command;
 		this.info = info;
 	}
+
+	@Override
+	public String toString() {
+		return "CommandInfo("+command+", "+info.get("processKey")+")";
+	}
 }

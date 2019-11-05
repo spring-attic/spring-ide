@@ -15,6 +15,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.eclipse.core.resources.IProject;
 import org.junit.Assert;
@@ -38,14 +39,14 @@ public class MockLiveProcesses {
 	private final Map<String, MockProcess> processes = new LinkedHashMap<>();
 
 	public class MockProcess {
-		final private String processKey;
-		private String projectName;
 		private int refreshCount = 0;
 		private boolean connected = false;
+		private ImmutableMap<String, String> processData;
 
-		private MockProcess(String processKey, String projectName) {
-			this.processKey = processKey;
-			this.projectName = projectName;
+		private MockProcess(ImmutableMap<String,String> processData) {
+			this.processData = processData;
+			Assert.assertTrue(processData.containsKey("processKey"));
+			String processKey = processData.get("processKey");
 			Assert.assertFalse("duplicate process key", processes.containsKey(processKey));
 			processes.put(processKey, this);
 		}
@@ -76,11 +77,11 @@ public class MockLiveProcesses {
 		}
 
 		public String getProcessKey() {
-			return processKey;
+			return processData.get("processKey");
 		}
 
-		public String getProjectName() {
-			return projectName;
+		public Map<? extends String, ? extends String> getInfo() {
+			return processData;
 		}
 	}
 
@@ -106,12 +107,8 @@ public class MockLiveProcesses {
 
 		private CommandInfo command(String cmdId, MockProcess process) {
 			ImmutableMap.Builder<String, String> info = ImmutableMap.builder();
-			info.put("processKey", process.getProcessKey());
 			info.put("action", cmdId);
-			info.put("label", process.getProcessKey()+" lbl");
-			if (process.getProjectName()!=null) {
-				info.put("projectName", process.getProjectName());
-			}
+			info.putAll(process.getInfo());
 			return new CommandInfo(cmdId, info.build());
 		}
 
@@ -143,8 +140,25 @@ public class MockLiveProcesses {
 		}
 	};
 
-	public MockProcess newProcess(String processKey, IProject project) {
-		return new MockProcess(processKey, project==null?null:project.getName());
+	public MockProcess newLocalProcess(String processKey, IProject project, int pid) {
+		if (project!=null) {
+			return new MockProcess(ImmutableMap.of(
+					"processKey", processKey,
+					"projectName", project.getName(),
+					"processId", ""+pid,
+					"label", processKey +" lbl"
+			));
+		} else {
+			return new MockProcess(ImmutableMap.of(
+					"processKey", processKey,
+					"processId", ""+pid,
+					"label", processKey +" lbl"
+			));
+		}
+	}
+
+	public MockProcess newProcess(ImmutableMap<String, String> processData) {
+		return new MockProcess(processData);
 	}
 
 }

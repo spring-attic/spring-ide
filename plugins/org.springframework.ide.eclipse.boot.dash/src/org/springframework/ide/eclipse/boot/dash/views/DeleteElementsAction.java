@@ -119,7 +119,7 @@ public class DeleteElementsAction<T extends RunTargetType> extends AbstractBootD
 	}
 
 	private boolean isCorrectTargetType(BootDashModel model) {
-		return targetTypeClass.isAssignableFrom(model.getRunTarget().getType().getClass());
+		return model!=null && targetTypeClass.isAssignableFrom(model.getRunTarget().getType().getClass());
 	}
 
 }

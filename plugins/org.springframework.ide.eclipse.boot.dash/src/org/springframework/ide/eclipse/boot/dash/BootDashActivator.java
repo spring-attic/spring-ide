@@ -14,6 +14,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.net.proxy.IProxyService;
@@ -197,7 +198,7 @@ public class BootDashActivator extends AbstractUIPlugin {
 	}
 
 	private void sendRemoteBootAppUrls() {
-		ImmutableSet.Builder<List<String>> allRemoteApps = ImmutableSet.builder();
+		ImmutableSet.Builder<Map<String,Object>> allRemoteApps = ImmutableSet.builder();
 		if (model!=null) {
 			allRemoteApps.addAll(model.getJmxSshTunnelManager().getUrls().getValue());
 		}
@@ -209,7 +210,7 @@ public class BootDashActivator extends AbstractUIPlugin {
 				Class<?> lsClass = lsBundle.loadClass("org.springframework.tooling.boot.ls.BootLanguageServerPlugin");
 				Method lsMethod = lsClass.getMethod("getRemoteBootApps");
 				@SuppressWarnings("unchecked")
-				LiveSetVariable<List<String>> remoteBootAppsVar = (LiveSetVariable<List<String>>) lsMethod.invoke(null);
+				LiveSetVariable<Map<String,Object>> remoteBootAppsVar = (LiveSetVariable<Map<String,Object>>) lsMethod.invoke(null);
 				remoteBootAppsVar.replaceAll(allRemoteApps.build());
 			}
 		} catch (Exception e) {
