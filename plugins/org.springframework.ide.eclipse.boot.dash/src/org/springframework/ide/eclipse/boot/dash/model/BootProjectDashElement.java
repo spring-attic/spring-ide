@@ -204,27 +204,22 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 	@Override
 	public ObservableSet<BootDashElement> getChildren() {
 		if (children==null) {
-			children = createChildrenExp();
+			children = LiveSets.mapSync(getBootDashModel().launchConfTracker.getConfigs(delegate),
+					new Function<ILaunchConfiguration, BootDashElement>() {
+						public BootDashElement apply(ILaunchConfiguration input) {
+							return childFactory.createOrGet(input);
+						}
+					}
+			);
+			children.addListener(new ValueListener<ImmutableSet<BootDashElement>>() {
+				public void gotValue(LiveExpression<ImmutableSet<BootDashElement>> exp, ImmutableSet<BootDashElement> value) {
+					getBootDashModel().notifyElementChanged(BootProjectDashElement.this, "children changed");
+					refreshRunState();
+				}
+			});
+			addDisposableChild(children);
 		}
 		return this.children;
-	}
-
-	protected ObservableSet<BootDashElement> createChildrenExp() {
-		ObservableSet<BootDashElement> children = LiveSets.mapSync(getBootDashModel().launchConfTracker.getConfigs(delegate),
-				new Function<ILaunchConfiguration, BootDashElement>() {
-					public BootDashElement apply(ILaunchConfiguration input) {
-						return childFactory.createOrGet(input);
-					}
-				}
-		);
-		children.addListener(new ValueListener<ImmutableSet<BootDashElement>>() {
-			public void gotValue(LiveExpression<ImmutableSet<BootDashElement>> exp, ImmutableSet<BootDashElement> value) {
-				getBootDashModel().notifyElementChanged(BootProjectDashElement.this, "children changed");
-				refreshRunState();
-			}
-		});
-		addDisposableChild(children);
-		return children;
 	}
 
 	@Override
