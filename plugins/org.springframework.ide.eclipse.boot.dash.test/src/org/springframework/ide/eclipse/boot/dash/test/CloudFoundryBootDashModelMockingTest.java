@@ -137,6 +137,7 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 
@@ -929,12 +930,11 @@ public class CloudFoundryBootDashModelMockingTest {
 		ACondition.waitFor("sshtunnel creation", 2_000, () -> {
 			int jmxPort = app.getCfJmxPort();
 			assertEquals(
-				ImmutableSet.of(Arrays.asList(
-					"service:jmx:rmi://localhost:"+jmxPort+"/jndi/rmi://localhost:"+jmxPort+"/jmxrmi",
-					"tunneled-jmx-app.cfmockapps.io",
-					null,
-					null,
-					"false"
+				ImmutableSet.of(ImmutableMap.of(
+					"jmxurl", "service:jmx:rmi://localhost:"+jmxPort+"/jndi/rmi://localhost:"+jmxPort+"/jmxrmi",
+					"host", "tunneled-jmx-app.cfmockapps.io",
+					"keepChecking", false,
+					"processId", app.getAppGuid().toString()
 				)),
 				tunnels.getUrls().getValues()
 			);
@@ -1054,12 +1054,11 @@ public class CloudFoundryBootDashModelMockingTest {
 		ACondition.waitFor("sshtunnel creation", 2_000, () -> {
 			int jmxPort = app.getCfJmxPort();
 			assertEquals(
-				ImmutableSet.of(Arrays.asList(
-					"service:jmx:rmi://localhost:"+jmxPort+"/jndi/rmi://localhost:"+jmxPort+"/jmxrmi",
-					"tunneled-jmx-app.cfmockapps.io",
-					null,
-					null,
-					"false"
+				ImmutableSet.of(ImmutableMap.of(
+					"jmxurl", "service:jmx:rmi://localhost:"+jmxPort+"/jndi/rmi://localhost:"+jmxPort+"/jmxrmi",
+					"host", "tunneled-jmx-app.cfmockapps.io",
+					"keepChecking", false,
+					"processId", app.getAppGuid().toString()
 				)),
 				tunnels.getUrls().getValues()
 			);
@@ -1131,12 +1130,11 @@ public class CloudFoundryBootDashModelMockingTest {
 			int jmxPort = app.getCfJmxPort();
 			assertTrue(jmxPort>0);
 			assertEquals(
-				ImmutableSet.of(Arrays.asList(
-						"service:jmx:rmi://localhost:"+jmxPort+"/jndi/rmi://localhost:"+jmxPort+"/jmxrmi",
-						"tunneled-jmx-app.cfmockapps.io",
-						null,
-						null,
-						"false"
+				ImmutableSet.of(ImmutableMap.of(
+					"jmxurl", "service:jmx:rmi://localhost:"+jmxPort+"/jndi/rmi://localhost:"+jmxPort+"/jmxrmi",
+					"host", "tunneled-jmx-app.cfmockapps.io",
+					"keepChecking", false,
+					"processId", app.getAppGuid().toString()
 				)),
 				tunnels.getUrls().getValues()
 			);
@@ -1180,12 +1178,11 @@ public class CloudFoundryBootDashModelMockingTest {
 			JmxSshTunnelManager tunnels = harness.getJmxSshTunnelManager();
 			ACondition.waitFor("sshtunnel creation", 2_000, () -> {
 				assertEquals(
-						ImmutableSet.of(Arrays.asList(
-							"service:jmx:rmi://localhost:"+jmxPort+"/jndi/rmi://localhost:"+jmxPort+"/jmxrmi",
-							"tunneled-jmx-app.cfmockapps.io",
-							null,
-							null,
-							"false"
+						ImmutableSet.of(ImmutableMap.of(
+							"jmxurl", "service:jmx:rmi://localhost:"+jmxPort+"/jndi/rmi://localhost:"+jmxPort+"/jmxrmi",
+							"host", "tunneled-jmx-app.cfmockapps.io",
+							"keepChecking", false,
+							"processId", app.getAppGuid().toString()
 						)),
 						tunnels.getUrls().getValues()
 				);
