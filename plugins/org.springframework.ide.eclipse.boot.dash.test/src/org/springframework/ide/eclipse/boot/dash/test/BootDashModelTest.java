@@ -1170,7 +1170,7 @@ public class BootDashModelTest {
 			assertFalse(rm.isUserDefined());
 
 			//Case 1 example (path represented directly in the json key).
-			rm = assertRequestMappingWithPath(mappings, "/**/favicon.ico");
+			rm = assertRequestMappingWithPath(mappings, "/actuator/health");
 			assertFalse(rm.isUserDefined());
 
 		} finally {
