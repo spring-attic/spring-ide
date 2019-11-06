@@ -747,7 +747,7 @@ public class CloudFoundryClientTest {
 			.block();
 
 		assertContains(names,
-				"cflinuxfs2"
+				"cflinuxfs3"
 		);
 	}
 
@@ -829,7 +829,7 @@ public class CloudFoundryClientTest {
 	@Test
 	public void testGetApplicationStack() throws Exception {
 		String appName = appHarness.randomAppName();
-		String stackName = "cflinuxfs2";
+		String stackName = "cflinuxfs3";
 
 		CFPushArguments params = new CFPushArguments();
 		params.setAppName(appName);
