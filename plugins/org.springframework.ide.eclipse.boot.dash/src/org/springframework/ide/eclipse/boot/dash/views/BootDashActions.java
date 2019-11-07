@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2017 Pivotal, Inc.
+ * Copyright (c) 2015, 2019 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -63,6 +63,7 @@ public class BootDashActions {
 	///// actions ///////////////////
 	private RunStateAction[] runStateActions;
 	private AbstractBootDashElementsAction openConsoleAction;
+	private LinkWithConsoleAction linkWithConsoleAction;
 	private OpenLaunchConfigAction openConfigAction;
 	private OpenInBrowserAction openBrowserAction;
 	private OpenNgrokAdminUi openNgrokAdminUi;
@@ -180,6 +181,7 @@ public class BootDashActions {
 
 		openConfigAction = new OpenLaunchConfigAction(defaultActionParams().setDefinitionId("org.springframework.ide.eclipse.boot.dash.boot.dash.OpenLaunchConfigAction"));
 		openConsoleAction = new OpenConsoleAction(defaultActionParams());
+		linkWithConsoleAction = new LinkWithConsoleAction(defaultActionParams().setStyle(IAction.AS_CHECK_BOX));
 		openBrowserAction = new OpenInBrowserAction(defaultActionParams());
 		openNgrokAdminUi = new OpenNgrokAdminUi(defaultActionParams());
 		openInPackageExplorerAction = new OpenInPackageExplorer(defaultActionParams());
@@ -350,6 +352,10 @@ public class BootDashActions {
 		return openConsoleAction;
 	}
 
+	public AbstractBootDashElementsAction getLinkWithConsoleAction() {
+		return linkWithConsoleAction;
+	}
+
 	public AbstractBootDashElementsAction getOpenInPackageExplorerAction() {
 		return openInPackageExplorerAction;
 	}
@@ -430,6 +436,9 @@ public class BootDashActions {
 		}
 		if (openConsoleAction != null) {
 			openConsoleAction.dispose();
+		}
+		if (linkWithConsoleAction != null) {
+			linkWithConsoleAction.dispose();
 		}
 		if (openConfigAction != null) {
 			openConfigAction.dispose();

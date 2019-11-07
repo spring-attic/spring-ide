@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2017 Pivotal Software, Inc.
+ * Copyright (c) 2015, 2019 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,7 +41,7 @@ public class AbstractBootDashElementsAction extends AbstractBootDashAction {
 		}
 	}
 
-	final private MultiSelection<BootDashElement> selection;
+	final protected MultiSelection<BootDashElement> selection;
 	final private ValueListener<ImmutableSet<BootDashElement>> selectionListener;
 	final protected BootDashViewModel model;
 	private ElementStateListener modelListener;
