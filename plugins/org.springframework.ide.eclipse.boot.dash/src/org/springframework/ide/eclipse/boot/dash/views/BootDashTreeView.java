@@ -215,7 +215,11 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 		manager.add(actions.getOpenConsoleAction());
 		manager.add(actions.getOpenConfigAction());
 		manager.add(actions.getShowPropertiesViewAction());
-		addDynamicSubmenu(manager, "Live Data Connections...", BootDashActivator.getImageDescriptor("icons/light-bulb.png"), actions.getLiveDataConnectionManagement());
+		addDynamicSubmenu(manager, "Live Data Connections...",
+				BootDashActivator.getImageDescriptor("icons/light-bulb.png"),
+				BootDashActivator.getImageDescriptor("icons/light-bulb-disabled.png"),
+				actions.getLiveDataConnectionManagement()
+		);
 		manager.add(actions.getToggleFiltersDialogAction());
 
 // This ought to work, but it doesn't.
@@ -226,11 +230,11 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 		// manager.add(action2);
 	}
 
-	private void addDynamicSubmenu(IToolBarManager toolbar, String label, ImageDescriptor imageDescriptor, DynamicSubMenuSupplier lazyActions) {
+	private void addDynamicSubmenu(IToolBarManager toolbar, String label, ImageDescriptor imageDescriptor, ImageDescriptor imageDescriptorDisabled, DynamicSubMenuSupplier lazyActions) {
 		if (lazyActions!=null) {
 			Action dropdownAction=new Action(label, SWT.DROP_DOWN){};
 			dropdownAction.setImageDescriptor(imageDescriptor);
-			dropdownAction.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/add_target_disabled.png"));
+			dropdownAction.setDisabledImageDescriptor(imageDescriptorDisabled);
 			dropdownAction.setMenuCreator(new IMenuCreator() {
 				Menu theMenu;
 
