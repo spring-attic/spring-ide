@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2017 Pivotal, Inc.
+ * Copyright (c) 2015, 2019 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -182,6 +182,7 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 		manager.add(actions.getOpenBrowserAction());
 		manager.add(actions.getOpenNgrokAdminUi());
 		manager.add(actions.getOpenConsoleAction());
+		manager.add(actions.getLinkWithConsoleAction());
 		manager.add(actions.getOpenInPackageExplorerAction());
 		manager.add(actions.getOpenConfigAction());
 		manager.add(actions.getShowPropertiesViewAction());
@@ -213,6 +214,7 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 		}
 		manager.add(actions.getOpenBrowserAction());
 		manager.add(actions.getOpenConsoleAction());
+		manager.add(actions.getLinkWithConsoleAction());
 		manager.add(actions.getOpenConfigAction());
 		manager.add(actions.getShowPropertiesViewAction());
 		addDynamicSubmenu(manager, "Live Data Connections...",

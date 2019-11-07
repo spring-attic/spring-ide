@@ -524,6 +524,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		addVisible(manager, actions.getOpenBrowserAction());
 		addVisible(manager, actions.getOpenNgrokAdminUi());
 		addVisible(manager, actions.getOpenConsoleAction());
+		addVisible(manager, actions.getLinkWithConsoleAction());
 		addVisible(manager, actions.getOpenInPackageExplorerAction());
 		addVisible(manager, actions.getShowPropertiesViewAction());
 		addDynamicSubmenu(manager, "Live Data Connections...", BootDashActivator.getImageDescriptor("icons/light-bulb.png"), actions.getLiveDataConnectionManagement());
