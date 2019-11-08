@@ -12,18 +12,11 @@ package org.springframework.ide.eclipse.boot.dash.views;
 
 import java.io.StringWriter;
 import java.text.DateFormat;
-import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
-import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 /**
  * Console manager for elements in a {@link BootDashModel}.
@@ -101,6 +94,8 @@ public abstract class BootDashModelConsoleManager {
 
 	public abstract void reconnect(BootDashElement element) throws Exception;
 
+	public abstract boolean hasConsole(BootDashElement element);
+
 	protected String asBootDashLog(String message) {
 		Date date = new Date(System.currentTimeMillis());
 		String dateVal = DateFormat.getDateTimeInstance().format(date);
@@ -119,40 +114,4 @@ public abstract class BootDashModelConsoleManager {
 		writer.append('\n');
 		return writer.toString();
 	}
-
-	public static void showSelected(UserInteractions ui, Collection<BootDashElement> selected) {
-
-		Job job = new Job("Opening console") {
-
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				doShowConsoles(ui, selected);
-				return Status.OK_STATUS;
-			}
-
-		};
-		job.schedule();
-	}
-
-	public static void doShowConsoles(UserInteractions ui, Collection<BootDashElement> selectedElements) {
-
-		if (selectedElements != null) {
-
-			Iterator<BootDashElement> it = selectedElements.iterator();
-
-			// Show first element only for now
-			if (it.hasNext()) {
-				BootDashElement element = selectedElements.iterator().next();
-				BootDashModel model = element.getBootDashModel();
-				try {
-					if (model.getElementConsoleManager() != null) {
-						model.getElementConsoleManager().showConsole(element);
-					}
-				} catch (Exception e) {
-					ui.errorPopup("Open Console Failure", e.getMessage());
-				}
-			}
-		}
-	}
-
 }
