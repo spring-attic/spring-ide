@@ -11,12 +11,17 @@
 package org.springframework.ide.eclipse.boot.dash.views.sections;
 
 import java.util.List;
-import java.util.function.Supplier;
 
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
-public interface DynamicSubMenuSupplier extends Supplier<List<IAction>> {
+public interface DynamicSubMenuSupplier {
+	String getLabel();
+	List<IAction> getActions();
+	default ImageDescriptor getImageDescriptor() { return null; }
+	default ImageDescriptor getDisabledImageDescriptor() { return null; }
+
 	default boolean isVisible() { return true; }
 	default LiveExpression<Boolean> isEnabled() { return LiveExpression.constant(true); }
 }

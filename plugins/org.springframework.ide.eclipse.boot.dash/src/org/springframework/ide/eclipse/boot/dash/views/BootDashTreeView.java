@@ -49,6 +49,7 @@ import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.util.MenuUtil;
 import org.springframework.ide.eclipse.boot.dash.util.ToolbarPulldownContributionItem;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashUnifiedTreeSection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.DynamicSubMenuSupplier;
@@ -186,6 +187,7 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 		manager.add(actions.getOpenInPackageExplorerAction());
 		manager.add(actions.getOpenConfigAction());
 		manager.add(actions.getShowPropertiesViewAction());
+		MenuUtil.addDynamicSubmenu(manager, actions.getLiveDataConnectionManagement());
 
 		manager.add(new Separator());
 		manager.add(actions.getExposeRunAppAction());
@@ -217,11 +219,7 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 		manager.add(actions.getLinkWithConsoleAction());
 		manager.add(actions.getOpenConfigAction());
 		manager.add(actions.getShowPropertiesViewAction());
-		addDynamicSubmenu(manager, "Live Data Connections...",
-				BootDashActivator.getImageDescriptor("icons/light-bulb.png"),
-				BootDashActivator.getImageDescriptor("icons/light-bulb-disabled.png"),
-				actions.getLiveDataConnectionManagement()
-		);
+		MenuUtil.addDynamicSubmenu(manager, actions.getLiveDataConnectionManagement());
 		manager.add(actions.getToggleFiltersDialogAction());
 
 // This ought to work, but it doesn't.
@@ -230,57 +228,6 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 		createAddRunTargetPulldown(manager);
 		// manager.add(refreshAction);
 		// manager.add(action2);
-	}
-
-	private void addDynamicSubmenu(IToolBarManager toolbar, String label, ImageDescriptor imageDescriptor, ImageDescriptor imageDescriptorDisabled, DynamicSubMenuSupplier lazyActions) {
-		if (lazyActions!=null) {
-			Action dropdownAction=new Action(label, SWT.DROP_DOWN){};
-			dropdownAction.setImageDescriptor(imageDescriptor);
-			dropdownAction.setDisabledImageDescriptor(imageDescriptorDisabled);
-			dropdownAction.setMenuCreator(new IMenuCreator() {
-				Menu theMenu;
-
-				@Override
-				public Menu getMenu(Menu parent) {
-					return null;
-				}
-
-				@Override
-				public Menu getMenu(Control parent) {
-					if (theMenu==null) {
-						final MenuManager menu = createDynamicPulldownMenuManager(label, imageDescriptor, lazyActions);
-						theMenu = menu.createContextMenu(parent);
-						theMenu.addDisposeListener(new DisposeListener() {
-							public void widgetDisposed(DisposeEvent e) {
-								menu.dispose();
-							}
-						});
-					}
-					return theMenu;
-				}
-
-				@Override
-				public void dispose() {
-				}
-			});
-
-			lazyActions.isEnabled().onChange(UIValueListener.from((e, v) -> {
-				dropdownAction.setEnabled(e.getValue());
-			}));
-
-			toolbar.add(new ToolbarPulldownContributionItem(dropdownAction));
-		}
-	}
-
-	protected MenuManager createDynamicPulldownMenuManager(String label, ImageDescriptor imageDescriptor, Supplier<List<IAction>> actionSupplier) {
-		final MenuManager menu = new MenuManager(label, imageDescriptor, null);
-		menu.setRemoveAllWhenShown(true);
-		menu.addMenuListener((IMenuManager manager) -> {
-			for (IAction a : actionSupplier.get()) {
-				menu.add(a);
-			}
-		});
-		return menu;
 	}
 
 	private void addAddRunTargetMenuActions(IMenuManager manager) {

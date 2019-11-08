@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveProcessCommandsExecutor.Server;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
@@ -49,6 +51,21 @@ public class LiveDataConnectionManagementActions extends AbstractDisposable impl
 	private final Params params;
 	private LiveProcessCommandsExecutor liveProcessCmds;
 	private final LiveExpression<Boolean> isEnabled;
+
+	@Override
+	public String getLabel() {
+		return "Live Data Connections...";
+	}
+
+	@Override
+	public ImageDescriptor getImageDescriptor() {
+		return BootDashActivator.getImageDescriptor("icons/light-bulb.png");
+	}
+
+	@Override
+	public ImageDescriptor getDisabledImageDescriptor() {
+		return BootDashActivator.getImageDescriptor("icons/light-bulb-disabled.png");
+	}
 
 	@Override
 	public boolean isVisible() {
@@ -147,7 +164,7 @@ public class LiveDataConnectionManagementActions extends AbstractDisposable impl
 	}
 
 	@Override
-	public List<IAction> get() {
+	public List<IAction> getActions() {
 		Set<BootDashElement> bdes = params.getSelection().getValue();
 		Predicate<ExecuteCommandAction> filter;
 		if (bdes.isEmpty()) {
@@ -197,5 +214,4 @@ public class LiveDataConnectionManagementActions extends AbstractDisposable impl
 	public LiveExpression<Boolean> isEnabled() {
 		return isEnabled;
 	}
-
 }

@@ -82,6 +82,7 @@ import org.springframework.ide.eclipse.boot.dash.model.ModifiableModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.util.HiddenElementsLabel;
+import org.springframework.ide.eclipse.boot.dash.util.MenuUtil;
 import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashAction;
 import org.springframework.ide.eclipse.boot.dash.views.AddRunTargetAction;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
@@ -526,7 +527,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		addVisible(manager, actions.getOpenConsoleAction());
 		addVisible(manager, actions.getOpenInPackageExplorerAction());
 		addVisible(manager, actions.getShowPropertiesViewAction());
-		addDynamicSubmenu(manager, "Live Data Connections...", BootDashActivator.getImageDescriptor("icons/light-bulb.png"), actions.getLiveDataConnectionManagement());
+		MenuUtil.addDynamicSubmenu(manager, actions.getLiveDataConnectionManagement());
 
 		manager.add(new Separator());
 
@@ -565,15 +566,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		customizeActions.add(actions.getCustomizeTargetLabelAction());
 		customizeActions.add(actions.getCustomizeTargetAppsManagerURLAction());
 		addSubmenu(manager, "Customize...", null, customizeActions.build());
-
-//		manager.add
-//		addVisible(manager, new Separator());
-//		addVisible(manager, refreshAction);
-//		addVisible(manager, action2);
-		// Other plug-ins can contribute there actions here
-//		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 	}
-
 
 	/**
 	 * Adds a submenu containing a given list of actions. The menu is only added if
@@ -591,45 +584,6 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 				submenu.setImageDescriptor(imageDescriptor);
 				parent.add(submenu);
 			}
-		}
-	}
-
-	/**
-	 * Adds a submenu containing a dynamically computed list of actions. The list of actions
-	 * is computed on demand when the submenu is about to show.
-	 */
-	private void addDynamicSubmenu(IMenuManager parent, String label, ImageDescriptor imageDescriptor, DynamicSubMenuSupplier lazyActions) {
-		if (lazyActions!=null && lazyActions.isVisible()) {
-			MenuManager submenu = new MenuManager(label) {
-				public boolean isEnabled() {
-					return lazyActions.isEnabled().getValue();
-				}
-
-				@Override
-				public void fill(Menu parent, int index) {
-					super.fill(parent, index);
-					try {
-						Field f = MenuManager.class.getDeclaredField("menuItem");
-						f.setAccessible(true);
-						MenuItem mi = (MenuItem) f.get(this);
-						if (mi!=null) {
-							mi.setEnabled(isEnabled());
-						}
-						getMenu().setEnabled(isEnabled());
-					} catch (Exception e) {
-						Log.log(e);
-					}
-				}
-			};
-			submenu.setRemoveAllWhenShown(true);
-			submenu.addMenuListener(menuAboutToShow -> {
-				List<IAction> actions = lazyActions.get();
-				for (IAction a : actions) {
-					menuAboutToShow.add(a);
-				}
-			});
-			submenu.setImageDescriptor(imageDescriptor);
-			parent.add(submenu);
 		}
 	}
 

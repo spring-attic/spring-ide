@@ -210,14 +210,14 @@ public class BootDashActionTests {
 			selection.setElements(projectElement);
 			int numprocs = processCounts[i];
 			if (numprocs==0) {
-				List<IAction> actions = liveActionsMenu.get();
+				List<IAction> actions = liveActionsMenu.getActions();
 				assertEquals(1, actions.size());
 				IAction action = actions.get(0);
 				assertEquals("No matching processes", action.getText());
 				assertFalse(action.isEnabled());
 			} else {
 				Stream<String> processNames = mockProcesses.get(i).stream().map(MockProcess::getProcessKey);
-				List<IAction> actions = liveActionsMenu.get();
+				List<IAction> actions = liveActionsMenu.getActions();
 				for (IAction a : actions) {
 					assertTrue(a.isEnabled());
 				}
@@ -257,7 +257,7 @@ public class BootDashActionTests {
 		//test a and b selected
 		{
 			selection.setElements(a, b);
-			List<IAction> actions = liveActionsMenu.get();
+			List<IAction> actions = liveActionsMenu.getActions();
 			Set<String> actualLabels = actions.stream().map(IAction::getText).collect(Collectors.toSet());
 			assertEquals(ImmutableSet.of("Connect a:0 lbl", "Connect b:0 lbl", "Connect b:1 lbl"), actualLabels);
 			for (IAction ac : actions) {
@@ -268,7 +268,7 @@ public class BootDashActionTests {
 		//test b and c selected
 		{
 			selection.setElements(b, c);
-			List<IAction> actions = liveActionsMenu.get();
+			List<IAction> actions = liveActionsMenu.getActions();
 			Set<String> actualLabels = actions.stream().map(IAction::getText).collect(Collectors.toSet());
 			assertEquals(ImmutableSet.of("Connect c:0 lbl", "Connect b:0 lbl", "Connect b:1 lbl"), actualLabels);
 			for (IAction ac : actions) {
@@ -279,7 +279,7 @@ public class BootDashActionTests {
 		//no elements selected
 		{
 			selection.setElements(/*none*/);
-			List<IAction> actions = liveActionsMenu.get();
+			List<IAction> actions = liveActionsMenu.getActions();
 			Set<String> actualLabels = actions.stream().map(IAction::getText).collect(Collectors.toSet());
 			assertEquals(ImmutableSet.of("Connect a:0 lbl", "Connect c:0 lbl", "Connect b:0 lbl", "Connect b:1 lbl"), actualLabels);
 			for (IAction ac : actions) {
@@ -296,7 +296,7 @@ public class BootDashActionTests {
 
 
 		harness.selection.setElements(harness.getElementFor(project));
-		Set<String> labels = actions.getLiveDataConnectionManagement().get().stream().map(a -> a.getText()).collect(Collectors.toSet());
+		Set<String> labels = actions.getLiveDataConnectionManagement().getActions().stream().map(a -> a.getText()).collect(Collectors.toSet());
 		assertEquals(ImmutableSet.of("Connect a-process lbl"), labels);
 	}
 
@@ -311,13 +311,13 @@ public class BootDashActionTests {
 		assertFalse(process.isConnected());
 		process.assertRefreshed(0);
 
-		IAction action = assertSingleEnabledActionWithLabel(actionProvider.get(), "Connect a-process lbl");
+		IAction action = assertSingleEnabledActionWithLabel(actionProvider.getActions(), "Connect a-process lbl");
 		action.run();
 		assertTrue(process.isConnected());
 		process.assertRefreshed(0);
 
 		{
-			List<IAction> actions = actionProvider.get();
+			List<IAction> actions = actionProvider.getActions();
 			assertEquals(2, actions.size());
 			IAction refreshAction = assertActionWithLabel(actions, "Refresh a-process lbl");
 			IAction disconnectAction = assertActionWithLabel(actions, "Disconnect a-process lbl");
@@ -328,7 +328,7 @@ public class BootDashActionTests {
 		}
 
 		{
-			List<IAction> actions = actionProvider.get();
+			List<IAction> actions = actionProvider.getActions();
 			assertEquals(2, actions.size());
 			IAction refreshAction = assertActionWithLabel(actions, "Refresh a-process lbl");
 			IAction disconnectAction = assertActionWithLabel(actions, "Disconnect a-process lbl");
@@ -337,7 +337,7 @@ public class BootDashActionTests {
 			assertFalse(process.isConnected());
 		}
 
-		assertSingleEnabledActionWithLabel(actionProvider.get(), "Connect a-process lbl");
+		assertSingleEnabledActionWithLabel(actionProvider.getActions(), "Connect a-process lbl");
 	}
 
 	@Test
@@ -365,7 +365,7 @@ public class BootDashActionTests {
 		//no elements selected
 		{
 			selection.setElements(/*none*/);
-			List<IAction> actions = liveActionsMenu.get();
+			List<IAction> actions = liveActionsMenu.getActions();
 			Set<String> actualLabels = actions.stream().map(IAction::getText).collect(Collectors.toSet());
 			assertEquals(ImmutableSet.of("Connect remote process 1 (lbl)", "Connect 4433 (com.example.demo.WebaaaApplication)"), actualLabels);
 			for (IAction ac : actions) {
@@ -376,7 +376,7 @@ public class BootDashActionTests {
 		//local element selected
 		{
 			selection.setElements(localEl);
-			List<IAction> actions = liveActionsMenu.get();
+			List<IAction> actions = liveActionsMenu.getActions();
 			Set<String> actualLabels = actions.stream().map(IAction::getText).collect(Collectors.toSet());
 			assertEquals(ImmutableSet.of("Connect 4433 (com.example.demo.WebaaaApplication)"), actualLabels);
 			for (IAction ac : actions) {
@@ -387,7 +387,7 @@ public class BootDashActionTests {
 		{
 			CloudAppDashElement cfElement = mockCfElement(appGuid);
 			selection.setElements(cfElement);
-			List<IAction> actions = liveActionsMenu.get();
+			List<IAction> actions = liveActionsMenu.getActions();
 			Set<String> actualLabels = actions.stream().map(IAction::getText).collect(Collectors.toSet());
 			assertEquals(ImmutableSet.of("Connect remote process 1 (lbl)"), actualLabels);
 			for (IAction ac : actions) {
