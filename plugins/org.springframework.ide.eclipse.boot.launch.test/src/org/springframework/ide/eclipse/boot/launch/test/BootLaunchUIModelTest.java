@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
+import org.springframework.ide.eclipse.boot.launch.BootLaunchActivator;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchUIModel;
 import org.springframework.ide.eclipse.boot.launch.IProfileHistory;
@@ -45,6 +46,7 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 
 		private Map<String, String[]> map = new HashMap<>();
 
+		@Override
 		public String[] getHistory(IProject project) {
 			String[] h = map.get(project.getName());
 			if (h!=null) {
@@ -455,7 +457,7 @@ public class BootLaunchUIModelTest extends BootLaunchTestCase {
 
 		ILaunchConfigurationWorkingCopy wc = createWorkingCopy();
 		eJmxModel.setDefaults(wc);
-		assertTrue(BootLaunchConfigurationDelegate.getEnableLiveBeanSupport(wc));
+		assertEquals(BootLaunchActivator.getInstance().isLiveBeanSupported(), BootLaunchConfigurationDelegate.getEnableLiveBeanSupport(wc));
 		assertTrue(BootLaunchConfigurationDelegate.getEnableLifeCycle(wc));
 		int jmxPort = Integer.parseInt(BootLaunchConfigurationDelegate.getJMXPort(wc));
 		assertEquals(BootLaunchConfigurationDelegate.DEFAULT_JMX_PORT, jmxPort);
