@@ -315,7 +315,9 @@ public class EditStartersModelTest {
 				//See: https://github.com/spring-io/start.spring.io/issues/191
 				//"cloud-starter-zookeeper-config", "cloud-starter-consul-config", "data-rest-hal"
 				Pair.of("cloud-function", "web"),
-				Pair.of("cloud-function", "webflux")
+				Pair.of("cloud-function", "webflux"),
+				Pair.of("cloud-contract-verifier", "cloud-function"),
+				Pair.of("cloud-contract-verifier", "session")
 		);
 
 		ImmutableSet<String> interestingIds = ImmutableSet.of(
