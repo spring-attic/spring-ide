@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.refactoring;
+package org.springframework.ide.eclipse.boot.refactoring.typerename;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
@@ -31,8 +31,8 @@ import org.eclipse.ltk.core.refactoring.participants.RenameParticipant;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.UIJob;
-import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 /**
  * @author Kris De Volder
@@ -99,7 +99,7 @@ public class TypeRenameParticipant extends RenameParticipant {
 					Assert.isLegal(oldCompanionName.startsWith(oldName));
 					String postfix = oldCompanionName.substring(oldName.length());
 					String newCompanionName = newName+postfix;
-					boolean answeredYes = MessageDialog.openQuestion(getShell(), "Also Rename '"+companionType.getElementName()+"'?", 
+					boolean answeredYes = MessageDialog.openQuestion(getShell(), "Also Rename '"+companionType.getElementName()+"'?",
 							"Type '"+oldName+"' was renamed to '"+newName+"'." +
 							"Do you also want to rename '"+companionType.getElementName()+
 							"' from package '"+companionType.getPackageFragment().getElementName()+"' "+

@@ -71,20 +71,6 @@
   </decorator>
 </extension>
 
-<extension point="org.eclipse.ltk.core.refactoring.renameParticipants">
-  <renameParticipant class="org.springframework.ide.eclipse.boot.refactoring.TypeRenameParticipant" id="org.springframework.ide.eclipse.boot.refactoring.TypeRenameParticipant" name="Rename Companion Type Rename Participant">
-    <enablement>
-      <with variable="affectedNatures">
-        <iterate operator="or">
-          <equals value="org.eclipse.jdt.core.javanature"/>
-        </iterate>
-      </with>
-      <with variable="element">
-        <instanceof value="org.eclipse.jdt.core.IType"/>
-      </with>
-    </enablement>
-  </renameParticipant>
-</extension>
 <extension
       point="org.eclipse.core.runtime.preferences">
    <initializer
