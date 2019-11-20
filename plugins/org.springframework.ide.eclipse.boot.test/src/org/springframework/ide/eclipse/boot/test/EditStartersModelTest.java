@@ -297,8 +297,6 @@ public class EditStartersModelTest {
 	}
 
 	@Test
-	@Ignore // also covered by the `focussedCrossSelectionTest` so ignoring for now as it fails because of:
-	// https://github.com/spring-io/initializr/issues/1034
 	public void webAndFunctionCrossSelectionTest() throws Exception {
 		NewSpringBootWizardModel newWizard = new NewSpringBootWizardModel(new MockPrefsStore());
 		doSingleCrossSelectionTest(newWizard.getDependencyBox("cloud-function"), newWizard.getDependencyBox("web"));
@@ -311,14 +309,7 @@ public class EditStartersModelTest {
 				//"cloud-starter-zookeeper-config", "cloud-starter-consul-config", "data-rest-hal"
 		);
 
-		ImmutableSet<Pair<String,String>> badPairs = ImmutableSet.of(
-				//See: https://github.com/spring-io/start.spring.io/issues/191
-				//"cloud-starter-zookeeper-config", "cloud-starter-consul-config", "data-rest-hal"
-				Pair.of("cloud-function", "web"),
-				Pair.of("cloud-function", "webflux"),
-				Pair.of("cloud-contract-verifier", "cloud-function"),
-				Pair.of("cloud-contract-verifier", "session")
-		);
+		ImmutableSet<Pair<String,String>> badPairs = ImmutableSet.of();
 
 		ImmutableSet<String> interestingIds = ImmutableSet.of(
 				"cloud-function", "session"
