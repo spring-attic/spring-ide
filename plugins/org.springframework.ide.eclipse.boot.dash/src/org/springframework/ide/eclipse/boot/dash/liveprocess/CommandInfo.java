@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.liveprocess;
 
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class CommandInfo {
 
@@ -25,6 +26,11 @@ public class CommandInfo {
 
 	@Override
 	public String toString() {
-		return "CommandInfo("+command+", "+info.get("processKey")+")";
+		StringBuilder s = new StringBuilder("CommandInfo("+command+", {\n");
+		for (Entry<String, String> e : info.entrySet()) {
+			s.append("    "+e.getKey() +": "+e.getValue()+"\n");
+		}
+		s.append("})");
+		return s.toString();
 	}
 }
