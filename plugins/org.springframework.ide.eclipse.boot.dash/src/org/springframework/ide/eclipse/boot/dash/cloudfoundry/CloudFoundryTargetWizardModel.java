@@ -73,23 +73,97 @@ public class CloudFoundryTargetWizardModel {
 	private RunTargetType runTargetType;
 	private BootDashModelContext context;
 
-	private LiveVariable<String> url = new LiveVariable<>();
-	private LiveVariable<CFSpace> space = new LiveVariable<>();
-	private LiveVariable<Boolean> selfsigned = new LiveVariable<>(false);
-	private LiveVariable<Boolean> skipSslValidation = new LiveVariable<>(false);
-	private LiveVariable<LoginMethod> method = new LiveVariable<>(LoginMethod.PASSWORD);
-	private LiveVariable<String> userName = new LiveVariable<>();
-	private LiveVariable<String> password = new LiveVariable<>();
-	private LiveVariable<StoreCredentialsMode> storeCredentials = new LiveVariable<>(StoreCredentialsMode.STORE_NOTHING);
+	private final LiveVariable<String> url = new LiveVariable<>();
+	private final LiveVariable<CFSpace> space = new LiveVariable<>();
+	private final LiveVariable<Boolean> selfsigned = new LiveVariable<>(false);
+	private final LiveVariable<Boolean> skipSslValidation = new LiveVariable<>(false);
+	private final LiveVariable<LoginMethod> method = new LiveVariable<>(LoginMethod.PASSWORD);
+	private final LiveVariable<String> userName = new LiveVariable<>();
+	private final LiveVariable<String> password = new LiveVariable<>();
+	private final LiveVariable<StoreCredentialsMode> storeCredentials = new LiveVariable<>(StoreCredentialsMode.STORE_NOTHING);
 
-	private LiveVariable<ValidationResult> spaceResolutionStatus = new LiveVariable<>(ValidationResult.OK); // has an error if resolution failed.
-	private LiveVariable<OrgsAndSpaces> resolvedSpaces = new LiveVariable<>();
+	private final LiveVariable<ValidationResult> spaceResolutionStatus = new LiveVariable<>(ValidationResult.OK); // has an error if resolution failed.
+	private final LiveVariable<OrgsAndSpaces> resolvedSpaces = new LiveVariable<>();
 
 	private String refreshToken = null;
 
-	private Validator credentialsValidator = new CredentialsValidator();
-	private Validator spaceValidator = new CloudSpaceValidator();
-	private Validator resolvedSpacesValidator = new ResolvedSpacesValidator();
+	private final Validator credentialsValidator = new Validator() {
+		{
+			dependsOn(url);
+			dependsOn(userName);
+			dependsOn(method);
+			dependsOn(password);
+		}
+
+		@Override
+		protected ValidationResult compute() {
+			if (isEmpty(userName.getValue()) && method.getValue()==LoginMethod.PASSWORD) {
+				return ValidationResult.info("Enter a username");
+			} else if (isEmpty(url.getValue())) {
+				try {
+					new URL(url.getValue());
+					return ValidationResult.info("Enter a target URL");
+				} catch (MalformedURLException e) {
+					return ValidationResult.error(e.getMessage());
+				}
+			} else if (method.getValue()==LoginMethod.PASSWORD) {
+				if (isEmpty(password.getValue())) {
+					return ValidationResult.info("Enter a password");
+				}
+			} else if (method.getValue()==LoginMethod.TEMPORARY_CODE) {
+				if (isEmpty(password.getValue())) {
+					return ValidationResult.info("Enter a Temporary Access Code");
+				}
+			}
+			return ValidationResult.OK;
+		}
+
+		protected boolean isEmpty(String value) {
+			return value == null || value.trim().length() == 0;
+		}
+	};
+
+	private final Validator spaceValidator = new Validator() {
+		{
+			dependsOn(space);
+		}
+		@Override
+		protected ValidationResult compute() {
+			if (getSpaceName() == null || getOrganizationName() == null) {
+				return ValidationResult.info("Select a Cloud space");
+			}
+
+			if (space.getValue() != null) {
+				RunTarget existing = CloudFoundryTargetWizardModel.this.getExistingRunTarget(space.getValue());
+				if (existing != null) {
+					return ValidationResult.error("A run target for that space already exists: '" + existing.getName()
+							+ "'. Please select another space.");
+				}
+			}
+			return ValidationResult.OK;
+		}
+	};
+	private Validator resolvedSpacesValidator = new Validator() {
+		{
+			dependsOn(spaceResolutionStatus);
+			dependsOn(resolvedSpaces);
+		}
+		@Override
+		protected ValidationResult compute() {
+			ValidationResult resolveStatus = spaceResolutionStatus.getValue();
+			if (!resolveStatus.isOk()) {
+				return resolveStatus;
+			}
+			if (resolvedSpaces.getValue() == null || resolvedSpaces.getValue().getAllSpaces() == null) {
+				return ValidationResult.info("Select a space to validate the credentials.");
+			}
+			if (resolvedSpaces.getValue().getAllSpaces().isEmpty()) {
+				return ValidationResult.error(
+						"No spaces available to select. Please check that the credentials and target URL are correct, and spaces are defined in the target.");
+			}
+			return ValidationResult.OK;
+		}
+	};
 	private Validator storeCredentialsValidator = PasswordDialogModel.makeStoreCredentialsValidator(method, storeCredentials);
 	private CompositeValidator allPropertiesValidator = new CompositeValidator();
 
@@ -111,25 +185,6 @@ public class CloudFoundryTargetWizardModel {
 		this.interactions = interactions;
 		this.existingTargets = existingTargets == null ? ImmutableSet.<RunTarget>of() : existingTargets;
 		this.clientFactory = clientFactory;
-		// The credentials validator should be notified any time there are
-		// changes
-		// to url, username, password and selfsigned setting.
-		credentialsValidator.dependsOn(url);
-		credentialsValidator.dependsOn(selfsigned);
-		credentialsValidator.dependsOn(userName);
-		credentialsValidator.dependsOn(password);
-		credentialsValidator.dependsOn(method);
-
-		// Spaces validator is notified when there are changes to the space
-		// variable. This is a separate validator as space validation and spave
-		// value setting may only occur AFTER ALL credentials/URL are entered or
-		// validated, and different listeners may need to be registered for
-		// credential validation
-		// vs space validation
-		spaceValidator.dependsOn(space);
-
-		resolvedSpacesValidator.dependsOn(spaceResolutionStatus);
-		resolvedSpacesValidator.dependsOn(resolvedSpaces);
 
 		// Aggregate of the credentials and space validators.
 		allPropertiesValidator.addChild(credentialsValidator);
@@ -138,18 +193,6 @@ public class CloudFoundryTargetWizardModel {
 		allPropertiesValidator.addChild(spaceValidator);
 
 		url.setValue(getDefaultTargetUrl());
-	}
-
-	/**
-	 * @param allPropertiesValidationListener
-	 *            listener that is notified when any property is validated
-	 */
-	public void addAllPropertiesListener(ValueListener<ValidationResult> allPropertiesValidationListener) {
-		allPropertiesValidator.addListener(allPropertiesValidationListener);
-	}
-
-	public void removeAllPropertiesListeners(ValueListener<ValidationResult> allPropertiesValidationListener) {
-		allPropertiesValidator.removeListener(allPropertiesValidationListener);
 	}
 
 	public void setUrl(String url) {
@@ -383,72 +426,6 @@ public class CloudFoundryTargetWizardModel {
 			return (StorageException) e.getCause();
 		}
 		return null;
-	}
-
-	class CredentialsValidator extends Validator {
-		@Override
-		protected ValidationResult compute() {
-			if (isEmpty(userName.getValue()) && method.getValue()==LoginMethod.PASSWORD) {
-				return ValidationResult.info("Enter a username");
-			} else if (isEmpty(url.getValue())) {
-				try {
-					new URL(url.getValue());
-					return ValidationResult.info("Enter a target URL");
-				} catch (MalformedURLException e) {
-					return ValidationResult.error(e.getMessage());
-				}
-			} else if (method.getValue()==LoginMethod.PASSWORD) {
-				if (isEmpty(password.getValue())) {
-					return ValidationResult.info("Enter a password");
-				}
-			} else if (method.getValue()==LoginMethod.TEMPORARY_CODE) {
-				if (isEmpty(password.getValue())) {
-					return ValidationResult.info("Enter a Temporary Access Code");
-				}
-			}
-			return ValidationResult.OK;
-		}
-
-		protected boolean isEmpty(String value) {
-			return value == null || value.trim().length() == 0;
-		}
-	}
-
-	class CloudSpaceValidator extends Validator {
-
-		@Override
-		protected ValidationResult compute() {
-			if (getSpaceName() == null || getOrganizationName() == null) {
-				return ValidationResult.info("Select a Cloud space");
-			}
-
-			if (space.getValue() != null) {
-				RunTarget existing = CloudFoundryTargetWizardModel.this.getExistingRunTarget(space.getValue());
-				if (existing != null) {
-					return ValidationResult.error("A run target for that space already exists: '" + existing.getName()
-							+ "'. Please select another space.");
-				}
-			}
-			return ValidationResult.OK;
-		}
-	}
-
-	class ResolvedSpacesValidator extends Validator {
-		@Override
-		protected ValidationResult compute() {
-			ValidationResult resolveStatus = spaceResolutionStatus.getValue();
-			if (!resolveStatus.isOk()) {
-				return resolveStatus;
-			}
-			if (resolvedSpaces.getValue() == null || resolvedSpaces.getValue().getAllSpaces() == null) {
-				return ValidationResult.info("Select a space to validate the credentials.");
-			}
-			if (resolvedSpaces.getValue().getAllSpaces().isEmpty()) {
-				return ValidationResult.error(
-						"No spaces available to select. Please check that the credentials and target URL are correct, and spaces are defined in the target.");
-			}
-			return ValidationResult.OK;
-		}
 	}
 
 	/**

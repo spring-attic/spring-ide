@@ -21,11 +21,8 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 public class CFExceptions {
 
 	public static boolean isAuthFailure(Exception e) {
-		//TODO: what about v2, how does it signal auth failure exactly? (This doesn't matter now,
-		// because we hit it in V1, but it may matter once we completely get rid of V1. We will
-		// then likely hit a similar exception in V2 at a later time, but it probably won't
-		// be recognized as such.
-		return false;
+		String msg = ExceptionUtil.getMessage(e);
+		return msg.contains("Bad credentials");
 	}
 
 	public static boolean isSSLCertificateFailure(Exception e) {

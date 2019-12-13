@@ -57,12 +57,12 @@ class OrgsAndSpacesWizardPage extends WizardPage implements ValueListener<Valida
 		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/wizban_cloudfoundry.png"));
 		this.targetProperties = targetWizardModel;
 		this.spaces = targetWizardModel.getSpaces();
-		targetWizardModel.addAllPropertiesListener(this);
+		targetWizardModel.getValidator().addListener(this);
 	}
 
 	@Override
 	public void dispose() {
-		this.targetProperties.removeAllPropertiesListeners(this);
+		this.targetProperties.getValidator().removeListener(this);
 		super.dispose();
 	}
 
@@ -259,6 +259,7 @@ class OrgsAndSpacesWizardPage extends WizardPage implements ValueListener<Valida
 
 	@Override
 	public void gotValue(LiveExpression<ValidationResult> exp, ValidationResult value) {
+		value = exp.getValue();
 		setErrorMessage(null);
 		canFinish = true;
 		if (value.status == IStatus.ERROR) {
