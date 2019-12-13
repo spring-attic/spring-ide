@@ -107,7 +107,6 @@ public class CloudAppLogManager extends BootDashModelConsoleManager {
 		ApplicationLogConsole console = getExisitingConsole(runTarget.getTargetProperties(), appName);
 		if (console != null) {
 			console.close();
-			console.destroy();
 		}
 	}
 

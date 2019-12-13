@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2016 Pivotal, Inc.
+ * Copyright (c) 2015, 2019 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -90,6 +90,15 @@ public class ApplicationLogConsole extends MessageConsole implements IPropertyCh
 		return message + '\n';
 	}
 
+	/**
+	 * Closes the console AND removes it from the console manager in Eclipse.
+	 *  <p>
+	 * IMPORTANT: When the  console is removed from the console manager by close,
+	 * it ALSO destroys the console, so it is NOT necessary
+	 * to call destroy on the console after it is closed.
+	 * <p>
+	 * Once a console is closed, it CANNOT be used again.
+	 */
 	public synchronized void close() {
 		setLogStreamingToken(null);
 
@@ -104,6 +113,9 @@ public class ApplicationLogConsole extends MessageConsole implements IPropertyCh
 		}
 		activeStreams.clear();
 		IConsoleManager manager = ConsolePlugin.getDefault().getConsoleManager();
+		// IMPORTANT: by removing from the console manager, the console is  ALSO  automatically
+		// destroyed.  See javadoc for org.eclipse.ui.console.AbstractConsole.destroy()
+		// See also PT 170262394
 		manager.removeConsoles(new IConsole[] { this });
 	}
 
