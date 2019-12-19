@@ -2,7 +2,7 @@
 <feature
       id="org.springframework.ide.eclipse.roo.feature"
       label="%featureName"
-      version="3.9.11.qualifier"
+      version="3.9.12.qualifier"
       provider-name="%providerName"
       plugin="org.springframework.ide.eclipse">
 
@@ -19,7 +19,7 @@
    </license>
 
    <requires>
-      <import feature="org.springframework.ide.eclipse.feature" version="3.9.11"/>
+      <import feature="org.springframework.ide.eclipse.feature" version="3.9.12"/>
       <import feature="org.eclipse.ajdt" version="2.0.1" match="greaterOrEqual"/>
    </requires>
 

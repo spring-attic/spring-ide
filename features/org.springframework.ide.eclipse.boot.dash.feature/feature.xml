@@ -14,7 +14,7 @@
 <feature
       id="org.springframework.ide.eclipse.boot.dash.feature"
       label="%featureName"
-      version="3.9.11.qualifier"
+      version="3.9.12.qualifier"
       provider-name="%providerName"
       plugin="org.springframework.ide.eclipse">
 
