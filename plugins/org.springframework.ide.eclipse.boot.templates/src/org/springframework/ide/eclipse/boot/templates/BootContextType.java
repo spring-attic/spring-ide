@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011, 2016 IBM Corporation and others.
+ * Copyright (c) 2007, 2020 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ package org.springframework.ide.eclipse.boot.templates;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.internal.corext.template.java.AbstractJavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
+import org.eclipse.jdt.internal.corext.template.java.IJavaContext;
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jface.text.IDocument;
@@ -57,12 +58,23 @@ public class BootContextType extends AbstractJavaContextType {
 	 */
 	public static final String ID_STATEMENTS= "boot-statements"; //$NON-NLS-1$
 
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.template.java.AbstractJavaContextType#initializeContext(org.eclipse.jdt.internal.corext.template.java.JavaContext)
+	/**
+	 * this is the old method to override (for Eclipse 4.13 and older)
+	 * cannot use @Override anymore due to this one missing in Eclipse 4.14 and beyond
+	 * TODO: delete as soon as we skip compatibility with Eclipse 4.13 and older
 	 */
-	@Override
 	protected void initializeContext(JavaContext context) {
+		ensureInitialized();
+		if (!getId().equals(BootContextType.ID_ALL)) { // a specific context must also allow the templates that work everywhere
+			context.addCompatibleContextType(BootContextType.ID_ALL);
+		}
+	}
+
+	/**
+	 * this is the new method to override (starting with Eclipse 4.14 and beyond)
+	 * TODO: add @Override as soon as we skip compatibility with Eclipse 4.13 and older
+	 */
+	protected void initializeContext(IJavaContext context) {
 		ensureInitialized();
 		if (!getId().equals(BootContextType.ID_ALL)) { // a specific context must also allow the templates that work everywhere
 			context.addCompatibleContextType(BootContextType.ID_ALL);
