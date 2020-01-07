@@ -15,8 +15,6 @@ package org.springframework.ide.eclipse.boot.templates;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.internal.corext.template.java.AbstractJavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
-import org.eclipse.jdt.internal.corext.template.java.IJavaContext;
-import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
@@ -58,29 +56,6 @@ public class BootContextType extends AbstractJavaContextType {
 	 */
 	public static final String ID_STATEMENTS= "boot-statements"; //$NON-NLS-1$
 
-	/**
-	 * this is the old method to override (for Eclipse 4.13 and older)
-	 * cannot use @Override anymore due to this one missing in Eclipse 4.14 and beyond
-	 * TODO: delete as soon as we skip compatibility with Eclipse 4.13 and older
-	 */
-	protected void initializeContext(JavaContext context) {
-		ensureInitialized();
-		if (!getId().equals(BootContextType.ID_ALL)) { // a specific context must also allow the templates that work everywhere
-			context.addCompatibleContextType(BootContextType.ID_ALL);
-		}
-	}
-
-	/**
-	 * this is the new method to override (starting with Eclipse 4.14 and beyond)
-	 * TODO: add @Override as soon as we skip compatibility with Eclipse 4.13 and older
-	 */
-	protected void initializeContext(IJavaContext context) {
-		ensureInitialized();
-		if (!getId().equals(BootContextType.ID_ALL)) { // a specific context must also allow the templates that work everywhere
-			context.addCompatibleContextType(BootContextType.ID_ALL);
-		}
-	}
-
 	@Override
 	public java.util.Iterator resolvers() {
 		ensureInitialized();
@@ -106,13 +81,20 @@ public class BootContextType extends AbstractJavaContextType {
 			this.addResolver(iter.next());
 	}
 
+	private void doInitializeContext(BootJavaContext context) {
+		ensureInitialized();
+		if (!getId().equals(BootContextType.ID_ALL)) { // a specific context must also allow the templates that work everywhere
+			context.addCompatibleContextType(BootContextType.ID_ALL);
+		}
+	}
+
 	/*
 	 * @see org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType#createContext(org.eclipse.jface.text.IDocument, int, int, org.eclipse.jdt.core.ICompilationUnit)
 	 */
 	@Override
 	public CompilationUnitContext createContext(IDocument document, int offset, int length, ICompilationUnit compilationUnit) {
 		BootJavaContext javaContext= new BootJavaContext(this, document, offset, length, compilationUnit);
-		initializeContext(javaContext);
+		doInitializeContext(javaContext);
 		return javaContext;
 	}
 
@@ -122,7 +104,7 @@ public class BootContextType extends AbstractJavaContextType {
 	@Override
 	public CompilationUnitContext createContext(IDocument document, Position completionPosition, ICompilationUnit compilationUnit) {
 		BootJavaContext javaContext= new BootJavaContext(this, document, completionPosition, compilationUnit);
-		initializeContext(javaContext);
+		doInitializeContext(javaContext);
 		return javaContext;
 	}
 
