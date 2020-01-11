@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: org.springframework.ide.eclipse.boot.dash.cf;singleton:=true
+Bundle-Version: 3.9.12.qualifier
+Bundle-Vendor: Pivotal Inc
+Bundle-Name: Spring Boot Dash CF Support
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.springframework.ide.eclipse.boot.launch,
+ org.springframework.ide.eclipse.boot,
+ org.springframework.ide.eclipse.boot.dash
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-Activator: org.springframework.ide.eclipse.boot.dash.cf.BootDashCfPlugin
+Bundle-ActivationPolicy: lazy
