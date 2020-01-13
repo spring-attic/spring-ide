@@ -8,7 +8,12 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.springframework.ide.eclipse.boot.launch,
  org.springframework.ide.eclipse.boot,
- org.springframework.ide.eclipse.boot.dash
+ org.springframework.ide.eclipse.boot.dash,
+ org.springsource.ide.eclipse.commons.livexp,
+ com.google.guava;bundle-version="15.0.0",
+ org.springframework.ide.eclipse.boot.wizard
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: org.springframework.ide.eclipse.boot.dash.cf.BootDashCfPlugin
 Bundle-ActivationPolicy: lazy
+Export-Package: org.springframework.ide.eclipse.boot.dash.cf,
+ org.springframework.ide.eclipse.boot.dash.cf.runtarget

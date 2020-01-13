@@ -28,9 +28,9 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.Assert;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetWizardModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
@@ -130,7 +130,7 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 			TestBootDashModelContext context,
 			CloudFoundryClientFactory clientFactory
 	) throws Exception {
-		CloudFoundryRunTargetType cfTargetType = new CloudFoundryRunTargetType(context, clientFactory);
+		CloudFoundryRunTargetType cfTargetType = CloudFoundryRunTargetType.withClient(context, clientFactory);
 		return new CloudFoundryTestHarness(context, clientFactory, cfTargetType);
 	}
 

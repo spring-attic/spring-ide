@@ -31,7 +31,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CfTargetsInfo;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CfTargetsInfo.Target;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CfTargetsInfo.TargetDiagnosticMessages;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
@@ -39,12 +38,14 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultC
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultBootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
 /**
@@ -166,10 +167,12 @@ public class BootDashActivator extends AbstractUIPlugin {
 	public BootDashViewModel getModel() {
 		if (model==null) {
 			DefaultBootDashModelContext context = new DefaultBootDashModelContext();
+			List<RunTargetType> types = new ArrayList<>();
+			types.add(RunTargetTypes.LOCAL);
+			types.addAll(RunTargetTypes.loadFromExtensionPoint(context));
+
 			model = new BootDashViewModel(context,
-					RunTargetTypes.LOCAL,
-					new CloudFoundryRunTargetType(context, DefaultCloudFoundryClientFactoryV2.INSTANCE)
-					// RunTargetTypes.LATTICE
+					types.toArray(new RunTargetType[types.size()])
 			);
 
 			model.getRunTargets().addListener(new ValueListener<ImmutableSet<RunTarget>>() {

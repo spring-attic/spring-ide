@@ -26,7 +26,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IAction;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeployToCloudFoundryTargetAction;
 import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveDataConnectionManagementActions;
 import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveProcessCommandsExecutor;
@@ -39,6 +38,7 @@ import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.LocalRunTargetType;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKInstallManager;
 import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashElementsAction.Params;
@@ -87,7 +87,7 @@ public class BootDashActions {
 
 	private DuplicateConfigAction duplicateConfigAction;
 
-	private DeleteElementsAction<CloudFoundryRunTargetType> deleteAppsAction;
+	private DeleteElementsAction<RemoteRunTargetType> deleteAppsAction;
 	private DeleteElementsAction<LocalRunTargetType> deleteConfigsAction;
 
 	private OpenToggleFiltersDialogAction toggleFiltersDialogAction;
@@ -187,7 +187,7 @@ public class BootDashActions {
 		openInPackageExplorerAction = new OpenInPackageExplorer(defaultActionParams());
 		addTargetActions = createAddTargetActions();
 
-		deleteAppsAction = new DeleteElementsAction<>(this, CloudFoundryRunTargetType.class, elementsSelection, ui);
+		deleteAppsAction = new DeleteElementsAction<>(this, RemoteRunTargetType.class, elementsSelection, ui);
 		deleteAppsAction.setText("Delete");
 		deleteAppsAction.setToolTipText("Permantently removes selected artifact(s) from CloudFoundry");
 		deleteConfigsAction = new DeleteElementsAction<>(this, LocalRunTargetType.class, elementsSelection, ui);
@@ -523,7 +523,7 @@ public class BootDashActions {
 
 		ImmutableList.Builder<IAction> builder = ImmutableList.builder();
 		for (RunTarget target : targets) {
-			if (target.getType() instanceof CloudFoundryRunTargetType) {
+			if (target.getType() instanceof RemoteRunTargetType) {
 				builder.add(actionFactory.createOrGet(target));
 			}
 		}

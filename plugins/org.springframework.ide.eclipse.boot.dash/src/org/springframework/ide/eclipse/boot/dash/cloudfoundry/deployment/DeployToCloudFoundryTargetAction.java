@@ -15,16 +15,16 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashElementsAction;
-import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -40,7 +40,7 @@ public class DeployToCloudFoundryTargetAction extends AbstractBootDashElementsAc
 	public DeployToCloudFoundryTargetAction(Params params, RunTarget target, RunState runningOrDebugging) {
 		super(params);
 		this.setText(target.getName());
-		Assert.isLegal(target.getType() instanceof CloudFoundryRunTargetType);
+		Assert.isLegal(target.getType() instanceof RemoteRunTargetType);
 		Assert.isLegal(runningOrDebugging==RunState.RUNNING || runningOrDebugging==RunState.DEBUGGING);
 		this.target = target;
 		this.runOrDebug = runningOrDebugging;
@@ -74,7 +74,7 @@ public class DeployToCloudFoundryTargetAction extends AbstractBootDashElementsAc
 		BootDashElement element = getSingleSelectedElement();
 		setVisible(element != null && element instanceof BootProjectDashElement);
 
-		if (this.target != null && this.target.getType() instanceof CloudFoundryRunTargetType) {
+		if (this.target != null && this.target.getType() instanceof RemoteRunTargetType) {
 			setEnabled(((CloudFoundryRunTarget) this.target).isConnected());
 		}
 	}
