@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2016 GoPivotal, Inc.
+ * Copyright (c) 2013, 2020 GoPivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,11 +18,15 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.springframework.ide.eclipse.boot.util.Log;
+import org.springframework.ide.eclipse.boot.wizard.starters.AddStartersDialog;
 import org.springsource.ide.eclipse.commons.frameworks.ui.internal.utils.ProjectFilter;
 import org.springsource.ide.eclipse.commons.frameworks.ui.internal.utils.SelectionUtils;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 public class EditBootStartersHandler extends AbstractHandler {
 
@@ -30,19 +34,28 @@ public class EditBootStartersHandler extends AbstractHandler {
 	 * the command has been executed, so extract extract the needed information
 	 * from the application context.
 	 */
+	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
+		Shell activeShell = HandlerUtil.getActiveShell(event);
 		try {
 			ISelection selection = HandlerUtil.getCurrentSelection(event);
 			if (selection!=null) {
 				List<IProject> projects = SelectionUtils.getProjects(selection, ProjectFilter.anyProject);
 				if (projects!=null && !projects.isEmpty()) {
 					IProject project = projects.get(0);
-					EditStartersDialog.openFor(project, HandlerUtil.getActiveShell(event));
+					if (event.getTrigger() instanceof Event) {
+						Event e = (Event) event.getTrigger();
+						if ((e.stateMask & SWT.ALT) != 0) {
+							AddStartersDialog.openFor(project, activeShell);
+							return null;
+						}
+					}
+					EditStartersDialog.openFor(project, activeShell);
 				}
 			}
 		} catch (Throwable e) {
 			Log.log(e);
-			MessageDialog.openError(HandlerUtil.getActiveShell(event), "Error", ExceptionUtil.getMessage(e));
+			MessageDialog.openError(activeShell, "Error", ExceptionUtil.getMessage(e));
 		}
 		return null;
 	}
