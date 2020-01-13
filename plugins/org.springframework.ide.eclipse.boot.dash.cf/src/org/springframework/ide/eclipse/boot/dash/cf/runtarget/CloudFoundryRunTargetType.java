@@ -8,19 +8,27 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
+package org.springframework.ide.eclipse.boot.dash.cf.runtarget;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetWizardModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryUiUtil;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultCloudFoundryClientFactoryV2;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultWizardModelUserInteractions;
-import org.springframework.ide.eclipse.boot.dash.model.WizardModelUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
+import org.springframework.ide.eclipse.boot.dash.model.WizardModelUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.AbstractRunTargetType;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTargetType;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypeFactory;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
 import org.springframework.ide.eclipse.boot.dash.views.RunTargetWizard;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
@@ -28,7 +36,16 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 /**
  * @author Kris De Volder
  */
-public class CloudFoundryRunTargetType extends AbstractRunTargetType {
+public class CloudFoundryRunTargetType extends AbstractRunTargetType implements RemoteRunTargetType {
+
+	public static class Factory implements RunTargetTypeFactory {
+
+		@Override
+		public RunTargetType create(BootDashModelContext context) {
+			return new CloudFoundryRunTargetType(context, DefaultCloudFoundryClientFactoryV2.INSTANCE);
+		}
+
+	}
 
 	private static final ImageDescriptor SMALL_ICON = BootDashActivator.getImageDescriptor("icons/cloud_obj.png");
 
@@ -38,7 +55,7 @@ public class CloudFoundryRunTargetType extends AbstractRunTargetType {
 
 	private WizardModelUserInteractions interactions;
 
-	public CloudFoundryRunTargetType(BootDashModelContext context, CloudFoundryClientFactory clientFactory) {
+	private CloudFoundryRunTargetType(BootDashModelContext context, CloudFoundryClientFactory clientFactory) {
 		super(context, "Cloud Foundry");
 		this.context = context;
 		this.clientFactory = clientFactory;
@@ -96,5 +113,9 @@ public class CloudFoundryRunTargetType extends AbstractRunTargetType {
 				"   '%a': API URL\n" +
 				"\n" +
 				"To escape a variable name simply repeat the '%' sign. E.g. '%%u'";
+	}
+
+	public static CloudFoundryRunTargetType withClient(BootDashModelContext context, CloudFoundryClientFactory clientFactory) {
+		return new CloudFoundryRunTargetType(context, clientFactory);
 	}
 }
