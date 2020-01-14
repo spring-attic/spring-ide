@@ -83,7 +83,6 @@ public class AddStartersModel implements OkButtonHandler {
 	public final HierarchicalMultiSelectionFieldModel<Dependency> dependencies = new HierarchicalMultiSelectionFieldModel<>(Dependency.class, "dependencies")
 			.label("Dependencies:");
 
-	private HashSet<MavenId> activeStarters;
 	private SpringBootStarters starters;
 
 	protected final SpringBootCore springBootCore;
@@ -121,46 +120,38 @@ public class AddStartersModel implements OkButtonHandler {
 
 	@Override
 	public void performOk() {
-		Job job = new Job("Adding starters for "+getProjectName()) {
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				try {
-					// PT 169994346 : no longer automatically add starters into pom
-					// this will  be replaced by manual changes to  pom and other project
-					// files in a separate "diff" page in  the wizard.
-//					addStartersInProject();
-					return Status.OK_STATUS;
-				} catch (Exception e) {
-					Log.log(e);
-					return ExceptionUtil.status(e);
-				}
-			}
-
-			@Override
-			public boolean belongsTo(Object family) {
-				return family==JOB_FAMILY;
-			}
-		};
-		job.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
-		job.schedule();
-	}
-
-	private void addStartersInProject() throws Exception {
-		List<Dependency> selected = dependencies.getCurrentSelection();
-		List<SpringBootStarter> selectedStarters = new ArrayList<>(selected.size());
-		for (Dependency dep : selected) {
-			String id = dep.getId();
-			SpringBootStarter starter = starters.getStarter(id);
-			if (starter!=null) {
-				selectedStarters.add(starter);
-			}
-		}
-		project.modifyDependencies(getDelta());
-		for (Dependency s : selected) {
-			if (!initialDependencies.contains(s)) {
-				popularities.incrementUsageCount(s);
-			}
-		}
+//		Job job = new Job("Adding starters for "+getProjectName()) {
+//			@Override
+//			protected IStatus run(IProgressMonitor monitor) {
+//				try {
+//					List<Dependency> selected = dependencies.getCurrentSelection();
+//					List<SpringBootStarter> selectedStarters = new ArrayList<>(selected.size());
+//					for (Dependency dep : selected) {
+//						String id = dep.getId();
+//						SpringBootStarter starter = starters.getStarter(id);
+//						if (starter!=null) {
+//							selectedStarters.add(starter);
+//						}
+//					}
+//					project.modifyDependencies(getDelta());
+//					for (Dependency s : selected) {
+//						if (!initialDependencies.contains(s)) {
+//							popularities.incrementUsageCount(s);
+//						}
+//					}
+//					return Status.OK_STATUS;
+//				} catch (Exception e) {
+//					Log.log(e);
+//					return ExceptionUtil.status(e);
+//				}
+//			}
+//			@Override
+//			public boolean belongsTo(Object family) {
+//				return family==JOB_FAMILY;
+//			}
+//		};
+//		job.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
+//		job.schedule();
 	}
 
 	/**
@@ -201,34 +192,34 @@ public class AddStartersModel implements OkButtonHandler {
 
 	}
 
-	private Set<String> getActiveStarters() throws Exception {
-		Set<MavenId> deps = getActiveDependencies();
-		ImmutableSet.Builder<String> activeStarters = ImmutableSet.builder();
-		for (MavenId mavenId : deps) {
-			String starter = starters.getId(mavenId);
-			if (starter!=null) {
-				activeStarters.add(starter);
-			}
-		}
-		return activeStarters.build();
-	}
-
-	private Set<MavenId> getActiveDependencies() throws Exception {
-		if (this.activeStarters==null) {
-			this.activeStarters = new HashSet<>();
-			List<IMavenCoordinates> deps = project.getDependencies();
-			if (deps!=null) {
-				for (IMavenCoordinates coords : deps) {
-					String gid = coords.getGroupId();
-					String aid = coords.getArtifactId();
-					if (aid!=null && gid!=null) {
-						this.activeStarters.add(new MavenId(gid, aid));
-					}
-				}
-			}
-		}
-		return activeStarters;
-	}
+//	private Set<String> getActiveStarters() throws Exception {
+//		Set<MavenId> deps = getActiveDependencies();
+//		ImmutableSet.Builder<String> activeStarters = ImmutableSet.builder();
+//		for (MavenId mavenId : deps) {
+//			String starter = starters.getId(mavenId);
+//			if (starter!=null) {
+//				activeStarters.add(starter);
+//			}
+//		}
+//		return activeStarters.build();
+//	}
+//
+//	private Set<MavenId> getActiveDependencies() throws Exception {
+//		if (this.activeStarters==null) {
+//			this.activeStarters = new HashSet<>();
+//			List<IMavenCoordinates> deps = project.getDependencies();
+//			if (deps!=null) {
+//				for (IMavenCoordinates coords : deps) {
+//					String gid = coords.getGroupId();
+//					String aid = coords.getArtifactId();
+//					if (aid!=null && gid!=null) {
+//						this.activeStarters.add(new MavenId(gid, aid));
+//					}
+//				}
+//			}
+//		}
+//		return activeStarters;
+//	}
 
 	/**
 	 * Retrieves the most popular dependencies based on the number of times they have
@@ -335,4 +326,7 @@ public class AddStartersModel implements OkButtonHandler {
 		throw new IllegalArgumentException("No such dependency: "+dependencyId);
 	}
 
+	public ISpringBootProject getProject() {
+		return project;
+	}
 }

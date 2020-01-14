@@ -17,12 +17,14 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.springframework.ide.eclipse.boot.wizard.starters.AddStartersDialog;
+import org.springframework.ide.eclipse.boot.wizard.starters.AddStartersWizard;
 import org.springsource.ide.eclipse.commons.frameworks.ui.internal.utils.ProjectFilter;
 import org.springsource.ide.eclipse.commons.frameworks.ui.internal.utils.SelectionUtils;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
@@ -38,7 +40,7 @@ public class EditBootStartersHandler extends AbstractHandler {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		Shell activeShell = HandlerUtil.getActiveShell(event);
 		try {
-			ISelection selection = HandlerUtil.getCurrentSelection(event);
+			IStructuredSelection selection = HandlerUtil.getCurrentStructuredSelection(event);
 			if (selection!=null) {
 				List<IProject> projects = SelectionUtils.getProjects(selection, ProjectFilter.anyProject);
 				if (projects!=null && !projects.isEmpty()) {
@@ -46,7 +48,10 @@ public class EditBootStartersHandler extends AbstractHandler {
 					if (event.getTrigger() instanceof Event) {
 						Event e = (Event) event.getTrigger();
 						if ((e.stateMask & SWT.ALT) != 0) {
-							AddStartersDialog.openFor(project, activeShell);
+//							AddStartersDialog.openFor(project, activeShell);
+							AddStartersWizard addStartersWizard = new AddStartersWizard();
+							addStartersWizard.init(PlatformUI.getWorkbench(), selection);
+							new WizardDialog(activeShell, addStartersWizard).open();
 							return null;
 						}
 					}
