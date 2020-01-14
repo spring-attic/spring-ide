@@ -22,6 +22,7 @@ import java.lang.invoke.MethodType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Properties;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
@@ -213,7 +214,7 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 	public String getVMArguments(ILaunchConfiguration conf)
 			throws CoreException {
 		try {
-			StringBuilder vmArgs = new StringBuilder(super.getVMArguments(conf));
+			List<String> vmArgs = new ArrayList<>();
 			// VM args for JMX connection
 			EnumSet<JmxBeanSupport.Feature> enabled = getEnabledJmxFeatures(conf);
 			if (!enabled.isEmpty()) {
@@ -226,24 +227,27 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 				if (port==0) {
 					port = PortFinder.findFreePort(); //slightly better than calling JmxBeanSupport.randomPort()
 				}
-				String enableLiveBeanArgs = JmxBeanSupport.jmxBeanVmArgs(port, enabled);
-				vmArgs.insert(0, enableLiveBeanArgs);
-				CURRENT_LAUNCH.get().setAttribute(JMX_PORT, ""+port);
+				String[] enableLiveBeanArgs = DebugPlugin.parseArguments(JmxBeanSupport.jmxBeanVmArgs(port, enabled));
+				for (int i = 0; i < enableLiveBeanArgs.length; i++) {
+					vmArgs.add(i, enableLiveBeanArgs[i]);
+				}
+				ILaunch currentLaunch = CURRENT_LAUNCH.get();
+				if (currentLaunch!=null) {
+					currentLaunch.setAttribute(JMX_PORT, ""+port);
+				}
 			}
 			// Fast startup VM args
 			String fastStartupArgs = BootActivator.getDefault().getPreferenceStore().getString(BootPreferences.PREF_BOOT_FAST_STARTUP_JVM_ARGS);
 			boolean fastStartup = getFastStartup(conf) && fastStartupArgs != null && !fastStartupArgs.isEmpty();
 			if (fastStartup && !fastStartupArgs.trim().isEmpty()) {
 				// Add space to separate fast startup args from the preceding arguments
-				vmArgs.append('\n');
-				vmArgs.append(fastStartupArgs);
+				vmArgs.addAll(Arrays.asList(DebugPlugin.parseArguments(fastStartupArgs)));
 			}
 
 			String projectName = AbstractBootLaunchConfigurationDelegate.getProjectName(conf);
-			vmArgs.append('\n');
-			vmArgs.append("-D" + SPRING_PROJECT_NAME_ATTRIBUTE + "=" + projectName);
+			vmArgs.add("-D" + SPRING_PROJECT_NAME_ATTRIBUTE + "=" + projectName);
 
-			return vmArgs.toString();
+			return DebugPlugin.renderArguments(vmArgs.toArray(new String[vmArgs.size()]), null);
 		} catch (Exception e) {
 			Log.log(e);
 		}

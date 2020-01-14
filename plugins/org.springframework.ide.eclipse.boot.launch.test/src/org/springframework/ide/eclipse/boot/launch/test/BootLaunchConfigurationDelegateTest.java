@@ -605,8 +605,24 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		assertOk(result);
 	}
 
+	public void testProjectWithSpaces() throws Exception {
+		IProject project = createLaunchReadyProject("project with spaces");
+		ILaunchConfigurationWorkingCopy wc = createBaseWorkingCopy("project with spaces", TEST_MAIN_CLASS);
+		String actualArgsStr = new BootLaunchConfigurationDelegate().getVMArguments(wc);
+		String[] acutalArgs = DebugPlugin.parseArguments(actualArgsStr);
+		boolean found = false;
+		final String prefix = "-Dspring.boot.project.name=";
+		for (String string : acutalArgs) {
+			if (string.startsWith(prefix)) {
+				String value = string.substring(prefix.length());
+				assertEquals("project with spaces", value);
+				found = true;
+			}
+		}
+		assertTrue("Did not find expected vmargument "+prefix, found);
+	}
+
 	public void testEmptyFastStartupVmArgs() throws Exception {
-		createLaunchReadyProject(TEST_PROJECT);
 		ILaunchConfigurationWorkingCopy wc = createBaseWorkingCopy();
 		BootLaunchConfigurationDelegate.setFastStartup(wc, true);
 
