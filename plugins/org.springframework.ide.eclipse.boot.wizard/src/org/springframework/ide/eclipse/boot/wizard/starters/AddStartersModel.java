@@ -125,27 +125,17 @@ public class AddStartersModel implements OkButtonHandler {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
-					List<Dependency> selected = dependencies.getCurrentSelection();
-					List<SpringBootStarter> selectedStarters = new ArrayList<>(selected.size());
-					for (Dependency dep : selected) {
-						String id = dep.getId();
-						SpringBootStarter starter = starters.getStarter(id);
-						if (starter!=null) {
-							selectedStarters.add(starter);
-						}
-					}
-					project.modifyDependencies(getDelta());
-					for (Dependency s : selected) {
-						if (!initialDependencies.contains(s)) {
-							popularities.incrementUsageCount(s);
-						}
-					}
+					// PT 169994346 : no longer automatically add starters into pom
+					// this will  be replaced by manual changes to  pom and other project
+					// files in a separate "diff" page in  the wizard.
+//					addStartersInProject();
 					return Status.OK_STATUS;
 				} catch (Exception e) {
 					Log.log(e);
 					return ExceptionUtil.status(e);
 				}
 			}
+
 			@Override
 			public boolean belongsTo(Object family) {
 				return family==JOB_FAMILY;
@@ -153,6 +143,24 @@ public class AddStartersModel implements OkButtonHandler {
 		};
 		job.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
 		job.schedule();
+	}
+
+	private void addStartersInProject() throws Exception {
+		List<Dependency> selected = dependencies.getCurrentSelection();
+		List<SpringBootStarter> selectedStarters = new ArrayList<>(selected.size());
+		for (Dependency dep : selected) {
+			String id = dep.getId();
+			SpringBootStarter starter = starters.getStarter(id);
+			if (starter!=null) {
+				selectedStarters.add(starter);
+			}
+		}
+		project.modifyDependencies(getDelta());
+		for (Dependency s : selected) {
+			if (!initialDependencies.contains(s)) {
+				popularities.incrementUsageCount(s);
+			}
+		}
 	}
 
 	/**
