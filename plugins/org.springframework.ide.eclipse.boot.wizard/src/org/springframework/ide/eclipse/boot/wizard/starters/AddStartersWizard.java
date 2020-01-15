@@ -13,8 +13,6 @@ import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
 import org.springframework.ide.eclipse.boot.wizard.BootWizardActivator;
-import org.springframework.ide.eclipse.boot.wizard.CompareGeneratedAndCurrentPage;
-import org.springframework.ide.eclipse.boot.wizard.DependencyPage;
 import org.springframework.ide.eclipse.boot.wizard.InitializrFactoryModel;
 import org.springsource.ide.eclipse.commons.frameworks.ui.internal.utils.ProjectFilter;
 import org.springsource.ide.eclipse.commons.frameworks.ui.internal.utils.SelectionUtils;

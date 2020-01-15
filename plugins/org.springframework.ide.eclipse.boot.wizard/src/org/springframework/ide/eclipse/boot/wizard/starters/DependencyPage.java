@@ -1,4 +1,14 @@
-package org.springframework.ide.eclipse.boot.wizard;
+/*******************************************************************************
+ * Copyright (c) 2020 Pivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    GoPivotal, Inc. - initial API and implementation
+ *******************************************************************************/
+package org.springframework.ide.eclipse.boot.wizard.starters;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,8 +18,14 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.boot.livexp.ui.DynamicSection;
+import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection;
+import org.springframework.ide.eclipse.boot.wizard.FilteredDependenciesSection;
+import org.springframework.ide.eclipse.boot.wizard.InitializrFactoryModel;
+import org.springframework.ide.eclipse.boot.wizard.MakeDefaultSection;
+import org.springframework.ide.eclipse.boot.wizard.NewSpringBootWizard;
+import org.springframework.ide.eclipse.boot.wizard.SearchBoxSection;
+import org.springframework.ide.eclipse.boot.wizard.SelectedDependenciesSection;
 import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
-import org.springframework.ide.eclipse.boot.wizard.starters.AddStartersModel;
 import org.springsource.ide.eclipse.commons.livexp.ui.CommentSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.GroupSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;

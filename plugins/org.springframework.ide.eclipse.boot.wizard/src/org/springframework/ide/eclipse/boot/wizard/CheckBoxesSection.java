@@ -323,7 +323,7 @@ public class CheckBoxesSection<T> extends WizardPageSection {
 		return false;
 	}
 
-	boolean isCreated() {
+	public boolean isCreated() {
 		return composite != null;
 	}
 

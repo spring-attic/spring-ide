@@ -1,4 +1,14 @@
-package org.springframework.ide.eclipse.boot.wizard;
+/*******************************************************************************
+ * Copyright (c) 2020 Pivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    GoPivotal, Inc. - initial API and implementation
+ *******************************************************************************/
+package org.springframework.ide.eclipse.boot.wizard.starters;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -22,7 +32,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.springframework.ide.eclipse.boot.wizard.starters.AddStartersModel;
+import org.springframework.ide.eclipse.boot.wizard.InitializrFactoryModel;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
