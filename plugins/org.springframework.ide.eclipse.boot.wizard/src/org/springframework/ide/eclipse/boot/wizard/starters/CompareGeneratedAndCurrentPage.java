@@ -20,6 +20,7 @@ import org.eclipse.compare.IStreamContentAccessor;
 import org.eclipse.compare.ITypedElement;
 import org.eclipse.compare.ResourceNode;
 import org.eclipse.compare.structuremergeviewer.DiffNode;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -56,15 +57,16 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 
 	private void setupCompareViewer() {
 		try {
-			ResourceNode left = new ResourceNode(factoryModel.getModel().getValue().getProject().getProject().getFile("pom.xml"));
+			IProject project = factoryModel.getModel().getValue().getProject().getProject();
+			ResourceNode left = new ResourceNode(project.getFile("pom.xml"));
 
 			GeneratedInput right = new GeneratedInput("pom.xml", left.getImage(), factoryModel.getModel().getValue()
 					.getProject().generatePom(factoryModel.getModel().getValue().dependencies.getCurrentSelection()));
 
 			CompareConfiguration config = new CompareConfiguration();
-			config.setLeftLabel(left.getName());
+			config.setLeftLabel("Local file in project - " + project.getName() + ": " + left.getName());
 			config.setLeftImage(left.getImage());
-			config.setRightLabel(right.getName());
+			config.setRightLabel("Spring Initializr: " + left.getName());
 			config.setRightImage(right.getImage());
 			config.setLeftEditable(true);
 
