@@ -16,12 +16,13 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElemen
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.SelectManifestOp;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 public class SelectManifestAction extends AbstractCloudAppDashElementsAction {
 
 	public SelectManifestAction(Params params) {
 		super(params);
-		Assert.isNotNull(ui);
+		params.getContext().assertDefinitionFor(UserInteractions.class);
 		this.setText("Select Manifest");
 		this.setToolTipText("Selects a manifest YAML file to use during application restart.");
 		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/selectmanifest.gif"));
@@ -32,7 +33,7 @@ public class SelectManifestAction extends AbstractCloudAppDashElementsAction {
 		CloudAppDashElement element = getSelectedCloudElementWithProject();
 		if (element != null) {
 			CloudFoundryBootDashModel model = element.getCloudModel();
-			model.runAsynch(new SelectManifestOp(element, ui), ui);
+			model.runAsynch(new SelectManifestOp(element, ui()), ui());
 		}
 	}
 

@@ -15,6 +15,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDa
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ServicesRefreshOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ConnectOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.TargetApplicationsRefreshOperation;
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -26,8 +27,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
  */
 public class ToggleBootDashModelConnection extends AbstractBootDashModelAction {
 
-	protected ToggleBootDashModelConnection(LiveExpression<BootDashModel> section, UserInteractions ui) {
-		super(section, ui);
+	protected ToggleBootDashModelConnection(LiveExpression<BootDashModel> section, SimpleDIContext context) {
+		super(section, context);
 	}
 
 	@Override
@@ -63,9 +64,9 @@ public class ToggleBootDashModelConnection extends AbstractBootDashModelAction {
 		BootDashModel model = sectionSelection.getValue();
 		if (model  instanceof CloudFoundryBootDashModel) {
 			CloudFoundryBootDashModel connectable = (CloudFoundryBootDashModel) model;
-			connectable.runAsynch(new ConnectOperation(connectable, !connectable.getRunTarget().isConnected(), ui), ui);
-			connectable.runAsynch(new TargetApplicationsRefreshOperation(connectable, ui), ui);
-			connectable.runAsynch(new ServicesRefreshOperation(connectable), ui);
+			connectable.runAsynch(new ConnectOperation(connectable, !connectable.getRunTarget().isConnected(), context), ui());
+			connectable.runAsynch(new TargetApplicationsRefreshOperation(connectable, ui()), ui());
+			connectable.runAsynch(new ServicesRefreshOperation(connectable), ui());
 		}
 	}
 

@@ -10,16 +10,16 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
-import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 public class CustmomizeTargetLabelAction extends AbstractBootDashModelAction {
 
-	protected CustmomizeTargetLabelAction(LiveExpression<BootDashModel> section, UserInteractions ui) {
-		super(section, ui);
+	protected CustmomizeTargetLabelAction(LiveExpression<BootDashModel> section, SimpleDIContext context) {
+		super(section, context);
 		setText("Customize Label...");
 	}
 
@@ -47,7 +47,7 @@ public class CustmomizeTargetLabelAction extends AbstractBootDashModelAction {
 		final BootDashModel section = sectionSelection.getValue();
 		if (isApplicable(section)) {
 			EditTemplateDialogModel model = CustomizeTargetLabelDialogModel.create(section);
-			ui.openEditTemplateDialog(model);
+			ui().openEditTemplateDialog(model);
 		}
 	}
 

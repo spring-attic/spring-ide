@@ -16,7 +16,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Supplier;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -27,6 +26,7 @@ import org.eclipse.jface.action.IAction;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeployToCloudFoundryTargetAction;
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveDataConnectionManagementActions;
 import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveProcessCommandsExecutor;
 import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
@@ -56,7 +56,6 @@ public class BootDashActions {
 	///// context info //////////////
 	private BootDashViewModel model;
 	private MultiSelection<BootDashElement> elementsSelection;
-	private UserInteractions ui;
 	private LiveExpression<BootDashModel> sectionSelection;
 	private LiveProcessCommandsExecutor liveProcessCmds;
 
@@ -101,24 +100,26 @@ public class BootDashActions {
 	private Map<String, IAction> defIdToActions = new HashMap<>();
 
 	private LiveDataConnectionManagementActions liveDataConnectionManagement;
+	private final SimpleDIContext context;
 
-	public BootDashActions(BootDashViewModel model, MultiSelection<BootDashElement> selection, UserInteractions ui,  LiveProcessCommandsExecutor liveProcessCmds) {
+	public BootDashActions(BootDashViewModel model, MultiSelection<BootDashElement> selection, SimpleDIContext context,  LiveProcessCommandsExecutor liveProcessCmds) {
 		this(
 				model,
 				selection,
 				null,
-				ui,
+				context,
 				liveProcessCmds
 		);
 	}
 
-	public BootDashActions(BootDashViewModel model, MultiSelection<BootDashElement> selection, LiveExpression<BootDashModel> section, UserInteractions ui, LiveProcessCommandsExecutor liveProcessCmds) {
+	public BootDashActions(BootDashViewModel model, MultiSelection<BootDashElement> selection, LiveExpression<BootDashModel> section, SimpleDIContext context, LiveProcessCommandsExecutor liveProcessCmds) {
 		this.liveProcessCmds = liveProcessCmds;
-		Assert.isNotNull(ui);
+		Assert.isNotNull(context);
+		context.assertDefinitionFor(UserInteractions.class);
 		this.model = model;
 		this.elementsSelection = selection;
 		this.sectionSelection = section;
-		this.ui = ui;
+		this.context = context;
 
 		makeActions();
 	}
@@ -127,7 +128,7 @@ public class BootDashActions {
 		return new Params(this)
 				.setModel(model)
 				.setSelection(elementsSelection)
-				.setUi(ui)
+				.setContext(context)
 				.setLiveProcessCmds(liveProcessCmds);
 	}
 
@@ -154,7 +155,7 @@ public class BootDashActions {
 								for (BootDashElement el : selecteds) {
 									monitor.subTask("Stopping: " + el.getName());
 									try {
-										el.stopAsync(ui);
+										el.stopAsync(ui());
 									} catch (Exception e) {
 										return BootActivator.createErrorStatus(e);
 									}
@@ -187,10 +188,10 @@ public class BootDashActions {
 		openInPackageExplorerAction = new OpenInPackageExplorer(defaultActionParams());
 		addTargetActions = createAddTargetActions();
 
-		deleteAppsAction = new DeleteElementsAction<>(this, RemoteRunTargetType.class, elementsSelection, ui);
+		deleteAppsAction = new DeleteElementsAction<>(this, RemoteRunTargetType.class, elementsSelection, context);
 		deleteAppsAction.setText("Delete");
 		deleteAppsAction.setToolTipText("Permantently removes selected artifact(s) from CloudFoundry");
-		deleteConfigsAction = new DeleteElementsAction<>(this, LocalRunTargetType.class, elementsSelection, ui);
+		deleteConfigsAction = new DeleteElementsAction<>(this, LocalRunTargetType.class, elementsSelection, context);
 		deleteConfigsAction.setText("Delete Config");
 		deleteConfigsAction.setToolTipText("Permantently deletes Launch Configgurations from the workspace");
 
@@ -199,21 +200,21 @@ public class BootDashActions {
 		selectManifestAction = new SelectManifestAction(defaultActionParams());
 
 		if (sectionSelection != null) {
-			refreshAction = new RefreshRunTargetAction(sectionSelection, ui);
-			removeTargetAction = new RemoveRunTargetAction(sectionSelection, model, ui);
-			updatePasswordAction = new UpdatePasswordAction(sectionSelection, ui);
-			openCloudAdminConsoleAction = new OpenCloudAdminConsoleAction(sectionSelection, ui);
-			toggleTargetConnectionAction = new ToggleBootDashModelConnection(sectionSelection, ui);
-			customizeTargetLabelAction = new CustmomizeTargetLabelAction(sectionSelection, ui);
-			customizeTargetAppsManagerURLAction = new CustmomizeTargetAppManagerURLAction(sectionSelection, ui);
+			refreshAction = new RefreshRunTargetAction(sectionSelection, context);
+			removeTargetAction = new RemoveRunTargetAction(sectionSelection, model, context);
+			updatePasswordAction = new UpdatePasswordAction(sectionSelection, context);
+			openCloudAdminConsoleAction = new OpenCloudAdminConsoleAction(sectionSelection, context);
+			toggleTargetConnectionAction = new ToggleBootDashModelConnection(sectionSelection, context);
+			customizeTargetLabelAction = new CustmomizeTargetLabelAction(sectionSelection, context);
+			customizeTargetAppsManagerURLAction = new CustmomizeTargetAppManagerURLAction(sectionSelection, context);
 		}
 
 		showPropertiesViewAction = new ShowViewAction(PROPERTIES_VIEW_ID);
 
-		toggleFiltersDialogAction = new OpenToggleFiltersDialogAction(model.getToggleFilters(), elementsSelection, ui);
+		toggleFiltersDialogAction = new OpenToggleFiltersDialogAction(model.getToggleFilters(), elementsSelection, context);
 		toggleFilterActions = new ToggleFilterAction[model.getToggleFilters().getAvailableFilters().length];
 		for (int i = 0; i < toggleFilterActions.length; i++) {
-			toggleFilterActions[i] = new ToggleFilterAction(model, model.getToggleFilters().getAvailableFilters()[i], ui);
+			toggleFilterActions[i] = new ToggleFilterAction(model, model.getToggleFilters().getAvailableFilters()[i], context);
 		}
 
 		exposeRunAppAction = new ExposeAppAction(defaultActionParams(), RunState.RUNNING, NGROKInstallManager.getInstance());
@@ -237,7 +238,7 @@ public class BootDashActions {
 		debugOnTargetActions = createDeployOnTargetActions(RunState.DEBUGGING);
 		runOnTargetActions = createDeployOnTargetActions(RunState.RUNNING);
 
-		openFilterPreferencesAction = new OpenFilterPreferencesAction(ui);
+		openFilterPreferencesAction = new OpenFilterPreferencesAction(context);
 		liveDataConnectionManagement = new LiveDataConnectionManagementActions(defaultActionParams());
 	}
 
@@ -246,7 +247,7 @@ public class BootDashActions {
 		ArrayList<AddRunTargetAction> actions = new ArrayList<>();
 		for (RunTargetType tt : targetTypes) {
 			if (tt.canInstantiate()) {
-				actions.add(new AddRunTargetAction(tt, model.getRunTargets(), ui));
+				actions.add(new AddRunTargetAction(tt, model.getRunTargets(), context));
 			}
 		}
 		return actions.toArray(new AddRunTargetAction[actions.size()]);
@@ -291,7 +292,7 @@ public class BootDashActions {
 							for (BootDashElement el : selecteds) {
 								monitor.subTask("Restarting: " + el.getName());
 								try {
-									el.restart(goalState, ui);
+									el.restart(goalState, ui());
 								} catch (Exception e) {
 									return BootActivator.createErrorStatus(e);
 								}
@@ -555,6 +556,10 @@ public class BootDashActions {
 
 	public LiveDataConnectionManagementActions getLiveDataConnectionManagement() {
 		return liveDataConnectionManagement;
+	}
+
+	UserInteractions ui() {
+		return context.getBean(UserInteractions.class);
 	}
 
 }

@@ -61,7 +61,7 @@ public class OpenNgrokAdminUi extends AbstractBootDashElementsAction {
 		if (client != null) {
 			String url = client.getURL();
 			if (url != null) {
-				ui.openUrl(url);
+				ui().openUrl(url);
 			}
 		}
 	}

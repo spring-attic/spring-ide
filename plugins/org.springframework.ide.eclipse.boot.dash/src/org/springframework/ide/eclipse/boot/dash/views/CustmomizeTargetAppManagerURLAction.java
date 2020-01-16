@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.views;
 
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.dialogs.CustomizeAppsManagerURLDialogModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
@@ -19,7 +20,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 public class CustmomizeTargetAppManagerURLAction extends AbstractBootDashModelAction {
 
-	protected CustmomizeTargetAppManagerURLAction(LiveExpression<BootDashModel> section, UserInteractions ui) {
+	protected CustmomizeTargetAppManagerURLAction(LiveExpression<BootDashModel> section, SimpleDIContext ui) {
 		super(section, ui);
 		setText("Customize Cloud Admin Console URL...");
 	}
@@ -46,7 +47,7 @@ public class CustmomizeTargetAppManagerURLAction extends AbstractBootDashModelAc
 		final BootDashModel section = sectionSelection.getValue();
 		if (isApplicable(section)) {
 			CustomizeAppsManagerURLDialogModel model = new CustomizeAppsManagerURLDialogModel((CloudFoundryBootDashModel)section);
-			ui.openEditAppsManagerURLDialog(model);
+			ui().openEditAppsManagerURLDialog(model);
 		}
 	}
 

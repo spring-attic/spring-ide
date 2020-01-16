@@ -23,7 +23,6 @@ public class RestartApplicationOnlyAction extends AbstractCloudAppDashElementsAc
 
 	public RestartApplicationOnlyAction(Params params) {
 		super(params);
-		Assert.isNotNull(ui);
 		this.setText("Restart Only");
 		this.setToolTipText("Restarts the application without uploading changes.");
 		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/restart.png"));
@@ -40,9 +39,9 @@ public class RestartApplicationOnlyAction extends AbstractCloudAppDashElementsAc
 					if (el instanceof CloudAppDashElement) {
 						try {
 							CloudAppDashElement cloudAppDashElement = (CloudAppDashElement) el;
-							cloudAppDashElement.restartOnlyAsynch(ui, cloudAppDashElement.createCancelationToken());
+							cloudAppDashElement.restartOnlyAsynch(ui(), cloudAppDashElement.createCancelationToken());
 						} catch (Exception e) {
-							ui.errorPopup("Error restarting application", e.getMessage());
+							ui().errorPopup("Error restarting application", e.getMessage());
 						}
 					}
 				}

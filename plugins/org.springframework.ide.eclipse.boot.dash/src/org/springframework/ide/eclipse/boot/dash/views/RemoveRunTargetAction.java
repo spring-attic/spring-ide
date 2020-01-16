@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.views;
 
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
@@ -23,7 +24,7 @@ public class RemoveRunTargetAction extends AbstractBootDashModelAction {
 	private BootDashViewModel viewModel;
 
 	public RemoveRunTargetAction(LiveExpression<BootDashModel> sectionSelection, BootDashViewModel viewModel,
-			UserInteractions ui) {
+			SimpleDIContext ui) {
 		super(sectionSelection, ui);
 
 		this.viewModel = viewModel;
@@ -37,7 +38,7 @@ public class RemoveRunTargetAction extends AbstractBootDashModelAction {
 	@Override
 	public void run() {
 		RunTarget target = getRunTargetToRemove();
-		viewModel.removeTarget(target, ui);
+		viewModel.removeTarget(target, ui());
 	}
 
 	@Override

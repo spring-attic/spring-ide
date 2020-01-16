@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.views;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.springframework.ide.eclipse.boot.core.BootPreferences;
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 /**
@@ -24,8 +25,8 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
  */
 public class OpenFilterPreferencesAction extends AbstractBootDashAction {
 
-	protected OpenFilterPreferencesAction(UserInteractions ui) {
-		super(ui, IAction.AS_PUSH_BUTTON);
+	protected OpenFilterPreferencesAction(SimpleDIContext context) {
+		super(context, IAction.AS_PUSH_BUTTON);
 		setText("Boot Projects Filters Preferences...");
 		setToolTipText("Open Preferences for Spring Boot projects filters");
 	}

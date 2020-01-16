@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.views;
 
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialogModel;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -27,7 +28,7 @@ public class OpenToggleFiltersDialogAction extends AbstractBootDashAction {
 	 */
 	private ToggleFiltersModel viewModel;
 
-	public OpenToggleFiltersDialogAction(ToggleFiltersModel model, MultiSelection<BootDashElement> selection, UserInteractions ui) {
+	public OpenToggleFiltersDialogAction(ToggleFiltersModel model, MultiSelection<BootDashElement> selection, SimpleDIContext ui) {
 		super(ui);
 		this.viewModel = model;
 		setText("Filters...");
@@ -38,7 +39,7 @@ public class OpenToggleFiltersDialogAction extends AbstractBootDashAction {
 	@Override
 	public void run() {
 		ToggleFiltersDialogModel dlg = new ToggleFiltersDialogModel(viewModel);
-		ui.openDialog(dlg);
+		ui().openDialog(dlg);
 	}
 
 }

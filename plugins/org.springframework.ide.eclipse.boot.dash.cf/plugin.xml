@@ -7,5 +7,11 @@
             class="org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryRunTargetType$Factory">
       </factory>
    </extension>
+   <extension
+         point="org.springframework.ide.eclipse.boot.dash.injections">
+      <injection
+            class="org.springframework.ide.eclipse.boot.dash.cf.BootDashInjections">
+      </injection>
+   </extension>
 
 </plugin>

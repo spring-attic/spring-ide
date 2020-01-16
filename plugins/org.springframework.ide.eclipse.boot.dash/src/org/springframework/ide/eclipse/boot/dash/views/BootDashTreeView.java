@@ -42,6 +42,8 @@ import org.eclipse.ui.views.properties.IPropertySheetPage;
 import org.eclipse.ui.views.properties.tabbed.ITabbedPropertySheetPageContributor;
 import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.di.EclipseBeanLoader;
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveDataConnectionManagementActions;
 import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveProcessCommandsExecutor;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
@@ -51,6 +53,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.util.MenuUtil;
 import org.springframework.ide.eclipse.boot.dash.util.ToolbarPulldownContributionItem;
+import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions.UIContext;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashUnifiedTreeSection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.DynamicSubMenuSupplier;
 import org.springframework.ide.eclipse.boot.dash.views.sections.TagSearchSection;
@@ -86,7 +89,12 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 
 	private BootDashActions actions;
 
-	private UserInteractions ui = new DefaultUserInteractions(this);
+	SimpleDIContext context = new SimpleDIContext();
+	{
+		context.defInstance(UIContext.class, this);
+		context.defInstance(UserInteractions.class, new DefaultUserInteractions(context));
+		new EclipseBeanLoader(context).loadFromExtensionPoint(BootDashActivator.INJECTIONS_EXTENSION_ID);
+	}
 
 	private MultiSelection<BootDashElement> selection = null; // lazy init
 
@@ -127,7 +135,7 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 		// Create the help context id for the viewer's control
 		// PlatformUI.getWorkbench().getHelpSystem().setHelp(tv.getControl(),
 		// "org.springframework.ide.eclipse.boot.dash.viewer");
-		actions = new BootDashActions(model, getRawSelection(), ui, LiveProcessCommandsExecutor.getDefault());
+		actions = new BootDashActions(model, getRawSelection(), context, LiveProcessCommandsExecutor.getDefault());
 		// hookContextMenu();
 		// hookDoubleClickAction();
 		contributeToActionBars();
@@ -300,8 +308,8 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 		}
 	}
 
-	public UserInteractions getUserInteractions() {
-		return ui;
+	public UserInteractions ui() {
+		return context.getBean(UserInteractions.class);
 	}
 
 	public BootDashActions getActions() {
@@ -317,7 +325,7 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 	protected List<IPageSection> createSections() throws CoreException {
 		List<IPageSection> sections = new ArrayList<>();
 		sections.add(new TagSearchSection(BootDashTreeView.this, model.getFilterBox().getText(), model));
-		sections.add(new BootDashUnifiedTreeSection(this, model, ui));
+		sections.add(new BootDashUnifiedTreeSection(this, model, context));
 
 		return sections;
 	}

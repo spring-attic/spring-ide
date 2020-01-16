@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ModelStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
@@ -35,8 +36,8 @@ public abstract class AbstractBootDashModelAction extends AbstractBootDashAction
 	private ValueListener<BootDashModel> sectionListener;
 	private BootDashModel listeningTo;
 
-	protected AbstractBootDashModelAction(LiveExpression<BootDashModel> section, UserInteractions ui) {
-		super(ui);
+	protected AbstractBootDashModelAction(LiveExpression<BootDashModel> section, SimpleDIContext context) {
+		super(context);
 		this.sectionSelection = section;
 		this.listeningTo = null;
 		this.sectionSelection.addListener(sectionListener = new ValueListener<BootDashModel>() {

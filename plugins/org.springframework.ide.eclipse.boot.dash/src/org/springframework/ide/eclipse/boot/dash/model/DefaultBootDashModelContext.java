@@ -26,9 +26,12 @@ import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnelFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnelImpl;
+import org.springframework.ide.eclipse.boot.dash.di.EclipseBeanLoader;
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions;
+import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions.UIContext;
 import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
 import org.springframework.ide.eclipse.boot.pstore.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
@@ -37,7 +40,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 /**
  * @author Kris De Volder
  */
-public class DefaultBootDashModelContext implements BootDashModelContext {
+public class DefaultBootDashModelContext extends BootDashModelContext {
 
 	private IScopedPropertyStore<IProject> projectProperties = PropertyStores.createForProjects();
 
@@ -51,18 +54,28 @@ public class DefaultBootDashModelContext implements BootDashModelContext {
 
 	private BootInstallManager bootInstalls = BootInstallManager.getInstance();
 
-	private UserInteractions ui = new DefaultUserInteractions(() -> {
-		IWorkbench wb = PlatformUI.getWorkbench();
-		if (wb!=null) {
-			IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
-			if (win!=null) {
-				return win.getShell();
-			}
-		}
-		return null;
-	});
-
 	private SshTunnelFactory sshTunnelFactory = SshTunnelImpl::new;
+
+	private static SimpleDIContext createInjections() {
+		SimpleDIContext injections = new SimpleDIContext();
+		injections.defInstance(UIContext.class, () -> {
+			IWorkbench wb = PlatformUI.getWorkbench();
+			if (wb!=null) {
+				IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
+				if (win!=null) {
+					return win.getShell();
+				}
+			}
+			return null;
+		});
+		injections.defInstance(UserInteractions.class, new DefaultUserInteractions(injections));
+		new EclipseBeanLoader(injections).loadFromExtensionPoint(BootDashActivator.INJECTIONS_EXTENSION_ID);
+		return injections;
+	}
+
+	public DefaultBootDashModelContext() {
+		super(createInjections());
+	}
 
 	@Override
 	public IWorkspace getWorkspace() {
@@ -117,11 +130,6 @@ public class DefaultBootDashModelContext implements BootDashModelContext {
 	@Override
 	public BootInstallManager getBootInstallManager() {
 		return bootInstalls;
-	}
-
-	@Override
-	public UserInteractions getUi() {
-		return ui;
 	}
 
 	@Override

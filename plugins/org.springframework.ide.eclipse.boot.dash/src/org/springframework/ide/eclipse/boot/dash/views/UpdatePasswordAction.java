@@ -22,6 +22,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDa
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ConnectOperation;
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.StoreCredentialsMode;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
@@ -36,8 +37,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 public class UpdatePasswordAction extends AbstractCloudDashModelAction {
 
 	public UpdatePasswordAction(LiveExpression<BootDashModel> sectionSelection,
-			UserInteractions ui) {
-		super(sectionSelection, ui);
+			SimpleDIContext context) {
+		super(sectionSelection, context);
 		this.setText("Update Password");
 		this.setToolTipText("Update password locally for the selected target.");
 		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/update_password.png"));
@@ -69,7 +70,7 @@ public class UpdatePasswordAction extends AbstractCloudDashModelAction {
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
 						PasswordDialogModel passwordDialogModel = new PasswordDialogModel(runTarget.getClientFactory(), runTarget.getTargetProperties(), storePassword);
-						ui.openPasswordDialog(passwordDialogModel);
+						cfUi().openPasswordDialog(passwordDialogModel);
 						if (passwordDialogModel.isOk()) {
 							runTarget.getTargetProperties().setStoreCredentials(
 									passwordDialogModel.getEffectiveStoreMode());
@@ -78,7 +79,7 @@ public class UpdatePasswordAction extends AbstractCloudDashModelAction {
 							try {
 								runTarget.getTargetProperties().setCredentials(credentials);
 							} catch (CannotAccessPropertyException e) {
-								ui.warningPopup("Failed Storing Password",
+								ui().warningPopup("Failed Storing Password",
 										"Failed to store password in Secure Storage for " + targetId
 												+ ". Secure Storage is most likely locked. Current password will be kept until disconnect.");
 								// Set "remember password" to false. Password hasn't been stored.
@@ -89,19 +90,19 @@ public class UpdatePasswordAction extends AbstractCloudDashModelAction {
 								if (targetModel.isConnected()) {
 									// Disconnect if connected
 									CFCredentials savedCreds = runTarget.getTargetProperties().getCredentials();
-									new ConnectOperation(targetModel, false, ui).run(monitor);
+									new ConnectOperation(targetModel, false, context).run(monitor);
 									// Disconnect will wipe out password if it's not stored, so reset it below.
 									runTarget.getTargetProperties().setCredentials(savedCreds);
 								}
-								new ConnectOperation(targetModel, true, ui).run(monitor);
+								new ConnectOperation(targetModel, true, context).run(monitor);
 							} catch (Exception e) {
 								targetModel.setBaseRefreshState(RefreshState.error(e));
-								ui.errorPopup("Failed Setting Credentials", "Credentials for " + targetId
+								ui().errorPopup("Failed Setting Credentials", "Credentials for " + targetId
 										+ " are not valid. Ensure credentials are correct.");
 							}
 
 							// launch refresh if disconnected it would just clear out children
-							targetModel.refresh(ui);
+							targetModel.refresh(ui());
 						}
 						lastRunCompletion.complete(null);
 						return Status.OK_STATUS;

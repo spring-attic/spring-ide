@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnelFactory;
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
 import org.springframework.ide.eclipse.boot.pstore.IScopedPropertyStore;
@@ -26,9 +27,11 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 /**
  * @author Kris De Volder
  */
-public interface BootDashModelContext {
+public abstract class BootDashModelContext {
 
-	//TODO: many places where this being passed around it is accompanited by a BootDashViewModel.
+	public final SimpleDIContext injections;
+
+	//TODO: many places where this being passed around it is accompanied by a BootDashViewModel.
 	// These two parameters passed together represent the real 'BootDashModelContext'.
 	//So the proper thing to do is:
 	//
@@ -38,26 +41,26 @@ public interface BootDashModelContext {
 	//      - a BootDashViewModel
 	//  - where both of these types occur together, replace with a reference to the new BootDashViewModelContext
 
-	IWorkspace getWorkspace();
+	public abstract IWorkspace getWorkspace();
 
-	ILaunchManager getLaunchManager();
+	public abstract ILaunchManager getLaunchManager();
 
-	IPath getStateLocation();
+	public abstract IPath getStateLocation();
 
-	IScopedPropertyStore<IProject> getProjectProperties();
-	IScopedPropertyStore<RunTargetType> getRunTargetProperties();
-	IPropertyStore getViewProperties();
+	public abstract IScopedPropertyStore<IProject> getProjectProperties();
+	public abstract IScopedPropertyStore<RunTargetType> getRunTargetProperties();
+	public abstract IPropertyStore getViewProperties();
 
-	SecuredCredentialsStore getSecuredCredentialsStore();
+	public abstract SecuredCredentialsStore getSecuredCredentialsStore();
 
 	/**
 	 * A store for properties which is suitable for sensitive data with basic protection.
 	 * I.e. backed by a unencrypted file which is made only accessible to the current user
 	 * and protected by the os. The file is not encrypted in any way.
 	 */
-	IPropertyStore getPrivatePropertyStore();
+	public abstract IPropertyStore getPrivatePropertyStore();
 
-	void log(Exception e);
+	public abstract void log(Exception e);
 
 	/**
 	 *!!!!Warning!!!!<p>
@@ -67,12 +70,19 @@ public interface BootDashModelContext {
 	 * that means that injecting a different filter than the one used by that method
 	 * will not work as expected.
 	 */
-	LiveExpression<Pattern> getBootProjectExclusion();
+	public abstract LiveExpression<Pattern> getBootProjectExclusion();
 
-	BootInstallManager getBootInstallManager();
+	public abstract BootInstallManager getBootInstallManager();
 
-	UserInteractions getUi();
+	public final UserInteractions getUi() {
+		return injections.getBean(UserInteractions.class);
+	}
 
-	SshTunnelFactory getSshTunnelFactory();
+	public abstract SshTunnelFactory getSshTunnelFactory();
+
+	protected BootDashModelContext(SimpleDIContext injections) {
+		this.injections = injections;
+		injections.assertDefinitionFor(UserInteractions.class);
+	}
 
 }

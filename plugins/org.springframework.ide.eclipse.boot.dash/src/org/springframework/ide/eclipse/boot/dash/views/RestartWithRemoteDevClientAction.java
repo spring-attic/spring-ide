@@ -74,7 +74,7 @@ public class RestartWithRemoteDevClientAction extends AbstractCloudAppDashElemen
 		for (BootDashElement _e : getSelectedElements()) {
 			if (_e instanceof CloudAppDashElement && _e.getBootDashModel() instanceof CloudFoundryBootDashModel && _e.getProject() != null) {
 				CloudAppDashElement e = (CloudAppDashElement) _e;
-				e.restartWithRemoteClient(ui, e.createCancelationToken());
+				e.restartWithRemoteClient(ui(), e.createCancelationToken());
 			}
 		}
 	}

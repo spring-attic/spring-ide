@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.views;
 
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
@@ -23,7 +24,7 @@ import org.springsource.ide.eclipse.commons.ui.UiUtil;
  */
 public class OpenCloudAdminConsoleAction extends AbstractCloudDashModelAction {
 
-	public OpenCloudAdminConsoleAction(LiveExpression<BootDashModel> sectionSelection, UserInteractions ui) {
+	public OpenCloudAdminConsoleAction(LiveExpression<BootDashModel> sectionSelection, SimpleDIContext ui) {
 		super(sectionSelection, ui);
 		this.setText("Open Cloud Admin Console");
 		this.setToolTipText("Opens the Cloud Administration Console for this Cloud Foundry Space and Organisation");
@@ -41,7 +42,7 @@ public class OpenCloudAdminConsoleAction extends AbstractCloudDashModelAction {
 					UiUtil.openUrl(appsManagerURL);
 				}
 				else {
-					ui.errorPopup("can't find unique identificators",
+					ui().errorPopup("can't find unique identificators",
 							"The Cloud Target that you selected doesn't contain required information about the organization and the space yet (recently added unique identifiers). Please remove the target and add it again to fix this.");
 				}
 			}

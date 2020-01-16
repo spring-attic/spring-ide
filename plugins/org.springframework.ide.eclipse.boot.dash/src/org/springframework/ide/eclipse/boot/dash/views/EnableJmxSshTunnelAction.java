@@ -81,7 +81,7 @@ public class EnableJmxSshTunnelAction extends AbstractCloudAppDashElementsAction
 					e.setEnableJmxSshTunnel(enable);
 					RunState runstate = e.getRunState();
 					if (runstate!=RunState.INACTIVE) {
-						int answer = ui.confirmOperation((enable ? "Enabling" : "Disabling") +" JMX Requires Restart",
+						int answer = ui().confirmOperation((enable ? "Enabling" : "Disabling") +" JMX Requires Restart",
 								"Enabling JMX is done by setting environment parameters on startup. For this setting to take effect the app needs to be restarted.\n\n" +
 								"Do you want to restart now?",
 								new String[] {
@@ -92,7 +92,7 @@ public class EnableJmxSshTunnelAction extends AbstractCloudAppDashElementsAction
 						);
 						if (answer==0) {
 							RunState runningOrDebugging = runstate==RunState.DEBUGGING ? RunState.DEBUGGING : RunState.RUNNING;
-							e.restart(runningOrDebugging, ui);
+							e.restart(runningOrDebugging, ui());
 						}
 					}
 				}

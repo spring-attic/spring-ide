@@ -23,6 +23,7 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnelFactory;
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
@@ -38,7 +39,9 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
-public class TestBootDashModelContext implements BootDashModelContext {
+import static org.mockito.Mockito.*;
+
+public class TestBootDashModelContext extends BootDashModelContext {
 
 	private File stateLoc;
 	private File installLoc;
@@ -52,13 +55,11 @@ public class TestBootDashModelContext implements BootDashModelContext {
 	private IPropertyStore privateProperties = new InMemoryPropertyStore();
 	private IPropertyStore installProperties = new InMemoryPropertyStore();
 	private BootInstallManager bootInstalls;
-	private UserInteractions ui;
 	private SshTunnelFactory sshTunnelFactory = MockSshTunnel::new;
 
-	public TestBootDashModelContext(IWorkspace workspace, ILaunchManager launchMamager, UserInteractions ui) {
-		Assert.isNotNull(ui);
+	public TestBootDashModelContext(IWorkspace workspace, ILaunchManager launchMamager) {
+		super(createInjections());
 		try {
-			this.ui = ui;
 			this.workspace = workspace;
 			this.launchManager = launchMamager;
 			stateLoc = StsTestUtil.createTempDirectory("plugin-state", null);
@@ -69,6 +70,12 @@ public class TestBootDashModelContext implements BootDashModelContext {
 		} catch (Exception e) {
 			throw ExceptionUtil.unchecked(e);
 		}
+	}
+
+	private static SimpleDIContext createInjections() {
+		SimpleDIContext injections = new SimpleDIContext();
+		injections.defInstance(AllUserInteractions.class, mock(AllUserInteractions.class));
+		return injections;
 	}
 
 	public IPath getStateLocation() {
@@ -134,11 +141,6 @@ public class TestBootDashModelContext implements BootDashModelContext {
 	public TestBootDashModelContext reload() throws Exception {
 		this.bootInstalls = new BootInstallManager(installLoc, installProperties);
 		return this;
-	}
-
-	@Override
-	public UserInteractions getUi() {
-		return ui;
 	}
 
 	@Override

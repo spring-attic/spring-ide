@@ -98,7 +98,7 @@ public class LinkWithConsoleAction extends AbstractBootDashElementsAction {
 					}
 
 				} catch (Exception e) {
-					ui.errorPopup("Open Console Failure", e.getMessage());
+					ui().errorPopup("Open Console Failure", e.getMessage());
 				}
 			}
 		}
