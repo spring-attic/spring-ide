@@ -22,24 +22,15 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.springframework.ide.eclipse.boot.core.IMavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
-import org.springframework.ide.eclipse.boot.core.MavenId;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
-import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarters;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.DependencyGroup;
 import org.springframework.ide.eclipse.boot.util.DependencyDelta;
-import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
 import org.springframework.ide.eclipse.boot.wizard.DefaultDependencies;
 import org.springframework.ide.eclipse.boot.wizard.DependencyFilterBox;
@@ -49,10 +40,8 @@ import org.springframework.ide.eclipse.boot.wizard.MultiSelectionFieldModel;
 import org.springframework.ide.eclipse.boot.wizard.NewSpringBootWizardModel;
 import org.springframework.ide.eclipse.boot.wizard.PopularityTracker;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.OkButtonHandler;
-import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
-
-import com.google.common.collect.ImmutableSet;
 
 /**
  * @author Kris De Volder
@@ -160,8 +149,6 @@ public class AddStartersModel implements OkButtonHandler {
 	private void discoverOptions(HierarchicalMultiSelectionFieldModel<Dependency> dependencies) throws Exception {
 		starters = project.getStarterInfos();
 
-//		Set<String> activeStarters = getActiveStarters();
-
 		if (starters!=null) {
 			for (DependencyGroup dgroup : starters.getDependencyGroups()) {
 				String catName = dgroup.getName();
@@ -180,46 +167,13 @@ public class AddStartersModel implements OkButtonHandler {
 						);
 
 						boolean selected = false;
-//					 selected = activeStarters.contains(dep.getId());
-//						if (selected) {
-//							initialDependencies.add(dep);
-//						}
+
 						dependencies.setSelection(catName, dep, selected);
 					}
 				}
 			}
 		}
-
 	}
-
-//	private Set<String> getActiveStarters() throws Exception {
-//		Set<MavenId> deps = getActiveDependencies();
-//		ImmutableSet.Builder<String> activeStarters = ImmutableSet.builder();
-//		for (MavenId mavenId : deps) {
-//			String starter = starters.getId(mavenId);
-//			if (starter!=null) {
-//				activeStarters.add(starter);
-//			}
-//		}
-//		return activeStarters.build();
-//	}
-//
-//	private Set<MavenId> getActiveDependencies() throws Exception {
-//		if (this.activeStarters==null) {
-//			this.activeStarters = new HashSet<>();
-//			List<IMavenCoordinates> deps = project.getDependencies();
-//			if (deps!=null) {
-//				for (IMavenCoordinates coords : deps) {
-//					String gid = coords.getGroupId();
-//					String aid = coords.getArtifactId();
-//					if (aid!=null && gid!=null) {
-//						this.activeStarters.add(new MavenId(gid, aid));
-//					}
-//				}
-//			}
-//		}
-//		return activeStarters;
-//	}
 
 	/**
 	 * Retrieves the most popular dependencies based on the number of times they have
@@ -329,4 +283,21 @@ public class AddStartersModel implements OkButtonHandler {
 	public ISpringBootProject getProject() {
 		return project;
 	}
+
+	public boolean hasCurrentDependencies() {
+		List<Dependency> currentSelection = this.dependencies.getCurrentSelection();
+		return currentSelection != null && currentSelection.size() > 0;
+	}
+
+	public void onDependencyChange(Runnable runnable) {
+		ValueListener<Boolean> selectionListener = (exp, val) -> {
+			runnable.run();
+		};
+
+		for (String cat : dependencies.getCategories()) {
+			MultiSelectionFieldModel<Dependency> dependencyGroup = dependencies.getContents(cat);
+			dependencyGroup.addSelectionListener(selectionListener);
+		}
+	}
+
 }

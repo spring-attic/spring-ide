@@ -13,19 +13,22 @@ package org.springframework.ide.eclipse.boot.wizard.starters;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.ui.PlatformUI;
+import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.boot.livexp.ui.DynamicSection;
 import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection;
+import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
 import org.springframework.ide.eclipse.boot.wizard.FilteredDependenciesSection;
 import org.springframework.ide.eclipse.boot.wizard.InitializrFactoryModel;
 import org.springframework.ide.eclipse.boot.wizard.MakeDefaultSection;
 import org.springframework.ide.eclipse.boot.wizard.NewSpringBootWizard;
 import org.springframework.ide.eclipse.boot.wizard.SearchBoxSection;
 import org.springframework.ide.eclipse.boot.wizard.SelectedDependenciesSection;
-import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.ui.CommentSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.GroupSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
@@ -58,12 +61,25 @@ public class DependencyPage extends WizardPageWithSections {
 
 	@Override
 	protected List<WizardPageSection> createSections() {
-		DynamicSection dynamicSection = new DynamicSection(this, factoryModel.getModel().apply((dynamicModel) -> {
+		LiveExpression<AddStartersModel> model = factoryModel.getModel();
+		DynamicSection dynamicSection = new DynamicSection(this, model.apply((dynamicModel) -> {
 			if (dynamicModel != null) {
 				return createDynamicSections(dynamicModel);
 			}
 			return new CommentSection(this, NewSpringBootWizard.NO_CONTENT_AVAILABLE);
 		} ));
+
+		model.getValue().onDependencyChange(() -> {
+			Display.getDefault().asyncExec(() -> {
+				IWizard wizard = DependencyPage.this.getWizard();
+				if (wizard != null) {
+					IWizardContainer container = wizard.getContainer();
+					if (container != null) {
+						container.updateButtons();
+					}
+				}
+			});
+		});
 
 		return ImmutableList.of(dynamicSection);
 	}
@@ -132,4 +148,19 @@ public class DependencyPage extends WizardPageWithSections {
 		frequentlyUsedSection.isVisible.setValue(!frequentDependencies.isEmpty());
 		return frequentlyUsedSection;
 	}
+
+	@Override
+	public boolean isPageComplete() {
+		// We cannot complete from  the dependency page as
+		// a user has to go to the  next page to manually accept changes
+		// into their existing project
+		return false;
+	}
+
+	@Override
+	public boolean canFlipToNextPage() {
+		LiveExpression<AddStartersModel> model = factoryModel.getModel();
+		return model != null && model.getValue() != null && model.getValue().hasCurrentDependencies();
+	}
+
 }
