@@ -10,26 +10,24 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.AssertionFailedException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CfUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.MissingPasswordException;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFExceptions;
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.StoreCredentialsMode;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
 import org.springframework.ide.eclipse.boot.util.Log;
-
-import reactor.core.scheduler.Schedulers;
 
 /**
  * Operation for connecting/disconnecting CF run target
@@ -40,16 +38,12 @@ import reactor.core.scheduler.Schedulers;
 public class ConnectOperation extends CloudOperation {
 
 	private boolean connect;
-	private UserInteractions ui;
+	private final SimpleDIContext context;
 
-	public ConnectOperation(CloudFoundryBootDashModel model, boolean connect) {
+	public ConnectOperation(CloudFoundryBootDashModel model, boolean connect, SimpleDIContext context) {
 		super("Connecting run target " + model.getRunTarget().getName(), model);
 		this.connect = connect;
-	}
-
-	public ConnectOperation(CloudFoundryBootDashModel model, boolean connect, UserInteractions ui) {
-		this(model, connect);
-		this.ui = ui;
+		this.context = context;
 	}
 
 	@Override
@@ -59,7 +53,7 @@ public class ConnectOperation extends CloudOperation {
 				try {
 					model.setBaseRefreshState(RefreshState.loading("Connecting..."));
 					model.getRunTarget().connect();
-					model.refresh(ui);
+					model.refresh(ui());
 					model.getRunTarget().getTargetProperties().put(CloudFoundryTargetProperties.DISCONNECTED, null);
 					model.getViewModel().updateTargetPropertiesInStore();
 					model.setBaseRefreshState(RefreshState.READY);
@@ -79,7 +73,7 @@ public class ConnectOperation extends CloudOperation {
 
 				} catch (MissingPasswordException|CannotAccessPropertyException|AssertionFailedException e) {
 					model.setBaseRefreshState(RefreshState.READY);
-					if (ui == null) {
+					if (ui() == null) {
 						Log.log(e);
 					} else {
 						CloudFoundryRunTarget runtarget = model.getRunTarget();
@@ -88,7 +82,7 @@ public class ConnectOperation extends CloudOperation {
 								runtarget.getTargetProperties(),
 								runtarget.getTargetProperties().getStoreCredentials()
 						);
-						ui.openPasswordDialog(passwordDialogModel);
+						cfUi().openPasswordDialog(passwordDialogModel);
 						if (passwordDialogModel.isOk()) {
 							model.getRunTarget().getTargetProperties().setStoreCredentials(passwordDialogModel.getStoreVar().getValue());
 							CFCredentials credentials = passwordDialogModel.getCredentials();
@@ -96,7 +90,7 @@ public class ConnectOperation extends CloudOperation {
 							try {
 								model.getRunTarget().getTargetProperties().setCredentials(credentials);
 							} catch (CannotAccessPropertyException e1) {
-								ui.warningPopup("Failed Storing Password",
+								ui().warningPopup("Failed Storing Password",
 										"Failed to store password in Secure Storage for " + passwordDialogModel.getTargetId()
 												+ ". Secure Storage is most likely locked. Current password will be kept until disconnect.");
 								// Set "remember password" to false. Password hasn't been stored.
@@ -108,7 +102,7 @@ public class ConnectOperation extends CloudOperation {
 					}
 				} catch (Exception e) {
 					model.setBaseRefreshState(RefreshState.error(e));
-					if (ui == null) {
+					if (!context.hasDefinitionFor(UserInteractions.class)) {
 						throw e;
 					} else {
 						String msg = "Failed to connect to " + model.getRunTarget().getId() + ". ";
@@ -118,7 +112,7 @@ public class ConnectOperation extends CloudOperation {
 							msg = msg+ " See error log for detailed message.";
 							Log.log(e);
 						}
-						ui.errorPopup("Cannot Connect to Cloud Foundry", msg);
+						ui().errorPopup("Cannot Connect to Cloud Foundry", msg);
 					}
 				}
 			} else if (!connect && model.getRunTarget().isConnected()) {
@@ -133,6 +127,14 @@ public class ConnectOperation extends CloudOperation {
 				model.setBaseRefreshState(RefreshState.READY);
 			}
 		}
+	}
+
+	private CfUserInteractions cfUi() {
+		return context.getBean(CfUserInteractions.class);
+	}
+
+	private UserInteractions ui() {
+		return context.getBean(UserInteractions.class);
 	}
 
 	public ISchedulingRule getSchedulingRule() {

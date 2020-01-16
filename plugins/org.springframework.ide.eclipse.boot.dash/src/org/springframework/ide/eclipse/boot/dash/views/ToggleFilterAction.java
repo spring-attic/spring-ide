@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.views;
 
 import org.eclipse.jface.action.IAction;
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.ToggleFiltersModel;
 import org.springframework.ide.eclipse.boot.dash.model.ToggleFiltersModel.FilterChoice;
@@ -33,8 +34,8 @@ public class ToggleFilterAction extends AbstractBootDashAction {
 	private ValueListener<ImmutableSet<FilterChoice>> selectedFilterListener;
 	final private FilterChoice filter;
 
-	public ToggleFilterAction(BootDashViewModel model, FilterChoice filter, UserInteractions ui) {
-		super(ui, IAction.AS_CHECK_BOX);
+	public ToggleFilterAction(BootDashViewModel model, FilterChoice filter, SimpleDIContext context) {
+		super(context, IAction.AS_CHECK_BOX);
 		this.filter = filter;
 		this.toggleFilters = model.getToggleFilters();
 		this.setText(filter.getLabel());

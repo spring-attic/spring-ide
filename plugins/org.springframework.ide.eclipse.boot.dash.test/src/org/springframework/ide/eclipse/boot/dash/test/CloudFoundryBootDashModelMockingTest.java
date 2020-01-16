@@ -91,6 +91,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.HealthCheck
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFDomainStatus;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ReactorUtils;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel;
@@ -147,7 +148,6 @@ public class CloudFoundryBootDashModelMockingTest {
 
 	private TestBootDashModelContext context;
 	private BootProjectTestHarness projects;
-	private UserInteractions ui;
 	private MockCloudFoundryClientFactory clientFactory;
 	private CloudFoundryTestHarness harness;
 	private BootDashActions actions;
@@ -163,20 +163,20 @@ public class CloudFoundryBootDashModelMockingTest {
 	public TestBracketter testBracketter = new TestBracketter();
 
 	private SpringBootCore springBootCore = SpringBootCore.getDefault();
+	private AllUserInteractions ui;
 
 	@Before
 	public void setup() throws Exception {
 		StsTestUtil.deleteAllProjects();
-		this.ui = mock(UserInteractions.class);
 		this.context = new TestBootDashModelContext(
 				ResourcesPlugin.getWorkspace(),
-				DebugPlugin.getDefault().getLaunchManager(),
-				ui
+				DebugPlugin.getDefault().getLaunchManager()
 		);
+		this.ui = context.injections.getBean(AllUserInteractions.class);
 		this.clientFactory = new MockCloudFoundryClientFactory();
 		this.harness = CloudFoundryTestHarness.create(context, clientFactory);
 		this.projects = new BootProjectTestHarness(context.getWorkspace());
-		this.actions = new BootDashActions(harness.model, harness.selection.forReading(), harness.sectionSelection, ui, null);
+		this.actions = new BootDashActions(harness.model, harness.selection.forReading(), harness.sectionSelection, context.injections, null);
 	}
 
 	@After

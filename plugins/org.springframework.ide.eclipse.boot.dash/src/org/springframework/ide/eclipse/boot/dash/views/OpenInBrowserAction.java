@@ -41,7 +41,7 @@ public class OpenInBrowserAction extends AbstractBootDashElementsAction {
 	public void run() {
 		String url = getUrl();
 		if (url!=null) {
-			ui.openUrl(url);
+			ui().openUrl(url);
 		}
 	}
 

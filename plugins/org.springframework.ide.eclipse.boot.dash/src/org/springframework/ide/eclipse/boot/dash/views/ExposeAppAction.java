@@ -49,7 +49,7 @@ public class ExposeAppAction extends RunStateAction {
 						AbstractLaunchConfigurationsDashElement<?> localDashProject = (AbstractLaunchConfigurationsDashElement<?>) e;
 						localDashProject.shutdownExpose();
 					} catch (Exception ex) {
-						ui.errorPopup("error shutting down tunnel", "error shutting down tunnel");
+						ui().errorPopup("error shutting down tunnel", "error shutting down tunnel");
 					}
 				}
 			}
@@ -65,14 +65,14 @@ public class ExposeAppAction extends RunStateAction {
 	protected Job createJob() {
 		final Collection<BootDashElement> selecteds = getSelectedElements();
 		if (!selecteds.isEmpty()) {
-			boolean riskAccepted = ui.confirmWithToggle("ngrok.tunnel.warning.state", "Really Expose local service on public internet?",
+			boolean riskAccepted = ui().confirmWithToggle("ngrok.tunnel.warning.state", "Really Expose local service on public internet?",
 					"The ngrok tunnel uses a third-party server to pass all data between your local app and its clients over a public internet connection.\n\n" +
 					"Do you really want to do this?",
 					null);
 			if (riskAccepted) {
 				String ngrokInstall = this.ngrokManager.getDefaultInstall();
 				if (ngrokInstall == null) {
-					ngrokInstall = ui.chooseFile("ngrok installation", null);
+					ngrokInstall = ui().chooseFile("ngrok installation", null);
 					if (ngrokInstall != null) {
 						this.ngrokManager.addInstall(ngrokInstall);
 						this.ngrokManager.setDefaultInstall(ngrokInstall);
@@ -95,7 +95,7 @@ public class ExposeAppAction extends RunStateAction {
 											monitor.subTask("Restarting: " + el.getName());
 											try {
 												AbstractLaunchConfigurationsDashElement<?> localDashProject = (AbstractLaunchConfigurationsDashElement<?>) el;
-												localDashProject.restartAndExpose(ExposeAppAction.this.goalState, ngrokClient, eurekaInstance, ui);
+												localDashProject.restartAndExpose(ExposeAppAction.this.goalState, ngrokClient, eurekaInstance, ui());
 											} catch (Exception e) {
 												return BootActivator.createErrorStatus(e);
 											}
@@ -116,7 +116,7 @@ public class ExposeAppAction extends RunStateAction {
 	}
 
 	private String getEurekaInstance() {
-		String eurekaInstance = ui.selectRemoteEureka(model, "Eureka URL", "please enter the full URL of the Eureka instance you would like to use", "", null);
+		String eurekaInstance = ui().selectRemoteEureka(model, "Eureka URL", "please enter the full URL of the Eureka instance you would like to use", "", null);
 
 		if (eurekaInstance != null) {
 			if (eurekaInstance.endsWith("/eureka") || eurekaInstance.endsWith("/eureka/")) {

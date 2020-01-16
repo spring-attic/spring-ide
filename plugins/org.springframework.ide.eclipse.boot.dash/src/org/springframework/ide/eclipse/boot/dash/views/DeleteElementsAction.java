@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
@@ -33,13 +34,13 @@ public class DeleteElementsAction<T extends RunTargetType> extends AbstractBootD
 
 	private Class<T> targetTypeClass;
 
-	public DeleteElementsAction(BootDashActions actions, Class<T> targetType, MultiSelection<BootDashElement> selection, UserInteractions ui) {
+	public DeleteElementsAction(BootDashActions actions, Class<T> targetType, MultiSelection<BootDashElement> selection, SimpleDIContext context) {
 		super(new Params(actions)
 				.setSelection(selection)
-				.setUi(ui)
+				.setContext(context)
 		);
 		this.targetTypeClass = targetType;
-		Assert.isNotNull(ui);
+		context.assertDefinitionFor(UserInteractions.class);
 		this.setText("Delete Elements");
 		this.setToolTipText("Delete the selected elements.");
 		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/delete_app.png"));
@@ -61,11 +62,11 @@ public class DeleteElementsAction<T extends RunTargetType> extends AbstractBootD
 		for (final Entry<BootDashModel, Collection<BootDashElement>> workitem : sortingBins.asMap().entrySet()) {
 			BootDashModel model = workitem.getKey();
 			final DeletionCapabableModel modifiable = (DeletionCapabableModel)model; //cast is safe. Only DeleteCapabableModel are added to sortingBins
-			if (ui.confirmOperation("Deleting Elements", modifiable.getDeletionConfirmationMessage(workitem.getValue()))) {
+			if (ui().confirmOperation("Deleting Elements", modifiable.getDeletionConfirmationMessage(workitem.getValue()))) {
 				Job job = new Job("Deleting Elements from " + model.getRunTarget().getName()) {
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
-						modifiable.delete(workitem.getValue(), ui);
+						modifiable.delete(workitem.getValue(), ui());
 						return Status.OK_STATUS;
 					}
 

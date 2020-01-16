@@ -88,7 +88,7 @@ public class DeployToCloudFoundryTargetAction extends AbstractBootDashElementsAc
 				if (project != null) {
 					CloudFoundryBootDashModel cfModel = (CloudFoundryBootDashModel) model.getSectionByTargetId(target.getId());
 					//No need to wrap this in a job as it already does that itself:
-					cfModel.performDeployment(ImmutableSet.of(project), ui, runOrDebug);
+					cfModel.performDeployment(ImmutableSet.of(project), ui(), runOrDebug);
 				}
 			}
 		} catch (Exception e) {

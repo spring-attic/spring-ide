@@ -70,7 +70,7 @@ public class OpenInPackageExplorer extends AbstractBootDashElementsAction {
 						model.getElementConsoleManager().showConsole(element);
 					}
 				} catch (Exception e) {
-					ui.errorPopup("Open Console Failure", e.getMessage());
+					ui().errorPopup("Open Console Failure", e.getMessage());
 				}
 			}
 		}

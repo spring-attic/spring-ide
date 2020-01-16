@@ -35,7 +35,7 @@ public class OpenConsoleAction extends AbstractBootDashElementsAction {
 	@Override
 	public void run() {
 		final Collection<BootDashElement> selecteds = getSelectedElements();
-		showSelected(ui, selecteds);
+		showSelected(ui(), selecteds);
 	}
 
 	protected void showSelected(UserInteractions ui, Collection<BootDashElement> selected) {
@@ -69,7 +69,7 @@ public class OpenConsoleAction extends AbstractBootDashElementsAction {
 					}
 
 				} catch (Exception e) {
-					ui.errorPopup("Open Console Failure", e.getMessage());
+					ui().errorPopup("Open Console Failure", e.getMessage());
 				}
 			}
 		}

@@ -18,6 +18,7 @@ import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.compare.CompareEditorInput;
 import org.eclipse.compare.structuremergeviewer.DiffNode;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -49,6 +50,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.Manifes
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlFileInput;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlGraphDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlInput;
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.dialogs.CustomizeAppsManagerURLDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.CustomizeAppsManagerURLDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel;
@@ -76,21 +78,22 @@ import org.springsource.ide.eclipse.commons.ui.UiUtil;
  */
 public class DefaultUserInteractions implements UserInteractions {
 
+	private final SimpleDIContext context;
+
 	public interface UIContext {
 		Shell getShell();
 	}
 
-	private UIContext context;
-
-	public DefaultUserInteractions(UIContext context) {
+	public DefaultUserInteractions(SimpleDIContext context) {
 		this.context = context;
+		context.assertDefinitionFor(UIContext.class);
 	}
 
 	@Override
 	public ILaunchConfiguration chooseConfigurationDialog(final String dialogTitle, final String message,
 			final Collection<ILaunchConfiguration> configs) {
 		final LiveVariable<ILaunchConfiguration> chosen = new LiveVariable<>();
-		context.getShell().getDisplay().syncExec(new Runnable() {
+		getShell().getDisplay().syncExec(new Runnable() {
 			public void run() {
 				IDebugModelPresentation labelProvider = DebugUITools.newDebugModelPresentation();
 				try {
@@ -113,7 +116,7 @@ public class DefaultUserInteractions implements UserInteractions {
 	}
 
 	private Shell getShell() {
-		return context.getShell();
+		return context.getBean(UIContext.class).getShell();
 	}
 
 	@Override
@@ -339,15 +342,6 @@ public class DefaultUserInteractions implements UserInteractions {
 			);
 		});
 		return answer.get();
-	}
-
-	@Override
-	public void openPasswordDialog(PasswordDialogModel model) {
-		getShell().getDisplay().syncExec(new Runnable() {
-			public void run() {
-				new UpdatePasswordDialog(getShell(), model).open();
-			}
-		});
 	}
 
 	@Override

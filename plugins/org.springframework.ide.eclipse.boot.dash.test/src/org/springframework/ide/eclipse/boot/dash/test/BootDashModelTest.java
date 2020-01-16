@@ -1424,8 +1424,8 @@ public class BootDashModelTest {
 	@Rule
 	public LaunchCleanups launchCleanups = new LaunchCleanups();
 
-	private UserInteractions ui;
 	private BootDashViewModelHarness harness;
+	private AllUserInteractions ui;
 
 	@Before
 	public void setup() throws Exception {
@@ -1435,12 +1435,11 @@ public class BootDashModelTest {
 		suspendOnUncaughtException(false);
 
 		StsTestUtil.deleteAllProjects();
-		this.ui = mock(UserInteractions.class);
 		this.context = new TestBootDashModelContext(
 				ResourcesPlugin.getWorkspace(),
-				DebugPlugin.getDefault().getLaunchManager(),
-				ui
+				DebugPlugin.getDefault().getLaunchManager()
 		);
+		this.ui = context.injections.getBean(AllUserInteractions.class);
 		this.harness = new BootDashViewModelHarness(context, RunTargetTypes.LOCAL);
 		this.model = harness.getRunTargetModel(RunTargetTypes.LOCAL);
 		this.projects = new BootProjectTestHarness(context.getWorkspace());

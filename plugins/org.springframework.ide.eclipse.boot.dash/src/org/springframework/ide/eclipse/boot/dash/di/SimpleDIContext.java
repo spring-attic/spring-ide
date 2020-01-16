@@ -11,11 +11,14 @@
 package org.springframework.ide.eclipse.boot.dash.di;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+import org.eclipse.core.runtime.Assert;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
+
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
 
 /**
@@ -25,11 +28,19 @@ import com.google.common.collect.ImmutableList;
  */
 public class SimpleDIContext {
 
+	private String creationLocation;
+
+	public SimpleDIContext() {
+		this.creationLocation = ExceptionUtil.stacktrace();
+	}
+
+	private Cache<Class<?>, Object> beanCache = CacheBuilder.newBuilder().build();
+
 	public interface BeanFactory<T> {
 		T create(SimpleDIContext context) throws Exception;
 	}
 
-	private static final class Definition<T> {
+	public static final class Definition<T> {
 		private final Class<T> type;
 		private final BeanFactory<T> factory;
 		private CompletableFuture<T> instance;
@@ -54,30 +65,39 @@ public class SimpleDIContext {
 		}
 	}
 
-	private Map<Class<?>, Definition<?>> resolveCache = new HashMap<>();
-
 	private List<Definition<?>> definitions = new ArrayList<>();
 
 	public <T> void def(Class<T> type, BeanFactory<T> factory) {
 		definitions.add(new Definition<>(type, factory));
 	}
 
-	public synchronized <T> T getBean(Class<T> type) throws Exception {
+	public <T> void defInstance(Class<T> klass, T instance) {
+		Assert.isNotNull(instance);
+		def(klass, (x) -> instance);
+	}
+
+	@SuppressWarnings("unchecked")
+	public synchronized <T> T getBean(Class<T> type) {
 		lockdown();
-		return resolveDefinition(type).get(this);
+		try {
+			return (T) beanCache.get(type, () -> resolveDefinition(type).get(this));
+		} catch (Exception e) {
+			throw ExceptionUtil.unchecked(e);
+		}
+
 	}
 
 	@SuppressWarnings("unchecked")
 	protected <T> Definition<T> resolveDefinition(Class<T> type) {
-		//TODO: cache instance definition resolution?
 		for (int i = definitions.size()-1; i>=0; i--) {
 			Definition<?> d = definitions.get(i);
 			if (d.satisfies(type)) {
 				return (Definition<T>) d;
 			}
 		}
-		throw new IllegalStateException("No definition for bean of type "+type);
+		throw new IllegalStateException("No definition for bean of type "+type+"\n context created:\n"+creationLocation);
 	}
+
 
 	/**
 	 * Prevents additional definitions from being added. The idea is that using an injection
@@ -86,8 +106,21 @@ public class SimpleDIContext {
 	 * started, which happens automatically when the first bean is requested, the context becomes
 	 * immmutable and no longer allows adding definitions.
 	 */
-	private void lockdown() {
+	SimpleDIContext lockdown() {
 		definitions = ImmutableList.copyOf(definitions);
+		return this;
 	}
 
+	public void assertDefinitionFor(Class<?> requested) {
+		Assert.isLegal(hasDefinitionFor(requested), "No definition for "+requested);
+	}
+
+	public boolean hasDefinitionFor(Class<?> requested) {
+		for (Definition<?> d : definitions) {
+			if (d.satisfies(requested)) {
+				return true; //ok
+			}
+		}
+		return false;
+	}
 }

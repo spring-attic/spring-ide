@@ -43,6 +43,7 @@ import org.junit.Test;
 import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveDataConnectionManagementActions;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractLaunchConfigurationsDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -506,7 +507,7 @@ public class BootDashActionTests {
 			}
 		};
 
-		when(ui.confirmOperation(eq("Deleting Elements"), anyString())).thenReturn(true);
+		when(ui().confirmOperation(eq("Deleting Elements"), anyString())).thenReturn(true);
 		action.run();
 
 		new ACondition("Wait for config deletion", 3000) {
@@ -519,6 +520,10 @@ public class BootDashActionTests {
 		};
 	}
 
+
+	private UserInteractions ui() {
+		return context.injections.getBean(AllUserInteractions.class);
+	}
 
 	@Test
 	public void duplicateConfigAction() throws Exception {
@@ -949,7 +954,6 @@ public class BootDashActionTests {
 	private BootProjectTestHarness projects;
 	private BootDashViewModelHarness harness;
 	private BootDashActions actions;
-	private UserInteractions ui;
 
 	@Rule
 	public AutobuildingEnablement autobuild = new AutobuildingEnablement(false);
@@ -965,16 +969,15 @@ public class BootDashActionTests {
 	@Before
 	public void setup() throws Exception {
 		StsTestUtil.deleteAllProjects();
-		this.ui = mock(UserInteractions.class);
+		SimpleDIContext injections = new SimpleDIContext();
 		this.context = new TestBootDashModelContext(
 				ResourcesPlugin.getWorkspace(),
-				DebugPlugin.getDefault().getLaunchManager(),
-				ui
+				DebugPlugin.getDefault().getLaunchManager()
 		);
 		this.processes = new MockLiveProcesses();
 		this.harness = new BootDashViewModelHarness(context, RunTargetTypes.LOCAL);
 		this.projects = new BootProjectTestHarness(context.getWorkspace());
-		this.actions = new BootDashActions(harness.model, harness.selection.forReading(), ui, processes.commandExecutor);
+		this.actions = new BootDashActions(harness.model, harness.selection.forReading(), injections, processes.commandExecutor);
 	}
 
 	@After

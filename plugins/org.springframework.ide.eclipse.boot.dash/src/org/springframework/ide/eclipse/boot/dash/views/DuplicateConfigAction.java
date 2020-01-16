@@ -43,7 +43,7 @@ public class DuplicateConfigAction extends AbstractBootDashElementsAction {
 		if (_e instanceof Duplicatable<?>) {
 			Duplicatable<?> e = (Duplicatable<?>) _e;
 			if (e.canDuplicate()) {
-				e.duplicate(ui);
+				e.duplicate(ui());
 			}
 		}
 	}

@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.Assert;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryRunTargetType;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CfUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetWizardModel;
@@ -311,7 +312,7 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 		return target.getRunTarget().getType().getName()+":"+target.getRunTarget().getId();
 	}
 
-	public void answerPasswordPrompt(UserInteractions ui, PasswordAnswerer answerer) {
+	public void answerPasswordPrompt(CfUserInteractions ui, PasswordAnswerer answerer) {
 		doAnswer(new Answer<Boolean>() {
 			@Override
 			public Boolean answer(InvocationOnMock invocation) throws Throwable {

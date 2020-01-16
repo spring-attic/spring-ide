@@ -63,7 +63,7 @@ public class ReconnectCloudConsoleAction extends AbstractCloudAppDashElementsAct
 						model.getElementConsoleManager().reconnect(element);
 					}
 				} catch (Exception e) {
-					ui.errorPopup("Reconnect Console Failure", e.getMessage());
+					ui().errorPopup("Reconnect Console Failure", e.getMessage());
 				}
 			}
 		}

@@ -88,7 +88,7 @@ public class CloudFoundryBootDashModelIntegrationTest {
 
 	private TestBootDashModelContext context;
 	private BootProjectTestHarness projects;
-	private UserInteractions ui;
+	private AllUserInteractions ui;
 	private CloudFoundryTestHarness harness;
 
 	////////////////////////////////////////////////////////////
@@ -109,12 +109,11 @@ public class CloudFoundryBootDashModelIntegrationTest {
 	@Before
 	public void setup() throws Exception {
 		StsTestUtil.deleteAllProjects();
-		this.ui = mock(UserInteractions.class);
 		this.context = new TestBootDashModelContext(
 				ResourcesPlugin.getWorkspace(),
-				DebugPlugin.getDefault().getLaunchManager(),
-				ui
+				DebugPlugin.getDefault().getLaunchManager()
 		);
+		this.ui = context.injections.getBean(AllUserInteractions.class);
 		this.harness = CloudFoundryTestHarness.create(context);
 		this.projects = new BootProjectTestHarness(context.getWorkspace());
 	}

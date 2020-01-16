@@ -44,7 +44,6 @@ public interface UserInteractions {
 	void openUrl(String url);
 	boolean confirmOperation(String title, String message);
 	void openDialog(ToggleFiltersDialogModel model);
-	void openPasswordDialog(PasswordDialogModel model);
 	String selectRemoteEureka(BootDashViewModel model, String title, String message, String initialValue, IInputValidator validator);
 
 	int confirmOperation(String title, String message, String[] buttonLabels, int defaultButtonIndex);

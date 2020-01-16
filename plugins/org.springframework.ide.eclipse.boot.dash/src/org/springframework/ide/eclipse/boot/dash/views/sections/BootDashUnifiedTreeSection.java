@@ -68,6 +68,7 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveProcessCommandsExecutor;
 import org.springframework.ide.eclipse.boot.dash.livexp.ElementwiseListener;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
@@ -133,9 +134,10 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 	private MultiSelection<BootDashElement> selection;
 	private LiveExpression<BootDashModel> sectionSelection;
 	private BootDashActions actions;
-	private UserInteractions ui;
 	private LiveExpression<Filter<BootDashElement>> searchFilterModel;
 	private Stylers stylers;
+	private final SimpleDIContext context;
+
 
 	private final IPropertyChangeListener THEME_LISTENER = new IPropertyChangeListener() {
 
@@ -312,10 +314,11 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 
 	}
 
-	public BootDashUnifiedTreeSection(IPageWithSections owner, BootDashViewModel model, UserInteractions ui) {
+	public BootDashUnifiedTreeSection(IPageWithSections owner, BootDashViewModel model, SimpleDIContext context) {
 		super(owner);
-		Assert.isNotNull(ui);
-		this.ui = ui;
+		Assert.isNotNull(context);
+		context.assertDefinitionFor(UserInteractions.class);
+		this.context = context;
 		this.model = model;
 		this.searchFilterModel = model.getFilter();
 	}
@@ -347,7 +350,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 			}
 		});
 
-		actions = new BootDashActions(model, getSelection(), getSectionSelection(), ui, LiveProcessCommandsExecutor.getDefault());
+		actions = new BootDashActions(model, getSelection(), getSectionSelection(), context, LiveProcessCommandsExecutor.getDefault());
 		hookContextMenu();
 
 		// Careful, either selection or tableviewer might be created first.
@@ -389,12 +392,13 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 							@Override
 							protected IStatus run(IProgressMonitor monitor) {
 								try {
-									button.perform(ui);
+									button.perform(ui());
 								} catch (Exception e) {
 									Log.log(e);
 								}
 								return Status.OK_STATUS;
 							}
+
 						};
 						job.schedule();
 					}
@@ -720,10 +724,10 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 							protected IStatus run(IProgressMonitor monitor) {
 								if (modifiableModel != null && selection != null) {
 									try {
-										modifiableModel.add(Arrays.asList(elements), ui);
+										modifiableModel.add(Arrays.asList(elements), ui());
 
 									} catch (Exception e) {
-										ui.errorPopup("Failed to Add Element", e.getMessage());
+										ui().errorPopup("Failed to Add Element", e.getMessage());
 									}
 								}
 								return Status.OK_STATUS;
@@ -763,6 +767,10 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 	@Override
 	public LiveExpression<ValidationResult> getValidator() {
 		return Validator.OK;
+	}
+
+	private UserInteractions ui() {
+		return context.getBean(UserInteractions.class);
 	}
 
 }

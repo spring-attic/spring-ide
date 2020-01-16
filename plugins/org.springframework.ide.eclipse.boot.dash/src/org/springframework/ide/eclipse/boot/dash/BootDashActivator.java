@@ -93,6 +93,8 @@ public class BootDashActivator extends AbstractUIPlugin {
 
 	private IProxyService proxyService;
 
+	public static final String INJECTIONS_EXTENSION_ID = "org.springframework.ide.eclipse.boot.dash.injections";
+
 	public synchronized IProxyService getProxyService() {
 		if (proxyService==null) {
 			BundleContext bc = getBundle().getBundleContext();

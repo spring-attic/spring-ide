@@ -12,13 +12,14 @@ package org.springframework.ide.eclipse.boot.dash.views;
 
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 public class RefreshRunTargetAction extends AbstractBootDashModelAction {
 
-	public RefreshRunTargetAction(LiveExpression<BootDashModel> section, UserInteractions ui) {
+	public RefreshRunTargetAction(LiveExpression<BootDashModel> section, SimpleDIContext ui) {
 		super(section, ui);
 		this.setText("Refresh");
 		this.setToolTipText("Manually refresh contents of the section");
@@ -29,7 +30,7 @@ public class RefreshRunTargetAction extends AbstractBootDashModelAction {
 	public void run() {
 		BootDashModel model = sectionSelection.getValue();
 		if (model!=null) {
-			model.refresh(ui);
+			model.refresh(ui());
 		}
 	}
 
