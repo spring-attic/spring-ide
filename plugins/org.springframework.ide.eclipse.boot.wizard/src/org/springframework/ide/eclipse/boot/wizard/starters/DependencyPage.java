@@ -69,7 +69,13 @@ public class DependencyPage extends WizardPageWithSections {
 			return new CommentSection(this, NewSpringBootWizard.NO_CONTENT_AVAILABLE);
 		} ));
 
-		model.getValue().onDependencyChange(() -> {
+
+		return ImmutableList.of(dynamicSection);
+	}
+
+	protected WizardPageSection createDynamicSections(AddStartersModel model) {
+
+		model.onDependencyChange(() -> {
 			Display.getDefault().asyncExec(() -> {
 				IWizard wizard = DependencyPage.this.getWizard();
 				if (wizard != null) {
@@ -81,10 +87,6 @@ public class DependencyPage extends WizardPageWithSections {
 			});
 		});
 
-		return ImmutableList.of(dynamicSection);
-	}
-
-	protected WizardPageSection createDynamicSections(AddStartersModel model) {
 		List<WizardPageSection> sections = new ArrayList<>();
 
 		sections.add(createFrequentlyUsedSection(model));
