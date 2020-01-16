@@ -140,7 +140,7 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 
 		@Override
 		public String getType() {
-			return "yml";
+			return "xml";
 		}
 
 		@Override

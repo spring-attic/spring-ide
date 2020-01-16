@@ -48,7 +48,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -94,7 +93,6 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
 import junit.framework.AssertionFailedError;
@@ -924,14 +922,15 @@ public class EditStartersModelTest {
 			this.unavailable = true;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
-		public String getPom(String bootVersion, List<String> starters) throws Exception {
+		public String getPom(Map<String, ?> parameters) throws Exception {
 			if (unavailable) {
 				throw new IOException("Initializr Service Unavailable");
 			} else if (generateFakePom) {
-				return generateFakePom(bootVersion, starters);
+				return generateFakePom((String) parameters.get("bootVersion"), (List<String>) parameters.get("dependencies"));
 			} else {
-				return InitializrService.DEFAULT.getPom(bootVersion, starters);
+				return InitializrService.DEFAULT.getPom(parameters);
 			}
 		}
 

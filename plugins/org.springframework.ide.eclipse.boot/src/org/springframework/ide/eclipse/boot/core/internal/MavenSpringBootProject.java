@@ -54,7 +54,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.DebugPlugin;
@@ -82,7 +81,6 @@ import org.eclipse.m2e.core.ui.internal.editing.PomEdits.Operation;
 import org.eclipse.m2e.core.ui.internal.editing.PomEdits.OperationTuple;
 import org.eclipse.m2e.core.ui.internal.editing.PomHelper;
 import org.springframework.ide.eclipse.boot.core.Bom;
-import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.IMavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.MavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.MavenId;
@@ -90,7 +88,6 @@ import org.springframework.ide.eclipse.boot.core.Repo;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarters;
-import org.springframework.ide.eclipse.boot.core.initializr.InitializrDependencySpec.BomInfo;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
 import org.springframework.ide.eclipse.boot.util.DependencyDelta;
 import org.springframework.ide.eclipse.boot.util.DumpOutput;
@@ -113,8 +110,6 @@ public class MavenSpringBootProject extends SpringBootProject {
 	public static boolean DUMP_MAVEN_OUTPUT = false;
 
 	private static final String MVN_LAUNCH_MODE = "run";
-
-	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 
 	private static final String REPOSITORIES = "repositories";
 	private static final String REPOSITORY = "repository";
@@ -189,15 +184,9 @@ public class MavenSpringBootProject extends SpringBootProject {
 				}
 			}
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 		}
 		return null;
-	}
-
-	private void debug(String string) {
-		if (DEBUG) {
-			System.out.println(string);
-		}
 	}
 
 	@Override
@@ -324,7 +313,7 @@ public class MavenSpringBootProject extends SpringBootProject {
 				}
 			}));
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 		}
 	}
 
@@ -345,7 +334,7 @@ public class MavenSpringBootProject extends SpringBootProject {
 				return getBootVersion(mp.getDependencies());
 			}
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 		}
 		return SpringBootCore.getDefaultBootVersion();
 	}
@@ -658,6 +647,25 @@ public class MavenSpringBootProject extends SpringBootProject {
 				workingCopy.setAttribute(MavenLaunchConstants.ATTR_PROFILES, selectedProfiles);
 			}
 		}
+	}
+
+	@Override
+	protected Map<String, Object> pomGenerationParameters(
+			List<org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency> initialDependencies)
+			throws Exception {
+		Map<String, Object> parameters = super.pomGenerationParameters(initialDependencies);
+		parameters.put("type", "maven-project");
+		parameters.put("language", "java");
+		MavenProject mavenProject = getMavenProject();
+		if (mavenProject != null) {
+			parameters.put("description", mavenProject.getDescription());
+			parameters.put("groupId", mavenProject.getGroupId());
+			parameters.put("artifactId", mavenProject.getArtifactId());
+			parameters.put("version", mavenProject.getVersion());
+			parameters.put("packaging", mavenProject.getPackaging());
+			parameters.put("javaVerion", mavenProject.getProperties().get("java.version"));
+		}
+		return parameters;
 	}
 
 

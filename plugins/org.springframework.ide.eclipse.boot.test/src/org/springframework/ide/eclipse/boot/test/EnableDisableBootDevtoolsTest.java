@@ -15,6 +15,7 @@ import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.b
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
 
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -49,7 +50,7 @@ public class EnableDisableBootDevtoolsTest {
 		}
 
 		@Override
-		public String getPom(String bootVersion, List<String> starters) throws Exception {
+		public String getPom(Map<String, ?> parameters) throws Exception {
 			throw new UnsupportedOperationException();
 		}
 	};
