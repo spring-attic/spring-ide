@@ -78,9 +78,9 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 					return new DiffNode(left, right);
 				}
 			};
-			input.setTitle("Merge Local Deployment Manifest File");
+			input.setTitle("Merge Local File");
 
-			new Job("Comparing project pom with generated pom.") {
+			new Job("Comparing project file with generated file from Spring Initializr.") {
 
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {

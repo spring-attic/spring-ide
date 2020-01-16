@@ -42,19 +42,17 @@ public class EditBootStartersHandler extends AbstractHandler {
 		try {
 			IStructuredSelection selection = HandlerUtil.getCurrentStructuredSelection(event);
 			if (selection!=null) {
-				List<IProject> projects = SelectionUtils.getProjects(selection, ProjectFilter.anyProject);
-				if (projects!=null && !projects.isEmpty()) {
-					IProject project = projects.get(0);
-					if (event.getTrigger() instanceof Event) {
-						Event e = (Event) event.getTrigger();
-						if ((e.stateMask & SWT.ALT) != 0) {
-//							AddStartersDialog.openFor(project, activeShell);
-							AddStartersWizard addStartersWizard = new AddStartersWizard();
-							addStartersWizard.init(PlatformUI.getWorkbench(), selection);
-							new WizardDialog(activeShell, addStartersWizard).open();
-							return null;
-						}
+				// PT 169994346 - "Secret" way to open alternate Add Starters wizard.
+				if (event.getTrigger() instanceof Event) {
+					Event e = (Event) event.getTrigger();
+					if ((e.stateMask & SWT.ALT) != 0) {
+						AddStartersWizard.openFor(activeShell, selection);
+						return null;
 					}
+				}
+
+				IProject project = StartersWizardUtil.getProject(selection);
+				if (project != null) {
 					EditStartersDialog.openFor(project, activeShell);
 				}
 			}
