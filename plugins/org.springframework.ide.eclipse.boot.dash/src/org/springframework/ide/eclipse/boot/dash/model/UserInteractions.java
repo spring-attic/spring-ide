@@ -25,7 +25,6 @@ import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDia
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
-import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialogModel;
 
 /**
