@@ -1,8 +1,8 @@
 package org.springframework.ide.eclipse.boot.dash.cf;
 
-import org.springframework.ide.eclipse.boot.dash.di.EclipseBeanLoader.Contribution;
 import org.springframework.ide.eclipse.boot.dash.cf.ui.DefaultCfUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CfUserInteractions;
+import org.springframework.ide.eclipse.boot.dash.di.EclipseBeanLoader.Contribution;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultBootDashModelContext;
 

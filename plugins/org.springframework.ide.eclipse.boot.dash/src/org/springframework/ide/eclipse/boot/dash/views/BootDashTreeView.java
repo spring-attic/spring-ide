@@ -89,13 +89,6 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 
 	private BootDashActions actions;
 
-	SimpleDIContext context = new SimpleDIContext();
-	{
-		context.defInstance(UIContext.class, this);
-		context.defInstance(UserInteractions.class, new DefaultUserInteractions(context));
-		new EclipseBeanLoader(context).loadFromExtensionPoint(BootDashActivator.INJECTIONS_EXTENSION_ID);
-	}
-
 	private MultiSelection<BootDashElement> selection = null; // lazy init
 
 	private List<ISelectionChangedListener> selectionListeners = new ArrayList<>();
@@ -135,10 +128,14 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 		// Create the help context id for the viewer's control
 		// PlatformUI.getWorkbench().getHelpSystem().setHelp(tv.getControl(),
 		// "org.springframework.ide.eclipse.boot.dash.viewer");
-		actions = new BootDashActions(model, getRawSelection(), context, LiveProcessCommandsExecutor.getDefault());
+		actions = new BootDashActions(model, getRawSelection(), context(), LiveProcessCommandsExecutor.getDefault());
 		// hookContextMenu();
 		// hookDoubleClickAction();
 		contributeToActionBars();
+	}
+
+	private SimpleDIContext context() {
+		return model.getContext().injections;
 	}
 
 	public synchronized MultiSelection<BootDashElement> getRawSelection() {
@@ -309,7 +306,7 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 	}
 
 	public UserInteractions ui() {
-		return context.getBean(UserInteractions.class);
+		return context().getBean(UserInteractions.class);
 	}
 
 	public BootDashActions getActions() {
@@ -325,7 +322,7 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 	protected List<IPageSection> createSections() throws CoreException {
 		List<IPageSection> sections = new ArrayList<>();
 		sections.add(new TagSearchSection(BootDashTreeView.this, model.getFilterBox().getText(), model));
-		sections.add(new BootDashUnifiedTreeSection(this, model, context));
+		sections.add(new BootDashUnifiedTreeSection(this, model, context()));
 
 		return sections;
 	}
