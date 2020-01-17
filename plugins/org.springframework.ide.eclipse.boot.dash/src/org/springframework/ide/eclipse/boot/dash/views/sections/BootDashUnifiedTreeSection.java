@@ -128,6 +128,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 
 	protected static final Object[] NO_OBJECTS = new Object[0];
 
+	private MenuManager menuMgr;
 	private CustomTreeViewer tv;
 	private BootDashViewModel model;
 	private MultiSelection<Object> mixedSelection; // selection that may contain section or element nodes or both.
@@ -350,7 +351,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 			}
 		});
 
-		actions = new BootDashActions(model, getSelection(), getSectionSelection(), context, LiveProcessCommandsExecutor.getDefault());
+		actions = new BootDashActions(model, getElementSelection(), getSectionSelection(), context, LiveProcessCommandsExecutor.getDefault());
 		hookContextMenu();
 
 		// Careful, either selection or tableviewer might be created first.
@@ -492,7 +493,11 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 
 
 	@Override
-	public synchronized MultiSelection<BootDashElement> getSelection() {
+	public synchronized MultiSelection<Object> getSelection() {
+		return getMixedSelection();
+	}
+
+	private synchronized MultiSelection<BootDashElement> getElementSelection() {
 		if (selection==null) {
 			selection = getMixedSelection().filter(BootDashElement.class);
 			debug("selection", selection.getElements());
@@ -510,7 +515,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 	}
 
 	private void hookContextMenu() {
-		MenuManager menuMgr = new MenuManager("#PopupMenu");
+		this.menuMgr = new MenuManager("#PopupMenu");
 		menuMgr.setRemoveAllWhenShown(true);
 		menuMgr.addMenuListener(new IMenuListener() {
 			public void menuAboutToShow(IMenuManager manager) {
@@ -520,7 +525,6 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		Menu menu = menuMgr.createContextMenu(tv.getControl());
 		tv.getControl().setMenu(menu);
 	}
-
 
 	private void fillContextMenu(IMenuManager manager) {
 		for (RunStateAction a : actions.getRunStateActions()) {
@@ -630,7 +634,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 
 			@Override
 			public void dragSetData(DragSourceEvent event) {
-				Set<BootDashElement> selection = getSelection().getValue();
+				Set<BootDashElement> selection = getElementSelection().getValue();
 				BootDashElement[] elements = selection.toArray(new BootDashElement[selection.size()]);
 				LocalSelectionTransfer.getTransfer().setSelection(new StructuredSelection(elements));
 				event.detail = DND.DROP_COPY;
@@ -638,7 +642,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 
 			@Override
 			public void dragStart(DragSourceEvent event) {
-				if (!canDeploySelection(getSelection().getValue())) {
+				if (!canDeploySelection(getElementSelection().getValue())) {
 					event.doit = false;
 				} else {
 					dragSetData(event);
@@ -771,6 +775,10 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 
 	private UserInteractions ui() {
 		return context.getBean(UserInteractions.class);
+	}
+
+	public MenuManager getMenuMgr() {
+		return menuMgr;
 	}
 
 }

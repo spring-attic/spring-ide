@@ -13,18 +13,14 @@ package org.springframework.ide.eclipse.boot.dash.views;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Supplier;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuCreator;
-import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -42,9 +38,7 @@ import org.eclipse.ui.views.properties.IPropertySheetPage;
 import org.eclipse.ui.views.properties.tabbed.ITabbedPropertySheetPageContributor;
 import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.di.EclipseBeanLoader;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
-import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveDataConnectionManagementActions;
 import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveProcessCommandsExecutor;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelectionSource;
@@ -53,15 +47,11 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.util.MenuUtil;
 import org.springframework.ide.eclipse.boot.dash.util.ToolbarPulldownContributionItem;
-import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions.UIContext;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashUnifiedTreeSection;
-import org.springframework.ide.eclipse.boot.dash.views.sections.DynamicSubMenuSupplier;
 import org.springframework.ide.eclipse.boot.dash.views.sections.TagSearchSection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.ViewPartWithSections;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.core.UIValueListener;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
-import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageSection;
 
 import com.google.common.collect.ImmutableSet;
@@ -92,6 +82,8 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 	private MultiSelection<BootDashElement> selection = null; // lazy init
 
 	private List<ISelectionChangedListener> selectionListeners = new ArrayList<>();
+
+	private BootDashUnifiedTreeSection treeSection;
 
 	/*
 	 * The content provider class is responsible for providing objects to the
@@ -124,6 +116,7 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 		super.createPartControl(parent);
 
 		getSite().setSelectionProvider(this);
+		getSite().registerContextMenu(treeSection.getMenuMgr(), this);
 
 		// Create the help context id for the viewer's control
 		// PlatformUI.getWorkbench().getHelpSystem().setHelp(tv.getControl(),
@@ -322,7 +315,7 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 	protected List<IPageSection> createSections() throws CoreException {
 		List<IPageSection> sections = new ArrayList<>();
 		sections.add(new TagSearchSection(BootDashTreeView.this, model.getFilterBox().getText(), model));
-		sections.add(new BootDashUnifiedTreeSection(this, model, context()));
+		sections.add(treeSection = new BootDashUnifiedTreeSection(this, model, context()));
 
 		return sections;
 	}

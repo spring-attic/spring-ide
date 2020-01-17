@@ -1,20 +1,16 @@
-/*******************************************************************************
- * Copyright (c) 2015, 2016 Pivotal, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * https://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *     Pivotal, Inc. - initial API and implementation
- *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.views;
+package org.springframework.ide.eclipse.boot.dash.cf.ui;
 
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.handlers.HandlerUtil;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CfUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
@@ -22,28 +18,42 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ConnectOperati
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.StoreCredentialsMode;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
-import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
-import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
+import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
-public class UpdatePasswordAction extends AbstractCloudDashModelAction {
+public class UpdatePasswordHandler extends AbstractHandler {
 
-	public UpdatePasswordAction(LiveExpression<BootDashModel> sectionSelection,
-			SimpleDIContext context) {
-		super(sectionSelection, context);
-		this.setText("Update Password");
-		this.setToolTipText("Update password locally for the selected target.");
-		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/update_password.png"));
+	//	public UpdatePasswordAction(LiveExpression<BootDashModel> sectionSelection,
+	//			SimpleDIContext context) {
+	//		super(sectionSelection, context);
+	//		this.setText("Update Password");
+	//		this.setToolTipText("Update password locally for the selected target.");
+	//		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/update_password.png"));
+	//	}
+
+	private CfUserInteractions cfUi() {
+		return injections().getBean(CfUserInteractions.class);
+	}
+
+	private UserInteractions ui() {
+		return injections().getBean(UserInteractions.class);
+	}
+
+	private SimpleDIContext injections() {
+		return BootDashActivator.getDefault().getModel().getContext().injections;
+	}
+
+	private CloudFoundryBootDashModel selection(ExecutionEvent event) {
+		IStructuredSelection s = HandlerUtil.getCurrentStructuredSelection(event);
+		return (CloudFoundryBootDashModel) s.getFirstElement();
 	}
 
 	@Override
-	public void run() {
+	public Object execute(ExecutionEvent event) throws ExecutionException {
 		try {
-			final CloudFoundryBootDashModel targetModel = (CloudFoundryBootDashModel) sectionSelection.getValue();
+			final CloudFoundryBootDashModel targetModel = selection(event);
 			final CloudFoundryRunTarget runTarget = targetModel.getRunTarget();
 			if (runTarget!=null) {
 				final String targetId = runTarget.getId();
@@ -64,7 +74,7 @@ public class UpdatePasswordAction extends AbstractCloudDashModelAction {
 							} catch (CannotAccessPropertyException e) {
 								ui().warningPopup("Failed Storing Password",
 										"Failed to store password in Secure Storage for " + targetId
-												+ ". Secure Storage is most likely locked. Current password will be kept until disconnect.");
+										+ ". Secure Storage is most likely locked. Current password will be kept until disconnect.");
 								// Set "remember password" to false. Password hasn't been stored.
 								runTarget.getTargetProperties().setStoreCredentials(StoreCredentialsMode.STORE_NOTHING);
 							}
@@ -73,11 +83,11 @@ public class UpdatePasswordAction extends AbstractCloudDashModelAction {
 								if (targetModel.isConnected()) {
 									// Disconnect if connected
 									CFCredentials savedCreds = runTarget.getTargetProperties().getCredentials();
-									new ConnectOperation(targetModel, false, context).run(monitor);
+									new ConnectOperation(targetModel, false, injections()).run(monitor);
 									// Disconnect will wipe out password if it's not stored, so reset it below.
 									runTarget.getTargetProperties().setCredentials(savedCreds);
 								}
-								new ConnectOperation(targetModel, true, context).run(monitor);
+								new ConnectOperation(targetModel, true, injections()).run(monitor);
 							} catch (Exception e) {
 								targetModel.setBaseRefreshState(RefreshState.error(e));
 								ui().errorPopup("Failed Setting Credentials", "Credentials for " + targetId
@@ -89,33 +99,12 @@ public class UpdatePasswordAction extends AbstractCloudDashModelAction {
 						}
 						return Status.OK_STATUS;
 					}
+
 				};
 				job.schedule();
 			}
 		} catch (Exception e) {
 			Log.log(e);
-		}
-	}
-
-	@Override
-	public void updateEnablement() {
-		this.setEnabled(getCredentialsHolder(sectionSelection.getValue())!=null);
-	}
-
-	@Override
-	public void updateVisibility() {
-		setVisible(getCredentialsHolder(sectionSelection.getValue()) != null);
-	}
-
-	private RunTargetWithProperties getCredentialsHolder(BootDashModel section) {
-		if (section!=null) {
-			RunTarget target = section.getRunTarget();
-			if (target instanceof RunTargetWithProperties) {
-				RunTargetWithProperties targetWithProps = (RunTargetWithProperties) target;
-				if (targetWithProps.requiresCredentials()) {
-					return targetWithProps;
-				}
-			}
 		}
 		return null;
 	}
