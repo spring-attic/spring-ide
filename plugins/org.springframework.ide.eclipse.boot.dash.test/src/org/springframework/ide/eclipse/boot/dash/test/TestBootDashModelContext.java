@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
+import org.springframework.ide.eclipse.boot.dash.cf.actions.CfBootDashActions;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnelFactory;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
@@ -31,6 +32,7 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetT
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockSecuredCredentialStore;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockSshTunnel;
+import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
 import org.springframework.ide.eclipse.boot.pstore.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.pstore.InMemoryPropertyStore;
@@ -75,6 +77,7 @@ public class TestBootDashModelContext extends BootDashModelContext {
 	private static SimpleDIContext createInjections() {
 		SimpleDIContext injections = new SimpleDIContext();
 		injections.defInstance(AllUserInteractions.class, mock(AllUserInteractions.class));
+		injections.defInstance(BootDashActions.Factory.class, CfBootDashActions.factory);
 		return injections;
 	}
 

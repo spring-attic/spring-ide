@@ -77,6 +77,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.internal.MavenSpringBootProject;
+import org.springframework.ide.eclipse.boot.dash.cf.actions.UpdatePasswordAction;
 import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
@@ -91,7 +92,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.HealthCheck
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFDomainStatus;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ReactorUtils;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
-import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel;
@@ -105,7 +105,6 @@ import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
-import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.DeploymentAnswerer;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCFApplication;
@@ -119,7 +118,6 @@ import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.CustmomizeTargetLabelAction;
 import org.springframework.ide.eclipse.boot.dash.views.CustomizeTargetLabelDialogModel;
 import org.springframework.ide.eclipse.boot.dash.views.EnableJmxSshTunnelAction;
-import org.springframework.ide.eclipse.boot.dash.views.UpdatePasswordAction;
 import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.test.AutobuildingEnablement;
@@ -2300,7 +2298,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		waitForApps(model, appName);
 
 		harness.sectionSelection.setValue(model);
-		IAction updatePassword = actions.getUpdatePasswordAction();
+		IAction updatePassword = updatePasswordAction();
 		assertTrue(updatePassword.isEnabled());
 
 		harness.answerPasswordPrompt(ui, (d) -> {
@@ -2334,6 +2332,13 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertEquals(IStatus.ERROR, validationResult.status);
 		assertContains("Invalid credentials", validationResult.msg);
 
+	}
+
+	private UpdatePasswordAction updatePasswordAction() {
+		return (UpdatePasswordAction) actions.getInjectedActions().stream()
+		.filter(action -> action instanceof UpdatePasswordAction)
+		.findFirst()
+		.get();
 	}
 
 	@Test public void pushWithHealthCheckProcess() throws Exception {
@@ -2384,7 +2389,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		waitForApps(model, appName);
 
 		harness.sectionSelection.setValue(model);
-		IAction updatePassword = actions.getUpdatePasswordAction();
+		IAction updatePassword = updatePasswordAction();
 		assertTrue(updatePassword.isEnabled());
 
 		// Clear out any mocks on the ui object
@@ -2440,7 +2445,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		waitForApps(model, appName);
 
 		harness.sectionSelection.setValue(model);
-		IAction updatePassword = actions.getUpdatePasswordAction();
+		IAction updatePassword = updatePasswordAction();
 		assertTrue(updatePassword.isEnabled());
 
 		// Clear out any mocks on the ui object
@@ -2502,7 +2507,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		waitForApps(model, appName);
 
 		harness.sectionSelection.setValue(model);
-		IAction updatePassword = actions.getUpdatePasswordAction();
+		IAction updatePassword = updatePasswordAction();
 		assertTrue(updatePassword.isEnabled());
 
 		// Clear out any mocks on the ui object
@@ -2558,7 +2563,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		waitForApps(model, appName);
 
 		harness.sectionSelection.setValue(model);
-		IAction updatePassword = actions.getUpdatePasswordAction();
+		IAction updatePassword = updatePasswordAction();
 		assertTrue(updatePassword.isEnabled());
 
 		// Clear out any mocks on the ui object
@@ -2612,7 +2617,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		waitForApps(model, appName);
 
 		harness.sectionSelection.setValue(model);
-		IAction updatePassword = actions.getUpdatePasswordAction();
+		IAction updatePassword = updatePasswordAction();
 		assertTrue(updatePassword.isEnabled());
 
 		// Clear out any mocks on the ui object
@@ -2656,7 +2661,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		waitForApps(target, appName);
 
 		harness.sectionSelection.setValue(target);
-		IAction updatePassword = actions.getUpdatePasswordAction();
+		IAction updatePassword = updatePasswordAction();
 		assertTrue(updatePassword.isEnabled());
 
 		// Clear out any mocks on the ui object
@@ -2767,7 +2772,7 @@ public class CloudFoundryBootDashModelMockingTest {
 			passwordDialog.performOk();
 		});
 		harness.sectionSelection.setValue(model);
-		UpdatePasswordAction updatePW = actions.getUpdatePasswordAction();
+		UpdatePasswordAction updatePW = updatePasswordAction();
 		updatePW.run();
 		updatePW.waitFor();
 

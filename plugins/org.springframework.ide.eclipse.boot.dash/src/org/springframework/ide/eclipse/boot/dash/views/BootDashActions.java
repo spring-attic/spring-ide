@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -77,7 +78,6 @@ public class BootDashActions {
 	private OpenCloudAdminConsoleAction openCloudAdminConsoleAction;
 	private ReconnectCloudConsoleAction reconnectCloudConsoleAction;
 	private ToggleBootDashModelConnection toggleTargetConnectionAction;
-	private UpdatePasswordAction updatePasswordAction;
 	private ShowViewAction showPropertiesViewAction;
 	private ExposeAppAction exposeRunAppAction;
 	private ExposeAppAction exposeDebugAppAction;
@@ -101,6 +101,12 @@ public class BootDashActions {
 
 	private LiveDataConnectionManagementActions liveDataConnectionManagement;
 	private final SimpleDIContext context;
+
+	private List<IAction> injectedActions;
+
+	public interface Factory {
+		Collection<IAction> create(BootDashViewModel model, MultiSelection<BootDashElement> selection, LiveExpression<BootDashModel> section, SimpleDIContext context, LiveProcessCommandsExecutor liveProcessCmds);
+	}
 
 	public BootDashActions(BootDashViewModel model, MultiSelection<BootDashElement> selection, SimpleDIContext context,  LiveProcessCommandsExecutor liveProcessCmds) {
 		this(
@@ -202,7 +208,6 @@ public class BootDashActions {
 		if (sectionSelection != null) {
 			refreshAction = new RefreshRunTargetAction(sectionSelection, context);
 			removeTargetAction = new RemoveRunTargetAction(sectionSelection, model, context);
-			updatePasswordAction = new UpdatePasswordAction(sectionSelection, context);
 			openCloudAdminConsoleAction = new OpenCloudAdminConsoleAction(sectionSelection, context);
 			toggleTargetConnectionAction = new ToggleBootDashModelConnection(sectionSelection, context);
 			customizeTargetLabelAction = new CustmomizeTargetLabelAction(sectionSelection, context);
@@ -240,6 +245,12 @@ public class BootDashActions {
 
 		openFilterPreferencesAction = new OpenFilterPreferencesAction(context);
 		liveDataConnectionManagement = new LiveDataConnectionManagementActions(defaultActionParams());
+
+		ImmutableList.Builder<IAction> injectedActions = ImmutableList.builder();
+		for (Factory f : context.getBeans(Factory.class)) {
+			injectedActions.addAll(f.create(model, elementsSelection, sectionSelection, context, liveProcessCmds));
+		};
+		this.injectedActions = injectedActions.build();
 	}
 
 	private AddRunTargetAction[] createAddTargetActions() {
@@ -409,10 +420,6 @@ public class BootDashActions {
 		return toggleTargetConnectionAction;
 	}
 
-	public UpdatePasswordAction getUpdatePasswordAction() {
-		return updatePasswordAction;
-	}
-
 	/**
 	 * @return show properties view action instance
 	 */
@@ -562,4 +569,7 @@ public class BootDashActions {
 		return context.getBean(UserInteractions.class);
 	}
 
+	public List<IAction> getInjectedActions() {
+		return injectedActions;
+	}
 }

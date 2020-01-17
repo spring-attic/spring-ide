@@ -9,9 +9,7 @@
    </extension>
    <extension
          point="org.springframework.ide.eclipse.boot.dash.injections">
-      <injection
-            class="org.springframework.ide.eclipse.boot.dash.cf.BootDashInjections">
-      </injection>
+      <injection class="org.springframework.ide.eclipse.boot.dash.cf.BootDashInjections"/>
    </extension>
 
 </plugin>

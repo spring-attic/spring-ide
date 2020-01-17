@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.di;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.Assert;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
@@ -35,6 +36,7 @@ public class SimpleDIContext {
 	}
 
 	private Cache<Class<?>, Object> beanCache = CacheBuilder.newBuilder().build();
+	private Cache<Class<?>, List<Object>> beanListCache = CacheBuilder.newBuilder().build();
 
 	public interface BeanFactory<T> {
 		T create(SimpleDIContext context) throws Exception;
@@ -118,9 +120,36 @@ public class SimpleDIContext {
 	public boolean hasDefinitionFor(Class<?> requested) {
 		for (Definition<?> d : definitions) {
 			if (d.satisfies(requested)) {
-				return true; //ok
+				return true;
 			}
 		}
 		return false;
 	}
+
+	@SuppressWarnings("unchecked")
+	public <T> List<T> getBeans(Class<T> type) {
+		lockdown();
+		try {
+			return (List<T>) beanListCache.get(type, () -> {
+				ImmutableList.Builder<Object> builder = ImmutableList.builder();
+				resolveDefinitions(type).forEach(d -> {
+					try {
+						builder.add(d.get(this));
+					} catch (Exception e) {
+						throw ExceptionUtil.unchecked(e);
+					}
+				});
+				return builder.build();
+			});
+		} catch (Exception e) {
+			throw ExceptionUtil.unchecked(e);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T> Stream<Definition<T>> resolveDefinitions(Class<T> type) {
+		Object defs = definitions.stream().filter(d -> d.satisfies(type));
+		return (Stream<Definition<T>>)defs;
+	}
+
 }

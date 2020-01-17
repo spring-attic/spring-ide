@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.views;
+package org.springframework.ide.eclipse.boot.dash.cf.actions;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -30,13 +30,13 @@ import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
+import org.springframework.ide.eclipse.boot.dash.views.AbstractCloudDashModelAction;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 public class UpdatePasswordAction extends AbstractCloudDashModelAction {
 
-	public UpdatePasswordAction(LiveExpression<BootDashModel> sectionSelection,
-			SimpleDIContext context) {
+	public UpdatePasswordAction(LiveExpression<BootDashModel> sectionSelection, SimpleDIContext context) {
 		super(sectionSelection, context);
 		this.setText("Update Password");
 		this.setToolTipText("Update password locally for the selected target.");
