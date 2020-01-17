@@ -39,11 +39,11 @@ import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpe
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.DependencyGroup;
 import org.springframework.ide.eclipse.boot.util.DependencyDelta;
-import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.ui.OkButtonHandler;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.common.collect.ImmutableSet;
 

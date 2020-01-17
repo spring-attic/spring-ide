@@ -45,7 +45,7 @@ import com.google.common.collect.ImmutableList;
 public class NewSpringBootWizard extends Wizard implements INewWizard, IImportWizard {
 
 	private static final ImageDescriptor IMAGE = BootWizardImages.BOOT_WIZARD_ICON;
-	static final String NO_CONTENT_AVAILABLE = "No content available.";
+	public static final String NO_CONTENT_AVAILABLE = "No content available.";
 
 	private InitializrFactoryModel<NewSpringBootWizardModel> model;
 

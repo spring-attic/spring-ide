@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.core.internal;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -103,7 +104,16 @@ public abstract class SpringBootProject implements ISpringBootProject {
 
 	@Override
 	public String generatePom(List<Dependency> initialDependencies) throws Exception {
+		return initializr.getPom(pomGenerationParameters(initialDependencies));
+	}
+
+	protected Map<String, Object> pomGenerationParameters(List<Dependency> initialDependencies) throws Exception {
 		SpringBootStarters knownStarters = getStarterInfos();
+
+		Map<String, Object> parameters = new HashMap<>();
+
+		parameters.put("name", project.getName());
+		parameters.put("bootVersion", getBootVersion());
 
 		List<String> starterIds = new ArrayList<>();
 		for (Dependency dep : initialDependencies) {
@@ -113,8 +123,9 @@ public abstract class SpringBootProject implements ISpringBootProject {
 				starterIds.add(id);
 			}
 		}
+		parameters.put("dependencies", starterIds);
 
-		return initializr.getPom(getBootVersion(), starterIds);
+		return parameters;
 	}
 
 	public boolean isKnownStarter(MavenId mavenId) {

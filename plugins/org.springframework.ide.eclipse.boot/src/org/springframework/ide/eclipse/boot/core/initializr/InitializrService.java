@@ -13,15 +13,16 @@ package org.springframework.ide.eclipse.boot.core.initializr;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.List;
+import java.util.Collection;
+import java.util.Map;
 import java.util.function.Supplier;
 
+import org.apache.maven.shared.utils.io.IOUtil;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.ide.eclipse.boot.core.SimpleUriBuilder;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarters;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
-import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 
 public interface InitializrService {
 
@@ -32,7 +33,7 @@ public interface InitializrService {
 	/**
 	 * Generates a pom by contacting intializer service.
 	 */
-	String getPom(String bootVersion, List<String> starters) throws Exception;
+	String getPom(Map<String, ?> parameters) throws Exception;
 
 	static InitializrService create(URLConnectionFactory urlConnectionFactory, Supplier<String> baseUrl) {
 		return new InitializrService() {
@@ -53,7 +54,7 @@ public interface InitializrService {
 			}
 
 			@Override
-			public String getPom(String bootVersion, List<String> starters) throws Exception {
+			public String getPom(Map<String, ?> parameters) throws Exception {
 				//Example uri:
 				//https://start-development.cfapps.io/starter.zip
 				//	?name=demo&groupId=com.example&artifactId=demo
@@ -67,9 +68,18 @@ public interface InitializrService {
 				//  &dependencies=cloud-aws&dependencies=cloud-hystrix-dashboard&dependencies=web
 
 				SimpleUriBuilder builder = new SimpleUriBuilder(baseUrl.get()+"/pom.xml");
-				builder.addParameter("bootVersion", bootVersion);
-				for (String starter : starters) {
-					builder.addParameter("dependencies", starter);
+				for (Map.Entry<String, ?> entry : parameters.entrySet()) {
+					String key = entry.getKey();
+					Object value = entry.getValue();
+					if (value instanceof String) {
+						builder.addParameter(key, (String) value);
+					} else if (value instanceof Collection) {
+						for (Object item : (Collection<?>) value) {
+							if (item instanceof String) {
+								builder.addParameter(key, (String) item);
+							}
+						}
+					}
 				}
 				URLConnection urlConnection = urlConnectionFactory.createConnection(new URL(builder.toString()));
 				urlConnection.connect();
