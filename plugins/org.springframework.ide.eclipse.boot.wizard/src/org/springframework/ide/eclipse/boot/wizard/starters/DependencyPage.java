@@ -162,7 +162,7 @@ public class DependencyPage extends WizardPageWithSections {
 	@Override
 	public boolean canFlipToNextPage() {
 		LiveExpression<AddStartersModel> model = factoryModel.getModel();
-		return model != null && model.getValue() != null && model.getValue().hasCurrentDependencies();
+		return model != null && model.getValue() != null && model.getValue().canShowDiffPage();
 	}
 
 }

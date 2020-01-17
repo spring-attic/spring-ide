@@ -41,8 +41,10 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 	private void setupCompareViewer() {
 		try {
 
-			CompareEditorInput input = factoryModel.getModel().getValue().generateAndScheduleCompareInput();
-			compareViewer = input.createContents(contentsContainer);
+			AddStartersModel model = factoryModel.getModel().getValue();
+			CompareEditorInput compareInput = model.generateCompareInput();
+
+			compareViewer = compareInput.createContents(contentsContainer);
 			compareViewer.setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
 			contentsContainer.layout();
 		} catch (Exception e) {
@@ -67,7 +69,7 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 
 	@Override
 	public boolean isPageComplete() {
-		return true;
+		return getWizard().getContainer().getCurrentPage() == this;
 	}
 
 }
