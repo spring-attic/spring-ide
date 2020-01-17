@@ -43,9 +43,6 @@ public class EditStartersDialog extends DialogWithSections {
 	private static final Point DEPENDENCY_SECTION_SIZE = new Point(SWT.DEFAULT, 300);
 	static final String NO_CONTENT_AVAILABLE = "No content available.";
 
-	private static final int SAVE_BUTTON = 256;
-	private static final String AUTO_SAVE_DIRTY_POM = "EditStartersDialog.pom.autosave";
-
 	public InitializrFactoryModel<EditStartersModel> model;
 	private boolean firstSearchBox = true; //becomes false after the searchBox is created first time.
 	private long openingTime;
