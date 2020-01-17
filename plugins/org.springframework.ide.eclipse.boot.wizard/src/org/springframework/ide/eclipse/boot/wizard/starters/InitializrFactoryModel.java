@@ -10,12 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard.starters;
 
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.ide.eclipse.boot.core.initializr.HttpRedirectionException;
-import org.springframework.ide.eclipse.boot.wizard.InitializrFactoryModel.ModelFactory;
-import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
