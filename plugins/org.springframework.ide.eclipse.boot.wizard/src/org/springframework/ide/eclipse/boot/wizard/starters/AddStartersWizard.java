@@ -32,6 +32,7 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 public class AddStartersWizard extends Wizard implements IWorkbenchWizard {
 
 	private InitializrFactoryModel<AddStartersModel> fmodel;
+	private CompareGeneratedAndCurrentPage comparePage;
 
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
@@ -65,7 +66,16 @@ public class AddStartersWizard extends Wizard implements IWorkbenchWizard {
 	}
 
 	@Override
+	public boolean canFinish() {
+		if (this.comparePage != null) {
+			return this.comparePage.isPageComplete();
+		}
+		return super.canFinish();
+	}
+
+	@Override
 	public boolean performFinish() {
+		fmodel.getModel().getValue().performOk();
 		return true;
 	}
 
@@ -73,7 +83,8 @@ public class AddStartersWizard extends Wizard implements IWorkbenchWizard {
 	public void addPages() {
 		super.addPages();
 		addPage(new DependencyPage(fmodel));
-		addPage(new CompareGeneratedAndCurrentPage(fmodel));
+		this.comparePage = new CompareGeneratedAndCurrentPage(fmodel);
+		addPage(comparePage);
 	}
 
 	public static void openFor(Shell shell, IStructuredSelection selection) throws CoreException {

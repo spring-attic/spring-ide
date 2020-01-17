@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard.starters;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -19,18 +22,28 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
+import org.eclipse.compare.CompareConfiguration;
+import org.eclipse.compare.CompareEditorInput;
+import org.eclipse.compare.IStreamContentAccessor;
+import org.eclipse.compare.ITypedElement;
+import org.eclipse.compare.ResourceNode;
+import org.eclipse.compare.structuremergeviewer.DiffNode;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarters;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.DependencyGroup;
-import org.springframework.ide.eclipse.boot.util.DependencyDelta;
 import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
 import org.springframework.ide.eclipse.boot.wizard.DefaultDependencies;
 import org.springframework.ide.eclipse.boot.wizard.DependencyFilterBox;
@@ -42,19 +55,13 @@ import org.springframework.ide.eclipse.boot.wizard.PopularityTracker;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.OkButtonHandler;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 /**
- * @author Kris De Volder
+ *
  */
 public class AddStartersModel implements OkButtonHandler {
-
-	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
-
-	private void debug(String string) {
-		if (DEBUG) {
-			System.out.println(string);
-		}
-	}
 
 	public static final Object JOB_FAMILY = "EditStartersModel.JOB_FAMILY";
 
@@ -63,18 +70,14 @@ public class AddStartersModel implements OkButtonHandler {
 	private final PopularityTracker popularities;
 	private final DefaultDependencies defaultDependencies;
 
-	/**
-	 * Will be used to remember the set of initially selected dependencies (i.e. those that are already
-	 * present in the project when the dialog is opened.
-	 */
-	private final List<Dependency> initialDependencies = new ArrayList<>();
-
 	public final HierarchicalMultiSelectionFieldModel<Dependency> dependencies = new HierarchicalMultiSelectionFieldModel<>(Dependency.class, "dependencies")
 			.label("Dependencies:");
 
 	private SpringBootStarters starters;
 
 	protected final SpringBootCore springBootCore;
+
+	private CompareEditorInput input;
 
 	/**
 	 * Create EditStarters dialog model and initialize it based on a project selection.
@@ -96,51 +99,34 @@ public class AddStartersModel implements OkButtonHandler {
 		return project.getProject().getName();
 	}
 
-	protected DependencyDelta getDelta() throws Exception {
-		debug("Computing dependency delta...");
-		debug("   intial dependencies = "+initialDependencies.stream().map(d -> d.getId()).collect(Collectors.toList()));
-		debug("   selected dependencies = "+dependencies.getCurrentSelection().stream().map(d -> d.getId()).collect(Collectors.toList()));
-		String referencePom = project.generatePom(initialDependencies);
-		String targetPom = project.generatePom(dependencies.getCurrentSelection());
-		DependencyDelta delta = DependencyDelta.create(referencePom, targetPom);
-		debug(""+delta);
-		return delta;
-	}
-
 	@Override
 	public void performOk() {
-//		Job job = new Job("Adding starters for "+getProjectName()) {
-//			@Override
-//			protected IStatus run(IProgressMonitor monitor) {
-//				try {
-//					List<Dependency> selected = dependencies.getCurrentSelection();
-//					List<SpringBootStarter> selectedStarters = new ArrayList<>(selected.size());
-//					for (Dependency dep : selected) {
-//						String id = dep.getId();
-//						SpringBootStarter starter = starters.getStarter(id);
-//						if (starter!=null) {
-//							selectedStarters.add(starter);
-//						}
-//					}
-//					project.modifyDependencies(getDelta());
-//					for (Dependency s : selected) {
-//						if (!initialDependencies.contains(s)) {
-//							popularities.incrementUsageCount(s);
-//						}
-//					}
-//					return Status.OK_STATUS;
-//				} catch (Exception e) {
-//					Log.log(e);
-//					return ExceptionUtil.status(e);
-//				}
-//			}
-//			@Override
-//			public boolean belongsTo(Object family) {
-//				return family==JOB_FAMILY;
-//			}
-//		};
-//		job.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
-//		job.schedule();
+		Job job = new Job("Adding starters for "+getProjectName()) {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					List<Dependency> selected = dependencies.getCurrentSelection();
+
+					for (Dependency s : selected) {
+						popularities.incrementUsageCount(s);
+					}
+
+					if (input != null) {
+						input.saveChanges(monitor);
+					}
+					return Status.OK_STATUS;
+				} catch (Exception e) {
+					Log.log(e);
+					return ExceptionUtil.status(e);
+				}
+			}
+			@Override
+			public boolean belongsTo(Object family) {
+				return family==JOB_FAMILY;
+			}
+		};
+		job.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
+		job.schedule();
 	}
 
 	/**
@@ -299,5 +285,80 @@ public class AddStartersModel implements OkButtonHandler {
 			dependencyGroup.addSelectionListener(selectionListener);
 		}
 	}
+
+	public CompareEditorInput generateAndScheduleCompareInput() throws Exception {
+		IProject project = getProject().getProject();
+		ResourceNode left = new ResourceNode(project.getFile("pom.xml"));
+
+		GeneratedInput right = new GeneratedInput("pom.xml", left.getImage(), getProject().generatePom(dependencies.getCurrentSelection()));
+
+		CompareConfiguration config = new CompareConfiguration();
+		config.setLeftLabel("Local file in project - " + project.getName() + ": " + left.getName());
+		config.setLeftImage(left.getImage());
+		config.setRightLabel("Spring Initializr: " + left.getName());
+		config.setRightImage(right.getImage());
+		config.setLeftEditable(true);
+
+		this.input = new CompareEditorInput(config) {
+			@Override
+			protected Object prepareInput(IProgressMonitor arg0)
+					throws InvocationTargetException, InterruptedException {
+				return new DiffNode(left, right);
+			}
+		};
+		this.input.setTitle("Merge Local File");
+
+		new Job("Comparing project file with generated file from Spring Initializr.") {
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					input.run(monitor);
+					return Status.OK_STATUS;
+				} catch (InvocationTargetException | InterruptedException e) {
+					return ExceptionUtil.coreException(e).getStatus();
+				}
+			}
+
+		}.schedule();
+
+		return this.input;
+	}
+
+	private class GeneratedInput implements ITypedElement, IStreamContentAccessor {
+
+		private String name;
+		private Image image;
+		private String content;
+
+		public GeneratedInput(String name, Image image, String content) {
+			super();
+			this.name = name;
+			this.image = image;
+			this.content = content;
+		}
+
+		@Override
+		public String getName() {
+			return name;
+		}
+
+		@Override
+		public Image getImage() {
+			return image;
+		}
+
+		@Override
+		public String getType() {
+			return "xml";
+		}
+
+		@Override
+		public InputStream getContents() throws CoreException {
+			return new ByteArrayInputStream(content.getBytes());
+		}
+
+	}
+
 
 }
