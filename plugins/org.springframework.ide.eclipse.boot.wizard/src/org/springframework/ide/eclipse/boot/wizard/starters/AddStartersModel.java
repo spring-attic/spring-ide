@@ -79,9 +79,7 @@ public class AddStartersModel implements OkButtonHandler {
 
 	protected final SpringBootCore springBootCore;
 
-	private final LocalResource localResource;
-
-	private CompareEditorInput compareInput;
+	private CompareEditorInput currentCompareInput;
 
 	/**
 	 * Create EditStarters dialog model and initialize it based on a project selection.
@@ -91,10 +89,6 @@ public class AddStartersModel implements OkButtonHandler {
 		this.popularities = new PopularityTracker(store);
 		this.defaultDependencies = new DefaultDependencies(store);
 		this.project = springBootCore.project(selectedProject);
-
-		// Left side is the local editable file
-		// Right side is the read-only generated file
-	    this.localResource = new LocalResource(project.getProject().getFile("pom.xml"));
 
 		discoverOptions(dependencies);
 	}
@@ -111,32 +105,28 @@ public class AddStartersModel implements OkButtonHandler {
 	@Override
 	public void performOk() {
 
-		Job job = new Job("Saving starter changes for "+getProjectName()) {
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				try {
-					List<Dependency> selected = dependencies.getCurrentSelection();
+		List<Dependency> selected = dependencies.getCurrentSelection();
 
-					for (Dependency s : selected) {
-						popularities.incrementUsageCount(s);
-					}
+		for (Dependency s : selected) {
+			popularities.incrementUsageCount(s);
+		}
 
-					if (AddStartersModel.this.localResource != null) {
-						AddStartersModel.this.localResource.commit(monitor);
-					}
-					return Status.OK_STATUS;
-				} catch (Exception e) {
-					Log.log(e);
-					return ExceptionUtil.status(e);
-				}
-			}
-			@Override
-			public boolean belongsTo(Object family) {
-				return family==JOB_FAMILY;
-			}
-		};
-		job.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
-		job.schedule();
+		// IMPORTANT: save the contents of the local pom via
+		// the Eclipse compare input API. The reason is that
+		// Eclipse compare will first flush the left and right
+		// input before saving and mark the editor as dirty .
+		// Without this flush, nothing will be saved.
+		if (this.currentCompareInput != null
+				&& this.currentCompareInput.isSaveNeeded()) {
+			// Use this API instead of the save API
+			// This will ensure the editor is flushed and saved
+			// in the UI thread before the controls are disposed
+			// Not doing this can result in NPEs if a direct
+			// save is performed asynchronously as the editor
+			// controls may be disposed when the wizard closes
+			// but before save can be performed
+			this.currentCompareInput.okPressed();
+		}
 	}
 
 	/**
@@ -266,7 +256,6 @@ public class AddStartersModel implements OkButtonHandler {
 		for (String catName : dependencies.getCategories()) {
 			MultiSelectionFieldModel<Dependency> cat = dependencies.getContents(catName);
 			for (Dependency dep : cat.getChoices()) {
-//				System.out.println(dep.getId());
 				if (dependencyId.equals(dep.getId())) {
 					cat.select(dep);
 					return; //dep found and added to selection
@@ -299,33 +288,31 @@ public class AddStartersModel implements OkButtonHandler {
 	public CompareEditorInput generateCompareInput() throws Exception {
 		IProject project = getProject().getProject();
 
-		ResourceNode editableLeft = this.localResource.getResourceNode();
+		// Left side is the local editable file
+		// Right side is the read-only generated file
+		LocalResource localResource = new LocalResource(project.getProject().getFile("pom.xml"));
+
+		ResourceNode editableLeft = localResource.getResourceNode();
 
 		// Resource from Spring Initializr that is show in the right side of the compare view
-		GeneratedResource right = new GeneratedResource("pom.xml", editableLeft.getImage(), getProject().generatePom(dependencies.getCurrentSelection()));
+		GeneratedResource generatedResource = new GeneratedResource("pom.xml", editableLeft.getImage(), getProject().generatePom(dependencies.getCurrentSelection()));
 
 		CompareConfiguration config = new CompareConfiguration();
 		config.setLeftLabel("Local file in " + project.getName() + ": " + editableLeft.getName());
 		config.setLeftImage(editableLeft.getImage());
 		config.setRightLabel("Spring Initializr: " + editableLeft.getName());
-		config.setRightImage(right.getImage());
+		config.setRightImage(generatedResource.getImage());
 		config.setLeftEditable(true);
 
-		this.compareInput = new CompareEditorInput(config) {
-			@Override
-			protected Object prepareInput(IProgressMonitor arg0)
-					throws InvocationTargetException, InterruptedException {
-				return new DiffNode(editableLeft, right);
-			}
-		};
-		compareInput.setTitle("Merge Local File");
+		this.currentCompareInput = createCompareEditorInput(localResource, generatedResource, config);
+		this.currentCompareInput.setTitle("Merge Local File");
 
 		new Job("Comparing project file with generated file from Spring Initializr.") {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
-					compareInput.run(monitor);
+					AddStartersModel.this.currentCompareInput.run(monitor);
 					return Status.OK_STATUS;
 				} catch (InvocationTargetException | InterruptedException e) {
 					return ExceptionUtil.coreException(e).getStatus();
@@ -334,7 +321,31 @@ public class AddStartersModel implements OkButtonHandler {
 
 		}.schedule();
 
-		return compareInput;
+		return AddStartersModel.this.currentCompareInput;
+	}
+
+	private CompareEditorInput createCompareEditorInput(LocalResource localResource, GeneratedResource generatedResource,
+			CompareConfiguration config) {
+
+
+		CompareEditorInput _currentCompareInput = new CompareEditorInput(config) {
+			@Override
+			protected Object prepareInput(IProgressMonitor pm)
+					throws InvocationTargetException, InterruptedException {
+				return new DiffNode(localResource.getResourceNode(), generatedResource);
+			}
+
+			@Override
+			public void saveChanges(IProgressMonitor monitor) throws CoreException {
+				// Delegate to Eclipse compare to flush the viewer before saving
+				super.saveChanges(monitor);
+				localResource.commit(monitor);
+
+			}
+
+
+		};
+		return _currentCompareInput;
 	}
 
 	/**
@@ -350,7 +361,7 @@ public class AddStartersModel implements OkButtonHandler {
 			this.resourceNode = new BufferedResourceNode(file);
 		}
 
-		public void commit(IProgressMonitor monitor) throws Exception {
+		public void commit(IProgressMonitor monitor) throws CoreException {
 			this.resourceNode.commit(monitor);
 		}
 
