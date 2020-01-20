@@ -215,6 +215,7 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 			throws CoreException {
 		try {
 			List<String> vmArgs = new ArrayList<>();
+			vmArgs.addAll(Arrays.asList(DebugPlugin.parseArguments(super.getVMArguments(conf))));
 			// VM args for JMX connection
 			EnumSet<JmxBeanSupport.Feature> enabled = getEnabledJmxFeatures(conf);
 			if (!enabled.isEmpty()) {

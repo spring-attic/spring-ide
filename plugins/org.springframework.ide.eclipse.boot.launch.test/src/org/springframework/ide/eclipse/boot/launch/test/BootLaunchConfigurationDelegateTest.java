@@ -574,7 +574,7 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		String fastStartupArgs = BootActivator.getDefault().getPreferenceStore().getDefaultString(BootPreferences.PREF_BOOT_FAST_STARTUP_JVM_ARGS);
 		assertTrue(!fastStartupArgs.trim().isEmpty());
 		String vmArgs = new BootLaunchConfigurationDelegate().getVMArguments(wc);
-		assertTrue(vmArgs.contains("\n" + fastStartupArgs+"\n"));
+		assertContains(" " + fastStartupArgs+" ", vmArgs);
 
 		LaunchResult result = LaunchUtil.synchLaunch(wc);
 		assertOk(result);
@@ -595,7 +595,7 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		String fastStartupArgs = BootActivator.getDefault().getPreferenceStore().getDefaultString(BootPreferences.PREF_BOOT_FAST_STARTUP_JVM_ARGS);
 		assertTrue(!fastStartupArgs.trim().isEmpty());
 		String vmArgs = new BootLaunchConfigurationDelegate().getVMArguments(wc);
-		assertTrue(vmArgs.contains("\n" + fastStartupArgs+"\n"));
+		assertEquals("-Xmx1024M " + fastStartupArgs+" -Dspring.boot.project.name=dump-info", vmArgs);
 
 		// Also try live beans/JMX arguments
 		BootLaunchConfigurationDelegate.setEnableLifeCycle(wc, true);
@@ -606,7 +606,7 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 	}
 
 	public void testProjectWithSpaces() throws Exception {
-		IProject project = createLaunchReadyProject("project with spaces");
+		createLaunchReadyProject("project with spaces");
 		ILaunchConfigurationWorkingCopy wc = createBaseWorkingCopy("project with spaces", TEST_MAIN_CLASS);
 		String actualArgsStr = new BootLaunchConfigurationDelegate().getVMArguments(wc);
 		String[] acutalArgs = DebugPlugin.parseArguments(actualArgsStr);
@@ -623,6 +623,7 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 	}
 
 	public void testEmptyFastStartupVmArgs() throws Exception {
+		createLaunchReadyProject(TEST_PROJECT);
 		ILaunchConfigurationWorkingCopy wc = createBaseWorkingCopy();
 		BootLaunchConfigurationDelegate.setFastStartup(wc, true);
 
@@ -638,7 +639,7 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 		String fastStartupArgs = BootActivator.getDefault().getPreferenceStore().getString(BootPreferences.PREF_BOOT_FAST_STARTUP_JVM_ARGS);
 		assertTrue(!fastStartupArgs.isEmpty() && fastStartupArgs.trim().isEmpty());
 		String actualArgs = new BootLaunchConfigurationDelegate().getVMArguments(wc);
-		assertEquals(vmArgs+"\n-Dspring.boot.project.name="+TEST_PROJECT, actualArgs);
+		assertEquals(vmArgs+" -Dspring.boot.project.name="+TEST_PROJECT, actualArgs);
 
 		LaunchResult result = LaunchUtil.synchLaunch(wc);
 		assertOk(result);
