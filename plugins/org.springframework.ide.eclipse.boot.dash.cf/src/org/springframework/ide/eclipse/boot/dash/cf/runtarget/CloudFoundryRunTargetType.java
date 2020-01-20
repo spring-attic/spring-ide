@@ -27,7 +27,6 @@ import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.WizardModelUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.AbstractRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTargetType;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypeFactory;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
 import org.springframework.ide.eclipse.boot.dash.views.RunTargetWizard;
@@ -38,14 +37,9 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
  */
 public class CloudFoundryRunTargetType extends AbstractRunTargetType implements RemoteRunTargetType {
 
-	public static class Factory implements RunTargetTypeFactory {
-
-		@Override
-		public RunTargetType create(BootDashModelContext context) {
-			return new CloudFoundryRunTargetType(context, DefaultCloudFoundryClientFactoryV2.INSTANCE);
-		}
-
-	}
+	public static RunTargetTypeFactory factory = context -> {
+		return new CloudFoundryRunTargetType(context, DefaultCloudFoundryClientFactoryV2.INSTANCE);
+	};
 
 	private static final ImageDescriptor SMALL_ICON = BootDashActivator.getImageDescriptor("icons/cloud_obj.png");
 

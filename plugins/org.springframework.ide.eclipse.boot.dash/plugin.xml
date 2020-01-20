@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point id="org.springframework.ide.eclipse.boot.dash.runtargettype" name="runtargettype" schema="schema/runtargettype.exsd"/>
    <extension-point id="org.springframework.ide.eclipse.boot.dash.injections" name="org.springframework.ide.eclipse.boot.dash.injections" schema="schema/org.springframework.ide.eclipse.boot.dash.injections.exsd"/>
 
    <extension

@@ -19,12 +19,11 @@ import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.common.collect.ImmutableList;
 
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypeFactory;
 
 public class RunTargetTypes {
-
-	private static final String EXTENSION_ID = "org.springframework.ide.eclipse.boot.dash.runtargettype";
 
 	//TODO: Get rid of the 'LOCAL' contstants in this class.
 	// The existence of this class and all the references littered around the
@@ -33,17 +32,10 @@ public class RunTargetTypes {
 	public static final RunTargetType LOCAL = new LocalRunTargetType("Local");
 
 	public static List<RunTargetType> loadFromExtensionPoint(BootDashModelContext context) {
+		SimpleDIContext injections = context.injections;
 		ImmutableList.Builder<RunTargetType> contributions = ImmutableList.builder();
-
-		IExtensionRegistry registry = Platform.getExtensionRegistry();
-		IConfigurationElement[] elements = registry.getConfigurationElementsFor(EXTENSION_ID);
-		for (IConfigurationElement ce : elements) {
-			try {
-				RunTargetTypeFactory f = (RunTargetTypeFactory) ce.createExecutableExtension("class");
-				contributions.add(f.create(context));
-			} catch (Exception e) {
-				Log.log(e);
-			}
+		for (RunTargetTypeFactory f : injections.getBeans(RunTargetTypeFactory.class)) {
+			contributions.add(f.create(context));
 		}
 		return contributions.build();
 	}
