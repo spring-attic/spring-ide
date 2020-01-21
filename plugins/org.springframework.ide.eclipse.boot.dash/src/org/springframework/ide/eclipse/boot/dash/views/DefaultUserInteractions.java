@@ -84,6 +84,20 @@ public class DefaultUserInteractions implements UserInteractions {
 		Shell getShell();
 	}
 
+	/**
+	 * Deprecated. Provided for backward compat with cft
+	 */
+	@Deprecated
+	public DefaultUserInteractions(UIContext uiContext) {
+		this(diContextForCft(uiContext));
+	}
+
+	private static SimpleDIContext diContextForCft(UIContext uiContext) {
+		SimpleDIContext c = new SimpleDIContext();
+		c.defInstance(UIContext.class, uiContext);
+		return c;
+	}
+
 	public DefaultUserInteractions(SimpleDIContext context) {
 		this.context = context;
 		context.assertDefinitionFor(UIContext.class);
