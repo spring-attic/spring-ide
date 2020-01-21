@@ -154,19 +154,19 @@ public class BootDashModelTest {
 
 		ButtonModel button = harness.assertButton(model, ENABLE_CLOUD_CLI_BUTTON);
 
-		when(ui.confirmOperation(contains("Confirm Installation of Spring Cloud CLI"), contains("will be installed into"))).thenReturn(true);
+		when(ui().confirmOperation(contains("Confirm Installation of Spring Cloud CLI"), contains("will be installed into"))).thenReturn(true);
 		//Actual confirm dialog prompts example: [Confirm Installation of Spring Cloud CLI?, Spring Cloud CLI version 1.3.3.RELEASE will be installed into Boot 1.5.4.RELEASE.]
 
-		button.perform(ui);
+		button.perform(ui());
 		assertFalse(model.getViewModel().getToggleFilters().getSelectedFilters().contains(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES));
 		ACondition.waitFor("Local services to appear", MAVEN_BUILD_TIMEOUT, () -> {
 			assertServiceElements("dataflow", "zipkin", "eureka", "kafka", "h2", "configserver", "hystrixdashboard", "stubrunner");
 		});
 		assertNull(harness.getButton(model, ENABLE_CLOUD_CLI_BUTTON));
 
-		verify(ui).confirmOperation(anyString(), anyString());
-		verifyNoMoreInteractions(ui);
-		reset(ui);
+		verify(ui()).confirmOperation(anyString(), anyString());
+		verifyNoMoreInteractions(ui());
+		reset(ui());
 
 		// State preserved/restored on reload?
 		harness.reload();
@@ -181,22 +181,22 @@ public class BootDashModelTest {
 			assertServiceElements("dataflow", "zipkin", "eureka", "kafka", "h2", "configserver", "hystrixdashboard", "stubrunner");
 		});
 		assertNull(harness.getButton(model, ENABLE_CLOUD_CLI_BUTTON));
-		verifyZeroInteractions(ui); //Since cloud cli already installed we should not be prompted whether we want to install it.
+		verifyZeroInteractions(ui()); //Since cloud cli already installed we should not be prompted whether we want to install it.
 	}
 
 	@Test public void testAutoInstallSpringCloudCLIRejected() throws Exception {
 		assertTrue(model.getViewModel().getToggleFilters().getSelectedFilters().contains(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES));
 
 		ButtonModel button = harness.assertButton(model, ENABLE_CLOUD_CLI_BUTTON);
-		when(ui.confirmOperation(contains("Confirm Installation of Spring Cloud CLI"), contains("will be installed into"))).thenReturn(false);
-		button.perform(ui);
+		when(ui().confirmOperation(contains("Confirm Installation of Spring Cloud CLI"), contains("will be installed into"))).thenReturn(false);
+		button.perform(ui());
 
 		harness.assertButton(model, ENABLE_CLOUD_CLI_BUTTON);
 		assertTrue(model.getViewModel().getToggleFilters().getSelectedFilters().contains(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES));
 
 		assertServiceElements(/*NONE*/);
-		verify(ui).confirmOperation(anyString(), anyString());
-		verifyNoMoreInteractions(ui);
+		verify(ui()).confirmOperation(anyString(), anyString());
+		verifyNoMoreInteractions(ui());
 	}
 
 	@Test public void testAutoInstallSpringCloudCLITriggeredByFilterChange() throws Exception {
@@ -204,7 +204,7 @@ public class BootDashModelTest {
 		assertTrue(selectedFilters.contains(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES));
 		harness.assertButton(model, ENABLE_CLOUD_CLI_BUTTON);
 
-		when(ui.confirmOperation(contains("Confirm Installation of Spring Cloud CLI"), contains("will be installed into"))).thenReturn(true);
+		when(ui().confirmOperation(contains("Confirm Installation of Spring Cloud CLI"), contains("will be installed into"))).thenReturn(true);
 		selectedFilters.remove(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES);
 
 		ACondition.waitFor("Local services to appear", MAVEN_BUILD_TIMEOUT, () -> {
@@ -212,8 +212,8 @@ public class BootDashModelTest {
 		});
 		assertNull(harness.getButton(model, ENABLE_CLOUD_CLI_BUTTON));
 
-		verify(ui).confirmOperation(anyString(), anyString());
-		verifyNoMoreInteractions(ui);
+		verify(ui()).confirmOperation(anyString(), anyString());
+		verifyNoMoreInteractions(ui());
 	}
 
 	@Test public void testAutoInstallSpringCloudCLICustom() throws Exception {
@@ -228,9 +228,9 @@ public class BootDashModelTest {
 		assertEquals(customCliInstall, context.getBootInstallManager().getDefaultInstall());
 		assertTrue(context.getBootInstallManager().getInstalls().contains(customCliInstall));
 
-		when(ui.confirmOperation(contains("Confirm Installation of Spring Cloud CLI"), contains("will be installed into"))).thenReturn(true);
+		when(ui().confirmOperation(contains("Confirm Installation of Spring Cloud CLI"), contains("will be installed into"))).thenReturn(true);
 		ButtonModel button = harness.assertButton(model, ENABLE_CLOUD_CLI_BUTTON);
-		button.perform(ui);
+		button.perform(ui());
 		assertFalse(model.getViewModel().getToggleFilters().getSelectedFilters().contains(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES));
 
 		ACondition.waitFor("Local services to appear", MAVEN_BUILD_TIMEOUT, () -> {
@@ -238,8 +238,8 @@ public class BootDashModelTest {
 		});
 		assertNull(harness.getButton(model, ENABLE_CLOUD_CLI_BUTTON));
 
-		verify(ui).confirmOperation(anyString(), anyString());
-		verifyNoMoreInteractions(ui);
+		verify(ui()).confirmOperation(anyString(), anyString());
+		verifyNoMoreInteractions(ui());
 	}
 
 	@Test public void testAutoInstallSpringCloudCLINotSupported() throws Exception {
@@ -256,11 +256,11 @@ public class BootDashModelTest {
 		assertTrue(context.getBootInstallManager().getInstalls().contains(customCliInstall));
 
 		ButtonModel button = harness.assertButton(model, ENABLE_CLOUD_CLI_BUTTON);
-		button.perform(ui);
+		button.perform(ui());
 		assertTrue(model.getViewModel().getToggleFilters().getSelectedFilters().contains(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES));
 		assertNotNull(harness.getButton(model, ENABLE_CLOUD_CLI_BUTTON));
-		verify(ui).errorPopup(contains("Auto installation of Spring Cloud CLI not possible"), contains("Couldn't determine a compatible Spring Cloud CLI version"));
-		verifyNoMoreInteractions(ui);
+		verify(ui()).errorPopup(contains("Auto installation of Spring Cloud CLI not possible"), contains("Couldn't determine a compatible Spring Cloud CLI version"));
+		verifyNoMoreInteractions(ui());
 	}
 
 	private IBootInstall performCustomCliInstall(URL customZipUrl) throws Exception {
@@ -486,9 +486,9 @@ public class BootDashModelTest {
 		waitNonServiceElements(projectName);
 
 		BootProjectDashElement element = getElement(projectName);
-		element.openConfig(ui); //Ensure that at least one launch config exists.
-		verify(ui).openLaunchConfigurationDialogOnGroup(any(ILaunchConfiguration.class), any(String.class));
-		verifyNoMoreInteractions(ui);
+		element.openConfig(ui()); //Ensure that at least one launch config exists.
+		verify(ui()).openLaunchConfigurationDialogOnGroup(any(ILaunchConfiguration.class), any(String.class));
+		verifyNoMoreInteractions(ui());
 		ACondition.waitFor("child", 3000, () -> {
 			assertNotNull(getSingleValue(element.getCurrentChildren()));
 		});
@@ -512,6 +512,10 @@ public class BootDashModelTest {
 	}
 
 
+	private UserInteractions ui() {
+		return context.injections.getBean(AllUserInteractions.class);
+	}
+
 	/**
 	 * Test that element state listener for launch conf element is notified when it is
 	 * launched via its project.
@@ -534,9 +538,9 @@ public class BootDashModelTest {
 		waitNonServiceElements(projectName);
 
 		BootProjectDashElement element = getElement(projectName);
-		element.openConfig(ui); //Ensure that at least one launch config exists.
-		verify(ui).openLaunchConfigurationDialogOnGroup(any(ILaunchConfiguration.class), any(String.class));
-		verifyNoMoreInteractions(ui);
+		element.openConfig(ui()); //Ensure that at least one launch config exists.
+		verify(ui()).openLaunchConfigurationDialogOnGroup(any(ILaunchConfiguration.class), any(String.class));
+		verifyNoMoreInteractions(ui());
 		ACondition.waitFor("child", 3000, () -> {
 			assertNotNull(getSingleValue(element.getCurrentChildren()));
 		});
@@ -568,7 +572,7 @@ public class BootDashModelTest {
 		listener = mock(ElementStateListener.class);
 		model.addElementStateListener(listener);
 
-		element.stopAsync(ui);
+		element.stopAsync(ui());
 		waitForState(element, RunState.INACTIVE);
 		waitForState(childElement, RunState.INACTIVE);
 
@@ -595,9 +599,9 @@ public class BootDashModelTest {
 		IProject project = createBootProject(projectName, bootVersionAtLeast("1.3"));
 
 		BootProjectDashElement element = getElement(projectName);
-		element.openConfig(ui); //Ensure that at least one launch config exists.
-		verify(ui).openLaunchConfigurationDialogOnGroup(any(ILaunchConfiguration.class), any(String.class));
-		verifyNoMoreInteractions(ui);
+		element.openConfig(ui()); //Ensure that at least one launch config exists.
+		verify(ui()).openLaunchConfigurationDialogOnGroup(any(ILaunchConfiguration.class), any(String.class));
+		verifyNoMoreInteractions(ui());
 
 		//Disable lifecycle mgmt on config
 		ACondition.waitFor("child", 3000, () -> {
@@ -625,12 +629,12 @@ public class BootDashModelTest {
 	private void doStartBootAppWithoutLifeCycleTest(BootProjectDashElement app, RunState runOrDebug) throws Exception {
 		try {
 			waitForState(app, RunState.INACTIVE);
-			app.restart(runOrDebug, ui);
+			app.restart(runOrDebug, ui());
 			Thread.sleep(2000); //Give app a little bit of time to get going.
 			waitForState(app, runOrDebug);
 		} finally {
 			ACondition.waitFor("stop hammering", 20000, () -> {
-				app.stopAsync(ui);
+				app.stopAsync(ui());
 				assertEquals(RunState.INACTIVE, app.getRunState());
 			});
 		}
@@ -676,7 +680,7 @@ public class BootDashModelTest {
 		listener = mock(ElementStateListener.class);
 		model.addElementStateListener(listener);
 
-		element.stopAsync(ui);
+		element.stopAsync(ui());
 		waitForState(element, RunState.INACTIVE);
 
 		//4 changes:  INACTIVE -> STARTING, STARTING -> RUNNING, livePort(set), actualInstances++
@@ -733,7 +737,7 @@ public class BootDashModelTest {
 		try {
 			waitForState(project, RunState.INACTIVE);
 			System.out.println("Starting "+project);
-			project.restart(RunState.RUNNING, ui);
+			project.restart(RunState.RUNNING, ui());
 			waitForState(project, RunState.RUNNING);
 
 			BootDashElement launch = CollectionUtils.getSingle(project.getChildren().getValues());
@@ -756,7 +760,7 @@ public class BootDashModelTest {
 
 			//Now try that this also works in debug mode...
 			System.out.println("Restart project in DEBUG mode...");
-			project.restart(RunState.DEBUGGING, ui);
+			project.restart(RunState.DEBUGGING, ui());
 			waitForState(project, RunState.DEBUGGING);
 
 			waitForPort(project, changedPort);
@@ -773,7 +777,7 @@ public class BootDashModelTest {
 
 		} finally {
 			System.out.println("Cleanup: stop "+project);
-			project.stopAsync(ui);
+			project.stopAsync(ui());
 			waitForState(project, RunState.INACTIVE);
 		}
 	}
@@ -803,7 +807,7 @@ public class BootDashModelTest {
 			RecordingElementChangedListener recordedChanges1 = new RecordingElementChangedListener();
 			model.addElementStateListener(recordedChanges1);
 
-			element.restart(RunState.RUNNING, ui);
+			element.restart(RunState.RUNNING, ui());
 			waitForState(element, RunState.RUNNING);
 
 			List<RunState> states1 = recordedChanges1.getRecordedRunStates();
@@ -816,7 +820,7 @@ public class BootDashModelTest {
 			RecordingElementChangedListener recordedChanges2 = new RecordingElementChangedListener();
 			model.addElementStateListener(recordedChanges2);
 
-			element.restart(RunState.DEBUGGING, ui);
+			element.restart(RunState.DEBUGGING, ui());
 			waitForState(element, RunState.DEBUGGING);
 
 			List<RunState> states2 = recordedChanges2.getRecordedRunStates();
@@ -827,7 +831,7 @@ public class BootDashModelTest {
 			model.removeElementStateListener(recordedChanges2);
 
 		} finally {
-			element.stopAsync(ui);
+			element.stopAsync(ui());
 			waitForState(element, RunState.INACTIVE);
 		}
 	}
@@ -835,12 +839,12 @@ public class BootDashModelTest {
 	private void doRestartTest(String projectName, RunState fromState, RunState toState) throws Exception {
 		BootDashElement element = getElement(projectName);
 		try {
-			element.restart(fromState, ui);
+			element.restart(fromState, ui());
 			waitForState(element, fromState);
 
 			final ILaunch launch = getActiveLaunch(element);
 
-			element.restart(toState, ui);
+			element.restart(toState, ui());
 
 			//Watch out for race conditions... we can't really reliably observe the
 			// 'terminated' state of the element, as we don't know how long it will
@@ -857,7 +861,7 @@ public class BootDashModelTest {
 
 			waitForState(element, toState);
 		} finally {
-			element.stopAsync(ui);
+			element.stopAsync(ui());
 			waitForState(element, RunState.INACTIVE);
 		}
 	}
@@ -890,8 +894,8 @@ public class BootDashModelTest {
 			assertInstances("0/1", el2);
 			assertInstancesLabel("", el2); // hidden label for ?/1 case
 
-			el1.restart(RunState.RUNNING, ui);
-			el2.restart(RunState.RUNNING, ui);
+			el1.restart(RunState.RUNNING, ui());
+			el2.restart(RunState.RUNNING, ui());
 
 			waitForState(el1, RunState.RUNNING);
 			waitForState(el2, RunState.RUNNING);
@@ -913,7 +917,7 @@ public class BootDashModelTest {
 				}
 			};
 
-			el1.stopAsync(ui);
+			el1.stopAsync(ui());
 			new ACondition("check port summary", MODEL_UPDATE_TIMEOUT) {
 				public boolean test() throws Exception {
 					assertEquals(ImmutableSet.of(port2), project.getLivePorts());
@@ -957,7 +961,7 @@ public class BootDashModelTest {
 		try {
 			waitForState(element, RunState.INACTIVE);
 
-			element.restart(RunState.RUNNING, ui);
+			element.restart(RunState.RUNNING, ui());
 			waitForState(element, RunState.RUNNING);
 
 			new ACondition(4000) {
@@ -982,7 +986,7 @@ public class BootDashModelTest {
 				}
 			};
 
-			element.restart(RunState.RUNNING, ui);
+			element.restart(RunState.RUNNING, ui());
 			waitForState(element, RunState.RUNNING);
 			new ACondition(4000) {
 				public boolean test() throws Exception {
@@ -993,7 +997,7 @@ public class BootDashModelTest {
 			};
 
 		} finally {
-			element.stopAsync(ui);
+			element.stopAsync(ui());
 			waitForState(element, RunState.INACTIVE);
 		}
 	}
@@ -1027,7 +1031,7 @@ public class BootDashModelTest {
 			waitForState(element, RunState.INACTIVE);
 			assertNull(element.getLiveRequestMappings()); // unknown since can only be determined when app is running
 
-			element.restart(RunState.RUNNING, ui);
+			element.restart(RunState.RUNNING, ui());
 			waitForState(element, RunState.RUNNING);
 			new ACondition("Wait for request mappings", MODEL_UPDATE_TIMEOUT) {
 				public boolean test() throws Exception {
@@ -1078,7 +1082,7 @@ public class BootDashModelTest {
 			assertFalse(rm.isUserDefined());
 
 		} finally {
-			element.stopAsync(ui);
+			element.stopAsync(ui());
 			waitForState(element, RunState.INACTIVE);
 		}
 	}
@@ -1124,7 +1128,7 @@ public class BootDashModelTest {
 			waitForState(element, RunState.INACTIVE);
 			assertNull(element.getLiveRequestMappings()); // unknown since can only be determined when app is running
 
-			element.restart(runMode, ui);
+			element.restart(runMode, ui());
 			waitForState(element, runMode);
 			ACondition.waitFor("Wait for request mappings", MODEL_UPDATE_TIMEOUT, () -> {
 				List<RequestMapping> mappings = element.getLiveRequestMappings();
@@ -1156,7 +1160,7 @@ public class BootDashModelTest {
 			assertFalse(rm.isUserDefined());
 
 		} finally {
-			element.stopAsync(ui);
+			element.stopAsync(ui());
 			waitForState(element, RunState.INACTIVE);
 		}
 	}
@@ -1425,7 +1429,6 @@ public class BootDashModelTest {
 	public LaunchCleanups launchCleanups = new LaunchCleanups();
 
 	private BootDashViewModelHarness harness;
-	private AllUserInteractions ui;
 
 	@Before
 	public void setup() throws Exception {
@@ -1439,8 +1442,7 @@ public class BootDashModelTest {
 				ResourcesPlugin.getWorkspace(),
 				DebugPlugin.getDefault().getLaunchManager()
 		);
-		this.ui = context.injections.getBean(AllUserInteractions.class);
-		this.harness = new BootDashViewModelHarness(context, RunTargetTypes.LOCAL);
+		this.harness = new BootDashViewModelHarness(context.withTargetTypes(RunTargetTypes.LOCAL));
 		this.model = harness.getRunTargetModel(RunTargetTypes.LOCAL);
 		this.projects = new BootProjectTestHarness(context.getWorkspace());
 		StsTestUtil.setAutoBuilding(false);

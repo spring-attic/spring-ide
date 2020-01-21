@@ -96,7 +96,7 @@ public class BootDashViewModelTest {
 
 	@Test
 	public void testCreate() throws Exception {
-		harness = new BootDashViewModelHarness(context, RunTargetTypes.LOCAL);
+		harness = new BootDashViewModelHarness(context.withTargetTypes(RunTargetTypes.LOCAL));
 		BootDashModel localModel = harness.getRunTargetModel(RunTargetTypes.LOCAL);
 		assertNotNull(localModel);
 
@@ -108,10 +108,10 @@ public class BootDashViewModelTest {
 	@Test
 	public void testGetTargetTypes() throws Exception {
 		RunTargetType targetType = mock(RunTargetType.class);
-		harness = new BootDashViewModelHarness(context,
+		harness = new BootDashViewModelHarness(context.withTargetTypes(
 				RunTargetTypes.LOCAL,
 				targetType
-		);
+		));
 
 		assertElements(harness.model.getRunTargetTypes(),
 				RunTargetTypes.LOCAL,
@@ -126,10 +126,10 @@ public class BootDashViewModelTest {
 		RunTarget target = mock(RunTarget.class);
 		BootDashModel bootDashModel = mock(BootDashModel.class);
 
-		harness = new BootDashViewModelHarness(context,
+		harness = new BootDashViewModelHarness(context.withTargetTypes(
 				RunTargetTypes.LOCAL,
 				targetType
-		);
+		));
 
 		assertEquals(0, harness.getRunTargetModels(targetType).size());
 
@@ -165,10 +165,10 @@ public class BootDashViewModelTest {
 	public void testElementStateListenerAddedAfterModel() throws Exception {
 		RunTargetType targetType = mock(RunTargetType.class);
 		RunTarget target = mock(RunTarget.class);
-		harness = new BootDashViewModelHarness(context,
+		harness = new BootDashViewModelHarness(context.withTargetTypes(
 				RunTargetTypes.LOCAL,
 				targetType
-		);
+		));
 		//We need a more fleshed-out BootDashModel mock for this test, so not using mockito here:
 		MockBootDashModel bdm = new MockBootDashModel(target, harness.context, harness.model);
 
@@ -215,10 +215,10 @@ public class BootDashViewModelTest {
 	public void testElementStateListenerAddedBeforeModel() throws Exception {
 		RunTargetType targetType = mock(RunTargetType.class);
 		RunTarget target = mock(RunTarget.class);
-		harness = new BootDashViewModelHarness(context,
+		harness = new BootDashViewModelHarness(context.withTargetTypes(
 				RunTargetTypes.LOCAL,
 				targetType
-		);
+		));
 		//We need a more fleshed-out BootDashModel mock for this test, so not using mockito here:
 		MockBootDashModel bdm = new MockBootDashModel(target, harness.context, harness.model);
 
@@ -254,9 +254,9 @@ public class BootDashViewModelTest {
 	@Test
 	public void testRemoveTargetToleratesNull() throws Exception {
 		UserInteractions ui = mock(UserInteractions.class);
-		harness = new BootDashViewModelHarness(context,
+		harness = new BootDashViewModelHarness(context.withTargetTypes(
 				RunTargetTypes.LOCAL
-		);
+		));
 		harness.model.removeTarget(null, ui);
 
 		verifyZeroInteractions(ui);
@@ -266,10 +266,10 @@ public class BootDashViewModelTest {
 	public void testRemoveTargetCanceled() throws Exception {
 		RunTargetType targetType = mock(RunTargetType.class);
 		RunTarget target = mock(RunTarget.class);
-		harness = new BootDashViewModelHarness(context,
+		harness = new BootDashViewModelHarness(context.withTargetTypes(
 				RunTargetTypes.LOCAL,
 				targetType
-		);
+		));
 		BootDashModel bdm = new MockBootDashModel(target, harness.context, harness.model);
 
 		when(target.getId()).thenReturn("target_id");
@@ -305,10 +305,10 @@ public class BootDashViewModelTest {
 	public void testRemoveTargetConfirmed() throws Exception {
 		RunTargetType targetType = mock(RunTargetType.class);
 		RunTarget target = mock(RunTarget.class);
-		harness = new BootDashViewModelHarness(context,
+		harness = new BootDashViewModelHarness(context.withTargetTypes(
 				RunTargetTypes.LOCAL,
 				targetType
-		);
+		));
 		BootDashModel bdm = new MockBootDashModel(target, harness.context, harness.model);
 
 		when(target.getId()).thenReturn("target_id");
@@ -347,10 +347,10 @@ public class BootDashViewModelTest {
 		RunTarget target = mock(RunTarget.class);
 		RunTarget otherTarget = mock(RunTarget.class);
 
-		harness = new BootDashViewModelHarness(context,
+		harness = new BootDashViewModelHarness(context.withTargetTypes(
 				RunTargetTypes.LOCAL,
 				targetType
-		);
+		));
 		BootDashModel bdm = new MockBootDashModel(target, harness.context, harness.model);
 
 		when(target.getId()).thenReturn("target_id");
@@ -395,9 +395,9 @@ public class BootDashViewModelTest {
 		// filter matches elements. So it only does some basic test cases.
 		//There are more in-depth tests for the filters elsewhere.
 
-		harness = new BootDashViewModelHarness(context,
+		harness = new BootDashViewModelHarness(context.withTargetTypes(
 				RunTargetTypes.LOCAL
-		);
+		));
 
 		LiveVariable<String> filterText = harness.model.getFilterBox().getText();
 		LiveExpression<Filter<BootDashElement>> filter = harness.model.getFilter();
@@ -419,9 +419,9 @@ public class BootDashViewModelTest {
 		// filter matches elements. So it only does some basic test cases.
 		//There are more in-depth tests for the filters elsewhere.
 
-		harness = new BootDashViewModelHarness(context,
+		harness = new BootDashViewModelHarness(context.withTargetTypes(
 				RunTargetTypes.LOCAL
-		);
+		));
 
 		LiveSetVariable<FilterChoice> toggleFilters = harness.model.getToggleFilters().getSelectedFilters();
 		toggleFilters.replaceAll(ImmutableSet.<FilterChoice>of());
@@ -442,9 +442,9 @@ public class BootDashViewModelTest {
 
 	@Test
 	public void testFilterIsTreeAware() throws Exception {
-		harness = new BootDashViewModelHarness(context,
+		harness = new BootDashViewModelHarness(context.reload().withTargetTypes(
 				RunTargetTypes.LOCAL
-		);
+		));
 
 		LiveVariable<String> filterBox = harness.model.getFilterBox().getText();
 		LiveExpression<Filter<BootDashElement>> filter = harness.model.getFilter();
@@ -533,11 +533,10 @@ public class BootDashViewModelTest {
 		RunTargetType targetType = new MockRunTargetType(context, "MOCK");
 		String targetId = "foo";
 
-		harness = new BootDashViewModelHarness(
-				context,
+		harness = new BootDashViewModelHarness(context.withTargetTypes(
 				RunTargetTypes.LOCAL,
 				targetType
-		);
+		));
 
 		TargetProperties props = new TargetProperties(targetType, targetId, harness.context);
 		props.put("describe", "This is foo");
@@ -567,11 +566,11 @@ public class BootDashViewModelTest {
 		RunTargetType fooType = new MockRunTargetType(context, "foo-type");
 		RunTargetType barType = new MockRunTargetType(context, "bar-type");
 
-		harness = new BootDashViewModelHarness(context,
+		harness = new BootDashViewModelHarness(context.withTargetTypes(
 				RunTargetTypes.LOCAL,
 				fooType,
 				barType
-		);
+		));
 
 		Comparator<BootDashModel> comparator = harness.model.getModelComparator();
 
@@ -623,7 +622,7 @@ public class BootDashViewModelTest {
 	@Test
 	public void testUpdatePropertiesInStore() throws Exception {
 		MockRunTargetType targetType = new MockRunTargetType(context, "mock-type");
-		harness = new BootDashViewModelHarness(context, targetType);
+		harness = new BootDashViewModelHarness(context.withTargetTypes(targetType));
 		targetType.setRequiresCredentials(true);
 		TargetProperties properties = new TargetProperties(targetType, "target-id", harness.context);
 		properties.setCredentials(CFCredentials.fromPassword("secret"));
@@ -647,7 +646,7 @@ public class BootDashViewModelTest {
 	@Test
 	public void testRememberPassword() throws Exception {
 		MockRunTargetType targetType = new MockRunTargetType(context, "mock-type");
-		harness = new BootDashViewModelHarness(context, targetType);
+		harness = new BootDashViewModelHarness(context.withTargetTypes(targetType));
 		targetType.setRequiresCredentials(true);
 		TargetProperties properties = new TargetProperties(targetType, "target-id", harness.context);
 		properties.setStoreCredentials(StoreCredentialsMode.STORE_PASSWORD);
@@ -684,7 +683,7 @@ public class BootDashViewModelTest {
 	@Test
 	public void testDontRememberPassword() throws Exception {
 		MockRunTargetType targetType = new MockRunTargetType(context, "mock-type");
-		harness = new BootDashViewModelHarness(context, targetType);
+		harness = new BootDashViewModelHarness(context.withTargetTypes(targetType));
 		targetType.setRequiresCredentials(true);
 		TargetProperties properties = new TargetProperties(targetType, "target-id", harness.context);
 		properties.setStoreCredentials(StoreCredentialsMode.STORE_NOTHING);

@@ -30,13 +30,4 @@ public class RunTargetTypes {
 	// code pointing to its constants makes it rather hard in some cases to
 	// mock things out for unit testing.
 	public static final RunTargetType LOCAL = new LocalRunTargetType("Local");
-
-	public static List<RunTargetType> loadFromExtensionPoint(BootDashModelContext context) {
-		SimpleDIContext injections = context.injections;
-		ImmutableList.Builder<RunTargetType> contributions = ImmutableList.builder();
-		for (RunTargetTypeFactory f : injections.getBeans(RunTargetTypeFactory.class)) {
-			contributions.add(f.create(context));
-		}
-		return contributions.build();
-	}
 }

@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.di;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.Assert;
@@ -68,6 +69,7 @@ public class SimpleDIContext {
 	}
 
 	private List<Definition<?>> definitions = new ArrayList<>();
+	private AtomicBoolean locked = new AtomicBoolean();
 
 	public <T> void def(Class<T> type, BeanFactory<T> factory) {
 		definitions.add(new Definition<>(type, factory));
@@ -109,7 +111,9 @@ public class SimpleDIContext {
 	 * immmutable and no longer allows adding definitions.
 	 */
 	SimpleDIContext lockdown() {
-		definitions = ImmutableList.copyOf(definitions);
+		if (locked.compareAndSet(false, true)) {
+			definitions = ImmutableList.copyOf(definitions);
+		}
 		return this;
 	}
 

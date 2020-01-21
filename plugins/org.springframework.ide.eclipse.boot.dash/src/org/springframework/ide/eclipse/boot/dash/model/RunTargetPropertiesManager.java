@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,10 @@ public class RunTargetPropertiesManager implements ValueListener<ImmutableSet<Ru
 
 	public static final String RUN_TARGET_KEY = "runTargets";
 
+	public RunTargetPropertiesManager(BootDashModelContext context, Collection<RunTargetType> types) {
+		this(context, types.toArray(new RunTargetType[types.size()]));
+	}
+
 	public RunTargetPropertiesManager(BootDashModelContext context, RunTargetType[] types) {
 		this.context = context;
 		this.types = types;
@@ -41,8 +46,8 @@ public class RunTargetPropertiesManager implements ValueListener<ImmutableSet<Ru
 
 	public List<RunTarget> getStoredTargets() {
 
-		List<RunTarget> targets = new ArrayList<RunTarget>();
-		PropertiesMapper<List<Map<String, String>>> mapper = new PropertiesMapper<List<Map<String, String>>>();
+		List<RunTarget> targets = new ArrayList<>();
+		PropertiesMapper<List<Map<String, String>>> mapper = new PropertiesMapper<>();
 		for (RunTargetType type : types) {
 			if (type==RunTargetTypes.LOCAL) {
 				targets.add(RunTargets.LOCAL);
@@ -72,7 +77,7 @@ public class RunTargetPropertiesManager implements ValueListener<ImmutableSet<Ru
 	}
 
 	public synchronized void store(Set<RunTarget> targets) {
-		Map<RunTargetType, List<RunTargetWithProperties>> propertiesToPersist = new HashMap<RunTargetType, List<RunTargetWithProperties>>();
+		Map<RunTargetType, List<RunTargetWithProperties>> propertiesToPersist = new HashMap<>();
 
 		// Only persist run target properties that can be instantiated
 		for (RunTargetType type : types) {
@@ -100,10 +105,10 @@ public class RunTargetPropertiesManager implements ValueListener<ImmutableSet<Ru
 		}
 
 		// Persist the properties, and if necessary, any passwords
-		PropertiesMapper<List<Map<String, String>>> mapper = new PropertiesMapper<List<Map<String, String>>>();
+		PropertiesMapper<List<Map<String, String>>> mapper = new PropertiesMapper<>();
 		for (Entry<RunTargetType, List<RunTargetWithProperties>> entry : propertiesToPersist.entrySet()) {
 
-			List<Map<String, String>> asStringMap = new ArrayList<Map<String, String>>();
+			List<Map<String, String>> asStringMap = new ArrayList<>();
 			for (RunTargetWithProperties storedProp : entry.getValue()) {
 				TargetProperties targProps = storedProp.getTargetProperties();
 				asStringMap.add(targProps.getPropertiesToPersist());

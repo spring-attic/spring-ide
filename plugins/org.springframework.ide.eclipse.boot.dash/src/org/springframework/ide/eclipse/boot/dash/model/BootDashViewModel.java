@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -20,8 +21,12 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugStrategyManager;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshDebugSupport;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnelFactory;
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypeFactory;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.util.JmxSshTunnelManager;
 import org.springframework.ide.eclipse.boot.dash.util.TreeAwareFilter;
 import org.springframework.ide.eclipse.boot.util.ProcessTracker;
@@ -32,8 +37,8 @@ import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 import org.springsource.ide.eclipse.commons.livexp.util.Filters;
 
 import com.google.common.base.Function;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnelFactory;
 
 /**
  * @author Kris De Volder
@@ -55,11 +60,22 @@ public class BootDashViewModel extends AbstractDisposable {
 	private DebugStrategyManager cfDebugStrategies;
 	private BootDashModelContext context;
 
+	private static List<RunTargetType> createRunTargetTypes(BootDashModelContext context) {
+		SimpleDIContext injections = context.injections;
+		ImmutableList.Builder<RunTargetType> rtTypes = ImmutableList.builder();
+		rtTypes.add(RunTargetTypes.LOCAL);
+		for (RunTargetTypeFactory f : injections.getBeans(RunTargetTypeFactory.class)) {
+			rtTypes.add(f.create(context));
+		}
+		return rtTypes.build();
+	}
+
 	/**
 	 * Create an 'empty' BootDashViewModel with no run targets. Targets can be
 	 * added by adding them to the runTarget's LiveSet.
 	 */
-	public BootDashViewModel(BootDashModelContext context, RunTargetType... runTargetTypes) {
+	public BootDashViewModel(BootDashModelContext context) {
+		List<RunTargetType> runTargetTypes = createRunTargetTypes(context);
 		runTargets = new LiveSetVariable<>(new LinkedHashSet<RunTarget>(), AsyncMode.SYNC);
 		this.context = context;
 		models = new BootDashModelManager(context, this, runTargets);
@@ -69,7 +85,7 @@ public class BootDashViewModel extends AbstractDisposable {
 		runTargets.addAll(existingtargets);
 		runTargets.addListener(manager);
 
-		this.orderedRunTargetTypes = Arrays.asList(runTargetTypes);
+		this.orderedRunTargetTypes = runTargetTypes;
 		this.targetComparator = new RunTargetComparator(orderedRunTargetTypes);
 		this.modelComparator = new BootModelComparator(targetComparator);
 

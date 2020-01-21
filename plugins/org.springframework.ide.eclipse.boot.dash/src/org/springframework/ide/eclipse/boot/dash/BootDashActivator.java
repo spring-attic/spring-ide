@@ -169,13 +169,7 @@ public class BootDashActivator extends AbstractUIPlugin {
 	public BootDashViewModel getModel() {
 		if (model==null) {
 			DefaultBootDashModelContext context = new DefaultBootDashModelContext();
-			List<RunTargetType> types = new ArrayList<>();
-			types.add(RunTargetTypes.LOCAL);
-			types.addAll(RunTargetTypes.loadFromExtensionPoint(context));
-
-			model = new BootDashViewModel(context,
-					types.toArray(new RunTargetType[types.size()])
-			);
+			model = new BootDashViewModel(context);
 
 			model.getRunTargets().addListener(new ValueListener<ImmutableSet<RunTarget>>() {
 

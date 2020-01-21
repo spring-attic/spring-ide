@@ -192,7 +192,7 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 	public final CloudFoundryRunTargetType cfTargetType;
 
 	private CloudFoundryTestHarness(TestBootDashModelContext context, CloudFoundryClientFactory clientFactory, CloudFoundryRunTargetType cfTargetType) throws Exception {
-		super(context, RunTargetTypes.LOCAL, cfTargetType);
+		super(context.withTargetTypes(RunTargetTypes.LOCAL, cfTargetType));
 		Assert.isNotNull(clientFactory, "clientFactory");
 		this.clientFactory = clientFactory;
 		this.cfTargetType = cfTargetType;

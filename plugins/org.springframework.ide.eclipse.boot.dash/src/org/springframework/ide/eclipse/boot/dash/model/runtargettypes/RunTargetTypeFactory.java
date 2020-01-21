@@ -10,10 +10,16 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model.runtargettypes;
 
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 
 /**
  * The interface that has to be implemented to define a new runtarget type.
+ *
+ * TODO: This type shouldn't be necessary. RunTargetType is already a factory.
+ * So this is a factry for a factory. It should be possible to just use RunTargetType
+ * directly as a bean. To figure out how... investiaget {@link CloudFoundryRunTargetType}
+ * and try to get rid of its reference to BootDashModelContext.
  *
  * @author Kris De Volder
  */

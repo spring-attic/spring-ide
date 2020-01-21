@@ -29,6 +29,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypeFactory;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockSecuredCredentialStore;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockSshTunnel;
@@ -149,6 +150,13 @@ public class TestBootDashModelContext extends BootDashModelContext {
 	@Override
 	public SshTunnelFactory getSshTunnelFactory() {
 		return sshTunnelFactory;
+	}
+
+	public TestBootDashModelContext withTargetTypes(RunTargetType... types) {
+		for (RunTargetType t : types) {
+			injections.defInstance(RunTargetTypeFactory.class, c -> t);
+		}
+		return this;
 	}
 
 }

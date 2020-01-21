@@ -161,7 +161,6 @@ public class CloudFoundryBootDashModelMockingTest {
 	public TestBracketter testBracketter = new TestBracketter();
 
 	private SpringBootCore springBootCore = SpringBootCore.getDefault();
-	private AllUserInteractions ui;
 
 	@Before
 	public void setup() throws Exception {
@@ -170,7 +169,6 @@ public class CloudFoundryBootDashModelMockingTest {
 				ResourcesPlugin.getWorkspace(),
 				DebugPlugin.getDefault().getLaunchManager()
 		);
-		this.ui = context.injections.getBean(AllUserInteractions.class);
 		this.clientFactory = new MockCloudFoundryClientFactory();
 		this.harness = CloudFoundryTestHarness.create(context, clientFactory);
 		this.projects = new BootProjectTestHarness(context.getWorkspace());
@@ -243,7 +241,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		waitForJobsToComplete();
 		assertTrue(target.isConnected()); //should auto connect.
-		verifyZeroInteractions(ui); //should not prompt for password (but used stored pass).
+		verifyZeroInteractions(ui()); //should not prompt for password (but used stored pass).
 
 		{
 			SecuredCredentialsStore store = harness.getCredentialsStore();
@@ -260,6 +258,10 @@ public class CloudFoundryBootDashModelMockingTest {
 		ACondition.waitFor("changed stored token", 300, () -> {
 			assertEquals("another-2", getStoredToken(target));
 		});
+	}
+
+	private AllUserInteractions ui() {
+		return context.injections.getBean(AllUserInteractions.class);
 	}
 
 	private String getStoredToken(CloudFoundryBootDashModel target) {
@@ -292,7 +294,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		waitForJobsToComplete();
 		assertFalse(target.isConnected()); //should not auto connect.
-		verifyZeroInteractions(ui);
+		verifyZeroInteractions(ui());
 
 		{
 			SecuredCredentialsStore store = harness.getCredentialsStore();
@@ -334,7 +336,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		waitForJobsToComplete();
 		assertFalse(target.isConnected()); //should not auto connect.
-		verifyZeroInteractions(ui);
+		verifyZeroInteractions(ui());
 
 		{
 			SecuredCredentialsStore store = harness.getCredentialsStore();
@@ -380,7 +382,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 			waitForJobsToComplete();
 			assertTrue(target.isConnected()); //should auto connect.
-			verifyZeroInteractions(ui); //should not prompt for password (but used stored pass).
+			verifyZeroInteractions(ui()); //should not prompt for password (but used stored pass).
 
 			{
 				SecuredCredentialsStore store = harness.getCredentialsStore();
@@ -439,10 +441,10 @@ public class CloudFoundryBootDashModelMockingTest {
 				assertNull(storedCred);
 			}
 
-			verifyZeroInteractions(ui);
+			verifyZeroInteractions(ui());
 
 			//When we connect... the user should get prompted for password
-			harness.answerPasswordPrompt(ui, (d) -> {
+			harness.answerPasswordPrompt(ui(), (d) -> {
 				d.getMethodVar().setValue(targetParams.getCredentials().getType().toLoginMethod());
 				d.getPasswordVar().setValue(targetParams.getCredentials().getSecret());
 				d.validateCredentials().block();
@@ -457,8 +459,8 @@ public class CloudFoundryBootDashModelMockingTest {
 				assertTrue(target.isConnected());
 			});
 
-			verify(ui).openPasswordDialog(any());
-			verifyNoMoreInteractions(ui);
+			verify(ui()).openPasswordDialog(any());
+			verifyNoMoreInteractions(ui());
 		}
 	}
 
@@ -506,7 +508,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 			waitForJobsToComplete();
 			assertTrue(target.isConnected()); //should auto connect.
-			verifyZeroInteractions(ui); //should not prompt for password (but used stored token).
+			verifyZeroInteractions(ui()); //should not prompt for password (but used stored token).
 
 			clientFactory.changeRefrestToken("another-1");
 			clientFactory.changeRefrestToken("another-2");
@@ -552,7 +554,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		space.defApp("anotherfoo");
 		space.defApp("anotherbar");
-		target.refresh(ui);
+		target.refresh(ui());
 
 		waitForApps(target, "foo", "bar", "anotherfoo", "anotherbar");
 	}
@@ -572,7 +574,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		foo.start(CancelationTokens.NULL);
 
-		target.refresh(ui);
+		target.refresh(ui());
 
 		new ACondition("wait for app states", 3000) {
 			@Override
@@ -609,7 +611,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		foo.setHealthCheckType(HealthChecks.HC_PROCESS);
 
-		target.refresh(ui);
+		target.refresh(ui());
 
 		new ACondition("wait for app health check", 3000) {
 			@Override
@@ -643,7 +645,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		space.defService("rabbit");
 
-		target.refresh(ui);
+		target.refresh(ui());
 		waitForServices(target, "elephantsql", "cleardb", "rabbit");
 		waitForElements(target, "foo", "elephantsql", "cleardb", "rabbit");
 	}
@@ -864,8 +866,8 @@ public class CloudFoundryBootDashModelMockingTest {
 				"  random-route: true\n" +
 				"  domain: tcp.domain.com"
 		);
-		harness.answerDeploymentPrompt(ui, manifest);
-		target.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		harness.answerDeploymentPrompt(ui(), manifest);
+		target.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
 		waitForApps(target, appName);
 		CloudAppDashElement app = getApplication(target, project);
 		waitForState(app, RunState.RUNNING, 10_000);
@@ -889,27 +891,27 @@ public class CloudFoundryBootDashModelMockingTest {
 		String yaml = "applications:\n" +
 					  "- name: "+appName+"\n";
 		IFile manifest = createFile(project, "manifest.yml", yaml);
-		harness.answerDeploymentPrompt(ui, new DeploymentAnswerer(yaml) {
+		harness.answerDeploymentPrompt(ui(), new DeploymentAnswerer(yaml) {
 			@Override
 			public void apply(CloudApplicationDeploymentProperties properties) throws Exception {
 				properties.setManifestFile(manifest);
 				properties.setEnableJmxSshTunnel(false);
 			}
 		});
-		target.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		target.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
 		waitForApps(target, appName);
 		CloudAppDashElement app = getApplication(target, project);
 		waitForState(app, RunState.RUNNING, 10_000);
 		assertFalse(app.getEnableJmxSshTunnel());
 
 		ACondition.waitFor("stop hammering", 20000, () -> {
-			app.stopAsync(ui);
+			app.stopAsync(ui());
 			assertEquals(RunState.INACTIVE, app.getRunState());
 		});
 
 		//Now... redeploy and overwrite, cahning ssh enablement
-		reset(ui);
-		harness.answerDeploymentPrompt(ui, new DeploymentAnswerer(yaml) {
+		reset(ui());
+		harness.answerDeploymentPrompt(ui(), new DeploymentAnswerer(yaml) {
 			@Override
 			public void apply(CloudApplicationDeploymentProperties properties) throws Exception {
 				properties.setManifestFile(manifest);
@@ -917,8 +919,8 @@ public class CloudFoundryBootDashModelMockingTest {
 			}
 		});
 
-		Mockito.doReturn(ManifestDiffDialogModel.Result.USE_MANIFEST).when(ui).confirmReplaceApp(any(), any(), any(), any());
-		target.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		Mockito.doReturn(ManifestDiffDialogModel.Result.USE_MANIFEST).when(ui()).confirmReplaceApp(any(), any(), any(), any());
+		target.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
 
 		ACondition.waitFor("app restart", 20000, () -> {
 			assertEquals(RunState.RUNNING, app.getRunState());
@@ -938,7 +940,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		});
 
 		ACondition.waitFor("stop hammering", 20000, () -> {
-			app.stopAsync(ui);
+			app.stopAsync(ui());
 			assertEquals(RunState.INACTIVE, app.getRunState());
 		});
 		ACondition.waitFor("tunnel closed", 2_000, () -> {
@@ -959,14 +961,14 @@ public class CloudFoundryBootDashModelMockingTest {
 		String yaml = "applications:\n" +
 					  "- name: "+appName+"\n";
 		IFile manifest = createFile(project, "manifest.yml", yaml);
-		harness.answerDeploymentPrompt(ui, new DeploymentAnswerer(yaml) {
+		harness.answerDeploymentPrompt(ui(), new DeploymentAnswerer(yaml) {
 			@Override
 			public void apply(CloudApplicationDeploymentProperties properties) throws Exception {
 				properties.setManifestFile(manifest);
 				properties.setEnableJmxSshTunnel(false);
 			}
 		});
-		target.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		target.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
 		waitForApps(target, appName);
 		CloudAppDashElement app = getApplication(target, project);
 		waitForState(app, RunState.RUNNING, 10_000);
@@ -978,7 +980,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertTrue(toggleJmx.isVisible());
 		assertEquals("Enable JMX Ssh Tunnelling", toggleJmx.getText());
 
-		harness.answerConfirmationMultipleChoice(ui, (title, msg, choices, defaultIndex) -> {
+		harness.answerConfirmationMultipleChoice(ui(), (title, msg, choices, defaultIndex) -> {
 			assertEquals("Enabling JMX Requires Restart", title);
 			for (int i = 0; i < choices.length; i++) {
 				if (choices[i].startsWith("No")) {
@@ -997,7 +999,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		});
 
 		ACondition.waitFor("stop hammering", 2_000, () -> {
-			app.stopAsync(ui);
+			app.stopAsync(ui());
 			assertEquals(RunState.INACTIVE, app.getRunState());
 		});
 	}
@@ -1015,14 +1017,14 @@ public class CloudFoundryBootDashModelMockingTest {
 		String yaml = "applications:\n" +
 		"- name: "+appName+"\n";
 		IFile manifest = createFile(project, "manifest.yml", yaml);
-		harness.answerDeploymentPrompt(ui, new DeploymentAnswerer(yaml) {
+		harness.answerDeploymentPrompt(ui(), new DeploymentAnswerer(yaml) {
 			@Override
 			public void apply(CloudApplicationDeploymentProperties properties) throws Exception {
 				properties.setEnableJmxSshTunnel(false);
 				properties.setManifestFile(manifest);
 			}
 		});
-		target.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		target.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
 		waitForApps(target, appName);
 		CloudAppDashElement app = getApplication(target, project);
 		waitForState(app, RunState.RUNNING, 10_000);
@@ -1034,7 +1036,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertTrue(toggleJmx.isVisible());
 		assertEquals("Enable JMX Ssh Tunnelling", toggleJmx.getText());
 
-		harness.answerConfirmationMultipleChoice(ui, (title, msg, choices, defaultIndex) -> {
+		harness.answerConfirmationMultipleChoice(ui(), (title, msg, choices, defaultIndex) -> {
 			assertEquals("Enabling JMX Requires Restart", title);
 			for (int i = 0; i < choices.length; i++) {
 				if (choices[i].startsWith("Yes")) {
@@ -1061,8 +1063,8 @@ public class CloudFoundryBootDashModelMockingTest {
 			);
 		});
 
-		reset(ui);
-		harness.answerConfirmationMultipleChoice(ui, (title, msg, choices, defaultIndex) -> {
+		reset(ui());
+		harness.answerConfirmationMultipleChoice(ui(), (title, msg, choices, defaultIndex) -> {
 			assertEquals("Disabling JMX Requires Restart", title);
 			for (int i = 0; i < choices.length; i++) {
 				if (choices[i].startsWith("Yes")) {
@@ -1090,7 +1092,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		});
 
 		ACondition.waitFor("stop hammering", 2_000, () -> {
-			app.stopAsync(ui);
+			app.stopAsync(ui());
 			assertEquals(RunState.INACTIVE, app.getRunState());
 		});
 	}
@@ -1109,14 +1111,14 @@ public class CloudFoundryBootDashModelMockingTest {
 		final String yaml = "applications:\n" +
 				"- name: "+appName+"\n";
 		IFile manifest = createFile(project, "manifest.yml", yaml);
-		harness.answerDeploymentPrompt(ui, new DeploymentAnswerer(yaml) {
+		harness.answerDeploymentPrompt(ui(), new DeploymentAnswerer(yaml) {
 			@Override
 			public void apply(CloudApplicationDeploymentProperties properties) throws Exception {
 				properties.setManifestFile(manifest);
 				properties.setEnableJmxSshTunnel(true);
 			}
 		});
-		target.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		target.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
 		waitForApps(target, appName);
 		CloudAppDashElement app = getApplication(target, project);
 		waitForState(app, RunState.RUNNING, 10_000);
@@ -1138,7 +1140,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		});
 
 		ACondition.waitFor("stop hammering", 20000, () -> {
-			app.stopAsync(ui);
+			app.stopAsync(ui());
 			assertEquals(RunState.INACTIVE, app.getRunState());
 		});
 	}
@@ -1158,14 +1160,14 @@ public class CloudFoundryBootDashModelMockingTest {
 			String yaml = "applications:\n" +
 						  "- name: "+appName+"\n";
 			IFile manifest = createFile(project, "manifest.yml", yaml);
-			harness.answerDeploymentPrompt(ui, new DeploymentAnswerer(yaml) {
+			harness.answerDeploymentPrompt(ui(), new DeploymentAnswerer(yaml) {
 				@Override
 				public void apply(CloudApplicationDeploymentProperties properties) throws Exception {
 					properties.setManifestFile(manifest);
 					properties.setEnableJmxSshTunnel(true);
 				}
 			});
-			target.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+			target.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
 			waitForApps(target, appName);
 			CloudAppDashElement app = getApplication(target, project);
 			waitForState(app, RunState.RUNNING, 10_000);
@@ -1228,8 +1230,8 @@ public class CloudFoundryBootDashModelMockingTest {
 				"applications:\n" +
 				"- name: "+appName+"\n"
 		);
-		harness.answerDeploymentPrompt(ui, manifest); //Note: don't need to disable explictly because its the default.
-		target.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		harness.answerDeploymentPrompt(ui(), manifest); //Note: don't need to disable explictly because its the default.
+		target.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
 		waitForApps(target, appName);
 		CloudAppDashElement app = getApplication(target, project);
 		waitForState(app, RunState.RUNNING, 10_000);
@@ -1255,8 +1257,8 @@ public class CloudFoundryBootDashModelMockingTest {
 				"  routes: \n" +
 				"  - route: tcp.domain.com:61001\n"
 		);
-		harness.answerDeploymentPrompt(ui, manifest);
-		target.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		harness.answerDeploymentPrompt(ui(), manifest);
+		target.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
 		waitForApps(target, appName);
 		CloudAppDashElement app = getApplication(target, project);
 		waitForState(app, RunState.RUNNING, 10_000);
@@ -1287,8 +1289,8 @@ public class CloudFoundryBootDashModelMockingTest {
 				"- name: "+appName+"\n" +
 				"  random-route: true\n"
 		);
-		harness.answerDeploymentPrompt(ui, manifest);
-		target.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		harness.answerDeploymentPrompt(ui(), manifest);
+		target.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
 		waitForApps(target, appName);
 		CloudAppDashElement app = getApplication(target, project);
 		waitForState(app, RunState.RUNNING, 10_000);
@@ -1333,7 +1335,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		barSpace.addModelStateListener(modelStateListener);
 
 		doAnswer(editSetTemplate("%s - %o @ %a"))
-			.when(ui).openEditTemplateDialog(any(EditTemplateDialogModel.class));
+			.when(ui()).openEditTemplateDialog(any(EditTemplateDialogModel.class));
 
 		action.run();
 
@@ -1346,10 +1348,10 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		//Let's also try a user interaction that involves the 'Restore Defaults' button...
 
-		reset(ui, modelStateListener);
+		reset(ui(), modelStateListener);
 
 		doAnswer(restoreDefaultTemplate())
-			.when(ui).openEditTemplateDialog(any(EditTemplateDialogModel.class));
+			.when(ui()).openEditTemplateDialog(any(EditTemplateDialogModel.class));
 
 		action.run();
 
@@ -1438,8 +1440,8 @@ public class CloudFoundryBootDashModelMockingTest {
 				"  health-check-type: http\n" +
 				"  health-check-http-endpoint: /health\n"
 		);
-		harness.answerDeploymentPrompt(ui, manifest);
-		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		harness.answerDeploymentPrompt(ui(), manifest);
+		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
 
 		ACondition.waitFor("wait for app '"+ appName +"'to be RUNNING", 30000, () -> {
 			CloudAppDashElement app = model.getApplication(appName);
@@ -1462,9 +1464,9 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		Map<String, String> env = new HashMap<>();
 		env.put("FOO", "something");
-		harness.answerDeploymentPrompt(ui, appName, appName, env);
+		harness.answerDeploymentPrompt(ui(), appName, appName, env);
 
-		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
 
 		new ACondition("wait for app '"+ appName +"'to be RUNNING", 30000) { //why so long? JDT searching for main type.
 			public boolean test() throws Exception {
@@ -1638,7 +1640,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		appElement.setError(new IOException("Something bad happened"));
 		waitForState(appElement, RunState.UNKNOWN, 3000);
 
-		target.refresh(ui);
+		target.refresh(ui());
 
 		waitForState(appElement, RunState.INACTIVE, 3000);
 	}
@@ -1652,8 +1654,8 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		final String appName = appHarness.randomAppName();
 
-		harness.answerDeploymentPrompt(ui, appName, appName);
-		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		harness.answerDeploymentPrompt(ui(), appName, appName);
+		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
 		waitForApps(model, appName);
 
 		CloudAppDashElement app = model.getApplication(appName);
@@ -1680,9 +1682,9 @@ public class CloudFoundryBootDashModelMockingTest {
 					  "  memory: 512M\n";
 		IFile manifestFile = createFile(project, "manifest.yml", yaml);
 
-		harness.answerDeploymentPrompt(ui, manifestFile);
+		harness.answerDeploymentPrompt(ui(), manifestFile);
 
-		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
 
 		waitForApps(model, appName);
 
@@ -1707,14 +1709,14 @@ public class CloudFoundryBootDashModelMockingTest {
 	protected void doUnchangedAppRestartTest(CloudAppDashElement app, MockCFApplication deployedApp) throws Exception {
 		//Try to restart app. Nothing should change because we haven't changed the manifest
 		CFApplication appInfo = deployedApp.getBasicInfo();
-		app.restart(RunState.RUNNING, ui);
+		app.restart(RunState.RUNNING, ui());
 		waitForJobsToComplete();
 		waitForState(app, RunState.RUNNING, 10_000);
 
 		CFApplication newAppInfo = deployedApp.getBasicInfo();
 		assertSameAppState(appInfo, newAppInfo);
 		//If no change was detected the manifest compare dialog shouldn't have popped.
-		verify(ui, never()).openManifestDiffDialog(any());
+		verify(ui(), never()).openManifestDiffDialog(any());
 	}
 
 	private void assertSameAppState(CFApplication appInfo, CFApplication newAppInfo) {
@@ -1750,9 +1752,9 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		final String appName = project.getName();
 
-		harness.answerDeploymentPrompt(ui, new DeploymentAnswerer());
+		harness.answerDeploymentPrompt(ui(), new DeploymentAnswerer());
 
-		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
 
 		waitForApps(model, appName);
 
@@ -1783,9 +1785,9 @@ public class CloudFoundryBootDashModelMockingTest {
 			assertEquals("war", springBootCore.project(project).getPackaging());
 
 			String appName = project.getName();
-			harness.answerDeploymentPrompt(ui, new DeploymentAnswerer());
+			harness.answerDeploymentPrompt(ui(), new DeploymentAnswerer());
 
-			model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+			model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
 			waitForApps(model, appName);
 
 			CloudAppDashElement app = model.getApplication(appName);
@@ -1815,8 +1817,8 @@ public class CloudFoundryBootDashModelMockingTest {
 		final String appName = appHarness.randomAppName();
 
 		clientFactory.setAppStartDelay(TimeUnit.MINUTES, 2);
-		harness.answerDeploymentPrompt(ui, appName, appName);
-		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		harness.answerDeploymentPrompt(ui(), appName, appName);
+		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
 		waitForApps(model, appName);
 
 		CloudAppDashElement app = model.getApplication(appName);
@@ -1824,7 +1826,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		waitForState(app, RunState.STARTING, 3000);
 
 		ACondition.waitFor("stop hammering", 20000, () -> {
-			app.stopAsync(ui);
+			app.stopAsync(ui());
 			assertEquals(RunState.INACTIVE, app.getRunState());
 		});
 
@@ -1857,11 +1859,11 @@ public class CloudFoundryBootDashModelMockingTest {
 			}
 		});
 		System.out.println("Restaring app...");
-		app.restart(RunState.RUNNING, ui);
+		app.restart(RunState.RUNNING, ui());
 		waitForState(app, RunState.STARTING, 30000);
 
 		System.out.println("Stopping app...");
-		app.stopAsync(ui);
+		app.stopAsync(ui());
 
 		waitForState(app, RunState.INACTIVE, 20000);
 		System.out.println("Stopped!");
@@ -1882,10 +1884,10 @@ public class CloudFoundryBootDashModelMockingTest {
 		waitForApps(model, appName);
 
 		clientFactory.setAppStartDelay(TimeUnit.MINUTES, 2);
-		app.restartOnlyAsynch(ui, app.createCancelationToken());
+		app.restartOnlyAsynch(ui(), app.createCancelationToken());
 		waitForState(app, RunState.STARTING, 3000);
 
-		app.stopAsync(ui);
+		app.stopAsync(ui());
 		waitForState(app, RunState.INACTIVE, 20000);
 	}
 
@@ -1903,9 +1905,9 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertNull(app.getProject());
 		waitForState(app, RunState.INACTIVE, 3000);
 
-		harness.answerDeploymentPrompt(ui, appName, appName);
-		Mockito.doReturn(ManifestDiffDialogModel.Result.USE_MANIFEST).when(ui).confirmReplaceApp(any(), any(), any(), any());
-		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		harness.answerDeploymentPrompt(ui(), appName, appName);
+		Mockito.doReturn(ManifestDiffDialogModel.Result.USE_MANIFEST).when(ui()).confirmReplaceApp(any(), any(), any(), any());
+		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
 
 		System.out.println(app.getRunState());
 		waitForJobsToComplete();
@@ -1913,7 +1915,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertEquals(project, app.getProject());
 		assertEquals(1, deployedApp.getPushCount());
 
-		verify(ui).confirmReplaceApp(any(), any(), any(), any());
+		verify(ui()).confirmReplaceApp(any(), any(), any(), any());
 	}
 
 
@@ -1930,15 +1932,15 @@ public class CloudFoundryBootDashModelMockingTest {
 		app.setProject(null);
 		assertNull(app.getProject());
 
-		harness.answerDeploymentPrompt(ui, appName, appName);
-		doReturn(ManifestDiffDialogModel.Result.CANCELED).when(ui).confirmReplaceApp(any(), any(), any(), any());
-		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		harness.answerDeploymentPrompt(ui(), appName, appName);
+		doReturn(ManifestDiffDialogModel.Result.CANCELED).when(ui()).confirmReplaceApp(any(), any(), any(), any());
+		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
 
 		waitForJobsToComplete();
 		assertNull(app.getProject()); // since op was canceled it should not have set the project on the app.
 		assertEquals(0, deployedApp.getPushCount());							  // since op was canceled it should not have deployed the app.
 
-		verify(ui).confirmReplaceApp(any(), any(), any(), any());
+		verify(ui()).confirmReplaceApp(any(), any(), any(), any());
 	}
 
 	@Test public void manifestDiffDialogNotShownWhenNothingChanged() throws Exception {
@@ -1951,9 +1953,9 @@ public class CloudFoundryBootDashModelMockingTest {
 				"applications:\n" +
 				"- name: "+appName+"\n"
 		);
-		harness.answerDeploymentPrompt(ui, manifest);
+		harness.answerDeploymentPrompt(ui(), manifest);
 		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
-		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
 		waitForApps(model, appName);
 		CloudAppDashElement app = model.getApplication(appName);
 		waitForState(app, RunState.RUNNING, 10_000);
@@ -1962,12 +1964,12 @@ public class CloudFoundryBootDashModelMockingTest {
 //		deployedApp.scaleInstances(2); // change it 'externally'
 		assertEquals(1, app.getActualInstances()); //The model doesn't know yet that it has changed!
 
-//		harness.answerDeploymentPrompt(ui, appName, appName);
-		app.restart(RunState.RUNNING, ui);
+//		harness.answerDeploymentPrompt(ui(), appName, appName);
+		app.restart(RunState.RUNNING, ui());
 		waitForJobsToComplete();
 
 		//If no change was detected the manifest compare dialog shouldn't have popped.
-		verify(ui, never()).openManifestDiffDialog(any());
+		verify(ui(), never()).openManifestDiffDialog(any());
 	}
 
 	@Test public void manifestDiffDialogShownWhenInstancesChangedExternally() throws Exception {
@@ -1995,12 +1997,12 @@ public class CloudFoundryBootDashModelMockingTest {
 		deployedApp.scaleInstances(2); // change it 'externally'
 		assertEquals(1, app.getActualInstances()); //The model doesn't know yet that it has changed!
 
-		app.restart(RunState.RUNNING, ui);
+		app.restart(RunState.RUNNING, ui());
 
 		waitForJobsToComplete();
 
 		//If the change was detected the deployment props dialog should have popped exactly once.
-		verify(ui).openManifestDiffDialog(any());
+		verify(ui()).openManifestDiffDialog(any());
 	}
 
 	@Test public void manifestDiffDialogChooseUseManfifest() throws Exception {
@@ -2016,10 +2018,10 @@ public class CloudFoundryBootDashModelMockingTest {
 				"  memory: 1111M\n"
 		);
 
-		harness.answerDeploymentPrompt(ui, manifest);
+		harness.answerDeploymentPrompt(ui(), manifest);
 
 		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
-		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
 
 		waitForApps(model, appName);
 		CloudAppDashElement app = model.getApplication(appName);
@@ -2028,19 +2030,19 @@ public class CloudFoundryBootDashModelMockingTest {
 		{
 			MockCFApplication appInCloud = space.getApplication(appName);
 			assertEquals(1111, appInCloud.getMemory());
-			Mockito.reset(ui);
+			Mockito.reset(ui());
 
 			//// real test begins here
 
 			appInCloud.setMemory(2222);
 		}
 
-		harness.answerManifestDiffDialog(ui, (ManifestDiffDialogModel dialog) -> {
+		harness.answerManifestDiffDialog(ui(), (ManifestDiffDialogModel dialog) -> {
 			//??? code to check what's in the dialog???
 			return ManifestDiffDialogModel.Result.USE_MANIFEST;
 		});
 
-		app.restart(RunState.RUNNING, ui);
+		app.restart(RunState.RUNNING, ui());
 
 		waitForJobsToComplete();
 		{
@@ -2065,10 +2067,10 @@ public class CloudFoundryBootDashModelMockingTest {
 				"  memory: 1111M\n"
 		);
 
-		harness.answerDeploymentPrompt(ui, manifest);
+		harness.answerDeploymentPrompt(ui(), manifest);
 
 		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
-		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
 
 		waitForApps(model, appName);
 		CloudAppDashElement app = model.getApplication(appName);
@@ -2076,18 +2078,18 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		MockCFApplication appInCloud = space.getApplication(appName);
 		assertEquals(1111, appInCloud.getMemory());
-		Mockito.reset(ui);
+		Mockito.reset(ui());
 
 		//// real test begins here
 
 		appInCloud.setMemory(2222);
 
-		harness.answerManifestDiffDialog(ui, (ManifestDiffDialogModel dialog) -> {
+		harness.answerManifestDiffDialog(ui(), (ManifestDiffDialogModel dialog) -> {
 			//??? code to check what's in the dialog???
 			return ManifestDiffDialogModel.Result.FORGET_MANIFEST;
 		});
 
-		app.restart(RunState.RUNNING, ui);
+		app.restart(RunState.RUNNING, ui());
 
 		waitForJobsToComplete();
 
@@ -2114,8 +2116,8 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
 
-		harness.answerDeploymentPrompt(ui, manifestFile);
-		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		harness.answerDeploymentPrompt(ui(), manifestFile);
+		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
 
 		waitForApps(model, "foo");
 
@@ -2126,8 +2128,8 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		assertEquals("some content here\n", space.getApplication(appName).getFileContents("test.txt"));
 
-		verify(ui).promptApplicationDeploymentProperties(any());
-		verifyNoMoreInteractions(ui);
+		verify(ui()).promptApplicationDeploymentProperties(any());
+		verifyNoMoreInteractions(ui());
 	}
 
 
@@ -2151,8 +2153,8 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
 
-		harness.answerDeploymentPrompt(ui, manifestFile);
-		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		harness.answerDeploymentPrompt(ui(), manifestFile);
+		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
 
 		waitForApps(model, "foo");
 
@@ -2163,8 +2165,8 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		assertEquals("some content here\n", space.getApplication(appName).getFileContents("test.txt"));
 
-		verify(ui).promptApplicationDeploymentProperties(any());
-		verifyNoMoreInteractions(ui);
+		verify(ui()).promptApplicationDeploymentProperties(any());
+		verifyNoMoreInteractions(ui());
 	}
 
 	@Test public void testDeployManifestWithoutPathAttribute() throws Exception {
@@ -2178,10 +2180,10 @@ public class CloudFoundryBootDashModelMockingTest {
 				"applications:\n" +
 				"- name: "+appName+"\n"
 		);
-		File referenceJar = BootJarPackagingTest.packageAsJar(project, ui);
+		File referenceJar = BootJarPackagingTest.packageAsJar(project, ui());
 
-		harness.answerDeploymentPrompt(ui, manifestFile);
-		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		harness.answerDeploymentPrompt(ui(), manifestFile);
+		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
 		waitForApps(model, appName);
 
 		CloudAppDashElement app = model.getApplication(appName);
@@ -2258,15 +2260,15 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		harness.selection.setElements(ImmutableSet.of(app));
 
-		harness.answerDeploymentPrompt(ui, manifestFile);
+		harness.answerDeploymentPrompt(ui(), manifestFile);
 
 		assertNull(app.getDeploymentManifestFile());
 		actions.getSelectManifestAction().run();
 		waitForJobsToComplete();
 		assertEquals(manifestFile, app.getDeploymentManifestFile());
 
-		verify(ui).promptApplicationDeploymentProperties(any());
-		verifyNoMoreInteractions(ui);
+		verify(ui()).promptApplicationDeploymentProperties(any());
+		verifyNoMoreInteractions(ui());
 	}
 
 	@Test public void disconnectTarget() throws Exception {
@@ -2301,7 +2303,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		IAction updatePassword = updatePasswordAction();
 		assertTrue(updatePassword.isEnabled());
 
-		harness.answerPasswordPrompt(ui, (d) -> {
+		harness.answerPasswordPrompt(ui(), (d) -> {
 			d.getPasswordVar().setValue(targetParams.getCredentials().getSecret());
 			d.validateCredentials().block();
 			d.performOk();
@@ -2316,11 +2318,11 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertEquals(RefreshState.READY, model.getRefreshState());
 
 		// Clear out any mocks on the ui object set above
-		reset(ui);
+		reset(ui());
 
 		CompletableFuture<ValidationResult> passwordValidation = new CompletableFuture<>();
 
-		harness.answerPasswordPrompt(ui, (d) -> {
+		harness.answerPasswordPrompt(ui(), (d) -> {
 			d.getPasswordVar().setValue("wrong password");
 			ReactorUtils.completeWith(passwordValidation, d.validateCredentials());
 			//d.performOk(); //shouldn't perform ok because we are expecting passwordValidation to fail
@@ -2365,8 +2367,8 @@ public class CloudFoundryBootDashModelMockingTest {
 							"- name: "+appName+"\n" +
 							(specified==null?"":"  health-check-type: "+specified+"\n");
 
-		harness.answerDeploymentPrompt(ui, new DeploymentAnswerer(yaml));
-		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		harness.answerDeploymentPrompt(ui(), new DeploymentAnswerer(yaml));
+		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
 		waitForApps(model, appName);
 		waitForState(model.getApplication(appName), RunState.RUNNING, 4000);
 		waitForJobsToComplete();
@@ -2393,10 +2395,10 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertTrue(updatePassword.isEnabled());
 
 		// Clear out any mocks on the ui object
-		reset(ui);
+		reset(ui());
 
 		String newToken=clientFactory.getSsoToken();
-		harness.answerPasswordPrompt(ui, (d) -> {
+		harness.answerPasswordPrompt(ui(), (d) -> {
 			d.getMethodVar().setValue(LoginMethod.TEMPORARY_CODE);
 			d.getPasswordVar().setValue(newToken);
 			d.getStoreVar().setValue(StoreCredentialsMode.STORE_NOTHING);
@@ -2423,7 +2425,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertFalse(model.isConnected());
 
 		// Clear out any mocks on the ui object to get the right count below
-		reset(ui);
+		reset(ui());
 
 		actions.getToggleTargetConnectionAction().run();
 		waitForJobsToComplete();
@@ -2432,8 +2434,8 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertEquals(RefreshState.READY, model.getRefreshState());
 		assertNull(model.getApplication(appName));
 
-		verify(ui).openPasswordDialog(any());
-		verifyNoMoreInteractions(ui);
+		verify(ui()).openPasswordDialog(any());
+		verifyNoMoreInteractions(ui());
 	}
 
 	@Test public void updateTargetSsoAndStorePassword() throws Exception {
@@ -2449,12 +2451,12 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertTrue(updatePassword.isEnabled());
 
 		// Clear out any mocks on the ui object
-		reset(ui);
+		reset(ui());
 
 		LiveVariable<ValidationResult> capturedStoreValidator = new LiveVariable<>(null);
 
 		String newToken=clientFactory.getSsoToken();
-		harness.answerPasswordPrompt(ui, (d) -> {
+		harness.answerPasswordPrompt(ui(), (d) -> {
 			d.getMethodVar().setValue(LoginMethod.TEMPORARY_CODE);
 			d.getPasswordVar().setValue(newToken);
 			d.getStoreVar().setValue(StoreCredentialsMode.STORE_PASSWORD);
@@ -2485,7 +2487,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertFalse(model.isConnected());
 
 		// Clear out any mocks on the ui object to get the right count below
-		reset(ui);
+		reset(ui());
 
 		actions.getToggleTargetConnectionAction().run();
 		waitForJobsToComplete();
@@ -2494,8 +2496,8 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertEquals(RefreshState.READY, model.getRefreshState());
 		assertNull(model.getApplication(appName));
 
-		verify(ui).openPasswordDialog(any());
-		verifyNoMoreInteractions(ui);
+		verify(ui()).openPasswordDialog(any());
+		verifyNoMoreInteractions(ui());
 	}
 
 	@Test public void updateTargetSsoAndStoreToken() throws Exception {
@@ -2511,10 +2513,10 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertTrue(updatePassword.isEnabled());
 
 		// Clear out any mocks on the ui object
-		reset(ui);
+		reset(ui());
 
 		String newToken=clientFactory.getSsoToken();
-		harness.answerPasswordPrompt(ui, (d) -> {
+		harness.answerPasswordPrompt(ui(), (d) -> {
 			d.getMethodVar().setValue(LoginMethod.TEMPORARY_CODE);
 			d.getPasswordVar().setValue(newToken);
 			d.getStoreVar().setValue(StoreCredentialsMode.STORE_TOKEN);
@@ -2542,7 +2544,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertFalse(model.isConnected());
 
 		// Clear out any mocks on the ui object to get the right count below
-		reset(ui);
+		reset(ui());
 
 		actions.getToggleTargetConnectionAction().run();
 		waitForJobsToComplete();
@@ -2551,7 +2553,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertEquals(RefreshState.READY, model.getRefreshState());
 		assertNotNull(model.getApplication(appName));
 
-		verifyZeroInteractions(ui); //should have used stored token so no pw dialog!
+		verifyZeroInteractions(ui()); //should have used stored token so no pw dialog!
 	}
 
 	@Test public void updateTargetPasswordAndStoreNothing() throws Exception {
@@ -2567,9 +2569,9 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertTrue(updatePassword.isEnabled());
 
 		// Clear out any mocks on the ui object
-		reset(ui);
+		reset(ui());
 
-		harness.answerPasswordPrompt(ui, (d) -> {
+		harness.answerPasswordPrompt(ui(), (d) -> {
 			d.getPasswordVar().setValue(targetParams.getCredentials().getSecret());
 			d.getStoreVar().setValue(StoreCredentialsMode.STORE_NOTHING);
 			d.validateCredentials().block();
@@ -2595,7 +2597,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertFalse(model.isConnected());
 
 		// Clear out any mocks on the ui object to get the right count below
-		reset(ui);
+		reset(ui());
 
 		actions.getToggleTargetConnectionAction().run();
 		waitForJobsToComplete();
@@ -2604,8 +2606,8 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertEquals(RefreshState.READY, model.getRefreshState());
 		assertNull(model.getApplication(appName));
 
-		verify(ui).openPasswordDialog(any());
-		verifyNoMoreInteractions(ui);
+		verify(ui()).openPasswordDialog(any());
+		verifyNoMoreInteractions(ui());
 	}
 
 	@Test public void updateTargetPasswordAndStorePassword() throws Exception {
@@ -2621,9 +2623,9 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertTrue(updatePassword.isEnabled());
 
 		// Clear out any mocks on the ui object
-		reset(ui);
+		reset(ui());
 
-		harness.answerPasswordPrompt(ui, (d) -> {
+		harness.answerPasswordPrompt(ui(), (d) -> {
 			d.getPasswordVar().setValue(targetParams.getCredentials().getSecret());
 			d.getStoreVar().setValue(StoreCredentialsMode.STORE_PASSWORD);
 			d.validateCredentials().block();
@@ -2640,7 +2642,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertFalse(model.isConnected());
 
 		// Clear out any mocks on the ui object to get the right count below
-		reset(ui);
+		reset(ui());
 
 		actions.getToggleTargetConnectionAction().run();
 		waitForJobsToComplete();
@@ -2649,7 +2651,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertEquals(RefreshState.READY, model.getRefreshState());
 		assertNotNull(model.getApplication(appName));
 
-		verifyNoMoreInteractions(ui);
+		verifyNoMoreInteractions(ui());
 	}
 
 	@Test public void updateTargetPasswordAndStoreToken() throws Exception {
@@ -2665,9 +2667,9 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertTrue(updatePassword.isEnabled());
 
 		// Clear out any mocks on the ui object
-		reset(ui);
+		reset(ui());
 
-		harness.answerPasswordPrompt(ui, (d) -> {
+		harness.answerPasswordPrompt(ui(), (d) -> {
 			d.getPasswordVar().setValue(targetParams.getCredentials().getSecret());
 			d.getStoreVar().setValue(StoreCredentialsMode.STORE_TOKEN);
 			d.validateCredentials().block();
@@ -2684,7 +2686,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertFalse(target.isConnected());
 
 		// Clear out any mocks on the ui object to get the right count below
-		reset(ui);
+		reset(ui());
 
 		actions.getToggleTargetConnectionAction().run();
 		waitForJobsToComplete();
@@ -2698,7 +2700,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertEquals(RefreshState.READY, target.getRefreshState());
 		assertNotNull(target.getApplication(appName));
 
-		verifyNoMoreInteractions(ui);
+		verifyNoMoreInteractions(ui());
 
 		clientFactory.changeRefrestToken("another-1");
 		clientFactory.changeRefrestToken("another-2");
@@ -2741,7 +2743,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertEquals(1, clientFactory.instanceCount());
 
 		harness.sectionSelection.setValue(model);
-		when(ui.confirmOperation(contains("Deleting"), any()))
+		when(ui().confirmOperation(contains("Deleting"), any()))
 			.thenReturn(true);
 		actions.getRemoveRunTargetAction().run();
 
@@ -2766,7 +2768,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		clientFactory.setPassword("something-else");
 
 		harness.sectionSelection.setValue(model);
-		harness.answerPasswordPrompt(ui, (PasswordDialogModel passwordDialog) -> {
+		harness.answerPasswordPrompt(ui(), (PasswordDialogModel passwordDialog) -> {
 			passwordDialog.getPasswordVar().setValue("something-else");
 			assertEquals(ValidationResult.OK, passwordDialog.validateCredentials().block());
 			passwordDialog.performOk();
@@ -2800,8 +2802,8 @@ public class CloudFoundryBootDashModelMockingTest {
 				"  routes:\n" +
 				"  - route: "+host+".cfmockapps.io"+appPath
 		);
-		harness.answerDeploymentPrompt(ui, manifest);
-		target.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		harness.answerDeploymentPrompt(ui(), manifest);
+		target.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
 		waitForApps(target, appName);
 
 		CloudAppDashElement app = target.getApplication(appName);
@@ -2911,8 +2913,8 @@ public class CloudFoundryBootDashModelMockingTest {
 
 	protected CloudAppDashElement deployApp(final CloudFoundryBootDashModel model, final String appName, IProject project)
 			throws Exception {
-		harness.answerDeploymentPrompt(ui, appName, appName);
-		model.performDeployment(ImmutableSet.of(project), ui, RunState.RUNNING);
+		harness.answerDeploymentPrompt(ui(), appName, appName);
+		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
 
 		waitForApps(model, appName);
 
