@@ -71,13 +71,15 @@ public class SimpleDIContext {
 	private List<Definition<?>> definitions = new ArrayList<>();
 	private AtomicBoolean locked = new AtomicBoolean();
 
-	public <T> void def(Class<T> type, BeanFactory<T> factory) {
+	public <T> SimpleDIContext def(Class<T> type, BeanFactory<T> factory) {
 		definitions.add(new Definition<>(type, factory));
+		return this;
 	}
 
-	public <T> void defInstance(Class<T> klass, T instance) {
+	public <T> SimpleDIContext defInstance(Class<T> klass, T instance) {
 		Assert.isNotNull(instance);
 		def(klass, (x) -> instance);
+		return this;
 	}
 
 	@SuppressWarnings("unchecked")

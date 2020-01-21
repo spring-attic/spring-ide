@@ -89,13 +89,9 @@ public class DefaultUserInteractions implements UserInteractions {
 	 */
 	@Deprecated
 	public DefaultUserInteractions(UIContext uiContext) {
-		this(diContextForCft(uiContext));
-	}
-
-	private static SimpleDIContext diContextForCft(UIContext uiContext) {
-		SimpleDIContext c = new SimpleDIContext();
-		c.defInstance(UIContext.class, uiContext);
-		return c;
+		this(new SimpleDIContext()
+				.defInstance(UIContext.class, uiContext)
+		);
 	}
 
 	public DefaultUserInteractions(SimpleDIContext context) {
