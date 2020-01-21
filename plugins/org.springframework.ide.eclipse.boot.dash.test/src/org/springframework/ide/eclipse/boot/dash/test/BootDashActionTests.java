@@ -969,12 +969,12 @@ public class BootDashActionTests {
 	@Before
 	public void setup() throws Exception {
 		StsTestUtil.deleteAllProjects();
-		SimpleDIContext injections = new SimpleDIContext();
-		injections.defInstance(AllUserInteractions.class, mock(AllUserInteractions.class));
 		this.context = new TestBootDashModelContext(
 				ResourcesPlugin.getWorkspace(),
 				DebugPlugin.getDefault().getLaunchManager()
 		);
+		SimpleDIContext injections = context.injections;
+
 		this.processes = new MockLiveProcesses();
 		this.harness = new BootDashViewModelHarness(context.withTargetTypes(RunTargetTypes.LOCAL));
 		this.projects = new BootProjectTestHarness(context.getWorkspace());
