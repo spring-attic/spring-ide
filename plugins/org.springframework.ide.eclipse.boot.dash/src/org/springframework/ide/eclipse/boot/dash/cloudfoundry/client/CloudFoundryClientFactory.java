@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client;
 
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
 
 public abstract class CloudFoundryClientFactory {
@@ -27,11 +26,6 @@ public abstract class CloudFoundryClientFactory {
 	 *             if there was an error connecting, including if password is
 	 *             not set or invalid.
 	 */
-	public ClientRequests getClient(CloudFoundryRunTarget runTarget) throws Exception {
-		CloudFoundryTargetProperties targetProperties = (CloudFoundryTargetProperties) runTarget.getTargetProperties();
-		return getClient(new CFClientParams(targetProperties));
-	}
-
 	public final ClientRequests getClient(CloudFoundryTargetProperties targetProperties) throws Exception {
 		return getClient(new CFClientParams(targetProperties));
 	}
