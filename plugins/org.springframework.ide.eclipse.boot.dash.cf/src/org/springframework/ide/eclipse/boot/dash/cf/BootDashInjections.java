@@ -17,8 +17,13 @@ public class BootDashInjections implements Contribution {
 
 	@Override
 	public void applyBeanDefinitions(SimpleDIContext context) throws Exception {
+		//TargetType
 		context.defInstance(RunTargetTypeFactory.class, CloudFoundryRunTargetType.factory);
-		context.def(CfUserInteractions.class, DefaultCfUserInteractions::new);
+
+		//UI actions
 		context.defInstance(BootDashActions.Factory.class, CfBootDashActions.factory);
+
+		//UI support (internal)
+		context.def(CfUserInteractions.class, DefaultCfUserInteractions::new);
 	}
 }

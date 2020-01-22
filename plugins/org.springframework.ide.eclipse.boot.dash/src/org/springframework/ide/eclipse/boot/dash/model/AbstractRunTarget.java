@@ -89,11 +89,6 @@ public abstract class AbstractRunTarget implements RunTarget, TemplateEnv {
 	}
 
 	@Override
-	public BootDashColumn[] getAllColumns() {
-		return BootDashColumn.values();
-	}
-
-	@Override
 	public RunTargetType getType() {
 		return type;
 	}

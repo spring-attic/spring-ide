@@ -11,7 +11,9 @@ Require-Bundle: org.eclipse.ui,
  org.springframework.ide.eclipse.boot.dash,
  org.springsource.ide.eclipse.commons.livexp,
  com.google.guava;bundle-version="15.0.0",
- org.springframework.ide.eclipse.boot.wizard
+ org.springframework.ide.eclipse.boot.wizard,
+ io.projectreactor.reactor-core,
+ org.reactivestreams.reactive-streams
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: org.springframework.ide.eclipse.boot.dash.cf.BootDashCfPlugin
 Bundle-ActivationPolicy: lazy

@@ -42,8 +42,6 @@ public interface RunTarget extends IdAble, Nameable, Disposable {
 	 */
 	public abstract ILaunchConfiguration createLaunchConfig(IJavaProject jp, IType mainType) throws Exception;
 
-	public abstract BootDashColumn[] getAllColumns();
-
 	public abstract BootDashColumn[] getDefaultColumns();
 
 	/**

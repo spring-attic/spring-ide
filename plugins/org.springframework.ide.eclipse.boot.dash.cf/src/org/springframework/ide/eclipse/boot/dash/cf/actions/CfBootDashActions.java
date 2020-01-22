@@ -26,6 +26,7 @@ public class CfBootDashActions {
 		ImmutableList.Builder<IAction> builder = ImmutableList.builder();
 		if (section!=null) {
 			builder.add(new UpdatePasswordAction(section, context));
+			builder.add(new ToggleBootDashModelConnection(section, context));
 		}
 		return builder.build();
 	};

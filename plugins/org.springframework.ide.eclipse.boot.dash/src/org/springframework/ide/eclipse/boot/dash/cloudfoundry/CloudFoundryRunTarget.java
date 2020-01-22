@@ -81,7 +81,6 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 
 	public static final EnumSet<RunState> RUN_GOAL_STATES = EnumSet.of(INACTIVE, STARTING, RUNNING, DEBUGGING);
 	private static final BootDashColumn[] DEFAULT_COLUMNS = { RUN_STATE_ICN, NAME, PROJECT, INSTANCES, DEFAULT_PATH, TAGS, JMX_SSH_TUNNEL };
-	private static final BootDashColumn[] ALL_COLUMNS = { RUN_STATE_ICN, NAME, PROJECT, INSTANCES, HOST, DEFAULT_PATH, TAGS };
 
 	private static final String APPS_MANAGER_HOST = "APPS_MANAGER_HOST";
 	private static final String BUILDPACKS = "BUILDPACKS";
@@ -175,11 +174,6 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 	@Override
 	public BootDashColumn[] getDefaultColumns() {
 		return DEFAULT_COLUMNS;
-	}
-
-	@Override
-	public BootDashColumn[] getAllColumns() {
-		return ALL_COLUMNS;
 	}
 
 	@Override

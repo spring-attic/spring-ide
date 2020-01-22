@@ -77,6 +77,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.internal.MavenSpringBootProject;
+import org.springframework.ide.eclipse.boot.dash.cf.actions.ToggleBootDashModelConnection;
 import org.springframework.ide.eclipse.boot.dash.cf.actions.UpdatePasswordAction;
 import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
@@ -138,6 +139,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
+
+import junit.framework.TestCase;
 
 /**
  * @author Kris De Volder
@@ -452,7 +455,7 @@ public class CloudFoundryBootDashModelMockingTest {
 			});
 
 			harness.sectionSelection.setValue(target);
-			IAction connectAction = actions.getToggleTargetConnectionAction();
+			IAction connectAction = toggleTargetConnectionAction();
 			connectAction.run();
 
 			ACondition.waitFor("connected to target", 5_000, () -> {
@@ -697,7 +700,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		//For https://www.pivotaltracker.com/story/show/114408475
 		// Apps and services should disappear when target is disconnected
 
-		IAction toggleConnection = actions.getToggleTargetConnectionAction();
+		IAction toggleConnection = toggleTargetConnectionAction();
 		harness.sectionSelection.setValue(target);
 		toggleConnection.run();
 
@@ -1522,7 +1525,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		deployApp(model, appName, project);
 		assertAppToProjectBinding(model, project, appName);
 
-		IAction toggleConnectionAction = actions.getToggleTargetConnectionAction();
+		IAction toggleConnectionAction = toggleTargetConnectionAction();
 		harness.sectionSelection.setValue(model);
 
 		toggleConnectionAction.run();
@@ -2281,7 +2284,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertEquals(1, clientFactory.instanceCount());
 
 		harness.sectionSelection.setValue(model);
-		IAction disconnectAction = actions.getToggleTargetConnectionAction();
+		IAction disconnectAction = toggleTargetConnectionAction();
 		assertTrue(disconnectAction.isEnabled());
 		disconnectAction.run();
 		waitForApps(model);
@@ -2334,13 +2337,6 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertEquals(IStatus.ERROR, validationResult.status);
 		assertContains("Invalid credentials", validationResult.msg);
 
-	}
-
-	private UpdatePasswordAction updatePasswordAction() {
-		return (UpdatePasswordAction) actions.getInjectedActions().stream()
-		.filter(action -> action instanceof UpdatePasswordAction)
-		.findFirst()
-		.get();
 	}
 
 	@Test public void pushWithHealthCheckProcess() throws Exception {
@@ -2419,7 +2415,7 @@ public class CloudFoundryBootDashModelMockingTest {
 			assertNull(harness.getPrivateStore().get(harness.privateStoreKey(model)));
 		}
 
-		actions.getToggleTargetConnectionAction().run();
+		toggleTargetConnectionAction().run();
 
 		waitForJobsToComplete();
 		assertFalse(model.isConnected());
@@ -2427,7 +2423,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		// Clear out any mocks on the ui object to get the right count below
 		reset(ui());
 
-		actions.getToggleTargetConnectionAction().run();
+		toggleTargetConnectionAction().run();
 		waitForJobsToComplete();
 
 		assertFalse(model.isConnected());
@@ -2481,7 +2477,7 @@ public class CloudFoundryBootDashModelMockingTest {
 			assertNull(harness.getPrivateStore().get(harness.privateStoreKey(model)));
 		}
 
-		actions.getToggleTargetConnectionAction().run();
+		toggleTargetConnectionAction().run();
 
 		waitForJobsToComplete();
 		assertFalse(model.isConnected());
@@ -2489,7 +2485,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		// Clear out any mocks on the ui object to get the right count below
 		reset(ui());
 
-		actions.getToggleTargetConnectionAction().run();
+		toggleTargetConnectionAction().run();
 		waitForJobsToComplete();
 
 		assertFalse(model.isConnected());
@@ -2538,7 +2534,7 @@ public class CloudFoundryBootDashModelMockingTest {
 			assertEquals(MockCloudFoundryClientFactory.FAKE_REFRESH_TOKEN, harness.getPrivateStore().get(harness.privateStoreKey(model)));
 		}
 
-		actions.getToggleTargetConnectionAction().run();
+		toggleTargetConnectionAction().run();
 
 		waitForJobsToComplete();
 		assertFalse(model.isConnected());
@@ -2546,7 +2542,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		// Clear out any mocks on the ui object to get the right count below
 		reset(ui());
 
-		actions.getToggleTargetConnectionAction().run();
+		toggleTargetConnectionAction().run();
 		waitForJobsToComplete();
 
 		assertTrue(model.isConnected());
@@ -2591,7 +2587,7 @@ public class CloudFoundryBootDashModelMockingTest {
 			assertNull(harness.getPrivateStore().get(harness.privateStoreKey(model)));
 		}
 
-		actions.getToggleTargetConnectionAction().run();
+		toggleTargetConnectionAction().run();
 
 		waitForJobsToComplete();
 		assertFalse(model.isConnected());
@@ -2599,7 +2595,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		// Clear out any mocks on the ui object to get the right count below
 		reset(ui());
 
-		actions.getToggleTargetConnectionAction().run();
+		toggleTargetConnectionAction().run();
 		waitForJobsToComplete();
 
 		assertFalse(model.isConnected());
@@ -2636,7 +2632,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		waitForJobsToComplete();
 
-		actions.getToggleTargetConnectionAction().run();
+		toggleTargetConnectionAction().run();
 
 		waitForJobsToComplete();
 		assertFalse(model.isConnected());
@@ -2644,7 +2640,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		// Clear out any mocks on the ui object to get the right count below
 		reset(ui());
 
-		actions.getToggleTargetConnectionAction().run();
+		toggleTargetConnectionAction().run();
 		waitForJobsToComplete();
 
 		assertTrue(model.isConnected());
@@ -2680,7 +2676,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		waitForJobsToComplete();
 
-		actions.getToggleTargetConnectionAction().run();
+		toggleTargetConnectionAction().run();
 
 		waitForJobsToComplete();
 		assertFalse(target.isConnected());
@@ -2688,7 +2684,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		// Clear out any mocks on the ui object to get the right count below
 		reset(ui());
 
-		actions.getToggleTargetConnectionAction().run();
+		toggleTargetConnectionAction().run();
 		waitForJobsToComplete();
 
 		assertTrue(target.isConnected());
@@ -2708,7 +2704,6 @@ public class CloudFoundryBootDashModelMockingTest {
 			assertEquals("another-2", getStoredToken(target));
 		});
 	}
-
 
 	@Test public void apiVersionCheck() throws Exception {
 		CFClientParams targetParams = CfTestTargetParams.fromEnv();
@@ -3044,6 +3039,21 @@ public class CloudFoundryBootDashModelMockingTest {
 		};
 	}
 
+	private ToggleBootDashModelConnection toggleTargetConnectionAction() {
+		return getInjectedAction(ToggleBootDashModelConnection.class);
+	}
+
+	private UpdatePasswordAction updatePasswordAction() {
+		return getInjectedAction(UpdatePasswordAction.class);
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T extends IAction> T getInjectedAction(Class<T> klass) {
+		return (T) actions.getInjectedActions().stream()
+				.filter(action -> klass.isAssignableFrom(action.getClass()))
+				.findFirst()
+				.get();
+	}
 
 	///////////////////////////////////////////////////////////////////////////////////
 

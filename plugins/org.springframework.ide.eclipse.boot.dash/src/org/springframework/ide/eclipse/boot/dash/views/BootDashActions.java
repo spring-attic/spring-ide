@@ -77,7 +77,6 @@ public class BootDashActions {
 	private EnableJmxSshTunnelAction enableJmxSshTunnel;
 	private OpenCloudAdminConsoleAction openCloudAdminConsoleAction;
 	private ReconnectCloudConsoleAction reconnectCloudConsoleAction;
-	private ToggleBootDashModelConnection toggleTargetConnectionAction;
 	private ShowViewAction showPropertiesViewAction;
 	private ExposeAppAction exposeRunAppAction;
 	private ExposeAppAction exposeDebugAppAction;
@@ -209,7 +208,6 @@ public class BootDashActions {
 			refreshAction = new RefreshRunTargetAction(sectionSelection, context);
 			removeTargetAction = new RemoveRunTargetAction(sectionSelection, model, context);
 			openCloudAdminConsoleAction = new OpenCloudAdminConsoleAction(sectionSelection, context);
-			toggleTargetConnectionAction = new ToggleBootDashModelConnection(sectionSelection, context);
 			customizeTargetLabelAction = new CustmomizeTargetLabelAction(sectionSelection, context);
 			customizeTargetAppsManagerURLAction = new CustmomizeTargetAppManagerURLAction(sectionSelection, context);
 		}
@@ -414,10 +412,6 @@ public class BootDashActions {
 
 	public IAction getOpenCloudAdminConsoleAction() {
 		return openCloudAdminConsoleAction;
-	}
-
-	public IAction getToggleTargetConnectionAction() {
-		return toggleTargetConnectionAction;
 	}
 
 	/**
