@@ -13,6 +13,8 @@ package org.springframework.ide.eclipse.boot.dash;
 import java.lang.reflect.Method;
 import java.util.Map;
 
+import javax.ws.rs.HEAD;
+
 import org.eclipse.core.net.proxy.IProxyService;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -83,7 +85,6 @@ public class BootDashActivator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-		// Initialize config for manifest YAML LS
 		new M2ELogbackCustomizer().schedule();
 	}
 
@@ -174,7 +175,6 @@ public class BootDashActivator extends AbstractUIPlugin {
 			e.printStackTrace();
 		}
 	}
-
 
 	@Override
 	protected void initializeImageRegistry(ImageRegistry reg) {
