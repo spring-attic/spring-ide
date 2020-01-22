@@ -11,11 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.core.net.proxy.IProxyService;
 import org.eclipse.core.runtime.Platform;
@@ -27,25 +23,11 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CfTargetsInfo;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CfTargetsInfo.Target;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CfTargetsInfo.TargetDiagnosticMessages;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultCloudFoundryClientFactoryV2;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultBootDashModelContext;
-import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
-import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
 /**
@@ -66,24 +48,10 @@ public class BootDashActivator extends AbstractUIPlugin {
 	public static final String CHECK_ICON = "check";
 	public static final String CHECK_GREYSCALE_ICON = "check-greyscale";
 
-	// NOTE: using ':' to separate the "shorter" part of the message from the longer. The longer part may be shown in the UI by expanding the hover info
-	private static final String TARGET_SOURCE = "Boot Dashboard";
-	private static final String NO_ORG_SPACE = "Boot Dashboard - No org/space selected: Verify Cloud Foundry target connection in Boot Dashboard or login via 'cf' CLI";
-	// Make this a "generic" message, instead of using "Boot Dash" prefix as it shows general instructions when there are not targets
-	private static final String NO_TARGETS = "No Cloud Foundry targets found: Create a target in Boot Dashboard or login via 'cf' CLI";
-	private static final String CONNECTION_ERROR = "Boot Dashboard - Error connecting to Cloud Foundry target: Verify network connection or that existing target has valid credentials.";
-
-
 	// The shared instance
 	private static BootDashActivator plugin;
 
 	private BootDashViewModel model;
-
-	private final ValueListener<ClientRequests> clientsChangedListener = (exp, client) -> {
-		if (client instanceof DefaultClientRequestsV2) {
-			addRefreshTokenListener((DefaultClientRequestsV2) client);
-		}
-	};
 
 	/**
 	 * The constructor
@@ -116,7 +84,6 @@ public class BootDashActivator extends AbstractUIPlugin {
 		super.start(context);
 		plugin = this;
 		// Initialize config for manifest YAML LS
-		updateCloudTargetsInManifestEditor(getModel().getRunTargets().getValues());
 		new M2ELogbackCustomizer().schedule();
 	}
 
@@ -171,15 +138,6 @@ public class BootDashActivator extends AbstractUIPlugin {
 			DefaultBootDashModelContext context = new DefaultBootDashModelContext();
 			model = new BootDashViewModel(context);
 
-			model.getRunTargets().addListener(new ValueListener<ImmutableSet<RunTarget>>() {
-
-				@Override
-				public void gotValue(LiveExpression<ImmutableSet<RunTarget>> exp, ImmutableSet<RunTarget> value) {
-					// On target changes, add the client listener in each target so that when the client changes, a notification is sent
-					addClientChangeListeners(value);
-				}
-			});
-
 //			DebugSelectionListener debugSelectionListener = new DebugSelectionListener(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService());
 //			model.addDisposableChild(debugSelectionListener);
 
@@ -217,85 +175,6 @@ public class BootDashActivator extends AbstractUIPlugin {
 		}
 	}
 
-	private void updateCloudTargetsInManifestEditor(ImmutableSet<RunTarget> value) {
-		Set<RunTarget> toUpdate = value == null ? ImmutableSet.of() : value;
-
-		CfTargetsInfo targetsInfo = asTargetsInfo(toUpdate);
-		setCfTargetsInfo(targetsInfo);
-	}
-
-	/**
-	 * Add a listener to be notified when the refresh token becomes available OR
-	 * changes
-	 */
-	private void addRefreshTokenListener(DefaultClientRequestsV2 client) {
-		if (client != null && client.getRefreshTokens() != null && this.model != null
-				&& this.model.getRunTargets() != null) {
-			client.getRefreshTokens().doOnNext((token) ->
-			        // Although the refresh token change is for ONE client (i.e. one target)
-			        // compute cloud target information for ALL currently connected targets
-			        // as the manifest editor is updated with the full up-to-date list of connected
-			        // boot dash targets
-					updateCloudTargetsInManifestEditor(this.model.getRunTargets().getValue())
-				).subscribe();
-			client.getRefreshTokens().doOnComplete(() ->
-				updateCloudTargetsInManifestEditor(this.model.getRunTargets().getValue())
-			).subscribe();
-		}
-	}
-
-	private void addClientChangeListeners(ImmutableSet<RunTarget> targets) {
-		if (targets != null) {
-			for (RunTarget runTarget : targets) {
-				if (runTarget instanceof CloudFoundryRunTarget) {
-					((CloudFoundryRunTarget) runTarget).addConnectionStateListener(clientsChangedListener);
-				}
-			}
-		}
-	}
-
-	private CfTargetsInfo asTargetsInfo(Collection<RunTarget> targets) {
-		List<CfTargetsInfo.Target> collectedTargets = new ArrayList<>();
-		for (RunTarget runTarget : targets) {
-			if (runTarget instanceof CloudFoundryRunTarget) {
-
-				CloudFoundryRunTarget cloudFoundryRunTarget = (CloudFoundryRunTarget) runTarget;
-				if (cloudFoundryRunTarget.isConnected()) {
-					String token = cloudFoundryRunTarget.getClient().getRefreshToken();
-					if (token != null) {
-						CloudFoundryTargetProperties properties = cloudFoundryRunTarget.getTargetProperties();
-						String target = properties.getUrl();
-						String org = properties.getOrganizationName();
-						String space = properties.getSpaceName();
-						boolean sslDisabled = properties.skipSslValidation();
-
-						CfTargetsInfo.Target integrationTarget = new Target();
-
-						integrationTarget.setApi(target);
-						integrationTarget.setOrg(org);
-						integrationTarget.setSpace(space);
-						integrationTarget.setSslDisabled(sslDisabled);
-						integrationTarget.setRefreshToken(token);
-						collectedTargets.add(integrationTarget);
-					}
-				}
-			}
-		}
-
-		CfTargetsInfo targetsInfo = new CfTargetsInfo();
-		targetsInfo.setCfTargets(collectedTargets);
-		targetsInfo.setDiagnosticMessages(getDiagnosticMessages());
-		return targetsInfo ;
-	}
-
-	private TargetDiagnosticMessages getDiagnosticMessages() {
-		TargetDiagnosticMessages messages = new TargetDiagnosticMessages();
-		messages.setConnectionError(CONNECTION_ERROR);
-		messages.setNoOrgSpace(NO_ORG_SPACE);
-		messages.setNoTargetsFound(NO_TARGETS);
-		messages.setTargetSource(TARGET_SOURCE);
-		return messages;
-	}
 
 	@Override
 	protected void initializeImageRegistry(ImageRegistry reg) {
@@ -313,21 +192,6 @@ public class BootDashActivator extends AbstractUIPlugin {
 
 	public static IEclipsePreferences getPreferences() {
 		return InstanceScope.INSTANCE.getNode(PLUGIN_ID);
-	}
-
-	private void setCfTargetsInfo(Object targetsInfo) {
-//		CloudFoundryManifestLanguageServer.setCfTargetLoginOptions(targetsInfo);
-		try {
-			Bundle lsBundle = Platform.getBundle("org.springframework.tooling.cloudfoundry.manifest.ls");
-			if (lsBundle != null && lsBundle.getState() != Bundle.INSTALLED) {
-				Class<?> lsClass = lsBundle.loadClass("org.springframework.tooling.cloudfoundry.manifest.ls.CloudFoundryManifestLanguageServer");
-				Method lsMethod = lsClass.getMethod("setCfTargetLoginOptions", Object.class);
-				lsMethod.invoke(null, targetsInfo);
-			}
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 
 }
