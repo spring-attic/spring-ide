@@ -13,8 +13,6 @@ package org.springframework.ide.eclipse.boot.dash;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-import javax.ws.rs.HEAD;
-
 import org.eclipse.core.net.proxy.IProxyService;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
