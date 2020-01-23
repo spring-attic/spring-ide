@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Pivotal, Inc.
+ * Copyright (c) 2016-2019 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,13 +13,13 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.swt.widgets.Display;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.RemoteBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashElementsAction;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -31,13 +31,13 @@ import com.google.common.collect.ImmutableSet;
 /**
  * @author Kris De Volder
  */
-public class DeployToCloudFoundryTargetAction extends AbstractBootDashElementsAction {
+public class DeployToRemoteTargetAction<Client> extends AbstractBootDashElementsAction {
 
 	private RunState runOrDebug;
-	private RunTarget target;
-	private ValueListener<ClientRequests> connectionListener;
+	private RemoteRunTarget<Client> target;
+	private ValueListener<Client> connectionListener;
 
-	public DeployToCloudFoundryTargetAction(Params params, RunTarget target, RunState runningOrDebugging) {
+	public DeployToRemoteTargetAction(Params params, RemoteRunTarget<Client> target, RunState runningOrDebugging) {
 		super(params);
 		this.setText(target.getName());
 		Assert.isLegal(target.getType() instanceof RemoteRunTargetType);
@@ -45,9 +45,9 @@ public class DeployToCloudFoundryTargetAction extends AbstractBootDashElementsAc
 		this.target = target;
 		this.runOrDebug = runningOrDebugging;
 
-		this.connectionListener = new ValueListener<ClientRequests>() {
+		this.connectionListener = new ValueListener<Client>() {
 			@Override
-			public void gotValue(LiveExpression<ClientRequests> exp, ClientRequests value) {
+			public void gotValue(LiveExpression<Client> exp, Client value) {
 				Display.getDefault().asyncExec(new Runnable() {
 					public void run() {
 						update();
@@ -56,10 +56,7 @@ public class DeployToCloudFoundryTargetAction extends AbstractBootDashElementsAc
 			}
 		};
 
-		if (target instanceof CloudFoundryRunTarget) {
-			((CloudFoundryRunTarget) target).addConnectionStateListener(connectionListener);
-		}
-
+		target.addConnectionStateListener(connectionListener);
 		updateEnablement();
 	}
 
@@ -75,7 +72,7 @@ public class DeployToCloudFoundryTargetAction extends AbstractBootDashElementsAc
 		setVisible(element != null && element instanceof BootProjectDashElement);
 
 		if (this.target != null && this.target.getType() instanceof RemoteRunTargetType) {
-			setEnabled(((CloudFoundryRunTarget) this.target).isConnected());
+			setEnabled(((RemoteRunTarget) this.target).isConnected());
 		}
 	}
 
@@ -86,7 +83,7 @@ public class DeployToCloudFoundryTargetAction extends AbstractBootDashElementsAc
 			if (element != null) {
 				final IProject project = element.getProject();
 				if (project != null) {
-					CloudFoundryBootDashModel cfModel = (CloudFoundryBootDashModel) model.getSectionByTargetId(target.getId());
+					RemoteBootDashModel cfModel = (RemoteBootDashModel) model.getSectionByTargetId(target.getId());
 					//No need to wrap this in a job as it already does that itself:
 					cfModel.performDeployment(ImmutableSet.of(project), ui(), runOrDebug);
 				}
@@ -98,10 +95,7 @@ public class DeployToCloudFoundryTargetAction extends AbstractBootDashElementsAc
 
 	@Override
 	public void dispose() {
-		if (target instanceof CloudFoundryRunTarget) {
-			((CloudFoundryRunTarget) target).removeConnectionStateListener(connectionListener);
-		}
-
+		target.removeConnectionStateListener(connectionListener);
 		super.dispose();
 	}
 

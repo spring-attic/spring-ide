@@ -122,7 +122,7 @@ import com.google.common.collect.ImmutableSet.Builder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-public class CloudFoundryBootDashModel extends AbstractBootDashModel implements ModifiableModel {
+public class CloudFoundryBootDashModel extends RemoteBootDashModel implements ModifiableModel {
 
 	private IPropertyStore modelStore;
 

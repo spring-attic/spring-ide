@@ -26,7 +26,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IAction;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeployToCloudFoundryTargetAction;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeployToRemoteTargetAction;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveDataConnectionManagementActions;
 import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveProcessCommandsExecutor;
@@ -39,6 +39,7 @@ import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.LocalRunTargetType;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKInstallManager;
@@ -535,9 +536,13 @@ public class BootDashActions {
 	private DisposingFactory<RunTarget, AbstractBootDashAction> createDeployOnTargetActions(final RunState runningOrDebugging) {
 		ObservableSet<RunTarget> runtargets = model.getRunTargets();
 		return new DisposingFactory<RunTarget, AbstractBootDashAction>(runtargets) {
+			@SuppressWarnings({ "rawtypes", "unchecked" })
 			@Override
 			protected AbstractBootDashAction create(RunTarget target) {
-				return new DeployToCloudFoundryTargetAction(defaultActionParams(), target, runningOrDebugging);
+				if (target instanceof RemoteRunTarget) {
+					return new DeployToRemoteTargetAction(defaultActionParams(), (RemoteRunTarget)target, runningOrDebugging);
+				}
+				return null;
 			}
 		};
 	}

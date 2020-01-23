@@ -14,7 +14,6 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetT
 import org.springframework.ide.eclipse.boot.dash.util.template.Template;
 import org.springframework.ide.eclipse.boot.dash.util.template.TemplateEnv;
 import org.springframework.ide.eclipse.boot.dash.util.template.Templates;
-import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStores;

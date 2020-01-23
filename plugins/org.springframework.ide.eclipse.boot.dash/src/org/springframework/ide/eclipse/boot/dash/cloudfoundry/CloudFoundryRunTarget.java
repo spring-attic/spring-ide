@@ -15,7 +15,6 @@ import static org.springframework.ide.eclipse.boot.dash.model.RunState.INACTIVE;
 import static org.springframework.ide.eclipse.boot.dash.model.RunState.RUNNING;
 import static org.springframework.ide.eclipse.boot.dash.model.RunState.STARTING;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.DEFAULT_PATH;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.HOST;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.INSTANCES;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.JMX_SSH_TUNNEL;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.NAME;
@@ -37,7 +36,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
@@ -51,15 +49,16 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
-import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
-public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTargetWithProperties {
+public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTargetWithProperties, RemoteRunTarget<ClientRequests> {
 
 	private CloudFoundryTargetProperties targetProperties;
 
@@ -139,7 +138,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 		}
 	}
 
-
+	@Override
 	public boolean isConnected() {
 		return cachedClient.getValue() != null;
 	}
