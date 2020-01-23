@@ -126,5 +126,4 @@ public interface BootDashElement extends Nameable, Taggable {
 	 *         element be brought into a given run-state.
 	 */
 	EnumSet<RunState> supportedGoalStates();
-
 }

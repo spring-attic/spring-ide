@@ -1,7 +1,5 @@
 package org.springframework.ide.eclipse.boot.dash.cf.actions;
 
-import java.util.Collection;
-
 import org.eclipse.jface.action.IAction;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveProcessCommandsExecutor;
@@ -26,6 +24,7 @@ public class CfBootDashActions {
 		ImmutableList.Builder<IAction> builder = ImmutableList.builder();
 		if (section!=null) {
 			builder.add(new UpdatePasswordAction(section, context));
+			builder.add(new OpenCloudAdminConsoleAction(section, context));
 			builder.add(new ToggleBootDashModelConnection(section, context));
 		}
 		return builder.build();

@@ -8,16 +8,16 @@
  * Contributors:
  *     Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.views;
+package org.springframework.ide.eclipse.boot.dash.cf.actions;
 
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
-import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.views.AbstractCloudDashModelAction;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-import org.springsource.ide.eclipse.commons.ui.UiUtil;
 
 /**
  * @author Martin Lippert
@@ -35,16 +35,9 @@ public class OpenCloudAdminConsoleAction extends AbstractCloudDashModelAction {
 	public void run() {
 		final BootDashModel targetModel = sectionSelection.getValue();
 		if (targetModel != null) {
-			RunTarget runTarget = targetModel.getRunTarget();
-			if (runTarget instanceof CloudFoundryRunTarget) {
-				String appsManagerURL = ((CloudFoundryRunTarget) runTarget).getAppsManagerURL();
-				if (appsManagerURL != null && appsManagerURL.length() > 0) {
-					UiUtil.openUrl(appsManagerURL);
-				}
-				else {
-					ui().errorPopup("can't find unique identificators",
-							"The Cloud Target that you selected doesn't contain required information about the organization and the space yet (recently added unique identifiers). Please remove the target and add it again to fix this.");
-				}
+			RunTarget target = targetModel.getRunTarget();
+			if (target instanceof CloudFoundryRunTarget) {
+				((CloudFoundryRunTarget) target).openCloudAdminConsole(ui());
 			}
 		}
 	}

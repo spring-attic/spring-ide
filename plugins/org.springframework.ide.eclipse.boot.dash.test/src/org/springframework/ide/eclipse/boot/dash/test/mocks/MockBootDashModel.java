@@ -58,5 +58,4 @@ public class MockBootDashModel extends AbstractBootDashModel {
 	public void add(BootDashElement element) {
 		elements.add(element);
 	}
-
 }

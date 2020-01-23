@@ -105,4 +105,9 @@ public interface RunTarget extends IdAble, Nameable, Disposable {
 	 */
 	public abstract void setNameTemplate(String template) throws Exception;
 
+	/**
+	 * Called when user double-clicks on RunTarget in the boot dash view.
+	 */
+	default void performDoubleClickAction(UserInteractions ui) {}
+
 }

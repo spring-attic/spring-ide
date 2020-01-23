@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.boot.dash.views;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ModelStateListener;
-import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 

@@ -49,6 +49,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
+import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
@@ -57,6 +58,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
+import org.springsource.ide.eclipse.commons.ui.UiUtil;
 
 public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTargetWithProperties, RemoteRunTarget<ClientRequests> {
 
@@ -382,6 +384,22 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 
 	public LiveExpression<ClientRequests> getClientExp() {
 		return cachedClient;
+	}
+
+	@Override
+	public void performDoubleClickAction(UserInteractions ui) {
+		openCloudAdminConsole(ui);
+	}
+
+	public void openCloudAdminConsole(UserInteractions ui) {
+		String appsManagerURL = getAppsManagerURL();
+		if (appsManagerURL != null && appsManagerURL.length() > 0) {
+			UiUtil.openUrl(appsManagerURL);
+		}
+		else {
+			ui.errorPopup("can't find unique identificators",
+					"The Cloud Target that you selected doesn't contain required information about the organization and the space yet (recently added unique identifiers). Please remove the target and add it again to fix this.");
+		}
 	}
 
 }

@@ -14,6 +14,7 @@ import java.util.Comparator;
 
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Platform;
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -36,7 +37,6 @@ public abstract class AbstractBootDashModel extends AbstractDisposable implement
 			System.out.println(string);
 		}
 	}
-
 
 	public AbstractBootDashModel(RunTarget target, BootDashViewModel parent) {
 		super();
@@ -138,5 +138,10 @@ public abstract class AbstractBootDashModel extends AbstractDisposable implement
 
 	public ObservableSet<ButtonModel> getButtons() {
 		return LiveSets.emptySet(ButtonModel.class);
+	}
+
+	@Override
+	public final void performDoubleClickAction(UserInteractions ui) {
+		getRunTarget().performDoubleClickAction(ui);
 	}
 }

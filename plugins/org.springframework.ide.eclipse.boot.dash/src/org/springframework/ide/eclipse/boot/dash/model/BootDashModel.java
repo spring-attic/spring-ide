@@ -97,4 +97,6 @@ public interface BootDashModel {
 	String getDisplayName();
 
 	ObservableSet<ButtonModel> getButtons();
+
+	void performDoubleClickAction(UserInteractions ui);
 }

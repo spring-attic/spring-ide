@@ -76,7 +76,6 @@ public class BootDashActions {
 	private SelectManifestAction selectManifestAction;
 	private RestartWithRemoteDevClientAction restartWithRemoteDevClientAction;
 	private EnableJmxSshTunnelAction enableJmxSshTunnel;
-	private OpenCloudAdminConsoleAction openCloudAdminConsoleAction;
 	private ReconnectCloudConsoleAction reconnectCloudConsoleAction;
 	private ShowViewAction showPropertiesViewAction;
 	private ExposeAppAction exposeRunAppAction;
@@ -208,7 +207,6 @@ public class BootDashActions {
 		if (sectionSelection != null) {
 			refreshAction = new RefreshRunTargetAction(sectionSelection, context);
 			removeTargetAction = new RemoveRunTargetAction(sectionSelection, model, context);
-			openCloudAdminConsoleAction = new OpenCloudAdminConsoleAction(sectionSelection, context);
 			customizeTargetLabelAction = new CustmomizeTargetLabelAction(sectionSelection, context);
 			customizeTargetAppsManagerURLAction = new CustmomizeTargetAppManagerURLAction(sectionSelection, context);
 		}
@@ -409,10 +407,6 @@ public class BootDashActions {
 
 	public IAction getReconnectCloudConsole() {
 		return reconnectCloudConsoleAction;
-	}
-
-	public IAction getOpenCloudAdminConsoleAction() {
-		return openCloudAdminConsoleAction;
 	}
 
 	/**

@@ -371,11 +371,9 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 							UiUtil.openUrl(url);
 						}
 					}
-					else if (sectionSelection.getValue() != null) {
-						IAction openCloudAdminConsoleAction = actions.getOpenCloudAdminConsoleAction();
-						if (openCloudAdminConsoleAction != null) {
-							openCloudAdminConsoleAction.run();
-						}
+					else {
+						BootDashModel section = sectionSelection.getValue();
+						section.performDoubleClickAction(ui());
 					}
 				}
 			}
@@ -567,7 +565,6 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		for (IAction a : actions.getInjectedActions()) {
 			addVisible(manager, a);
 		}
-		addVisible(manager, actions.getOpenCloudAdminConsoleAction());
 		addVisible(manager, actions.getReconnectCloudConsole());
 
 		manager.add(new Separator());

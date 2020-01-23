@@ -295,5 +295,4 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 	public RefreshState getRefreshState() {
 		return refreshState.getValue();
 	}
-
 }
