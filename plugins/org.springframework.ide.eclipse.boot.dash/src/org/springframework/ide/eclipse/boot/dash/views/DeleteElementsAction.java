@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.boot.dash.views;
 import java.util.Collection;
 import java.util.Map.Entry;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;

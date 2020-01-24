@@ -78,6 +78,7 @@ import org.mockito.stubbing.Answer;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.internal.MavenSpringBootProject;
 import org.springframework.ide.eclipse.boot.dash.cf.actions.EnableJmxSshTunnelAction;
+import org.springframework.ide.eclipse.boot.dash.cf.actions.SelectManifestAction;
 import org.springframework.ide.eclipse.boot.dash.cf.actions.ToggleBootDashModelConnection;
 import org.springframework.ide.eclipse.boot.dash.cf.actions.UpdatePasswordAction;
 import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryRunTargetType;
@@ -2218,7 +2219,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		app1.setProject(project1);
 		app2.setProject(project2);
 
-		IAction action = actions.getSelectManifestAction();
+		IAction action = selectManifestAction();
 
 		assertTrue(harness.selection.getElements().isEmpty());
 		assertFalse(action.isEnabled());
@@ -2266,7 +2267,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		harness.answerDeploymentPrompt(ui(), manifestFile);
 
 		assertNull(app.getDeploymentManifestFile());
-		actions.getSelectManifestAction().run();
+		selectManifestAction().run();
 		waitForJobsToComplete();
 		assertEquals(manifestFile, app.getDeploymentManifestFile());
 
@@ -3049,6 +3050,10 @@ public class CloudFoundryBootDashModelMockingTest {
 
 	private EnableJmxSshTunnelAction enableJmxSshTunnel() {
 		return getInjectedAction(EnableJmxSshTunnelAction.class);
+	}
+
+	private SelectManifestAction selectManifestAction() {
+		return getInjectedAction(SelectManifestAction.class);
 	}
 
 	@SuppressWarnings("unchecked")

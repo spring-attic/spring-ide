@@ -75,7 +75,6 @@ public class BootDashActions {
 	private RefreshRunTargetAction refreshAction;
 	private RemoveRunTargetAction removeTargetAction;
 	private RestartApplicationOnlyAction restartOnlyAction;
-	private SelectManifestAction selectManifestAction;
 	private RestartWithRemoteDevClientAction restartWithRemoteDevClientAction;
 	private ReconnectCloudConsoleAction reconnectCloudConsoleAction;
 	private ShowViewAction showPropertiesViewAction;
@@ -202,7 +201,6 @@ public class BootDashActions {
 
 		restartOnlyAction = new RestartApplicationOnlyAction(defaultActionParams());
 		reconnectCloudConsoleAction = new ReconnectCloudConsoleAction(defaultActionParams());
-		selectManifestAction = new SelectManifestAction(defaultActionParams());
 
 		if (sectionSelection != null) {
 			refreshAction = new RefreshRunTargetAction(sectionSelection, context);
@@ -396,10 +394,6 @@ public class BootDashActions {
 
 	public IAction getRestartOnlyApplicationAction() {
 		return restartOnlyAction;
-	}
-
-	public IAction getSelectManifestAction() {
-		return selectManifestAction;
 	}
 
 	public IAction getReconnectCloudConsole() {

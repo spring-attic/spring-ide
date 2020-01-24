@@ -24,7 +24,7 @@ public class CfBootDashActions {
 			LiveProcessCommandsExecutor liveProcessCmds
 	) -> {
 
-		Params params = new Params(actions)
+		Params defaultActionParams = new Params(actions)
 				.setModel(model)
 				.setSelection(selection)
 				.setContext(context)
@@ -33,7 +33,8 @@ public class CfBootDashActions {
 
 
 		ImmutableList.Builder<AbstractBootDashAction> builder = ImmutableList.builder();
-		builder.add(new EnableJmxSshTunnelAction(params));
+		builder.add(new SelectManifestAction(defaultActionParams));
+		builder.add(new EnableJmxSshTunnelAction(defaultActionParams));
 		if (section!=null) {
 			builder.add(new UpdatePasswordAction(section, context));
 			builder.add(new OpenCloudAdminConsoleAction(section, context));
