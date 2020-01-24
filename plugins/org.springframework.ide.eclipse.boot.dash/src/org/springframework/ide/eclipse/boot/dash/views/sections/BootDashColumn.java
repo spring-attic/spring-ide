@@ -59,7 +59,6 @@ public enum BootDashColumn {
 	private final int defaultWidth;
 	private int allignment = SWT.LEFT;
 	private EditingSupportFactory editingSupport;
-	private BootDashActionFactory singleClickAction;
 
 	private BootDashColumn(String label, int defaultWidth) {
 		this.label = label;
@@ -88,9 +87,5 @@ public enum BootDashColumn {
 
 	public EditingSupportFactory getEditingSupport() {
 		return editingSupport;
-	}
-
-	public BootDashActionFactory getSingleClickAction() {
-		return singleClickAction;
 	}
 }
