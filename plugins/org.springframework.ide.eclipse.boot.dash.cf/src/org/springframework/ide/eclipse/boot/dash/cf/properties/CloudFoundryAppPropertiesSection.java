@@ -8,10 +8,20 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.views.properties;
+package org.springframework.ide.eclipse.boot.dash.cf.properties;
 
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.views.properties.AbstractBdeGeneralPropertiesSection;
+import org.springframework.ide.eclipse.boot.dash.views.properties.AppPropertyControl;
+import org.springframework.ide.eclipse.boot.dash.views.properties.BootDashElementPropertyControl;
+import org.springframework.ide.eclipse.boot.dash.views.properties.DefaultPathPropertyControl;
+import org.springframework.ide.eclipse.boot.dash.views.properties.InstancesPropertyControl;
+import org.springframework.ide.eclipse.boot.dash.views.properties.ProjectPropertyControl;
+import org.springframework.ide.eclipse.boot.dash.views.properties.ReadOnlyStringPropertyControl;
+import org.springframework.ide.eclipse.boot.dash.views.properties.RunStatePropertyControl;
+import org.springframework.ide.eclipse.boot.dash.views.properties.TagsPropertyControl;
+import org.springframework.ide.eclipse.boot.dash.views.properties.UrlPropertyControl;
 
 /**
  * Properties view section for Cloud Foundry app elements

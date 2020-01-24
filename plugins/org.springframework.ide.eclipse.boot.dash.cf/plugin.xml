@@ -6,4 +6,19 @@
       <injection class="org.springframework.ide.eclipse.boot.dash.cf.BootDashInjections"/>
    </extension>
 
+   <extension
+         point="org.eclipse.ui.views.properties.tabbed.propertySections">
+      <propertySections
+            contributorId="org.springframework.ide.eclipse.boot.dash.propertyContributor">
+         <propertySection
+               class="org.springframework.ide.eclipse.boot.dash.cf.properties.CloudFoundryAppPropertiesSection"
+               id="org.springframework.ide.eclipse.boot.dash.section.CloudFoundryGeneral"
+               tab="org.springframework.ide.eclipse.boot.dash.tab.General">
+            <input
+                  type="org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement">
+            </input>
+         </propertySection>
+      </propertySections>
+   </extension>
+
 </plugin>

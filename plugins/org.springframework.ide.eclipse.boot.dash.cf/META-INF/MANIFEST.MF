@@ -17,7 +17,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.resources,
  org.eclipse.debug.core,
  org.eclipse.jdt.core,
- org.springsource.ide.eclipse.commons.ui
+ org.springsource.ide.eclipse.commons.ui,
+ org.eclipse.ui.views.properties.tabbed
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: org.springframework.ide.eclipse.boot.dash.cf.BootDashCfPlugin
 Bundle-ActivationPolicy: lazy
