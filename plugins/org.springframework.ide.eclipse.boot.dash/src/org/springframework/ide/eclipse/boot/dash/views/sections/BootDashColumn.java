@@ -10,82 +10,19 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views.sections;
 
-import org.eclipse.jface.viewers.EditingSupport;
-import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.swt.SWT;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
-
 public enum BootDashColumn {
 
-	RUN_STATE_ICN(	"",	        20),
-	INSTANCES(      "Instances", 50),
-	PROJECT(		"Project", 	150),
-	NAME(			"Name",		150),
-	HOST(           "Host",     70),
-	LIVE_PORT(		"Port",		70),
-	DEFAULT_PATH(	"Path",		70),
-	TAGS(			"Tags",		100),
-	EXPOSED_URL(	"Exposed via",		100),
-	DEVTOOLS(		"Devtools", 70),
-	JMX_SSH_TUNNEL(	"Jmx",		30),
-	TREE_VIEWER_MAIN("", 100); //this is a 'fake' column which corresponds to the single column shown in unified tree viewer.
+	RUN_STATE_ICN,
+	INSTANCES,
+	PROJECT,
+	NAME,
+	HOST,
+	LIVE_PORT,
+	DEFAULT_PATH,
+	TAGS,
+	EXPOSED_URL,
+	DEVTOOLS,
+	JMX_SSH_TUNNEL,
+	TREE_VIEWER_MAIN; //this is a 'fake' column which corresponds to the single column shown in unified tree viewer.
 
-	//Configure some odds and ends that don't apply to every column:
-	static {
-		RUN_STATE_ICN.longLabel = "State";
-
-		TAGS.editingSupport = new EditingSupportFactory() {
-			@Override
-			public EditingSupport createEditingSupport(TableViewer viewer, LiveExpression<BootDashElement> selection,
-					BootDashViewModel model, Stylers stylers) {
-				return new TagEditingSupport(viewer, selection, model, stylers);
-			}
-		};
-
-		DEFAULT_PATH.editingSupport = new EditingSupportFactory() {
-			@Override
-			public EditingSupport createEditingSupport(TableViewer viewer, LiveExpression<BootDashElement> selection,
-					BootDashViewModel model, Stylers stylers) {
-				return new DefaultPathEditorSupport(viewer, selection, stylers);
-			}
-		};
-	}
-
-	private final String label;
-	private String longLabel;
-	private final int defaultWidth;
-	private int allignment = SWT.LEFT;
-	private EditingSupportFactory editingSupport;
-
-	private BootDashColumn(String label, int defaultWidth) {
-		this.label = label;
-		this.longLabel = label;
-		this.defaultWidth = defaultWidth;
-	}
-
-	public String getLabel() {
-		return label;
-	}
-
-	public String getLongLabel() {
-		return longLabel;
-	}
-
-	public int getDefaultWidth() {
-		return defaultWidth;
-	}
-
-	/**
-	 * @return SWT style constant controlling aligment (e.g SWT.LEFT or SWT.RIGHT)
-	 */
-	public int getAllignment() {
-		return allignment;
-	}
-
-	public EditingSupportFactory getEditingSupport() {
-		return editingSupport;
-	}
 }
