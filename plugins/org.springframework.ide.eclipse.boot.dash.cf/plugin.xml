@@ -18,6 +18,14 @@
                   type="org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement">
             </input>
          </propertySection>
+         <propertySection
+               class="org.springframework.ide.eclipse.boot.dash.cf.properties.CloudServiceGeneralPropertiesSection"
+               id="org.springframework.ide.eclipse.boot.dash.section.CloudServiceSection"
+               tab="org.springframework.ide.eclipse.boot.dash.tab.General">
+            <input
+                  type="org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudServiceInstanceDashElement">
+            </input>
+         </propertySection>
       </propertySections>
    </extension>
 

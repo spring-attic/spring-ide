@@ -8,11 +8,17 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.views.properties;
+package org.springframework.ide.eclipse.boot.dash.cf.properties;
 
 import java.util.function.Function;
 
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudServiceInstanceDashElement;
+import org.springframework.ide.eclipse.boot.dash.views.properties.AbstractBdeGeneralPropertiesSection;
+import org.springframework.ide.eclipse.boot.dash.views.properties.AbstractBdePropertyControl;
+import org.springframework.ide.eclipse.boot.dash.views.properties.BdeReadOnlyTextPropertyControl;
+import org.springframework.ide.eclipse.boot.dash.views.properties.BootDashElementPropertyControl;
+import org.springframework.ide.eclipse.boot.dash.views.properties.TagsPropertyControl;
+import org.springframework.ide.eclipse.boot.dash.views.properties.UrlPropertyControl;
 
 /**
  * Properties section for cloud service elements
