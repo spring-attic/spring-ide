@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2019 Pivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Pivotal, Inc. - initial API and implementation
+ *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cf.actions;
 
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
@@ -30,12 +40,11 @@ public class CfBootDashActions {
 				.setContext(context)
 				.setLiveProcessCmds(liveProcessCmds);
 
-
-
 		ImmutableList.Builder<AbstractBootDashAction> builder = ImmutableList.builder();
 		builder.add(new RestartApplicationOnlyAction(defaultActionParams));
 		builder.add(new SelectManifestAction(defaultActionParams));
 		builder.add(new EnableJmxSshTunnelAction(defaultActionParams));
+		builder.add(new ReconnectCloudConsoleAction(defaultActionParams));
 		if (section!=null) {
 			builder.add(new UpdatePasswordAction(section, context));
 			builder.add(new OpenCloudAdminConsoleAction(section, context));

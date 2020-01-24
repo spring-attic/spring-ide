@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.views;
+package org.springframework.ide.eclipse.boot.dash.cf.actions;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -21,6 +21,9 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
+import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashElementsAction;
+import org.springframework.ide.eclipse.boot.dash.views.AbstractCloudAppDashElementsAction;
+import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashElementsAction.Params;
 
 public class ReconnectCloudConsoleAction extends AbstractCloudAppDashElementsAction {
 

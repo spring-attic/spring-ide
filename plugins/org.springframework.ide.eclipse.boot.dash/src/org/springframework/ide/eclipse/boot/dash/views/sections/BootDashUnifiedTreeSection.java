@@ -562,7 +562,6 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		for (IAction a : actions.getInjectedActions(AbstractBootDashAction.Location.CONTEXT_MENU)) {
 			addVisible(manager, a);
 		}
-		addVisible(manager, actions.getReconnectCloudConsole());
 
 		manager.add(new Separator());
 
