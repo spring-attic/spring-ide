@@ -96,11 +96,6 @@ public interface UserInteractions {
 	 */
 	void openEditTemplateDialog(EditTemplateDialogModel model);
 
-	/**
-	 * Opens a {@link CustomizeAppsManagerURLDialog} on given dialog model.
-	 */
-	void openEditAppsManagerURLDialog(CustomizeAppsManagerURLDialogModel model);
-
 	ManifestDiffDialogModel.Result confirmReplaceApp(String title, CloudData cloudData, IFile manifestFile, CloudApplicationDeploymentProperties deploymentProperties)
 			throws OperationCanceledException, Exception;
 }

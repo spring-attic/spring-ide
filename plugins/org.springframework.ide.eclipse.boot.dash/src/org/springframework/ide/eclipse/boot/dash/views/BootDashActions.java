@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -43,6 +44,7 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunT
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKInstallManager;
+import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashAction.Location;
 import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashElementsAction.Params;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
@@ -91,7 +93,6 @@ public class BootDashActions {
 	private OpenToggleFiltersDialogAction toggleFiltersDialogAction;
 	private ToggleFilterAction[] toggleFilterActions;
 	private CustmomizeTargetLabelAction customizeTargetLabelAction;
-	private CustmomizeTargetAppManagerURLAction customizeTargetAppsManagerURLAction;
 
 	private DisposingFactory<RunTarget, AbstractBootDashAction> debugOnTargetActions;
 	private DisposingFactory<RunTarget, AbstractBootDashAction> runOnTargetActions;
@@ -101,10 +102,10 @@ public class BootDashActions {
 	private LiveDataConnectionManagementActions liveDataConnectionManagement;
 	private final SimpleDIContext context;
 
-	private List<IAction> injectedActions;
+	private List<AbstractBootDashAction> injectedActions;
 
 	public interface Factory {
-		Collection<IAction> create(BootDashViewModel model, MultiSelection<BootDashElement> selection, LiveExpression<BootDashModel> section, SimpleDIContext context, LiveProcessCommandsExecutor liveProcessCmds);
+		Collection<AbstractBootDashAction> create(BootDashViewModel model, MultiSelection<BootDashElement> selection, LiveExpression<BootDashModel> section, SimpleDIContext context, LiveProcessCommandsExecutor liveProcessCmds);
 	}
 
 	public BootDashActions(BootDashViewModel model, MultiSelection<BootDashElement> selection, SimpleDIContext context,  LiveProcessCommandsExecutor liveProcessCmds) {
@@ -208,7 +209,6 @@ public class BootDashActions {
 			refreshAction = new RefreshRunTargetAction(sectionSelection, context);
 			removeTargetAction = new RemoveRunTargetAction(sectionSelection, model, context);
 			customizeTargetLabelAction = new CustmomizeTargetLabelAction(sectionSelection, context);
-			customizeTargetAppsManagerURLAction = new CustmomizeTargetAppManagerURLAction(sectionSelection, context);
 		}
 
 		showPropertiesViewAction = new ShowViewAction(PROPERTIES_VIEW_ID);
@@ -243,7 +243,7 @@ public class BootDashActions {
 		openFilterPreferencesAction = new OpenFilterPreferencesAction(context);
 		liveDataConnectionManagement = new LiveDataConnectionManagementActions(defaultActionParams());
 
-		ImmutableList.Builder<IAction> injectedActions = ImmutableList.builder();
+		ImmutableList.Builder<AbstractBootDashAction> injectedActions = ImmutableList.builder();
 		for (Factory f : context.getBeans(Factory.class)) {
 			injectedActions.addAll(f.create(model, elementsSelection, sectionSelection, context, liveProcessCmds));
 		};
@@ -498,10 +498,6 @@ public class BootDashActions {
 		return customizeTargetLabelAction;
 	}
 
-	public CustmomizeTargetAppManagerURLAction getCustomizeTargetAppsManagerURLAction() {
-		return customizeTargetAppsManagerURLAction;
-	}
-
 	public ImmutableList<IAction> getDebugOnTargetActions() {
 		return getDeployAndStartOnTargetActions(debugOnTargetActions);
 	}
@@ -562,7 +558,11 @@ public class BootDashActions {
 		return context.getBean(UserInteractions.class);
 	}
 
-	public List<IAction> getInjectedActions() {
+	public List<IAction> getInjectedActions(Location menu) {
+		return injectedActions.stream().filter(a -> a.showIn().contains(menu)).collect(Collectors.toList());
+	}
+
+	public Collection<AbstractBootDashAction> getAllInjectedActions() {
 		return injectedActions;
 	}
 }

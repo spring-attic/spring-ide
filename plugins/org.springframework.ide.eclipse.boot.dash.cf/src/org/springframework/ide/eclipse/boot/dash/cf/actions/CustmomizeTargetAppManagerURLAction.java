@@ -8,20 +8,22 @@
  * Contributors:
  *     Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.views;
+package org.springframework.ide.eclipse.boot.dash.cf.actions;
+
+import java.util.EnumSet;
 
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.dialogs.CustomizeAppsManagerURLDialogModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
-import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.views.AbstractCloudDashModelAction;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
-public class CustmomizeTargetAppManagerURLAction extends AbstractBootDashModelAction {
+public class CustmomizeTargetAppManagerURLAction extends AbstractCloudDashModelAction{
 
-	protected CustmomizeTargetAppManagerURLAction(LiveExpression<BootDashModel> section, SimpleDIContext ui) {
-		super(section, ui);
+	protected CustmomizeTargetAppManagerURLAction(LiveExpression<BootDashModel> section, SimpleDIContext context) {
+		super(section, context);
 		setText("Customize Cloud Admin Console URL...");
 	}
 
@@ -30,6 +32,7 @@ public class CustmomizeTargetAppManagerURLAction extends AbstractBootDashModelAc
 		this.setEnabled(isApplicable(sectionSelection.getValue()));
 	}
 
+	@Override
 	public void updateVisibility() {
 		this.setVisible(isApplicable(sectionSelection.getValue()));
 	}
@@ -47,8 +50,13 @@ public class CustmomizeTargetAppManagerURLAction extends AbstractBootDashModelAc
 		final BootDashModel section = sectionSelection.getValue();
 		if (isApplicable(section)) {
 			CustomizeAppsManagerURLDialogModel model = new CustomizeAppsManagerURLDialogModel((CloudFoundryBootDashModel)section);
-			ui().openEditAppsManagerURLDialog(model);
+			cfUi().openEditAppsManagerURLDialog(model);
 		}
+	}
+
+	@Override
+	public EnumSet<Location> showIn() {
+		return EnumSet.of(Location.CUSTOMIZE_MENU);
 	}
 
 }

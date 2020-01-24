@@ -562,7 +562,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		addVisible(manager, actions.getRestartWithRemoteDevClientAction());
 		addVisible(manager, actions.getEnableJmxSshTunnel());
 		addVisible(manager, actions.getDeleteAppsAction());
-		for (IAction a : actions.getInjectedActions()) {
+		for (IAction a : actions.getInjectedActions(AbstractBootDashAction.Location.CONTEXT_MENU)) {
 			addVisible(manager, a);
 		}
 		addVisible(manager, actions.getReconnectCloudConsole());
@@ -571,7 +571,9 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 
 		ImmutableList.Builder<IAction> customizeActions = ImmutableList.builder();
 		customizeActions.add(actions.getCustomizeTargetLabelAction());
-		customizeActions.add(actions.getCustomizeTargetAppsManagerURLAction());
+		for (IAction a : actions.getInjectedActions(AbstractBootDashAction.Location.CUSTOMIZE_MENU)) {
+			customizeActions.add(a);
+		}
 		addSubmenu(manager, "Customize...", null, customizeActions.build());
 	}
 

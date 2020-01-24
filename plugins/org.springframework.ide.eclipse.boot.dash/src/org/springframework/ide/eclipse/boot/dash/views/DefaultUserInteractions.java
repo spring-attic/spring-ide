@@ -335,15 +335,6 @@ public class DefaultUserInteractions implements UserInteractions {
 	}
 
 	@Override
-	public void openEditAppsManagerURLDialog(CustomizeAppsManagerURLDialogModel model) {
-		getShell().getDisplay().syncExec(new Runnable() {
-			public void run() {
-				new CustomizeAppsManagerURLDialog(model, getShell()).open();
-			}
-		});
-	}
-
-	@Override
 	public int confirmOperation(String title, String message, String[] buttonLabels, int defaultButtonIndex) {
 		AtomicInteger answer = new AtomicInteger();
 		getShell().getDisplay().syncExec(() -> {

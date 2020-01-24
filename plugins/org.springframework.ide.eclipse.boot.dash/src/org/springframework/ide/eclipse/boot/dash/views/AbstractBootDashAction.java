@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
+import java.util.EnumSet;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
@@ -21,8 +23,17 @@ import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
  */
 public class AbstractBootDashAction extends Action implements Disposable {
 
+	public static enum Location {
+		CONTEXT_MENU,
+		CUSTOMIZE_MENU
+	}
+
 	private boolean isVisible = true;
 	protected final SimpleDIContext context;
+
+	public EnumSet<Location> showIn() {
+		return EnumSet.of(Location.CONTEXT_MENU);
+	}
 
 	protected AbstractBootDashAction(SimpleDIContext context, int style) {
 		super("", style);

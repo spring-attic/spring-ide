@@ -3049,7 +3049,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 	@SuppressWarnings("unchecked")
 	private <T extends IAction> T getInjectedAction(Class<T> klass) {
-		return (T) actions.getInjectedActions().stream()
+		return (T) actions.getAllInjectedActions().stream()
 				.filter(action -> klass.isAssignableFrom(action.getClass()))
 				.findFirst()
 				.get();

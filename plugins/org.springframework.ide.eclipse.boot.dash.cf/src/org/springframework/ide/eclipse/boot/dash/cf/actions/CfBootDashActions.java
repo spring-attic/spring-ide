@@ -1,12 +1,12 @@
 package org.springframework.ide.eclipse.boot.dash.cf.actions;
 
-import org.eclipse.jface.action.IAction;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveProcessCommandsExecutor;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
+import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashAction;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
@@ -21,11 +21,12 @@ public class CfBootDashActions {
 			SimpleDIContext context,
 			LiveProcessCommandsExecutor liveProcessCmds
 	) -> {
-		ImmutableList.Builder<IAction> builder = ImmutableList.builder();
+		ImmutableList.Builder<AbstractBootDashAction> builder = ImmutableList.builder();
 		if (section!=null) {
 			builder.add(new UpdatePasswordAction(section, context));
 			builder.add(new OpenCloudAdminConsoleAction(section, context));
 			builder.add(new ToggleBootDashModelConnection(section, context));
+			builder.add(new CustmomizeTargetAppManagerURLAction(section, context));
 		}
 		return builder.build();
 	};
