@@ -8,9 +8,8 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.views;
+package org.springframework.ide.eclipse.boot.dash.cf.actions;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -18,6 +17,9 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashElementsAction;
+import org.springframework.ide.eclipse.boot.dash.views.AbstractCloudAppDashElementsAction;
+import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashElementsAction.Params;
 
 public class RestartApplicationOnlyAction extends AbstractCloudAppDashElementsAction {
 

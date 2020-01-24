@@ -74,7 +74,6 @@ public class BootDashActions {
 	private AddRunTargetAction[] addTargetActions;
 	private RefreshRunTargetAction refreshAction;
 	private RemoveRunTargetAction removeTargetAction;
-	private RestartApplicationOnlyAction restartOnlyAction;
 	private RestartWithRemoteDevClientAction restartWithRemoteDevClientAction;
 	private ReconnectCloudConsoleAction reconnectCloudConsoleAction;
 	private ShowViewAction showPropertiesViewAction;
@@ -199,7 +198,6 @@ public class BootDashActions {
 		deleteConfigsAction.setText("Delete Config");
 		deleteConfigsAction.setToolTipText("Permantently deletes Launch Configgurations from the workspace");
 
-		restartOnlyAction = new RestartApplicationOnlyAction(defaultActionParams());
 		reconnectCloudConsoleAction = new ReconnectCloudConsoleAction(defaultActionParams());
 
 		if (sectionSelection != null) {
@@ -389,11 +387,6 @@ public class BootDashActions {
 
 	public IAction getDeleteConfigsAction() {
 		return deleteConfigsAction;
-	}
-
-
-	public IAction getRestartOnlyApplicationAction() {
-		return restartOnlyAction;
 	}
 
 	public IAction getReconnectCloudConsole() {

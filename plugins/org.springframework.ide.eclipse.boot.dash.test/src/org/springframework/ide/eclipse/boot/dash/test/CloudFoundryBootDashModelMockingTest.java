@@ -78,6 +78,7 @@ import org.mockito.stubbing.Answer;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.internal.MavenSpringBootProject;
 import org.springframework.ide.eclipse.boot.dash.cf.actions.EnableJmxSshTunnelAction;
+import org.springframework.ide.eclipse.boot.dash.cf.actions.RestartApplicationOnlyAction;
 import org.springframework.ide.eclipse.boot.dash.cf.actions.SelectManifestAction;
 import org.springframework.ide.eclipse.boot.dash.cf.actions.ToggleBootDashModelConnection;
 import org.springframework.ide.eclipse.boot.dash.cf.actions.UpdatePasswordAction;
@@ -1604,7 +1605,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		//The state refressh is asynch so until state becomes 'INACTIVE' it will be unknown.
 		waitForState(appElement, RunState.INACTIVE, 3000);
-		IAction restartAction = actions.getRestartOnlyApplicationAction();
+		IAction restartAction = restartOnlyApplicationAction();
 
 		RunStateHistory runstateHistory = new RunStateHistory();
 
@@ -3054,6 +3055,10 @@ public class CloudFoundryBootDashModelMockingTest {
 
 	private SelectManifestAction selectManifestAction() {
 		return getInjectedAction(SelectManifestAction.class);
+	}
+
+	private IAction restartOnlyApplicationAction() {
+		return getInjectedAction(RestartApplicationOnlyAction.class);
 	}
 
 	@SuppressWarnings("unchecked")
