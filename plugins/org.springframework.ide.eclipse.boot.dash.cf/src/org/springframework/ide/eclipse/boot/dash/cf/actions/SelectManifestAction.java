@@ -16,7 +16,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDa
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.SelectManifestOp;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
-import org.springframework.ide.eclipse.boot.dash.views.AbstractCloudAppDashElementsAction;
 
 public class SelectManifestAction extends AbstractCloudAppDashElementsAction {
 

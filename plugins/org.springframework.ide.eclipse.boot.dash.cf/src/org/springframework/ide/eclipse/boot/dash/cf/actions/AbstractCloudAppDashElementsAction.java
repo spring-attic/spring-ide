@@ -8,10 +8,12 @@
  * Contributors:
  *     Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.views;
+package org.springframework.ide.eclipse.boot.dash.cf.actions;
 
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashElementsAction;
+import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashElementsAction.Params;
 
 /**
  * Action for {@link CloudAppDashElement} elements only

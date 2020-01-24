@@ -22,7 +22,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDa
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
-import org.springframework.ide.eclipse.boot.dash.views.AbstractCloudAppDashElementsAction;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 public class EnableJmxSshTunnelAction extends AbstractCloudAppDashElementsAction {

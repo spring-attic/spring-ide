@@ -22,7 +22,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElemen
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashElementsAction;
-import org.springframework.ide.eclipse.boot.dash.views.AbstractCloudAppDashElementsAction;
 import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashElementsAction.Params;
 
 public class ReconnectCloudConsoleAction extends AbstractCloudAppDashElementsAction {
