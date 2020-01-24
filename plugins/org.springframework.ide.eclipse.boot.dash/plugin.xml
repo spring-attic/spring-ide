@@ -99,9 +99,6 @@
             <input
                   type="org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement">
             </input>
-            <input
-                  type="org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement">
-            </input>
          </propertySection>
          <propertySection
                class="org.springframework.ide.eclipse.boot.dash.views.properties.LocalGeneralPropertiesSection"
@@ -132,9 +129,6 @@
             <input
                   type="org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement">
             </input>
-            <input
-                  type="org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement">
-            </input>
          </propertySection>
          <propertySection
                class="org.springframework.ide.eclipse.boot.dash.views.properties.EnvPropertiesSection"
@@ -145,9 +139,6 @@
             </input>
             <input
                   type="org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement">
-            </input>
-            <input
-                  type="org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement">
             </input>
          </propertySection>
       </propertySections>
