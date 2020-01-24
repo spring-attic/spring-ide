@@ -46,7 +46,7 @@ public class ApplicationRunningStateTracker {
 
 
 	public ApplicationRunningStateTracker(CancelationToken cancelationToken, CloudAppDashElement app) {
-		this.model = app.getCloudModel();
+		this.model = app.getBootDashModel();
 		this.requests = model.getClient();
 		this.appName = app.getName();
 		this.timeout = APP_START_TIMEOUT;

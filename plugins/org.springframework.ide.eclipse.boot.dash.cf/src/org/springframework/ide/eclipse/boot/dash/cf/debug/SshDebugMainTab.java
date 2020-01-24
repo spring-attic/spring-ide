@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh;
+package org.springframework.ide.eclipse.boot.dash.cf.debug;
 
 import static org.springframework.ide.eclipse.boot.ui.BootUIImages.BOOT_DEVTOOLS_ICON;
 

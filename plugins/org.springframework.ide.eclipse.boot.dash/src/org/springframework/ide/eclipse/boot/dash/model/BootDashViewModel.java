@@ -20,7 +20,6 @@ import java.util.Set;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugStrategyManager;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshDebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnelFactory;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
@@ -57,7 +56,6 @@ public class BootDashViewModel extends AbstractDisposable {
 	private List<RunTargetType> orderedRunTargetTypes;
 	private Comparator<BootDashModel> modelComparator;
 	private Comparator<RunTarget> targetComparator;
-	private DebugStrategyManager cfDebugStrategies;
 	private BootDashModelContext context;
 
 	private static List<RunTargetType> createRunTargetTypes(BootDashModelContext context) {
@@ -102,11 +100,6 @@ public class BootDashViewModel extends AbstractDisposable {
 		addDisposableChild(filter);
 
 		devtoolsProcessTracker = DevtoolsUtil.createProcessTracker(this);
-		cfDebugStrategies = createCfDebugStrategies();
-	}
-
-	protected DebugStrategyManager createCfDebugStrategies() {
-		return new DebugStrategyManager(SshDebugSupport.INSTANCE, this);
 	}
 
 	public LiveSetVariable<RunTarget> getRunTargets() {
@@ -117,7 +110,6 @@ public class BootDashViewModel extends AbstractDisposable {
 	public void dispose() {
 		models.dispose();
 		devtoolsProcessTracker.dispose();
-		cfDebugStrategies.dispose();
 		filterBox.dispose();
 	}
 
@@ -191,14 +183,6 @@ public class BootDashViewModel extends AbstractDisposable {
 
 	public Comparator<RunTarget> getTargetComparator() {
 		return this.targetComparator;
-	}
-
-	public DebugSupport getCfDebugSupport() {
-		//TODO: DebugSupport is specific to CF, so why is it provided here in the viewModel that encompasses all
-		//types of elements?
-		//Right now there seems to be no better place for it, but maybe it really belong in the
-		// CF RunTargetType.
-		return cfDebugStrategies.getStrategy();
 	}
 
 	public BootDashModelContext getContext() {

@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug;
 
+import java.util.List;
+
+import org.eclipse.core.runtime.Assert;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
@@ -23,14 +26,15 @@ import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
  */
 public class DebugStrategyManager implements Disposable {
 
-	// At the moment there's only one supported debug strategy, in the future there may be more than one.
-	// In that case this class may need be generalized to manage a collection of strategies somehow.
 
 	private DebugSupport strategy;
 	private Disposable processTracker;
 
-	public DebugStrategyManager(DebugSupport strategy, BootDashViewModel viewModel) {
-		this.strategy = strategy;
+	public DebugStrategyManager(List<DebugSupport> list, BootDashViewModel viewModel) {
+		// At the moment there's only one supported debug strategy, in the future there may be more than one.
+		// In that case this class may need be generalized to manage a collection of strategies somehow.
+		Assert.isLegal(list.size()==1);
+		this.strategy = list.get(0);
 		this.processTracker = strategy.createProcessTracker(viewModel);
 	}
 

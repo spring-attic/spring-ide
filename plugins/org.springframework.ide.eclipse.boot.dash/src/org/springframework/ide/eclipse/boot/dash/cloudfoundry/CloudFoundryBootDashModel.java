@@ -62,6 +62,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDoma
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ReactorUtils;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.CloudAppLogManager;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugStrategyManager;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentPropertiesDialog;
@@ -77,6 +78,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.TargetApplicat
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategies;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategy;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.ICloudApplicationArchiver;
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel.ManifestType;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
@@ -123,6 +125,7 @@ import reactor.core.publisher.Mono;
 
 public class CloudFoundryBootDashModel extends RemoteBootDashModel implements ModifiableModel {
 
+	private DebugStrategyManager cfDebugStrategies;
 	private IPropertyStore modelStore;
 
 	public static final String APP_TO_PROJECT_MAPPING = "projectToAppMapping";
@@ -286,8 +289,13 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 	private DisposingFactory<BootDashElement, LiveExpression<URI>> actuatorUrlFactory;
 
 
+	private SimpleDIContext getDiContext() {
+		return getViewModel().getContext().injections;
+	}
+
 	public CloudFoundryBootDashModel(CloudFoundryRunTarget target, BootDashModelContext context, BootDashViewModel parent) {
 		super(target, parent);
+		cfDebugStrategies = new DebugStrategyManager(getDiContext().getBeans(DebugSupport.class), getViewModel());
 		RunTargetType type = target.getType();
 		IPropertyStore typeStore = PropertyStores.createForScope(type, context.getRunTargetProperties());
 		this.modelStore = PropertyStores.createSubStore(target.getId(), typeStore);
@@ -443,7 +451,7 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 			final UserInteractions ui,
 			RunState runOrDebug
 	) throws Exception {
-		DebugSupport debugSuppport = getViewModel().getCfDebugSupport();
+		DebugSupport debugSuppport = getDebugSupport();
 		runAsynch(new ProjectsDeployer(CloudFoundryBootDashModel.this, ui, projectsToDeploy, runOrDebug, debugSuppport),
 				ui);
 	}
@@ -978,6 +986,10 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 
 	public UnsupportedPushProperties getUnsupportedProperties() {
 		return unsupportedPushProperties;
+	}
+
+	public DebugSupport getDebugSupport() {
+		return cfDebugStrategies.getStrategy();
 	}
 
 }

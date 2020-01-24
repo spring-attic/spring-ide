@@ -54,7 +54,7 @@ public class HealthCheckPropertyControl extends AbstractBdePropertyControl {
 				String selected = selection.getText();
 				if (StringUtil.hasText(selected)) {
 					SetHealthCheckOperation op = new SetHealthCheckOperation(app, selected, app.createCancelationToken());
-					app.getCloudModel().runAsynch(op, null /* no user interactions */);
+					app.getBootDashModel().runAsynch(op, null /* no user interactions */);
 				}
 			}
 		});

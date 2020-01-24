@@ -59,6 +59,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.RemoteDevClientStartOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.SetHealthCheckOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.ParsedUri;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.Deletable;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -171,7 +172,7 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 
 	protected void showConsole() {
 		try {
-			getCloudModel().getElementConsoleManager().showConsole(this);
+			getBootDashModel().getElementConsoleManager().showConsole(this);
 		} catch (Exception e) {
 			Log.log(e);
 		}
@@ -179,8 +180,8 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 
 	protected void resetAndShowConsole() {
 		try {
-			getCloudModel().getElementConsoleManager().resetConsole(getName());
-			getCloudModel().getElementConsoleManager().showConsole(getName());
+			getBootDashModel().getElementConsoleManager().resetConsole(getName());
+			getBootDashModel().getElementConsoleManager().showConsole(getName());
 		} catch (Exception e) {
 			Log.log(e);
 		}
@@ -203,15 +204,16 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 		jmxSshTunnelStatus.refresh();
 	}
 
-	public CloudFoundryBootDashModel getCloudModel() {
-		return (CloudFoundryBootDashModel) getBootDashModel();
+	@Override
+	public CloudFoundryBootDashModel getBootDashModel() {
+		return (CloudFoundryBootDashModel) super.getBootDashModel();
 	}
 
 	@Override
 	public void stopAsync(UserInteractions ui) throws Exception {
 		cancelOperations();
 		String appName = getName();
-		getCloudModel().runAsynch("Stopping application " + appName, appName, (IProgressMonitor monitor) -> {
+		getBootDashModel().runAsynch("Stopping application " + appName, appName, (IProgressMonitor monitor) -> {
 			stop(createCancelationToken(), monitor);
 		}, ui);
 	}
@@ -258,7 +260,7 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 
 	public DebugSupport getDebugSupport() {
 		//In the future we may need to choose between multiple strategies here.
-		return getViewModel().getCfDebugSupport();
+		return getBootDashModel().getDebugSupport();
 	}
 
 	public BootDashViewModel getViewModel() {
@@ -267,7 +269,7 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 
 	public void restartWithRemoteClient(UserInteractions ui, CancelationToken cancelationToken) {
 		String opName = "Restart Remote DevTools Client for application '" + getName() + "'";
-		getCloudModel().runAsynch(opName, getName(), (IProgressMonitor monitor) -> {
+		getBootDashModel().runAsynch(opName, getName(), (IProgressMonitor monitor) -> {
 			doRestartWithRemoteClient(RunState.RUNNING, ui, cancelationToken, monitor);
 		}, ui);
 	}
@@ -275,7 +277,7 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 	protected void doRestartWithRemoteClient(RunState runningOrDebugging, UserInteractions ui, CancelationToken cancelationToken, IProgressMonitor monitor)
 			throws Exception {
 
-		CloudFoundryBootDashModel model = getCloudModel();
+		CloudFoundryBootDashModel model = getBootDashModel();
 		Map<String, String> envVars = model.getRunTarget().getClient().getApplicationEnvironment(getName());
 
 		if (getProject() == null) {
@@ -325,7 +327,7 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 
 	public void restartOnlyAsynch(UserInteractions ui, CancelationToken cancelationToken) {
 		String opName = "Restarting application " + getName();
-		getCloudModel().runAsynch(opName, getName(), (IProgressMonitor monitor) -> {
+		getBootDashModel().runAsynch(opName, getName(), (IProgressMonitor monitor) -> {
 			restartOnly(ui, cancelationToken, monitor);
 		}, ui);
 	}
@@ -628,19 +630,19 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 
 	public void log(String message, LogType logType) {
 		try {
-			getCloudModel().getElementConsoleManager().writeToConsole(this, message, logType);
+			getBootDashModel().getElementConsoleManager().writeToConsole(this, message, logType);
 		} catch (Exception e) {
 			Log.log(e);
 		}
 	}
 
 	@Override
-	public Object getParent() {
+	public BootDashModel getParent() {
 		return getBootDashModel();
 	}
 
 	protected LiveExpression<URI> getActuatorUrl() {
-		LiveExpression<URI> urlExp = getCloudModel().getActuatorUrlFactory().createOrGet(this);
+		LiveExpression<URI> urlExp = getBootDashModel().getActuatorUrlFactory().createOrGet(this);
 		if (urlExp!=null) {
 			return urlExp;
 		}
@@ -749,7 +751,7 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 	 */
 	public void print(String msg, LogType type) {
 		try {
-			BootDashModelConsoleManager consoles = getCloudModel().getElementConsoleManager();
+			BootDashModelConsoleManager consoles = getBootDashModel().getElementConsoleManager();
 			consoles.writeToConsole(this, msg+"\n", type);
 		} catch (Exception e) {
 			Log.log(e);
@@ -766,11 +768,11 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 		CFApplicationDetail data = getClient().getApplication(getName());
 		if (data==null) {
 			//Looks like element no longer exist in CF so remove it from the model
-			CloudFoundryBootDashModel model = getCloudModel();
+			CloudFoundryBootDashModel model = getBootDashModel();
 			model.removeApplication(getName());
 			return null;
 		}
-		getCloudModel().updateApplication(data);
+		getBootDashModel().updateApplication(data);
 		return this;
 	}
 
@@ -804,7 +806,7 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 			checkTerminationRequested(cancelationToken, monitor);
 
 			CloudApplicationDeploymentProperties properties = deploymentProperties == null
-					? getCloudModel().resolveDeploymentProperties(updatedApp, ui, monitor) : deploymentProperties;
+					? getBootDashModel().resolveDeploymentProperties(updatedApp, ui, monitor) : deploymentProperties;
 
 			// Update JAVA_OPTS env variable with Remote DevTools Client secret
 			DevtoolsUtil.setupEnvVarsForRemoteClient(properties.getEnvironmentVariables(),
@@ -823,7 +825,7 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 
 			checkTerminationRequested(cancelationToken, monitor);
 
-			CFPushArguments pushArgs = properties.toPushArguments(getCloudModel().getCloudDomains(monitor));
+			CFPushArguments pushArgs = properties.toPushArguments(getBootDashModel().getCloudDomains(monitor));
 
 			getClient().push(pushArgs, CancelationTokens.merge(cancelationToken, monitor));
 
@@ -846,7 +848,7 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 
 	@Override
 	public void delete(UserInteractions ui) {
-		CloudFoundryBootDashModel model = getCloudModel();
+		CloudFoundryBootDashModel model = getBootDashModel();
 		CloudAppDashElement cloudElement = this;
 		cloudElement.cancelOperations();
 		CancelationToken cancelToken = cloudElement.createCancelationToken();
@@ -867,7 +869,7 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 		// Allow deletions to occur concurrently with any other application
 		// operation
 		operation.setSchedulingRule(null);
-		getCloudModel().runAsynch(operation, ui);
+		getBootDashModel().runAsynch(operation, ui);
 	}
 
 	@Override

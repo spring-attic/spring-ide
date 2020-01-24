@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh;
+package org.springframework.ide.eclipse.boot.dash.cf.debug;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -25,7 +25,7 @@ public class SshDebugStartOperation extends CloudApplicationOperation {
 	private CloudAppDashElement app;
 
 	public SshDebugStartOperation(CloudAppDashElement app, DebugSupport debugSupport, CancelationToken cancelationToken) {
-		super("Starting SSH debugging for app '"+app.getName()+"'", app.getCloudModel(), app.getName(), cancelationToken);
+		super("Starting SSH debugging for app '"+app.getName()+"'", app.getBootDashModel(), app.getName(), cancelationToken);
 		this.app = app;
 	}
 

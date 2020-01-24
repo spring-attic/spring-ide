@@ -31,7 +31,7 @@ public class SetHealthCheckOperation extends CloudApplicationOperation {
 	private static final String CONFIRM_CHANGE_KEY = SetHealthCheckOperation.class.getName()+".confirm";
 
 	public SetHealthCheckOperation(CloudAppDashElement app, String hcType, UserInteractions ui, boolean confirmChange, CancelationToken cancelationToken) {
-		super("set-health-check "+app.getName()+" "+hcType, app.getCloudModel(), app.getName(), cancelationToken);
+		super("set-health-check "+app.getName()+" "+hcType, app.getBootDashModel(), app.getName(), cancelationToken);
 		this.app = app;
 		this.hcType = hcType;
 		this.ui = ui;

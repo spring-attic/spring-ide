@@ -215,33 +215,7 @@
          name="ngrok">
    		</page>
    	</extension>
-	<extension point="org.eclipse.debug.core.launchConfigurationTypes">
-	    <launchConfigurationType
-	          id="org.springframework.ide.eclipse.boot.dash.ssh.tunnel.launch"
-	          name="Boot Dash SSH Debug Tunnel"
-	          delegate="org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshDebugLaunchConfigurationDelegate"
-	          modes="debug"
-	          sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
-	          sourcePathComputerId="org.eclipse.jdt.launching.sourceLookup.javaSourcePathComputer">
-	    </launchConfigurationType>
-	</extension>
 
-    <extension
-          point="org.eclipse.debug.ui.launchConfigurationTypeImages">
-	    <launchConfigurationTypeImage
-	        icon="platform:/plugin/org.springframework.ide.eclipse.boot/resources/icons/boot-devtools-icon.png"
-	        configTypeID="org.springframework.ide.eclipse.boot.dash.ssh.tunnel.launch"
-	        id="org.springframework.ide.eclipse.boot.dash.ssh.tunnel.launch.image">
-	    </launchConfigurationTypeImage>
-    </extension>
-
-<extension point="org.eclipse.debug.ui.launchConfigurationTabGroups">
-    <launchConfigurationTabGroup
-        type="org.springframework.ide.eclipse.boot.dash.ssh.tunnel.launch"
-        class="org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshDebugLaunchConfigurationTabGroup"
-        id="org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshDebugLaunchConfigurationTabGroup">
-    </launchConfigurationTabGroup>
-</extension>
 <extension
       point="org.eclipse.compare.contentMergeViewers">
    <contentTypeBinding

@@ -8,10 +8,10 @@
  * Contributors:
  *     Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh;
+package org.springframework.ide.eclipse.boot.dash.cf.debug;
 
-import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshDebugLaunchConfigurationDelegate.getApp;
-import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshDebugLaunchConfigurationDelegate.getLaunchType;
+import static org.springframework.ide.eclipse.boot.dash.cf.debug.SshDebugLaunchConfigurationDelegate.getApp;
+import static org.springframework.ide.eclipse.boot.dash.cf.debug.SshDebugLaunchConfigurationDelegate.getLaunchType;
 
 import java.util.Map;
 

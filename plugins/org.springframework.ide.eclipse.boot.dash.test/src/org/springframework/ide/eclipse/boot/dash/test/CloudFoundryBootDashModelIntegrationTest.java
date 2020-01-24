@@ -217,7 +217,7 @@ public class CloudFoundryBootDashModelIntegrationTest {
 		when(ui().confirmOperation(eq("Deleting Elements"), anyString())).thenReturn(true);
 
 		CloudAppDashElement app = model.getApplication(appName);
-		app.getCloudModel().delete(ImmutableList.<BootDashElement>of(app), ui());
+		app.getBootDashModel().delete(ImmutableList.<BootDashElement>of(app), ui());
 
 		new ACondition("wait for app to be deleted", APP_DELETE_TIMEOUT) {
 

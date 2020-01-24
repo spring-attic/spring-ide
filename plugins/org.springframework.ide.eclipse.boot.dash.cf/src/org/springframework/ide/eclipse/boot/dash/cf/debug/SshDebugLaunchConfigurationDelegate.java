@@ -8,13 +8,14 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh;
+package org.springframework.ide.eclipse.boot.dash.cf.debug;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -41,6 +42,8 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTar
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshClientSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshHost;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnelImpl;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
@@ -49,9 +52,7 @@ import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelega
 import org.springframework.ide.eclipse.boot.launch.util.WaitFor;
 import org.springframework.ide.eclipse.boot.util.ProcessListenerAdapter;
 import org.springframework.ide.eclipse.boot.util.ProcessTracker;
-import org.springframework.util.Assert;
-import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
-import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 @SuppressWarnings("restriction")
 public class SshDebugLaunchConfigurationDelegate extends AbstractBootLaunchConfigurationDelegate {
@@ -257,14 +258,17 @@ public class SshDebugLaunchConfigurationDelegate extends AbstractBootLaunchConfi
 			// connect to remote VM
 			try {
 				new WaitFor(DEBUG_CONNECT_TIMEOUT) {
+					@Override
 					public void run() throws Exception {
 						connector.connect(argMap, monitor, launch);
 					}
 				};
 				new ProcessTracker(new ProcessListenerAdapter() {
+					@Override
 					public void debugTargetTerminated(ProcessTracker tracker, IDebugTarget target) {
 						handleTermination(tracker, target.getLaunch());
 					}
+					@Override
 					public void processTerminated(ProcessTracker tracker, IProcess process) {
 						handleTermination(tracker, process.getLaunch());
 					}

@@ -30,7 +30,7 @@ public class SelectManifestOp extends CloudOperation {
 	protected final UserInteractions ui;
 
 	public SelectManifestOp(CloudAppDashElement cde, UserInteractions ui) {
-		super("Select a manifest file", cde.getCloudModel());
+		super("Select a manifest file", cde.getBootDashModel());
 		this.cde = cde;
 		this.ui = ui;
 	}
