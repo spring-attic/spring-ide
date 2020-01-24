@@ -77,6 +77,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.internal.MavenSpringBootProject;
+import org.springframework.ide.eclipse.boot.dash.cf.actions.EnableJmxSshTunnelAction;
 import org.springframework.ide.eclipse.boot.dash.cf.actions.ToggleBootDashModelConnection;
 import org.springframework.ide.eclipse.boot.dash.cf.actions.UpdatePasswordAction;
 import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryRunTargetType;
@@ -118,7 +119,6 @@ import org.springframework.ide.eclipse.boot.dash.util.JmxSshTunnelManager;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.CustmomizeTargetLabelAction;
 import org.springframework.ide.eclipse.boot.dash.views.CustomizeTargetLabelDialogModel;
-import org.springframework.ide.eclipse.boot.dash.views.EnableJmxSshTunnelAction;
 import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.test.AutobuildingEnablement;
@@ -978,7 +978,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertFalse(app.getEnableJmxSshTunnel());
 
 		harness.selection.setElements(app);
-		EnableJmxSshTunnelAction toggleJmx = actions.getEnableJmxSshTunnel();
+		EnableJmxSshTunnelAction toggleJmx = enableJmxSshTunnel();
 		assertTrue(toggleJmx.isEnabled());
 		assertTrue(toggleJmx.isVisible());
 		assertEquals("Enable JMX Ssh Tunnelling", toggleJmx.getText());
@@ -1034,7 +1034,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertFalse(app.getEnableJmxSshTunnel());
 
 		harness.selection.setElements(app);
-		EnableJmxSshTunnelAction toggleJmx = actions.getEnableJmxSshTunnel();
+		EnableJmxSshTunnelAction toggleJmx = enableJmxSshTunnel();
 		assertTrue(toggleJmx.isEnabled());
 		assertTrue(toggleJmx.isVisible());
 		assertEquals("Enable JMX Ssh Tunnelling", toggleJmx.getText());
@@ -3045,6 +3045,10 @@ public class CloudFoundryBootDashModelMockingTest {
 
 	private UpdatePasswordAction updatePasswordAction() {
 		return getInjectedAction(UpdatePasswordAction.class);
+	}
+
+	private EnableJmxSshTunnelAction enableJmxSshTunnel() {
+		return getInjectedAction(EnableJmxSshTunnelAction.class);
 	}
 
 	@SuppressWarnings("unchecked")

@@ -77,7 +77,6 @@ public class BootDashActions {
 	private RestartApplicationOnlyAction restartOnlyAction;
 	private SelectManifestAction selectManifestAction;
 	private RestartWithRemoteDevClientAction restartWithRemoteDevClientAction;
-	private EnableJmxSshTunnelAction enableJmxSshTunnel;
 	private ReconnectCloudConsoleAction reconnectCloudConsoleAction;
 	private ShowViewAction showPropertiesViewAction;
 	private ExposeAppAction exposeRunAppAction;
@@ -105,7 +104,7 @@ public class BootDashActions {
 	private List<AbstractBootDashAction> injectedActions;
 
 	public interface Factory {
-		Collection<AbstractBootDashAction> create(BootDashViewModel model, MultiSelection<BootDashElement> selection, LiveExpression<BootDashModel> section, SimpleDIContext context, LiveProcessCommandsExecutor liveProcessCmds);
+		Collection<AbstractBootDashAction> create(BootDashActions actions, BootDashViewModel model, MultiSelection<BootDashElement> selection, LiveExpression<BootDashModel> section, SimpleDIContext context, LiveProcessCommandsExecutor liveProcessCmds);
 	}
 
 	public BootDashActions(BootDashViewModel model, MultiSelection<BootDashElement> selection, SimpleDIContext context,  LiveProcessCommandsExecutor liveProcessCmds) {
@@ -233,8 +232,6 @@ public class BootDashActions {
 
 		restartWithRemoteDevClientAction = new RestartWithRemoteDevClientAction(defaultActionParams());
 
-		enableJmxSshTunnel = new EnableJmxSshTunnelAction(defaultActionParams());
-
 		duplicateConfigAction = new DuplicateConfigAction(defaultActionParams());
 
 		debugOnTargetActions = createDeployOnTargetActions(RunState.DEBUGGING);
@@ -245,7 +242,7 @@ public class BootDashActions {
 
 		ImmutableList.Builder<AbstractBootDashAction> injectedActions = ImmutableList.builder();
 		for (Factory f : context.getBeans(Factory.class)) {
-			injectedActions.addAll(f.create(model, elementsSelection, sectionSelection, context, liveProcessCmds));
+			injectedActions.addAll(f.create(this, model, elementsSelection, sectionSelection, context, liveProcessCmds));
 		};
 		this.injectedActions = injectedActions.build();
 	}
@@ -544,10 +541,6 @@ public class BootDashActions {
 
 	public IAction getAction(String id) {
 		return defIdToActions.get(id);
-	}
-
-	public EnableJmxSshTunnelAction getEnableJmxSshTunnel() {
-		return enableJmxSshTunnel;
 	}
 
 	public LiveDataConnectionManagementActions getLiveDataConnectionManagement() {

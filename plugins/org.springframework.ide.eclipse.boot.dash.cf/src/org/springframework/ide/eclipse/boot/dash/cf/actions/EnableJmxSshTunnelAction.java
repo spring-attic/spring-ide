@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.views;
+package org.springframework.ide.eclipse.boot.dash.cf.actions;
 
 import java.net.URL;
 
@@ -22,6 +22,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDa
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
+import org.springframework.ide.eclipse.boot.dash.views.AbstractCloudAppDashElementsAction;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 public class EnableJmxSshTunnelAction extends AbstractCloudAppDashElementsAction {
@@ -38,9 +39,11 @@ public class EnableJmxSshTunnelAction extends AbstractCloudAppDashElementsAction
 		}
 		if (model != null) {
 			model.addElementStateListener(stateListener = new ElementStateListener() {
+				@Override
 				public void stateChanged(BootDashElement e) {
 					if (getSelectedElements().contains(e) && !PlatformUI.getWorkbench().isClosing()) {
 						PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+							@Override
 							public void run() {
 								updateEnablement();
 							}
