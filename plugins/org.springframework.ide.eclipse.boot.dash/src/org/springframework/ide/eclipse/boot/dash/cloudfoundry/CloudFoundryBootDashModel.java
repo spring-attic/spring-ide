@@ -369,6 +369,9 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 			debugTargetDisconnector.dispose();
 			debugTargetDisconnector = null;
 		}
+		if (cfDebugStrategies!=null) {
+			cfDebugStrategies.dispose();
+		}
 		applications.dispose();
 		ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
 		super.dispose();
