@@ -28,5 +28,6 @@ Bundle-Activator: org.springframework.ide.eclipse.boot.dash.cf.BootDashCfPlugin
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.boot.dash.cf,
  org.springframework.ide.eclipse.boot.dash.cf.actions,
+ org.springframework.ide.eclipse.boot.dash.cf.debug,
  org.springframework.ide.eclipse.boot.dash.cf.runtarget,
  org.springframework.ide.eclipse.boot.dash.cf.ui

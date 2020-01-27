@@ -28,8 +28,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-import static org.springframework.ide.eclipse.boot.dash.test.BootDashViewModelHarness.assertLabelContains;
-import static org.springframework.ide.eclipse.boot.dash.test.BootDashViewModelHarness.getLabel;
 import static org.springframework.ide.eclipse.boot.dash.test.actuator.RequestMappingAsserts.assertRequestMappingWithPath;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.bootVersionAtLeast;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.setPackage;
@@ -946,9 +944,10 @@ public class BootDashModelTest {
 	}
 
 	private void assertInstancesLabel(String expect, BootDashElement e) {
-		BootDashLabels labels = new BootDashLabels(null); // we test this without styler, still better than not testing.
-		String actual = labels.getStyledText(e, BootDashColumn.INSTANCES).toString();
-		assertEquals(expect, actual);
+		try (BootDashLabels labels = new BootDashLabels(context.injections, null)) {
+			String actual = labels.getStyledText(e, BootDashColumn.INSTANCES).toString();
+			assertEquals(expect, actual);
+		}
 	}
 
 	@Test public void livePort() throws Exception {
@@ -1183,13 +1182,13 @@ public class BootDashModelTest {
 		IProject project = createBootProject(projectName, withStarters("web", "actuator", "devtools"));
 		final BootDashElement element = getElement(projectName);
 		assertTrue(element.hasDevtools());
-		assertLabelContains("[devtools]", element);
+		harness.assertLabelContains("[devtools]", element);
 
 		//Also check that we do not add 'devtools' label to launch configs.
 		ILaunchConfiguration conf = BootLaunchConfigurationDelegate.createConf(project);
 		String confName = conf.getName();
 
-		assertEquals(confName, getLabel(harness.getElementFor(conf)));
+		assertEquals(confName, harness.getLabel(harness.getElementFor(conf)));
 
 		//Try and see that if we remove the devtools dependency from the project then the label updates.
 		StsTestUtil.setAutoBuilding(true); // so that autobuild causes classpath update as would
@@ -1198,7 +1197,7 @@ public class BootDashModelTest {
 		new ACondition("Wait for devtools to disapear", MAVEN_BUILD_TIMEOUT) {
 			public boolean test() throws Exception {
 				assertFalse(element.hasDevtools());
-				assertEquals(projectName, getLabel(element));
+				assertEquals(projectName, harness.getLabel(element));
 				return true;
 			}
 		};
@@ -1207,7 +1206,7 @@ public class BootDashModelTest {
 		new ACondition("Wait for devtools to re-apear", MAVEN_BUILD_TIMEOUT) {
 			public boolean test() throws Exception {
 				assertFalse(element.hasDevtools());
-				assertEquals(projectName, getLabel(element));
+				assertEquals(projectName, harness.getLabel(element));
 				return true;
 			}
 		};

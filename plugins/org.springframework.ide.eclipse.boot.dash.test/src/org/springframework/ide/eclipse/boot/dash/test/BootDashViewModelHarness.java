@@ -214,13 +214,13 @@ public class BootDashViewModelHarness {
 		}
 	}
 
-	public static void assertLabelContains(String expectSnippet, Object element) {
+	public void assertLabelContains(String expectSnippet, Object element) {
 		assertContains(expectSnippet, getLabel(element));
 	}
 
-	public static String getLabel(Object element) {
+	public String getLabel(Object element) {
 		Stylers stylers = new Stylers(null);
-		BootDashLabels labels = new BootDashLabels(stylers);
+		BootDashLabels labels = new BootDashLabels(context.injections, stylers);
 		try {
 			return labels
 					.getStyledText(element, BootDashColumn.TREE_VIEWER_MAIN)

@@ -45,6 +45,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDa
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudServiceInstanceDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.JmxSshTunnelStatus;
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractLaunchConfigurationsDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
@@ -79,6 +80,17 @@ import com.google.common.collect.ImmutableSet;
 @SuppressWarnings("restriction")
 public class BootDashLabels implements Disposable {
 
+	public static abstract class Contribution {
+		public final ImmutableSet<BootDashColumn> appliesTo;
+
+		public Contribution(ImmutableSet<BootDashColumn> appliesTo) {
+			super();
+			this.appliesTo = appliesTo;
+		}
+
+		public abstract StyledString getStyledText(BootDashLabels labels, BootDashElement element, BootDashColumn col);
+	}
+
 	public static final String TEXT_DECORATION_COLOR_THEME = "org.springframework.ide.eclipse.boot.dash.TextDecorColor";
 	public static final String ALT_TEXT_DECORATION_COLOR_THEME = "org.springframework.ide.eclipse.boot.dash.AltTextDecorColor";
 	public static final String MUTED_TEXT_DECORATION_COLOR_THEME = "org.springframework.ide.eclipse.boot.dash.MutedTextDecorColor";
@@ -111,10 +123,10 @@ public class BootDashLabels implements Disposable {
 	@Deprecated
 	public BootDashLabels() {
 		//Create slighly less-capable 'Stylers':
-		this(new Stylers(null));
+		this(SimpleDIContext.EMPTY, new Stylers(null));
 	}
 
-	public BootDashLabels(Stylers stylers) {
+	public BootDashLabels(SimpleDIContext injections, Stylers stylers) {
 		this.stylers = stylers;
 	}
 

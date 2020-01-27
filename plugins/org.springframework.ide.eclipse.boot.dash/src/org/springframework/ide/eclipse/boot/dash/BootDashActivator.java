@@ -23,6 +23,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultBootDashModelContext;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
@@ -151,6 +152,10 @@ public class BootDashActivator extends AbstractUIPlugin {
 //			RemoteAppsPrefs.addListener(this::sendRemoteBootAppUrls);
 		}
 		return model;
+	}
+
+	public SimpleDIContext getInjections() {
+		return getModel().getContext().injections;
 	}
 
 	private void sendRemoteBootAppUrls() {

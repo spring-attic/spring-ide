@@ -23,6 +23,7 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
 import org.springframework.ide.eclipse.boot.dash.cf.actions.CfBootDashActions;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnelFactory;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
@@ -41,6 +42,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
+
+import org.springframework.ide.eclipse.boot.dash.cf.debug.SshDebugSupport;
 
 import static org.mockito.Mockito.*;
 
@@ -79,6 +82,7 @@ public class TestBootDashModelContext extends BootDashModelContext {
 		SimpleDIContext injections = new SimpleDIContext();
 		injections.defInstance(AllUserInteractions.class, mock(AllUserInteractions.class));
 		injections.defInstance(BootDashActions.Factory.class, CfBootDashActions.factory);
+		injections.defInstance(DebugSupport.class, SshDebugSupport.INSTANCE);
 		return injections;
 	}
 

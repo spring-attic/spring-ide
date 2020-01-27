@@ -30,6 +30,8 @@ import com.google.common.collect.ImmutableList;
  */
 public class SimpleDIContext {
 
+	public static final SimpleDIContext EMPTY = new SimpleDIContext().lockdown();
+
 	private String creationLocation;
 
 	public SimpleDIContext() {

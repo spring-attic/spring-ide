@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.views.properties;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.labels.BootDashLabels;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
@@ -52,7 +53,8 @@ public abstract class AbstractBdePropertyControl implements BootDashElementPrope
 	@Override
 	public void createControl(Composite composite, TabbedPropertySheetPage page) {
 		stylers = new Stylers(composite.getFont());
-		bdeLabels = new BootDashLabels(stylers).setDeclutter(false);
+		bdeLabels = new BootDashLabels(BootDashActivator.getDefault().getInjections(), stylers);
+		bdeLabels.setDeclutter(false);
 	}
 
 	protected Stylers getStylers() {
