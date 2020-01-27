@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Pivotal, Inc.
+ * Copyright (c) 2020 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,30 +13,24 @@ package org.springframework.ide.eclipse.cft;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
-import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions;
+import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions.UIContext;
 
-public class CFTIntegrationUserInteractions extends DefaultUserInteractions {
+/**
+ * 
+ * Provides an actual {@link Shell} context for UI interactions needed to call boot dashboard API
+ */
+public class CftUiContext implements UIContext {
 
-	public CFTIntegrationUserInteractions() {
-		super(getDefaultContext());
-	}
-
-	public static UIContext getDefaultContext() {
-		return new UIContext() {
-
+	@Override
+	public Shell getShell() {
+		final Shell[] shell = new Shell[1];
+		Display.getDefault().syncExec(new Runnable() {
 			@Override
-			public Shell getShell() {
-				final Shell[] shell = new Shell[1];
-				Display.getDefault().syncExec(new Runnable() {
-					@Override
-					public void run() {
-						shell[0] = PlatformUI.getWorkbench().getModalDialogShellProvider().getShell();
-					}
-				});
-				return shell[0];
+			public void run() {
+				shell[0] = PlatformUI.getWorkbench().getModalDialogShellProvider().getShell();
 			}
-
-		};
+		});
+		return shell[0];
 	}
 
 }

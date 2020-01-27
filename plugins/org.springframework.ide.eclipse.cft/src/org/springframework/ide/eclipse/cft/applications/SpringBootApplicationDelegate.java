@@ -18,6 +18,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.model.IModuleResource;
+import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions.UIContext;
+import org.springframework.ide.eclipse.cft.CftUiInteractions;
+import org.springframework.ide.eclipse.cft.CftUiContext;
 import org.springframework.ide.eclipse.cft.ProjectUtils;
 
 public class SpringBootApplicationDelegate extends ModuleResourceApplicationDelegate {
@@ -36,6 +39,14 @@ public class SpringBootApplicationDelegate extends ModuleResourceApplicationDele
 	@Override
 	public CFApplicationArchive getApplicationArchive(IModule module, IServer server, IModuleResource[] moduleResources,
 			IProgressMonitor monitor) throws CoreException {
-		return new BootDashboardArchiver().getApplicationArchive(module, server, moduleResources, monitor);
+		return new BootDashboardArchiver(getCftUiInteractions()).getApplicationArchive(module, server, moduleResources, monitor);
+	}
+
+	private CftUiInteractions getCftUiInteractions() {
+		return new CftUiInteractions(getUiContext());
+	}
+
+	private UIContext getUiContext() {
+		return new CftUiContext();
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Pivotal, Inc.
+ * Copyright (c) 2016, 2020 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,15 +32,19 @@ import org.eclipse.wst.server.core.model.IModuleResource;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategies;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategy;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.ICloudApplicationArchiver;
-import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.cft.CFTConsole;
-import org.springframework.ide.eclipse.cft.CFTIntegrationUserInteractions;
+import org.springframework.ide.eclipse.cft.CftUiInteractions;
 import org.springframework.ide.eclipse.cft.Log;
 import org.springframework.ide.eclipse.cft.ProjectUtils;
 
 public class BootDashboardArchiver implements ICloudFoundryArchiver {
 
-	private CFTIntegrationUserInteractions userInteractions;
+
+	private final CftUiInteractions uiInteractions;
+
+	public BootDashboardArchiver(CftUiInteractions uiInteractions) {
+		this.uiInteractions = uiInteractions;
+	}
 
 	@Override
 	public CFApplicationArchive getApplicationArchive(IModule module, IServer server, IModuleResource[] resources,
@@ -62,13 +66,13 @@ public class BootDashboardArchiver implements ICloudFoundryArchiver {
 	}
 
 	protected CFApplicationArchive getFromBootDashboardIntegration(CloudFoundryApplicationModule appModule,
-			CloudFoundryServer cloudServer, IProject project, UserInteractions ui, IProgressMonitor monitor)
+			CloudFoundryServer cloudServer, IProject project,  IProgressMonitor monitor)
 			throws Exception {
 
 		// Bugzilla (CFT) 495814 fix
 		refreshProject(project, appModule, cloudServer, monitor);
 
-		CloudApplicationArchiverStrategy strategy = CloudApplicationArchiverStrategies.packageAsJar(project, ui);
+		CloudApplicationArchiverStrategy strategy = CloudApplicationArchiverStrategies.packageAsJar(project, uiInteractions.getUserInteractions());
 		ICloudApplicationArchiver archiver = strategy.getArchiver(monitor);
 
 		// Null archiver means operation cancelled.
@@ -96,7 +100,7 @@ public class BootDashboardArchiver implements ICloudFoundryArchiver {
 			CloudFoundryServer cloudServer, IProject project, IProgressMonitor monitor) throws CoreException {
 		if (ProjectUtils.isSpringBootProject(appModule)) {
 			try {
-				return getFromBootDashboardIntegration(appModule, cloudServer, project, getUserInteractions(), monitor);
+				return getFromBootDashboardIntegration(appModule, cloudServer, project, monitor);
 			} catch (Exception e) {
 				// If error, don't propagate error to allow fallback to other
 				// archiving mechanisms, unless it is operation Cancelled
@@ -108,13 +112,6 @@ public class BootDashboardArchiver implements ICloudFoundryArchiver {
 			}
 		}
 		return null;
-	}
-
-	protected synchronized UserInteractions getUserInteractions() {
-		if (userInteractions == null) {
-			userInteractions = new CFTIntegrationUserInteractions();
-		}
-		return userInteractions;
 	}
 
 	protected void refreshProject(IProject project, CloudFoundryApplicationModule appModule,
