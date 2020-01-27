@@ -48,6 +48,8 @@ import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.*;
+
 import com.google.common.collect.ImmutableSet;
 
 /**
@@ -227,14 +229,12 @@ public class BootDashLabels implements Disposable {
 		}
 		try {
 			if (element != null) {
-				switch (column) {
-				case PROJECT:
+				if (column==PROJECT) {
 					IJavaProject jp = element.getJavaProject();
 					return jp == null ? new Image[0] : new Image[] { getJavaLabels().getImage(jp) };
-				case TREE_VIEWER_MAIN:
-				case RUN_STATE_ICN:
+				} else if (column==TREE_VIEWER_MAIN || column == RUN_STATE_ICN ) {
 					return decorateRunStateImages(element);
-				default:
+				} else {
 					return NO_IMAGES;
 				}
 			}
@@ -273,22 +273,15 @@ public class BootDashLabels implements Disposable {
 	 * added around it. Return null
 	 */
 	public Styler getPrefixSuffixStyler(BootDashColumn column) {
-		switch (column) {
-		case TAGS:
+		if (column==TAGS) {
 			return stylers.tagBrackets();
-		case LIVE_PORT:
+		} else if (column==LIVE_PORT) {
 			Color portColor = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry().get(TEXT_DECORATION_COLOR_THEME);
 			return stylers.color(portColor);
-		case INSTANCES:
+		} else if (column==INSTANCES) {
 			Color instancesColor = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry().get(ALT_TEXT_DECORATION_COLOR_THEME);
 			return stylers.color(instancesColor);
-		case NAME:
-		case PROJECT:
-//			return null;
-		case HOST:
-		case RUN_STATE_ICN:
-		case DEFAULT_PATH:
-		default:
+		} else {
 			return Stylers.NULL;
 		}
 	}
@@ -300,12 +293,10 @@ public class BootDashLabels implements Disposable {
 		StyledString styledLabel = null;
 
 		if (element != null) {
-			switch(column) {
-			case TAGS:
+			if (column==TAGS) {
 				String text = TagUtils.toString(element.getTags());
 				styledLabel = stylers == null ? new StyledString(text) : TagUtils.applyTagStyles(text, stylers.tag());
-				break;
-			case PROJECT:
+			} else if (column==PROJECT) {
 				IJavaProject jp = element.getJavaProject();
 				if (jp == null) {
 					// Not all projects in elements are Java projects. CF elements accept any project that contains a valid manifest.yml since the manifest.yml may
@@ -331,12 +322,10 @@ public class BootDashLabels implements Disposable {
 						styledLabel.append(devtoolsDecoration);
 					}
 				}
-				break;
-			case HOST:
+			} else if (column==HOST) {
 				String host = element.getLiveHost();
 				label = host == null ? UNKNOWN_LABEL : host;
-				break;
-			case TREE_VIEWER_MAIN:
+			} else if (column==TREE_VIEWER_MAIN) {
 				BootDashColumn[] cols = element.getColumns();
 				styledLabel = new StyledString();
 				for (BootDashColumn col : cols) {
@@ -363,8 +352,7 @@ public class BootDashLabels implements Disposable {
 						}
 					}
 				}
-				break;
-			case NAME:
+			} else if (column==NAME) {
 				styledLabel = new StyledString();
 
 				if (element.getName() != null) {
@@ -373,17 +361,14 @@ public class BootDashLabels implements Disposable {
 				else {
 					styledLabel.append(UNKNOWN_LABEL);
 				}
-
-				break;
-			case DEVTOOLS:
+			} else if (column==DEVTOOLS) {
 				if (element.hasDevtools()) {
 					Color color = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry().get(TEXT_DECORATION_COLOR_THEME);
 					styledLabel = new StyledString("devtools", stylers.color(color));
 				} else {
 					styledLabel = new StyledString();
 				}
-				break;
-			case JMX_SSH_TUNNEL:
+			} else if (column==JMX_SSH_TUNNEL) {
 				if (element instanceof CloudAppDashElement) {
 					CloudAppDashElement cfApp = (CloudAppDashElement) element;
 					JmxSshTunnelStatus tunnelState = cfApp.getJmxSshTunnelStatus().getValue();
@@ -395,11 +380,9 @@ public class BootDashLabels implements Disposable {
 				} else {
 					styledLabel = new StyledString();
 				}
-				break;
-			case RUN_STATE_ICN:
+			} else if (column==RUN_STATE_ICN) {
 				label = element.getRunState().toString();
-				break;
-			case LIVE_PORT:
+			} else if (column==LIVE_PORT) {
 				RunState runState = element.getRunState();
 				if (runState == RunState.RUNNING || runState == RunState.DEBUGGING) {
 					String textLabel;
@@ -425,8 +408,7 @@ public class BootDashLabels implements Disposable {
 						styledLabel = new StyledString(textLabel, stylers.color(color));
 					}
 				}
-				break;
-			case DEFAULT_PATH:
+			} else if (column==DEFAULT_PATH) {
 				String path = element.getDefaultRequestMappingPath();
 				if (stylers == null) {
 					label = path == null ? "" : path;
@@ -434,8 +416,7 @@ public class BootDashLabels implements Disposable {
 					Color color = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry().get(MUTED_TEXT_DECORATION_COLOR_THEME);
 					styledLabel = new StyledString(path == null ? "" : path, stylers.color(color));
 				}
-				break;
-			case INSTANCES:
+			} else if (column==INSTANCES) {
 				int actual = element.getActualInstances();
 				int desired = element.getDesiredInstances();
 				if (!declutter || desired!=1 || actual > 1) { //Don't show: less clutter, you can already see whether a single instance is running or not
@@ -446,9 +427,8 @@ public class BootDashLabels implements Disposable {
 						styledLabel = new StyledString(actual+"/"+desired,stylers.color(instancesColor));
 					}
 				}
-				break;
-			case EXPOSED_URL:
-				runState = element.getRunState();
+			} else if (column==EXPOSED_URL) {
+				RunState runState = element.getRunState();
 				if (runState == RunState.RUNNING || runState == RunState.DEBUGGING) {
 					List<String> tunnelNames = new ArrayList<>();
 					if (element instanceof AbstractLaunchConfigurationsDashElement<?>) {
@@ -472,8 +452,7 @@ public class BootDashLabels implements Disposable {
 					}
 
 				}
-				break;
-			default:
+			} else {
 				label = UNKNOWN_LABEL;
 			}
 		}
