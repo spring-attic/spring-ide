@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.views;
+package org.springframework.ide.eclipse.boot.dash.labels;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -97,7 +97,7 @@ public class RunStateImages {
 		}
 	}
 
-	void dispose() {
+	public void dispose() {
 		if (animations!=null) {
 			for (Image[] anim : animations.values()) {
 				if (anim!=null) {

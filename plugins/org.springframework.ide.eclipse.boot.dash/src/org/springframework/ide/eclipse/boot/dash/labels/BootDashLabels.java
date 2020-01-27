@@ -8,10 +8,22 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.views;
+package org.springframework.ide.eclipse.boot.dash.labels;
+
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.DEFAULT_PATH;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.DEVTOOLS;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.EXPOSED_URL;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.HOST;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.INSTANCES;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.JMX_SSH_TUNNEL;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.LIVE_PORT;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.NAME;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.PROJECT;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.TAGS;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.TREE_VIEWER_MAIN;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
@@ -23,7 +35,6 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.StyledString.Styler;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.PlatformUI;
@@ -43,12 +54,11 @@ import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKClient;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKLaunchTracker;
+import org.springframework.ide.eclipse.boot.dash.views.ImageDecorator;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
-
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.*;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -474,23 +484,6 @@ public class BootDashLabels implements Disposable {
 
 	/////////////////////////////////////////////////////////////////////////////////////////////
 	// private / helper stuff
-
-	private String commaSeparated(Collection<String> elements) {
-		if (elements!=null) {
-			StringBuilder buf = new StringBuilder();
-			boolean needComma = false;
-			for (String string : elements) {
-				if (needComma) {
-					buf.append(',');
-				} else {
-					needComma = true;
-				}
-				buf.append(string);
-			}
-			return buf.toString();
-		}
-		return "";
-	}
 
 	private boolean hasText(StyledString stext) {
 		return !stext.getString().isEmpty();

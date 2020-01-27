@@ -15,6 +15,7 @@ import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.graphics.Image;
+import org.springframework.ide.eclipse.boot.dash.labels.BootDashLabels;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.util.ColumnViewerAnimator;
