@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 import java.net.URI;
 import java.util.List;
 
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.WrappingBootDashElement;

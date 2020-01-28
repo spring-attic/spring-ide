@@ -40,6 +40,8 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement.CloudAppIdentity;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.OperationTracker.Task;
@@ -892,4 +894,13 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 		return null;
 	}
 
+	@Override
+	public ImageDescriptor getRunStateImageDecoration() {
+		if (this.getTarget() != null && this.getRunState() == RunState.RUNNING) {
+			if (DevtoolsUtil.isDevClientAttached(this, ILaunchManager.RUN_MODE)) {
+				return BootDashActivator.getDefault().getImageRegistry().getDescriptor(BootDashActivator.DT_ICON_ID);
+			}
+		}
+		return null;
+	}
 }
