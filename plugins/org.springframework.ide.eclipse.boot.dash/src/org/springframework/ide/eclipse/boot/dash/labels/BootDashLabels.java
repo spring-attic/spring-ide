@@ -38,7 +38,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudServiceInstanceDashElement;
+//import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudServiceInstanceDashElement;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractLaunchConfigurationsDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -67,7 +67,7 @@ import com.google.common.collect.ImmutableSet;
  * implementations can wrap and use rather than a direct implementation of
  * a particular label provider interface.
  * <p>
- * Instances of this class may allocate resources (e.g. images)
+ * Instances of this class may allocate resources (e.g. images and fonts)
  * and must be disposed when they are not needed anymore.
  *
  * @author Alex Boyko
@@ -104,7 +104,7 @@ public class BootDashLabels implements Disposable {
 	 * TODO replace 'runStateImages' and this registry with a single registry
 	 * for working with both animatons & simple images.
 	 */
-	private ImageDecorator images = new ImageDecorator();
+	private ImageDecorator imageDecorator = new ImageDecorator();
 
 	private Stylers stylers;
 
@@ -140,9 +140,9 @@ public class BootDashLabels implements Disposable {
 			runStateImages.dispose();
 			runStateImages = null;
 		}
-		if (images!=null) {
-			images.dispose();
-			images = null;
+		if (imageDecorator!=null) {
+			imageDecorator.dispose();
+			imageDecorator = null;
 		}
 	}
 
@@ -207,7 +207,7 @@ public class BootDashLabels implements Disposable {
 	}
 
 	private Image[] toAnimation(ImageDescriptor icon, ImageDescriptor decoration) {
-		Image img = images.get(icon, decoration);
+		Image img = imageDecorator.get(icon, decoration);
 		return toAnimation(img);
 	}
 
@@ -219,39 +219,25 @@ public class BootDashLabels implements Disposable {
 	}
 
 	public Image[] getImageAnimation(BootDashElement element, BootDashColumn column) {
-		if (element instanceof CloudServiceInstanceDashElement) {
-			ImageDescriptor img = BootDashActivator.getDefault().getImageRegistry().getDescriptor(BootDashActivator.SERVICE_ICON);
-			return toAnimation(img, null);
-		} else if (element instanceof LocalCloudServiceDashElement) {
-			if (column == BootDashColumn.RUN_STATE_ICN || column == BootDashColumn.TREE_VIEWER_MAIN) {
-				ImageDescriptor img;
-				switch (element.getRunState()) {
-				case RUNNING:
-					img = BootDashActivator.getDefault().getImageRegistry().getDescriptor(BootDashActivator.SERVICE_ICON);
-					return toAnimation(img, null);
-				case STARTING:
-					return getRunStateAnimation(element.getRunState());
-				default:
-					img = BootDashActivator.getDefault().getImageRegistry().getDescriptor(BootDashActivator.SERVICE_INACTIVE_ICON);
-					return toAnimation(img, null);
-				}
+		if (column == BootDashColumn.RUN_STATE_ICN || column == BootDashColumn.TREE_VIEWER_MAIN) {
+			ImageDescriptor img = element.getCustomRunStateIcon();
+			Image[] anim;
+			if (img!=null) {
+				anim = toAnimation(img, null);
 			} else {
-				return NO_IMAGES;
+				anim = getRunStateAnimation(element.getRunState());
 			}
-		}
-		try {
-			if (element != null) {
-				if (column==PROJECT) {
+			ImageDescriptor decor = element.getRunStateImageDecoration();
+			return imageDecorator.decorateImages(anim, decor);
+		} else if (column==PROJECT) {
+			try {
+				if (element != null) {
 					IJavaProject jp = element.getJavaProject();
-					return jp == null ? new Image[0] : new Image[] { getJavaLabels().getImage(jp) };
-				} else if (column==TREE_VIEWER_MAIN || column == RUN_STATE_ICN ) {
-					return decorateRunStateImages(element);
-				} else {
-					return NO_IMAGES;
+					return jp == null ? new Image[0] : new Image[] { getJavaLabels().getImage(jp)};
 				}
+			} catch (Exception e) {
+				Log.log(e);
 			}
-		} catch (Exception e) {
-			Log.log(e);
 		}
 		return NO_IMAGES;
 	}
@@ -526,17 +512,6 @@ public class BootDashLabels implements Disposable {
 			Log.log(e);
 		}
 		return null;
-	}
-
-	private Image[] decorateRunStateImages(BootDashElement bde) throws Exception {
-		Image[] decoratedImages = getRunStateAnimation(bde.getRunState());
-		if (decoratedImages!=null && decoratedImages.length>0) {
-			ImageDescriptor decorDesc = bde.getRunStateImageDecoration();
-			if (decorDesc!=null) {
-				decoratedImages = runStateImages.getDecoratedImages(bde.getRunState(), decorDesc, IDecoration.BOTTOM_RIGHT);
-			}
-		}
-		return decoratedImages;
 	}
 
 	/**

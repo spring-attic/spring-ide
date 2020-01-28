@@ -61,7 +61,7 @@ public class ImageDecorator implements Disposable {
 			return get(icon);
 		} else {
 			if (decoratedImages==null) {
-				decoratedImages = new HashMap<Object, Image>();
+				decoratedImages = new HashMap<>();
 			}
 			Object key = keyFor(icon, decoration);
 			Image existing = decoratedImages.get(key);
@@ -75,6 +75,26 @@ public class ImageDecorator implements Disposable {
 			return existing;
 		}
 	}
+
+	private Image get(Image baseImg, ImageDescriptor decoration) {
+		if (decoration==null) {
+			return baseImg;
+		} else {
+			if (decoratedImages==null) {
+				decoratedImages = new HashMap<>();
+			}
+			Object key = keyFor(baseImg, decoration);
+			Image existing = decoratedImages.get(key);
+			if (existing==null) {
+				debug("Decorating: "+baseImg + " with "+decoration);
+				DecorationOverlayIcon overlayer = new DecorationOverlayIcon(baseImg,
+						decoration, IDecoration.BOTTOM_RIGHT);
+				decoratedImages.put(key, existing = overlayer.createImage());
+			}
+			return existing;
+		}
+	}
+
 
 	private static void debug(String string) {
 		if (DEBUG) {
@@ -92,8 +112,16 @@ public class ImageDecorator implements Disposable {
 		return images.get(desc);
 	}
 
-	private Object keyFor(ImageDescriptor icon, ImageDescriptor decoration) {
+	private Object keyFor(Object icon, ImageDescriptor decoration) {
 		return Arrays.asList(icon, decoration);
+	}
+
+	public Image[] decorateImages(Image[] anim, ImageDescriptor decoration) {
+		Image[] decorated = new Image[anim.length];
+		for (int i = 0; i < decorated.length; i++) {
+			decorated[i] = get(anim[i], decoration);
+		}
+		return decorated;
 	}
 
 }

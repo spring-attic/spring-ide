@@ -14,6 +14,8 @@ import java.util.EnumSet;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
@@ -166,4 +168,8 @@ public class CloudServiceInstanceDashElement extends CloudDashElement<String> im
 		return SERVICE_RUN_GOAL_STATES;
 	}
 
+	@Override
+	public ImageDescriptor getCustomRunStateIcon() {
+		return BootDashActivator.getDefault().getImageRegistry().getDescriptor(BootDashActivator.SERVICE_ICON);
+	}
 }

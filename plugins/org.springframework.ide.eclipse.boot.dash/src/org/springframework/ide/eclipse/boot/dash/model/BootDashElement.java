@@ -129,4 +129,5 @@ public interface BootDashElement extends Nameable, Taggable {
 	EnumSet<RunState> supportedGoalStates();
 
 	default ImageDescriptor getRunStateImageDecoration() { return null; }
+	default ImageDescriptor getCustomRunStateIcon() { return null; }
 }

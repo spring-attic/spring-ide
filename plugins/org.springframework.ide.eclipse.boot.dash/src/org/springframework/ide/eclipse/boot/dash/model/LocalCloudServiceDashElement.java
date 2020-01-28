@@ -33,6 +33,8 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.cli.CloudCliServiceLaunchConfigurationDelegate;
@@ -243,5 +245,17 @@ public class LocalCloudServiceDashElement extends AbstractLaunchConfigurationsDa
 		}
 
 		return null;
+	}
+
+	@Override
+	public ImageDescriptor getCustomRunStateIcon() {
+		switch (getRunState()) {
+		case RUNNING:
+			return BootDashActivator.getDefault().getImageRegistry().getDescriptor(BootDashActivator.SERVICE_ICON);
+		case STARTING:
+			return null; // fall back on default implementation
+		default:
+			return BootDashActivator.getDefault().getImageRegistry().getDescriptor(BootDashActivator.SERVICE_INACTIVE_ICON);
+		}
 	}
 }
