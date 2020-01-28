@@ -56,7 +56,7 @@ public class BootDashViewModelHarness {
 	 */
 	public BootDashViewModelHarness(TestBootDashModelContext context) throws Exception {
 		this.context = context;
-		this.model = new BootDashViewModel(context);
+		this.model = context.injections.getBean(BootDashViewModel.class);
 	}
 
 	/**
@@ -66,7 +66,7 @@ public class BootDashViewModelHarness {
 	public void reload() throws Exception {
 		dispose();
 		context = context.reload();
-		this.model = new BootDashViewModel(context);
+		this.model = context.injections.getBean(BootDashViewModel.class);
 	}
 
 //	public static class MockContext implements BootDashModelContext {

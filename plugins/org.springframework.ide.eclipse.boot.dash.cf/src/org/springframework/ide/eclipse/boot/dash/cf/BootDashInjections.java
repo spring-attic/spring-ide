@@ -40,7 +40,7 @@ public class BootDashInjections implements Contribution {
 		//BootDashLabels
 		context.defInstance(BootDashLabels.Contribution.class, BootDashCfLabels.jmxDecoration);
 
-		//internal
+		//cf internal
 		context.def(CfUserInteractions.class, DefaultCfUserInteractions::new);
 		context.defInstance(DebugSupport.class, SshDebugSupport.INSTANCE);
 	}

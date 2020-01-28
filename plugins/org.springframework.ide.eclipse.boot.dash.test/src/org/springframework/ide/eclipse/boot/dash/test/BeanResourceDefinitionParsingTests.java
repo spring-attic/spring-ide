@@ -43,7 +43,6 @@ public class BeanResourceDefinitionParsingTests {
 
 	@After
 	public void tearDown() throws Exception {
-
 	}
 
 	@Test

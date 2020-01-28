@@ -82,6 +82,7 @@ public abstract class BootDashModelContext {
 
 	protected BootDashModelContext(SimpleDIContext injections) {
 		this.injections = injections;
+		injections.defInstance(BootDashModelContext.class, this);
 		injections.assertDefinitionFor(UserInteractions.class);
 	}
 

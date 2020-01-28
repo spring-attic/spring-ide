@@ -27,6 +27,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnelFactory;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
@@ -83,6 +84,7 @@ public class TestBootDashModelContext extends BootDashModelContext {
 		injections.defInstance(AllUserInteractions.class, mock(AllUserInteractions.class));
 		injections.defInstance(BootDashActions.Factory.class, CfBootDashActions.factory);
 		injections.defInstance(DebugSupport.class, SshDebugSupport.INSTANCE);
+		injections.def(BootDashViewModel.class, BootDashViewModel::new);
 		return injections;
 	}
 
@@ -148,6 +150,7 @@ public class TestBootDashModelContext extends BootDashModelContext {
 	 */
 	public TestBootDashModelContext reload() throws Exception {
 		this.bootInstalls = new BootInstallManager(installLoc, installProperties);
+		injections.reload();
 		return this;
 	}
 
@@ -162,5 +165,4 @@ public class TestBootDashModelContext extends BootDashModelContext {
 		}
 		return this;
 	}
-
 }

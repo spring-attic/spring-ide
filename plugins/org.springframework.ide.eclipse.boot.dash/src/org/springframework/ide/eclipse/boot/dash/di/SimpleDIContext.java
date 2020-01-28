@@ -68,6 +68,9 @@ public class SimpleDIContext {
 			}
 			return instance.get();
 		}
+		public void reload() {
+			instance = null;
+		}
 	}
 
 	private List<Definition<?>> definitions = new ArrayList<>();
@@ -158,6 +161,18 @@ public class SimpleDIContext {
 	private <T> Stream<Definition<T>> resolveDefinitions(Class<T> type) {
 		Object defs = definitions.stream().filter(d -> d.satisfies(type));
 		return (Stream<Definition<T>>)defs;
+	}
+
+	/**
+	 * Clears out all bean caches and forces new beans to be created
+	 * when they are requested again,
+	 */
+	public void reload() {
+		beanCache.invalidateAll();
+		beanListCache.invalidateAll();
+		for (Definition<?> d : definitions) {
+			d.reload();
+		}
 	}
 
 }

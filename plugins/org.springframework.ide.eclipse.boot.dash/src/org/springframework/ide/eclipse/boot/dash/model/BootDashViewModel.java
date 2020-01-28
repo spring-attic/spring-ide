@@ -72,10 +72,11 @@ public class BootDashViewModel extends AbstractDisposable {
 	 * Create an 'empty' BootDashViewModel with no run targets. Targets can be
 	 * added by adding them to the runTarget's LiveSet.
 	 */
-	public BootDashViewModel(BootDashModelContext context) {
+	public BootDashViewModel(SimpleDIContext injections)
+	{
+		context = injections.getBean(BootDashModelContext.class);
 		List<RunTargetType> runTargetTypes = createRunTargetTypes(context);
 		runTargets = new LiveSetVariable<>(new LinkedHashSet<RunTarget>(), AsyncMode.SYNC);
-		this.context = context;
 		models = new BootDashModelManager(context, this, runTargets);
 
 		manager = new RunTargetPropertiesManager(context, runTargetTypes);

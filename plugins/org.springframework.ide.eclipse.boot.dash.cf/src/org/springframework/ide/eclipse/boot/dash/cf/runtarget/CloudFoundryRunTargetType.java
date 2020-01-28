@@ -19,9 +19,11 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTar
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetWizardModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryUiUtil;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultCloudFoundryClientFactoryV2;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultWizardModelUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.WizardModelUserInteractions;
@@ -30,7 +32,9 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunT
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypeFactory;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
 import org.springframework.ide.eclipse.boot.dash.views.RunTargetWizard;
+import org.springframework.ide.eclipse.boot.util.ProcessTracker;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
+import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 /**
  * @author Kris De Volder
@@ -44,9 +48,7 @@ public class CloudFoundryRunTargetType extends AbstractRunTargetType implements 
 	private static final ImageDescriptor SMALL_ICON = BootDashActivator.getImageDescriptor("icons/cloud_obj.png");
 
 	private CloudFoundryClientFactory clientFactory;
-
 	private final BootDashModelContext context;
-
 	private WizardModelUserInteractions interactions;
 
 	private CloudFoundryRunTargetType(BootDashModelContext context, CloudFoundryClientFactory clientFactory) {
@@ -86,6 +88,7 @@ public class CloudFoundryRunTargetType extends AbstractRunTargetType implements 
 				? new CloudFoundryRunTarget((CloudFoundryTargetProperties) props, this, clientFactory)
 				: new CloudFoundryRunTarget(new CloudFoundryTargetProperties(props, this), this, clientFactory);
 	}
+
 
 	@Override
 	public ImageDescriptor getIcon() {

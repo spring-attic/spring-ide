@@ -136,7 +136,7 @@ public class BootDashActivator extends AbstractUIPlugin {
 	public BootDashViewModel getModel() {
 		if (model==null) {
 			DefaultBootDashModelContext context = new DefaultBootDashModelContext();
-			model = new BootDashViewModel(context);
+			model = context.injections.getBean(BootDashViewModel.class);
 
 //			DebugSelectionListener debugSelectionListener = new DebugSelectionListener(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService());
 //			model.addDisposableChild(debugSelectionListener);

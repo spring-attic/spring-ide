@@ -85,6 +85,7 @@ public class DefaultBootDashModelContext extends BootDashModelContext {
 			}
 		});
 		injections.defInstance(UserInteractions.class, new DefaultUserInteractions(injections));
+		injections.def(BootDashViewModel.class, BootDashViewModel::new);
 		new EclipseBeanLoader(injections).loadFromExtensionPoint(BootDashActivator.INJECTIONS_EXTENSION_ID);
 		return injections;
 	}
