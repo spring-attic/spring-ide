@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.model;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.util.template.Templates;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
@@ -109,5 +110,9 @@ public interface RunTarget extends IdAble, Nameable, Disposable {
 	 * Called when user double-clicks on RunTarget in the boot dash view.
 	 */
 	default void performDoubleClickAction(UserInteractions ui) {}
+
+	default ImageDescriptor getIcon() {
+		return getType().getIcon();
+	}
 
 }

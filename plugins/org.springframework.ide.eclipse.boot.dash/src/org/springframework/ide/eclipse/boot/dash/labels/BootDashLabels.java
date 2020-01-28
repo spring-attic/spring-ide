@@ -40,7 +40,6 @@ import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudServiceInstanceDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
@@ -196,15 +195,7 @@ public class BootDashLabels implements Disposable {
 	}
 
 	private ImageDescriptor getIcon(BootDashModel element) {
-		if (element instanceof CloudFoundryBootDashModel) {
-			CloudFoundryBootDashModel cfModel = (CloudFoundryBootDashModel) element;
-			if (cfModel.getRunTarget().isConnected()) {
-				return BootDashActivator.getImageDescriptor("icons/cloud-ready.png");
-			} else {
-				return BootDashActivator.getImageDescriptor("icons/cloud-inactive.png");
-			}
-		}
-		return element.getRunTarget().getType().getIcon();
+		return element.getRunTarget().getIcon();
 	}
 
 	private ImageDescriptor getDecoration(BootDashModel element) {

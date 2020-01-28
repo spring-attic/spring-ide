@@ -36,7 +36,9 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.osgi.framework.Version;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
@@ -404,4 +406,12 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 		}
 	}
 
+	@Override
+	public ImageDescriptor getIcon() {
+		if (isConnected()) {
+			return BootDashActivator.getImageDescriptor("icons/cloud-ready.png");
+		} else {
+			return BootDashActivator.getImageDescriptor("icons/cloud-inactive.png");
+		}
+	}
 }
