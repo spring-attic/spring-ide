@@ -15,7 +15,6 @@ import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashC
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.EXPOSED_URL;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.HOST;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.INSTANCES;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.JMX_SSH_TUNNEL;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.LIVE_PORT;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.NAME;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.PROJECT;
@@ -44,7 +43,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElemen
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudServiceInstanceDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.JmxSshTunnelStatus;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractLaunchConfigurationsDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -61,6 +59,8 @@ import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 
 /**
@@ -88,7 +88,7 @@ public class BootDashLabels implements Disposable {
 			this.appliesTo = appliesTo;
 		}
 
-		public abstract StyledString getStyledText(BootDashLabels labels, BootDashElement element, BootDashColumn col);
+		public abstract StyledString getStyledText(Stylers stylers, BootDashElement element, BootDashColumn col);
 	}
 
 	public static final String TEXT_DECORATION_COLOR_THEME = "org.springframework.ide.eclipse.boot.dash.TextDecorColor";
@@ -113,6 +113,7 @@ public class BootDashLabels implements Disposable {
 	private Stylers stylers;
 
 	private boolean declutter = true;
+	final private SimpleDIContext injections;
 
 	/**
 	 * This constructor is deprecated. It produces something incapable of
@@ -127,6 +128,7 @@ public class BootDashLabels implements Disposable {
 	}
 
 	public BootDashLabels(SimpleDIContext injections, Stylers stylers) {
+		this.injections = injections;
 		this.stylers = stylers;
 	}
 
@@ -315,6 +317,10 @@ public class BootDashLabels implements Disposable {
 		StyledString styledLabel = null;
 
 		if (element != null) {
+			styledLabel = styledTextFromContributions(element, column);
+			if (styledLabel!=null) {
+				return styledLabel;
+			}
 			if (column==TAGS) {
 				String text = TagUtils.toString(element.getTags());
 				styledLabel = stylers == null ? new StyledString(text) : TagUtils.applyTagStyles(text, stylers.tag());
@@ -387,18 +393,6 @@ public class BootDashLabels implements Disposable {
 				if (element.hasDevtools()) {
 					Color color = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry().get(TEXT_DECORATION_COLOR_THEME);
 					styledLabel = new StyledString("devtools", stylers.color(color));
-				} else {
-					styledLabel = new StyledString();
-				}
-			} else if (column==JMX_SSH_TUNNEL) {
-				if (element instanceof CloudAppDashElement) {
-					CloudAppDashElement cfApp = (CloudAppDashElement) element;
-					JmxSshTunnelStatus tunnelState = cfApp.getJmxSshTunnelStatus().getValue();
-					if (tunnelState!=JmxSshTunnelStatus.DISABLED) {
-						Color activeColor = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry().get(TEXT_DECORATION_COLOR_THEME);
-						Color notActiveColor = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry().get(MUTED_TEXT_DECORATION_COLOR_THEME);
-						styledLabel = new StyledString("jmx", tunnelState==JmxSshTunnelStatus.ACTIVE ? stylers.color(activeColor) : stylers.color(notActiveColor));
-					}
 				} else {
 					styledLabel = new StyledString();
 				}
@@ -484,6 +478,32 @@ public class BootDashLabels implements Disposable {
 			return new StyledString(label);
 		}
 		return new StyledString("");
+	}
+
+	private StyledString styledTextFromContributions(BootDashElement element, BootDashColumn col) {
+		initContributions();
+		ImmutableCollection<Contribution> contributions = this.contributions.get(col);
+		for (Contribution c : contributions) {
+			StyledString styledText = c.getStyledText(stylers, element, col);
+			if (styledText!=null) {
+				return styledText;
+			}
+		}
+		return null;
+	}
+
+	private ImmutableMultimap<BootDashColumn, Contribution> contributions = null;
+
+	private void initContributions() {
+		if (contributions==null) {
+			ImmutableMultimap.Builder<BootDashColumn, Contribution> builder = ImmutableMultimap.builder();
+			for (Contribution c : injections.getBeans(Contribution.class)) {
+				for (BootDashColumn col : c.appliesTo) {
+					builder.put(col, c);
+				}
+			}
+			contributions = builder.build();
+		}
 	}
 
 	/**

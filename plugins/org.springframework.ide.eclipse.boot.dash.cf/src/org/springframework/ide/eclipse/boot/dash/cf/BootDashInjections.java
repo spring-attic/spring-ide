@@ -12,11 +12,13 @@ package org.springframework.ide.eclipse.boot.dash.cf;
 
 import org.springframework.ide.eclipse.boot.dash.cf.actions.CfBootDashActions;
 import org.springframework.ide.eclipse.boot.dash.cf.debug.SshDebugSupport;
+import org.springframework.ide.eclipse.boot.dash.cf.labels.BootDashCfLabels;
 import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cf.ui.DefaultCfUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CfUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.di.EclipseBeanLoader.Contribution;
+import org.springframework.ide.eclipse.boot.dash.labels.BootDashLabels;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultBootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypeFactory;
@@ -34,6 +36,9 @@ public class BootDashInjections implements Contribution {
 
 		//UI actions
 		context.defInstance(BootDashActions.Factory.class, CfBootDashActions.factory);
+
+		//BootDashLabels
+		context.defInstance(BootDashLabels.Contribution.class, BootDashCfLabels.jmxDecoration);
 
 		//internal
 		context.def(CfUserInteractions.class, DefaultCfUserInteractions::new);

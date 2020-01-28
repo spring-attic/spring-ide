@@ -28,6 +28,5 @@ public class BootDashColumn {
 	public static final BootDashColumn TAGS = new BootDashColumn("TAGS");
 	public static final BootDashColumn EXPOSED_URL = new BootDashColumn("EXPOSED_URL");
 	public static final BootDashColumn DEVTOOLS = new BootDashColumn("DEVTOOLS");
-	public static final BootDashColumn JMX_SSH_TUNNEL = new BootDashColumn("JMX_SSH_TUNNEL");
 	public static final BootDashColumn TREE_VIEWER_MAIN = new BootDashColumn("TREE_VIEWER_MAIN"); //this is a 'fake' column which corresponds to the single column shown in unified tree viewer.
 }
