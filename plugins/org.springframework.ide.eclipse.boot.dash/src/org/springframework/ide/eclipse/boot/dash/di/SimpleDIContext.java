@@ -14,9 +14,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.Assert;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import com.google.common.cache.Cache;
@@ -48,28 +51,33 @@ public class SimpleDIContext {
 	public static final class Definition<T> {
 		private final Class<T> type;
 		private final BeanFactory<T> factory;
-		private CompletableFuture<T> instance;
+		AtomicBoolean requested = new AtomicBoolean(false);
+		private CompletableFuture<T> instance = new CompletableFuture<>();
 		public Definition(Class<T> type, BeanFactory<T> factory) {
 			super();
 			this.type = type;
 			this.factory = factory;
+			this.reload();
 		}
 		public boolean satisfies(Class<?> requested) {
 			return requested.isAssignableFrom(type);
 		}
 		public synchronized T get(SimpleDIContext context) throws Exception {
-			if (instance==null) {
-				instance = new CompletableFuture<>();
+			if (requested.compareAndSet(false, true)) {
 				try {
 					instance.complete(factory.create(context));
-				}catch (Throwable e) {
+				} catch (Throwable e) {
 					instance.completeExceptionally(e);
 				}
 			}
 			return instance.get();
 		}
 		public void reload() {
-			instance = null;
+			instance = new CompletableFuture<>();
+			requested.set(false);
+		}
+		public CompletableFuture<Void> whenCreated(Consumer<T> requestor) {
+			return instance.thenAccept(requestor);
 		}
 	}
 
@@ -173,6 +181,14 @@ public class SimpleDIContext {
 		for (Definition<?> d : definitions) {
 			d.reload();
 		}
+	}
+
+	public <T> Supplier<T> supplier(Class<T> type) {
+		return () -> getBean(type);
+	}
+
+	public <T> CompletableFuture<Void> whenCreated(Class<T> type, Consumer<T> requestor) {
+		return resolveDefinition(type).whenCreated(requestor);
 	}
 
 }

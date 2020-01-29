@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cf.runtarget;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -39,7 +41,7 @@ import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 /**
  * @author Kris De Volder
  */
-public class CloudFoundryRunTargetType extends AbstractRunTargetType implements RemoteRunTargetType {
+public class CloudFoundryRunTargetType extends AbstractRunTargetType implements RemoteRunTargetType, Disposable {
 
 	public static RunTargetTypeFactory factory = context -> {
 		return new CloudFoundryRunTargetType(context, DefaultCloudFoundryClientFactoryV2.INSTANCE);
@@ -50,6 +52,9 @@ public class CloudFoundryRunTargetType extends AbstractRunTargetType implements 
 	private CloudFoundryClientFactory clientFactory;
 	private final BootDashModelContext context;
 	private WizardModelUserInteractions interactions;
+	private AtomicBoolean processTrackerInitialized = new AtomicBoolean(false);
+	private ProcessTracker devtoolsProcessTracker;
+
 
 	private CloudFoundryRunTargetType(BootDashModelContext context, CloudFoundryClientFactory clientFactory) {
 		super(context, "Cloud Foundry");
@@ -84,11 +89,20 @@ public class CloudFoundryRunTargetType extends AbstractRunTargetType implements 
 
 	@Override
 	public RunTarget createRunTarget(TargetProperties props) {
+		ensureProcessTracker();
 		return props instanceof CloudFoundryTargetProperties
 				? new CloudFoundryRunTarget((CloudFoundryTargetProperties) props, this, clientFactory)
 				: new CloudFoundryRunTarget(new CloudFoundryTargetProperties(props, this), this, clientFactory);
 	}
 
+
+	private void ensureProcessTracker() {
+		if (processTrackerInitialized.compareAndSet(false, true)) {
+			context.injections.whenCreated(BootDashViewModel.class, (model) -> {
+				devtoolsProcessTracker = DevtoolsUtil.createProcessTracker(model);
+			});
+		}
+	}
 
 	@Override
 	public ImageDescriptor getIcon() {
@@ -114,5 +128,13 @@ public class CloudFoundryRunTargetType extends AbstractRunTargetType implements 
 
 	public static CloudFoundryRunTargetType withClient(BootDashModelContext context, CloudFoundryClientFactory clientFactory) {
 		return new CloudFoundryRunTargetType(context, clientFactory);
+	}
+
+	@Override
+	public void dispose() {
+		if (devtoolsProcessTracker != null) {
+			devtoolsProcessTracker.dispose();
+			devtoolsProcessTracker = null;
+		}
 	}
 }

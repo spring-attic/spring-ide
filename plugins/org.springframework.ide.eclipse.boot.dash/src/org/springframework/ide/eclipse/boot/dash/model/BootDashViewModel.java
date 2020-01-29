@@ -10,16 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugStrategyManager;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnelFactory;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
@@ -30,6 +25,7 @@ import org.springframework.ide.eclipse.boot.dash.util.JmxSshTunnelManager;
 import org.springframework.ide.eclipse.boot.dash.util.TreeAwareFilter;
 import org.springframework.ide.eclipse.boot.util.ProcessTracker;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
+import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
@@ -52,7 +48,6 @@ public class BootDashViewModel extends AbstractDisposable {
 	private ToggleFiltersModel toggleFiltersModel;
 	private BootDashElementsFilterBoxModel filterBox;
 	private LiveExpression<Filter<BootDashElement>> filter;
-	private ProcessTracker devtoolsProcessTracker;
 	private List<RunTargetType> orderedRunTargetTypes;
 	private Comparator<BootDashModel> modelComparator;
 	private Comparator<RunTarget> targetComparator;
@@ -99,8 +94,6 @@ public class BootDashViewModel extends AbstractDisposable {
 		});
 		filter = Filters.compose(treeAwarefilter, toggleFiltersModel.getFilter());
 		addDisposableChild(filter);
-
-		devtoolsProcessTracker = DevtoolsUtil.createProcessTracker(this);
 	}
 
 	public LiveSetVariable<RunTarget> getRunTargets() {
@@ -109,8 +102,12 @@ public class BootDashViewModel extends AbstractDisposable {
 
 	@Override
 	public void dispose() {
+		for (RunTargetType rtt : runTargetTypes) {
+			if (rtt instanceof Disposable) {
+				((Disposable) rtt).dispose();
+			}
+		}
 		models.dispose();
-		devtoolsProcessTracker.dispose();
 		filterBox.dispose();
 	}
 
