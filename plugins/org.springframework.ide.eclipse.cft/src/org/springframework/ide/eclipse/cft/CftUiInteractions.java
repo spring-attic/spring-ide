@@ -10,10 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.cft;
 
-import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
-import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions;
-import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions.UIContext;
 
 /**
  * CFT wrapper around {@link UserInteractions} used by boot dashboard.
@@ -21,22 +19,8 @@ import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions.U
  */
 public class CftUiInteractions {
 
-	private final UIContext uiContext;
-
-	/**
-	 * 
-	 * @param uiContext UI context that contains a shell to use for user
-	 *                  interactions
-	 */
-	public CftUiInteractions(UIContext uiContext) {
-		this.uiContext = uiContext;
-	}
-
 	public UserInteractions getUserInteractions() {
-		return new DefaultUserInteractions(getDiContext(uiContext));
+		return BootDashActivator.getDefault().getInjections().getBean(UserInteractions.class);
 	}
-	
-	protected SimpleDIContext getDiContext(UIContext uiContext) {
-		return new SimpleDIContext().defInstance(UIContext.class, uiContext);
-	}
+
 }
