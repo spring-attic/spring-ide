@@ -24,11 +24,14 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultBootDashModelContext;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableSet;
 
 /**
@@ -133,10 +136,11 @@ public class BootDashActivator extends AbstractUIPlugin {
 		Log.warn(message);
 	}
 
+	private final Supplier<BootDashModelContext> context = Suppliers.memoize(DefaultBootDashModelContext::new);
+
 	public BootDashViewModel getModel() {
 		if (model==null) {
-			DefaultBootDashModelContext context = new DefaultBootDashModelContext();
-			model = context.injections.getBean(BootDashViewModel.class);
+			model = context.get().injections.getBean(BootDashViewModel.class);
 
 //			DebugSelectionListener debugSelectionListener = new DebugSelectionListener(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService());
 //			model.addDisposableChild(debugSelectionListener);
@@ -155,7 +159,7 @@ public class BootDashActivator extends AbstractUIPlugin {
 	}
 
 	public SimpleDIContext getInjections() {
-		return getModel().getContext().injections;
+		return context.get().injections;
 	}
 
 	private void sendRemoteBootAppUrls() {
