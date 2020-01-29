@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.util;
+package org.springframework.ide.eclipse.boot.dash.cloudfoundry.jmxtunnel;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -19,7 +19,6 @@ import java.util.UUID;
 
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnel;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.JmxSupport;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;

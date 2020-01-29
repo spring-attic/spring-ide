@@ -96,6 +96,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.HealthCheck
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFDomainStatus;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ReactorUtils;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.jmxtunnel.JmxSshTunnelManager;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel;
@@ -117,7 +118,6 @@ import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCloudFoundryClie
 import org.springframework.ide.eclipse.boot.dash.test.mocks.RunStateHistory;
 import org.springframework.ide.eclipse.boot.dash.test.util.ZipDiff;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
-import org.springframework.ide.eclipse.boot.dash.util.JmxSshTunnelManager;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.CustmomizeTargetLabelAction;
 import org.springframework.ide.eclipse.boot.dash.views.CustomizeTargetLabelDialogModel;
