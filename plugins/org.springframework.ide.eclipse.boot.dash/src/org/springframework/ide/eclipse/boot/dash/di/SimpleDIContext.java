@@ -19,7 +19,6 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.Assert;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import com.google.common.cache.Cache;
