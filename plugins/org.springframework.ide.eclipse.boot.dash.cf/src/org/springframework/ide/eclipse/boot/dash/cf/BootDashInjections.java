@@ -17,6 +17,9 @@ import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryRunTar
 import org.springframework.ide.eclipse.boot.dash.cf.ui.DefaultCfUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CfUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnelFactory;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnelImpl;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.jmxtunnel.JmxSshTunnelManager;
 import org.springframework.ide.eclipse.boot.dash.di.EclipseBeanLoader.Contribution;
 import org.springframework.ide.eclipse.boot.dash.labels.BootDashLabels;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
@@ -43,6 +46,9 @@ public class BootDashInjections implements Contribution {
 		//cf internal
 		context.def(CfUserInteractions.class, DefaultCfUserInteractions::new);
 		context.defInstance(DebugSupport.class, SshDebugSupport.INSTANCE);
+		context.defInstance(SshTunnelFactory.class, SshTunnelImpl::new);
+		context.defInstance(JmxSshTunnelManager.class, new JmxSshTunnelManager());
+
 	}
 
 

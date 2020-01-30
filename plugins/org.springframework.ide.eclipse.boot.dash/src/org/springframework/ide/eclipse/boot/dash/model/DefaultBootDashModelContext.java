@@ -90,8 +90,6 @@ public class DefaultBootDashModelContext extends BootDashModelContext {
 		injections.def(BootDashViewModel.class, BootDashViewModel::new);
 		injections.def(RemoteBootAppsDataHolder.class, RemoteBootAppsDataHolder::new);
 		injections.def(RemoteBootAppsDataHolder.Contributor.class, CloudFoundryRemoteBootAppsDataContributor::new);
-		injections.defInstance(SshTunnelFactory.class, SshTunnelImpl::new);
-		injections.defInstance(JmxSshTunnelManager.class, new JmxSshTunnelManager());
 		new EclipseBeanLoader(injections).loadFromExtensionPoint(BootDashActivator.INJECTIONS_EXTENSION_ID);
 		return injections;
 	}

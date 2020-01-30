@@ -78,10 +78,6 @@ public abstract class BootDashModelContext {
 		return injections.getBean(UserInteractions.class);
 	}
 
-	public final SshTunnelFactory getSshTunnelFactory() {
-		return injections.getBean(SshTunnelFactory.class);
-	}
-
 	protected BootDashModelContext(SimpleDIContext injections) {
 		this.injections = injections;
 		injections.defInstance(BootDashModelContext.class, this);
