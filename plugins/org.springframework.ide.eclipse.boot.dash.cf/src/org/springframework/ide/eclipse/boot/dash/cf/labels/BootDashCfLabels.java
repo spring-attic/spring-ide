@@ -28,6 +28,7 @@ public class BootDashCfLabels {
 					Color notActiveColor = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry().get(MUTED_TEXT_DECORATION_COLOR_THEME);
 					return new StyledString("jmx", tunnelState==JmxSshTunnelStatus.ACTIVE ? stylers.color(activeColor) : stylers.color(notActiveColor));
 				}
+				return new StyledString();
 			}
 			return null;
 		}
