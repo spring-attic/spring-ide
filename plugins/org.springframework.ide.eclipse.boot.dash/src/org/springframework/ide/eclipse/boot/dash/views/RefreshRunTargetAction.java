@@ -14,7 +14,9 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 public class RefreshRunTargetAction extends AbstractBootDashModelAction {
@@ -37,8 +39,12 @@ public class RefreshRunTargetAction extends AbstractBootDashModelAction {
 	@Override
 	public void updateEnablement() {
 		super.updateEnablement();
-		if (sectionSelection.getValue() instanceof CloudFoundryBootDashModel) {
-			setEnabled(((CloudFoundryBootDashModel)sectionSelection.getValue()).getRunTarget().isConnected());
+		BootDashModel model = sectionSelection.getValue();
+		if (model!=null) {
+			RunTarget target = model.getRunTarget();
+			if (target instanceof RemoteRunTarget<?>) {
+				setEnabled(((RemoteRunTarget<?>) target).isConnected());
+			}
 		}
 	}
 
