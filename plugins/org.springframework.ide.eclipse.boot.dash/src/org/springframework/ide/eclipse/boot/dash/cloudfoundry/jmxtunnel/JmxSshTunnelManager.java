@@ -11,21 +11,18 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.jmxtunnel;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnel;
+import org.springframework.ide.eclipse.boot.dash.remoteapps.RemoteBootAppsDataHolder.RemoteAppData;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSet.Builder;
 
 /**
  * An instance of this class keeps track of open ssh tunnels for JMX connections to
@@ -36,27 +33,27 @@ public class JmxSshTunnelManager {
 
 	private Map<SshTunnel, CloudAppDashElement> tunnels = new HashMap<>();
 
-	private ObservableSet<Map<String,Object>> jmxUrls = ObservableSet.<Map<String, Object>>builder()
+	private ObservableSet<RemoteAppData> jmxUrls = ObservableSet.<RemoteAppData>builder()
 			.refresh(AsyncMode.ASYNC)
 			.compute(this::collectUrls)
 			.build();
 
-	private synchronized ImmutableSet<Map<String,Object>> collectUrls() {
-		ImmutableSet.Builder<Map<String,Object>> builder = ImmutableSet.builder();
+	private synchronized ImmutableSet<RemoteAppData> collectUrls() {
+		ImmutableSet.Builder<RemoteAppData> builder = ImmutableSet.builder();
 		for (Entry<SshTunnel, CloudAppDashElement> entry : tunnels.entrySet()) {
 			SshTunnel tunnel = entry.getKey();
 			CloudAppDashElement app = entry.getValue();
 			int port = tunnel.getLocalPort();
 			if (port>0) {
-				LinkedHashMap<String, Object> map = new LinkedHashMap<>();
-				map.put("jmxurl",  JmxSupport.getJmxUrl(port));
-				map.put("host",  app.getLiveHost());
-				map.put("keepChecking", false);
+				RemoteAppData data = new RemoteAppData();
+				data.setJmxurl(JmxSupport.getJmxUrl(port));
+				data.setHost(app.getLiveHost());
+				data.setKeepChecking(false);
 				UUID guid = app.getAppGuid();
 				if (guid!=null) {
-					map.put("processId", guid.toString());
+					data.setProcessId(guid.toString());
 				}
-				builder.add(map);
+				builder.add(data);
 			}
 		}
 		return builder.build();
@@ -75,10 +72,7 @@ public class JmxSshTunnelManager {
 		jmxUrls.refresh();
 	}
 
-	/**
-	 * LiveSet of pairs containing a url (left value) + corresponding cf app's host name (rigt value) in each pair.
-	 */
-	public ObservableSet<Map<String,Object>> getUrls() {
+	public ObservableSet<RemoteAppData> getUrls() {
 		return jmxUrls;
 	}
 

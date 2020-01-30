@@ -144,43 +144,12 @@ public class BootDashActivator extends AbstractUIPlugin {
 
 //			DebugSelectionListener debugSelectionListener = new DebugSelectionListener(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService());
 //			model.addDisposableChild(debugSelectionListener);
-
-			model.getJmxSshTunnelManager().getUrls().addListener((exp, v) -> {
-//				System.out.println(">>>>> jmx urls ===");
-//				for (String url : exp.getValue()) {
-//					System.out.println(url);
-//				}
-//				System.out.println("<<<<< jmx urls ===");
-				sendRemoteBootAppUrls();
-			});
-//			RemoteAppsPrefs.addListener(this::sendRemoteBootAppUrls);
 		}
 		return model;
 	}
 
 	public SimpleDIContext getInjections() {
 		return context.get().injections;
-	}
-
-	private void sendRemoteBootAppUrls() {
-		ImmutableSet.Builder<Map<String,Object>> allRemoteApps = ImmutableSet.builder();
-		if (model!=null) {
-			allRemoteApps.addAll(model.getJmxSshTunnelManager().getUrls().getValue());
-		}
-//		allRemoteApps.addAll(new RemoteAppsPrefs().getRemoteAppData());
-
-		try {
-			Bundle lsBundle = Platform.getBundle("org.springframework.tooling.boot.ls");
-			if (lsBundle != null && lsBundle.getState() != Bundle.INSTALLED) {
-				Class<?> lsClass = lsBundle.loadClass("org.springframework.tooling.boot.ls.BootLanguageServerPlugin");
-				Method lsMethod = lsClass.getMethod("getRemoteBootApps");
-				@SuppressWarnings("unchecked")
-				LiveSetVariable<Map<String,Object>> remoteBootAppsVar = (LiveSetVariable<Map<String,Object>>) lsMethod.invoke(null);
-				remoteBootAppsVar.replaceAll(allRemoteApps.build());
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 
 	@Override

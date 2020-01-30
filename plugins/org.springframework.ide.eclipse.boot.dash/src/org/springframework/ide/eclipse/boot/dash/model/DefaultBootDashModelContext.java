@@ -29,10 +29,12 @@ import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnelFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnelImpl;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.jmxtunnel.CloudFoundryRemoteBootAppsDataContributor;
 import org.springframework.ide.eclipse.boot.dash.di.EclipseBeanLoader;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springframework.ide.eclipse.boot.dash.remoteapps.RemoteBootAppsDataHolder;
 import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions.UIContext;
 import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
@@ -86,6 +88,8 @@ public class DefaultBootDashModelContext extends BootDashModelContext {
 		});
 		injections.defInstance(UserInteractions.class, new DefaultUserInteractions(injections));
 		injections.def(BootDashViewModel.class, BootDashViewModel::new);
+		injections.def(RemoteBootAppsDataHolder.class, RemoteBootAppsDataHolder::new);
+		injections.def(RemoteBootAppsDataHolder.Contributor.class, CloudFoundryRemoteBootAppsDataContributor::new);
 		new EclipseBeanLoader(injections).loadFromExtensionPoint(BootDashActivator.INJECTIONS_EXTENSION_ID);
 		return injections;
 	}
