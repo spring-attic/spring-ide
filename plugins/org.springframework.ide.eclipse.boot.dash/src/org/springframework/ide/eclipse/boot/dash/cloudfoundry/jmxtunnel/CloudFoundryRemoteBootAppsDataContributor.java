@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.jmxtunnel;
 
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.remoteapps.RemoteBootAppsDataHolder;
 import org.springframework.ide.eclipse.boot.dash.remoteapps.RemoteBootAppsDataHolder.RemoteAppData;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
@@ -26,7 +25,7 @@ public class CloudFoundryRemoteBootAppsDataContributor implements RemoteBootApps
 
 	@Override
 	public ObservableSet<RemoteAppData> getRemoteApps() {
-		return context.getBean(BootDashViewModel.class).getJmxSshTunnelManager().getUrls();
+		return context.getBean(JmxSshTunnelManager.class).getUrls();
 	}
 
 }

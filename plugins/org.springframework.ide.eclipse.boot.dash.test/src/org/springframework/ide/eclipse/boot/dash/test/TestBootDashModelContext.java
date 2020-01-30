@@ -25,6 +25,7 @@ import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
 import org.springframework.ide.eclipse.boot.dash.cf.actions.CfBootDashActions;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnelFactory;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.jmxtunnel.JmxSshTunnelManager;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
@@ -62,7 +63,6 @@ public class TestBootDashModelContext extends BootDashModelContext {
 	private IPropertyStore privateProperties = new InMemoryPropertyStore();
 	private IPropertyStore installProperties = new InMemoryPropertyStore();
 	private BootInstallManager bootInstalls;
-	private SshTunnelFactory sshTunnelFactory = MockSshTunnel::new;
 
 	public TestBootDashModelContext(IWorkspace workspace, ILaunchManager launchMamager) {
 		super(createInjections());
@@ -85,6 +85,8 @@ public class TestBootDashModelContext extends BootDashModelContext {
 		injections.defInstance(BootDashActions.Factory.class, CfBootDashActions.factory);
 		injections.defInstance(DebugSupport.class, SshDebugSupport.INSTANCE);
 		injections.def(BootDashViewModel.class, BootDashViewModel::new);
+		injections.defInstance(SshTunnelFactory.class, MockSshTunnel::new);
+		injections.defInstance(JmxSshTunnelManager.class, new JmxSshTunnelManager());
 		return injections;
 	}
 
@@ -152,11 +154,6 @@ public class TestBootDashModelContext extends BootDashModelContext {
 		this.bootInstalls = new BootInstallManager(installLoc, installProperties);
 		injections.reload();
 		return this;
-	}
-
-	@Override
-	public SshTunnelFactory getSshTunnelFactory() {
-		return sshTunnelFactory;
 	}
 
 	public TestBootDashModelContext withTargetTypes(RunTargetType... types) {

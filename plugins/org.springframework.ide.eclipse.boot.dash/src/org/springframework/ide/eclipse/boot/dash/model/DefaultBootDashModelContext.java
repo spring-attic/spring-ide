@@ -30,6 +30,7 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnelFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnelImpl;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.jmxtunnel.CloudFoundryRemoteBootAppsDataContributor;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.jmxtunnel.JmxSshTunnelManager;
 import org.springframework.ide.eclipse.boot.dash.di.EclipseBeanLoader;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
@@ -60,7 +61,6 @@ public class DefaultBootDashModelContext extends BootDashModelContext {
 
 	private BootInstallManager bootInstalls = BootInstallManager.getInstance();
 
-	private SshTunnelFactory sshTunnelFactory = SshTunnelImpl::new;
 
 	private static SimpleDIContext createInjections() {
 		SimpleDIContext injections = new SimpleDIContext();
@@ -90,6 +90,8 @@ public class DefaultBootDashModelContext extends BootDashModelContext {
 		injections.def(BootDashViewModel.class, BootDashViewModel::new);
 		injections.def(RemoteBootAppsDataHolder.class, RemoteBootAppsDataHolder::new);
 		injections.def(RemoteBootAppsDataHolder.Contributor.class, CloudFoundryRemoteBootAppsDataContributor::new);
+		injections.defInstance(SshTunnelFactory.class, SshTunnelImpl::new);
+		injections.defInstance(JmxSshTunnelManager.class, new JmxSshTunnelManager());
 		new EclipseBeanLoader(injections).loadFromExtensionPoint(BootDashActivator.INJECTIONS_EXTENSION_ID);
 		return injections;
 	}
@@ -151,11 +153,6 @@ public class DefaultBootDashModelContext extends BootDashModelContext {
 	@Override
 	public BootInstallManager getBootInstallManager() {
 		return bootInstalls;
-	}
-
-	@Override
-	public SshTunnelFactory getSshTunnelFactory() {
-		return sshTunnelFactory;
 	}
 
 }

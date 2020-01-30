@@ -369,7 +369,7 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 	}
 
 	public JmxSshTunnelManager getJmxSshTunnelManager() {
-		return model.getJmxSshTunnelManager();
+		return context.injections.getBean(JmxSshTunnelManager.class);
 	}
 
 }

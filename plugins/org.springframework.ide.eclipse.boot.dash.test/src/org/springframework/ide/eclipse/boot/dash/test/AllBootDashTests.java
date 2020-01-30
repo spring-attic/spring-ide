@@ -46,16 +46,16 @@ import org.springframework.ide.eclipse.boot.dash.test.yaml.Yaml2DeploymentProper
 	ActuatorClientTest.class,
 	ActuatorDataTest.class,
 	ToggleFiltersModelTest.class,
-	BeanResourceDefinitionParsingTests.class,
 
 	//Medium length (less than 30 seconds):
 	JarNameGeneratorTest.class,
-	BootJarPackagingTest.class,
 	BootDashViewModelTest.class,
-	DeploymentPropertiesDialogModelTests.class,
+	BootJarPackagingTest.class,
+	BeanResourceDefinitionParsingTests.class,
 
 	//Long tests (more than 30 seconds):
 	CloudFoundryBootDashModelMockingTest.class,
+	DeploymentPropertiesDialogModelTests.class,
 	BootDashActionTests.class,
 	BootDashModelTest.class,
 	CloudFoundryClientTest.class,

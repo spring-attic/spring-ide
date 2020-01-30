@@ -53,14 +53,17 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.HealthCheck
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnelFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.jmxtunnel.JmxSshTunnelManager;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.jmxtunnel.JmxSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.Operation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.RemoteDevClientStartOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.SetHealthCheckOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.ParsedUri;
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.Deletable;
@@ -881,9 +884,16 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 
 	public synchronized JmxSupport getJmxSupport() {
 		if (jmxSupport == null && getProject()!=null && getEnableJmxSshTunnel()) {
-			this.jmxSupport = new JmxSupport(this, getViewModel().getJmxSshTunnelManager(), getViewModel().getSshTunnelFactory());
+			this.jmxSupport = new JmxSupport(this,
+					injections().getBean(JmxSshTunnelManager.class),
+					injections().getBean(SshTunnelFactory.class)
+			);
 		}
 		return jmxSupport;
+	}
+
+	private SimpleDIContext injections() {
+		return this.getViewModel().getContext().injections;
 	}
 
 	public String getJmxUrl() {

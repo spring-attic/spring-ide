@@ -24,6 +24,8 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryUiUtil
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultCloudFoundryClientFactoryV2;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnelFactory;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.jmxtunnel.JmxSshTunnelManager;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultWizardModelUserInteractions;
@@ -59,6 +61,9 @@ public class CloudFoundryRunTargetType extends AbstractRunTargetType implements 
 	private CloudFoundryRunTargetType(BootDashModelContext context, CloudFoundryClientFactory clientFactory) {
 		super(context, "Cloud Foundry");
 		this.context = context;
+		context.injections.assertDefinitionFor(SshTunnelFactory.class);
+		context.injections.assertDefinitionFor(JmxSshTunnelManager.class);
+
 		this.clientFactory = clientFactory;
 		//TODO: Should be injected and merged with other user interactions, but required too much
 		// refactoring to implement in limited time
