@@ -14,7 +14,7 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 /**
- * CFT wrapper around {@link UserInteractions} used by boot dashboard.
+ * CFT wrapper around {@link UserInteractions} from boot dashboard.
  *
  */
 public class CftUiInteractions {
