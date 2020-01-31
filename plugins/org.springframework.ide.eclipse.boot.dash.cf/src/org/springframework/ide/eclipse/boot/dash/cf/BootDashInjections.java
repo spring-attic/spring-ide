@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Pivotal, Inc.
+ * Copyright (c) 2020 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,12 +19,14 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CfUserInteractions
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnelFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnelImpl;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.jmxtunnel.CloudFoundryRemoteBootAppsDataContributor;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.jmxtunnel.JmxSshTunnelManager;
 import org.springframework.ide.eclipse.boot.dash.di.EclipseBeanLoader.Contribution;
-import org.springframework.ide.eclipse.boot.dash.labels.BootDashLabels;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
+import org.springframework.ide.eclipse.boot.dash.labels.BootDashLabels;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultBootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypeFactory;
+import org.springframework.ide.eclipse.boot.dash.remoteapps.RemoteBootAppsDataHolder;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 
 /**
@@ -36,6 +38,9 @@ public class BootDashInjections implements Contribution {
 	public void applyBeanDefinitions(SimpleDIContext context) throws Exception {
 		//TargetType
 		context.defInstance(RunTargetTypeFactory.class, CloudFoundryRunTargetType.factory);
+
+		//Auto sync of cf deployed apps with JMX over SSH tunnel with boot ls (for live hover/data features).
+		context.def(RemoteBootAppsDataHolder.Contributor.class, CloudFoundryRemoteBootAppsDataContributor::new);
 
 		//UI actions
 		context.defInstance(BootDashActions.Factory.class, CfBootDashActions.factory);
