@@ -41,11 +41,11 @@ import org.springframework.ide.eclipse.boot.launch.cli.CloudCliServiceLaunchConf
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
 import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
-import org.springframework.ide.eclipse.boot.util.Log;
 import org.springframework.ide.eclipse.boot.util.RetryUtil;
 import org.springsource.ide.eclipse.commons.core.util.ProcessUtils;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;

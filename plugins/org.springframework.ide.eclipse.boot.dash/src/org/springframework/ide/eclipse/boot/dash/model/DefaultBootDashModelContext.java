@@ -39,6 +39,7 @@ import org.springframework.ide.eclipse.boot.pstore.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 /**
  * @author Kris De Volder
@@ -125,7 +126,7 @@ public class DefaultBootDashModelContext extends BootDashModelContext {
 
 	@Override
 	public void log(Exception e) {
-		BootDashActivator.log(e);
+		Log.log(e);
 	}
 
 	@Override

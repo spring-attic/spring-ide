@@ -14,13 +14,13 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
 import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -96,7 +96,7 @@ public class LaunchConfDashElement extends AbstractLaunchConfigurationsDashEleme
 		try {
 			delegate.delete();
 		} catch (Exception e) {
-			BootDashActivator.log(e);
+			Log.log(e);
 			ui.errorPopup("Could not delete: '"+getName()+"'", ExceptionUtil.getMessage(e));
 		}
 	}
