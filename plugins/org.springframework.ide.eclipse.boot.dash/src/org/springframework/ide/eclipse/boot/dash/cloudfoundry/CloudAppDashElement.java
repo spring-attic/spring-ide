@@ -64,6 +64,7 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.RemoteDevClien
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.SetHealthCheckOperation;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.ParsedUri;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
+import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveDataCapableElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.Deletable;
@@ -84,6 +85,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
+import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveDataConnectionManagementActions.ExecuteCommandAction;
+
 /**
  * A handle to a Cloud application. NOTE: This element should NOT hold Cloud
  * application state as it may be discarded and created multiple times for the
@@ -91,7 +94,7 @@ import org.springsource.ide.eclipse.commons.livexp.util.Log;
  * <p/>
  * Cloud application state should always be resolved from external sources
  */
-public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> implements Deletable, LogSink {
+public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> implements Deletable, LogSink, LiveDataCapableElement {
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 
@@ -912,5 +915,11 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public boolean matchesLiveProcessCommand(ExecuteCommandAction action) {
+		UUID appGuid = getAppGuid();
+		return appGuid!=null && appGuid.toString().equals(action.getProcessId());
 	}
 }

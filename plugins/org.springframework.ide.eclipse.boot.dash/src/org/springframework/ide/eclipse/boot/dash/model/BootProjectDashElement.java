@@ -16,6 +16,8 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
+import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveDataCapableElement;
+import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveDataConnectionManagementActions.ExecuteCommandAction;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.util.CollectionUtils;
@@ -42,7 +44,7 @@ import com.google.common.collect.ImmutableSortedSet;
  *
  * @author Kris De Volder
  */
-public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElement<IProject> {
+public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElement<IProject> implements LiveDataCapableElement {
 
 	private static final boolean DEBUG = DebugUtil.isDevelopment();
 
@@ -242,5 +244,11 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 	@Override
 	public Object getParent() {
 		return getBootDashModel();
+	}
+
+	@Override
+	public boolean matchesLiveProcessCommand(ExecuteCommandAction action) {
+		IProject project = getProject();
+		return project!=null && project.getName().equals(action.getProjectName());
 	}
 }

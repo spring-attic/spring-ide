@@ -13,21 +13,17 @@ package org.springframework.ide.eclipse.boot.dash.liveprocess;
 import java.time.Duration;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveProcessCommandsExecutor.Server;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
-import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashElementsAction;
 import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashElementsAction.Params;
@@ -71,12 +67,12 @@ public class LiveDataConnectionManagementActions extends AbstractDisposable impl
 	public boolean isVisible() {
 		if (liveProcessCmds!=null) {
 			Set<BootDashElement> selection = params.getSelection().getValue();
-			return selection.isEmpty() || selection.stream().anyMatch(x -> x instanceof BootProjectDashElement || x instanceof CloudAppDashElement);
+			return selection.isEmpty() || selection.stream().anyMatch(x -> x instanceof LiveDataCapableElement);
 		}
 		return false;
 	}
 
-	class ExecuteCommandAction extends AbstractBootDashElementsAction {
+	public class ExecuteCommandAction extends AbstractBootDashElementsAction {
 		private String projectName;
 		private String label;
 		private Server server;
@@ -150,7 +146,7 @@ public class LiveDataConnectionManagementActions extends AbstractDisposable impl
 					return true;
 				} else {
 					for (BootDashElement bde : els) {
-						if (bde instanceof BootProjectDashElement || bde instanceof CloudAppDashElement) {
+						if (bde instanceof LiveDataCapableElement) {
 							RunState s = bde.getRunState();
 							if (s == RunState.RUNNING || s ==RunState.DEBUGGING) {
 								return true;
@@ -172,16 +168,8 @@ public class LiveDataConnectionManagementActions extends AbstractDisposable impl
 		} else {
 			filter = action -> {
 				for (BootDashElement bde : bdes) {
-					if (bde instanceof CloudAppDashElement) {
-						UUID appGuid = ((CloudAppDashElement) bde).getAppGuid();
-						if (appGuid!=null && appGuid.toString().equals(action.getProcessId())) {
-							return true;
-						}
-					} else {
-						IProject project = bde.getProject();
-						if (project!=null && project.getName().equals(action.getProjectName())) {
-							return true;
-						}
+					if (bde instanceof LiveDataCapableElement) {
+						return ((LiveDataCapableElement)bde).matchesLiveProcessCommand(action);
 					}
 				}
 				return false;
