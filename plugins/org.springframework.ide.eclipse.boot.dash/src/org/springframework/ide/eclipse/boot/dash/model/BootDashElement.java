@@ -17,6 +17,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModel;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.env.LiveEnvModel;
@@ -130,4 +131,5 @@ public interface BootDashElement extends Nameable, Taggable {
 
 	default ImageDescriptor getRunStateImageDecoration() { return null; }
 	default ImageDescriptor getCustomRunStateIcon() { return null; }
+	default Image getPropertiesTitleIconImage() { return null; }
 }

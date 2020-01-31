@@ -54,12 +54,8 @@ public class PropertiesTitleLabelProvider implements ILabelProvider {
 			IStructuredSelection selection = (IStructuredSelection) element;
 			if (selection.size() == 1) {
 				Object o = selection.getFirstElement();
-				if (o instanceof CloudServiceInstanceDashElement) {
-					return BootDashActivator.getDefault().getImageRegistry().get(BootDashActivator.SERVICE_ICON);
-				} else if (o instanceof CloudAppDashElement) {
-					return BootDashActivator.getDefault().getImageRegistry().get(BootDashActivator.CLOUD_ICON);
-				} else if (o instanceof BootProjectDashElement) {
-					return BootDashActivator.getDefault().getImageRegistry().get(BootDashActivator.BOOT_ICON);
+				if (o instanceof BootDashElement) {
+					return ((BootDashElement) o).getPropertiesTitleIconImage();
 				}
 			}
 		}

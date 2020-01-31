@@ -15,7 +15,9 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveDataCapableElement;
 import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveDataConnectionManagementActions.ExecuteCommandAction;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
@@ -250,5 +252,10 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 	public boolean matchesLiveProcessCommand(ExecuteCommandAction action) {
 		IProject project = getProject();
 		return project!=null && project.getName().equals(action.getProjectName());
+	}
+
+	@Override
+	public Image getPropertiesTitleIconImage() {
+		return BootDashActivator.getDefault().getImageRegistry().get(BootDashActivator.BOOT_ICON);
 	}
 }

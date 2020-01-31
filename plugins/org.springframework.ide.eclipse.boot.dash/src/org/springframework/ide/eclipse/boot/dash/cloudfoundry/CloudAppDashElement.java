@@ -42,6 +42,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement.CloudAppIdentity;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.OperationTracker.Task;
@@ -921,5 +922,10 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 	public boolean matchesLiveProcessCommand(ExecuteCommandAction action) {
 		UUID appGuid = getAppGuid();
 		return appGuid!=null && appGuid.toString().equals(action.getProcessId());
+	}
+
+	@Override
+	public Image getPropertiesTitleIconImage() {
+		return BootDashActivator.getDefault().getImageRegistry().get(BootDashActivator.CLOUD_ICON);
 	}
 }

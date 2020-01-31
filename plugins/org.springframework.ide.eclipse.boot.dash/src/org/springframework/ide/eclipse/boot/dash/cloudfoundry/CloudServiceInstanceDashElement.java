@@ -15,6 +15,7 @@ import java.util.EnumSet;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
@@ -171,5 +172,10 @@ public class CloudServiceInstanceDashElement extends CloudDashElement<String> im
 	@Override
 	public ImageDescriptor getCustomRunStateIcon() {
 		return BootDashActivator.getDefault().getImageRegistry().getDescriptor(BootDashActivator.SERVICE_ICON);
+	}
+
+	@Override
+	public Image getPropertiesTitleIconImage() {
+		return BootDashActivator.getDefault().getImageRegistry().get(BootDashActivator.SERVICE_ICON);
 	}
 }
