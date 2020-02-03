@@ -15,7 +15,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -42,6 +42,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveDataConnectionManagementActions;
@@ -66,6 +67,7 @@ import org.springframework.ide.eclipse.boot.dash.views.OpenLaunchConfigAction;
 import org.springframework.ide.eclipse.boot.dash.views.RunStateAction;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport;
+import org.springframework.ide.eclipse.boot.pstore.InMemoryPropertyStore;
 import org.springframework.ide.eclipse.boot.test.AutobuildingEnablement;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.WizardConfigurer;
@@ -386,7 +388,7 @@ public class BootDashActionTests {
 		}
 
 		{
-			CloudAppDashElement cfElement = mockCfElement(appGuid);
+			CloudAppDashElement cfElement = mockCfElement(appGuid, "demo-app");
 			selection.setElements(cfElement);
 			List<IAction> actions = liveActionsMenu.getActions();
 			Set<String> actualLabels = actions.stream().map(IAction::getText).collect(Collectors.toSet());
@@ -1010,13 +1012,16 @@ public class BootDashActionTests {
 		return element;
 	}
 
-	private CloudAppDashElement mockCfElement(String appGuid) {
+	private CloudAppDashElement mockCfElement(String appGuid, String appName) {
 		CloudFoundryRunTarget cfTarget = mock(CloudFoundryRunTarget.class);
 		RunTargetType cfType = mock(CloudFoundryRunTargetType.class);
 		when(cfTarget.getType()).thenReturn(cfType);
 
-		CloudAppDashElement element = mock(CloudAppDashElement.class);
+		CloudFoundryBootDashModel model = mock(CloudFoundryBootDashModel.class);
+		when(model.getRunTarget()).thenReturn(cfTarget);
+		CloudAppDashElement element = spy(new CloudAppDashElement(model, appName, new InMemoryPropertyStore()));
 		when(element.getAppGuid()).thenReturn(UUID.fromString(appGuid));
+		when(element.getName()).thenReturn(appName);
 		when(element.supportedGoalStates()).thenReturn(CloudFoundryRunTarget.RUN_GOAL_STATES);
 		when(element.getTarget()).thenReturn(cfTarget);
 		return element;
