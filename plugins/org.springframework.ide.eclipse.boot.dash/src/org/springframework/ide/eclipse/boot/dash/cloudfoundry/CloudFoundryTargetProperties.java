@@ -10,20 +10,14 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
-import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties.ORG_GUID;
-import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties.ORG_PROP;
-import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties.SPACE_GUID;
-import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties.SPACE_PROP;
-
-import org.eclipse.equinox.security.storage.StorageException;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.dialogs.StoreCredentialsMode;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
-import org.springframework.ide.eclipse.boot.util.Log;
 
 public class CloudFoundryTargetProperties extends TargetProperties {
 
@@ -37,12 +31,36 @@ public class CloudFoundryTargetProperties extends TargetProperties {
 	public final static String ORG_GUID = "organization_guid";
 	public final static String SPACE_GUID = "space_guid";
 
-	public CloudFoundryTargetProperties(RunTargetType runTargetType, BootDashModelContext context) {
-		super(runTargetType, context);
+	public static final String USERNAME_PROP = "username";
+	public static final String URL_PROP = "url";
+	private static final String STORE_PASSWORD = "storePassword";
+	private static final String STORE_CREDENTIALS = "storeCredentials";
+
+	private CFCredentials credentials;
+
+	final private BootDashModelContext context;
+
+	public CFCredentials getCredentials() throws CannotAccessPropertyException {
+		if (credentials == null) {
+			StoreCredentialsMode storeMode = getStoreCredentials();
+			try {
+				credentials = storeMode.loadCredentials(context, type, getRunTargetId());
+			} catch (Exception e) {
+				throw new CannotAccessPropertyException("Cannot read password.", e);
+			}
+		}
+		return credentials;
 	}
 
-	public CloudFoundryTargetProperties(TargetProperties targetProperties, RunTargetType runTargetType) {
-		super(targetProperties, runTargetType);
+	public void setCredentials(CFCredentials credentials) throws CannotAccessPropertyException {
+		this.credentials = credentials;
+		StoreCredentialsMode storeMode = getStoreCredentials();
+		storeMode.saveCredentials(context, type, getRunTargetId(), credentials);
+	}
+
+	public CloudFoundryTargetProperties(TargetProperties copyFrom, RunTargetType runTargetType, BootDashModelContext context) {
+		super(copyFrom, runTargetType);
+		this.context = context;
 		if (get(RUN_TARGET_ID) == null) {
 			put(RUN_TARGET_ID, getId(this));
 		}
@@ -120,8 +138,32 @@ public class CloudFoundryTargetProperties extends TargetProperties {
 		put(SKIP_SSL_VALIDATION_PROP, Boolean.toString(value));
 	}
 
+	public String getUsername() {
+		return map.get(USERNAME_PROP);
+	}
 	public void setUserName(String value) {
 		put(USERNAME_PROP, value);
 	}
+
+	public StoreCredentialsMode getStoreCredentials() {
+		String s = map.get(STORE_CREDENTIALS);
+		if (s!=null) {
+			return StoreCredentialsMode.valueOf(s);
+		} else {
+			//Try to preserve mode saved from old workspaces which only had store password support
+			// and not store auth token.
+			s = map.get(STORE_PASSWORD);
+			return s == null ? StoreCredentialsMode.STORE_NOTHING : StoreCredentialsMode.STORE_PASSWORD;
+		}
+	}
+
+	public void setStoreCredentials(StoreCredentialsMode store) {
+		map.put(STORE_CREDENTIALS, String.valueOf(store));
+	}
+
+	public String getUrl() {
+		return map.get(URL_PROP);
+	}
+
 
 }

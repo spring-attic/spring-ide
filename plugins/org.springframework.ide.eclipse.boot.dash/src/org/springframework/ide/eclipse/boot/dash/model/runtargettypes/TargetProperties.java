@@ -13,9 +13,6 @@ package org.springframework.ide.eclipse.boot.dash.model.runtargettypes;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.equinox.security.storage.StorageException;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
-import org.springframework.ide.eclipse.boot.dash.dialogs.StoreCredentialsMode;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 
@@ -35,42 +32,39 @@ import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 public class TargetProperties {
 
 	public static final String RUN_TARGET_ID = "runTargetID";
-	public static final String USERNAME_PROP = "username";
-	public static final String URL_PROP = "url";
-
-	private static final String STORE_PASSWORD = "storePassword";
-	private static final String STORE_CREDENTIALS = "storeCredentials";
 
 	protected Map<String, String> map;
-	private RunTargetType type;
-	private BootDashModelContext context;
-	private CFCredentials credentials;
+	protected RunTargetType type;
 
-	public TargetProperties(Map<String, String> map, RunTargetType type, BootDashModelContext context) {
+	public TargetProperties(Map<String, String> map, RunTargetType type) {
 		this.map = map;
 		this.type = type;
-		this.context = context;
 	}
 
-	public TargetProperties(BootDashModelContext context) {
-		this(new HashMap<String, String>(), null, context);
+	public TargetProperties() {
+		this(new HashMap<String, String>(), null);
 	}
 
 	public TargetProperties(TargetProperties targetProperties, RunTargetType runTargetType) {
-		this(targetProperties.getAllProperties(), runTargetType, targetProperties.context);
+		this(
+				targetProperties==null
+					?new HashMap<>()
+					:targetProperties.getAllProperties(),
+				runTargetType
+		);
 	}
 
-	public TargetProperties(RunTargetType type, BootDashModelContext context) {
-		this(new HashMap<String, String>(), type, context);
+	public TargetProperties(RunTargetType type) {
+		this(new HashMap<String, String>(), type);
 	}
 
 	public TargetProperties(RunTargetType type, String runTargetId, BootDashModelContext context) {
-		this(new HashMap<String, String>(), type, context);
+		this(new HashMap<String, String>(), type);
 		put(RUN_TARGET_ID, runTargetId);
 	}
 
-	public TargetProperties(Map<String, String> map, RunTargetType type, String runTargetId, BootDashModelContext context) {
-		this(type, context);
+	public TargetProperties(Map<String, String> map, RunTargetType type, String runTargetId) {
+		this(type);
 		if (map != null) {
 			this.map = map;
 		}
@@ -103,48 +97,6 @@ public class TargetProperties {
 
 	public RunTargetType getRunTargetType() {
 		return type;
-	}
-
-	public String getUsername() {
-		return map.get(USERNAME_PROP);
-	}
-
-	public StoreCredentialsMode getStoreCredentials() {
-		String s = map.get(STORE_CREDENTIALS);
-		if (s!=null) {
-			return StoreCredentialsMode.valueOf(s);
-		} else {
-			//Try to preserve mode saved from old workspaces which only had store password support
-			// and not store auth token.
-			s = map.get(STORE_PASSWORD);
-			return s == null ? StoreCredentialsMode.STORE_NOTHING : StoreCredentialsMode.STORE_PASSWORD;
-		}
-	}
-
-	public void setStoreCredentials(StoreCredentialsMode store) {
-		map.put(STORE_CREDENTIALS, String.valueOf(store));
-	}
-
-	public CFCredentials getCredentials() throws CannotAccessPropertyException {
-		if (credentials == null) {
-			StoreCredentialsMode storeMode = getStoreCredentials();
-			try {
-				credentials = storeMode.loadCredentials(context, type, getRunTargetId());
-			} catch (Exception e) {
-				throw new CannotAccessPropertyException("Cannot read password.", e);
-			}
-		}
-		return credentials;
-	}
-
-	public void setCredentials(CFCredentials credentials) throws CannotAccessPropertyException {
-		this.credentials = credentials;
-		StoreCredentialsMode storeMode = getStoreCredentials();
-		storeMode.saveCredentials(context, type, getRunTargetId(), credentials);
-	}
-
-	public String getUrl() {
-		return map.get(URL_PROP);
 	}
 
 	public void put(String key, String value) {

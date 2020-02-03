@@ -97,7 +97,7 @@ public class CloudFoundryRunTargetType extends AbstractRunTargetType implements 
 		ensureProcessTracker();
 		return props instanceof CloudFoundryTargetProperties
 				? new CloudFoundryRunTarget((CloudFoundryTargetProperties) props, this, clientFactory)
-				: new CloudFoundryRunTarget(new CloudFoundryTargetProperties(props, this), this, clientFactory);
+				: new CloudFoundryRunTarget(new CloudFoundryTargetProperties(props, this, context), this, clientFactory);
 	}
 
 

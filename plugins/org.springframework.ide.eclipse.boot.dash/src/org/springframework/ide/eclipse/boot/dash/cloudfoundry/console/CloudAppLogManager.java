@@ -83,7 +83,7 @@ public class CloudAppLogManager extends BootDashModelConsoleManager {
 	 * @param appName
 	 * @return existing console, or null if it does not exist.
 	 */
-	protected synchronized ApplicationLogConsole getExisitingConsole(TargetProperties targetProperties,
+	protected synchronized ApplicationLogConsole getExisitingConsole(CloudFoundryTargetProperties targetProperties,
 			String appName) {
 		IConsole[] consoles = ConsolePlugin.getDefault().getConsoleManager().getConsoles();
 		if (consoles != null) {
@@ -118,7 +118,7 @@ public class CloudAppLogManager extends BootDashModelConsoleManager {
 	 * @throws Exception
 	 *             if console was not created or found
 	 */
-	protected synchronized ApplicationLogConsole getApplicationConsole(TargetProperties targetProperties,
+	protected synchronized ApplicationLogConsole getApplicationConsole(CloudFoundryTargetProperties targetProperties,
 			String appName) throws Exception {
 		if (appName == null) {
 			throw ExceptionUtil.coreException("INTERNAL ERROR: No application name specified when writing to console.");
@@ -158,7 +158,7 @@ public class CloudAppLogManager extends BootDashModelConsoleManager {
 		}
 	}
 
-	public static String getConsoleId(TargetProperties targetProperties, String appName) {
+	public static String getConsoleId(CloudFoundryTargetProperties targetProperties, String appName) {
 		return getConsoleDisplayName(targetProperties, appName) + '-' + targetProperties.getUrl();
 	}
 

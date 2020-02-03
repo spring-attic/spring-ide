@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.test;
 
 import static junit.framework.TestCase.assertEquals;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -38,6 +39,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials.CFCredentialType;
 import org.springframework.ide.eclipse.boot.dash.dialogs.StoreCredentialsMode;
@@ -61,7 +63,6 @@ import org.springframework.ide.eclipse.boot.dash.test.mocks.MockRunTargetType;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveSet;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
@@ -624,7 +625,7 @@ public class BootDashViewModelTest {
 		MockRunTargetType targetType = new MockRunTargetType(context, "mock-type");
 		harness = new BootDashViewModelHarness(context.withTargetTypes(targetType));
 		targetType.setRequiresCredentials(true);
-		TargetProperties properties = new TargetProperties(targetType, "target-id", harness.context);
+		CloudFoundryTargetProperties properties = new CloudFoundryTargetProperties(null, targetType, harness.context);
 		properties.setCredentials(CFCredentials.fromPassword("secret"));
 
 		MockRunTarget target = (MockRunTarget) targetType.createRunTarget(properties);
@@ -632,7 +633,7 @@ public class BootDashViewModelTest {
 
 		harness.model.updateTargetPropertiesInStore();
 
-		assertEquals("secret", target.getTargetProperties().getCredentials().getSecret());
+		assertEquals("secret", ((CloudFoundryTargetProperties)target.getTargetProperties()).getCredentials().getSecret());
 
 		harness.reload();
 
@@ -648,7 +649,8 @@ public class BootDashViewModelTest {
 		MockRunTargetType targetType = new MockRunTargetType(context, "mock-type");
 		harness = new BootDashViewModelHarness(context.withTargetTypes(targetType));
 		targetType.setRequiresCredentials(true);
-		TargetProperties properties = new TargetProperties(targetType, "target-id", harness.context);
+		CloudFoundryTargetProperties properties = new CloudFoundryTargetProperties(null, targetType, harness.context);
+		properties.put(TargetProperties.RUN_TARGET_ID, "target-id");
 		properties.setStoreCredentials(StoreCredentialsMode.STORE_PASSWORD);
 		properties.setCredentials(CFCredentials.fromPassword("secret"));
 
@@ -662,10 +664,13 @@ public class BootDashViewModelTest {
 		//This test needs to have knowledge what keys the passwords are store under.
 		// That seems undesirable.
 		String key = "mock-type:target-id";
-		assertEquals(StoreCredentialsMode.STORE_PASSWORD, target.getTargetProperties().getStoreCredentials());
-		assertEquals(CFCredentialType.PASSWORD, target.getTargetProperties().getCredentials().getType());
-		assertEquals("secret", target.getTargetProperties().getCredentials().getSecret());
-		assertEquals("secret", secureStore.getCredentials(key));
+		{
+			CloudFoundryTargetProperties targetProperties = (CloudFoundryTargetProperties) target.getTargetProperties();
+			assertEquals(StoreCredentialsMode.STORE_PASSWORD, targetProperties.getStoreCredentials());
+			assertEquals(CFCredentialType.PASSWORD, targetProperties.getCredentials().getType());
+			assertEquals("secret", targetProperties.getCredentials().getSecret());
+			assertEquals("secret", secureStore.getCredentials(key));
+		}
 
 		/////////////////////////////////////////
 		// check that when runtargets are restored from the store the password prop is properly
@@ -676,8 +681,11 @@ public class BootDashViewModelTest {
 		MockRunTarget restoredTarget = (MockRunTarget) harness.getRunTarget(targetType);
 		assertTrue(restoredTarget != target); //Not a strict requirement, but it is more or less
 												// expected the restored target is a brand new object
-		assertEquals(StoreCredentialsMode.STORE_PASSWORD, restoredTarget.getTargetProperties().getStoreCredentials());
-		assertEquals("secret", restoredTarget.getTargetProperties().getCredentials().getSecret());
+		{
+			CloudFoundryTargetProperties restoredTargetProperties = (CloudFoundryTargetProperties) restoredTarget.getTargetProperties();
+			assertEquals(StoreCredentialsMode.STORE_PASSWORD, restoredTargetProperties.getStoreCredentials());
+			assertEquals("secret", restoredTargetProperties.getCredentials().getSecret());
+		}
 	}
 
 	@Test
@@ -685,7 +693,7 @@ public class BootDashViewModelTest {
 		MockRunTargetType targetType = new MockRunTargetType(context, "mock-type");
 		harness = new BootDashViewModelHarness(context.withTargetTypes(targetType));
 		targetType.setRequiresCredentials(true);
-		TargetProperties properties = new TargetProperties(targetType, "target-id", harness.context);
+		CloudFoundryTargetProperties properties = new CloudFoundryTargetProperties(null, targetType, harness.context);
 		properties.setStoreCredentials(StoreCredentialsMode.STORE_NOTHING);
 		properties.setCredentials(CFCredentials.fromPassword("secret"));
 
@@ -699,9 +707,12 @@ public class BootDashViewModelTest {
 		//This test needs to have knowledge what keys the passwords are store under.
 		// That seems undesirable.
 		String key = "mock-type:target-id";
-		assertEquals(StoreCredentialsMode.STORE_NOTHING, target.getTargetProperties().getStoreCredentials());
-		assertEquals("secret", target.getTargetProperties().getCredentials().getSecret());
-		assertNull(secureStore.getCredentials(key));
+		{
+			CloudFoundryTargetProperties targetProperties = (CloudFoundryTargetProperties) target.getTargetProperties();
+			assertEquals(StoreCredentialsMode.STORE_NOTHING, targetProperties.getStoreCredentials());
+			assertEquals("secret", targetProperties.getCredentials().getSecret());
+			assertNull(secureStore.getCredentials(key));
+		}
 
 		/////////////////////////////////////////
 		// check that when runtargets are restored from the store the password is not remebered
@@ -711,8 +722,11 @@ public class BootDashViewModelTest {
 		MockRunTarget restoredTarget = (MockRunTarget) harness.getRunTarget(targetType);
 		assertTrue(restoredTarget != target); //Not a strict requirement, but it is more or less
 												// expected the restored target is a brand new object
-		assertEquals(StoreCredentialsMode.STORE_NOTHING, restoredTarget.getTargetProperties().getStoreCredentials());
-		assertNull(restoredTarget.getTargetProperties().getCredentials());
+		{
+			CloudFoundryTargetProperties restoredTargetProperties = (CloudFoundryTargetProperties) restoredTarget.getTargetProperties();
+			assertEquals(StoreCredentialsMode.STORE_NOTHING,restoredTargetProperties.getStoreCredentials());
+			assertNull(restoredTargetProperties.getCredentials());
+		}
 	}
 
 }

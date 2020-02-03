@@ -19,6 +19,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
@@ -57,7 +58,8 @@ public class RunTargetPropertiesManager implements ValueListener<ImmutableSet<Ru
 					List<Map<String, String>> asList = mapper.convert(runTypesVal);
 					if (asList != null) {
 						for (Map<String, String> runTargetPropMap : asList) {
-							TargetProperties targProps = new TargetProperties(runTargetPropMap, type, context);
+							TargetProperties copyFrom = new TargetProperties(runTargetPropMap, type);
+							TargetProperties targProps = new CloudFoundryTargetProperties(copyFrom, type, context);
 							RunTarget target = type.createRunTarget(targProps);
 							if (target != null) {
 								targets.add(target);
