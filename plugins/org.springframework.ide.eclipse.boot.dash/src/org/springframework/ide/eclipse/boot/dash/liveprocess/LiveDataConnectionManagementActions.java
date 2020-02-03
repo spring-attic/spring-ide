@@ -169,7 +169,9 @@ public class LiveDataConnectionManagementActions extends AbstractDisposable impl
 			filter = action -> {
 				for (BootDashElement bde : bdes) {
 					if (bde instanceof LiveDataCapableElement) {
-						return ((LiveDataCapableElement)bde).matchesLiveProcessCommand(action);
+						if (((LiveDataCapableElement)bde).matchesLiveProcessCommand(action)) {
+							return true;
+						}
 					}
 				}
 				return false;
