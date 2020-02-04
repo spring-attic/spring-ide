@@ -15,7 +15,7 @@ import java.util.List;
 
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
+import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.launch.LaunchTabSelectionModel;

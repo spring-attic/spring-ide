@@ -11,9 +11,9 @@
 package org.springframework.ide.eclipse.boot.dash.cf.debug;
 
 import org.eclipse.core.resources.IProject;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
+import org.springframework.ide.eclipse.boot.dash.cf.model.CloudAppDashElement;
+import org.springframework.ide.eclipse.boot.dash.cf.model.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.launch.ExistingBootProjectSelectionValidator;

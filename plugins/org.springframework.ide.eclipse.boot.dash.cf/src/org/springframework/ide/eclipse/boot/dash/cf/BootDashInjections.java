@@ -11,16 +11,16 @@
 package org.springframework.ide.eclipse.boot.dash.cf;
 
 import org.springframework.ide.eclipse.boot.dash.cf.actions.CfBootDashActions;
+import org.springframework.ide.eclipse.boot.dash.cf.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cf.debug.SshDebugSupport;
+import org.springframework.ide.eclipse.boot.dash.cf.jmxtunnel.CloudFoundryRemoteBootAppsDataContributor;
+import org.springframework.ide.eclipse.boot.dash.cf.jmxtunnel.JmxSshTunnelManager;
 import org.springframework.ide.eclipse.boot.dash.cf.labels.BootDashCfLabels;
 import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryRunTargetType;
+import org.springframework.ide.eclipse.boot.dash.cf.ui.CfUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.cf.ui.DefaultCfUserInteractions;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CfUserInteractions;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnelFactory;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnelImpl;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.jmxtunnel.CloudFoundryRemoteBootAppsDataContributor;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.jmxtunnel.JmxSshTunnelManager;
 import org.springframework.ide.eclipse.boot.dash.di.EclipseBeanLoader.Contribution;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.labels.BootDashLabels;

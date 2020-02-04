@@ -11,9 +11,9 @@
 package org.springframework.ide.eclipse.boot.dash.cf.actions;
 
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.SelectManifestOp;
+import org.springframework.ide.eclipse.boot.dash.cf.model.CloudAppDashElement;
+import org.springframework.ide.eclipse.boot.dash.cf.model.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cf.ops.SelectManifestOp;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 

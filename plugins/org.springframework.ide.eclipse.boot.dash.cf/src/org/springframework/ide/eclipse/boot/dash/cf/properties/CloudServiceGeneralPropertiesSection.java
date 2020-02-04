@@ -12,7 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.cf.properties;
 
 import java.util.function.Function;
 
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudServiceInstanceDashElement;
+import org.springframework.ide.eclipse.boot.dash.cf.model.CloudServiceInstanceDashElement;
 import org.springframework.ide.eclipse.boot.dash.views.properties.AbstractBdeGeneralPropertiesSection;
 import org.springframework.ide.eclipse.boot.dash.views.properties.AbstractBdePropertyControl;
 import org.springframework.ide.eclipse.boot.dash.views.properties.BdeReadOnlyTextPropertyControl;

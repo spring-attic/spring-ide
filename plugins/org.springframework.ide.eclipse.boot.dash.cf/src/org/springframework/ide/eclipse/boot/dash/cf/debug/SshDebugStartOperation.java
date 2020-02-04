@@ -12,9 +12,8 @@ package org.springframework.ide.eclipse.boot.dash.cf.debug;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.DebugSupport;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.CloudApplicationOperation;
+import org.springframework.ide.eclipse.boot.dash.cf.model.CloudAppDashElement;
+import org.springframework.ide.eclipse.boot.dash.cf.ops.CloudApplicationOperation;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 
 /**

@@ -12,9 +12,9 @@ package org.springframework.ide.eclipse.boot.dash.cf.actions;
 
 import java.util.EnumSet;
 
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cf.dialogs.CustomizeAppsManagerURLDialogModel;
+import org.springframework.ide.eclipse.boot.dash.cf.model.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
-import org.springframework.ide.eclipse.boot.dash.dialogs.CustomizeAppsManagerURLDialogModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;

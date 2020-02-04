@@ -10,21 +10,18 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
-import javax.inject.Provider;
+import java.util.function.Supplier;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.jdt.internal.codeassist.ThrownExceptionFinder;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.OperationTracker.Task;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveCounter;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
+
 
 /**
  * Keeps track of whether a certain 'operation' is currently in progress.
@@ -54,9 +51,9 @@ public class OperationTracker {
 	 */
 	public final LiveCounter inProgress = new LiveCounter();
 
-	private Provider<String> name;
+	private Supplier<String> name;
 
-	public OperationTracker(Provider<String> name, LiveVariable<Throwable> error) {
+	public OperationTracker(Supplier<String> name, LiveVariable<Throwable> error) {
 		this.name = name;
 		this.error = error;
 	}

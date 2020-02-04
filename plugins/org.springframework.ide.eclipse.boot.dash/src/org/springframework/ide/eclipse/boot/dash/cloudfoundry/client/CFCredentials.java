@@ -10,8 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.client;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.Assert;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetWizardModel.LoginMethod;
+import org.springsource.ide.eclipse.commons.livexp.ui.Ilabelable;
 
 public class CFCredentials {
 
@@ -29,6 +30,24 @@ public class CFCredentials {
 			default:
 				return null;
 			}
+		}
+	}
+
+	public enum LoginMethod implements Ilabelable {
+		PASSWORD,
+		TEMPORARY_CODE;
+
+		@Override
+		public String getLabel() {
+			String[] pieces = name().split("_");
+			StringBuilder label = new StringBuilder();
+			for (int i = 0; i < pieces.length; i++) {
+				if (i>0) {
+					label.append(" ");
+				}
+				label.append(StringUtils.capitalize(pieces[i].toLowerCase()));
+			}
+			return label.toString();
 		}
 	}
 

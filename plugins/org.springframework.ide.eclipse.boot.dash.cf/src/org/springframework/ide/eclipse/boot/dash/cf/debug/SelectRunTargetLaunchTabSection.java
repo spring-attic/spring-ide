@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cf.debug;
 
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryRunTarget;
+import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.util.NameableLabelProvider;
 import org.springframework.ide.eclipse.boot.launch.util.DelegatingLaunchConfigurationTabSection;
 import org.springframework.ide.eclipse.boot.launch.util.ILaunchConfigurationTabSection;

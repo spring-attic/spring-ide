@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cf.properties;
 
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
+import org.springframework.ide.eclipse.boot.dash.cf.model.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.views.properties.AbstractBdeGeneralPropertiesSection;
 import org.springframework.ide.eclipse.boot.dash.views.properties.AppPropertyControl;

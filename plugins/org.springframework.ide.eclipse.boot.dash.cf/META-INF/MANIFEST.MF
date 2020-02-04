@@ -23,12 +23,27 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.debug.ui,
  org.eclipse.jdt.debug.ui,
  org.springsource.ide.eclipse.commons.core,
- com.google.gson
+ com.google.gson,
+ org.eclipse.ui.console,
+ javax.ws.rs;bundle-version="2.0.1",
+ org.springframework.ide.eclipse.beans.ui.live,
+ org.eclipse.compare,
+ org.eclipse.core.filebuffers,
+ org.eclipse.text,
+ org.springsource.ide.eclipse.commons.frameworks.core,
+ org.apache.httpcomponents.httpclient,
+ org.apache.httpcomponents.httpcore,
+ org.yaml.snakeyaml,
+ org.apache.commons.lang3,
+ org.springframework.ide.eclipse.editor.support
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: org.springframework.ide.eclipse.boot.dash.cf.BootDashCfPlugin
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.boot.dash.cf,
  org.springframework.ide.eclipse.boot.dash.cf.actions,
  org.springframework.ide.eclipse.boot.dash.cf.debug,
+ org.springframework.ide.eclipse.boot.dash.cf.dialogs,
+ org.springframework.ide.eclipse.boot.dash.cf.jmxtunnel,
+ org.springframework.ide.eclipse.boot.dash.cf.model,
  org.springframework.ide.eclipse.boot.dash.cf.runtarget,
  org.springframework.ide.eclipse.boot.dash.cf.ui

@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cf.actions;
 
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
+import org.springframework.ide.eclipse.boot.dash.cf.model.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashElementsAction;
 import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashElementsAction.Params;

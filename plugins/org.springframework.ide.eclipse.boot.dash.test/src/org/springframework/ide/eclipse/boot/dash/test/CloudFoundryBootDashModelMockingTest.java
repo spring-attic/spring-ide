@@ -82,24 +82,24 @@ import org.springframework.ide.eclipse.boot.dash.cf.actions.RestartApplicationOn
 import org.springframework.ide.eclipse.boot.dash.cf.actions.SelectManifestAction;
 import org.springframework.ide.eclipse.boot.dash.cf.actions.ToggleBootDashModelConnection;
 import org.springframework.ide.eclipse.boot.dash.cf.actions.UpdatePasswordAction;
+import org.springframework.ide.eclipse.boot.dash.cf.dialogs.PasswordDialogModel;
+import org.springframework.ide.eclipse.boot.dash.cf.jmxtunnel.JmxSshTunnelManager;
+import org.springframework.ide.eclipse.boot.dash.cf.model.CloudAppDashElement;
+import org.springframework.ide.eclipse.boot.dash.cf.model.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryRunTargetType;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetWizardModel.LoginMethod;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials.CFCredentialType;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials.LoginMethod;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFDomainType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.HealthChecks;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFDomainStatus;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.ReactorUtils;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.jmxtunnel.JmxSshTunnelManager;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
-import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.StoreCredentialsMode;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -143,7 +143,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 
 /**

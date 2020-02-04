@@ -11,10 +11,10 @@
 package org.springframework.ide.eclipse.boot.dash.cf.actions;
 
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ServicesRefreshOperation;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.ConnectOperation;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.TargetApplicationsRefreshOperation;
+import org.springframework.ide.eclipse.boot.dash.cf.model.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cf.ops.ConnectOperation;
+import org.springframework.ide.eclipse.boot.dash.cf.ops.ServicesRefreshOperation;
+import org.springframework.ide.eclipse.boot.dash.cf.ops.TargetApplicationsRefreshOperation;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashModelAction;

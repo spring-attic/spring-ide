@@ -84,7 +84,7 @@ import org.springframework.ide.eclipse.boot.core.cli.BootCliCommand;
 import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
 import org.springframework.ide.eclipse.boot.core.cli.install.CloudCliInstall;
 import org.springframework.ide.eclipse.boot.core.cli.install.IBootInstall;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudServiceInstanceDashElement;
+import org.springframework.ide.eclipse.boot.dash.cf.model.CloudServiceInstanceDashElement;
 import org.springframework.ide.eclipse.boot.dash.labels.BootDashLabels;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElementsFilterBoxModel;

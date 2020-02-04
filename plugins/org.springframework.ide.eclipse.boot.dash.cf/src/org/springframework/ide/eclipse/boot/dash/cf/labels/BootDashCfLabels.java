@@ -7,7 +7,7 @@ import static org.springframework.ide.eclipse.boot.dash.labels.BootDashLabels.TE
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.ui.PlatformUI;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
+import org.springframework.ide.eclipse.boot.dash.cf.model.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.JmxSshTunnelStatus;
 import org.springframework.ide.eclipse.boot.dash.labels.BootDashLabels;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;

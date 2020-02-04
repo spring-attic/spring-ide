@@ -1,13 +1,12 @@
 package org.springframework.ide.eclipse.boot.dash.cf.ui;
 
 import org.eclipse.swt.widgets.Shell;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CfUserInteractions;
+import org.springframework.ide.eclipse.boot.dash.cf.dialogs.CustomizeAppsManagerURLDialog;
+import org.springframework.ide.eclipse.boot.dash.cf.dialogs.CustomizeAppsManagerURLDialogModel;
+import org.springframework.ide.eclipse.boot.dash.cf.dialogs.PasswordDialogModel;
+import org.springframework.ide.eclipse.boot.dash.cf.dialogs.UpdatePasswordDialog;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
-import org.springframework.ide.eclipse.boot.dash.dialogs.CustomizeAppsManagerURLDialog;
-import org.springframework.ide.eclipse.boot.dash.dialogs.CustomizeAppsManagerURLDialogModel;
-import org.springframework.ide.eclipse.boot.dash.dialogs.PasswordDialogModel;
 import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions.UIContext;
-import org.springframework.ide.eclipse.boot.dash.views.UpdatePasswordDialog;
 
 public class DefaultCfUserInteractions implements CfUserInteractions {
 

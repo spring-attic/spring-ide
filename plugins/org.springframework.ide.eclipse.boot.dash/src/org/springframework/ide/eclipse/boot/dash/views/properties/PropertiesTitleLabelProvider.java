@@ -14,11 +14,7 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.graphics.Image;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudServiceInstanceDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 
 /**
  * Label provider for Boot Dash elements for the tabbed properties view

@@ -18,10 +18,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement;
+import org.springframework.ide.eclipse.boot.dash.cf.jmxtunnel.JmxSshTunnelManager;
+import org.springframework.ide.eclipse.boot.dash.cf.jmxtunnel.JmxSupport;
+import org.springframework.ide.eclipse.boot.dash.cf.model.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnelFactory;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.jmxtunnel.JmxSshTunnelManager;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.jmxtunnel.JmxSupport;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockSshTunnel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;

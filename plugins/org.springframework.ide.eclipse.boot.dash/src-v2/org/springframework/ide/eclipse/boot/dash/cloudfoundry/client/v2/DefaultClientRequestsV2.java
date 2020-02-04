@@ -74,7 +74,6 @@ import org.cloudfoundry.uaa.UaaClient;
 import org.cloudfoundry.util.PaginationUtils;
 import org.eclipse.core.runtime.Platform;
 import org.osgi.framework.Version;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationRunningStateTracker;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFBuildpack;
@@ -113,7 +112,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 
 	private static AtomicLong instances = new AtomicLong(0);
 
-	public static final Duration APP_START_TIMEOUT = Duration.ofMillis(ApplicationRunningStateTracker.APP_START_TIMEOUT);
+	public static final Duration APP_START_TIMEOUT = Duration.ofMinutes(10);
 	public static final Duration GET_SERVICES_TIMEOUT = Duration.ofSeconds(60);
 	public static final Duration GET_SPACES_TIMEOUT = Duration.ofSeconds(20);
 	public static final Duration GET_USERNAME_TIMEOUT = Duration.ofSeconds(5);

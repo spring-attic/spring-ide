@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cf.actions;
 
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CfUserInteractions;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cf.model.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cf.ui.CfUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashModelAction;

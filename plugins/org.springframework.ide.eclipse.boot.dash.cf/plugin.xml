@@ -26,7 +26,7 @@
                id="org.springframework.ide.eclipse.boot.dash.section.CloudFoundryGeneral"
                tab="org.springframework.ide.eclipse.boot.dash.tab.General">
             <input
-                  type="org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppDashElement">
+                  type="org.springframework.ide.eclipse.boot.dash.cf.model.CloudAppDashElement">
             </input>
          </propertySection>
          <propertySection
@@ -34,7 +34,7 @@
                id="org.springframework.ide.eclipse.boot.dash.section.CloudServiceSection"
                tab="org.springframework.ide.eclipse.boot.dash.tab.General">
             <input
-                  type="org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudServiceInstanceDashElement">
+                  type="org.springframework.ide.eclipse.boot.dash.cf.model.CloudServiceInstanceDashElement">
             </input>
          </propertySection>
       </propertySections>
