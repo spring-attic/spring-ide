@@ -8,12 +8,13 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment;
+package org.springframework.ide.eclipse.boot.dash.cf.deployment;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.reconciler.Reconciler;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.AppNameReconcilingStrategy;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlASTProvider;
 import org.yaml.snakeyaml.Yaml;
 

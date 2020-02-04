@@ -257,22 +257,6 @@
    </key>
 </extension>
 <extension
-      point="org.eclipse.ui.genericeditor.reconcilers">
-   <reconciler
-         class="org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.ApplicationNameReconciler"
-         contentType="org.springframework.ide.eclipse.manifest.yml">
-      <enabledWhen>
-         <with
-               variable="editor">
-            <test
-                  property="org.springframework.ide.eclipse.boot.EmbeddedEditor.context"
-                  value="deployment-properties-dialog">
-            </test>
-         </with>
-      </enabledWhen>
-   </reconciler>
-</extension>
-<extension
       point="org.eclipse.ui.themes">
    <colorDefinition
          categoryId="org.springsource.ide.eclipse.commons.ui"
