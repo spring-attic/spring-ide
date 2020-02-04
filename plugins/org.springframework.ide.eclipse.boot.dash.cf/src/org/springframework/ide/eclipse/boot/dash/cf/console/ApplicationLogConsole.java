@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry.console;
+package org.springframework.ide.eclipse.boot.dash.cf.console;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -26,11 +26,13 @@ import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.IOConsoleOutputStream;
 import org.eclipse.ui.console.MessageConsole;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.util.Log;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.CfLogType;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.IApplicationLogConsole;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import reactor.core.Disposable;
 
-@SuppressWarnings("restriction")
 public class ApplicationLogConsole extends MessageConsole implements IPropertyChangeListener, IApplicationLogConsole {
 
 	private Map<LogType, IOConsoleOutputStream> activeStreams = new HashMap<>();
@@ -77,7 +79,7 @@ public class ApplicationLogConsole extends MessageConsole implements IPropertyCh
 					return true;
 				}
 			} catch (IOException e) {
-				BootDashActivator.log(e);
+				Log.log(e);
 			}
 		}
 		return false;
