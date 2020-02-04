@@ -241,8 +241,12 @@ public class AddStartersModel implements OkButtonHandler {
 	}
 
 	public boolean canShowDiff() {
-		List<Dependency> currentSelection = this.dependencies.getCurrentSelection();
-		return currentSelection != null && currentSelection.size() > 0;
+
+//		List<Dependency> currentSelection = this.dependencies.getCurrentSelection();
+//		return currentSelection != null && currentSelection.size() > 0;
+		// Allow showing of diff even if no dependencies are selected, as that will
+		// still result in a valid generated initializr project
+		return true;
 	}
 
 	public void onDependencyChange(Runnable runnable) {
