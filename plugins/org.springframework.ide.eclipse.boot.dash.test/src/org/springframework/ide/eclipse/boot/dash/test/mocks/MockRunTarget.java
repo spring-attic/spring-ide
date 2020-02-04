@@ -20,6 +20,7 @@ import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashC
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
@@ -28,16 +29,16 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetT
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 
-public class MockRunTarget extends AbstractRunTarget implements RunTargetWithProperties {
+public class MockRunTarget extends AbstractRunTarget<CloudFoundryTargetProperties> implements RunTargetWithProperties<CloudFoundryTargetProperties> {
 
-	private TargetProperties properties;
+	private CloudFoundryTargetProperties properties;
 	private boolean requiresCredentials;
 
-	public MockRunTarget(RunTargetType type, TargetProperties properties) {
+	public MockRunTarget(RunTargetType<CloudFoundryTargetProperties> type, CloudFoundryTargetProperties properties) {
 		this(type, properties, false);
 	}
 
-	public MockRunTarget(RunTargetType type, TargetProperties properties, boolean requiresCredentials) {
+	public MockRunTarget(RunTargetType<CloudFoundryTargetProperties> type, CloudFoundryTargetProperties properties, boolean requiresCredentials) {
 		super(type, properties.getRunTargetId());
 		this.properties = properties;
 		this.requiresCredentials = requiresCredentials;
@@ -95,6 +96,11 @@ public class MockRunTarget extends AbstractRunTarget implements RunTargetWithPro
 
 	@Override
 	public void dispose() {
+	}
+
+	@Override
+	public CloudFoundryTargetProperties getParams() {
+		return properties;
 	}
 
 }

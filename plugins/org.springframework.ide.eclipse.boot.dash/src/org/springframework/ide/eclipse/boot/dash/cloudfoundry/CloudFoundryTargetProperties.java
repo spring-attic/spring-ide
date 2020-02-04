@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
+import java.util.Map;
+
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
@@ -18,6 +20,8 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
+
+import com.google.gson.Gson;
 
 public class CloudFoundryTargetProperties extends TargetProperties {
 
@@ -58,7 +62,7 @@ public class CloudFoundryTargetProperties extends TargetProperties {
 		storeMode.saveCredentials(context, type, getRunTargetId(), credentials);
 	}
 
-	public CloudFoundryTargetProperties(TargetProperties copyFrom, RunTargetType runTargetType, BootDashModelContext context) {
+	public CloudFoundryTargetProperties(TargetProperties copyFrom, RunTargetType<CloudFoundryTargetProperties> runTargetType, BootDashModelContext context) {
 		super(copyFrom, runTargetType);
 		this.context = context;
 		if (get(RUN_TARGET_ID) == null) {
@@ -165,5 +169,8 @@ public class CloudFoundryTargetProperties extends TargetProperties {
 		return map.get(URL_PROP);
 	}
 
-
+	public String toJson() {
+		Gson gson = new Gson();
+		return gson.toJson(map);
+	}
 }

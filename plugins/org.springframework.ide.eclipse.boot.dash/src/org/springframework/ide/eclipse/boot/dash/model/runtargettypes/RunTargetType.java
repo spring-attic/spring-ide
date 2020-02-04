@@ -26,7 +26,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
  *
  * @author Kris De Volder
  */
-public interface RunTargetType extends Nameable {
+public interface RunTargetType<Params> extends Nameable {
 
 	/**
 	 * @return Whether it is possible to create instances of this type. Not all
@@ -47,7 +47,7 @@ public interface RunTargetType extends Nameable {
 	 * @return if {@link #canInstantiate()} returns true, return a new {@link RunTarget}. Return null if this
 	 * type cannot be instantiated.
 	 */
-	RunTarget createRunTarget(TargetProperties properties);
+	RunTarget<Params> createRunTarget(Params properties);
 
 	ImageDescriptor getIcon();
 
@@ -85,4 +85,7 @@ public interface RunTargetType extends Nameable {
 	 * supported '%' template variables.
 	 */
 	String getTemplateHelpText();
+
+	Params parseParams(String serializedTargetParams);
+	String serialize(Params serializedTargetParams);
 }

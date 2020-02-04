@@ -531,7 +531,7 @@ public class BootDashViewModelTest {
 
 	@Test
 	public void testRestoreSingleRunTarget() throws Exception {
-		RunTargetType targetType = new MockRunTargetType(context, "MOCK");
+		RunTargetType<CloudFoundryTargetProperties> targetType = new MockRunTargetType(context, "MOCK");
 		String targetId = "foo";
 
 		harness = new BootDashViewModelHarness(context.withTargetTypes(
@@ -539,9 +539,10 @@ public class BootDashViewModelTest {
 				targetType
 		));
 
-		TargetProperties props = new TargetProperties(targetType, targetId, harness.context);
+		CloudFoundryTargetProperties props = new CloudFoundryTargetProperties(null, targetType, harness.context);
+		props.put(TargetProperties.RUN_TARGET_ID, targetId);
 		props.put("describe", "This is foo");
-		RunTarget savedTarget = targetType.createRunTarget(props);
+		RunTarget<CloudFoundryTargetProperties> savedTarget = targetType.createRunTarget(props);
 		harness.model.getRunTargets().add(savedTarget);
 		BootDashModelContext oldContext = harness.context;
 

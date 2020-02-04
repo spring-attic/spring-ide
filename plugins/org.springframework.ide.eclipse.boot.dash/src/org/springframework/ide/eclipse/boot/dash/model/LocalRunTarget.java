@@ -19,7 +19,7 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetT
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 
-public class LocalRunTarget extends AbstractRunTarget {
+public class LocalRunTarget extends AbstractRunTarget<Void> {
 
 	public static final RunTarget INSTANCE = new LocalRunTarget();
 	public static final BootDashColumn[] DEFAULT_COLUMNS = {
@@ -72,5 +72,10 @@ public class LocalRunTarget extends AbstractRunTarget {
 
 	@Override
 	public void dispose() {
+	}
+
+	@Override
+	public Void getParams() {
+		return null;
 	}
 }

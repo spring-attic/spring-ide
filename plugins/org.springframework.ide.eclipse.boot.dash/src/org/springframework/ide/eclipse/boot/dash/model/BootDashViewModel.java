@@ -71,7 +71,7 @@ public class BootDashViewModel extends AbstractDisposable {
 		models = new BootDashModelManager(context, this, runTargets);
 
 		manager = new RunTargetPropertiesManager(context, runTargetTypes);
-		List<RunTarget> existingtargets = manager.getStoredTargets();
+		List<RunTarget> existingtargets = manager.load();
 		runTargets.addAll(existingtargets);
 		runTargets.addListener(manager);
 

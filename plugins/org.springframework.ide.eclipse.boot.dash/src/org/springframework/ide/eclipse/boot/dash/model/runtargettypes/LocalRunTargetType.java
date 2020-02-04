@@ -18,7 +18,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 /**
  * @author Kris De Volder
  */
-public class LocalRunTargetType extends AbstractRunTargetType {
+public class LocalRunTargetType extends AbstractRunTargetType<Void> {
 	LocalRunTargetType(String name) {
 		super(null, name);
 	}
@@ -39,12 +39,22 @@ public class LocalRunTargetType extends AbstractRunTargetType {
 	}
 
 	@Override
-	public RunTarget createRunTarget(TargetProperties properties) {
-		return null;
+	public RunTarget<Void> createRunTarget(Void nothing) {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public ImageDescriptor getIcon() {
 		return BootDashActivator.getDefault().getImageRegistry().getDescriptor(BootDashActivator.BOOT_ICON);
+	}
+
+	@Override
+	public Void parseParams(String serializedTargetParams) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public String serialize(Void serializedTargetParams) {
+		throw new UnsupportedOperationException();
 	}
 }

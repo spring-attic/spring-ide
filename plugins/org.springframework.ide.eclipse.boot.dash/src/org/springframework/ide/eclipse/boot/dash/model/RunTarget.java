@@ -29,9 +29,9 @@ import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
  *
  * @author Kris De Volder
  */
-public interface RunTarget extends IdAble, Nameable, Disposable {
+public interface RunTarget<Params> extends IdAble, Nameable, Disposable {
 
-	public abstract RunTargetType getType();
+	public abstract RunTargetType<Params> getType();
 
 	/**
 	 * Create a launch config for a given dash element and initialize it with
@@ -115,4 +115,5 @@ public interface RunTarget extends IdAble, Nameable, Disposable {
 		return getType().getIcon();
 	}
 
+	abstract Params getParams();
 }

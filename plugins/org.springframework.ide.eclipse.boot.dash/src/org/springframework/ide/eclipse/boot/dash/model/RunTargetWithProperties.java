@@ -17,13 +17,13 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProp
  * Not all run targets define properties (e.g. the local run target)
  *
  */
-public interface RunTargetWithProperties extends RunTarget {
+public interface RunTargetWithProperties<Params> extends RunTarget<Params> {
 
 	public TargetProperties getTargetProperties();
 
 	/**
 	 * Refresh the target properties.
-	 * 
+	 *
 	 * @throws Exception
 	 *             if refresh failed or target properties are invalid
 	 */

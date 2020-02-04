@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cf.runtarget;
 
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -40,10 +41,12 @@ import org.springframework.ide.eclipse.boot.util.ProcessTracker;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
+import com.google.gson.Gson;
+
 /**
  * @author Kris De Volder
  */
-public class CloudFoundryRunTargetType extends AbstractRunTargetType implements RemoteRunTargetType, Disposable {
+public class CloudFoundryRunTargetType extends AbstractRunTargetType<CloudFoundryTargetProperties> implements RemoteRunTargetType<CloudFoundryTargetProperties>, Disposable {
 
 	public static RunTargetTypeFactory factory = context -> {
 		return new CloudFoundryRunTargetType(context, DefaultCloudFoundryClientFactoryV2.INSTANCE);
@@ -93,7 +96,7 @@ public class CloudFoundryRunTargetType extends AbstractRunTargetType implements 
 	}
 
 	@Override
-	public RunTarget createRunTarget(TargetProperties props) {
+	public RunTarget createRunTarget(CloudFoundryTargetProperties props) {
 		ensureProcessTracker();
 		return props instanceof CloudFoundryTargetProperties
 				? new CloudFoundryRunTarget((CloudFoundryTargetProperties) props, this, clientFactory)
@@ -141,5 +144,18 @@ public class CloudFoundryRunTargetType extends AbstractRunTargetType implements 
 			devtoolsProcessTracker.dispose();
 			devtoolsProcessTracker = null;
 		}
+	}
+
+	@Override
+	public CloudFoundryTargetProperties parseParams(String serializedTargetParams) {
+		Gson gson = new Gson();
+		@SuppressWarnings("unchecked")
+		Map<String,String> map = gson.fromJson(serializedTargetParams, Map.class);
+		return new CloudFoundryTargetProperties(new TargetProperties(map, this), this, context);
+	}
+
+	@Override
+	public String serialize(CloudFoundryTargetProperties props) {
+		return props.toJson();
 	}
 }

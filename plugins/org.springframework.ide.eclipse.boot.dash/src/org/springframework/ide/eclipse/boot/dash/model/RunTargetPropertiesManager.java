@@ -12,29 +12,28 @@ package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
-import org.springframework.ide.eclipse.boot.pstore.PropertiesMapper;
+import org.springsource.ide.eclipse.commons.frameworks.core.util.ArrayEncoder;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 
 public class RunTargetPropertiesManager implements ValueListener<ImmutableSet<RunTarget>> {
 
 	private final BootDashModelContext context;
-	private final RunTargetType[] types;
 
-	public static final String RUN_TARGET_KEY = "runTargets";
+	@SuppressWarnings("rawtypes")
+	private final RunTargetType<?>[] types;
+
+	public static final String RUN_TARGET_KEY = "runTargets-v2";
 
 	public RunTargetPropertiesManager(BootDashModelContext context, Collection<RunTargetType> types) {
 		this(context, types.toArray(new RunTargetType[types.size()]));
@@ -45,25 +44,22 @@ public class RunTargetPropertiesManager implements ValueListener<ImmutableSet<Ru
 		this.types = types;
 	}
 
-	public List<RunTarget> getStoredTargets() {
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public List<RunTarget> load() {
 
 		List<RunTarget> targets = new ArrayList<>();
-		PropertiesMapper<List<Map<String, String>>> mapper = new PropertiesMapper<>();
 		for (RunTargetType type : types) {
 			if (type==RunTargetTypes.LOCAL) {
 				targets.add(RunTargets.LOCAL);
 			} else if (type.canInstantiate()) {
-				String runTypesVal = context.getRunTargetProperties().get(type, RUN_TARGET_KEY);
-				if (runTypesVal != null) {
-					List<Map<String, String>> asList = mapper.convert(runTypesVal);
-					if (asList != null) {
-						for (Map<String, String> runTargetPropMap : asList) {
-							TargetProperties copyFrom = new TargetProperties(runTargetPropMap, type);
-							TargetProperties targProps = new CloudFoundryTargetProperties(copyFrom, type, context);
-							RunTarget target = type.createRunTarget(targProps);
-							if (target != null) {
-								targets.add(target);
-							}
+				String serializedList = context.getRunTargetProperties().get(type, RUN_TARGET_KEY);
+				if (serializedList != null) {
+					String[] list = ArrayEncoder.decode(serializedList);
+					for (String serializedParams : list) {
+						Object params = type.parseParams(serializedParams);
+						RunTarget target = type.createRunTarget(params);
+						if (target != null) {
+							targets.add(target);
 						}
 					}
 				}
@@ -78,50 +74,30 @@ public class RunTargetPropertiesManager implements ValueListener<ImmutableSet<Ru
 		store(value);
 	}
 
-	public synchronized void store(Set<RunTarget> targets) {
-		Map<RunTargetType, List<RunTargetWithProperties>> propertiesToPersist = new HashMap<>();
-
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public synchronized void store(Set<RunTarget> _targets) {
 		// Only persist run target properties that can be instantiated
-		for (RunTargetType type : types) {
+		Multimap<RunTargetType<?>, RunTarget<?>> targetsByType = MultimapBuilder.hashKeys().linkedListValues().build();
+		for (RunTarget<?> target : _targets) {
+			RunTargetType<?> type = target.getType();
 			if (type.canInstantiate()) {
-				propertiesToPersist.put(type, new ArrayList<RunTargetWithProperties>());
+				targetsByType.put(type, target);
 			}
 		}
 
-		// Update the map of properties to persist based on the actual existing
-		// set of runtargets
-		if (targets != null) {
-
-			for (RunTarget target : targets) {
-
-				if (target instanceof RunTargetWithProperties) {
-					RunTargetWithProperties targetsWithProps = (RunTargetWithProperties) target;
-					TargetProperties targetProperties = targetsWithProps.getTargetProperties();
-					RunTargetType type = targetProperties.getRunTargetType();
-					List<RunTargetWithProperties> listMaps = propertiesToPersist.get(type);
-					if (listMaps != null) {
-						listMaps.add(targetsWithProps);
+		for (RunTargetType type : targetsByType.keys()) {
+			try {
+				Collection<RunTarget<?>> targets = targetsByType.get(type);
+				List<String> strings = new ArrayList<>(targets.size());
+				for (RunTarget t : targets) {
+					String s = type.serialize(t.getParams());
+					if (s!=null) {
+						strings.add(s);
 					}
 				}
-			}
-		}
-
-		// Persist the properties, and if necessary, any passwords
-		PropertiesMapper<List<Map<String, String>>> mapper = new PropertiesMapper<>();
-		for (Entry<RunTargetType, List<RunTargetWithProperties>> entry : propertiesToPersist.entrySet()) {
-
-			List<Map<String, String>> asStringMap = new ArrayList<>();
-			for (RunTargetWithProperties storedProp : entry.getValue()) {
-				TargetProperties targProps = storedProp.getTargetProperties();
-				asStringMap.add(targProps.getPropertiesToPersist());
-			}
-			try {
-				String serialisedVal = mapper.convertToString(asStringMap);
-				if (serialisedVal != null) {
-					context.getRunTargetProperties().put(entry.getKey(), RUN_TARGET_KEY, serialisedVal);
-				}
+				context.getRunTargetProperties().put(type, RUN_TARGET_KEY, ArrayEncoder.encode(strings.toArray(new String[strings.size()])));
 			} catch (Exception e) {
-				BootDashActivator.log(e);
+				Log.log(e);
 			}
 		}
 	}

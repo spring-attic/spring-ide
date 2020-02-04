@@ -18,7 +18,7 @@ import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
 /**
  * @author Kris De Volder
  */
-public abstract class AbstractRunTargetType implements RunTargetType {
+public abstract class AbstractRunTargetType<Params> implements RunTargetType<Params> {
 
 	private static final String NAME_TEMPLATE = "NAME_TEMPLATE";
 

@@ -58,7 +58,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.genericeditor,
  org.eclipse.e4.ui.css.swt.theme,
  org.eclipse.lsp4e,
- org.eclipse.lsp4j
+ org.eclipse.lsp4j,
+ com.google.gson
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,

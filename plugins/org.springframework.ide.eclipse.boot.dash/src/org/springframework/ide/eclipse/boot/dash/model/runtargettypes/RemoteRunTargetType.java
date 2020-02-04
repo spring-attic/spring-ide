@@ -10,5 +10,5 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model.runtargettypes;
 
-public interface RemoteRunTargetType extends RunTargetType {
+public interface RemoteRunTargetType<P> extends RunTargetType<P> {
 }

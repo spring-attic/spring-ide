@@ -64,7 +64,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 import org.springsource.ide.eclipse.commons.ui.UiUtil;
 
-public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTargetWithProperties, RemoteRunTarget<ClientRequests> {
+public class CloudFoundryRunTarget extends AbstractRunTarget<CloudFoundryTargetProperties> implements RunTargetWithProperties<CloudFoundryTargetProperties>, RemoteRunTarget<ClientRequests, CloudFoundryTargetProperties> {
 
 	private CloudFoundryTargetProperties targetProperties;
 
@@ -413,5 +413,10 @@ public class CloudFoundryRunTarget extends AbstractRunTarget implements RunTarge
 		} else {
 			return BootDashActivator.getImageDescriptor("icons/cloud-inactive.png");
 		}
+	}
+
+	@Override
+	public CloudFoundryTargetProperties getParams() {
+		return this.targetProperties;
 	}
 }

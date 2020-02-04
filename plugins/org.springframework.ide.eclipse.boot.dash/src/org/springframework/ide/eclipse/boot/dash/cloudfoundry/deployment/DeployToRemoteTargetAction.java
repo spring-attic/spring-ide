@@ -29,13 +29,13 @@ import com.google.common.collect.ImmutableSet;
 /**
  * @author Kris De Volder
  */
-public class DeployToRemoteTargetAction<Client> extends AbstractBootDashElementsAction {
+public class DeployToRemoteTargetAction<Client, Params> extends AbstractBootDashElementsAction {
 
 	private RunState runOrDebug;
-	private RemoteRunTarget<Client> target;
+	private RemoteRunTarget<Client, Params> target;
 	private ValueListener<Client> connectionListener;
 
-	public DeployToRemoteTargetAction(Params params, RemoteRunTarget<Client> target, RunState runningOrDebugging) {
+	public DeployToRemoteTargetAction(Params params, RemoteRunTarget<Client, Params> target, RunState runningOrDebugging) {
 		super(params);
 		this.setText(target.getName());
 		Assert.isLegal(target.getType() instanceof RemoteRunTargetType);

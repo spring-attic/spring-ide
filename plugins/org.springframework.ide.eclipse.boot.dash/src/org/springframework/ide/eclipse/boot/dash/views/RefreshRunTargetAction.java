@@ -40,8 +40,8 @@ public class RefreshRunTargetAction extends AbstractBootDashModelAction {
 		BootDashModel model = sectionSelection.getValue();
 		if (model!=null) {
 			RunTarget target = model.getRunTarget();
-			if (target instanceof RemoteRunTarget<?>) {
-				setEnabled(((RemoteRunTarget<?>) target).isConnected());
+			if (target instanceof RemoteRunTarget<?, ?>) {
+				setEnabled(((RemoteRunTarget<?, ?>) target).isConnected());
 			}
 		}
 	}

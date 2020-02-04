@@ -18,16 +18,16 @@ import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
 
-public abstract class AbstractRunTarget implements RunTarget, TemplateEnv {
+public abstract class AbstractRunTarget<Params> implements RunTarget<Params>, TemplateEnv {
 
 	private static final String NAME_TEMPLATE = "NAME_TEMPLATE";
 
 	private String id;
 	private String name;
-	private RunTargetType type;
+	private RunTargetType<Params> type;
 	private IPropertyStore propertyStore;
 
-	public AbstractRunTarget(RunTargetType type, String id, String name) {
+	public AbstractRunTarget(RunTargetType<Params> type, String id, String name) {
 		this.id = id;
 		this.name = name;
 		this.type = type;
@@ -37,7 +37,7 @@ public abstract class AbstractRunTarget implements RunTarget, TemplateEnv {
 		}
 	}
 
-	public AbstractRunTarget(RunTargetType type, String idAndName) {
+	public AbstractRunTarget(RunTargetType<Params> type, String idAndName) {
 		this(type, idAndName, idAndName);
 	}
 
