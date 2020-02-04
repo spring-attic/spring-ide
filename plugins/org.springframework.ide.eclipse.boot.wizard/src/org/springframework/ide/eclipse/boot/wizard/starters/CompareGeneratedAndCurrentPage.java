@@ -36,7 +36,7 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 	private Control compareViewer = null;
 
 	public CompareGeneratedAndCurrentPage(InitializrFactoryModel<AddStartersModel> factoryModel) {
-		super("Compare", "Compare Generated POM with the current POM", null);
+		super("Compare", "Compare local file with generated file from Initializr", null);
 		this.factoryModel = factoryModel;
 	}
 
