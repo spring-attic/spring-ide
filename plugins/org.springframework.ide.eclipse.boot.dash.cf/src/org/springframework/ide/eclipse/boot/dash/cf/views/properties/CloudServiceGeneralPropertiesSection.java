@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cf.properties;
+package org.springframework.ide.eclipse.boot.dash.cf.views.properties;
 
 import java.util.function.Function;
 
