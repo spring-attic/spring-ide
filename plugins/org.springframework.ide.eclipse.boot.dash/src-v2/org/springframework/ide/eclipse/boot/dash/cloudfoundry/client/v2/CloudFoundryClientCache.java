@@ -33,7 +33,7 @@ import org.eclipse.core.net.proxy.IProxyService;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.util.Log;
-import org.springframework.util.StringUtils;
+import org.springsource.ide.eclipse.commons.frameworks.core.util.StringUtils;
 
 import reactor.core.publisher.Mono;
 

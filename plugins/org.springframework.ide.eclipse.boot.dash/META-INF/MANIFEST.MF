@@ -63,9 +63,7 @@ Require-Bundle: org.eclipse.ui,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
- lib/commons-logging-1.2.jar,
- lib/spring-boot-loader-tools-1.2.3.RELEASE.jar,
- lib/spring-core-4.1.6.RELEASE.jar
+ lib/spring-boot-loader-tools-1.2.3.RELEASE.jar
 Export-Package: org.springframework.ide.eclipse.boot.dash,
  org.springframework.ide.eclipse.boot.dash.cloudfoundry,
  org.springframework.ide.eclipse.boot.dash.cloudfoundry.client,
