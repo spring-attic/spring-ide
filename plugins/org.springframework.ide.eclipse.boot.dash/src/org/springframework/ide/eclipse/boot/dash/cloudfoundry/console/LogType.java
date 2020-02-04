@@ -10,25 +10,14 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry.console;
 
-import org.cloudfoundry.doppler.LogMessage;
-import org.cloudfoundry.doppler.MessageType;
 import org.eclipse.swt.SWT;
 
 public class LogType {
 	/*
-	 * CF  log types
-	 */
-	public static final LogType CFSTDERROR = new LogType(MessageType.ERR.toString(), SWT.COLOR_RED);
-	public static final LogType CFSTDOUT = new LogType(MessageType.OUT.toString(), SWT.COLOR_DARK_GREEN);
-
-	/*
 	 * Local messages types
-	 *
 	 */
 	public static final LogType LOCALSTDOUT = new LogType(SWT.COLOR_DARK_BLUE);
 	public static final LogType LOCALSTDERROR = new LogType(SWT.COLOR_RED);
-
-	public static final LogType[] CFLOG_TYPES = { CFSTDOUT, CFSTDERROR };
 
 	private final String type;
 	private final int displayColour;
@@ -48,15 +37,6 @@ public class LogType {
 
 	public int getDisplayColour() {
 		return this.displayColour;
-	}
-
-	public static LogType getLogType(LogMessage message) {
-		for (LogType type : CFLOG_TYPES) {
-			if (type.getMessageType() != null && type.getMessageType().equals(message.getMessageType().toString())) {
-				return type;
-			}
-		}
-		return CFSTDOUT;
 	}
 
 }

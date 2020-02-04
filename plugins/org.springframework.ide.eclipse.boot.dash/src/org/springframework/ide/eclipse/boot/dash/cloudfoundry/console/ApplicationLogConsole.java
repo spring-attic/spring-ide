@@ -56,7 +56,7 @@ public class ApplicationLogConsole extends MessageConsole implements IPropertyCh
 		if (log == null) {
 			return;
 		}
-		final LogType logType = LogType.getLogType(log);
+		final LogType logType = CfLogType.getLogType(log);
 		writeApplicationLog(log.getMessage(), logType);
 	}
 
@@ -174,7 +174,7 @@ public class ApplicationLogConsole extends MessageConsole implements IPropertyCh
 
 	@Override
 	public void onError(Throwable exception) {
-		writeApplicationLog(exception.getMessage(), LogType.CFSTDERROR);
+		writeApplicationLog(exception.getMessage(), CfLogType.CFSTDERROR);
 	}
 
 	@Override
