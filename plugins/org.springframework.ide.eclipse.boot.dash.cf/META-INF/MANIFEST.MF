@@ -39,7 +39,8 @@ Require-Bundle: org.eclipse.ui,
  org.yaml.snakeyaml,
  org.apache.commons.lang3,
  org.springframework.ide.eclipse.editor.support,
- org.eclipse.jface.text
+ org.eclipse.jface.text,
+ org.springsource.ide.eclipse.commons.cloudfoundry.client.v2
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: org.springframework.ide.eclipse.boot.dash.cf.BootDashCfPlugin
 Bundle-ActivationPolicy: lazy
