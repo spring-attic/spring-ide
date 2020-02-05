@@ -12,13 +12,9 @@ package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.util.Collection;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.dialogs.IInputValidator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudData;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;

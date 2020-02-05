@@ -22,8 +22,8 @@ import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.junit.Test;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cf.deployment.ApplicationManifestHandler;
+import org.springframework.ide.eclipse.boot.dash.cf.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentProperties;
 
 import com.google.common.collect.ImmutableList;

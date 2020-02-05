@@ -12,11 +12,11 @@ package org.springframework.ide.eclipse.boot.dash.cf.jmxtunnel;
 
 import java.util.Map;
 
+import org.springframework.ide.eclipse.boot.dash.cf.client.SshClientSupport;
+import org.springframework.ide.eclipse.boot.dash.cf.client.SshHost;
+import org.springframework.ide.eclipse.boot.dash.cf.debug.SshTunnel;
+import org.springframework.ide.eclipse.boot.dash.cf.debug.SshTunnelFactory;
 import org.springframework.ide.eclipse.boot.dash.cf.model.CloudAppDashElement;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshClientSupport;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshHost;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnel;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnelFactory;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.launch.util.PortFinder;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;

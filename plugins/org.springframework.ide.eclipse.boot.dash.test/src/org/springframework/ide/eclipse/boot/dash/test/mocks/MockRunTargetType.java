@@ -13,7 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.test.mocks;
 import java.util.Map;
 
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
+import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryTargetProperties;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.AbstractRunTargetType;

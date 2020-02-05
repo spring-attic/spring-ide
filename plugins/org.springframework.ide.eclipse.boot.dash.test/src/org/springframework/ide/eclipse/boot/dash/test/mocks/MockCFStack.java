@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test.mocks;
 
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFStack;
+import org.springframework.ide.eclipse.boot.dash.cf.client.CFStack;
 
 /**
  * @author Kris De Volder

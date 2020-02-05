@@ -14,12 +14,12 @@ import java.util.Collection;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.springframework.ide.eclipse.boot.dash.cf.client.CFApplication;
+import org.springframework.ide.eclipse.boot.dash.cf.client.CFApplicationDetail;
+import org.springframework.ide.eclipse.boot.dash.cf.client.ClientRequests;
+import org.springframework.ide.eclipse.boot.dash.cf.client.CloudAppInstances;
 import org.springframework.ide.eclipse.boot.dash.cf.model.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cf.model.CloudFoundryBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudAppInstances;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplicationDetail;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 

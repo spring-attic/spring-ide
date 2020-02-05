@@ -16,8 +16,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.eclipse.core.runtime.Assert;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
+import org.springframework.ide.eclipse.boot.dash.cf.client.CFClientParams;
+import org.springframework.ide.eclipse.boot.dash.cf.client.CFCredentials;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.StringUtils;
 
 /**

@@ -15,8 +15,8 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFRoute;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.CFRouteBuilder;
+import org.springframework.ide.eclipse.boot.dash.cf.client.v2.CFRoute;
+import org.springframework.ide.eclipse.boot.dash.cf.client.v2.CFRouteBuilder;
 
 public class CFRouteTests {
 

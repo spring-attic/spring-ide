@@ -18,8 +18,8 @@ import java.util.Arrays;
 import java.util.Map;
 
 import org.junit.Test;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cf.deployment.ApplicationManifestHandler;
+import org.springframework.ide.eclipse.boot.dash.cf.deployment.CloudApplicationDeploymentProperties;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;

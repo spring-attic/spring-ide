@@ -23,7 +23,6 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
 import org.springframework.ide.eclipse.boot.dash.cf.actions.CfBootDashActions;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnelFactory;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
@@ -44,6 +43,7 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 import org.springframework.ide.eclipse.boot.dash.cf.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cf.debug.SshDebugSupport;
+import org.springframework.ide.eclipse.boot.dash.cf.debug.SshTunnelFactory;
 import org.springframework.ide.eclipse.boot.dash.cf.jmxtunnel.JmxSshTunnelManager;
 
 import static org.mockito.Mockito.*;

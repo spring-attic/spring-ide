@@ -20,7 +20,7 @@ import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashC
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
+import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryTargetProperties;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;

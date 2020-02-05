@@ -26,8 +26,6 @@ import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.IOConsoleOutputStream;
 import org.eclipse.ui.console.MessageConsole;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.CfLogType;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.IApplicationLogConsole;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 

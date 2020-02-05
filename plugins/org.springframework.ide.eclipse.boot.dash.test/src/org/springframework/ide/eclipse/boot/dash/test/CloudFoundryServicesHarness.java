@@ -19,8 +19,8 @@ import java.time.Duration;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.v2.DefaultClientRequestsV2;
+import org.springframework.ide.eclipse.boot.dash.cf.client.CFClientParams;
+import org.springframework.ide.eclipse.boot.dash.cf.client.v2.DefaultClientRequestsV2;
 import org.springframework.ide.eclipse.boot.util.RetryUtil;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;

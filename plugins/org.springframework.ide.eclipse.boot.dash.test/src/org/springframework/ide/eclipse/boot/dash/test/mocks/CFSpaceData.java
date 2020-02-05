@@ -12,8 +12,8 @@ package org.springframework.ide.eclipse.boot.dash.test.mocks;
 
 import java.util.UUID;
 
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFOrganization;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFSpace;
+import org.springframework.ide.eclipse.boot.dash.cf.client.CFOrganization;
+import org.springframework.ide.eclipse.boot.dash.cf.client.CFSpace;
 
 /**
  * @author Kris De Volder

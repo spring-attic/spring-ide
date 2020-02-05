@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test.mocks;
 
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
+import org.springframework.ide.eclipse.boot.dash.cf.client.CFServiceInstance;
 
 public class CFServiceInstanceData implements CFServiceInstance {
 

@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.boot.dash.test;
 
 import static junit.framework.TestCase.assertEquals;
-import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -39,10 +38,10 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials.CFCredentialType;
-import org.springframework.ide.eclipse.boot.dash.dialogs.StoreCredentialsMode;
+import org.springframework.ide.eclipse.boot.dash.cf.client.CFCredentials;
+import org.springframework.ide.eclipse.boot.dash.cf.client.CFCredentials.CFCredentialType;
+import org.springframework.ide.eclipse.boot.dash.cf.dialogs.StoreCredentialsMode;
+import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryTargetProperties;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;

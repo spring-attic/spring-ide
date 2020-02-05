@@ -15,11 +15,11 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.springframework.ide.eclipse.boot.dash.cf.client.CFServiceInstance;
+import org.springframework.ide.eclipse.boot.dash.cf.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cf.model.CloudDashElementFactory;
 import org.springframework.ide.eclipse.boot.dash.cf.model.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cf.model.CloudServiceInstanceDashElement;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.RefreshSchedulingRule;
 import org.springframework.ide.eclipse.boot.util.Log;
 

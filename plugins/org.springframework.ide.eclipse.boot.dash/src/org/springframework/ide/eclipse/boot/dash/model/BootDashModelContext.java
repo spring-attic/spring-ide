@@ -17,7 +17,6 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnelFactory;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;

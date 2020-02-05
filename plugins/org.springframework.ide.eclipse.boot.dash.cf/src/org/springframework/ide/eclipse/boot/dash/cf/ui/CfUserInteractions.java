@@ -12,11 +12,11 @@ package org.springframework.ide.eclipse.boot.dash.cf.ui;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.springframework.ide.eclipse.boot.dash.cf.deployment.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cf.deployment.CloudData;
 import org.springframework.ide.eclipse.boot.dash.cf.dialogs.CustomizeAppsManagerURLDialogModel;
+import org.springframework.ide.eclipse.boot.dash.cf.dialogs.DeploymentPropertiesDialogModel;
 import org.springframework.ide.eclipse.boot.dash.cf.dialogs.PasswordDialogModel;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudData;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
-import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
 
 public interface CfUserInteractions {

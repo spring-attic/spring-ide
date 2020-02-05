@@ -10,17 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.eclipse.compare.CompareConfiguration;
-import org.eclipse.compare.CompareEditorInput;
-import org.eclipse.compare.structuremergeviewer.DiffNode;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugModelPresentation;
@@ -30,27 +23,15 @@ import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.text.edits.MalformedTreeException;
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEdit;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudData;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentPropertiesDialog;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.ManifestDiffDialog;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlFileInput;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlGraphDeploymentProperties;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlInput;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
-import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
@@ -61,7 +42,6 @@ import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialogMode
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashTreeContentProvider;
-import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.ui.UiUtil;

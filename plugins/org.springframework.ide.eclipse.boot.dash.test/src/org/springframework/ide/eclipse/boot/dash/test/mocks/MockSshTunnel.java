@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test.mocks;
 
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.SshHost;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.debug.ssh.SshTunnel;
+import org.springframework.ide.eclipse.boot.dash.cf.client.SshHost;
+import org.springframework.ide.eclipse.boot.dash.cf.debug.SshTunnel;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
 import org.springframework.ide.eclipse.boot.dash.util.LogSink;
 

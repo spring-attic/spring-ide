@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cf.model;
 
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
+import org.springframework.ide.eclipse.boot.dash.cf.client.CFServiceInstance;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
 

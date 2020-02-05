@@ -14,11 +14,11 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.springframework.ide.eclipse.boot.dash.cf.deployment.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cf.deployment.CloudData;
+import org.springframework.ide.eclipse.boot.dash.cf.dialogs.DeploymentPropertiesDialogModel;
+import org.springframework.ide.eclipse.boot.dash.cf.dialogs.DeploymentPropertiesDialogModel.ManifestType;
 import org.springframework.ide.eclipse.boot.dash.cf.model.CloudAppDashElement;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudData;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
-import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel;
-import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel.ManifestType;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 

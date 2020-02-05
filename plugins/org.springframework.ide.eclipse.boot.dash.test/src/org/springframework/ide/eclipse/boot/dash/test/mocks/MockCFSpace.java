@@ -17,9 +17,9 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.mockito.Mockito;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFApplication;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFOrganization;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFServiceInstance;
+import org.springframework.ide.eclipse.boot.dash.cf.client.CFApplication;
+import org.springframework.ide.eclipse.boot.dash.cf.client.CFOrganization;
+import org.springframework.ide.eclipse.boot.dash.cf.client.CFServiceInstance;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveCounter;
 
 import com.google.common.collect.ImmutableList;

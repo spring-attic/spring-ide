@@ -10,13 +10,12 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cf.dialogs;
 
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFClientParams;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CFCredentials.LoginMethod;
-import org.springframework.ide.eclipse.boot.dash.dialogs.StoreCredentialsMode;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.CloudFoundryClientFactory;
+import org.springframework.ide.eclipse.boot.dash.cf.client.CFClientParams;
+import org.springframework.ide.eclipse.boot.dash.cf.client.CFCredentials;
+import org.springframework.ide.eclipse.boot.dash.cf.client.ClientRequests;
+import org.springframework.ide.eclipse.boot.dash.cf.client.CloudFoundryClientFactory;
+import org.springframework.ide.eclipse.boot.dash.cf.client.CFCredentials.LoginMethod;
+import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryTargetProperties;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
