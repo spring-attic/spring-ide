@@ -32,7 +32,7 @@ public class SelectManifestAction extends AbstractCloudAppDashElementsAction {
 		CloudAppDashElement element = getSelectedCloudElementWithProject();
 		if (element != null) {
 			CloudFoundryBootDashModel model = element.getBootDashModel();
-			model.runAsynch(new SelectManifestOp(element, ui()), ui());
+			model.runAsynch(new SelectManifestOp(element), ui());
 		}
 	}
 

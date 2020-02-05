@@ -68,6 +68,7 @@ import org.springframework.ide.eclipse.boot.dash.cf.ops.ProjectsDeployer;
 import org.springframework.ide.eclipse.boot.dash.cf.ops.ServicesRefreshOperation;
 import org.springframework.ide.eclipse.boot.dash.cf.ops.TargetApplicationsRefreshOperation;
 import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryRunTarget;
+import org.springframework.ide.eclipse.boot.dash.cf.ui.CfUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudData;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryTargetProperties;
@@ -283,6 +284,7 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 		}
 	};
 
+	@Override
 	public RefreshState getRefreshState() {
 		return refreshState.getValue();
 	}
@@ -332,8 +334,10 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 	public DisposingFactory<BootDashElement, LiveExpression<URI>> getActuatorUrlFactory() {
 		if (actuatorUrlFactory==null) {
 			this.actuatorUrlFactory = new DisposingFactory<BootDashElement,LiveExpression<URI>>(getElements()) {
+				@Override
 				protected LiveExpression<URI> create(final BootDashElement key) {
 					final LiveExpression<URI> uriExp = new LiveExpression<URI>() {
+						@Override
 						protected URI compute() {
 							try {
 								RunState runstate = key.getRunState();
@@ -350,6 +354,7 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 						}
 					};
 					final ElementStateListener elementListener = new ElementStateListener() {
+						@Override
 						public void stateChanged(BootDashElement e) {
 							if (e.equals(key)) {
 								uriExp.refresh();
@@ -357,6 +362,7 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 						}
 					};
 					uriExp.onDispose(new DisposeListener() {
+						@Override
 						public void disposed(Disposable disposed) {
 							removeElementStateListener(elementListener);
 						}
@@ -457,6 +463,7 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 		return true;
 	}
 
+	@Override
 	public void performDeployment(
 			final Set<IProject> projectsToDeploy,
 			final UserInteractions ui,
@@ -835,11 +842,15 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 			dialogModel.setSelectedManifest(foundManifestFile);
 			dialogModel.setManifestType(foundManifestFile == null ? ManifestType.MANUAL : ManifestType.FILE);
 
-			props = ui.promptApplicationDeploymentProperties(dialogModel);
+			props = cfUi().promptApplicationDeploymentProperties(dialogModel);
 
 			addApplicationArchive(project, props, cloudData, ui, monitor);
 		}
 		return props;
+	}
+
+	private CfUserInteractions cfUi() {
+		return getDiContext().getBean(CfUserInteractions.class);
 	}
 
 	public void addApplicationArchive(IProject project, CloudApplicationDeploymentProperties properties, CloudData cloudData,

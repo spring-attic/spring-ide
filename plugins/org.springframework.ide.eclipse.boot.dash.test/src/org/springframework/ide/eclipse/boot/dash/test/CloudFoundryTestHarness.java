@@ -208,7 +208,7 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 		return null;
 	}
 
-	public void answerDeploymentPrompt(UserInteractions ui, final String appName, final String hostName) throws Exception {
+	public void answerDeploymentPrompt(CfUserInteractions ui, final String appName, final String hostName) throws Exception {
 		final String yaml = "applications:\n" +
 				"- name: "+appName+"\n" +
 				"  host: "+hostName+"\n";
@@ -234,7 +234,7 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 
 
 
-	public void answerDeploymentPrompt(UserInteractions ui, final String appName, final String hostName, final List<String> bindServices) throws Exception {
+	public void answerDeploymentPrompt(CfUserInteractions ui, final String appName, final String hostName, final List<String> bindServices) throws Exception {
 		//TODO: replace this method with something more 'generic' that accepts a function which is passed the deploymentProperties
 		// so that it can add additional infos to it.
 		final String yaml = "applications:\n" +
@@ -267,7 +267,7 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 		return buf.toString();
 	}
 
-	public void answerDeploymentPrompt(UserInteractions ui, final String appName, final String hostName, final Map<String,String> env) throws Exception {
+	public void answerDeploymentPrompt(CfUserInteractions ui, final String appName, final String hostName, final Map<String,String> env) throws Exception {
 		String yaml = "applications:\n" +
 					  "- name: "+appName+"\n" +
 					  "  host: "+hostName+"\n" +
@@ -279,7 +279,7 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 	 * Does the same thing as what would happen if a user answered the deployment props dialog by selecting an
 	 * existing manifest file.
 	 */
-	public void answerDeploymentPrompt(UserInteractions ui, IFile manifestToSelect) throws Exception {
+	public void answerDeploymentPrompt(CfUserInteractions ui, IFile manifestToSelect) throws Exception {
 		String yaml = IOUtils.toString(manifestToSelect.getContents(), manifestToSelect.getCharset());
 		answerDeploymentPrompt(ui, new DeploymentAnswerer(yaml) {
 			@Override
@@ -290,7 +290,7 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 
 	}
 
-	public void answerDeploymentPrompt(UserInteractions ui, DeploymentAnswerer answerer) throws Exception {
+	public void answerDeploymentPrompt(CfUserInteractions ui, DeploymentAnswerer answerer) throws Exception {
 		when(ui.promptApplicationDeploymentProperties(any(DeploymentPropertiesDialogModel.class)))
 		.thenAnswer(new Answer<CloudApplicationDeploymentProperties>() {
 			@Override

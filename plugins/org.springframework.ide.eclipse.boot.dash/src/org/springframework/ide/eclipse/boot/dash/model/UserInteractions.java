@@ -46,19 +46,6 @@ public interface UserInteractions {
 	int confirmOperation(String title, String message, String[] buttonLabels, int defaultButtonIndex);
 
 	/**
-	 * Brings up the UI to enter application deployment manifest
-	 * @param cloudData
-	 * @param project
-	 * @param manifest
-	 * @param defaultYaml
-	 * @param readOnly
-	 * @param noModeSwicth
-	 * @return
-	 * @throws OperationCanceledException
-	 */
-	CloudApplicationDeploymentProperties promptApplicationDeploymentProperties(DeploymentPropertiesDialogModel model) throws Exception;
-
-	/**
 	 * Ask the user to select a file.
 	 * @param title The title of the open file dialog
 	 * @param file The default path/file that should be used when opening the dialog

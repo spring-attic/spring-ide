@@ -229,8 +229,8 @@ public class CloudFoundryBootDashModelIntegrationTest {
 		};
 	}
 
-	private UserInteractions ui() {
-		return context.injections.getBean(UserInteractions.class);
+	private AllUserInteractions ui() {
+		return context.injections.getBean(AllUserInteractions.class);
 	}
 
 	@Test public void testDeployAppIntoDebugMode() throws Exception {

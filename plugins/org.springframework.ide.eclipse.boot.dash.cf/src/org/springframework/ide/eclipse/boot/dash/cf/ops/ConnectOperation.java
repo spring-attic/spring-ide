@@ -130,14 +130,7 @@ public class ConnectOperation extends CloudOperation {
 		}
 	}
 
-	private CfUserInteractions cfUi() {
-		return context.getBean(CfUserInteractions.class);
-	}
-
-	private UserInteractions ui() {
-		return context.getBean(UserInteractions.class);
-	}
-
+	@Override
 	public ISchedulingRule getSchedulingRule() {
 		return new RefreshSchedulingRule(model.getRunTarget());
 	}

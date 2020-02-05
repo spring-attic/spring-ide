@@ -12,8 +12,15 @@ package org.springframework.ide.eclipse.boot.dash.cf.ui;
 
 import org.springframework.ide.eclipse.boot.dash.cf.dialogs.CustomizeAppsManagerURLDialogModel;
 import org.springframework.ide.eclipse.boot.dash.cf.dialogs.PasswordDialogModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel;
 
 public interface CfUserInteractions {
 	void openPasswordDialog(PasswordDialogModel model);
 	void openEditAppsManagerURLDialog(CustomizeAppsManagerURLDialogModel model);
+
+	/**
+	 * Brings up the UI to enter application deployment manifest
+	 */
+	CloudApplicationDeploymentProperties promptApplicationDeploymentProperties(DeploymentPropertiesDialogModel model) throws Exception;
 }

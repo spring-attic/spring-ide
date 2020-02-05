@@ -25,12 +25,10 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 public class SelectManifestOp extends CloudOperation {
 
 	protected final CloudAppDashElement cde;
-	protected final UserInteractions ui;
 
-	public SelectManifestOp(CloudAppDashElement cde, UserInteractions ui) {
+	public SelectManifestOp(CloudAppDashElement cde) {
 		super("Select a manifest file", cde.getBootDashModel());
 		this.cde = cde;
-		this.ui = ui;
 	}
 
 	@Override
@@ -56,10 +54,10 @@ public class SelectManifestOp extends CloudOperation {
 
 		CloudData cloudData = model.buildOperationCloudData(monitor, project);
 
-		DeploymentPropertiesDialogModel dialogModel = new DeploymentPropertiesDialogModel(ui, cloudData, project, cde.getSummaryData());
+		DeploymentPropertiesDialogModel dialogModel = new DeploymentPropertiesDialogModel(ui(), cloudData, project, cde.getSummaryData());
 		dialogModel.setSelectedManifest(manifest);
 		dialogModel.setManifestType(manifest == null ? ManifestType.MANUAL : ManifestType.FILE);
-		CloudApplicationDeploymentProperties props = ui.promptApplicationDeploymentProperties(dialogModel);
+		CloudApplicationDeploymentProperties props = cfUi().promptApplicationDeploymentProperties(dialogModel);
 
 		if (props == null) {
 			throw ExceptionUtil.coreException("Error loading deployment properties from the manifest YAML");

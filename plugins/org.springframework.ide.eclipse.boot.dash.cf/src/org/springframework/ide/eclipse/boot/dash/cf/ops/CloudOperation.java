@@ -14,8 +14,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.cf.model.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryRunTarget;
+import org.springframework.ide.eclipse.boot.dash.cf.ui.CfUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudErrors;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.client.ClientRequests;
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
+import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 public abstract class CloudOperation extends Operation<Void> {
 
@@ -56,4 +59,18 @@ public abstract class CloudOperation extends Operation<Void> {
 		}
 		return null;
 	}
+
+	protected SimpleDIContext getDIContext() {
+		return model.getViewModel().getContext().injections;
+	}
+
+	protected CfUserInteractions cfUi() {
+		return getDIContext().getBean(CfUserInteractions.class);
+	}
+
+	protected UserInteractions ui() {
+		return getDIContext().getBean(UserInteractions.class);
+	}
+
+
 }

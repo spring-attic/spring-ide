@@ -225,26 +225,6 @@ public class DefaultUserInteractions implements UserInteractions {
 	}
 
 	@Override
-	public CloudApplicationDeploymentProperties promptApplicationDeploymentProperties(DeploymentPropertiesDialogModel model)
-			throws Exception {
-		final Shell shell = getShell();
-
-		if (shell != null) {
-			model.initFileModel();
-			model.initManualModel();
-			shell.getDisplay().syncExec(new Runnable() {
-				@Override
-				public void run() {
-					new DeploymentPropertiesDialog(shell, model).open();
-				}
-			});
-		}
-
-		return model.getDeploymentProperties();
-	}
-
-
-	@Override
 	public boolean yesNoWithToggle(final String propertyKey, final String title, final String message, final String toggleMessage) {
 		final String ANSWER = propertyKey+".answer";
 		final String TOGGLE = propertyKey+".toggle";

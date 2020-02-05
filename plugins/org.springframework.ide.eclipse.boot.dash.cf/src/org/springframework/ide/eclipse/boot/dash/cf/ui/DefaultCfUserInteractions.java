@@ -5,7 +5,10 @@ import org.springframework.ide.eclipse.boot.dash.cf.dialogs.CustomizeAppsManager
 import org.springframework.ide.eclipse.boot.dash.cf.dialogs.CustomizeAppsManagerURLDialogModel;
 import org.springframework.ide.eclipse.boot.dash.cf.dialogs.PasswordDialogModel;
 import org.springframework.ide.eclipse.boot.dash.cf.dialogs.UpdatePasswordDialog;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentPropertiesDialog;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
+import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel;
 import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions.UIContext;
 
 public class DefaultCfUserInteractions implements CfUserInteractions {
@@ -38,5 +41,24 @@ public class DefaultCfUserInteractions implements CfUserInteractions {
 				new CustomizeAppsManagerURLDialog(model, getShell()).open();
 			}
 		});
+	}
+
+	@Override
+	public CloudApplicationDeploymentProperties promptApplicationDeploymentProperties(DeploymentPropertiesDialogModel model)
+			throws Exception {
+		final Shell shell = getShell();
+
+		if (shell != null) {
+			model.initFileModel();
+			model.initManualModel();
+			shell.getDisplay().syncExec(new Runnable() {
+				@Override
+				public void run() {
+					new DeploymentPropertiesDialog(shell, model).open();
+				}
+			});
+		}
+
+		return model.getDeploymentProperties();
 	}
 }
