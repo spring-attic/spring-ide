@@ -69,8 +69,8 @@ public class DeployToRemoteTargetAction<Client, Params> extends AbstractBootDash
 		BootDashElement element = getSingleSelectedElement();
 		setVisible(element != null && element instanceof BootProjectDashElement);
 
-		if (this.target != null && this.target.getType() instanceof RemoteRunTargetType) {
-			setEnabled(((RemoteRunTarget) this.target).isConnected());
+		if (this.target != null && this.target instanceof RemoteRunTarget) {
+			setEnabled(((RemoteRunTarget<?,?>) this.target).isConnected());
 		}
 	}
 
