@@ -19,7 +19,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudData;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
-import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
@@ -81,6 +80,4 @@ public interface UserInteractions {
 	 */
 	void openEditTemplateDialog(EditTemplateDialogModel model);
 
-	ManifestDiffDialogModel.Result confirmReplaceApp(String title, CloudData cloudData, IFile manifestFile, CloudApplicationDeploymentProperties deploymentProperties)
-			throws OperationCanceledException, Exception;
 }

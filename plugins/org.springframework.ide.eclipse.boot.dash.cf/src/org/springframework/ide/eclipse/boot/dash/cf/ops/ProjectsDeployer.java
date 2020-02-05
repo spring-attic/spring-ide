@@ -72,6 +72,7 @@ public class ProjectsDeployer extends CloudOperation {
 		this.debugSupport = debugSupport;
 	}
 
+	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 		monitor.beginTask("Deploy projects", projectsToDeploy.size());
 		try {
@@ -240,7 +241,7 @@ public class ProjectsDeployer extends CloudOperation {
 
 		String title = writer.toString();
 
-		Result result = ui.confirmReplaceApp(title, cloudData, manifestFile, existingAppProperties);
+		Result result = cfUi().confirmReplaceApp(title, cloudData, manifestFile, existingAppProperties);
 
 		handleResult.accept(result);
 	}

@@ -10,10 +10,14 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cf.ui;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.springframework.ide.eclipse.boot.dash.cf.dialogs.CustomizeAppsManagerURLDialogModel;
 import org.springframework.ide.eclipse.boot.dash.cf.dialogs.PasswordDialogModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudData;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.dialogs.DeploymentPropertiesDialogModel;
+import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
 
 public interface CfUserInteractions {
 	void openPasswordDialog(PasswordDialogModel model);
@@ -23,4 +27,8 @@ public interface CfUserInteractions {
 	 * Brings up the UI to enter application deployment manifest
 	 */
 	CloudApplicationDeploymentProperties promptApplicationDeploymentProperties(DeploymentPropertiesDialogModel model) throws Exception;
+
+	ManifestDiffDialogModel.Result confirmReplaceApp(String title, CloudData cloudData, IFile manifestFile, CloudApplicationDeploymentProperties deploymentProperties)
+			throws OperationCanceledException, Exception;
+
 }
