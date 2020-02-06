@@ -16,8 +16,8 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cf.model.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cf.model.CloudFoundryBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
+import org.springframework.ide.eclipse.boot.dash.views.LogType;
 
 /**
  * A cloud operation that is performed on a Cloud application (for example,

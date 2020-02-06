@@ -14,7 +14,6 @@ import java.io.StringWriter;
 import java.text.DateFormat;
 import java.util.Date;
 
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 

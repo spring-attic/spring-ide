@@ -21,9 +21,9 @@ import org.springframework.ide.eclipse.boot.dash.cf.client.CFInstanceState;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFInstanceStats;
 import org.springframework.ide.eclipse.boot.dash.cf.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cf.client.v2.DefaultClientRequestsV2;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
+import org.springframework.ide.eclipse.boot.dash.views.LogType;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 public class ApplicationRunningStateTracker {

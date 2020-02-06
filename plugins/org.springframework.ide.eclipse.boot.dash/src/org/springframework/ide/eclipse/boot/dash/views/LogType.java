@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry.console;
+package org.springframework.ide.eclipse.boot.dash.views;
 
 import org.eclipse.swt.SWT;
 

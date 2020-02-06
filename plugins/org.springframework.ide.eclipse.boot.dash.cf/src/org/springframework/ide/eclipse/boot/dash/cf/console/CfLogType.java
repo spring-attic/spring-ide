@@ -13,7 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.cf.console;
 import org.cloudfoundry.doppler.LogMessage;
 import org.cloudfoundry.doppler.MessageType;
 import org.eclipse.swt.SWT;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
+import org.springframework.ide.eclipse.boot.dash.views.LogType;
 
 public class CfLogType {
 

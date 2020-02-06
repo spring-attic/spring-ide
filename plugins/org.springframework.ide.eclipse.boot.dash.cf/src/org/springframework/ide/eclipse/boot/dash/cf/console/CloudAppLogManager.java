@@ -19,15 +19,15 @@ import org.eclipse.ui.console.MessageConsole;
 import org.springframework.ide.eclipse.boot.dash.cf.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryTargetProperties;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
+import org.springframework.ide.eclipse.boot.dash.views.LogType;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 public class CloudAppLogManager extends BootDashModelConsoleManager {
 
-	static final String CONSOLE_TYPE = "org.springframework.ide.eclipse.boot.dash.cloudfoundry.console";
+	static final String CONSOLE_TYPE = "org.springframework.ide.eclipse.boot.dash.console";
 	static final String ATT_TARGET_PROPERTIES = "consoleTargetProperties";
 	static final String ATT_APP_NAME = "consoleAppName";
 	static final String APP_CONSOLE_ID = "consoleId";
