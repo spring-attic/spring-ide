@@ -217,19 +217,6 @@
    	</extension>
 
 <extension
-      point="org.eclipse.compare.contentMergeViewers">
-   <contentTypeBinding
-         contentMergeViewerId="org.springframework.ide.eclipse.boot.dash.yamlMergeViewer"
-         contentTypeId="org.springframework.ide.eclipse.manifest.yml">
-   </contentTypeBinding>
-   <viewer
-         class="org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlMergeViewerCreator"
-         extensions="yml"
-         id="org.springframework.ide.eclipse.boot.dash.yamlMergeViewer"
-         label="YAML Text Merge">
-   </viewer>
-</extension>
-<extension
       point="org.eclipse.ui.bindings">
    <key
          commandId="org.springframework.ide.eclipse.boot.dash.boot.dash.OpenLaunchConfigAction"
