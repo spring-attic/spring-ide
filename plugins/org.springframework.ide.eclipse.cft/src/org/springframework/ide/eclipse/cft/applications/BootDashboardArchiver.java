@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.cft.applications;
 import java.io.File;
 import java.util.zip.ZipFile;
 
-import org.eclipse.cft.server.core.CFApplicationArchive;
 import org.eclipse.cft.server.core.internal.CloudFoundryProjectUtil;
 import org.eclipse.cft.server.core.internal.CloudFoundryServer;
 import org.eclipse.cft.server.core.internal.CloudServerUtil;
@@ -29,7 +28,8 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.model.IModuleResource;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategies;
+import org.springframework.ide.eclipse.boot.dash.cf.client.CFApplicationArchive;
+import org.springframework.ide.eclipse.boot.dash.cf.packaging.CloudApplicationArchiverStrategies;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategy;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.ICloudApplicationArchiver;
 import org.springframework.ide.eclipse.cft.CFTConsole;
