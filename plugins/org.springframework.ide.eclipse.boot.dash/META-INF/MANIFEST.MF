@@ -61,7 +61,6 @@ Bundle-ClassPath: .
 Export-Package: org.springframework.ide.eclipse.boot.dash,
  org.springframework.ide.eclipse.boot.dash.cloudfoundry,
  org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment,
- org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging,
  org.springframework.ide.eclipse.boot.dash.debug,
  org.springframework.ide.eclipse.boot.dash.devtools,
  org.springframework.ide.eclipse.boot.dash.di,
