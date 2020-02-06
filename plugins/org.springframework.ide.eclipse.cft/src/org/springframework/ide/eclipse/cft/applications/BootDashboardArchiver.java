@@ -28,7 +28,6 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.model.IModuleResource;
-import org.springframework.ide.eclipse.boot.dash.cf.client.CFApplicationArchive;
 import org.springframework.ide.eclipse.boot.dash.cf.packaging.CloudApplicationArchiverStrategies;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategy;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.ICloudApplicationArchiver;
@@ -36,6 +35,7 @@ import org.springframework.ide.eclipse.cft.CFTConsole;
 import org.springframework.ide.eclipse.cft.CftUiInteractions;
 import org.springframework.ide.eclipse.cft.Log;
 import org.springframework.ide.eclipse.cft.ProjectUtils;
+import org.eclipse.cft.server.core.CFApplicationArchive;
 
 public class BootDashboardArchiver implements ICloudFoundryArchiver {
 
