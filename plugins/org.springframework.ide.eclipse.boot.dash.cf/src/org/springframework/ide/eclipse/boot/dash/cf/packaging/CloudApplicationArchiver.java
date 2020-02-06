@@ -35,7 +35,6 @@ import org.springframework.boot.loader.tools.Repackager;
 import org.springframework.ide.eclipse.boot.dash.cf.deployment.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryUiUtil;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.JavaPackageFragmentRootHandler;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.ICloudApplicationArchiver;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.FileUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 

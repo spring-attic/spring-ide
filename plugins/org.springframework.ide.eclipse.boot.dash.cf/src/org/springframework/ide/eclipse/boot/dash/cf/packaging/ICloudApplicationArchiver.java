@@ -8,20 +8,14 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging;
+package org.springframework.ide.eclipse.boot.dash.cf.packaging;
+
+import java.io.File;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
-/**
- * Instances of this interface is responsible for initializing and instance of {@link ICloudApplicationArchiver}.
- * @author Kris De Volder
- */
-public interface CloudApplicationArchiverStrategy {
+public interface ICloudApplicationArchiver {
 
-	/**
-	 * A strategy may or may not always be applicable in a given situation. In that case it may return null when
-	 * asked to produce a ICloudApplicationArchiver.
-	 */
-	ICloudApplicationArchiver getArchiver(IProgressMonitor mon);
+	File getApplicationArchive(IProgressMonitor monitor) throws Exception;
 
 }

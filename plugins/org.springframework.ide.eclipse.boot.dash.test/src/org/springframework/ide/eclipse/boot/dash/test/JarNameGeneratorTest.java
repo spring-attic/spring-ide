@@ -22,7 +22,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.JavaCore;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.JarNameGenerator;
+import org.springframework.ide.eclipse.boot.dash.cf.packaging.JarNameGenerator;
 import org.springframework.ide.eclipse.boot.util.JavaProjectUtil;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestCase;
 

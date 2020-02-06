@@ -18,8 +18,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.springframework.ide.eclipse.boot.dash.cf.deployment.ApplicationManifestHandler;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategy;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.ICloudApplicationArchiver;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 /**
