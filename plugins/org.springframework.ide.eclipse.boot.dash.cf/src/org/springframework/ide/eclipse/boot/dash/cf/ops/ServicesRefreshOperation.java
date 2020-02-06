@@ -20,7 +20,6 @@ import org.springframework.ide.eclipse.boot.dash.cf.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cf.model.CloudDashElementFactory;
 import org.springframework.ide.eclipse.boot.dash.cf.model.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cf.model.CloudServiceInstanceDashElement;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.RefreshSchedulingRule;
 import org.springframework.ide.eclipse.boot.util.Log;
 
 import com.google.common.collect.ImmutableSet;

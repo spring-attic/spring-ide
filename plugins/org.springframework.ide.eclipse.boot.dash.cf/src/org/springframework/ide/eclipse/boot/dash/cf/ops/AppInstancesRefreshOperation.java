@@ -18,7 +18,6 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cf.model.CloudFoundryBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.RefreshSchedulingRule;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 

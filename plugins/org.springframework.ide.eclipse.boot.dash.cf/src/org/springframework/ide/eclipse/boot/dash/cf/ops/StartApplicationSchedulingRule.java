@@ -8,16 +8,16 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops;
+package org.springframework.ide.eclipse.boot.dash.cf.ops;
 
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 
-public class StopApplicationSchedulingRule extends CloudSchedulingRule {
+public class StartApplicationSchedulingRule extends CloudSchedulingRule {
 
 	private final String appName;
 
-	public StopApplicationSchedulingRule(RunTarget runTarget, String appName) {
+	public StartApplicationSchedulingRule(RunTarget runTarget, String appName) {
 		super(runTarget);
 		this.appName = appName;
 	}
@@ -29,18 +29,27 @@ public class StopApplicationSchedulingRule extends CloudSchedulingRule {
 
 			// Possibly in conflict only if the other operation is also on the
 			// same run target
-			if (otherCloudRule.getRunTarget().getId().equals(this.getRunTarget().getId())
-					&& otherCloudRule instanceof StopApplicationSchedulingRule) {
-				StopApplicationSchedulingRule otherApplicationSchedulingRule = (StopApplicationSchedulingRule) otherCloudRule;
+			if (otherCloudRule.getRunTarget().getId().equals(this.getRunTarget().getId())) {
+				// Application ops for the same target cannot run in parallel
+				// with that target's refresh op
+				if (otherCloudRule instanceof RefreshSchedulingRule) {
+					return true;
+				} else if (otherCloudRule instanceof StartApplicationSchedulingRule) {
 
-				return otherApplicationSchedulingRule.getAppName().equals(this.getAppName());
+					StartApplicationSchedulingRule otherApplicationSchedlingRule = (StartApplicationSchedulingRule) otherCloudRule;
+
+					// Only operation per app can be running. Other app
+					// operations can run in parallel for other apps
+					return otherApplicationSchedlingRule.getAppName().equals(this.getAppName());
+				}
+
 			}
 		}
 		return false;
 	}
 
 	public String getAppName() {
-		return this.appName;
+		return appName;
 	}
 
 }

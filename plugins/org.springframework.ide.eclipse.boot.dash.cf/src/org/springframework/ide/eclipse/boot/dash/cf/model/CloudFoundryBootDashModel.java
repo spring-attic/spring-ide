@@ -75,6 +75,7 @@ import org.springframework.ide.eclipse.boot.dash.cf.dialogs.DeploymentProperties
 import org.springframework.ide.eclipse.boot.dash.cf.dialogs.DeploymentPropertiesDialogModel;
 import org.springframework.ide.eclipse.boot.dash.cf.dialogs.DeploymentPropertiesDialogModel.ManifestType;
 import org.springframework.ide.eclipse.boot.dash.cf.ops.ConnectOperation;
+import org.springframework.ide.eclipse.boot.dash.cf.ops.JobBody;
 import org.springframework.ide.eclipse.boot.dash.cf.ops.Operation;
 import org.springframework.ide.eclipse.boot.dash.cf.ops.OperationsExecution;
 import org.springframework.ide.eclipse.boot.dash.cf.ops.ProjectsDeployer;
@@ -87,7 +88,6 @@ import org.springframework.ide.eclipse.boot.dash.cf.ui.CfUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.RemoteBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlFileInput;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlInput;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.ops.JobBody;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.CloudApplicationArchiverStrategy;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.packaging.ICloudApplicationArchiver;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;

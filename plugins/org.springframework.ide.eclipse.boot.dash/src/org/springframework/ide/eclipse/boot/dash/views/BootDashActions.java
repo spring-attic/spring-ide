@@ -191,7 +191,7 @@ public class BootDashActions {
 
 		deleteAppsAction = new DeleteElementsAction<>(this, RemoteRunTargetType.class, elementsSelection, context);
 		deleteAppsAction.setText("Delete");
-		deleteAppsAction.setToolTipText("Permantently removes selected artifact(s) from CloudFoundry");
+		deleteAppsAction.setToolTipText("Permantently removes selected artifact(s) from Remote Target");
 		deleteConfigsAction = new DeleteElementsAction<>(this, LocalRunTargetType.class, elementsSelection, context);
 		deleteConfigsAction.setText("Delete Config");
 		deleteConfigsAction.setToolTipText("Permantently deletes Launch Configgurations from the workspace");
