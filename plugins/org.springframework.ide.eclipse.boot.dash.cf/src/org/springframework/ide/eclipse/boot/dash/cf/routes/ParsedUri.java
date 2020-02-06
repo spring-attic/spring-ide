@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes;
+package org.springframework.ide.eclipse.boot.dash.cf.routes;
 
 /**
  * Represents the result of 'parsing; a route uri by a 'dumb' parser.

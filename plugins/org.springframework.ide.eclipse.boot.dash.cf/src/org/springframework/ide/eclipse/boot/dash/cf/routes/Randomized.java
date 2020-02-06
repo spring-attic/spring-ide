@@ -8,7 +8,7 @@
  * Contributors:
  *     Spring IDE Developers - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes;
+package org.springframework.ide.eclipse.boot.dash.cf.routes;
 
 import org.eclipse.core.runtime.Assert;
 

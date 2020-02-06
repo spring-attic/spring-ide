@@ -61,6 +61,7 @@ import org.springframework.ide.eclipse.boot.dash.cf.ops.CloudApplicationOperatio
 import org.springframework.ide.eclipse.boot.dash.cf.ops.Operation;
 import org.springframework.ide.eclipse.boot.dash.cf.ops.RemoteDevClientStartOperation;
 import org.springframework.ide.eclipse.boot.dash.cf.ops.SetHealthCheckOperation;
+import org.springframework.ide.eclipse.boot.dash.cf.routes.ParsedUri;
 import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryTargetProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudDashElement;
@@ -68,7 +69,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.JmxSshTunnelStatus
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.OperationTracker;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.OperationTracker.Task;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentProperties;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.ParsedUri;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveDataCapableElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;

@@ -20,9 +20,6 @@ import java.util.Set;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFDomainType;
 import org.springframework.ide.eclipse.boot.dash.cf.client.v2.CFDomainStatus;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.ParsedUri;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.Randomized;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.routes.RouteBinding;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
