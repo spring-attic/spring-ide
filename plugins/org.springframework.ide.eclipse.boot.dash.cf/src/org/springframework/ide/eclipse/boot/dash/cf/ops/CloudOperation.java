@@ -16,7 +16,7 @@ import org.springframework.ide.eclipse.boot.dash.cf.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cf.model.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.cf.ui.CfUserInteractions;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudErrors;
+import org.springframework.ide.eclipse.boot.dash.cf.util.CloudErrors;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
