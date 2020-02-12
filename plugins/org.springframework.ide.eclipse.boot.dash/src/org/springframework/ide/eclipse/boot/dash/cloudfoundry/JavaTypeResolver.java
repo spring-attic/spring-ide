@@ -20,6 +20,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.springframework.ide.eclipse.boot.dash.util.UiUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.maintype.MainTypeFinder;
 
 /**
@@ -73,7 +74,7 @@ public class JavaTypeResolver {
 						@Override
 						public void run() {
 
-							final Shell shell = CloudFoundryUiUtil.getShell();
+							final Shell shell = UiUtil.getShell();
 
 							if (shell != null && !shell.isDisposed()) {
 								SelectMainTypeWizard wizard = new SelectMainTypeWizard(typesFromSource);

@@ -25,7 +25,6 @@ import org.springframework.ide.eclipse.boot.dash.cf.devtools.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.cf.dialogs.CloudFoundryTargetWizardModel;
 import org.springframework.ide.eclipse.boot.dash.cf.dialogs.RunTargetWizard;
 import org.springframework.ide.eclipse.boot.dash.cf.jmxtunnel.JmxSshTunnelManager;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryUiUtil;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultWizardModelUserInteractions;
@@ -35,6 +34,7 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.AbstractRu
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypeFactory;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
+import org.springframework.ide.eclipse.boot.dash.util.UiUtil;
 import org.springframework.ide.eclipse.boot.util.ProcessTracker;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
@@ -76,7 +76,7 @@ public class CloudFoundryRunTargetType extends AbstractRunTargetType<CloudFoundr
 		CloudFoundryTargetWizardModel model = new CloudFoundryTargetWizardModel(this, clientFactory,
 				targets.getValues(), context, interactions);
 		RunTargetWizard wizard = new RunTargetWizard(model);
-		Shell shell = CloudFoundryUiUtil.getShell();
+		Shell shell = UiUtil.getShell();
 		if (shell != null) {
 			WizardDialog dialog = new WizardDialog(shell, wizard);
 			if (dialog.open() == Dialog.OK) {

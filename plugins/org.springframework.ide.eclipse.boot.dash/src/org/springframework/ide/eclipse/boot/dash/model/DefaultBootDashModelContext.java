@@ -58,7 +58,6 @@ public class DefaultBootDashModelContext extends BootDashModelContext {
 
 	private BootInstallManager bootInstalls = BootInstallManager.getInstance();
 
-
 	private static SimpleDIContext createInjections() {
 		SimpleDIContext injections = new SimpleDIContext();
 		injections.defInstance(UIContext.class, () -> {

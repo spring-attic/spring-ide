@@ -16,7 +16,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.progress.UIJob;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryUiUtil;
+import org.springframework.ide.eclipse.boot.dash.util.UiUtil;
 
 public class DefaultWizardModelUserInteractions implements WizardModelUserInteractions{
 	public void informationPopup(final String title, final String message) {
@@ -26,7 +26,7 @@ public class DefaultWizardModelUserInteractions implements WizardModelUserIntera
 
 			@Override
 			public IStatus runInUIThread(IProgressMonitor monitor) {
-				Shell shell = CloudFoundryUiUtil.getShell();
+				Shell shell = UiUtil.getShell();
 				if (shell != null) {
 					MessageDialog.openInformation(shell, title, message);
 				}

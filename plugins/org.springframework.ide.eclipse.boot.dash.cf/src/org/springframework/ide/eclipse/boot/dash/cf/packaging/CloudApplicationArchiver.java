@@ -33,8 +33,8 @@ import org.springframework.boot.loader.tools.LibraryCallback;
 import org.springframework.boot.loader.tools.LibraryScope;
 import org.springframework.boot.loader.tools.Repackager;
 import org.springframework.ide.eclipse.boot.dash.cf.deployment.ApplicationManifestHandler;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudFoundryUiUtil;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.JavaPackageFragmentRootHandler;
+import org.springframework.ide.eclipse.boot.dash.util.UiUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.FileUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
@@ -170,7 +170,7 @@ public class CloudApplicationArchiver implements ICloudApplicationArchiver {
 
 			@Override
 			public void run() {
-				Shell shell = CloudFoundryUiUtil.getShell();
+				Shell shell = UiUtil.getShell();
 
 				IJarExportRunnable runnable = packageData.createJarExportRunnable(shell);
 				try {

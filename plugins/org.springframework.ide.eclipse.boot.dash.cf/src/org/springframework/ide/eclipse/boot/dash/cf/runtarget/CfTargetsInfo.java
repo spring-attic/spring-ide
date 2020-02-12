@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal Software, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
+package org.springframework.ide.eclipse.boot.dash.cf.runtarget;
 
 import java.util.List;
 
