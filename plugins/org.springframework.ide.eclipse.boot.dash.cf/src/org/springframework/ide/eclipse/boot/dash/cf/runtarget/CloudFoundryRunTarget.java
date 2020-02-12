@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cf.runtarget;
 
+import static org.springframework.ide.eclipse.boot.dash.cf.jmxtunnel.BootDashCfColumns.JMX_SSH_TUNNEL;
 import static org.springframework.ide.eclipse.boot.dash.model.RunState.DEBUGGING;
 import static org.springframework.ide.eclipse.boot.dash.model.RunState.INACTIVE;
 import static org.springframework.ide.eclipse.boot.dash.model.RunState.RUNNING;
@@ -21,8 +22,6 @@ import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashC
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.PROJECT;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.TAGS;
-
-import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.BootDashCfColumns.JMX_SSH_TUNNEL;
 
 import java.util.Arrays;
 import java.util.Collection;

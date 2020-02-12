@@ -1,6 +1,6 @@
 package org.springframework.ide.eclipse.boot.dash.cf.labels;
 
-import static org.springframework.ide.eclipse.boot.dash.cloudfoundry.BootDashCfColumns.JMX_SSH_TUNNEL;
+import static org.springframework.ide.eclipse.boot.dash.cf.jmxtunnel.BootDashCfColumns.JMX_SSH_TUNNEL;
 import static org.springframework.ide.eclipse.boot.dash.labels.BootDashLabels.MUTED_TEXT_DECORATION_COLOR_THEME;
 import static org.springframework.ide.eclipse.boot.dash.labels.BootDashLabels.TEXT_DECORATION_COLOR_THEME;
 

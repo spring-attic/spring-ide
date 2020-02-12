@@ -1,4 +1,4 @@
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
+package org.springframework.ide.eclipse.boot.dash.cf.jmxtunnel;
 
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 
