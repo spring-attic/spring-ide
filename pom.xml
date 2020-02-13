@@ -97,6 +97,7 @@
 		<module>plugins/org.springframework.ide.eclipse.boot</module>
 		<module>plugins/org.springframework.ide.eclipse.boot.test</module>
 		<module>plugins/org.springframework.ide.eclipse.boot.dash</module>
+		<module>plugins/org.springframework.ide.eclipse.boot.dash.azure</module>
 		<module>plugins/org.springframework.ide.eclipse.boot.dash.cf</module>
 		<module>plugins/org.springframework.ide.eclipse.boot.dash.test</module>
 		<module>plugins/org.springframework.ide.eclipse.boot.launch</module>

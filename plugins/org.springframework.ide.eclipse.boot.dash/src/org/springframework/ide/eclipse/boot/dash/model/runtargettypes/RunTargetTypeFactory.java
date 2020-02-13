@@ -22,6 +22,6 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
  *
  * @author Kris De Volder
  */
-public interface RunTargetTypeFactory {
-	RunTargetType create(BootDashModelContext context);
+public interface RunTargetTypeFactory<Params> {
+	RunTargetType<Params> create(BootDashModelContext context);
 }
