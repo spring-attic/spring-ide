@@ -44,6 +44,7 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.lsp4e.LanguageServerWrapper;
 import org.eclipse.lsp4e.LanguageServiceAccessor;
+import org.eclipse.lsp4j.services.LanguageServer;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
@@ -84,9 +85,6 @@ import com.google.common.collect.ImmutableList;
 
 import junit.framework.AssertionFailedError;
 
-import org.springframework.tooling.cloudfoundry.manifest.ls.CloudFoundryManifestLanguageServer;
-import org.springframework.tooling.ls.eclipse.commons.preferences.LanguageServerConsolePreferenceConstants;
-
 
 /**
  * Tests for {@link DeploymentPropertiesDialogModel}
@@ -96,6 +94,8 @@ import org.springframework.tooling.ls.eclipse.commons.preferences.LanguageServer
  */
 @SuppressWarnings("restriction")
 public class DeploymentPropertiesDialogModelTests {
+
+	private static final String CF_SERVER_ID = "org.eclipse.languageserver.languages.cloudfoundrymanifest";
 
 	private static final long DISCONNECT_TIMEOUT = 10000;
 
@@ -151,6 +151,7 @@ public class DeploymentPropertiesDialogModelTests {
 	public static void afterAll() throws Exception {
 		StsTestUtil.deleteAllProjects();
 		waitForJobsToComplete();
+		waitForServerShutdown();
 	}
 
 	@Before
@@ -174,16 +175,29 @@ public class DeploymentPropertiesDialogModelTests {
 		Log.info("FINISHED test: " + name.getMethodName());
 	}
 
+	private static void waitForServerShutdown() throws Exception {
+		ACondition.waitFor("ls servers shutdown", DISCONNECT_TIMEOUT, () -> {
+			List<LanguageServer> servers = LanguageServiceAccessor.getActiveLanguageServers(x -> true);
+			assertTrue("still running server: "+servers, servers.isEmpty());
+		});
+	}
+
 	private void disposeModel() throws Exception {
 		if (model != null) {
 			IEditorInput fileInput = model.getFileYamlEditor().getEditorInput();
 			IEditorInput manualInput = model.getManualYamlEditor().getEditorInput();
 			model.dispose();
 			if (fileInput instanceof IFileEditorInput) {
-				waitUntilFileDisconnedted(((IFileEditorInput)fileInput).getFile());
+				List<LanguageServerWrapper> servers = getCfLanguageServers(((IFileEditorInput) fileInput).getFile(), null);
+				if (!servers.isEmpty()) {
+					waitUntilFileDisconnedted(((IFileEditorInput)fileInput).getFile());
+				}
 			}
 			if (manualInput instanceof IFileEditorInput) {
-				waitUntilFileDisconnedted(((IFileEditorInput)manualInput).getFile());
+				List<LanguageServerWrapper> servers = getCfLanguageServers(((IFileEditorInput) manualInput).getFile(), null);
+				if (!servers.isEmpty()) {
+					waitUntilFileDisconnedted(((IFileEditorInput)manualInput).getFile());
+				}
 			}
 			model = null;
 			waitForJobsToComplete();
@@ -194,7 +208,7 @@ public class DeploymentPropertiesDialogModelTests {
 		waitForJobsToComplete();
 		if (file.exists()) {
 			ACondition.waitFor(file.toString() + " disconnected from LS", DISCONNECT_TIMEOUT, () -> {
-				LanguageServerWrapper wrapper = getCfLanguageServer(file, LanguageServiceAccessor.getLSWrappers(file, cap -> true));
+				LanguageServerWrapper wrapper = getCfLanguageServer(file);
 				assertFalse(wrapper.isConnectedTo(file.getLocation()));
 			});
 		}
@@ -211,21 +225,29 @@ public class DeploymentPropertiesDialogModelTests {
 	private static void waitUntilFileConnected(IFile file) throws Exception {
 		waitForJobsToComplete();
 		ACondition.waitFor(file.toString() + " connected to LS", DISCONNECT_TIMEOUT, () -> {
-			LanguageServerWrapper wrapper = getCfLanguageServer(file, LanguageServiceAccessor.getLSWrappers(file, cap -> true));
+			LanguageServerWrapper wrapper = getCfLanguageServer(file);
 			assertTrue(wrapper.isConnectedTo(file.getLocation()));
 		});
 		waitForJobsToComplete();
 	}
 
-	private static LanguageServerWrapper getCfLanguageServer(IFile file, Collection<LanguageServerWrapper> wrappers) throws Exception {
-		StringBuilder available = new StringBuilder();
+	private static List<LanguageServerWrapper> getCfLanguageServers(IFile file, StringBuilder available ) throws Exception {
+		Collection<LanguageServerWrapper> wrappers = LanguageServiceAccessor.getLSWrappers(file, cap -> true);
 		List<LanguageServerWrapper> found = new ArrayList<>();
 		for (LanguageServerWrapper wrapper : wrappers) {
-			if ("org.eclipse.languageserver.languages.cloudfoundrymanifest".equals(wrapper.serverDefinition.id)) {
+			if (CF_SERVER_ID.equals(wrapper.serverDefinition.id)) {
 				found.add(wrapper);
 			}
-			available.append(wrapper.serverDefinition.id+" ");
+			if (available!=null) {
+				available.append(wrapper.serverDefinition.id+" ");
+			}
 		}
+		return found;
+	}
+
+	private static LanguageServerWrapper getCfLanguageServer(IFile file) throws Exception {
+		StringBuilder available = new StringBuilder();
+		List<LanguageServerWrapper> found = getCfLanguageServers(file, available);
 		if (found.isEmpty()) {
 			throw new NoSuchElementException("No CF language server wrapper found in: [ "+available+"]");
 		} else if (found.size()>1) {
@@ -253,15 +275,6 @@ public class DeploymentPropertiesDialogModelTests {
 			model.fileYamlEditorControlCreated();
 			model.getManualYamlEditor().createControl(shell);
 			model.manualYamlEditorControlCreated();
-			model.getFileEditorInput().onChange((exp, input) -> {
-				if (input != null && model.getFileYamlEditor().getViewer() != null) {
-					try {
-						waitUntilFileConnected(input.getFile());
-					} catch (Exception e) {
-						throw new RuntimeException(e);
-					}
-				}
-			});
 			waitUntilFileConnected(project.getFolder(".settings").getFile(DeploymentPropertiesDialogModel.DUMMY_FILE_MANIFEST_YML));
 			waitUntilFileConnected(project.getFolder(".settings").getFile(DeploymentPropertiesDialogModel.DUMMY_MANUAL_MANIFEST_YML));
 		} catch (CoreException e) {
@@ -287,6 +300,17 @@ public class DeploymentPropertiesDialogModelTests {
 		Mockito.when(cfApp.getUris()).thenReturn(Arrays.asList(new String[] {"myapp." + SPRING_CLOUD_DOMAINS.get(0).getName()}));
 		return cfApp;
 	}
+
+
+	/**
+	 * Select manifest in the model and wait for cf editor to connect,
+	 */
+	private void selectAndWait(IFile manifest) throws Exception {
+		model.setSelectedManifest(manifest);
+		waitUntilFileConnected(manifest);
+	}
+
+	////////////////////////////////////////////////////////////////////
 
 	@Test public void testNoTypeSelected() throws Exception {
 		IProject project = projects.createProject("p1");
@@ -416,7 +440,7 @@ public class DeploymentPropertiesDialogModelTests {
 		IFile file = createFile(project, "manifest.yml", "Some text content!");
 		createDialogModel(project, null);
 		model.type.setValue(ManifestType.FILE);
-		model.setSelectedManifest(file);
+		selectAndWait(file);
 		waitUntilFileDisconnedted(project.getFolder(".settings").getFile(DeploymentPropertiesDialogModel.DUMMY_FILE_MANIFEST_YML));
 
 		ACondition.waitFor("reconcile to occur", TIMEOUT, () -> {
@@ -448,7 +472,7 @@ public class DeploymentPropertiesDialogModelTests {
 				"  memory: 512M\n"
 		);
 		createDialogModel(project, null);
-		model.setSelectedManifest(file);
+		selectAndWait(file);
 		waitUntilFileDisconnedted(project.getFolder(".settings").getFile(DeploymentPropertiesDialogModel.DUMMY_FILE_MANIFEST_YML));
 		model.type.setValue(ManifestType.FILE);
 
@@ -497,7 +521,7 @@ public class DeploymentPropertiesDialogModelTests {
 			assertEquals(DEPLOYMENT_MANIFEST_FILE_NOT_SELECTED, validationResult.msg);
 		});
 
-		model.setSelectedManifest(validFile);
+		selectAndWait(validFile);
 		waitForJobsToComplete();
 		System.out.println("New manifest set");
 		System.out.println(model.getFileYamlEditor().getViewer().getDocument().get());
@@ -558,7 +582,7 @@ public class DeploymentPropertiesDialogModelTests {
 		model.type.setValue(ManifestType.FILE);
 		waitForJobsToComplete();
 
-		model.setSelectedManifest(validFileSingleName);
+		selectAndWait(validFileSingleName);
 		waitForJobsToComplete();
 
 		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
@@ -582,7 +606,7 @@ public class DeploymentPropertiesDialogModelTests {
 		createDialogModel(project, deployedApp);
 		model.type.setValue(ManifestType.FILE);
 
-		model.setSelectedManifest(invalidFileSingleName);
+		selectAndWait(invalidFileSingleName);
 
 		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
 			ValidationResult validationResult = model.getValidator().getValue();
@@ -609,7 +633,7 @@ public class DeploymentPropertiesDialogModelTests {
 		createDialogModel(project, deployedApp);
 		model.type.setValue(ManifestType.FILE);
 
-		model.setSelectedManifest(validFileMultiName);
+		selectAndWait(validFileMultiName);
 
 		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
 			ValidationResult validationResult = model.getValidator().getValue();
@@ -641,7 +665,7 @@ public class DeploymentPropertiesDialogModelTests {
 		createDialogModel(project, deployedApp);
 		model.type.setValue(ManifestType.FILE);
 
-		model.setSelectedManifest(invalidFileMultiName);
+		selectAndWait(invalidFileMultiName);
 
 		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
 			ValidationResult validationResult = model.getValidator().getValue();
@@ -682,7 +706,7 @@ public class DeploymentPropertiesDialogModelTests {
 		createDialogModel(project, deployedApp);
 
 		model.type.setValue(ManifestType.FILE);
-		model.setSelectedManifest(validFileMultiName);
+		selectAndWait(validFileMultiName);
 		ACondition.waitFor("app name reconcile", TIMEOUT, () -> assertEquals(appName, model.getFileSelectedAppName()));
 		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
 			ValidationResult validationResult = model.getValidator().getValue();
@@ -690,7 +714,7 @@ public class DeploymentPropertiesDialogModelTests {
 			assertEquals(CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
 		});
 
-		model.setSelectedManifest(invalidFileMultiName);
+		selectAndWait(invalidFileMultiName);
 		ACondition.waitFor("app name reconcile", TIMEOUT, () -> assertEquals(null, model.getFileSelectedAppName()));
 		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
 			ValidationResult validationResult = model.getValidator().getValue();
@@ -715,7 +739,7 @@ public class DeploymentPropertiesDialogModelTests {
 			assertEquals(CURRENT_GENERATED_DEPLOYMENT_MANIFEST, validationResult.msg);
 		});
 
-		model.setSelectedManifest(invalidFileMultiName);
+		selectAndWait(invalidFileMultiName);
 		ACondition.waitFor("app name reconcile", TIMEOUT, () -> assertEquals(null, model.getFileSelectedAppName()));
 		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
 			ValidationResult validationResult = model.getValidator().getValue();
@@ -760,7 +784,7 @@ public class DeploymentPropertiesDialogModelTests {
 				"  memory: 512M\n"
 		);
 		createDialogModel(project, null);
-		model.setSelectedManifest(file);
+		selectAndWait(file);
 		waitUntilFileDisconnedted(project.getFolder(".settings").getFile(DeploymentPropertiesDialogModel.DUMMY_FILE_MANIFEST_YML));
 		model.setManifestType(ManifestType.FILE);
 
@@ -779,7 +803,7 @@ public class DeploymentPropertiesDialogModelTests {
 				"  memory: 512M\n";
 		IFile file = createFile(project, "manifest.yml", text);
 		createDialogModel(project, null);
-		model.setSelectedManifest(file);
+		selectAndWait(file);
 		waitUntilFileDisconnedted(project.getFolder(".settings").getFile(DeploymentPropertiesDialogModel.DUMMY_FILE_MANIFEST_YML));
 
 		model.setManifestType(ManifestType.FILE);
@@ -817,7 +841,7 @@ public class DeploymentPropertiesDialogModelTests {
 				"  memory: 512M\n";
 		IFile file = createFile(project, "manifest.yml", text);
 		createDialogModel(project, null);
-		model.setSelectedManifest(file);
+		selectAndWait(file);
 		waitUntilFileDisconnedted(project.getFolder(".settings").getFile(DeploymentPropertiesDialogModel.DUMMY_FILE_MANIFEST_YML));
 		model.setManifestType(ManifestType.FILE);
 
@@ -847,7 +871,7 @@ public class DeploymentPropertiesDialogModelTests {
 				"  memory: 512M\n";
 		IFile file = createFile(project, "manifest.yml", text);
 		createDialogModel(project, null);
-		model.setSelectedManifest(file);
+		selectAndWait(file);
 		waitUntilFileDisconnedted(project.getFolder(".settings").getFile(DeploymentPropertiesDialogModel.DUMMY_FILE_MANIFEST_YML));
 		model.setManifestType(ManifestType.FILE);
 
@@ -884,7 +908,7 @@ public class DeploymentPropertiesDialogModelTests {
 				"  memory: " + memory + "M\n";
 		IFile file = createFile(project, "manifest.yml", text);
 		createDialogModel(project, null);
-		model.setSelectedManifest(file);
+		selectAndWait(file);
 		waitUntilFileDisconnedted(project.getFolder(".settings").getFile(DeploymentPropertiesDialogModel.DUMMY_FILE_MANIFEST_YML));
 		model.setManifestType(ManifestType.FILE);
 
@@ -938,7 +962,7 @@ public class DeploymentPropertiesDialogModelTests {
 
 		IFile file = createFile(project, "manifest.yml", text);
 		createDialogModel(project, null);
-		model.setSelectedManifest(file);
+		selectAndWait(file);
 		waitUntilFileDisconnedted(project.getFolder(".settings").getFile(DeploymentPropertiesDialogModel.DUMMY_FILE_MANIFEST_YML));
 		model.setManifestType(ManifestType.FILE);
 
@@ -982,7 +1006,7 @@ public class DeploymentPropertiesDialogModelTests {
 				"  memory: " + memory + "M\n";
 		IFile file = createFile(project, "manifest.yml", text);
 		createDialogModel(project, null);
-		model.setSelectedManifest(file);
+		selectAndWait(file);
 		waitUntilFileDisconnedted(project.getFolder(".settings").getFile(DeploymentPropertiesDialogModel.DUMMY_FILE_MANIFEST_YML));
 		model.setManifestType(ManifestType.FILE);
 		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
@@ -1007,7 +1031,7 @@ public class DeploymentPropertiesDialogModelTests {
 
 		assertEquals(text, IOUtil.toString(file.getContents()));
 
-		model.setSelectedManifest(file);
+		selectAndWait(file);
 		ACondition.waitFor("app name reconcile", TIMEOUT, () -> assertEquals(appNameFromFile, model.getFileSelectedAppName()));
 		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
 			ValidationResult validationResult = model.getValidator().getValue();
@@ -1038,7 +1062,7 @@ public class DeploymentPropertiesDialogModelTests {
 
 		IFile file = createFile(project, "manifest.yml", text);
 		createDialogModel(project, null);
-		model.setSelectedManifest(file);
+		selectAndWait(file);
 		waitUntilFileDisconnedted(project.getFolder(".settings").getFile(DeploymentPropertiesDialogModel.DUMMY_FILE_MANIFEST_YML));
 		model.setManifestType(ManifestType.FILE);
 
@@ -1056,7 +1080,7 @@ public class DeploymentPropertiesDialogModelTests {
 
 		assertEquals(newText, IOUtil.toString(file.getContents()));
 
-		model.setSelectedManifest(file);
+		selectAndWait(file);
 
 		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
 			ValidationResult validationResult = model.getValidator().getValue();
@@ -1083,7 +1107,7 @@ public class DeploymentPropertiesDialogModelTests {
 
 		IFile file = createFile(project, "manifest.yml", "");
 		createDialogModel(project, null);
-		model.setSelectedManifest(file);
+		selectAndWait(file);
 		waitUntilFileDisconnedted(project.getFolder(".settings").getFile(DeploymentPropertiesDialogModel.DUMMY_FILE_MANIFEST_YML));
 		model.setManifestType(ManifestType.FILE);
 
@@ -1107,7 +1131,7 @@ public class DeploymentPropertiesDialogModelTests {
 		// Input disconnect at this point - needs to be reset as well.
 		model.setSelectedManifest(null);
 		waitUntilFileDisconnedted(file);
-		model.setSelectedManifest(file);
+		selectAndWait(file);
 		model.getFileDocument().set(newText);
 		assertTrue(model.getFileLabel().getValue().endsWith("*"));
 		ACondition.waitFor("validation to occur", TIMEOUT, () -> {
@@ -1183,7 +1207,7 @@ public class DeploymentPropertiesDialogModelTests {
 		);
 		createDialogModel(project, null);
 		// Set resource annotation model
-		model.setSelectedManifest(file);
+		selectAndWait(file);
 		waitUntilFileDisconnedted(project.getFolder(".settings").getFile(DeploymentPropertiesDialogModel.DUMMY_FILE_MANIFEST_YML));
 		model.type.setValue(ManifestType.FILE);
 
@@ -1210,5 +1234,4 @@ public class DeploymentPropertiesDialogModelTests {
 			assertEquals(CHOOSE_AN_EXISTING_DEPLOYMENT_MANIFEST_YAML_FILE_FROM_THE_LOCAL_FILE_SYSTEM, validationResult.msg);
 		});
 	}
-
 }
