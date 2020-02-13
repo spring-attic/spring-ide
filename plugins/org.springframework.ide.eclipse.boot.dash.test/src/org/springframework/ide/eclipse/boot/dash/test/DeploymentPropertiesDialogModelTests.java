@@ -73,6 +73,7 @@ import org.springframework.ide.eclipse.boot.dash.cf.dialogs.DeploymentProperties
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
+import org.springframework.ide.eclipse.boot.test.util.TestBracketter;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
@@ -131,6 +132,7 @@ public class DeploymentPropertiesDialogModelTests {
 	////////////////////////////////////////////////////////////
 
 	@Rule public TestName name = new TestName();
+	@Rule public TestBracketter bracketer = new TestBracketter();
 
 	@BeforeClass
 	public static void beforeAll() throws Exception {
@@ -191,9 +193,10 @@ public class DeploymentPropertiesDialogModelTests {
 	private void waitUntilFileDisconnedted(IFile file) throws Exception {
 		waitForJobsToComplete();
 		if (file.exists()) {
-			for (LanguageServerWrapper wrapper : LanguageServiceAccessor.getLSWrappers(file, cap -> true)) {
-				ACondition.waitFor(file.toString() + " disconnected from LS", DISCONNECT_TIMEOUT, () -> assertFalse(wrapper.isConnectedTo(file.getLocation())));
-			}
+			ACondition.waitFor(file.toString() + " disconnected from LS", DISCONNECT_TIMEOUT, () -> {
+				LanguageServerWrapper wrapper = getCfLanguageServer(file, LanguageServiceAccessor.getLSWrappers(file, cap -> true));
+				assertFalse(wrapper.isConnectedTo(file.getLocation()));
+			});
 		}
 		FileEditorInput editorInput = new FileEditorInput(file);
 		TextFileDocumentProvider docProvider = (TextFileDocumentProvider) DocumentProviderRegistry.getDefault().getDocumentProvider(editorInput);
@@ -207,9 +210,10 @@ public class DeploymentPropertiesDialogModelTests {
 
 	private static void waitUntilFileConnected(IFile file) throws Exception {
 		waitForJobsToComplete();
-		Collection<LanguageServerWrapper> wrappers = LanguageServiceAccessor.getLSWrappers(file, cap -> true);
-		LanguageServerWrapper wrapper = getCfLanguageServer(file, wrappers);
-		ACondition.waitFor(file.toString() + " connected to LS", DISCONNECT_TIMEOUT, () -> assertTrue(wrapper.isConnectedTo(file.getLocation())));
+		ACondition.waitFor(file.toString() + " connected to LS", DISCONNECT_TIMEOUT, () -> {
+			LanguageServerWrapper wrapper = getCfLanguageServer(file, LanguageServiceAccessor.getLSWrappers(file, cap -> true));
+			assertTrue(wrapper.isConnectedTo(file.getLocation()));
+		});
 		waitForJobsToComplete();
 	}
 
