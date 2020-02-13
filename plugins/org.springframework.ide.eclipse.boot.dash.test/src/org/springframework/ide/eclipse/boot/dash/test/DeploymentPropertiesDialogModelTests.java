@@ -21,10 +21,14 @@ import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.create
 
 import java.io.ByteArrayInputStream;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
@@ -76,6 +80,12 @@ import org.springsource.ide.eclipse.commons.livexp.util.Log;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 import com.google.common.collect.ImmutableList;
+
+import junit.framework.AssertionFailedError;
+
+import org.springframework.tooling.cloudfoundry.manifest.ls.CloudFoundryManifestLanguageServer;
+import org.springframework.tooling.ls.eclipse.commons.preferences.LanguageServerConsolePreferenceConstants;
+
 
 /**
  * Tests for {@link DeploymentPropertiesDialogModel}
@@ -197,10 +207,32 @@ public class DeploymentPropertiesDialogModelTests {
 
 	private static void waitUntilFileConnected(IFile file) throws Exception {
 		waitForJobsToComplete();
-		for (LanguageServerWrapper wrapper : LanguageServiceAccessor.getLSWrappers(file, cap -> true)) {
-			ACondition.waitFor(file.toString() + " connected to LS", DISCONNECT_TIMEOUT, () -> assertTrue(wrapper.isConnectedTo(file.getLocation())));
-		}
+		Collection<LanguageServerWrapper> wrappers = LanguageServiceAccessor.getLSWrappers(file, cap -> true);
+		LanguageServerWrapper wrapper = getCfLanguageServer(file, wrappers);
+		ACondition.waitFor(file.toString() + " connected to LS", DISCONNECT_TIMEOUT, () -> assertTrue(wrapper.isConnectedTo(file.getLocation())));
 		waitForJobsToComplete();
+	}
+
+	private static LanguageServerWrapper getCfLanguageServer(IFile file, Collection<LanguageServerWrapper> wrappers) throws Exception {
+		StringBuilder available = new StringBuilder();
+		List<LanguageServerWrapper> found = new ArrayList<>();
+		for (LanguageServerWrapper wrapper : wrappers) {
+			if ("org.eclipse.languageserver.languages.cloudfoundrymanifest".equals(wrapper.serverDefinition.id)) {
+				found.add(wrapper);
+			}
+			available.append(wrapper.serverDefinition.id+" ");
+		}
+		if (found.isEmpty()) {
+			throw new NoSuchElementException("No CF language server wrapper found in: [ "+available+"]");
+		} else if (found.size()>1) {
+			throw new AssertionFailedError(
+					"Found more than one ls: "+
+							found.stream()
+							.map(w -> w.serverDefinition.id)
+							.collect(Collectors.toList())
+			);
+		}
+		return found.get(0);
 	}
 
 	private void createDialogModel(IProject project, CFApplication deployedApp) throws Exception {

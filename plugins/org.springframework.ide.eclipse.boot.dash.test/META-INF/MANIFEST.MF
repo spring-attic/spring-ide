@@ -40,7 +40,9 @@ Require-Bundle: org.junit,
  org.eclipse.ui.ide,
  org.springsource.ide.eclipse.commons.core,
  org.yaml.snakeyaml,
- com.google.gson
+ com.google.gson,
+ org.springframework.tooling.cloudfoundry.manifest.ls,
+ org.springframework.tooling.ls.eclipse.commons
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Import-Package: javax.ws.rs.client,
