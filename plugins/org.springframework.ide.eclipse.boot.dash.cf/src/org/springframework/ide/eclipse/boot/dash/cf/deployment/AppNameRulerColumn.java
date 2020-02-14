@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment;
+package org.springframework.ide.eclipse.boot.dash.cf.deployment;
 
 import java.util.Iterator;
 

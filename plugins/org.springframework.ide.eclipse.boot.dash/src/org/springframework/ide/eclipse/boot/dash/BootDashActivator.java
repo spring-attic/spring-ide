@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash;
 
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import org.eclipse.core.net.proxy.IProxyService;
 import org.eclipse.core.runtime.Platform;
@@ -30,7 +31,6 @@ import org.springframework.ide.eclipse.boot.dash.model.DefaultBootDashModelConte
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
-import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableSet;
 
@@ -136,7 +136,7 @@ public class BootDashActivator extends AbstractUIPlugin {
 		Log.warn(message);
 	}
 
-	private final Supplier<BootDashModelContext> context = Suppliers.memoize(DefaultBootDashModelContext::new);
+	private final Supplier<BootDashModelContext> context = Suppliers.memoize(() -> DefaultBootDashModelContext.create());
 
 	public BootDashViewModel getModel() {
 		if (model==null) {

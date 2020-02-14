@@ -19,9 +19,9 @@ import java.util.Iterator;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.text.Document;
 import org.junit.Test;
+import org.springframework.ide.eclipse.boot.dash.cf.deployment.AppNameAnnotation;
+import org.springframework.ide.eclipse.boot.dash.cf.deployment.AppNameAnnotationModel;
 import org.springframework.ide.eclipse.boot.dash.cf.deployment.AppNameReconciler;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.AppNameAnnotation;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.AppNameAnnotationModel;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlASTProvider;
 import org.yaml.snakeyaml.Yaml;
 

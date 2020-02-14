@@ -41,6 +41,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
+import java.util.function.Supplier;
+
 /**
  * @author Kris De Volder
  */
@@ -58,7 +60,7 @@ public class DefaultBootDashModelContext extends BootDashModelContext {
 
 	private BootInstallManager bootInstalls = BootInstallManager.getInstance();
 
-	private static SimpleDIContext createInjections() {
+	public static BootDashModelContext create() {
 		SimpleDIContext injections = new SimpleDIContext();
 		injections.defInstance(UIContext.class, () -> {
 			try {
@@ -85,12 +87,13 @@ public class DefaultBootDashModelContext extends BootDashModelContext {
 		injections.defInstance(UserInteractions.class, new DefaultUserInteractions(injections));
 		injections.def(BootDashViewModel.class, BootDashViewModel::new);
 		injections.def(RemoteBootAppsDataHolder.class, RemoteBootAppsDataHolder::new);
+		injections.def(BootDashModelContext.class, DefaultBootDashModelContext::new);
 		new EclipseBeanLoader(injections).loadFromExtensionPoint(BootDashActivator.INJECTIONS_EXTENSION_ID);
-		return injections;
+		return new DefaultBootDashModelContext(injections);
 	}
 
-	public DefaultBootDashModelContext() {
-		super(createInjections());
+	private DefaultBootDashModelContext(SimpleDIContext injections) {
+		super(injections);
 	}
 
 	@Override

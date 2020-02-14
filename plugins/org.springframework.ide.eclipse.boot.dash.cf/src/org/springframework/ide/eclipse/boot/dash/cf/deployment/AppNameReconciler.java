@@ -21,8 +21,6 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModelExtension;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.AppNameAnnotation;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.AppNameAnnotationModel;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlASTProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlFileAST;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
