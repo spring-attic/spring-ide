@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cf.client;
 
+import org.cloudfoundry.uaa.UaaException;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 /**
@@ -22,7 +23,7 @@ public class CFExceptions {
 
 	public static boolean isAuthFailure(Exception e) {
 		String msg = ExceptionUtil.getMessage(e);
-		return msg.contains("Bad credentials");
+		return msg.contains("Bad credentials") || ExceptionUtil.getDeepestCause(e) instanceof UaaException;
 	}
 
 	public static boolean isSSLCertificateFailure(Exception e) {

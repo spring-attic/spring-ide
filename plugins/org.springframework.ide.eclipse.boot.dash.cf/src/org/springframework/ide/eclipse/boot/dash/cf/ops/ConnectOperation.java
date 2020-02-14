@@ -28,6 +28,7 @@ import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
 import org.springframework.ide.eclipse.boot.util.Log;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 /**
  * Operation for connecting/disconnecting CF run target
@@ -107,7 +108,7 @@ public class ConnectOperation extends CloudOperation {
 					} else {
 						String msg = "Failed to connect to " + model.getRunTarget().getId() + ". ";
 						if (CFExceptions.isAuthFailure(e)) {
-							msg = msg+ " Ensure login credentials are correct.";
+							msg = ExceptionUtil.getMessage(e)+ ". Ensure login credentials are correct.";
 						} else {
 							msg = msg+ " See error log for detailed message.";
 							Log.log(e);
