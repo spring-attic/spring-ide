@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.boot.wizard.InitializrFactoryModel;
 import org.springframework.ide.eclipse.boot.wizard.starters.AddStartersCompareModel.AddStartersTrackerState;
 import org.springframework.ide.eclipse.boot.wizard.starters.eclipse.ResourceCompareInput;
+import org.springframework.ide.eclipse.maven.pom.PomPlugin;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
@@ -92,6 +93,7 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 
 			// Transform the compare result from the model into a compare editor input
 			final CompareEditorInput editorInput = createCompareEditorInput(compareResult);
+			editorInput.getCompareConfiguration().setProperty(PomPlugin.POM_STRUCTURE_ADDITIONS_COMPARE_SETTING, true);
 
 			// Save the editor on ok pressed
 			model.onOkPressed(() -> {

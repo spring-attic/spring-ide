@@ -114,6 +114,8 @@
         <module>plugins/org.springsource.ide.eclipse.commons.cloudfoundry.client.v2</module> <!--TODO: move to commons -->
 		<module>plugins/org.springframework.ide.eclipse.boot.wizard</module>
 		<module>plugins/org.springframework.ide.eclipse.boot.restart</module>
+		<module>plugins/org.springframework.ide.eclipse.maven.pom</module>
+		<module>plugins/org.springframework.ide.eclipse.maven.pom.tests</module>
         <module>features/org.springframework.ide.eclipse.boot.feature</module>
         <module>features/org.springframework.ide.eclipse.boot.dash.feature</module>
         
