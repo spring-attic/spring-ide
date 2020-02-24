@@ -25,6 +25,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarters;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrProjectDownloader;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.DependencyGroup;
@@ -61,11 +62,16 @@ public class AddStartersModel implements OkButtonHandler {
 
 	protected final SpringBootCore springBootCore;
 
+	protected final InitializrProjectDownloader projectDownloader;
 
 	/**
-	 * Create EditStarters dialog model and initialize it based on a project selection.
+	 * Create EditStarters dialog model and initialize it based on a project
+	 * selection.
+	 *
 	 */
-	public AddStartersModel(IProject selectedProject, SpringBootCore springBootCore, IPreferenceStore store) throws Exception {
+	public AddStartersModel(InitializrProjectDownloader projectDownloader, IProject selectedProject,
+			SpringBootCore springBootCore, IPreferenceStore store) throws Exception {
+		this.projectDownloader = projectDownloader;
 		this.springBootCore = springBootCore;
 		this.popularities = new PopularityTracker(store);
 		this.defaultDependencies = new DefaultDependencies(store);
@@ -260,8 +266,7 @@ public class AddStartersModel implements OkButtonHandler {
 		}
 	}
 
-	public AddStartersDiff getDiff() {
-		return new AddStartersDiff(getProject(), dependencies);
+	public AddStartersDiffModel getDiffModel() {
+		return new AddStartersDiffModel(getProject(), dependencies, projectDownloader);
 	}
-
 }

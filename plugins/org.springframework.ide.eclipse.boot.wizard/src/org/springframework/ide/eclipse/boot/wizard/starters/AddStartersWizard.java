@@ -6,7 +6,7 @@
  * https://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    GoPivotal, Inc. - initial API and implementation
+ *    Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard.starters;
 
@@ -22,11 +22,15 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWizard;
 import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
+import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrProjectDownloader;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrUrlBuilders;
 import org.springframework.ide.eclipse.boot.wizard.BootWizardActivator;
 import org.springframework.ide.eclipse.boot.wizard.InitializrFactoryModel;
 import org.springframework.ide.eclipse.boot.wizard.StartersWizardUtil;
+import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 public class AddStartersWizard extends Wizard implements IWorkbenchWizard {
@@ -42,13 +46,17 @@ public class AddStartersWizard extends Wizard implements IWorkbenchWizard {
 				IPreferenceStore preferenceStore = BootActivator.getDefault().getPreferenceStore();
 				fmodel = new InitializrFactoryModel<>((url) -> {
 					if (url!=null) {
-						InitializrService initializr = InitializrService.create(BootActivator.getUrlConnectionFactory(), () -> url);
+						URLConnectionFactory urlConnectionFactory = BootActivator.getUrlConnectionFactory();
+						String initializrUrl = BootPreferences.getInitializrUrl();
+
+						InitializrService initializr = InitializrService.create(urlConnectionFactory, () -> url);
 						SpringBootCore core = new SpringBootCore(initializr);
-						return new AddStartersModel(
-								project,
-								core,
-								preferenceStore
-						);
+
+						InitializrUrlBuilders urlBuilders = new InitializrUrlBuilders();
+						InitializrProjectDownloader projectDownloader = new InitializrProjectDownloader(
+								urlConnectionFactory, initializrUrl, urlBuilders);
+
+						return new AddStartersModel(projectDownloader, project, core, preferenceStore);
 					}
 					return null;
 				});

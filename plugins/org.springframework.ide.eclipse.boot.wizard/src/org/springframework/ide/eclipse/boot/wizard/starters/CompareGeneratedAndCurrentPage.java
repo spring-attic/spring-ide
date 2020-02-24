@@ -6,7 +6,7 @@
  * https://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    GoPivotal, Inc. - initial API and implementation
+ *    Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard.starters;
 
@@ -34,6 +34,7 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 	private final InitializrFactoryModel<AddStartersModel> factoryModel;
 	private Composite contentsContainer;
 	private Control compareViewer = null;
+	private AddStartersDiffModel diff;
 
 	public CompareGeneratedAndCurrentPage(InitializrFactoryModel<AddStartersModel> factoryModel) {
 		super("Compare", "Compare local file with generated file from Initializr", null);
@@ -51,7 +52,7 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 		try {
 
 			AddStartersModel model = factoryModel.getModel().getValue();
-			AddStartersDiff diff = model.getDiff();
+			diff = model.getDiffModel();
 
 			AddStartersCompareInput compareInput = diff.getCompareInput();
 
@@ -140,5 +141,15 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 	public boolean isPageComplete() {
 		return getWizard().getContainer().getCurrentPage() == this;
 	}
+
+	@Override
+	public void dispose() {
+		super.dispose();
+		if (this.diff != null) {
+			this.diff.dispose();
+		}
+	}
+
+
 
 }
