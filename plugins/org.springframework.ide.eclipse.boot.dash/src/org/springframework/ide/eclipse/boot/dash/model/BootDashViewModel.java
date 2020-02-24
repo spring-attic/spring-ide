@@ -18,7 +18,6 @@ import java.util.Set;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypeFactory;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.util.TreeAwareFilter;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
@@ -49,16 +48,6 @@ public class BootDashViewModel extends AbstractDisposable {
 	private Comparator<RunTarget> targetComparator;
 	private BootDashModelContext context;
 
-	private static List<RunTargetType> createRunTargetTypes(BootDashModelContext context) {
-		SimpleDIContext injections = context.injections;
-		ImmutableList.Builder<RunTargetType> rtTypes = ImmutableList.builder();
-		rtTypes.add(RunTargetTypes.LOCAL);
-		for (RunTargetTypeFactory f : injections.getBeans(RunTargetTypeFactory.class)) {
-			rtTypes.add(f.create(context));
-		}
-		return rtTypes.build();
-	}
-
 	/**
 	 * Create an 'empty' BootDashViewModel with no run targets. Targets can be
 	 * added by adding them to the runTarget's LiveSet.
@@ -66,7 +55,7 @@ public class BootDashViewModel extends AbstractDisposable {
 	public BootDashViewModel(SimpleDIContext injections)
 	{
 		context = injections.getBean(BootDashModelContext.class);
-		List<RunTargetType> runTargetTypes = createRunTargetTypes(context);
+		List<RunTargetType> runTargetTypes = context.injections.getBeans(RunTargetType.class);
 		runTargets = new LiveSetVariable<>(new LinkedHashSet<RunTarget>(), AsyncMode.SYNC);
 		models = new BootDashModelManager(context, this, runTargets);
 

@@ -11,6 +11,8 @@
 package org.springframework.ide.eclipse.boot.dash.cf;
 
 import org.springframework.ide.eclipse.boot.dash.cf.actions.CfBootDashActions;
+import org.springframework.ide.eclipse.boot.dash.cf.client.CloudFoundryClientFactory;
+import org.springframework.ide.eclipse.boot.dash.cf.client.v2.DefaultCloudFoundryClientFactoryV2;
 import org.springframework.ide.eclipse.boot.dash.cf.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cf.debug.SshDebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cf.debug.SshTunnelFactory;
@@ -25,7 +27,7 @@ import org.springframework.ide.eclipse.boot.dash.di.EclipseBeanLoader.Contributi
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.labels.BootDashLabels;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultBootDashModelContext;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypeFactory;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.remoteapps.RemoteBootAppsDataHolder;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 
@@ -37,7 +39,7 @@ public class BootDashInjections implements Contribution {
 	@Override
 	public void applyBeanDefinitions(SimpleDIContext context) throws Exception {
 		//TargetType
-		context.defInstance(RunTargetTypeFactory.class, CloudFoundryRunTargetType.factory);
+		context.def(RunTargetType.class, CloudFoundryRunTargetType::new);
 
 		//Auto sync of cf deployed apps with JMX over SSH tunnel with boot ls (for live hover/data features).
 		context.def(RemoteBootAppsDataHolder.Contributor.class, CloudFoundryRemoteBootAppsDataContributor::new);
@@ -53,7 +55,7 @@ public class BootDashInjections implements Contribution {
 		context.defInstance(DebugSupport.class, SshDebugSupport.INSTANCE);
 		context.defInstance(SshTunnelFactory.class, SshTunnelImpl::new);
 		context.defInstance(JmxSshTunnelManager.class, new JmxSshTunnelManager());
-
+		context.defInstance(CloudFoundryClientFactory.class, DefaultCloudFoundryClientFactoryV2.INSTANCE);
 	}
 
 

@@ -298,7 +298,7 @@ public class CloudFoundryTargetWizardModel {
 	 * clicks 'finish' button.
 	 */
 	private CloudFoundryTargetProperties createTargetProperties(boolean toFetchSpaces) throws CannotAccessPropertyException {
-		CloudFoundryTargetProperties targetProps = new CloudFoundryTargetProperties(null, runTargetType, context);
+		CloudFoundryTargetProperties targetProps = new CloudFoundryTargetProperties(null, runTargetType, context.injections);
 		if (!toFetchSpaces) {
 			//Take care: when fetching spaces the space may not be known yet, so neither is the id
 			String id = CloudFoundryTargetProperties.getId(

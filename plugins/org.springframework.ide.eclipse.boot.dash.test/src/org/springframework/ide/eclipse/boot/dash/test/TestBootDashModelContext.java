@@ -10,26 +10,31 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test;
 
+import static org.junit.Assert.assertFalse;
+import static org.mockito.Mockito.mock;
+
 import java.io.File;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
 import org.springframework.ide.eclipse.boot.dash.cf.actions.CfBootDashActions;
+import org.springframework.ide.eclipse.boot.dash.cf.client.CloudFoundryClientFactory;
+import org.springframework.ide.eclipse.boot.dash.cf.debug.DebugSupport;
+import org.springframework.ide.eclipse.boot.dash.cf.debug.SshDebugSupport;
+import org.springframework.ide.eclipse.boot.dash.cf.debug.SshTunnelFactory;
+import org.springframework.ide.eclipse.boot.dash.cf.jmxtunnel.JmxSshTunnelManager;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
-import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypeFactory;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockSecuredCredentialStore;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockSshTunnel;
@@ -41,12 +46,6 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
-import org.springframework.ide.eclipse.boot.dash.cf.debug.DebugSupport;
-import org.springframework.ide.eclipse.boot.dash.cf.debug.SshDebugSupport;
-import org.springframework.ide.eclipse.boot.dash.cf.debug.SshTunnelFactory;
-import org.springframework.ide.eclipse.boot.dash.cf.jmxtunnel.JmxSshTunnelManager;
-
-import static org.mockito.Mockito.*;
 
 public class TestBootDashModelContext extends BootDashModelContext {
 
@@ -156,9 +155,19 @@ public class TestBootDashModelContext extends BootDashModelContext {
 	}
 
 	public TestBootDashModelContext withTargetTypes(RunTargetType... types) {
+		assertFalse("Multiple initializations of RunTargetTypes ?", injections.hasDefinitionFor(RunTargetType.class));
 		for (RunTargetType t : types) {
-			injections.defInstance(RunTargetTypeFactory.class, c -> t);
+			injections.defInstance(RunTargetType.class, t);
 		}
 		return this;
+	}
+
+	public TestBootDashModelContext withCfClient(CloudFoundryClientFactory client) {
+		injections.defInstance(CloudFoundryClientFactory.class, client);
+		return this;
+	}
+
+	public RunTargetType getRargetTypeWithName(String name) {
+		return injections.getBeans(RunTargetType.class).stream().filter(t -> t.getName().equals(name)).findFirst().orElse(null);
 	}
 }

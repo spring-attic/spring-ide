@@ -171,12 +171,12 @@ public class CloudFoundryBootDashModelMockingTest {
 	@Before
 	public void setup() throws Exception {
 		StsTestUtil.deleteAllProjects();
+		this.clientFactory = new MockCloudFoundryClientFactory();
 		this.context = new TestBootDashModelContext(
 				ResourcesPlugin.getWorkspace(),
 				DebugPlugin.getDefault().getLaunchManager()
-		);
-		this.clientFactory = new MockCloudFoundryClientFactory();
-		this.harness = CloudFoundryTestHarness.create(context, clientFactory);
+		).withCfClient(clientFactory);
+		this.harness = CloudFoundryTestHarness.create(context);
 		this.projects = new BootProjectTestHarness(context.getWorkspace());
 		this.actions = new BootDashActions(harness.model, harness.selection.forReading(), harness.sectionSelection, context.injections, null);
 	}

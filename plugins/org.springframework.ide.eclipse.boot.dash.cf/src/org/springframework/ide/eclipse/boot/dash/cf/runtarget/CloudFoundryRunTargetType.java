@@ -25,6 +25,7 @@ import org.springframework.ide.eclipse.boot.dash.cf.devtools.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.cf.dialogs.CloudFoundryTargetWizardModel;
 import org.springframework.ide.eclipse.boot.dash.cf.dialogs.RunTargetWizard;
 import org.springframework.ide.eclipse.boot.dash.cf.jmxtunnel.JmxSshTunnelManager;
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultWizardModelUserInteractions;
@@ -32,7 +33,6 @@ import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.WizardModelUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.AbstractRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTargetType;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypeFactory;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
 import org.springframework.ide.eclipse.boot.dash.util.UiUtil;
 import org.springframework.ide.eclipse.boot.util.ProcessTracker;
@@ -46,26 +46,18 @@ import com.google.gson.Gson;
  */
 public class CloudFoundryRunTargetType extends AbstractRunTargetType<CloudFoundryTargetProperties> implements RemoteRunTargetType<CloudFoundryTargetProperties>, Disposable {
 
-	public static RunTargetTypeFactory factory = context -> {
-		return new CloudFoundryRunTargetType(context, DefaultCloudFoundryClientFactoryV2.INSTANCE);
-	};
-
 	private static final ImageDescriptor SMALL_ICON = BootDashActivator.getImageDescriptor("icons/cloud_obj.png");
 
-	private CloudFoundryClientFactory clientFactory;
-	private final BootDashModelContext context;
 	private WizardModelUserInteractions interactions;
 	private AtomicBoolean processTrackerInitialized = new AtomicBoolean(false);
 	private ProcessTracker devtoolsProcessTracker;
 
 
-	private CloudFoundryRunTargetType(BootDashModelContext context, CloudFoundryClientFactory clientFactory) {
-		super(context, "Cloud Foundry");
-		this.context = context;
-		context.injections.assertDefinitionFor(SshTunnelFactory.class);
-		context.injections.assertDefinitionFor(JmxSshTunnelManager.class);
+	public CloudFoundryRunTargetType(SimpleDIContext injections) {
+		super(injections, "Cloud Foundry");
+		injections.assertDefinitionFor(SshTunnelFactory.class);
+		injections.assertDefinitionFor(JmxSshTunnelManager.class);
 
-		this.clientFactory = clientFactory;
 		//TODO: Should be injected and merged with other user interactions, but required too much
 		// refactoring to implement in limited time
 		this.interactions = new DefaultWizardModelUserInteractions();
@@ -73,8 +65,8 @@ public class CloudFoundryRunTargetType extends AbstractRunTargetType<CloudFoundr
 
 	@Override
 	public void openTargetCreationUi(LiveSetVariable<RunTarget> targets) {
-		CloudFoundryTargetWizardModel model = new CloudFoundryTargetWizardModel(this, clientFactory,
-				targets.getValues(), context, interactions);
+		CloudFoundryTargetWizardModel model = new CloudFoundryTargetWizardModel(this, clientFactory(),
+				targets.getValues(), context(), interactions);
 		RunTargetWizard wizard = new RunTargetWizard(model);
 		Shell shell = UiUtil.getShell();
 		if (shell != null) {
@@ -88,6 +80,14 @@ public class CloudFoundryRunTargetType extends AbstractRunTargetType<CloudFoundr
 		}
 	}
 
+	private CloudFoundryClientFactory clientFactory() {
+		return injections.getBean(CloudFoundryClientFactory.class);
+	}
+
+	private BootDashModelContext context() {
+		return injections.getBean(BootDashModelContext.class);
+	}
+
 	@Override
 	public boolean canInstantiate() {
 		return true;
@@ -97,14 +97,15 @@ public class CloudFoundryRunTargetType extends AbstractRunTargetType<CloudFoundr
 	public RunTarget createRunTarget(CloudFoundryTargetProperties props) {
 		ensureProcessTracker();
 		return props instanceof CloudFoundryTargetProperties
-				? new CloudFoundryRunTarget((CloudFoundryTargetProperties) props, this, clientFactory)
-				: new CloudFoundryRunTarget(new CloudFoundryTargetProperties(props, this, context), this, clientFactory);
+				? new CloudFoundryRunTarget((CloudFoundryTargetProperties) props, this, clientFactory())
+				: new CloudFoundryRunTarget(new CloudFoundryTargetProperties(props, this, injections), this, clientFactory());
 	}
 
 
 	private void ensureProcessTracker() {
 		if (processTrackerInitialized.compareAndSet(false, true)) {
-			context.injections.whenCreated(BootDashViewModel.class, (model) -> {
+			//Careful... doing this too eagerly causes circular bean resolve issues. So... do this asyncly
+			injections.whenCreated(BootDashViewModel.class, (model) -> {
 				devtoolsProcessTracker = DevtoolsUtil.createProcessTracker(model);
 			});
 		}
@@ -132,10 +133,6 @@ public class CloudFoundryRunTargetType extends AbstractRunTargetType<CloudFoundr
 				"To escape a variable name simply repeat the '%' sign. E.g. '%%u'";
 	}
 
-	public static CloudFoundryRunTargetType withClient(BootDashModelContext context, CloudFoundryClientFactory clientFactory) {
-		return new CloudFoundryRunTargetType(context, clientFactory);
-	}
-
 	@Override
 	public void dispose() {
 		if (devtoolsProcessTracker != null) {
@@ -149,7 +146,7 @@ public class CloudFoundryRunTargetType extends AbstractRunTargetType<CloudFoundr
 		Gson gson = new Gson();
 		@SuppressWarnings("unchecked")
 		Map<String,String> map = gson.fromJson(serializedTargetParams, Map.class);
-		return new CloudFoundryTargetProperties(new TargetProperties(map, this), this, context);
+		return new CloudFoundryTargetProperties(new TargetProperties(map, this), this, injections);
 	}
 
 	@Override

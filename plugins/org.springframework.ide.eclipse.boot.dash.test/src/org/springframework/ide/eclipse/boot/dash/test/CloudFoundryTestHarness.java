@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
@@ -20,12 +21,14 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.Assert;
+import org.mockito.InjectMocks;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFClientParams;
@@ -123,20 +126,30 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 	public static final long CONNECT_TARGET_TIMEOUT = 30_000;
 
 	public static CloudFoundryTestHarness create(TestBootDashModelContext context) throws Exception {
-		CloudFoundryClientFactory clientFactory = DefaultCloudFoundryClientFactoryV2.INSTANCE;
-		return create(context, clientFactory);
+		context.injections.assertDefinitionFor(CloudFoundryClientFactory.class);
+		context.injections.assertNoDefinitionFor(RunTargetType.class);
+		context.injections.defInstance(RunTargetType.class, RunTargetTypes.LOCAL);
+		context.injections.def(CloudFoundryRunTargetType.class, CloudFoundryRunTargetType::new);
+		return new CloudFoundryTestHarness(context);
 	}
 
-	protected static CloudFoundryTestHarness create(
-			TestBootDashModelContext context,
-			CloudFoundryClientFactory clientFactory
-	) throws Exception {
-		CloudFoundryRunTargetType cfTargetType = CloudFoundryRunTargetType.withClient(context, clientFactory);
-		return new CloudFoundryTestHarness(context, clientFactory, cfTargetType);
-	}
 
 	public CloudFoundryBootDashModel getCfTargetModel() {
-		return (CloudFoundryBootDashModel) getRunTargetModel(cfTargetType);
+		return (CloudFoundryBootDashModel) getRunTargetModel(cfTargetType());
+	}
+
+	private RunTargetType cfTargetType() {
+		List<RunTargetType> types = context.injections.getBeans(RunTargetType.class);
+		for (RunTargetType t : types) {
+			if (t instanceof CloudFoundryRunTargetType) {
+				return t;
+			}
+		}
+		throw new NoSuchElementException("No cf target type");
+	}
+
+	private CloudFoundryClientFactory clientFactory() {
+		return context.injections.getBean(CloudFoundryClientFactory.class);
 	}
 
 	public CloudFoundryBootDashModel createCfTarget(
@@ -151,7 +164,7 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 			StoreCredentialsMode storePassword,
 			Asserter1<CloudFoundryTargetWizardModel> wizardAsserter
 	) throws Exception {
-		CloudFoundryTargetWizardModel wizard = new CloudFoundryTargetWizardModel(cfTargetType, clientFactory, NO_TARGETS, context);
+		CloudFoundryTargetWizardModel wizard = new CloudFoundryTargetWizardModel(cfTargetType(), clientFactory(), NO_TARGETS, context);
 
 		wizard.setUrl(params.getApiUrl());
 		wizard.setUsername(params.getUsername());
@@ -188,17 +201,13 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 
 	private static final ImmutableSet<RunTarget> NO_TARGETS = ImmutableSet.of();
 
-	private CloudFoundryClientFactory clientFactory;
-	public final CloudFoundryRunTargetType cfTargetType;
-
-	private CloudFoundryTestHarness(TestBootDashModelContext context, CloudFoundryClientFactory clientFactory, CloudFoundryRunTargetType cfTargetType) throws Exception {
-		super(context.withTargetTypes(RunTargetTypes.LOCAL, cfTargetType));
-		Assert.isNotNull(clientFactory, "clientFactory");
-		this.clientFactory = clientFactory;
-		this.cfTargetType = cfTargetType;
+	private CloudFoundryTestHarness(TestBootDashModelContext context) throws Exception {
+		super(context);
+		context.injections.assertDefinitionFor(CloudFoundryRunTargetType.class);
+		context.injections.assertDefinitionFor(CloudFoundryClientFactory.class);
 	}
 
-	private CFSpace getSpace(CloudFoundryTargetWizardModel wizard, String orgName, String spaceName) {
+	private static CFSpace getSpace(CloudFoundryTargetWizardModel wizard, String orgName, String spaceName) {
 		for (CFSpace space : wizard.getSpaces().getOrgSpaces(orgName)) {
 			if (space.getName().equals(spaceName)) {
 				return space;
@@ -324,7 +333,7 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 	}
 
 	public List<BootDashModel> getCfRunTargetModels() {
-		return getRunTargetModels(cfTargetType);
+		return getRunTargetModels(cfTargetType());
 	}
 
 	public CloudFoundryRunTargetType getCfTargetType() {

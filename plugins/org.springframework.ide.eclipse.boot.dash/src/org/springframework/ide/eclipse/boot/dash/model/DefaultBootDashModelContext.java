@@ -31,6 +31,7 @@ import org.springframework.ide.eclipse.boot.dash.di.EclipseBeanLoader;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.remoteapps.RemoteBootAppsDataHolder;
 import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions.UIContext;
@@ -40,8 +41,6 @@ import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
-
-import java.util.function.Supplier;
 
 /**
  * @author Kris De Volder
@@ -88,6 +87,7 @@ public class DefaultBootDashModelContext extends BootDashModelContext {
 		injections.def(BootDashViewModel.class, BootDashViewModel::new);
 		injections.def(RemoteBootAppsDataHolder.class, RemoteBootAppsDataHolder::new);
 		injections.def(BootDashModelContext.class, DefaultBootDashModelContext::new);
+		injections.defInstance(RunTargetType.class, RunTargetTypes.LOCAL);
 		new EclipseBeanLoader(injections).loadFromExtensionPoint(BootDashActivator.INJECTIONS_EXTENSION_ID);
 		return new DefaultBootDashModelContext(injections);
 	}

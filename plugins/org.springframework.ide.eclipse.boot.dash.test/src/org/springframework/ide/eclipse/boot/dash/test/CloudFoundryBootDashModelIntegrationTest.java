@@ -111,7 +111,7 @@ public class CloudFoundryBootDashModelIntegrationTest {
 		this.context = new TestBootDashModelContext(
 				ResourcesPlugin.getWorkspace(),
 				DebugPlugin.getDefault().getLaunchManager()
-		);
+		).withCfClient(clientFactory);
 		this.harness = CloudFoundryTestHarness.create(context);
 		this.projects = new BootProjectTestHarness(context.getWorkspace());
 	}

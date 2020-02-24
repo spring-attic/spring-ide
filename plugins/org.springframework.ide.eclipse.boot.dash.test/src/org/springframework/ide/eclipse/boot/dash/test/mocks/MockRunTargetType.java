@@ -14,6 +14,7 @@ import java.util.Map;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryTargetProperties;
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.AbstractRunTargetType;
@@ -25,11 +26,9 @@ import com.google.gson.Gson;
 public class MockRunTargetType extends AbstractRunTargetType<CloudFoundryTargetProperties> {
 
 	private boolean requiresCredentials;
-	private BootDashModelContext context;
 
-	public MockRunTargetType(BootDashModelContext context, String name) {
-		super(context, name);
-		this.context = context;
+	public MockRunTargetType(SimpleDIContext injections, String name) {
+		super(injections, name);
 	}
 
 	@Override
@@ -60,7 +59,7 @@ public class MockRunTargetType extends AbstractRunTargetType<CloudFoundryTargetP
 		Gson gson = new Gson();
 		@SuppressWarnings("unchecked")
 		Map<String,String> map = gson.fromJson(serializedTargetParams, Map.class);
-		return new CloudFoundryTargetProperties(new TargetProperties(map, this), this, context);
+		return new CloudFoundryTargetProperties(new TargetProperties(map, this), this, injections);
 	}
 
 	@Override

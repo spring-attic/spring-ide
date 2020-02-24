@@ -42,6 +42,7 @@ import org.springframework.ide.eclipse.boot.dash.cf.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFCredentials.CFCredentialType;
 import org.springframework.ide.eclipse.boot.dash.cf.dialogs.StoreCredentialsMode;
 import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryTargetProperties;
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
@@ -530,15 +531,17 @@ public class BootDashViewModelTest {
 
 	@Test
 	public void testRestoreSingleRunTarget() throws Exception {
-		RunTargetType<CloudFoundryTargetProperties> targetType = new MockRunTargetType(context, "MOCK");
+		context.injections.def(MockRunTargetType.class, injections -> {
+			MockRunTargetType targetType = new MockRunTargetType(injections, "MOCK");
+			return targetType;
+		});
+
 		String targetId = "foo";
 
-		harness = new BootDashViewModelHarness(context.withTargetTypes(
-				RunTargetTypes.LOCAL,
-				targetType
-		));
+		harness = new BootDashViewModelHarness(context);
+		MockRunTargetType targetType = context.injections.getBean(MockRunTargetType.class);
 
-		CloudFoundryTargetProperties props = new CloudFoundryTargetProperties(null, targetType, harness.context);
+		CloudFoundryTargetProperties props = new CloudFoundryTargetProperties(null, targetType, context.injections);
 		props.put(TargetProperties.RUN_TARGET_ID, targetId);
 		props.put("describe", "This is foo");
 		RunTarget<CloudFoundryTargetProperties> savedTarget = targetType.createRunTarget(props);
@@ -564,16 +567,15 @@ public class BootDashViewModelTest {
 		// the list of target-types it is initialized with. It should sort
 		//models based on type first then runtarget id second.
 
-		RunTargetType fooType = new MockRunTargetType(context, "foo-type");
-		RunTargetType barType = new MockRunTargetType(context, "bar-type");
-
-		harness = new BootDashViewModelHarness(context.withTargetTypes(
-				RunTargetTypes.LOCAL,
-				fooType,
-				barType
-		));
+		context.withTargetTypes(RunTargetTypes.LOCAL);
+		context.injections.def(RunTargetType.class, injections -> new MockRunTargetType(context.injections, "foo-type"));
+		context.injections.def(RunTargetType.class, injections -> new MockRunTargetType(context.injections, "bar-type"));
+		harness = new BootDashViewModelHarness(context);
 
 		Comparator<BootDashModel> comparator = harness.model.getModelComparator();
+
+		RunTargetType fooType = context.getRargetTypeWithName("foo-type");
+		RunTargetType barType = context.getRargetTypeWithName("bar-type");
 
 		BootDashModel[] sortedModels = {
 			//These are arranged in the order we expect them to be when
@@ -622,10 +624,15 @@ public class BootDashViewModelTest {
 
 	@Test
 	public void testUpdatePropertiesInStore() throws Exception {
-		MockRunTargetType targetType = new MockRunTargetType(context, "mock-type");
-		harness = new BootDashViewModelHarness(context.withTargetTypes(targetType));
-		targetType.setRequiresCredentials(true);
-		CloudFoundryTargetProperties properties = new CloudFoundryTargetProperties(null, targetType, harness.context);
+		context.injections.def(MockRunTargetType.class, injections -> {
+			MockRunTargetType targetType = new MockRunTargetType(injections, "mock-type");
+			targetType.setRequiresCredentials(true);
+			return targetType;
+		});
+		harness = new BootDashViewModelHarness(context);
+
+		MockRunTargetType targetType = context.injections.getBean(MockRunTargetType.class);
+		CloudFoundryTargetProperties properties = new CloudFoundryTargetProperties(null, targetType, context.injections);
 		properties.setCredentials(CFCredentials.fromPassword("secret"));
 
 		MockRunTarget target = (MockRunTarget) targetType.createRunTarget(properties);
@@ -646,10 +653,14 @@ public class BootDashViewModelTest {
 
 	@Test
 	public void testRememberPassword() throws Exception {
-		MockRunTargetType targetType = new MockRunTargetType(context, "mock-type");
-		harness = new BootDashViewModelHarness(context.withTargetTypes(targetType));
-		targetType.setRequiresCredentials(true);
-		CloudFoundryTargetProperties properties = new CloudFoundryTargetProperties(null, targetType, harness.context);
+		context.injections.def(MockRunTargetType.class, injections -> {
+			MockRunTargetType targetType = new MockRunTargetType(injections, "mock-type");
+			targetType.setRequiresCredentials(true);
+			return targetType;
+		});
+		harness = new BootDashViewModelHarness(context);
+		MockRunTargetType targetType = context.injections.getBean(MockRunTargetType.class);
+		CloudFoundryTargetProperties properties = new CloudFoundryTargetProperties(null, targetType, context.injections);
 		properties.put(TargetProperties.RUN_TARGET_ID, "target-id");
 		properties.setStoreCredentials(StoreCredentialsMode.STORE_PASSWORD);
 		properties.setCredentials(CFCredentials.fromPassword("secret"));
@@ -690,10 +701,15 @@ public class BootDashViewModelTest {
 
 	@Test
 	public void testDontRememberPassword() throws Exception {
-		MockRunTargetType targetType = new MockRunTargetType(context, "mock-type");
-		harness = new BootDashViewModelHarness(context.withTargetTypes(targetType));
-		targetType.setRequiresCredentials(true);
-		CloudFoundryTargetProperties properties = new CloudFoundryTargetProperties(null, targetType, harness.context);
+		context.injections.def(MockRunTargetType.class, injections -> {
+			MockRunTargetType targetType = new MockRunTargetType(injections, "mock-type");
+			targetType.setRequiresCredentials(true);
+			return targetType;
+		});
+		harness = new BootDashViewModelHarness(context);
+
+		MockRunTargetType targetType = context.injections.getBean(MockRunTargetType.class);
+		CloudFoundryTargetProperties properties = new CloudFoundryTargetProperties(null, targetType, context.injections);
 		properties.setStoreCredentials(StoreCredentialsMode.STORE_NOTHING);
 		properties.setCredentials(CFCredentials.fromPassword("secret"));
 

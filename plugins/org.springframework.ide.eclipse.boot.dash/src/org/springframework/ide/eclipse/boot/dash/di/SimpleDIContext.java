@@ -19,6 +19,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.Assert;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import com.google.common.cache.Cache;
@@ -78,6 +79,10 @@ public class SimpleDIContext {
 		public CompletableFuture<Void> whenCreated(Consumer<T> requestor) {
 			return instance.thenAccept(requestor);
 		}
+		@Override
+		public String toString() {
+			return "Definition("+type.getName()+")";
+		}
 	}
 
 	private List<Definition<?>> definitions = new ArrayList<>();
@@ -134,6 +139,11 @@ public class SimpleDIContext {
 	public void assertDefinitionFor(Class<?> requested) {
 		Assert.isLegal(hasDefinitionFor(requested), "No definition for "+requested);
 	}
+
+	public void assertNoDefinitionFor(Class<RunTargetType> requested) {
+		Assert.isLegal(!hasDefinitionFor(requested), "Definition already exists for "+requested);
+	}
+
 
 	public boolean hasDefinitionFor(Class<?> requested) {
 		for (Definition<?> d : definitions) {

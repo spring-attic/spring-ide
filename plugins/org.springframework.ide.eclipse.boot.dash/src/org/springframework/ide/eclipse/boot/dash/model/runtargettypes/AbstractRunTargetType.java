@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model.runtargettypes;
 
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
@@ -22,15 +23,18 @@ public abstract class AbstractRunTargetType<Params> implements RunTargetType<Par
 
 	private static final String NAME_TEMPLATE = "NAME_TEMPLATE";
 
+	protected final SimpleDIContext injections;
 	private String name;
 	private IPropertyStore propertyStore;
 
-	public AbstractRunTargetType(BootDashModelContext context, String name) {
+	public AbstractRunTargetType(SimpleDIContext injections, String name) {
 		this.name = name;
+		this.injections = injections;
 		//TODO: there shouldn't be any exceptions to allow for target types that don't provide a context.
 		// However this requires a bunch of refactoring to get rid of the global constants related to the
 		// 'LOCAL' runtarget and type.
-		if (context!=null) {
+		if (injections!=null) {
+			BootDashModelContext context = injections.getBean(BootDashModelContext.class);
 			this.propertyStore = PropertyStores.createSubStore(name, context.getViewProperties());
 		}
 	}

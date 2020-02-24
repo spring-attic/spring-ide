@@ -14,6 +14,7 @@ import org.springframework.ide.eclipse.boot.dash.cf.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cf.dialogs.StoreCredentialsMode;
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
@@ -40,13 +41,13 @@ public class CloudFoundryTargetProperties extends TargetProperties {
 
 	private CFCredentials credentials;
 
-	final private BootDashModelContext context;
+	final private SimpleDIContext injections;
 
 	public CFCredentials getCredentials() throws CannotAccessPropertyException {
 		if (credentials == null) {
 			StoreCredentialsMode storeMode = getStoreCredentials();
 			try {
-				credentials = storeMode.loadCredentials(context, type, getRunTargetId());
+				credentials = storeMode.loadCredentials(context(), type, getRunTargetId());
 			} catch (Exception e) {
 				throw new CannotAccessPropertyException("Cannot read password.", e);
 			}
@@ -57,12 +58,16 @@ public class CloudFoundryTargetProperties extends TargetProperties {
 	public void setCredentials(CFCredentials credentials) throws CannotAccessPropertyException {
 		this.credentials = credentials;
 		StoreCredentialsMode storeMode = getStoreCredentials();
-		storeMode.saveCredentials(context, type, getRunTargetId(), credentials);
+		storeMode.saveCredentials(context(), type, getRunTargetId(), credentials);
 	}
 
-	public CloudFoundryTargetProperties(TargetProperties copyFrom, RunTargetType<CloudFoundryTargetProperties> runTargetType, BootDashModelContext context) {
+	private BootDashModelContext context() {
+		return injections.getBean(BootDashModelContext.class);
+	}
+
+	public CloudFoundryTargetProperties(TargetProperties copyFrom, RunTargetType<CloudFoundryTargetProperties> runTargetType, SimpleDIContext injections) {
 		super(copyFrom, runTargetType);
-		this.context = context;
+		this.injections = injections;
 		if (get(RUN_TARGET_ID) == null) {
 			put(RUN_TARGET_ID, getId(this));
 		}
