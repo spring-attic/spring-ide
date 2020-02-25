@@ -10,12 +10,52 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.azure;
 
-import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypeFactory;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
+import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.AbstractRunTargetType;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTargetType;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 
-public class AzureRunTargetType /*implements RunTargetType<AzureTargetParams>*/ {
+import com.google.gson.Gson;
 
-	public static RunTargetTypeFactory factory = (BootDashModelContext context) -> {
-		throw new IllegalStateException("Not implemented yet");
-	};
+public class AzureRunTargetType extends AbstractRunTargetType<AzureTargetParams> implements RemoteRunTargetType<AzureTargetParams> {
+
+	public AzureRunTargetType(SimpleDIContext injections) {
+		super(injections, "Azure Spring Cloud");
+	}
+
+	@Override
+	public boolean canInstantiate() {
+		return true;
+	}
+
+	@Override
+	public void openTargetCreationUi(LiveSetVariable<RunTarget> targets) {
+		throw new UnsupportedOperationException("Not yet implemented");
+	}
+
+	@Override
+	public RunTarget<AzureTargetParams> createRunTarget(AzureTargetParams properties) {
+		throw new UnsupportedOperationException("Not yet implemented");
+	}
+
+	@Override
+	public ImageDescriptor getIcon() {
+		return BootDashAzurePlugin.getImageDescriptor("/icons/azure.png");
+	}
+
+	@Override
+	public AzureTargetParams parseParams(String serializedTargetParams) {
+		//TODO: the code below seems pretty generic. Can we provide a default implementation for it?
+		Gson gson = new Gson();
+		return gson.fromJson(serializedTargetParams, AzureTargetParams.class);
+	}
+
+	@Override
+	public String serialize(AzureTargetParams targetParams) {
+		//TODO: the code below seems pretty generic. Can we provide a default implementation for it?
+		Gson gson = new Gson();
+		return gson.toJson(targetParams);
+	}
 }

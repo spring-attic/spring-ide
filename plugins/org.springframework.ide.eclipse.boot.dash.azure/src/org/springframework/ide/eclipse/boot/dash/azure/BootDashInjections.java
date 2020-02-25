@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.boot.dash.azure;
 import org.springframework.ide.eclipse.boot.dash.di.EclipseBeanLoader.Contribution;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultBootDashModelContext;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypeFactory;
 
 /**
  * Contributes bean definitions to {@link DefaultBootDashModelContext}
@@ -23,7 +22,7 @@ public class BootDashInjections implements Contribution {
 	@Override
 	public void applyBeanDefinitions(SimpleDIContext context) throws Exception {
 		//TargetType
-		context.defInstance(RunTargetTypeFactory.class, AzureRunTargetType.factory);
+		context.def(AzureRunTargetType.class, AzureRunTargetType::new);
 
 		//UI actions
 //		context.defInstance(BootDashActions.Factory.class, AzureBootDashActions.factory);
