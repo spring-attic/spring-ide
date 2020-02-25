@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.boot.dash.azure;
 
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 public class BootDashAzurePlugin extends AbstractUIPlugin {
