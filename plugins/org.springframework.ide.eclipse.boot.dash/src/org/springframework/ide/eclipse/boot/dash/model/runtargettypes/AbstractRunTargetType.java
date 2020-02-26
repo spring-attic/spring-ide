@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.model.runtargettypes;
 
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
+import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
@@ -113,5 +114,9 @@ public abstract class AbstractRunTargetType<Params> implements RunTargetType<Par
 	@Override
 	public String getTemplateHelpText() {
 		return null;
+	}
+
+	protected UserInteractions ui() {
+		return injections.getBean(UserInteractions.class);
 	}
 }

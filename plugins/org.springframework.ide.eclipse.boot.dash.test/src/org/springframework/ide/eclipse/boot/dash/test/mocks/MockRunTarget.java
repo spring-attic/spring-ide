@@ -57,7 +57,7 @@ public class MockRunTarget extends AbstractRunTarget<CloudFoundryTargetPropertie
 	}
 
 	@Override
-	public MockBootDashModel createElementsTabelModel(BootDashModelContext context, BootDashViewModel viewModel) {
+	public MockBootDashModel createSectionModel(BootDashModelContext context, BootDashViewModel viewModel) {
 		return new MockBootDashModel(this, context, viewModel);
 	}
 

@@ -11,6 +11,8 @@
 package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.function.Function;
 
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IType;
@@ -75,5 +77,12 @@ public interface UserInteractions {
 	 * Opens a {@link EditTemplateDialog} on given dialog model.
 	 */
 	void openEditTemplateDialog(EditTemplateDialogModel model);
+
+	/**
+	 * Prompt the user to choose an element from a list.
+	 *
+	 * @return The chosen element or null (if user canceled the dialog).
+	 */
+	<T> T chooseElement(String title, String message, List<T> elemments, Function<T, String> labelProvider);
 
 }

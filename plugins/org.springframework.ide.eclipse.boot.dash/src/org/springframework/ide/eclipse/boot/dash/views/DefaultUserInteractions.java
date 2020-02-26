@@ -11,7 +11,9 @@
 package org.springframework.ide.eclipse.boot.dash.views;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -23,7 +25,9 @@ import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.FileDialog;
@@ -300,5 +304,36 @@ public class DefaultUserInteractions implements UserInteractions {
 		});
 	}
 
+	@Override
+	public <T> T chooseElement(final String dialogTitle, final String message,
+			final List<T> elements, Function<T, String> labelFun) {
+		try (LiveVariable<T> chosen = new LiveVariable<>()) {
+			getShell().getDisplay().syncExec(new Runnable() {
+				@SuppressWarnings("unchecked")
+				public void run() {
+					ILabelProvider labelProvider = new LabelProvider() {
+						public String getText(Object element) {
+							return labelFun.apply((T) element);
+						}
+					};
+					try {
+						ElementListSelectionDialog dialog = new ElementListSelectionDialog(getShell(), labelProvider);
+						dialog.setElements(elements.toArray());
+						dialog.setTitle(dialogTitle);
+						dialog.setMessage(message);
+						dialog.setMultipleSelection(false);
+						int result = dialog.open();
+						labelProvider.dispose();
+						if (result == Window.OK) {
+							chosen.setValue((T) dialog.getFirstResult());
+						}
+					} finally {
+						labelProvider.dispose();
+					}
+				}
+			});
+			return chosen.getValue();
+		}
+	}
 
 }

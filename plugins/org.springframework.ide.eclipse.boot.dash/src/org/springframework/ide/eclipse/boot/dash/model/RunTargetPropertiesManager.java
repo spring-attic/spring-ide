@@ -26,11 +26,11 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 
+@SuppressWarnings("rawtypes")
 public class RunTargetPropertiesManager implements ValueListener<ImmutableSet<RunTarget>> {
 
 	private final BootDashModelContext context;
 
-	@SuppressWarnings("rawtypes")
 	private final RunTargetType<?>[] types;
 
 	public static final String RUN_TARGET_KEY = "runTargets-v2";
@@ -44,7 +44,7 @@ public class RunTargetPropertiesManager implements ValueListener<ImmutableSet<Ru
 		this.types = types;
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "unchecked" })
 	public List<RunTarget> load() {
 
 		List<RunTarget> targets = new ArrayList<>();
@@ -57,9 +57,14 @@ public class RunTargetPropertiesManager implements ValueListener<ImmutableSet<Ru
 					String[] list = ArrayEncoder.decode(serializedList);
 					for (String serializedParams : list) {
 						Object params = type.parseParams(serializedParams);
-						RunTarget target = type.createRunTarget(params);
-						if (target != null) {
-							targets.add(target);
+						try {
+							RunTarget target = type.createRunTarget(params);
+							if (target != null) {
+								targets.add(target);
+							}
+						} catch (Exception e) {
+							//log and ignore invalid run targets
+							Log.log(e);
 						}
 					}
 				}
@@ -74,7 +79,6 @@ public class RunTargetPropertiesManager implements ValueListener<ImmutableSet<Ru
 		store(value);
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public synchronized void store(Set<RunTarget> _targets) {
 		// Only persist run target properties that can be instantiated
 		Multimap<RunTargetType<?>, RunTarget<?>> targetsByType = MultimapBuilder.hashKeys().linkedListValues().build();

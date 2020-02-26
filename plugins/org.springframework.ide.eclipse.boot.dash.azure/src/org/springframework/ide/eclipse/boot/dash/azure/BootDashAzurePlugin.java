@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.azure;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.osgi.framework.BundleContext;
 
 public class BootDashAzurePlugin extends AbstractUIPlugin {
 
@@ -35,6 +36,12 @@ public class BootDashAzurePlugin extends AbstractUIPlugin {
 	 */
 	public static ImageDescriptor getImageDescriptor(String path) {
 		return imageDescriptorFromPlugin(PLUGIN_ID, path);
+	}
+
+	@Override
+	public void start(BundleContext context) throws Exception {
+		System.out.println("BootDashAzurePlugin starting...");
+		super.start(context);
 	}
 
 }

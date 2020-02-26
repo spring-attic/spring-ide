@@ -10,10 +10,15 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.NAME;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
+
+import org.eclipse.core.runtime.Assert;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.util.template.Template;
 import org.springframework.ide.eclipse.boot.dash.util.template.TemplateEnv;
 import org.springframework.ide.eclipse.boot.dash.util.template.Templates;
+import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
@@ -22,12 +27,20 @@ public abstract class AbstractRunTarget<Params> implements RunTarget<Params>, Te
 
 	private static final String NAME_TEMPLATE = "NAME_TEMPLATE";
 
+	private static final BootDashColumn[] DEFAULT_COLS = {
+			RUN_STATE_ICN,
+			NAME,
+	};
+
 	private String id;
 	private String name;
 	private RunTargetType<Params> type;
 	private IPropertyStore propertyStore;
 
 	public AbstractRunTarget(RunTargetType<Params> type, String id, String name) {
+		Assert.isNotNull(name);
+		Assert.isNotNull(id);
+		Assert.isNotNull(type);
 		this.id = id;
 		this.name = name;
 		this.type = type;
@@ -144,5 +157,10 @@ public abstract class AbstractRunTarget<Params> implements RunTarget<Params>, Te
 			return new PropertyStoreApi(store);
 		}
 		return null;
+	}
+
+	@Override
+	public BootDashColumn[] getDefaultColumns() {
+		return DEFAULT_COLS;
 	}
 }

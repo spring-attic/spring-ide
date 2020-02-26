@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.di;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 public class EclipseBeanLoader {
 
@@ -27,14 +28,14 @@ public class EclipseBeanLoader {
 	}
 
 	public void loadFromExtensionPoint(String extensionPointId) {
-		try {
 			for (IConfigurationElement ce : Platform.getExtensionRegistry().getConfigurationElementsFor(extensionPointId)) {
-				Contribution contribution = (Contribution) ce.createExecutableExtension("class");
-				contribution.applyBeanDefinitions(context);
+				try {
+					Contribution contribution = (Contribution) ce.createExecutableExtension("class");
+					contribution.applyBeanDefinitions(context);
+				} catch (Exception e) {
+					Log.log(e);
+				}
 			}
-		} catch (Exception e) {
-			throw ExceptionUtil.unchecked(e);
-		}
 	}
 
 }

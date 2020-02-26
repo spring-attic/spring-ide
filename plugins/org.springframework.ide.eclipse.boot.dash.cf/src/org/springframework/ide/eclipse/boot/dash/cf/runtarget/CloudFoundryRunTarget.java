@@ -183,7 +183,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget<CloudFoundryTargetP
 	}
 
 	@Override
-	public AbstractBootDashModel createElementsTabelModel(BootDashModelContext context, BootDashViewModel parent) {
+	public AbstractBootDashModel createSectionModel(BootDashModelContext context, BootDashViewModel parent) {
 		return new CloudFoundryBootDashModel(this, context, parent);
 	}
 

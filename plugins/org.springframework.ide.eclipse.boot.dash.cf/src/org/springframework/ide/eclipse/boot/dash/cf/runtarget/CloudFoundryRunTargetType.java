@@ -30,6 +30,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultWizardModelUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
+import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.WizardModelUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.AbstractRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTargetType;
@@ -152,5 +153,11 @@ public class CloudFoundryRunTargetType extends AbstractRunTargetType<CloudFoundr
 	@Override
 	public String serialize(CloudFoundryTargetProperties props) {
 		return props.toJson();
+	}
+
+	@Override
+	public UserInteractions ui() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
