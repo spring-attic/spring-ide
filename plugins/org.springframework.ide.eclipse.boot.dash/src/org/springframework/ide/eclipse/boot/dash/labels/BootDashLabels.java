@@ -30,7 +30,6 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.StyledString.Styler;
 import org.eclipse.swt.graphics.Color;
@@ -44,7 +43,6 @@ import org.springframework.ide.eclipse.boot.dash.model.AbstractLaunchConfigurati
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.ButtonModel;
-import org.springframework.ide.eclipse.boot.dash.model.LocalCloudServiceDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKClient;
