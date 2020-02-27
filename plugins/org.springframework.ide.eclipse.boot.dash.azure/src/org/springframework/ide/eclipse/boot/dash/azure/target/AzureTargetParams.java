@@ -22,10 +22,11 @@ public class AzureTargetParams {
 	private String subscriptionId;
 	private String clusterId;
 	private String clusterName;
+	private String subscriptionName;
 
 	public AzureTargetParams() {}
 
-	public AzureTargetParams(AzureCredential credentials, String subscriptionId, String clusterId, String clusterName) {
+	public AzureTargetParams(AzureCredential credentials, String subscriptionId, String subscriptionName, String clusterId, String clusterName) {
 		super();
 		this.credentials = credentials;
 		this.subscriptionId = subscriptionId;
@@ -63,6 +64,10 @@ public class AzureTargetParams {
 
 	public void setClusterName(String clusterName) {
 		this.clusterName = clusterName;
+	}
+
+	public String getSubscriptionName() {
+		return this.subscriptionName;
 	}
 
 }

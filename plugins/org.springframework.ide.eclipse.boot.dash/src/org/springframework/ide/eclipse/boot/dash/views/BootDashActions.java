@@ -48,6 +48,7 @@ import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashAction.Lo
 import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashElementsAction.Params;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -487,7 +488,10 @@ public class BootDashActions {
 		ImmutableList.Builder<IAction> builder = ImmutableList.builder();
 		for (RunTarget target : targets) {
 			if (target.getType() instanceof RemoteRunTargetType) {
-				builder.add(actionFactory.createOrGet(target));
+				AbstractBootDashAction a = actionFactory.createOrGet(target);
+				if (a!=null) {
+					builder.add(actionFactory.createOrGet(target));
+				}
 			}
 		}
 		return builder.build();

@@ -6,7 +6,6 @@ import java.util.List;
 import org.eclipse.core.runtime.Assert;
 import org.springframework.ide.eclipse.boot.dash.azure.target.AzureTargetParams;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
-import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
@@ -160,6 +159,7 @@ public class STSAzureClient {
 		return new AzureTargetParams(
 				this.credentials,
 				subscription.subscriptionId(),
+				subscription.displayName(),
 				cluster.id(),
 				cluster.name()
 		);

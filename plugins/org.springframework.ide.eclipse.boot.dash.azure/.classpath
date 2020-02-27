@@ -17,7 +17,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/azure-keyvault-core-0.8.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/azure-keyvault-webkey-1.0.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/azure-maven-plugin-common-0.1.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/azure-mgmt-appplatform-1.0.0-beta-2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/azure-mgmt-appplatform-1.0.0-beta-2.jar" sourcepath="lib-src/azure-mgmt-appplatform-1.0.0-beta-2-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/azure-mgmt-appservice-1.30.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/azure-mgmt-batch-1.30.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/azure-mgmt-batchai-1.30.0.jar"/>

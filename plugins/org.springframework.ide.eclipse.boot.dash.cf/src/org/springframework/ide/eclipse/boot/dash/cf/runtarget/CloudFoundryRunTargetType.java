@@ -97,11 +97,8 @@ public class CloudFoundryRunTargetType extends AbstractRunTargetType<CloudFoundr
 	@Override
 	public RunTarget createRunTarget(CloudFoundryTargetProperties props) {
 		ensureProcessTracker();
-		return props instanceof CloudFoundryTargetProperties
-				? new CloudFoundryRunTarget((CloudFoundryTargetProperties) props, this, clientFactory())
-				: new CloudFoundryRunTarget(new CloudFoundryTargetProperties(props, this, injections), this, clientFactory());
+		return new CloudFoundryRunTarget((CloudFoundryTargetProperties) props, this, clientFactory());
 	}
-
 
 	private void ensureProcessTracker() {
 		if (processTrackerInitialized.compareAndSet(false, true)) {
