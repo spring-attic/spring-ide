@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.azure.target;
+package org.springframework.ide.eclipse.boot.dash.azure.runtarget;
 
 import java.util.List;
 

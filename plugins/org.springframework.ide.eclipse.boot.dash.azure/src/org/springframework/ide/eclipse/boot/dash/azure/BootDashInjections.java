@@ -11,7 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.azure;
 
 import org.springframework.ide.eclipse.boot.dash.di.EclipseBeanLoader.Contribution;
-import org.springframework.ide.eclipse.boot.dash.azure.target.AzureRunTargetType;
+import org.springframework.ide.eclipse.boot.dash.azure.runtarget.AzureRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultBootDashModelContext;
 

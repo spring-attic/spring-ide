@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
-import org.springframework.ide.eclipse.boot.dash.azure.target.AzureTargetParams;
+import org.springframework.ide.eclipse.boot.dash.azure.runtarget.AzureTargetParams;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;

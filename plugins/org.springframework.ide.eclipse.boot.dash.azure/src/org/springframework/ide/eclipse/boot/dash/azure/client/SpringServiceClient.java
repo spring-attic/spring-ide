@@ -11,7 +11,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.ide.eclipse.boot.dash.azure.target.AzureTargetParams;
+import org.springframework.ide.eclipse.boot.dash.azure.runtarget.AzureTargetParams;
 
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.credentials.AzureTokenCredentials;
