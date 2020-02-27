@@ -27,8 +27,8 @@ import javax.ws.rs.client.WebTarget;
 import org.eclipse.jdt.core.IType;
 import org.junit.Test;
 import org.springframework.ide.eclipse.beans.ui.live.model.TypeLookup;
+import org.springframework.ide.eclipse.boot.dash.cf.model.RestActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.RequestMapping;
-import org.springframework.ide.eclipse.boot.dash.model.actuator.RestActuatorClient;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 
 

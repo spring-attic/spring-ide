@@ -13,13 +13,16 @@ package org.springframework.ide.eclipse.boot.dash.cf.model;
 import java.net.URI;
 import java.util.List;
 
-import org.eclipse.jface.resource.ImageDescriptor;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModel;
+import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.WrappingBootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.ActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.RequestMapping;
-import org.springframework.ide.eclipse.boot.dash.model.actuator.RestActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.env.LiveEnvModel;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -40,12 +43,17 @@ public abstract class CloudDashElement<T> extends WrappingBootDashElement<T> {
 		return new RestActuatorClient(target, getTypeLookup(), getRestClient());
 	}
 
+	protected Client getRestClient() {
+		return ClientBuilder.newClient();
+	}
+
 	@Override
 	public List<RequestMapping> getLiveRequestMappings() {
 		synchronized (this) {
 			if (liveRequestMappings==null) {
 				final LiveExpression<URI> actuatorUrl = getActuatorUrl();
 				liveRequestMappings = new AsyncLiveExpression<ImmutableList<RequestMapping>>(null, "Fetch request mappings for '"+getName()+"'") {
+					@Override
 					protected ImmutableList<RequestMapping> compute() {
 						URI target = actuatorUrl.getValue();
 						if (target!=null) {
@@ -67,11 +75,13 @@ public abstract class CloudDashElement<T> extends WrappingBootDashElement<T> {
 		return liveRequestMappings.getValue();
 	}
 
+	@Override
 	public LiveBeansModel getLiveBeans() {
 		synchronized (this) {
 			if (liveBeans == null) {
 				final LiveExpression<URI> actuatorUrl = getActuatorUrl();
 				liveBeans = new AsyncLiveExpression<LiveBeansModel>(null, "Fetch beans for '"+getName()+"'") {
+					@Override
 					protected LiveBeansModel compute() {
 						URI target = actuatorUrl.getValue();
 						if (target != null) {
@@ -90,11 +100,13 @@ public abstract class CloudDashElement<T> extends WrappingBootDashElement<T> {
 		return liveBeans.getValue();
 	}
 
+	@Override
 	public LiveEnvModel getLiveEnv() {
 		synchronized (this) {
 			if (liveEnv == null) {
 				final LiveExpression<URI> actuatorUrl = getActuatorUrl();
 				liveEnv = new AsyncLiveExpression<LiveEnvModel>(null, "Fetch env for '"+getName()+"'") {
+					@Override
 					protected LiveEnvModel compute() {
 						URI target = actuatorUrl.getValue();
 						if (target != null) {
@@ -115,6 +127,11 @@ public abstract class CloudDashElement<T> extends WrappingBootDashElement<T> {
 
 	protected LiveExpression<URI> getActuatorUrl() {
 		return LiveExpression.constant(null);
+	}
+
+	@Override
+	public CloudFoundryRunTarget getTarget() {
+		return (CloudFoundryRunTarget) super.getTarget();
 	}
 
 }

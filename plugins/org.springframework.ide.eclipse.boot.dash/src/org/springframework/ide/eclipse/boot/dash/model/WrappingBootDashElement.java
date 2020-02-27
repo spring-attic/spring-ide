@@ -13,10 +13,6 @@ package org.springframework.ide.eclipse.boot.dash.model;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-
-import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -29,7 +25,6 @@ import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.Cancelat
 import org.springframework.ide.eclipse.boot.dash.util.Utils;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
-import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
@@ -213,10 +208,6 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 		}
 	}
 
-	protected Client getRestClient() {
-		return ClientBuilder.newClient();
-	}
-
 	/**
 	 * Ensure that element state notifications are fired when a given liveExp's value changes.
 	 */
@@ -259,5 +250,10 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 
 	public void cancelOperations() {
 		cancelationTokens.cancelAll();
+	}
+
+	@Override
+	public RunTarget getTarget() {
+		return getBootDashModel().getRunTarget();
 	}
 }

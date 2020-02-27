@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.model.actuator;
+package org.springframework.ide.eclipse.boot.dash.cf.model;
 
 import java.net.URI;
 
@@ -17,6 +17,7 @@ import javax.ws.rs.client.ClientBuilder;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.ide.eclipse.beans.ui.live.model.TypeLookup;
+import org.springframework.ide.eclipse.boot.dash.model.actuator.ActuatorClient;
 
 
 /**

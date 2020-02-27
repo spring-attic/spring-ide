@@ -19,7 +19,6 @@ import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFServiceInstance;
 import org.springframework.ide.eclipse.boot.dash.cf.client.ClientRequests;
-import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.AsyncDeletable;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -45,11 +44,6 @@ public class CloudServiceInstanceDashElement extends CloudDashElement<String> im
 		this.service = service;
 		IPropertyStore backingStore = PropertyStores.createSubStore("S"+getName(), modelStore);
 		this.persistentProperties = PropertyStores.createApi(backingStore);
-	}
-
-	@Override
-	public CloudFoundryRunTarget getTarget() {
-		return getBootDashModel().getRunTarget();
 	}
 
 	@Override

@@ -15,7 +15,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.debug.core,
  org.eclipse.jdt.core,
  com.google.guava,
- com.google.gson
+ com.google.gson,
+ org.springframework.ide.eclipse.beans.ui.live
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: org.springframework.ide.eclipse.boot.dash.azure.BootDashAzurePlugin
 Bundle-ActivationPolicy: lazy

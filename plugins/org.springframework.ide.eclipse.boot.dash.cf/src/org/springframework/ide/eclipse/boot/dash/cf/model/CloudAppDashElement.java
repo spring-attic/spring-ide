@@ -119,7 +119,6 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 
 	private CancelationTokens cancelationTokens;
 
-	private final CloudFoundryRunTarget cloudTarget;
 	private final CloudFoundryBootDashModel cloudModel;
 	private PropertyStoreApi persistentProperties;
 
@@ -206,7 +205,6 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 	public CloudAppDashElement(CloudFoundryBootDashModel model, String appName, IPropertyStore modelStore) {
 		super(model, new CloudAppIdentity(appName, model.getRunTarget()));
 		this.cancelationTokens = new CancelationTokens();
-		this.cloudTarget = model.getRunTarget();
 		this.cloudModel = model;
 		IPropertyStore backingStore = PropertyStores.createSubStore("A"+getName(), modelStore);
 		this.persistentProperties = PropertyStores.createApi(backingStore);
@@ -476,11 +474,6 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 	 */
 	public LiveExpression<RunState> getBaseRunStateExp() {
 		return baseRunState;
-	}
-
-	@Override
-	public CloudFoundryRunTarget getTarget() {
-		return cloudTarget;
 	}
 
 	@Override
@@ -798,6 +791,11 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 		}
 		getBootDashModel().updateApplication(data);
 		return this;
+	}
+
+	@Override
+	public CloudFoundryRunTarget getTarget() {
+		return (CloudFoundryRunTarget) super.getTarget();
 	}
 
 	private ClientRequests getClient() {

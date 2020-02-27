@@ -137,11 +137,6 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 	}
 
 	@Override
-	public RunTarget getTarget() {
-		return getBootDashModel().getRunTarget();
-	}
-
-	@Override
 	public int getLivePort() {
 		return livePort.getValue();
 	}
