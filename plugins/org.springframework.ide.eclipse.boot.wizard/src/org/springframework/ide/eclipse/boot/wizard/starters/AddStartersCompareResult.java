@@ -6,37 +6,41 @@
  * https://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    GoPivotal, Inc. - initial API and implementation
+ *    Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard.starters;
 
+import java.io.File;
+
 import org.eclipse.compare.CompareConfiguration;
 
-public class AddStartersCompareInput {
+/**
+ * The result from the compare model that contains two sides: a local project
+ * and a downloaded project
+ *
+ */
+public class AddStartersCompareResult {
 
-	private final LocalResource localResource;
-	private final GeneratedResource generatedResource;
+	private final LocalProject localResource;
+	private File downloadedProject;
 
-	public AddStartersCompareInput(LocalResource localResource, GeneratedResource generatedResource) {
+	public AddStartersCompareResult(LocalProject localResource, File downloadedProject) {
 		this.localResource = localResource;
-		this.generatedResource = generatedResource;
+		this.downloadedProject = downloadedProject;
 	}
 
-	public GeneratedResource getGeneratedResource() {
-		return generatedResource;
+	public File getDownloadedProject() {
+		return downloadedProject;
 	}
 
-	public LocalResource getLocalResource() {
+	public LocalProject getLocalResource() {
 		return localResource;
 	}
 
 	public CompareConfiguration getConfiguration() {
 		CompareConfiguration config = new CompareConfiguration();
-
 		config.setLeftLabel(localResource.getLabel());
-		config.setLeftImage(localResource.getImage());
-		config.setRightLabel("Spring Initializr: " + generatedResource.getName());
-		config.setRightImage(generatedResource.getImage());
+		config.setRightLabel("Spring Initializr: " + downloadedProject.getName());
 		config.setLeftEditable(localResource.isEditable());
 		return config;
 	}

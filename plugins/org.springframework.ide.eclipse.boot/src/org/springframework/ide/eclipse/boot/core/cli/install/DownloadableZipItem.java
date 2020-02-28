@@ -86,6 +86,26 @@ public class DownloadableZipItem extends DownloadableItem {
 		}
 	}
 
+	public File getZipFile() throws Exception {
+		try {
+			final File[] fileBox = new File[1];
+			downloader.doWithDownload(this, new DownloadRequestor() {
+				@Override
+				public void exec(File zipFile) throws Exception {
+					fileBox[0] = zipFile;
+				}
+			});
+			downloadStatus = Status.OK_STATUS;
+			return fileBox[0];
+		} catch (UIThreadDownloadDisallowed e) {
+			//Shouldn't affect download status since it means download was not attempted
+			throw e;
+		} catch (Exception e) {
+			downloadStatus = error(ExceptionUtil.getMessage(e));
+			throw e;
+		}
+	}
+
 	@Override
 	public void clearCache() {
 		synchronized (downloader) {

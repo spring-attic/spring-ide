@@ -64,6 +64,8 @@ public class AddStartersModel implements OkButtonHandler {
 
 	protected final InitializrProjectDownloader projectDownloader;
 
+	private final AddStartersCompareModel compareModel;
+
 	/**
 	 * Create EditStarters dialog model and initialize it based on a project
 	 * selection.
@@ -76,7 +78,7 @@ public class AddStartersModel implements OkButtonHandler {
 		this.popularities = new PopularityTracker(store);
 		this.defaultDependencies = new DefaultDependencies(store);
 		this.project = springBootCore.project(selectedProject);
-
+		this.compareModel = new AddStartersCompareModel(projectDownloader, getProject());
 		discoverOptions(dependencies);
 	}
 
@@ -247,11 +249,6 @@ public class AddStartersModel implements OkButtonHandler {
 	}
 
 	public boolean canShowDiff() {
-
-//		List<Dependency> currentSelection = this.dependencies.getCurrentSelection();
-//		return currentSelection != null && currentSelection.size() > 0;
-		// Allow showing of diff even if no dependencies are selected, as that will
-		// still result in a valid generated initializr project
 		return true;
 	}
 
@@ -266,7 +263,25 @@ public class AddStartersModel implements OkButtonHandler {
 		}
 	}
 
-	public AddStartersDiffModel getDiffModel() {
-		return new AddStartersDiffModel(getProject(), dependencies, projectDownloader);
+	/**
+	 * The compare model that has two sides to compare. Note that the model may not
+	 * yet be populated as it may require asynch download of content from initializr.
+	 *
+	 * Call {@link #populateComparison()} to begin populating the compare model with both sides.
+	 *
+	 */
+	public AddStartersCompareModel getCompareModel() {
+		return compareModel;
+	}
+
+	/**
+	 * Begin populating the compare model.
+	 */
+	public void populateComparison() {
+		getCompareModel().downloadProject(dependencies.getCurrentSelection());
+	}
+
+	public void dispose() {
+		compareModel.dispose();
 	}
 }

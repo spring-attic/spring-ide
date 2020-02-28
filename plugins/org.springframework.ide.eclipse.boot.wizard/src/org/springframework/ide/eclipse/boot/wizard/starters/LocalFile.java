@@ -6,7 +6,7 @@
  * https://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    GoPivotal, Inc. - initial API and implementation
+ *    Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard.starters;
 
@@ -18,14 +18,16 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.graphics.Image;
 
-public class LocalResource {
+public class LocalFile {
 
 	private final BufferedResourceNode wrappedResource;
 	private String label;
 	private boolean editable;
+	private final IProject project;
 
-	public LocalResource(IProject project, String resourceName, boolean editable) {
+	public LocalFile(IProject project, String resourceName, boolean editable) {
 		IFile localFile = project.getProject().getFile(resourceName);
+		this.project = project;
 		this.wrappedResource = new BufferedResourceNode(localFile);
 		this.label = "Local file in " + project.getName() + ": " + wrappedResource.getName();
 		this.editable = editable;
@@ -37,6 +39,10 @@ public class LocalResource {
 
 	public String getLabel() {
 		return label;
+	}
+
+	public IProject getProject() {
+		return project;
 	}
 
 	public Image getImage() {

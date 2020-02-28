@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.core.initializr;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
@@ -18,7 +19,6 @@ import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.cli.install.DownloadableZipItem;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager;
-import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadableItem;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
@@ -28,10 +28,6 @@ import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
  */
 public class InitializrProjectDownloader implements Disposable {
 
-	/**
-	 * There should only be one instance to avoid possibly memory leaks when using
-	 * the downloadManager
-	 */
 	private DownloadManager downloadManager;
 
 	private final String initializrUrl;
@@ -55,20 +51,31 @@ public class InitializrProjectDownloader implements Disposable {
 	 * @throws Exception
 	 */
 	public File getProject(List<Dependency> dependencies, ISpringBootProject bootProject) throws Exception {
-		if (downloadManager == null) {
-			downloadManager = new DownloadManager(urlConnectionFactory);
-		}
+		DownloadManager manager = getDownloadManager();
 
 		InitializrUrlBuilder builder = urlBuilders.getBuilder(bootProject, initializrUrl);
 		String url = builder
 				.dependencies(dependencies)
 				.build();
 
-		DownloadableItem item = new DownloadableZipItem(new URL(url), downloadManager);
+		DownloadableZipItem item = new DownloadableZipItem(new URL(url), manager);
 
-		File file = item.getFile();
+		File file = item.getZipFile();
 
 		return file;
+	}
+
+	private DownloadManager getDownloadManager() throws IOException {
+		// dispose the existing one to clear the cache directory. Otherwise
+		// subsequent download requests with different URLs will not download
+		// as  the download manager relies  on the temp cache directory  and  file
+		// name (as opposed to the download  URL) to decided  if  some
+		if (downloadManager != null) {
+			downloadManager.dispose();
+		}
+		downloadManager = new DownloadManager(urlConnectionFactory);
+
+		return downloadManager;
 	}
 
 	@Override
@@ -77,5 +84,4 @@ public class InitializrProjectDownloader implements Disposable {
 			downloadManager.dispose();
 		}
 	}
-
 }

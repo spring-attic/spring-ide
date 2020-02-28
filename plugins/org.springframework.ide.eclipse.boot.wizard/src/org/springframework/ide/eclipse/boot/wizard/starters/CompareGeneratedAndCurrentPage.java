@@ -13,8 +13,7 @@ package org.springframework.ide.eclipse.boot.wizard.starters;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.compare.CompareEditorInput;
-import org.eclipse.compare.structuremergeviewer.DiffNode;
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -25,7 +24,12 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.boot.wizard.InitializrFactoryModel;
+import org.springframework.ide.eclipse.boot.wizard.starters.AddStartersCompareModel.AddStartersTrackerState;
+import org.springframework.ide.eclipse.boot.wizard.starters.eclipse.ResourceCompareInput;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
@@ -34,10 +38,9 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 	private final InitializrFactoryModel<AddStartersModel> factoryModel;
 	private Composite contentsContainer;
 	private Control compareViewer = null;
-	private AddStartersDiffModel diff;
 
 	public CompareGeneratedAndCurrentPage(InitializrFactoryModel<AddStartersModel> factoryModel) {
-		super("Compare", "Compare local file with generated file from Initializr", null);
+		super("Compare", "Compare local project with generated project from Spring Initializr", null);
 		this.factoryModel = factoryModel;
 	}
 
@@ -48,32 +51,52 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 		setControl(contentsContainer);
 	}
 
-	private void setupCompareViewer() {
+	private void connectModelToUi(AddStartersModel model) {
+		AddStartersCompareModel compareModel = model.getCompareModel();
+
+		// Add listener to be notified with compare model is populated
+		compareModel.getCompareResult().addListener(new ValueListener<AddStartersCompareResult>() {
+			@Override
+			public void gotValue(LiveExpression<AddStartersCompareResult> exp, AddStartersCompareResult compareResult) {
+				Display.getDefault().asyncExec(() -> {
+					// Dispose the old viewer if it exists. This is the case of someone click back
+					// button from this page, and
+					// returning again to this page from the previous page
+					if (compareViewer != null) {
+						compareViewer.dispose();
+					}
+					if (compareResult != null) {
+						setupCompareViewer(compareResult);
+					}
+				});
+			}
+		});
+		compareModel.getDownloadTracker().addListener(new ValueListener<AddStartersTrackerState>() {
+			@Override
+			public void gotValue(LiveExpression<AddStartersTrackerState> exp, AddStartersTrackerState downloadState) {
+				Display.getDefault().asyncExec(() -> {
+					if (downloadState != null) {
+						setMessage(downloadState.getMessage());
+					} else {
+						setMessage("");
+					}
+				});
+			}
+		});
+	}
+
+	private void setupCompareViewer(AddStartersCompareResult compareResult) {
 		try {
 
 			AddStartersModel model = factoryModel.getModel().getValue();
-			diff = model.getDiffModel();
 
-			AddStartersCompareInput compareInput = diff.getCompareInput();
-
-			// Wire the model compare input with the UI editor input
-			final CompareEditorInput editorInput = createCompareEditorInput(compareInput);
+			// Transform the compare result from the model into a compare editor input
+			final CompareEditorInput editorInput = createCompareEditorInput(compareResult);
 
 			// Save the editor on ok pressed
 			model.onOkPressed(() -> {
-				// IMPORTANT: save the contents of the local pom via
-				// the Eclipse compare input API. The reason is that
-				// Eclipse compare will first flush the left and right
-				// input before saving and mark the editor as dirty .
-				// Without this flush, nothing will be saved.
 				if (editorInput.isSaveNeeded()) {
-					// Use this API instead of the save API
-					// This will ensure the editor is flushed and saved
-					// in the UI thread before the controls are disposed
-					// Not doing this can result in NPEs if a direct
-					// save is performed asynchronously as the editor
-					// controls may be disposed when the wizard closes
-					// but before save can be performed
+					// This will save changes in the editor.
 					editorInput.okPressed();
 				}
 			});
@@ -86,32 +109,27 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 		}
 	}
 
-	private CompareEditorInput createCompareEditorInput(AddStartersCompareInput inputFromModel) {
+	/**
+	 * Creates the Eclipse compare editor input from the compare model results.
+	 *
+	 * @param resultFromModel
+	 * @return
+	 * @throws Exception
+	 */
+	private CompareEditorInput createCompareEditorInput(AddStartersCompareResult resultFromModel) throws Exception {
 
-		final CompareEditorInput currentCompareInput = new CompareEditorInput(inputFromModel.getConfiguration()) {
-			@Override
-			protected Object prepareInput(IProgressMonitor pm) throws InvocationTargetException, InterruptedException {
-				return new DiffNode(inputFromModel.getLocalResource().getWrappedResource(),
-						inputFromModel.getGeneratedResource());
-			}
+		ResourceCompareInput compareEditorInput = new ResourceCompareInput(resultFromModel.getConfiguration());
+		setResources(compareEditorInput, resultFromModel);
 
-			@Override
-			public void saveChanges(IProgressMonitor monitor) throws CoreException {
-				// IMPORTANT Delegate to Eclipse compare to flush the viewer BEFORE commiting
-				// local changes
-				super.saveChanges(monitor);
-				inputFromModel.getLocalResource().commit(monitor);
-			}
+		compareEditorInput.setTitle(
+				"Compare local project on the left with generated project from Spring Initializr on the right");
 
-		};
-		currentCompareInput.setTitle("Merge Local File");
-
-		new Job("Comparing project file with generated file from Spring Initializr.") {
+		new Job("Comparing local project with generated project from Spring Initializr.") {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
-					currentCompareInput.run(monitor);
+					compareEditorInput.run(monitor);
 					return Status.OK_STATUS;
 				} catch (InvocationTargetException | InterruptedException e) {
 					return ExceptionUtil.coreException(e).getStatus();
@@ -119,22 +137,19 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 			}
 
 		}.schedule();
-		return currentCompareInput;
+		return compareEditorInput;
 	}
 
-	@Override
-	public void setVisible(boolean visible) {
-		if (visible) {
-			adjustCompareViewer();
-		}
-		super.setVisible(visible);
-	}
-
-	private void adjustCompareViewer() {
-		if (compareViewer != null) {
-			compareViewer.dispose();
-		}
-		setupCompareViewer();
+	/**
+	 * Sets the "left" and "right" resources to compare in the compare editor input
+	 *
+	 * @param input
+	 * @param inputFromModel
+	 * @throws Exception
+	 */
+	private void setResources(ResourceCompareInput input, AddStartersCompareResult inputFromModel) throws Exception {
+		IProject leftProject = inputFromModel.getLocalResource().getProject();
+		input.setSelection(leftProject, inputFromModel.getDownloadedProject());
 	}
 
 	@Override
@@ -143,13 +158,22 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 	}
 
 	@Override
-	public void dispose() {
-		super.dispose();
-		if (this.diff != null) {
-			this.diff.dispose();
+	public void setVisible(boolean visible) {
+		// Connect the model to the UI only when the page becomes visible.
+		// If this connection is done before, either the UI controls may not yet be created
+		// or the model may not yet be available.
+		if (visible) {
+			AddStartersModel model = factoryModel.getModel().getValue();
+			connectModelToUi(model);
+			model.populateComparison();
 		}
+		super.setVisible(visible);
 	}
 
-
-
+	@Override
+	public void dispose() {
+		super.dispose();
+		AddStartersModel model = factoryModel.getModel().getValue();
+		model.dispose();
+	}
 }
