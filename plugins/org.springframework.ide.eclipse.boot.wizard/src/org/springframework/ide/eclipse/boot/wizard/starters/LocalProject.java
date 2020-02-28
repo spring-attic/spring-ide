@@ -19,7 +19,7 @@ public class LocalProject {
 
 	public LocalProject(IProject project, boolean editable) {
 		this.project = project;
-		this.label = "Local projec:t " + project.getName();
+		this.label = "Local project: " + project.getName();
 		this.editable = editable;
 	}
 
