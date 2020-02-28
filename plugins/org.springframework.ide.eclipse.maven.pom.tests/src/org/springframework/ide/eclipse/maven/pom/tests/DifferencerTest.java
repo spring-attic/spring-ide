@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2020 Pivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    Pivotal, Inc. - initial API and implementation
+ *******************************************************************************/
 package org.springframework.ide.eclipse.maven.pom.tests;
 
 import static org.junit.Assert.assertEquals;
@@ -22,7 +32,7 @@ public class DifferencerTest {
 	
 	@Test
 	public void smokeTest() {
-		String xml1 = "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" + 
+		String xml1 = "<project xmlns=\"https://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"https://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" + 
 				"  <modelVersion>4.0.0</modelVersion>\n" + 
 				"  <parent>\n" + 
 				"    <artifactId>eclipse.platform.team</artifactId>\n" + 
@@ -94,14 +104,14 @@ public class DifferencerTest {
 
 	@Test
 	public void reorderedProjectAttributes() throws Exception {
-		String xml1 = "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" + 
+		String xml1 = "<project xmlns=\"https://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"https://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" + 
 				"  <modelVersion>4.0.0</modelVersion>\n" + 
 				"  <groupId>org.eclipse.compare</groupId>\n" + 
 				"  <artifactId>org.eclipse.compare.examples.xml</artifactId>\n" + 
 				"  <version>3.4.800-SNAPSHOT</version>\n" + 
 				"  <packaging>eclipse-plugin</packaging>\n" +
 				"</project>";
-		String xml2 = "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" + 
+		String xml2 = "<project xmlns=\"https://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"https://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" + 
 				"  <artifactId>org.eclipse.compare.examples.xml</artifactId>\n" + 
 				"  <modelVersion>4.0.0</modelVersion>\n" + 
 				"  <packaging>eclipse-plugin</packaging>\n" + 
@@ -117,7 +127,7 @@ public class DifferencerTest {
 	
 	@Test
 	public void dependecniesReordered() throws Exception {
-		String xml1 = "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" +
+		String xml1 = "<project xmlns=\"https://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"https://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" +
 				"  <dependencies>\n" +
 				"    <dependency>\n" + 
 				"      <groupId>org.springframework.boot</groupId>\n" + 
@@ -133,7 +143,7 @@ public class DifferencerTest {
 				"    </dependency>\n" + 
 				"  </dependencies>\n" +
 				"</project>";
-		String xml2 = "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" + 
+		String xml2 = "<project xmlns=\"https://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"https://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" + 
 				"  <dependencies>\n" +
 				"    <dependency>\n" + 
 				"      <groupId>org.springframework.cloud</groupId>\n" + 

@@ -1,15 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
- *
- * This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License 2.0
+ * Copyright (c) 2020 Pivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
- * https://www.eclipse.org/legal/epl-2.0/
- *
- * SPDX-License-Identifier: EPL-2.0
+ * https://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     IBM Corporation - initial API and implementation
+ *    Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.maven.pom;
 
@@ -33,13 +30,15 @@ import org.eclipse.compare.structuremergeviewer.IStructureCreator;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
-import org.xml.sax.Attributes;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXParseException;
 
 /**
- * This structure analyzer builds a parse tree of an XML document found in a
- * <code>IByteContentAccessor</code> input by calling getStructure(Object)
+ * Implementation is based on the Team XML Compare example
+ * 
+ * @author Alex Boyko
+ *
  */
 public class XMLStructureCreator implements IStructureCreator {
 
@@ -64,7 +63,6 @@ public class XMLStructureCreator implements IStructureCreator {
 		return DEFAULT_NAME;
 	}
 
-
 	/*
 	 * Returns the XML parse tree of the input.
 	 */
@@ -85,8 +83,8 @@ public class XMLStructureCreator implements IStructureCreator {
 			if (contents == null)
 				contents= ""; //$NON-NLS-1$
 			return createStructure(new Document(contents));
-		} catch (CoreException ex) {
-			PomPlugin.log(ex);
+		} catch (CoreException e) {
+			Log.log(e);
 		}
 		return null;
 	}
@@ -108,11 +106,11 @@ public class XMLStructureCreator implements IStructureCreator {
 			
 			return handler.getRoot();
 		} catch (SAXParseException e) {
-			PomPlugin.log(e);
+			Log.log(e);
 			return null;
 		} catch (Exception e) {
 			//				MessageDialog.openError(PomPlugin.getActiveWorkbenchShell(),"Error in XML parser","An error occured in the XML parser.\nNo structured compare can be shown");
-			PomPlugin.log(e);
+			Log.log(e);
 			return null;
 		}
 	}
@@ -209,53 +207,6 @@ public class XMLStructureCreator implements IStructureCreator {
 			}
 		}
 		return null;
-	}
-
-	/* Returns a sorted list of attributes.
-	 */
-	protected Attributes sortAttributes(Attributes attrs) {
-
-		AttributesImpl attributes= new AttributesImpl();
-		int len= (attrs != null) ? attrs.getLength() : 0;
-		for (int i= 0; i < len; i++) {
-			String name= attrs.getQName(i);
-			int count= attributes.getLength();
-			int j= 0;
-			while (j < count) {
-				if (name.compareTo(attributes.getQName(j)) < 0)
-					break;
-				j++;
-			}
-			attributes.insertAttributeAt(j, name, attrs.getType(i), attrs.getValue(i));
-		}
-
-		return attributes;
-
-	}
-
-//	public void setIdMap(String idmap_name) {
-//		fIdMapToUse= idmap_name;
-//	}
-
-	/*
-	 * Returns the name of the IdMap Scheme that will be used to set ids.
-	 */
-//	public String getIdMap() {
-//		return fIdMapToUse;
-//	}
-
-//	public void setUseIdMap() {
-//		if (fIdMaps != null && fIdMapsInternal != null)
-//			fUseIdMap= fIdMaps.containsKey(fIdMapToUse) || fIdMapsInternal.containsKey(fIdMapToUse);
-//	}
-//
-//	public boolean isUseIdMap() {
-//		return fUseIdMap;
-//	}
-
-	public void updateIdMaps() {
-//		fIdMaps= PomPlugin.getDefault().getIdMaps();
-//		fOrderedElements= PomPlugin.getDefault().getOrderedElements();
 	}
 
 	protected boolean isWhiteSpace(char c) {

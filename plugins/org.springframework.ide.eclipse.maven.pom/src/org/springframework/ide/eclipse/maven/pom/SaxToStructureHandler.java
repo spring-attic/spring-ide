@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2020 Pivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    Pivotal, Inc. - initial API and implementation
+ *******************************************************************************/
 package org.springframework.ide.eclipse.maven.pom;
 
 import org.eclipse.core.runtime.Assert;
@@ -9,19 +19,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 public class SaxToStructureHandler extends DefaultHandler {
-	
-//	public enum DOM_TYPES {
-//		ELEMENT,
-//		ATTRIBUTE,
-//		TEXT
-//	}
-//	
-//	private List<DocumentRangeNode> children;
-//	
-//	private DocumentRangeNode structure;
-//	
-//	private Locator locator;
-	
+		
 	private DomStructureComparable.Builder current;
 	private Locator locator;
 	private DomStructureComparable root;
@@ -36,7 +34,6 @@ public class SaxToStructureHandler extends DefaultHandler {
 	@Override
 	public void setDocumentLocator(Locator locator) {
 		this.locator = locator;
-		System.out.println(locator);
 	}
 
 	@Override
@@ -55,7 +52,6 @@ public class SaxToStructureHandler extends DefaultHandler {
 
 	@Override
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-//		System.out.println("Start " + localName + " line: " + locator.getLineNumber() + " column: " + locator.getColumnNumber() + " pid = " + locator.getPublicId() + " sysId = " + locator.getSystemId());
 		current = DomStructureComparable.createElement(document, current, localName);
 		current.start(locator);
 	}
