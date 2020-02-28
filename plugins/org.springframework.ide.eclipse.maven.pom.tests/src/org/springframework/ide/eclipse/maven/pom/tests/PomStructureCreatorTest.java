@@ -26,7 +26,7 @@ public class PomStructureCreatorTest {
 	
 	@Test
 	public void smokeTest() throws BadLocationException {
-		String xml = "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" + 
+		String xml = "<project xmlns=\"https://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"https://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" + 
 				"  <modelVersion>4.0.0</modelVersion>\n" + 
 				"  <parent>\n" + 
 				"    <artifactId>eclipse.platform.team</artifactId>\n" + 
@@ -59,7 +59,7 @@ public class PomStructureCreatorTest {
 	
 	@Test
 	public void domNodeRange_1() throws Exception {
-		String xml = "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" + 
+		String xml = "<project xmlns=\"https://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"https://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" + 
 				"<modelVersion>4.0.0</modelVersion>   \n" + 
 				"</project>";
 		DomStructureComparable result = parse(xml);
@@ -80,7 +80,7 @@ public class PomStructureCreatorTest {
 
 	@Test
 	public void domNodeRange_2() throws Exception {
-		String xml = "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" + 
+		String xml = "<project xmlns=\"https://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"https://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" + 
 				"   <modelVersion>4.0.0</modelVersion>" + 
 				"</project>";
 		DomStructureComparable result = parse(xml);
@@ -101,7 +101,7 @@ public class PomStructureCreatorTest {
 	
 	@Test
 	public void domNodeRange_3() throws Exception {
-		String xml = "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">" + 
+		String xml = "<project xmlns=\"https://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"https://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\">" + 
 				"<modelVersion>4.0.0</modelVersion>  \n" + 
 				"</project>";
 		DomStructureComparable result = parse(xml);
@@ -122,7 +122,7 @@ public class PomStructureCreatorTest {
 	
 	@Test
 	public void domNodeRange_4() throws Exception {
-		String xml = "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" +
+		String xml = "<project xmlns=\"https://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"https://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" +
 				"   \n" + 
 				"  <modelVersion>4.0.0</modelVersion>  \n" + 
 				"</project>";
