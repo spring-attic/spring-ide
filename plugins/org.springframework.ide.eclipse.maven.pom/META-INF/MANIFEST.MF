@@ -1,8 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Pom
+Bundle-Name: Maven POM Compare
 Bundle-SymbolicName: org.springframework.ide.eclipse.maven.pom;singleton:=true
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 3.9.12.qualifier
 Automatic-Module-Name: org.springframework.ide.eclipse.maven.pom
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.eclipse.compare,
@@ -16,3 +16,4 @@ Require-Bundle: org.eclipse.compare,
 Bundle-Activator: org.springframework.ide.eclipse.maven.pom.PomPlugin
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.maven.pom
+Bundle-Vendor: Pivotal Inc.

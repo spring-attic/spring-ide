@@ -1,8 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Tests
+Bundle-Name: Maven POM Compare Tests
 Bundle-SymbolicName: org.springframework.ide.eclipse.maven.pom.tests
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 3.9.12.qualifier
 Automatic-Module-Name: org.springframework.ide.eclipse.maven.pom.tests
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.junit,
@@ -10,3 +10,4 @@ Require-Bundle: org.junit,
  org.springframework.ide.eclipse.maven.pom,
  org.springsource.ide.eclipse.commons.livexp,
  org.eclipse.compare
+Bundle-Vendor: Pivotal Inc.
