@@ -103,6 +103,10 @@ import org.w3c.dom.Element;
 @SuppressWarnings("restriction")
 public class MavenSpringBootProject extends SpringBootProject {
 
+	private static final String JAVA_VERSION = "java.version";
+
+	private static final String MAVEN_PROJECT = "maven-project";
+
 	/**
 	 * Debug flag, may be flipped on temporarily by test code to spy on the output of maven
 	 * execution.
@@ -654,7 +658,7 @@ public class MavenSpringBootProject extends SpringBootProject {
 			List<org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency> initialDependencies)
 			throws Exception {
 		Map<String, Object> parameters = super.pomGenerationParameters(initialDependencies);
-		parameters.put("type", "maven-project");
+		parameters.put("type", MAVEN_PROJECT);
 		parameters.put("language", "java");
 		MavenProject mavenProject = getMavenProject();
 		if (mavenProject != null) {
@@ -663,10 +667,44 @@ public class MavenSpringBootProject extends SpringBootProject {
 			parameters.put("artifactId", mavenProject.getArtifactId());
 			parameters.put("version", mavenProject.getVersion());
 			parameters.put("packaging", mavenProject.getPackaging());
-			parameters.put("javaVerion", mavenProject.getProperties().get("java.version"));
+			parameters.put("javaVerion", mavenProject.getProperties().get(JAVA_VERSION));
 		}
 		return parameters;
 	}
 
+	@Override
+	public String buildType() {
+		return MAVEN_PROJECT;
+	}
+
+	@Override
+	public String artifactId() throws CoreException {
+		MavenProject mavenProject = getMavenProject();
+		return mavenProject == null ? null : mavenProject.getArtifactId();
+	}
+
+	@Override
+	public String groupId() throws CoreException {
+		MavenProject mavenProject = getMavenProject();
+		return mavenProject == null ? null : mavenProject.getGroupId();
+	}
+
+	@Override
+	public String javaVersion() throws CoreException {
+		MavenProject mavenProject = getMavenProject();
+		return mavenProject == null ? null : (String) mavenProject.getProperties().get(JAVA_VERSION);
+	}
+
+	@Override
+	public String version() throws CoreException {
+		MavenProject mavenProject = getMavenProject();
+		return mavenProject == null ? null : mavenProject.getVersion();
+	}
+
+	@Override
+	public String description() throws CoreException {
+		MavenProject mavenProject = getMavenProject();
+		return mavenProject == null ? null : mavenProject.getDescription();
+	}
 
 }

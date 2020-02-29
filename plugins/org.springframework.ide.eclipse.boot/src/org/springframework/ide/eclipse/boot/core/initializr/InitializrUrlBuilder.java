@@ -38,11 +38,37 @@ public class InitializrUrlBuilder {
 
 	private static final String LANGUAGE = "language";
 
+	private static final String DESCRIPTION = "description";
+
+	private static final String GROUP_ID = "groupId";
+
+	private static final String ARTIFACT_ID = "artifactId";
+
+	private static final String JAVA_VERSION = "javaVerion";
+
+	private static final String VERSION = "version";
+
 	private String language = "java"; // Default language
 
 	private List<Dependency> dependencies;
 
-	private ISpringBootProject bootProject;
+	private String groupId;
+
+	private String artifactId;
+
+	private String version;
+
+	private String description;
+
+	private String name;
+
+	private String buildType;
+
+	private String packaging;
+
+	private String bootVersion;
+
+	private String javaVersion;
 
 	private final String initializrUrl;
 
@@ -67,12 +93,20 @@ public class InitializrUrlBuilder {
 
 
 	public InitializrUrlBuilder project(ISpringBootProject bootProject) {
-		this.bootProject = bootProject;
+		try {
+			this.name = bootProject.getProject().getName();
+			this.groupId = bootProject.groupId();
+			this.artifactId = bootProject.artifactId();
+			this.version = bootProject.version();
+			this.description = bootProject.description();
+			this.javaVersion = bootProject.javaVersion();
+			this.bootVersion = bootProject.getBootVersion();
+			this.packaging = bootProject.getPackaging();
+			this.buildType = bootProject.buildType();
+		} catch (CoreException e) {
+			throw new IllegalArgumentException(e);
+		}
 		return this;
-	}
-
-	protected String getBuildType() {
-		return null;
 	}
 
 	public String build() throws Exception {
@@ -80,28 +114,45 @@ public class InitializrUrlBuilder {
 
 		SimpleUriBuilder uriBuilder = new SimpleUriBuilder(baseUrl);
 
-		String name = getName();
-
 		if (name != null) {
 			uriBuilder.addParameter(NAME, name);
 		}
 
-		String buildType = getBuildType();
 		if (buildType != null) {
 			uriBuilder.addParameter(TYPE, buildType);
 		}
 
-		String packaging = getPackaging();
 		if (packaging != null) {
 			uriBuilder.addParameter(PACKAGING, packaging);
 		}
 
-		String bootVersion = getBootVersion();
 		if (bootVersion != null) {
 			uriBuilder.addParameter(BOOT_VERSION, bootVersion);
 		}
 
-		uriBuilder.addParameter(LANGUAGE, language);
+		if (groupId != null) {
+			uriBuilder.addParameter(GROUP_ID, groupId);
+		}
+
+		if (artifactId != null) {
+			uriBuilder.addParameter(ARTIFACT_ID, artifactId);
+		}
+
+		if (version != null) {
+			uriBuilder.addParameter(VERSION, version);
+		}
+
+		if (description != null) {
+			uriBuilder.addParameter(DESCRIPTION, description);
+		}
+
+		if (javaVersion != null) {
+			uriBuilder.addParameter(JAVA_VERSION, javaVersion);
+		}
+
+		if (language != null) {
+			uriBuilder.addParameter(LANGUAGE, language);
+		}
 
 		if (dependencies != null) {
 			for (Dependency dep : dependencies) {
@@ -112,15 +163,49 @@ public class InitializrUrlBuilder {
 		return uriBuilder.toString();
 	}
 
-	private String getBootVersion() {
-		return bootProject != null ? bootProject.getBootVersion() : null;
+	public InitializrUrlBuilder bootVersion(String bootVersion) {
+		this.bootVersion = bootVersion;
+		return this;
 	}
 
-	private String getPackaging() throws CoreException {
-		return bootProject != null ? bootProject.getPackaging() : null;
+	public InitializrUrlBuilder packaging(String packaging) {
+		this.packaging = packaging;
+		return this;
 	}
 
-	private String getName() {
-		return bootProject != null ? bootProject.getProject().getName() : null;
+	public InitializrUrlBuilder name(String name) {
+		this.name = name;
+		return this;
 	}
+
+	public InitializrUrlBuilder buildType(String buildType) {
+		this.buildType = buildType;
+		return this;
+	}
+
+	public InitializrUrlBuilder groupId(String groupId) {
+		this.groupId = groupId;
+		return this;
+	}
+
+	public InitializrUrlBuilder artifactId(String artifactId) {
+		this.artifactId = artifactId;
+		return this;
+	}
+
+	public InitializrUrlBuilder version(String version) {
+		this.version = version;
+		return this;
+	}
+
+	public InitializrUrlBuilder description(String description) {
+		this.description = description;
+		return this;
+	}
+
+	public InitializrUrlBuilder javaVersion(String javaVersion) {
+		this.javaVersion = javaVersion;
+		return this;
+	}
+
 }

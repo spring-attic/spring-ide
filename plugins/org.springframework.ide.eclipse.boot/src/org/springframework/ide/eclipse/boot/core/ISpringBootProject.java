@@ -111,6 +111,18 @@ public interface ISpringBootProject {
 
 	public String getPackaging() throws CoreException;
 
+	public String buildType();
+
+	public String artifactId() throws CoreException;
+
+	public String groupId() throws CoreException;
+
+	public String javaVersion() throws CoreException;
+
+	public String version() throws CoreException;
+
+	public String description() throws CoreException;
+
 	public File executePackagingScript(IProgressMonitor monitor) throws CoreException;
 
 	/**

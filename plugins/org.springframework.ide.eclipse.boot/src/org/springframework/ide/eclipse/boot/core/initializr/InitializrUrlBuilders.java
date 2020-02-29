@@ -10,8 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.core.initializr;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
-import org.springframework.ide.eclipse.boot.core.internal.MavenSpringBootProject;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 /**
  * Factory for creating an Initializr URL builder
@@ -20,10 +23,23 @@ import org.springframework.ide.eclipse.boot.core.internal.MavenSpringBootProject
 public class InitializrUrlBuilders {
 
 	public InitializrUrlBuilder getBuilder(ISpringBootProject bootProject, String initializrUrl) {
-		if (bootProject instanceof MavenSpringBootProject) {
-			return new MavenInitializrUrlBuilder(initializrUrl).project(bootProject);
+		return new InitializrUrlBuilder(initializrUrl) {
+			@Override
+			protected String resolveBaseUrl(String initializrUrl) {
+				String url = super.resolveBaseUrl(initializrUrl);
+				try {
+					URI base = new URI(url);
+					URI resolved = base.resolve("/starter.zip");
+					url = resolved.toString();
+				} catch (URISyntaxException e) {
+					Log.log(e);
+				}
+
+				return url;
+			}
+
 		}
-		return null;
+		.project(bootProject);
 	}
 
 }
