@@ -40,6 +40,36 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 	private Composite contentsContainer;
 	private Control compareViewer = null;
 
+	final private ValueListener<AddStartersCompareResult> compareResultListener = new ValueListener<AddStartersCompareResult>() {
+		@Override
+		public void gotValue(LiveExpression<AddStartersCompareResult> exp, AddStartersCompareResult compareResult) {
+			Display.getDefault().asyncExec(() -> {
+				// Dispose the old viewer if it exists. This is the case of someone click back
+				// button from this page, and
+				// returning again to this page from the previous page
+				if (compareViewer != null) {
+					compareViewer.dispose();
+				}
+				if (compareResult != null) {
+					setupCompareViewer(compareResult);
+				}
+			});
+		}
+	};
+
+	final private ValueListener<AddStartersTrackerState> downloadStateListener = new ValueListener<AddStartersTrackerState>() {
+		@Override
+		public void gotValue(LiveExpression<AddStartersTrackerState> exp, AddStartersTrackerState downloadState) {
+			Display.getDefault().asyncExec(() -> {
+				if (downloadState != null) {
+					setMessage(downloadState.getMessage());
+				} else {
+					setMessage("");
+				}
+			});
+		}
+	};
+
 	public CompareGeneratedAndCurrentPage(InitializrFactoryModel<AddStartersModel> factoryModel) {
 		super("Compare", "Compare local project with generated project from Spring Initializr", null);
 		this.factoryModel = factoryModel;
@@ -54,36 +84,14 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 
 	private void connectModelToUi(AddStartersModel model) {
 		AddStartersCompareModel compareModel = model.getCompareModel();
+		compareModel.getCompareResult().addListener(compareResultListener);
+		compareModel.getDownloadTracker().addListener(downloadStateListener);
+	}
 
-		// Add listener to be notified with compare model is populated
-		compareModel.getCompareResult().addListener(new ValueListener<AddStartersCompareResult>() {
-			@Override
-			public void gotValue(LiveExpression<AddStartersCompareResult> exp, AddStartersCompareResult compareResult) {
-				Display.getDefault().asyncExec(() -> {
-					// Dispose the old viewer if it exists. This is the case of someone click back
-					// button from this page, and
-					// returning again to this page from the previous page
-					if (compareViewer != null) {
-						compareViewer.dispose();
-					}
-					if (compareResult != null) {
-						setupCompareViewer(compareResult);
-					}
-				});
-			}
-		});
-		compareModel.getDownloadTracker().addListener(new ValueListener<AddStartersTrackerState>() {
-			@Override
-			public void gotValue(LiveExpression<AddStartersTrackerState> exp, AddStartersTrackerState downloadState) {
-				Display.getDefault().asyncExec(() -> {
-					if (downloadState != null) {
-						setMessage(downloadState.getMessage());
-					} else {
-						setMessage("");
-					}
-				});
-			}
-		});
+	private void disconnectFromUi(AddStartersModel model) {
+		AddStartersCompareModel compareModel = model.getCompareModel();
+		compareModel.getCompareResult().removeListener(compareResultListener);
+		compareModel.getDownloadTracker().removeListener(downloadStateListener);
 	}
 
 	private void setupCompareViewer(AddStartersCompareResult compareResult) {
@@ -164,10 +172,14 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 		// Connect the model to the UI only when the page becomes visible.
 		// If this connection is done before, either the UI controls may not yet be created
 		// or the model may not yet be available.
+		AddStartersModel model = factoryModel.getModel().getValue();
 		if (visible) {
-			AddStartersModel model = factoryModel.getModel().getValue();
+			model.getCompareModel().initTrackers();
 			connectModelToUi(model);
 			model.populateComparison();
+		} else {
+			disconnectFromUi(model);
+			model.getCompareModel().disposeTrackers();
 		}
 		super.setVisible(visible);
 	}

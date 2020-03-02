@@ -37,13 +37,23 @@ public class AddStartersCompareModel implements Disposable {
 
 	private final ISpringBootProject bootProject;
 	private final InitializrProjectDownloader projectDownloader;
-	protected final LiveVariable<AddStartersCompareResult> compareInputModel = new LiveVariable<>(null);
-	protected final LiveVariable<AddStartersTrackerState> downloadTracker = new LiveVariable<>(
+	private LiveVariable<AddStartersCompareResult> compareInputModel = new LiveVariable<>(null);
+	private LiveVariable<AddStartersTrackerState> downloadTracker = new LiveVariable<>(
 			AddStartersTrackerState.NOT_STARTED);
 
 	public AddStartersCompareModel(InitializrProjectDownloader projectDownloader, ISpringBootProject bootProject) {
 		this.bootProject = bootProject;
 		this.projectDownloader = projectDownloader;
+	}
+
+	public void initTrackers() {
+		compareInputModel = new LiveVariable<>(null);
+		downloadTracker = new LiveVariable<>(AddStartersTrackerState.NOT_STARTED);
+	}
+
+	public void disposeTrackers() {
+		this.compareInputModel.dispose();
+		this.downloadTracker.dispose();
 	}
 
 	public LiveExpression<AddStartersCompareResult> getCompareResult() {
@@ -56,8 +66,8 @@ public class AddStartersCompareModel implements Disposable {
 
 	@Override
 	public void dispose() {
+		disposeTrackers();
 		this.projectDownloader.dispose();
-		this.compareInputModel.dispose();
 	}
 
 	public void downloadProject(List<Dependency> dependencies) {
