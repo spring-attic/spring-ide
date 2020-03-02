@@ -47,12 +47,6 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 		@Override
 		public void gotValue(LiveExpression<AddStartersCompareResult> exp, AddStartersCompareResult compareResult) {
 			Display.getDefault().asyncExec(() -> {
-				// Dispose the old viewer if it exists. This is the case of someone click back
-				// button from this page, and
-				// returning again to this page from the previous page
-				if (compareViewer != null) {
-					compareViewer.dispose();
-				}
 				if (compareResult != null) {
 					setupCompareViewer(compareResult);
 				}
@@ -186,6 +180,9 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 		} else {
 			disconnectFromUi(model);
 			model.getCompareModel().disposeTrackers();
+			if (compareViewer != null) {
+				compareViewer.dispose();
+			}
 		}
 		super.setVisible(visible);
 	}
