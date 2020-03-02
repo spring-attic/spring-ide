@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.function.Predicate;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -51,6 +52,7 @@ import org.eclipse.swt.graphics.Image;
  *
  * @since 2.0
  */
+@SuppressWarnings("restriction")
 public class ZipFileStructureCreator implements IStructureCreator {
 
 	/**
@@ -95,7 +97,7 @@ public class ZipFileStructureCreator implements IStructureCreator {
 	 * Add Starters: Changed for use in Add Starters wizard to filter out folders
 	 *
 	 */
-	static class ZipFolder extends ZipResource {
+	class ZipFolder extends ZipResource {
 
 		private HashMap<String, ZipResource> fChildren= new HashMap<>(10);
 
@@ -126,8 +128,6 @@ public class ZipFileStructureCreator implements IStructureCreator {
 				entry= path.substring(0, pos);
 				path= path.substring(pos + 1);
 			} else if (entry.length() > 0) {
-//				if (CompareUIPlugin.getDefault().filter(path, false, true))
-//					return null;
 				ZipFile ze= new ZipFile(entry);
 				fChildren.put(entry, ze);
 				return ze;
@@ -136,16 +136,16 @@ public class ZipFileStructureCreator implements IStructureCreator {
 
 			ZipFolder folder= null;
 			if (fChildren != null) {
-				Object o= fChildren.get(entry);
+				ZipResource o= fChildren.get(entry);
 				if (o instanceof ZipFolder)
 					folder= (ZipFolder) o;
 			}
 
 			if (folder == null) {
-//				if (path.length() > 0 && CompareUIPlugin.getDefault().filter(path, true, true))
+				if (path.length() > 0)
 					return null;
-//				folder= new ZipFolder(entry);
-//				fChildren.put(entry, folder);
+				folder= new ZipFolder(entry);
+				fChildren.put(entry, folder);
 			}
 
 			return folder.createContainer(path);
@@ -204,12 +204,13 @@ public class ZipFileStructureCreator implements IStructureCreator {
 	}
 
 	private String fTitle;
+	final private Predicate<String> filter;
 
 	/**
 	 * Create a new ZipFileStructureCreator.
 	 */
-	public ZipFileStructureCreator() {
-		this(Utilities.getString("ZipStructureCreator.name")); //$NON-NLS-1$
+	public ZipFileStructureCreator(Predicate<String> filter) {
+		this(Utilities.getString("ZipStructureCreator.name"), filter); //$NON-NLS-1$
 	}
 
 	/**
@@ -217,8 +218,9 @@ public class ZipFileStructureCreator implements IStructureCreator {
 	 * The title is returned by the method <code>getName()</code>.
 	 * @param title the title of this structure creator
 	 */
-	public ZipFileStructureCreator(String title) {
+	public ZipFileStructureCreator(String title, Predicate<String> filter) {
 		fTitle= title;
+		this.filter = filter;
 	}
 
 	@Override
@@ -251,29 +253,32 @@ public class ZipFileStructureCreator implements IStructureCreator {
 				if (entry == null)
 					break;
 
-				ZipFile ze= root.createContainer(entry.getName());
-				if (ze != null) {
-					int length= (int) entry.getSize();
-					if (length >= 0) {
-						byte[] buffer= new byte[length];
-						int offset= 0;
+				if (filter == null || filter.test(entry.getName())) {
+					ZipFile ze= root.createContainer(entry.getName());
+					if (ze != null) {
+						int length= (int) entry.getSize();
+						if (length >= 0) {
+							byte[] buffer= new byte[length];
+							int offset= 0;
 
-						do {
-							int n= zip.read(buffer, offset, length);
-							offset += n;
-							length -= n;
-						} while (length > 0);
+							do {
+								int n= zip.read(buffer, offset, length);
+								offset += n;
+								length -= n;
+							} while (length > 0);
 
-						ze.setBytes(buffer);
-					} else {
-						byte[] buffer= new byte[1024];
-						int n;
-						do {
-							n= zip.read(buffer, 0, 1024);
-							ze.appendBytes(buffer, n);
-						} while (n >= 0);
+							ze.setBytes(buffer);
+						} else {
+							byte[] buffer= new byte[1024];
+							int n;
+							do {
+								n= zip.read(buffer, 0, 1024);
+								ze.appendBytes(buffer, n);
+							} while (n >= 0);
+						}
 					}
 				}
+
 				zip.closeEntry();
 			}
 		} catch (IOException ex) {

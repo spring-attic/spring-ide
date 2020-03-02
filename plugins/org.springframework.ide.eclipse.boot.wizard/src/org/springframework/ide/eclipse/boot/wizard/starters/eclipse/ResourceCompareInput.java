@@ -29,6 +29,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.compare.CompareEditorInput;
@@ -74,11 +75,10 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import com.google.common.io.Files;
 
-
-
 /**
  * A two-way or three-way compare for arbitrary IResources.
  */
+@SuppressWarnings("restriction")
 public class ResourceCompareInput extends CompareEditorInput {
 
 	private static final boolean NORMALIZE_CASE= true;
@@ -93,6 +93,8 @@ public class ResourceCompareInput extends CompareEditorInput {
 	private IResource fRightResource;
 	private DiffTreeViewer fDiffViewer;
 	private IAction fOpenAction;
+
+	final private Predicate<String> filter;
 
 	class MyDiffNode extends DiffNode {
 
@@ -134,16 +136,15 @@ public class ResourceCompareInput extends CompareEditorInput {
 		}
 	}
 
-	static class FilteredBufferedResourceNode extends BufferedResourceNode {
+	class FilteredBufferedResourceNode extends BufferedResourceNode {
 		FilteredBufferedResourceNode(IResource resource) {
 			super(resource);
 		}
 		@Override
 		protected IStructureComparator createChild(IResource child) {
-			String name= child.getName();
-//			if (CompareUIPlugin.getDefault().filter(name, child instanceof IContainer, false))
-//				return null;
-			if (child.getType() == IResource.FILE) {
+			String path = child.getType() == IResource.FILE ? child.getProjectRelativePath().toString()
+					: child.getProjectRelativePath().addTrailingSeparator().toString();
+			if (filter == null || filter.test(path)) {
 				return new FilteredBufferedResourceNode(child);
 			}
 			return null;
@@ -153,8 +154,9 @@ public class ResourceCompareInput extends CompareEditorInput {
 	/*
 	 * Creates an compare editor input for the given selection.
 	 */
-	public ResourceCompareInput(CompareConfiguration config) {
+	public ResourceCompareInput(CompareConfiguration config, Predicate<String> filter) {
 		super(config);
+		this.filter = filter;
 	}
 
 	@Override
@@ -289,15 +291,15 @@ public class ResourceCompareInput extends CompareEditorInput {
 //		fRight= getStructure(fRightResource);
 //		return true;
 //	}
-
-	private boolean checkSelection(IResource[] resources) {
-		for (IResource resource : resources) {
-			if (resource == null) {
-				return false;
-			}
-		}
-		return true;
-	}
+//
+//	private boolean checkSelection(IResource[] resources) {
+//		for (IResource resource : resources) {
+//			if (resource == null) {
+//				return false;
+//			}
+//		}
+//		return true;
+//	}
 
 	/*
 	 * Returns true if compare can be executed for the given selection.
@@ -383,13 +385,13 @@ public class ResourceCompareInput extends CompareEditorInput {
 				IFile file= (IFile) input;
 				String type= normalizeCase(file.getFileExtension());
 				if ("JAR".equals(type) || "ZIP".equals(type)) //$NON-NLS-2$ //$NON-NLS-1$
-					return new ZipFileStructureCreator().getStructure(rn);
+					return new ZipFileStructureCreator(filter).getStructure(rn);
 				return rn;
 			}
 		} else if (objInp instanceof File) {
 			File file = (File) objInp;
 			if ("zip".equalsIgnoreCase(Files.getFileExtension(file.getName()))) {
-				return new ZipFileStructureCreator().getStructure(new IStreamContentAccessor() {
+				return new ZipFileStructureCreator(filter).getStructure(new IStreamContentAccessor() {
 
 					@Override
 					public InputStream getContents() throws CoreException {
@@ -439,6 +441,12 @@ public class ResourceCompareInput extends CompareEditorInput {
 			Differencer d= new Differencer() {
 				@Override
 				protected Object visit(Object parent, int description, Object ancestor, Object left, Object right) {
+					/*
+					 * If right side is 'null' then it is a removal on the left. Ignore all such changes!
+					 */
+					if (right == null) {
+						return null;
+					}
 					return new MyDiffNode((IDiffContainer) parent, description, (ITypedElement)ancestor, (ITypedElement)left, (ITypedElement)right);
 				}
 			};
