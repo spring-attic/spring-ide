@@ -32,6 +32,7 @@ public class DomStructureComparable implements IStructureComparator, IDocumentRa
 	private DomStructureComparable[] children;
 	private Object id;
 	private String name;
+	private DomStructureComparable parent;
 
 	public enum DomType {
 		ROOT,
@@ -115,6 +116,9 @@ public class DomStructureComparable implements IStructureComparator, IDocumentRa
 		this.document = document;
 		this.range = range;
 		this.children = children;
+		for (DomStructureComparable child : children) {
+			child.parent = this;
+		}
 	}
 
 	@Override
@@ -256,6 +260,10 @@ public class DomStructureComparable implements IStructureComparator, IDocumentRa
 		} catch (BadLocationException e) {
 			throw ExceptionUtil.unchecked(e);
 		}
+	}
+
+	public DomStructureComparable getParent() {
+		return parent;
 	}
 
 }

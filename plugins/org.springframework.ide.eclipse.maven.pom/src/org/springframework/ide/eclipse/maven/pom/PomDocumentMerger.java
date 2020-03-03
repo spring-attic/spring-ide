@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.maven.pom;
 
+import static org.springframework.ide.eclipse.maven.pom.PomDocumentDiffer.differenceDirections;
+import static org.springframework.ide.eclipse.maven.pom.PomDocumentDiffer.ignorePath;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -52,7 +55,13 @@ public class PomDocumentMerger extends DocumentMerger {
 		boolean ignoreWhiteSpace = true;
 		
 		
-		List<Difference> diffNodes = PomDocumentDiffer.create(lDoc, rDoc).filter(PomDocumentDiffer.differenceDirections(Direction.LEFT)).getDiffs();
+		List<Difference> diffNodes = PomDocumentDiffer.create(lDoc, rDoc)
+				.filter(differenceDirections(Direction.LEFT)
+						.and(ignorePath("project", "name"))
+						.and(ignorePath("project", "description"))
+						.and(ignorePath("project", "parent", "relativePath"))
+				)
+			.getDiffs();
 		
 		for (Difference d : diffNodes) {
 				Diff difference = null;

@@ -53,13 +53,13 @@ public class XmlDocumentDiffer {
 		
 		if (leftStructure == null && rightStructure != null) {
 			List<Difference> diffs = new ArrayList<>();
-			diffs.add(new Difference(Direction.LEFT, new Position(0, 0), new Position(0, rDoc.getLength())));
+			diffs.add(new Difference(Direction.LEFT, new Position(0, 0), new Position(0, rDoc.getLength()), leftStructure, rightStructure));
 			return diffs;
 		}
 
 		if (leftStructure != null && rightStructure == null) {
 			List<Difference> diffs = new ArrayList<>();
-			diffs.add(new Difference(Direction.RIGHT, new Position(0, lDoc.getLength()), new Position(0, 0)));
+			diffs.add(new Difference(Direction.RIGHT, new Position(0, lDoc.getLength()), new Position(0, 0), leftStructure, rightStructure));
 			return diffs;
 		}
 		
@@ -104,17 +104,17 @@ public class XmlDocumentDiffer {
 			Position insertLocation;
 			switch (diffNode.getKind() & Differencer.CHANGE_TYPE_MASK) {
 			case Differencer.CHANGE:
-				difference = new Difference(Direction.BOTH, left.getRange(), right.getRange());
+				difference = new Difference(Direction.BOTH, left.getRange(), right.getRange(), left, right);
 				break;
 			case Differencer.ADDITION:
 				parentNode = (DiffNode) diffNode.getParent();
 				insertLocation = parentNode == null ? new Position(lDoc.getLength(), 0) : insertPosition((DomStructureComparable)parentNode.getLeft());
-				difference = new Difference(Direction.LEFT, insertLocation, right.getRange());
+				difference = new Difference(Direction.LEFT, insertLocation, right.getRange(), left, right);
 				break;
 			case Differencer.DELETION:
 				parentNode = (DiffNode) diffNode.getParent();
 				insertLocation = parentNode == null ? new Position(rDoc.getLength(), 0) : insertPosition((DomStructureComparable)parentNode.getRight());
-				difference = new Difference(Direction.RIGHT, left.getRange(), insertLocation);
+				difference = new Difference(Direction.RIGHT, left.getRange(), insertLocation, left, right);
 				break;
 			}
 			if (this.filter.test(difference)) {
@@ -148,7 +148,7 @@ public class XmlDocumentDiffer {
 			Position leftChange = leftChanges.get(i);
 			Position rightChange = rightChanges.get(i);
 			allDiffs.add(new Difference(Direction.NONE, new Position(prevLeftEnd, leftChange.offset - prevLeftEnd),
-					new Position(prevRightEnd, rightChange.offset - prevRightEnd)));
+					new Position(prevRightEnd, rightChange.offset - prevRightEnd), null, null));
 			prevLeftEnd = leftChange.offset + leftChange.length;
 			prevRightEnd = rightChange.offset + rightChange.length;
 		}
@@ -156,7 +156,9 @@ public class XmlDocumentDiffer {
 			allDiffs.add(new Difference(
 				Direction.NONE,
 				new Position(prevLeftEnd, lDoc.getLength() - prevLeftEnd),
-				new Position(prevRightEnd, rDoc.getLength() - prevRightEnd)
+				new Position(prevRightEnd, rDoc.getLength() - prevRightEnd),
+				null,
+				null
 			));
 		}
 		
@@ -208,10 +210,14 @@ public class XmlDocumentDiffer {
 		final public Direction direction;
 		final public Position leftRange;
 		final public Position rightRange;
-		public Difference(Direction direction, Position leftRange, Position rightRange) {
+		final public DomStructureComparable leftComparable;
+		final public DomStructureComparable rightComparable;
+		public Difference(Direction direction, Position leftRange, Position rightRange, DomStructureComparable left, DomStructureComparable right) {
 			this.direction = direction;
 			this.leftRange = leftRange;
 			this.rightRange = rightRange;
+			this.leftComparable = left;
+			this.rightComparable = right;
 		} 
 	}
 	

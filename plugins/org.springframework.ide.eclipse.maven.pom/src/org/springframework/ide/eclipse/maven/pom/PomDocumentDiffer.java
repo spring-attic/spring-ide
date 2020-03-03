@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.function.Predicate;
 
 import org.eclipse.jface.text.IDocument;
+import org.springframework.ide.eclipse.maven.pom.DomStructureComparable.DomType;
 import org.springframework.ide.eclipse.maven.pom.XmlDocumentDiffer.Difference;
 import org.springframework.ide.eclipse.maven.pom.XmlDocumentDiffer.Direction;
 
@@ -39,6 +40,38 @@ public class PomDocumentDiffer {
 			@Override
 			public boolean test(Difference t) {
 				return Arrays.asList(directions).contains(t.direction);
+			}
+			
+		};
+	}
+	
+	public static Predicate<Difference> ignorePath(String... path) {
+		return new Predicate<Difference>() {
+
+			@Override
+			public boolean test(Difference t) {
+				if (t.leftComparable != null) {
+					return !samePath(t.leftComparable);
+				}
+				if (t.rightComparable != null) {
+					return !samePath(t.rightComparable);
+				}
+				return true;
+			}
+			
+			private boolean samePath(DomStructureComparable structure) {
+				for (int i = path.length - 1; i >= 0; i--) {
+					if (structure == null || structure.getDomType() == DomType.ROOT) {
+						return false;
+					} else {
+						if (path[i].equals(structure.getName())) {
+							structure = structure.getParent();
+						} else {
+							return false;
+						}
+					}
+				}
+				return true;
 			}
 			
 		};

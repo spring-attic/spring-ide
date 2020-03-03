@@ -11,8 +11,10 @@
 package org.springframework.ide.eclipse.maven.pom.tests;
 
 import static org.junit.Assert.assertEquals;
+import static org.springframework.ide.eclipse.maven.pom.PomDocumentDiffer.ignorePath;
 
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -497,6 +499,7 @@ public class DifferencerTest {
 			// none
 		);
 	}
+	
 	@Test
 	public void shuffleExclusionsAndAttributes() throws Exception {
 		String xml1 = "<project>\n" +
@@ -581,6 +584,77 @@ public class DifferencerTest {
 		);
 	}
 	
+	@Test
+	public void ignoreRelativePath() {
+		String xml1 = "<project xmlns=\"https://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"https://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" + 
+				"  <modelVersion>4.0.0</modelVersion>\n" + 
+				"  <parent>\n" + 
+				"    <artifactId>eclipse.platform.team</artifactId>\n" + 
+				"    <groupId>eclipse.platform.team</groupId>\n" + 
+				"    <version>4.15.0-SNAPSHOT</version>\n" + 
+				"    <relativePath>../../</relativePath>\n" + 
+				"  </parent>\n" + 
+				"  <groupId>org.eclipse.compare</groupId>\n" + 
+				"  <artifactId>org.eclipse.compare.examples.xml</artifactId>\n" + 
+				"  <version>3.4.800-SNAPSHOT</version>\n" + 
+				"  <packaging>eclipse-plugin</packaging>\n" + 
+				"</project>";
+		String xml2 = "<project xmlns=\"https://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"https://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" + 
+				"  <modelVersion>4.0.0</modelVersion>\n" + 
+				"  <parent>\n" + 
+				"    <artifactId>eclipse.platform.team</artifactId>\n" + 
+				"    <groupId>eclipse.platform.team</groupId>\n" + 
+				"    <version>4.15.0-SNAPSHOT</version>\n" + 
+				"  </parent>\n" + 
+				"  <groupId>org.eclipse.compare</groupId>\n" + 
+				"  <artifactId>org.eclipse.compare.examples.xml</artifactId>\n" + 
+				"  <version>3.4.800-SNAPSHOT</version>\n" + 
+				"  <packaging>eclipse-plugin</packaging>\n" + 
+				"</project>";
+		
+		List<Difference> differences = calculateDiffs(xml1, xml2, differ -> differ.filter(ignorePath("project", "parent", "relativePath")));
+		assertDiffs(differences
+			// None
+		);
+	}
+	
+	@Test
+	public void ignoreNameAndDescription() {
+		String xml1 = "<project xmlns=\"https://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"https://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" + 
+				"  <modelVersion>4.0.0</modelVersion>\n" + 
+				"  <parent>\n" + 
+				"    <artifactId>eclipse.platform.team</artifactId>\n" + 
+				"    <groupId>eclipse.platform.team</groupId>\n" + 
+				"    <version>4.15.0-SNAPSHOT</version>\n" + 
+				"    <relativePath>../../</relativePath>\n" + 
+				"  </parent>\n" + 
+				"  <name>Compare UI</name>\n" + 
+				"  <groupId>org.eclipse.compare</groupId>\n" + 
+				"  <artifactId>org.eclipse.compare.examples.xml</artifactId>\n" + 
+				"  <version>3.4.800-SNAPSHOT</version>\n" + 
+				"  <packaging>eclipse-plugin</packaging>\n" + 
+				"  <description>Eclipse plugin for Compare UI</description>\n" + 
+				"</project>";
+		String xml2 = "<project xmlns=\"https://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"https://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" + 
+				"  <modelVersion>4.0.0</modelVersion>\n" + 
+				"  <parent>\n" + 
+				"    <artifactId>eclipse.platform.team</artifactId>\n" + 
+				"    <groupId>eclipse.platform.team</groupId>\n" + 
+				"    <version>4.15.0-SNAPSHOT</version>\n" + 
+				"    <relativePath>../../</relativePath>\n" + 
+				"  </parent>\n" + 
+				"  <groupId>org.eclipse.compare</groupId>\n" + 
+				"  <artifactId>org.eclipse.compare.examples.xml</artifactId>\n" + 
+				"  <version>3.4.800-SNAPSHOT</version>\n" + 
+				"  <packaging>eclipse-plugin</packaging>\n" + 
+				"</project>";
+		
+		List<Difference> differences = calculateDiffs(xml1, xml2, differ -> differ.filter(ignorePath("project", "name").and(ignorePath("project", "description"))));
+		assertDiffs(differences
+			// None
+		);
+	}
+	
 	private ExpectedDiff gap(String string) {
 		return new ExpectedDiff(Direction.NONE, string, string);
 	}
@@ -631,6 +705,12 @@ public class DifferencerTest {
 
 	private List<Difference> calculateDiffs(String xml1, String xml2) {
 		XmlDocumentDiffer differ = PomDocumentDiffer.create(leftDoc = new Document(xml1), rightDoc = new Document(xml2));
+		return differ.getDiffs();
+	}
+	
+	private List<Difference> calculateDiffs(String xml1, String xml2, Consumer<XmlDocumentDiffer> configureDiffer) {
+		XmlDocumentDiffer differ = PomDocumentDiffer.create(leftDoc = new Document(xml1), rightDoc = new Document(xml2));
+		configureDiffer.accept(differ);
 		return differ.getDiffs();
 	}
 	
