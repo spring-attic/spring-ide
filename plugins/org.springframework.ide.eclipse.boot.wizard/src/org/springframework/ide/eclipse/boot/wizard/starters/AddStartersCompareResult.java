@@ -39,9 +39,9 @@ public class AddStartersCompareResult {
 
 	public CompareConfiguration getConfiguration() {
 		CompareConfiguration config = new CompareConfiguration();
-		config.setLeftLabel(localResource.getLabel());
-		config.setRightLabel("Spring Initializr: " + downloadedProject.getName());
-		config.setLeftEditable(localResource.isEditable());
+		config.setLeftLabel("Spring Initializr: " + downloadedProject.getName());
+		config.setRightLabel(localResource.getLabel());
+		config.setRightEditable(localResource.isEditable());
 		return config;
 	}
 

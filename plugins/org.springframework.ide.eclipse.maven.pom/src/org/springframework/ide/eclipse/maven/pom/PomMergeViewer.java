@@ -38,7 +38,7 @@ public class PomMergeViewer extends TextMergeViewer {
 		super(parent, style, configuration);
 		if (Boolean.TRUE.equals(configuration.getProperty(PomPlugin.POM_STRUCTURE_ADDITIONS_COMPARE_SETTING))) {
 			DocumentMerger original = getDocumentMerger();
-			PomDocumentMerger pomMerger = new PomDocumentMerger(getInputFromMerger(original));
+			PomDocumentMerger pomMerger = new PomDocumentMerger(getInputFromMerger(original), configuration);
 			setDocumentMerger(pomMerger);
 		}
 	}

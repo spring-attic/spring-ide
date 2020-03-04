@@ -19,6 +19,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.compare.internal.MergeViewerContentProvider;
 import org.eclipse.compare.internal.merge.DocumentMerger;
 import org.eclipse.compare.rangedifferencer.RangeDifference;
@@ -33,8 +34,11 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 @SuppressWarnings("restriction")
 public class PomDocumentMerger extends DocumentMerger {
 	
-	public PomDocumentMerger(IDocumentMergerInput input) {
+	private CompareConfiguration configuration;
+
+	public PomDocumentMerger(IDocumentMergerInput input, CompareConfiguration configuration) {
 		super(input);
+		this.configuration = configuration;
 	}
 	
 	private ArrayList<Diff> calculateDiffs() {
@@ -56,7 +60,7 @@ public class PomDocumentMerger extends DocumentMerger {
 		
 		
 		List<Difference> diffNodes = PomDocumentDiffer.create(lDoc, rDoc)
-				.filter(differenceDirections(Direction.LEFT)
+				.filter(differenceDirections(configuration.isMirrored() ? Direction.LEFT : Direction.RIGHT)
 						.and(ignorePath("project", "name"))
 						.and(ignorePath("project", "description"))
 						.and(ignorePath("project", "parent", "relativePath"))

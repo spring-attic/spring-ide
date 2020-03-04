@@ -65,6 +65,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -81,6 +82,112 @@ import com.google.common.io.Files;
 @SuppressWarnings("restriction")
 public class ResourceCompareInput extends CompareEditorInput {
 
+	public interface ResourceDescriptor {
+		String name();
+		String tooltipPathLabel();
+		Image image();
+		String label();
+		default void prepare(IProgressMonitor pm) throws CoreException {};
+		IStructureComparator structure(Predicate<String> filter);
+	}
+
+	public static ResourceDescriptor fromWorkspaceResource(IResource r) {
+		return new ResourceDescriptor() {
+
+			@Override
+			public String name() {
+				return r.getName();
+			}
+
+			@Override
+			public String tooltipPathLabel() {
+				return r.getFullPath().makeRelative().toString();
+			}
+
+			@Override
+			public String label() {
+				// for a linked resource in a hidden project use its local file system location
+				if (r.isLinked() && r.getProject().isHidden())
+					return r.getLocation().toString();
+				String n= r.getFullPath().toString();
+				if (n.charAt(0) == IPath.SEPARATOR)
+					return n.substring(1);
+				return n;
+			}
+
+			@Override
+			public Image image() {
+				return CompareUIPlugin.getImage(r);
+			}
+
+			@Override
+			public void prepare(IProgressMonitor pm) throws CoreException {
+				r.refreshLocal(IResource.DEPTH_INFINITE, pm);
+			}
+
+			@Override
+			public IStructureComparator structure(Predicate<String> filter) {
+				if (r instanceof IContainer)
+					return new FilteredBufferedResourceNode(r, filter);
+
+				if (r instanceof IFile) {
+					IStructureComparator rn= new FilteredBufferedResourceNode(r, filter);
+					IFile file= (IFile) r;
+					String type= normalizeCase(file.getFileExtension());
+					if ("JAR".equals(type) || "ZIP".equals(type)) //$NON-NLS-2$ //$NON-NLS-1$
+						return new ZipFileStructureCreator(filter).getStructure(rn);
+					return rn;
+				}
+				return null;
+			}
+
+		};
+	}
+
+	public static ResourceDescriptor fromFile(File f) {
+		return new ResourceDescriptor() {
+
+			@Override
+			public String name() {
+				return f.getName();
+			}
+
+			@Override
+			public String tooltipPathLabel() {
+				return f.getAbsolutePath();
+			}
+
+			@Override
+			public Image image() {
+				return null;
+			}
+
+			@Override
+			public String label() {
+				return f.getAbsolutePath();
+			}
+
+			@Override
+			public IStructureComparator structure(Predicate<String> filter) {
+				if ("zip".equalsIgnoreCase(Files.getFileExtension(f.getName()))) {
+					return new ZipFileStructureCreator(filter).getStructure(new IStreamContentAccessor() {
+
+						@Override
+						public InputStream getContents() throws CoreException {
+							try {
+								return new FileInputStream(f);
+							} catch (FileNotFoundException e) {
+								throw ExceptionUtil.unchecked(e);
+							}
+						}
+					});
+				}
+				return null;
+			}
+
+		};
+	}
+
 	private static final boolean NORMALIZE_CASE= true;
 
 	private boolean fThreeWay= false;
@@ -89,8 +196,8 @@ public class ResourceCompareInput extends CompareEditorInput {
 	private IStructureComparator fLeft;
 	private IStructureComparator fRight;
 	private IResource fAncestorResource;
-	private IResource fLeftResource;
-	private IResource fRightResource;
+	private ResourceDescriptor fLeftResource;
+	private ResourceDescriptor fRightResource;
 	private DiffTreeViewer fDiffViewer;
 	private IAction fOpenAction;
 
@@ -136,16 +243,18 @@ public class ResourceCompareInput extends CompareEditorInput {
 		}
 	}
 
-	class FilteredBufferedResourceNode extends BufferedResourceNode {
-		FilteredBufferedResourceNode(IResource resource) {
+	static class FilteredBufferedResourceNode extends BufferedResourceNode {
+		private Predicate<String> filter;
+		FilteredBufferedResourceNode(IResource resource, Predicate<String> filter) {
 			super(resource);
+			this.filter = filter;
 		}
 		@Override
 		protected IStructureComparator createChild(IResource child) {
 			String path = child.getType() == IResource.FILE ? child.getProjectRelativePath().toString()
 					: child.getProjectRelativePath().addTrailingSeparator().toString();
 			if (filter == null || filter.test(path)) {
-				return new FilteredBufferedResourceNode(child);
+				return new FilteredBufferedResourceNode(child, filter);
 			}
 			return null;
 		}
@@ -257,7 +366,7 @@ public class ResourceCompareInput extends CompareEditorInput {
 	// showSelectAncestorDialog flag it uses different dialogs to get the
 	// feedback from the user. Returns false if the user cancels the prompt,
 	// true otherwise.
-	public boolean setSelection(IResource left, File right) {
+	public boolean setSelection(ResourceDescriptor left, ResourceDescriptor right) {
 
 		fLeftResource= left;
 		fRightResource= left;
@@ -329,16 +438,16 @@ public class ResourceCompareInput extends CompareEditorInput {
 		CompareConfiguration cc= getCompareConfiguration();
 		if (fLeftResource != null) {
 			cc.setLeftLabel(buildLabel(fLeftResource));
-			cc.setLeftImage(CompareUIPlugin.getImage(fLeftResource));
+			cc.setLeftImage(fLeftResource.image());
 		}
 		if (fRightResource != null) {
 			cc.setRightLabel(buildLabel(fRightResource));
-			cc.setRightImage(CompareUIPlugin.getImage(fRightResource));
+			cc.setRightImage(fRightResource.image());
 		}
-		if (fThreeWay && fAncestorResource != null) {
-			cc.setAncestorLabel(buildLabel(fAncestorResource));
-			cc.setAncestorImage(CompareUIPlugin.getImage(fAncestorResource));
-		}
+//		if (fThreeWay && fAncestorResource != null) {
+//			cc.setAncestorLabel(buildLabel(fAncestorResource));
+//			cc.setAncestorImage(CompareUIPlugin.getImage(fAncestorResource));
+//		}
 	}
 
 	/*
@@ -373,39 +482,8 @@ public class ResourceCompareInput extends CompareEditorInput {
 	 * Returns <code>null</code> if no <code>IStructureComparator</code>
 	 * can be found for the <code>IResource</code>.
 	 */
-	private IStructureComparator getStructure(Object objInp) {
-
-		if (objInp instanceof IResource) {
-			IResource input = (IResource) objInp;
-			if (input instanceof IContainer)
-				return new FilteredBufferedResourceNode(input);
-
-			if (input instanceof IFile) {
-				IStructureComparator rn= new FilteredBufferedResourceNode(input);
-				IFile file= (IFile) input;
-				String type= normalizeCase(file.getFileExtension());
-				if ("JAR".equals(type) || "ZIP".equals(type)) //$NON-NLS-2$ //$NON-NLS-1$
-					return new ZipFileStructureCreator(filter).getStructure(rn);
-				return rn;
-			}
-		} else if (objInp instanceof File) {
-			File file = (File) objInp;
-			if ("zip".equalsIgnoreCase(Files.getFileExtension(file.getName()))) {
-				return new ZipFileStructureCreator(filter).getStructure(new IStreamContentAccessor() {
-
-					@Override
-					public InputStream getContents() throws CoreException {
-						try {
-							return new FileInputStream(file);
-						} catch (FileNotFoundException e) {
-							throw ExceptionUtil.unchecked(e);
-						}
-					}
-				});
-			}
-		}
-
-		return null;
+	private IStructureComparator getStructure(ResourceDescriptor r) {
+		return r.structure(filter);
 	}
 
 	/*
@@ -416,16 +494,16 @@ public class ResourceCompareInput extends CompareEditorInput {
 
 		try {
 			// fix for PR 1GFMLFB: ITPUI:WIN2000 - files that are out of sync with the file system appear as empty
-			fLeftResource.refreshLocal(IResource.DEPTH_INFINITE, pm);
-			fRightResource.refreshLocal(IResource.DEPTH_INFINITE, pm);
+			fLeftResource.prepare(pm);;
+			fRightResource.prepare(pm);;
 			if (fThreeWay && fAncestorResource != null)
 				fAncestorResource.refreshLocal(IResource.DEPTH_INFINITE, pm);
 			// end fix
 
 			pm.beginTask(Utilities.getString("ResourceCompare.taskName"), IProgressMonitor.UNKNOWN); //$NON-NLS-1$
 
-			String leftLabel= fLeftResource.getName();
-			String rightLabel= fRightResource.getName();
+			String leftLabel= fLeftResource.name();
+			String rightLabel= fRightResource.name();
 
 			String title;
 			if (fThreeWay) {
@@ -444,7 +522,7 @@ public class ResourceCompareInput extends CompareEditorInput {
 					/*
 					 * If right side is 'null' then it is a removal on the left. Ignore all such changes!
 					 */
-					if (right == null) {
+					if (left == null) {
 						return null;
 					}
 					return new MyDiffNode((IDiffContainer) parent, description, (ITypedElement)ancestor, (ITypedElement)left, (ITypedElement)right);
@@ -464,8 +542,8 @@ public class ResourceCompareInput extends CompareEditorInput {
 	@Override
 	public String getToolTipText() {
 		if (fLeftResource != null && fRightResource != null) {
-			String leftLabel= fLeftResource.getFullPath().makeRelative().toString();
-			String rightLabel= fRightResource.getFullPath().makeRelative().toString();
+			String leftLabel= fLeftResource.tooltipPathLabel();
+			String rightLabel= fRightResource.tooltipPathLabel();
 			if (fThreeWay) {
 				String format= Utilities.getString("ResourceCompare.threeWay.tooltip"); //$NON-NLS-1$
 				String ancestorLabel= fAncestorResource.getFullPath().makeRelative().toString();
@@ -478,14 +556,8 @@ public class ResourceCompareInput extends CompareEditorInput {
 		return super.getToolTipText();
 	}
 
-	private String buildLabel(IResource r) {
-		// for a linked resource in a hidden project use its local file system location
-		if (r.isLinked() && r.getProject().isHidden())
-			return r.getLocation().toString();
-		String n= r.getFullPath().toString();
-		if (n.charAt(0) == IPath.SEPARATOR)
-			return n.substring(1);
-		return n;
+	private String buildLabel(ResourceDescriptor r) {
+		return r.label();
 	}
 
 
