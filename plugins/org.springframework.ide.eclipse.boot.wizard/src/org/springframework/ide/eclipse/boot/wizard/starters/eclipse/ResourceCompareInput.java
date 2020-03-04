@@ -47,6 +47,7 @@ import org.eclipse.compare.structuremergeviewer.IDiffElement;
 import org.eclipse.compare.structuremergeviewer.IStructureComparator;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -258,6 +259,20 @@ public class ResourceCompareInput extends CompareEditorInput {
 			}
 			return null;
 		}
+		@Override
+		public ITypedElement replace(ITypedElement child, ITypedElement other) {
+			if (child == null) {	// add resource
+				// create a node without a resource behind it!
+				IResource resource= getResource();
+				if (resource instanceof IProject) {
+					IProject p = (IProject) resource;
+					IFile file = p.getFile(other.getName());
+					child = new BufferedResourceNode(file);
+				}
+			}
+			return super.replace(child, other);
+		}
+
 	}
 
 	/*
