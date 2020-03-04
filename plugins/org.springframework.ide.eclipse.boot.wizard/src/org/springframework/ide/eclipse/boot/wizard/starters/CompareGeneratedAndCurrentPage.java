@@ -50,7 +50,7 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 		public void gotValue(LiveExpression<AddStartersCompareResult> exp, AddStartersCompareResult compareResult) {
 			Display.getDefault().asyncExec(() -> {
 				if (compareResult != null) {
-					setupCompareViewer(compareResult);
+					setupCompareViewer();
 				}
 			});
 		}
@@ -93,14 +93,15 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 		compareModel.getDownloadTracker().removeListener(downloadStateListener);
 	}
 
-	private void setupCompareViewer(AddStartersCompareResult compareResult) {
+	private void setupCompareViewer() {
 		try {
 
 			AddStartersModel model = factoryModel.getModel().getValue();
 
 			// Transform the compare result from the model into a compare editor input
-			final CompareEditorInput editorInput = createCompareEditorInput(compareResult);
+			final CompareEditorInput editorInput = createCompareEditorInput(model.getCompareModel().getCompareResult().getValue());
 			editorInput.getCompareConfiguration().setProperty(PomPlugin.POM_STRUCTURE_ADDITIONS_COMPARE_SETTING, true);
+			editorInput.getCompareConfiguration().setProperty(ResourceCompareInput.OPEN_DIFF_NODE_COMPARE_SETTING, model.getCompareModel().diffFileToOpenInitially());
 
 			// Save the editor on ok pressed
 			model.onOkPressed(() -> {

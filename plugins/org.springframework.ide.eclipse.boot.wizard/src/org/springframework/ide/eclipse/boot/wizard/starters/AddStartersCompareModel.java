@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrProjectDownloader;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
+import org.springframework.ide.eclipse.boot.core.internal.MavenSpringBootProject;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
@@ -89,6 +90,16 @@ public class AddStartersCompareModel implements Disposable {
 		};
 		job.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
 		job.schedule();
+	}
+
+	String diffFileToOpenInitially() {
+		if (bootProject != null) {
+			switch (bootProject.buildType()) {
+			case MavenSpringBootProject.MAVEN_PROJECT:
+				return "pom.xml";
+			}
+		}
+		return null;
 	}
 
 	protected void generateCompareResult(File projectFromInitializr, List<Dependency> dependencies) throws Exception {

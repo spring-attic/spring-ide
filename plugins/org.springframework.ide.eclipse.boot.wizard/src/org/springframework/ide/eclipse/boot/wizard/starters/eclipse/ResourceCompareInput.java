@@ -60,6 +60,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
@@ -82,6 +83,8 @@ import com.google.common.io.Files;
  */
 @SuppressWarnings("restriction")
 public class ResourceCompareInput extends CompareEditorInput {
+
+	public static final String OPEN_DIFF_NODE_COMPARE_SETTING = "Open-Diff-Node-Setting";
 
 	public interface ResourceDescriptor {
 		String name();
@@ -319,6 +322,27 @@ public class ResourceCompareInput extends CompareEditorInput {
 
 				super.fillContextMenu(manager);
 			}
+
+			@Override
+			protected void initialSelection() {
+				Object input = getInput();
+				Object diffNodeName = getCompareConfiguration().getProperty(OPEN_DIFF_NODE_COMPARE_SETTING);
+				if (input instanceof MyDiffNode && diffNodeName != null) {
+					MyDiffNode root = (MyDiffNode) input;
+					for (IDiffElement e : root.getChildren()) {
+						MyDiffNode child = (MyDiffNode) e;
+						if (child.getRight() != null && child.getRight().getName().equals(diffNodeName)) {
+							getControl().getDisplay().asyncExec(() -> {
+								setSelection(new StructuredSelection(new MyDiffNode[] { child }), true);
+								handleOpen(null);
+							});
+							return;
+						}
+					}
+				}
+				super.initialSelection();
+			}
+
 		};
 		return fDiffViewer;
 	}

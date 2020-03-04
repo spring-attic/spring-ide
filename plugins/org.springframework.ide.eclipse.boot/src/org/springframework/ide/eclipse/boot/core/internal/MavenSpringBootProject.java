@@ -105,7 +105,7 @@ public class MavenSpringBootProject extends SpringBootProject {
 
 	private static final String JAVA_VERSION = "java.version";
 
-	private static final String MAVEN_PROJECT = "maven-project";
+	public static final String MAVEN_PROJECT = "maven-project";
 
 	/**
 	 * Debug flag, may be flipped on temporarily by test code to spy on the output of maven
