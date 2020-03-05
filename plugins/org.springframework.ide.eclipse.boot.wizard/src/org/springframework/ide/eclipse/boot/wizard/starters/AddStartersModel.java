@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
@@ -276,9 +277,10 @@ public class AddStartersModel implements OkButtonHandler {
 
 	/**
 	 * Begin populating the compare model.
+	 * @param monitor
 	 */
-	public void populateComparison() {
-		getCompareModel().downloadProject(dependencies.getCurrentSelection());
+	public void populateComparison(IProgressMonitor monitor) {
+		getCompareModel().downloadProject(dependencies.getCurrentSelection(), monitor);
 	}
 
 	public void dispose() {

@@ -10,19 +10,16 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard.starters;
 
+import static org.springframework.ide.eclipse.boot.wizard.starters.PathSelectors.pattern;
 import static org.springframework.ide.eclipse.boot.wizard.starters.PathSelectors.rootFilesOnly;
 import static org.springframework.ide.eclipse.boot.wizard.starters.eclipse.ResourceCompareInput.fromFile;
 import static org.springframework.ide.eclipse.boot.wizard.starters.eclipse.ResourceCompareInput.fromWorkspaceResource;
-import static org.springframework.ide.eclipse.boot.wizard.starters.PathSelectors.pattern;
 
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.compare.CompareEditorInput;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.wizard.WizardPage;
@@ -36,7 +33,6 @@ import org.springframework.ide.eclipse.boot.wizard.starters.eclipse.ResourceComp
 import org.springframework.ide.eclipse.maven.pom.PomPlugin;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
-import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 public class CompareGeneratedAndCurrentPage extends WizardPage {
@@ -115,6 +111,7 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 			compareViewer.setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
 			contentsContainer.layout();
 		} catch (Exception e) {
+			setErrorMessage("Failed to compare local project contents with generated project from the Initializr Service");
 			Log.log(e);
 		}
 	}
@@ -137,19 +134,15 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 		compareEditorInput.setTitle(
 				"Compare local project on the left with generated project from Spring Initializr on the right");
 
-		new Job("Comparing local project with generated project from Spring Initializr.") {
+		getWizard().getContainer().run(true, false, monitor -> {
+			monitor.beginTask(
+					"Calculating differences between project '"
+							+ resultFromModel.getLocalResource().getProject().getName() + "' and 'starter.zip'",
+					IProgressMonitor.UNKNOWN);
+			compareEditorInput.run(monitor);
+			monitor.done();
+		});
 
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				try {
-					compareEditorInput.run(monitor);
-					return Status.OK_STATUS;
-				} catch (InvocationTargetException | InterruptedException e) {
-					return ExceptionUtil.coreException(e).getStatus();
-				}
-			}
-
-		}.schedule();
 		return compareEditorInput;
 	}
 
@@ -179,7 +172,12 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 		if (visible) {
 			model.getCompareModel().initTrackers();
 			connectModelToUi(model);
-			model.populateComparison();
+			try {
+				getWizard().getContainer().run(true, false, monitor -> model.populateComparison(monitor));
+			} catch (InvocationTargetException | InterruptedException e) {
+				setErrorMessage("Failed to download project from the Initializr Service");
+				Log.log(e);
+			}
 		} else {
 			disconnectFromUi(model);
 			model.getCompareModel().disposeTrackers();
@@ -194,6 +192,8 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 	public void dispose() {
 		super.dispose();
 		AddStartersModel model = factoryModel.getModel().getValue();
-		model.dispose();
+		if (model != null) {
+			model.dispose();
+		}
 	}
 }

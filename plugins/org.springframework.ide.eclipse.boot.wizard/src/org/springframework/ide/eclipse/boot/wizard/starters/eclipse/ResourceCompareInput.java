@@ -533,8 +533,8 @@ public class ResourceCompareInput extends CompareEditorInput {
 
 		try {
 			// fix for PR 1GFMLFB: ITPUI:WIN2000 - files that are out of sync with the file system appear as empty
-			fLeftResource.prepare(pm);;
-			fRightResource.prepare(pm);;
+			fLeftResource.prepare(pm);
+			fRightResource.prepare(pm);
 			if (fThreeWay && fAncestorResource != null)
 				fAncestorResource.refreshLocal(IResource.DEPTH_INFINITE, pm);
 			// end fix

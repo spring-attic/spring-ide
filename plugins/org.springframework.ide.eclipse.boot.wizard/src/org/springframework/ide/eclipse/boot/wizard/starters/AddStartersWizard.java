@@ -10,9 +10,12 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard.starters;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -27,11 +30,11 @@ import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrProjectDownloader;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrUrlBuilders;
-import org.springframework.ide.eclipse.boot.wizard.BootWizardActivator;
 import org.springframework.ide.eclipse.boot.wizard.InitializrFactoryModel;
 import org.springframework.ide.eclipse.boot.wizard.StartersWizardUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 public class AddStartersWizard extends Wizard implements IWorkbenchWizard {
 
@@ -68,7 +71,7 @@ public class AddStartersWizard extends Wizard implements IWorkbenchWizard {
 					"A more detailed error message may be found in the Eclipse error log."
 			);
 			//Ensure exception is logged. (Eclipse UI may not log it!).
-			BootWizardActivator.log(e);
+			Log.log(e);
 			throw new Error(e);
 		}
 	}
@@ -102,8 +105,29 @@ public class AddStartersWizard extends Wizard implements IWorkbenchWizard {
 			if (promptResult == MessageDialog.OK) {
 				AddStartersWizard addStartersWizard = new AddStartersWizard();
 				addStartersWizard.init(PlatformUI.getWorkbench(), selection);
-				new WizardDialog(shell, addStartersWizard).open();
+				new WizardDialog(shell, addStartersWizard) {
+
+					@Override
+					public void run(boolean fork, boolean cancelable, IRunnableWithProgress runnable)
+							throws InvocationTargetException, InterruptedException {
+						super.run(fork, cancelable, runnable);
+						// The above restores the UI state to what it was before executing the runnable
+						// If after the execution UI state updates (i.e. buttons enabled) restore state
+						// following the execution of the runnable would wipe out the correct UI state.
+						// Therefore update the UI after the execution to minimize the effect of
+						// restoreUiState
+						updateButtons();
+					}
+
+				}.open();
 			}
 		}
 	}
+
+	@Override
+	public boolean needsProgressMonitor() {
+		return true;
+	}
+
+
 }
