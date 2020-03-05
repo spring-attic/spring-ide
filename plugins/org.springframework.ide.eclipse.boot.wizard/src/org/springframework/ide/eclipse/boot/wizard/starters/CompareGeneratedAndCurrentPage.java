@@ -11,7 +11,7 @@
 package org.springframework.ide.eclipse.boot.wizard.starters;
 
 import static org.springframework.ide.eclipse.boot.wizard.starters.PathSelectors.pattern;
-import static org.springframework.ide.eclipse.boot.wizard.starters.PathSelectors.rootFilesOnly;
+import static org.springframework.ide.eclipse.boot.wizard.starters.PathSelectors.rootFiles;
 import static org.springframework.ide.eclipse.boot.wizard.starters.eclipse.ResourceCompareInput.fromFile;
 import static org.springframework.ide.eclipse.boot.wizard.starters.eclipse.ResourceCompareInput.fromWorkspaceResource;
 
@@ -126,8 +126,8 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 	private CompareEditorInput createCompareEditorInput(AddStartersCompareResult resultFromModel) throws Exception {
 
 		ResourceCompareInput compareEditorInput = new ResourceCompareInput(resultFromModel.getConfiguration(),
-				rootFilesOnly()
-				.and(pattern("*.md").negate())
+				rootFiles()
+				.or(pattern("HELP.md"))
 		);
 		setResources(compareEditorInput, resultFromModel);
 

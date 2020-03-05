@@ -25,7 +25,7 @@ import java.util.function.Predicate;
  */
 public class PathSelectors {
 
-	public static Predicate<String> rootFilesOnly() {
+	public static Predicate<String> rootFiles() {
 		return path -> {
 			return path.indexOf('/') < 0;
 		};
