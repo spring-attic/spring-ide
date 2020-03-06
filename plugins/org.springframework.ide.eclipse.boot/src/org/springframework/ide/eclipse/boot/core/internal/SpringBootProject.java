@@ -19,6 +19,12 @@ import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.boot.core.IMavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.MavenId;
@@ -143,5 +149,34 @@ public abstract class SpringBootProject implements ISpringBootProject {
 		}
 		return null;
 	}
+
+	@Override
+	public String packageName() throws CoreException {
+		IJavaProject javaProject = JavaCore.create(project);
+		List<String> packageNames = new ArrayList<>();
+		for (IPackageFragmentRoot root : javaProject.getPackageFragmentRoots()) {
+			if (root.getKind() == IPackageFragmentRoot.K_SOURCE
+					&& !root.isExternal()
+					&& root.hasChildren()
+					&& root.getChildren().length > 0) {
+				for (IJavaElement e : root.getChildren()) {
+					if (e instanceof IPackageFragment) {
+						IPackageFragment pkg = (IPackageFragment) e;
+						if (pkg.containsJavaResources()) {
+							String name = pkg.getElementName();
+							packageNames.add(name);
+						}
+					}
+				}
+			}
+		}
+
+		String pkgName = packageNames.stream()
+			.min((p1, p2) -> p1.length() - p2.length())
+			.orElse(null);
+		return pkgName;
+
+	}
+
 
 }

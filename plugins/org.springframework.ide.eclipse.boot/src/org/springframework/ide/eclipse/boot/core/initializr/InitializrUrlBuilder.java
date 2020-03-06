@@ -48,6 +48,8 @@ public class InitializrUrlBuilder {
 
 	private static final String VERSION = "version";
 
+	private static final String PACKAGE_NAME = "packageName";
+
 	private String language = "java"; // Default language
 
 	private List<Dependency> dependencies;
@@ -69,6 +71,8 @@ public class InitializrUrlBuilder {
 	private String bootVersion;
 
 	private String javaVersion;
+
+	private String packageName;
 
 	private final String initializrUrl;
 
@@ -103,6 +107,7 @@ public class InitializrUrlBuilder {
 			this.bootVersion = bootProject.getBootVersion();
 			this.packaging = bootProject.getPackaging();
 			this.buildType = bootProject.buildType();
+			this.packageName = bootProject.packageName();
 		} catch (CoreException e) {
 			throw new IllegalArgumentException(e);
 		}
@@ -152,6 +157,10 @@ public class InitializrUrlBuilder {
 
 		if (language != null) {
 			uriBuilder.addParameter(LANGUAGE, language);
+		}
+
+		if (packageName != null) {
+			uriBuilder.addParameter(PACKAGE_NAME, packageName);
 		}
 
 		if (dependencies != null) {
@@ -208,4 +217,8 @@ public class InitializrUrlBuilder {
 		return this;
 	}
 
+	public InitializrUrlBuilder packageName(String packageName) {
+		this.packageName = packageName;
+		return this;
+	}
 }

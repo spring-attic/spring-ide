@@ -195,7 +195,7 @@ public class ResourceCompareInput extends CompareEditorInput {
 	private static final boolean NORMALIZE_CASE= true;
 
 	private boolean fThreeWay= false;
-	private Object fRoot;
+	private MyDiffNode fRoot;
 	private IStructureComparator fAncestor;
 	private IStructureComparator fLeft;
 	private IStructureComparator fRight;
@@ -245,6 +245,7 @@ public class ResourceCompareInput extends CompareEditorInput {
 			fLastId= id;
 			return id;
 		}
+
 	}
 
 	static class FilteredBufferedResourceNode extends BufferedResourceNode {
@@ -257,7 +258,7 @@ public class ResourceCompareInput extends CompareEditorInput {
 		protected IStructureComparator createChild(IResource child) {
 			String path = child.getType() == IResource.FILE ? child.getProjectRelativePath().toString()
 					: child.getProjectRelativePath().addTrailingSeparator().toString();
-			if (filter == null || filter.test(path)) {
+			if (filter == null || filter.test(path) || child.getType() == IResource.FOLDER) {
 				return new FilteredBufferedResourceNode(child, filter);
 			}
 			return null;
@@ -325,6 +326,7 @@ public class ResourceCompareInput extends CompareEditorInput {
 
 			@Override
 			protected void initialSelection() {
+				expandAll();
 				Object input = getInput();
 				Object diffNodeName = getCompareConfiguration().getProperty(OPEN_DIFF_NODE_COMPARE_SETTING);
 				if (input instanceof MyDiffNode && diffNodeName != null) {
@@ -558,23 +560,77 @@ public class ResourceCompareInput extends CompareEditorInput {
 			Differencer d= new Differencer() {
 				@Override
 				protected Object visit(Object parent, int description, Object ancestor, Object left, Object right) {
-					/*
-					 * If right side is 'null' then it is a removal on the left. Ignore all such changes!
-					 */
-					if (left == null) {
-						return null;
-					}
 					return new MyDiffNode((IDiffContainer) parent, description, (ITypedElement)ancestor, (ITypedElement)left, (ITypedElement)right);
 				}
 			};
 
-			fRoot= d.findDifferences(fThreeWay, pm, null, fAncestor, fLeft, fRight);
+			fRoot= (MyDiffNode) d.findDifferences(fThreeWay, pm, null, fAncestor, fLeft, fRight);
+			cleanDifferences(fRoot);
 			return fRoot;
 
 		} catch (CoreException ex) {
 			throw new InvocationTargetException(ex);
 		} finally {
 			pm.done();
+		}
+	}
+
+	private void cleanDifferences(MyDiffNode n) {
+		if (n.hasChildren()) {
+			for (IDiffElement child : n.getChildren()) {
+				if (child instanceof MyDiffNode) {
+					cleanDifferences((MyDiffNode) child);
+				}
+			}
+		} else {
+			ITypedElement right = n.getRight();
+			ITypedElement left = n.getLeft();
+			/*
+			 * If left side is 'null' then it is a removal on the right. Ignore all such changes!
+			 */
+			if (left == null) {
+				if (n.getParent() != null) {
+					n.getParent().removeToRoot(n);
+				}
+				return;
+			}
+			/*
+			 * Exclude added folders that don't have any filtered structure nodes
+			 */
+			if (right == null && left != null && left.getType() == ITypedElement.FOLDER_TYPE) {
+				if (left instanceof IStructureComparator) {
+					IStructureComparator str = (IStructureComparator) left;
+					if (str.getChildren() == null || str.getChildren().length == 0) {
+						if (filter != null) {
+							StringBuilder folderPath = new StringBuilder();
+							pathForLeft(n, folderPath);
+							if (filter.test(folderPath.toString())) {
+								return;
+							}
+						}
+						if (n.getParent() != null) {
+							n.getParent().removeToRoot(n);
+						}
+						return;
+					}
+				}
+			}
+
+		}
+	}
+
+	private void pathForLeft(MyDiffNode n, StringBuilder path) {
+		if (n == null) {
+			return;
+		} else {
+			ITypedElement left = n.getLeft();
+			pathForLeft((MyDiffNode) n.getParent(), path);
+			if (!left.getName().isEmpty()) {
+				path.append(left.getName());
+				if (left.getType() == ITypedElement.FOLDER_TYPE) {
+					path.append('/');
+				}
+			}
 		}
 	}
 

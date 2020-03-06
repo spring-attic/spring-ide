@@ -253,7 +253,7 @@ public class ZipFileStructureCreator implements IStructureCreator {
 				if (entry == null)
 					break;
 
-				if (filter == null || filter.test(entry.getName())) {
+				if (entry.isDirectory() || filter == null || filter.test(entry.getName())) {
 					ZipFile ze= root.createContainer(entry.getName());
 					if (ze != null) {
 						int length= (int) entry.getSize();

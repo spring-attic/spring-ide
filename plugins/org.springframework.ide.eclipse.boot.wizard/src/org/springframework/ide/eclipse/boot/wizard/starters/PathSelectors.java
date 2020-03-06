@@ -31,6 +31,10 @@ public class PathSelectors {
 		};
 	}
 
+	public static Predicate<String> path(String path) {
+		return path::equals;
+	}
+
 	public static Predicate<String> pattern(String glob) {
 		final PathMatcher pathMatcher = FileSystems.getDefault().getPathMatcher("glob:" + glob);
 		return path -> {
