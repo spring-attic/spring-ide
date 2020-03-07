@@ -54,7 +54,7 @@ public class DependencyPage extends WizardPageWithSections {
 
 	private CheckBoxesSection<Dependency> frequentlyUsedCheckboxes;
 
-	private LiveVariable<ValidationResult> initializrDataLoaded = new LiveVariable<>(ValidationResult.warning("Initilaizr data not yet loaded"));
+	private LiveVariable<ValidationResult> initializrDataLoaded = new LiveVariable<>(ValidationResult.warning("Initializr data not yet loaded"));
 	private LiveVariable<ValidationResult> initializrProjectInfoLoaded = new LiveVariable<>();
 
 	protected final InitializrFactoryModel<AddStartersModel> factoryModel;
