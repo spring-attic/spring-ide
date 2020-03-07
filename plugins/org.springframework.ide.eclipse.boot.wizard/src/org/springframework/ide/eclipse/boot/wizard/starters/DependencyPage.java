@@ -37,6 +37,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.ui.CommentSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.GroupSection;
+import org.springsource.ide.eclipse.commons.livexp.ui.LabeledPropertySection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
@@ -134,18 +135,13 @@ public class DependencyPage extends WizardPageWithSections {
 
 		model.onDependencyChange(() -> {
 			Display.getDefault().asyncExec(() -> {
-				IWizard wizard = DependencyPage.this.getWizard();
-				if (wizard != null) {
-					IWizardContainer container = wizard.getContainer();
-					if (container != null) {
-						container.updateButtons();
-					}
-				}
+				refreshWizardUi();
 			});
 		});
 
 		List<WizardPageSection> sections = new ArrayList<>();
 
+		sections.add(createBootInfoSection(model));
 		sections.add(createFrequentlyUsedSection(model));
 		sections.add(createTwoColumnSection(model));
 		GroupSection groupSection = new GroupSection(this, null, sections.toArray(new WizardPageSection[0]));
@@ -212,6 +208,11 @@ public class DependencyPage extends WizardPageWithSections {
 		return frequentlyUsedSection;
 	}
 
+	protected WizardPageSection createBootInfoSection(AddStartersModel model) {
+		LabeledPropertySection section = new LabeledPropertySection(this, model.getBootVersion());
+		return section;
+	}
+
 	@Override
 	public boolean isPageComplete() {
 		// We cannot complete from  the dependency page as
@@ -222,8 +223,31 @@ public class DependencyPage extends WizardPageWithSections {
 
 	@Override
 	public boolean canFlipToNextPage() {
-		LiveExpression<AddStartersModel> model = factoryModel.getModel();
-		return model != null && model.getValue() != null && model.getValue().canShowDiff();
+		return isValid();
+	}
+
+	private boolean isValid() {
+		LiveExpression<AddStartersModel> modelExp = factoryModel.getModel();
+
+		if (modelExp != null) {
+
+			AddStartersModel model = modelExp.getValue();
+			if (model != null) {
+				LiveExpression<IStatus> statusExp = model.getValidator();
+				return statusExp.getValue() != null && statusExp.getValue().isOK();
+			}
+		}
+		return false;
+	}
+
+	private void refreshWizardUi() {
+		IWizard wizard = DependencyPage.this.getWizard();
+		if (wizard != null) {
+			IWizardContainer container = wizard.getContainer();
+			if (container != null) {
+				container.updateButtons();
+			}
+		}
 	}
 
 }

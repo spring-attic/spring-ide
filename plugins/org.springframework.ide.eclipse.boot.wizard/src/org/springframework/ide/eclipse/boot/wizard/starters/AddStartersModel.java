@@ -22,6 +22,8 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
@@ -38,9 +40,13 @@ import org.springframework.ide.eclipse.boot.wizard.HierarchicalMultiSelectionFie
 import org.springframework.ide.eclipse.boot.wizard.MultiSelectionFieldModel;
 import org.springframework.ide.eclipse.boot.wizard.NewSpringBootWizardModel;
 import org.springframework.ide.eclipse.boot.wizard.PopularityTracker;
+import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.core.StringFieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.OkButtonHandler;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 /**
  *
@@ -67,6 +73,11 @@ public class AddStartersModel implements OkButtonHandler {
 
 	private final AddStartersCompareModel compareModel;
 
+	private final FieldModel<String> bootVersion = new StringFieldModel("Spring Boot Version:", "");
+
+	// Do not set OK status as default value. OK should only be set when validation has occurred successful
+	private final LiveVariable<IStatus> validator = new LiveVariable<>(null);
+
 	/**
 	 * Create EditStarters dialog model and initialize it based on a project
 	 * selection.
@@ -83,10 +94,13 @@ public class AddStartersModel implements OkButtonHandler {
 		discoverOptions(dependencies);
 	}
 
-	public String getBootVersion() {
-		return starters.getBootVersion();
+	public FieldModel<String> getBootVersion() {
+		return bootVersion;
 	}
 
+	public LiveExpression<IStatus> getValidator() {
+		return validator;
+	}
 
 	public String getProjectName() {
 		return project.getProject().getName();
@@ -113,9 +127,10 @@ public class AddStartersModel implements OkButtonHandler {
 	 * Dynamically discover input fields and 'style' options by parsing initializr form.
 	 */
 	private void discoverOptions(HierarchicalMultiSelectionFieldModel<Dependency> dependencies) throws Exception {
-		starters = project.getStarterInfos();
+		starters =  getInfoFromInitializr();
 
 		if (starters!=null) {
+			bootVersion.setValue(starters.getBootVersion());
 			for (DependencyGroup dgroup : starters.getDependencyGroups()) {
 				String catName = dgroup.getName();
 
@@ -139,6 +154,17 @@ public class AddStartersModel implements OkButtonHandler {
 				}
 			}
 		}
+	}
+
+	private SpringBootStarters getInfoFromInitializr()  {
+		try {
+			SpringBootStarters info = project.getStarterInfos();
+			validator.setValue(Status.OK_STATUS);
+			return info;
+		} catch (Exception e) {
+			validator.setValue(ExceptionUtil.status(e));
+		}
+		return null;
 	}
 
 	/**
@@ -247,10 +273,6 @@ public class AddStartersModel implements OkButtonHandler {
 
 	public ISpringBootProject getProject() {
 		return project;
-	}
-
-	public boolean canShowDiff() {
-		return true;
 	}
 
 	public void onDependencyChange(Runnable runnable) {
