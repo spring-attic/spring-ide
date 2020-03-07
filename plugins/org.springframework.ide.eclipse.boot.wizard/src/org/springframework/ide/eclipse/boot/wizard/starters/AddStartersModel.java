@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard.starters;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -22,8 +23,6 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
@@ -42,11 +41,12 @@ import org.springframework.ide.eclipse.boot.wizard.NewSpringBootWizardModel;
 import org.springframework.ide.eclipse.boot.wizard.PopularityTracker;
 import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.StringFieldModel;
+import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.OkButtonHandler;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 /**
  *
@@ -75,9 +75,6 @@ public class AddStartersModel implements OkButtonHandler {
 
 	private final FieldModel<String> bootVersion = new StringFieldModel("Spring Boot Version:", "");
 
-	// Do not set OK status as default value. OK should only be set when validation has occurred successful
-	private final LiveVariable<IStatus> validator = new LiveVariable<>(null);
-
 	/**
 	 * Create EditStarters dialog model and initialize it based on a project
 	 * selection.
@@ -91,15 +88,10 @@ public class AddStartersModel implements OkButtonHandler {
 		this.defaultDependencies = new DefaultDependencies(store);
 		this.project = springBootCore.project(selectedProject);
 		this.compareModel = new AddStartersCompareModel(projectDownloader, getProject());
-		discoverOptions(dependencies);
 	}
 
 	public FieldModel<String> getBootVersion() {
 		return bootVersion;
-	}
-
-	public LiveExpression<IStatus> getValidator() {
-		return validator;
 	}
 
 	public String getProjectName() {
@@ -123,14 +115,23 @@ public class AddStartersModel implements OkButtonHandler {
 		this.okRunnable = okRunnable;
 	}
 
+	public ValidationResult loadFromInitializr() {
+		return  discoverOptions(dependencies);
+	}
+
 	/**
 	 * Dynamically discover input fields and 'style' options by parsing initializr form.
 	 */
-	private void discoverOptions(HierarchicalMultiSelectionFieldModel<Dependency> dependencies) throws Exception {
-		starters =  getInfoFromInitializr();
+	private ValidationResult discoverOptions(HierarchicalMultiSelectionFieldModel<Dependency> dependencies) {
+		try {
+			starters = project.getStarterInfos();
+		} catch (Exception e) {
+			return parseError(e);
+		}
+
+		bootVersion.setValue(project.getBootVersion());
 
 		if (starters!=null) {
-			bootVersion.setValue(starters.getBootVersion());
 			for (DependencyGroup dgroup : starters.getDependencyGroups()) {
 				String catName = dgroup.getName();
 
@@ -153,18 +154,30 @@ public class AddStartersModel implements OkButtonHandler {
 					}
 				}
 			}
+			return ValidationResult.OK;
+		} else {
+			return ValidationResult.error("Starter information not available for: " + project.getBootVersion());
 		}
 	}
 
-	private SpringBootStarters getInfoFromInitializr()  {
-		try {
-			SpringBootStarters info = project.getStarterInfos();
-			validator.setValue(Status.OK_STATUS);
-			return info;
-		} catch (Exception e) {
-			validator.setValue(ExceptionUtil.status(e));
+	public ValidationResult parseError(Exception e) {
+		if (ExceptionUtil.getDeepestCause(e) instanceof FileNotFoundException) {
+			// Crude way to interpret that project boot version is not available in initializr
+			StringBuffer message = new StringBuffer();
+
+			// Get the boot version from project directly as opposed from the starters info, as it may
+			// not be available.
+			String bootVersionFromProject = project.getBootVersion();
+			message.append("Unable to download content for boot version: ");
+			message.append(bootVersionFromProject);
+			message.append(". The version may not be available.  Consider updating to a newer version.");
+
+			// Log the full message
+			Log.log(e);
+
+			return ValidationResult.error(message.toString());
 		}
-		return null;
+		return ValidationResult.from(ExceptionUtil.status(e));
 	}
 
 	/**

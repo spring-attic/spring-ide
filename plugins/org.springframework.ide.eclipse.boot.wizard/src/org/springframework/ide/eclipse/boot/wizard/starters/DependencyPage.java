@@ -55,6 +55,7 @@ public class DependencyPage extends WizardPageWithSections {
 	private CheckBoxesSection<Dependency> frequentlyUsedCheckboxes;
 
 	private LiveVariable<ValidationResult> initializrDataLoaded = new LiveVariable<>(ValidationResult.warning("Initilaizr data not yet loaded"));
+	private LiveVariable<ValidationResult> initializrProjectInfoLoaded = new LiveVariable<>();
 
 	protected final InitializrFactoryModel<AddStartersModel> factoryModel;
 
@@ -109,7 +110,12 @@ public class DependencyPage extends WizardPageWithSections {
 		LiveExpression<AddStartersModel> model = factoryModel.getModel();
 		DynamicSection dynamicSection = new DynamicSection(this, model.apply((dynamicModel) -> {
 			if (dynamicModel != null) {
-				return createDynamicSections(dynamicModel);
+				ValidationResult result = dynamicModel.loadFromInitializr();
+				initializrProjectInfoLoaded.setValue(result);
+
+				if (result.isOk()) {
+					return createDynamicSections(dynamicModel);
+				}
 			}
 			return new CommentSection(this, NewSpringBootWizard.NO_CONTENT_AVAILABLE);
 		} ));
@@ -125,6 +131,7 @@ public class DependencyPage extends WizardPageWithSections {
 
 		validator.addChild(factoryModel.getServiceUrlField().getValidator());
 		validator.addChild(initializrDataLoaded);
+		validator.addChild(initializrProjectInfoLoaded);
 
 		// Show progress for fetching data from the Iitializr.
 		// Start it off on UI thread in async fashion
@@ -227,17 +234,7 @@ public class DependencyPage extends WizardPageWithSections {
 	}
 
 	private boolean isValid() {
-		LiveExpression<AddStartersModel> modelExp = factoryModel.getModel();
-
-		if (modelExp != null) {
-
-			AddStartersModel model = modelExp.getValue();
-			if (model != null) {
-				LiveExpression<IStatus> statusExp = model.getValidator();
-				return statusExp.getValue() != null && statusExp.getValue().isOK();
-			}
-		}
-		return false;
+		return validator.getValue() != null && validator.getValue().isOk();
 	}
 
 	private void refreshWizardUi() {
