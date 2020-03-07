@@ -47,12 +47,14 @@ import org.eclipse.compare.structuremergeviewer.IDiffElement;
 import org.eclipse.compare.structuremergeviewer.IStructureComparator;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
@@ -204,6 +206,7 @@ public class ResourceCompareInput extends CompareEditorInput {
 	private ResourceDescriptor fRightResource;
 	private DiffTreeViewer fDiffViewer;
 	private IAction fOpenAction;
+	private IAction fCreateFolderAction;
 
 	final private Predicate<String> filter;
 
@@ -271,10 +274,28 @@ public class ResourceCompareInput extends CompareEditorInput {
 				if (resource instanceof IProject) {
 					IProject p = (IProject) resource;
 					IFile file = p.getFile(other.getName());
-					child = new BufferedResourceNode(file);
+					child = new FilteredBufferedResourceNode(file, filter);
+				}
+				if (resource instanceof IContainer && other.getType() == ITypedElement.FOLDER_TYPE) {
+					IFolder folder = ((IContainer)resource).getFolder(new Path(other.getName()));
+					FilteredBufferedResourceNode newFolderNode = new FilteredBufferedResourceNode(folder, filter);
+					// Set content for the dirty flag to become set
+					newFolderNode.setContent(null);
+					child = newFolderNode;
 				}
 			}
 			return super.replace(child, other);
+		}
+		@Override
+		public void commit(IProgressMonitor pm) throws CoreException {
+			if (isDirty()) {
+				IResource resource= getResource();
+				if (resource instanceof IFolder) {
+					((IFolder) resource).create(true, true, pm);
+					return;
+				}
+			}
+			super.commit(pm);
 		}
 
 	}
@@ -303,23 +324,37 @@ public class ResourceCompareInput extends CompareEditorInput {
 					Utilities.initAction(fOpenAction, getBundle(), "action.CompareContents."); //$NON-NLS-1$
 				}
 
-				boolean enable= false;
+				if (fCreateFolderAction == null) {
+					fCreateFolderAction = new Action() {
+						@Override
+						public void run() {
+							handleCreateFolder();
+						}
+					};
+					fCreateFolderAction.setText("Add Folder");
+					fCreateFolderAction.setToolTipText("Add missing empty folder");
+				}
+
 				ISelection selection= getSelection();
 				if (selection instanceof IStructuredSelection) {
 					IStructuredSelection ss= (IStructuredSelection)selection;
 					if (ss.size() == 1) {
 						Object element= ss.getFirstElement();
 						if (element instanceof MyDiffNode) {
-							ITypedElement te= ((MyDiffNode) element).getId();
-							if (te != null)
-								enable= !ITypedElement.FOLDER_TYPE.equals(te.getType());
-						} else
-							enable= true;
+							MyDiffNode diffNode = (MyDiffNode) element;
+							ITypedElement te= diffNode.getId();
+							if (te != null) {
+								if (ITypedElement.FOLDER_TYPE.equals(te.getType())) {
+									if (diffNode.getRight() == null) {
+										manager.add(fCreateFolderAction);
+									}
+								} else {
+									manager.add(fOpenAction);
+								}
+							}
+						}
 					}
 				}
-				fOpenAction.setEnabled(enable);
-
-				manager.add(fOpenAction);
 
 				super.fillContextMenu(manager);
 			}
@@ -343,6 +378,10 @@ public class ResourceCompareInput extends CompareEditorInput {
 					}
 				}
 				super.initialSelection();
+			}
+
+			private void handleCreateFolder() {
+				copySelected(true);
 			}
 
 		};
