@@ -60,7 +60,7 @@ public class DependencyPage extends WizardPageWithSections {
 	protected final InitializrFactoryModel<AddStartersModel> factoryModel;
 
 	public DependencyPage(InitializrFactoryModel<AddStartersModel> factoryModel) {
-		super("page2", "New Spring Starter Project Dependencies", null);
+		super("Dependencies", "New Spring Starter Project Dependencies", null);
 		this.factoryModel = factoryModel;
 	}
 
