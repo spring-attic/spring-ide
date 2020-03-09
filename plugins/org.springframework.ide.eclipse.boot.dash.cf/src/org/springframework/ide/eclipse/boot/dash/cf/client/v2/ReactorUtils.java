@@ -82,7 +82,7 @@ public class ReactorUtils {
 			.onErrorResume(errorFilter(cancelationToken))
 			.block(timeout);
 		} catch (Exception e) {
-			dumpStacks();
+			//dumpStacks();
 			throw new IOException(e);
 		}
 	}
