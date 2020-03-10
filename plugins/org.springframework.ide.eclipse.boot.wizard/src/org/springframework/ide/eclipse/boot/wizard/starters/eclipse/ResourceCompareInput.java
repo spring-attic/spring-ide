@@ -206,7 +206,7 @@ public class ResourceCompareInput extends CompareEditorInput {
 	private ResourceDescriptor fRightResource;
 	private DiffTreeViewer fDiffViewer;
 	private IAction fOpenAction;
-	private IAction fCreateFolderAction;
+	private IAction fCreateResourceAction;
 
 	final private Predicate<String> filter;
 
@@ -324,35 +324,49 @@ public class ResourceCompareInput extends CompareEditorInput {
 					Utilities.initAction(fOpenAction, getBundle(), "action.CompareContents."); //$NON-NLS-1$
 				}
 
-				if (fCreateFolderAction == null) {
-					fCreateFolderAction = new Action() {
+				if (fCreateResourceAction == null) {
+					fCreateResourceAction = new Action() {
 						@Override
 						public void run() {
-							handleCreateFolder();
+							copySelected(true);
 						}
 					};
-					fCreateFolderAction.setText("Add Folder");
-					fCreateFolderAction.setToolTipText("Add missing empty folder");
+					fCreateResourceAction.setText("Create Resource in Workspace");
+					fCreateResourceAction.setToolTipText("Create missing resource in the local project");
 				}
 
 				ISelection selection= getSelection();
 				if (selection instanceof IStructuredSelection) {
 					IStructuredSelection ss= (IStructuredSelection)selection;
+
 					if (ss.size() == 1) {
 						Object element= ss.getFirstElement();
 						if (element instanceof MyDiffNode) {
 							MyDiffNode diffNode = (MyDiffNode) element;
 							ITypedElement te= diffNode.getId();
 							if (te != null) {
-								if (ITypedElement.FOLDER_TYPE.equals(te.getType())) {
-									if (diffNode.getRight() == null) {
-										manager.add(fCreateFolderAction);
-									}
-								} else {
+								if (diffNode.getRight() == null) {
+									manager.add(fCreateResourceAction);
+									fCreateResourceAction.setEnabled(true);
+								}
+								if (!ITypedElement.FOLDER_TYPE.equals(te.getType())) {
 									manager.add(fOpenAction);
 								}
 							}
 						}
+					} else {
+						manager.add(fCreateResourceAction);
+						Object[] selectedElements = ss.toArray();
+						boolean enabled = true;
+						for (int i = 0; enabled && i < selectedElements.length; i++) {
+							if (selectedElements[i] instanceof MyDiffNode) {
+								MyDiffNode diffNode = (MyDiffNode) selectedElements[i];
+								enabled = diffNode.getRight() == null;
+							} else {
+								enabled = false;
+							}
+						}
+						fCreateResourceAction.setEnabled(enabled);
 					}
 				}
 
@@ -378,10 +392,6 @@ public class ResourceCompareInput extends CompareEditorInput {
 					}
 				}
 				super.initialSelection();
-			}
-
-			private void handleCreateFolder() {
-				copySelected(true);
 			}
 
 		};
