@@ -7,7 +7,7 @@
       <javaCompletionProposalComputer
             class="org.springframework.ide.eclipse.boot.templates.BootTemplateCompletionProposalComputer"
             activate="true"
-			categoryId="org.eclipse.jdt.ui.templateProposalCategory">
+			categoryId="org.eclipse.jdt.ui.templateProposalCategory" requiresUIThread="false">
 			<partition type="__dftl_partition_content_type"/>
       </javaCompletionProposalComputer>
     </extension>
