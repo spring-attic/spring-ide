@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugModelPresentation;
@@ -34,12 +33,9 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.ManifestDiffDialog;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
-import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
-import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel.Result;
 import org.springframework.ide.eclipse.boot.dash.dialogs.SelectRemoteEurekaDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialogModel;
@@ -47,7 +43,6 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashTreeContentProvider;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
-import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.ui.UiUtil;
 
 /**
@@ -255,24 +250,6 @@ public class DefaultUserInteractions implements UserInteractions {
 
 	protected IPreferenceStore getPreferencesStore() {
 		return BootDashActivator.getDefault().getPreferenceStore();
-	}
-
-	@Override
-	public Result openManifestDiffDialog(ManifestDiffDialogModel model) throws CoreException {
-		LiveVariable<Integer> resultCode = new LiveVariable<>();
-		LiveVariable<Throwable> error = new LiveVariable<>();
-		getShell().getDisplay().syncExec(() -> {
-			try {
-				resultCode.setValue(new ManifestDiffDialog(getShell(), model).open());
-			} catch (Exception e) {
-				error.setValue(e);
-			}
-		});
-		if (error.getValue()!=null) {
-			throw ExceptionUtil.coreException(error.getValue());
-		} else {
-			return ManifestDiffDialog.getResultForCode(resultCode.getValue());
-		}
 	}
 
 	@Override

@@ -31,4 +31,6 @@ public interface CfUserInteractions {
 	ManifestDiffDialogModel.Result confirmReplaceApp(String title, CloudData cloudData, IFile manifestFile, CloudApplicationDeploymentProperties deploymentProperties)
 			throws OperationCanceledException, Exception;
 
+	ManifestDiffDialogModel.Result openManifestDiffDialog(ManifestDiffDialogModel model) throws Exception;
+
 }

@@ -6,6 +6,7 @@ import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.compare.CompareEditorInput;
 import org.eclipse.compare.structuremergeviewer.DiffNode;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -18,6 +19,7 @@ import org.eclipse.text.edits.TextEdit;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cf.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cf.deployment.CloudData;
+import org.springframework.ide.eclipse.boot.dash.cf.deployment.ManifestDiffDialog;
 import org.springframework.ide.eclipse.boot.dash.cf.deployment.YamlGraphDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cf.dialogs.CustomizeAppsManagerURLDialog;
 import org.springframework.ide.eclipse.boot.dash.cf.dialogs.CustomizeAppsManagerURLDialogModel;
@@ -25,7 +27,6 @@ import org.springframework.ide.eclipse.boot.dash.cf.dialogs.DeploymentProperties
 import org.springframework.ide.eclipse.boot.dash.cf.dialogs.DeploymentPropertiesDialogModel;
 import org.springframework.ide.eclipse.boot.dash.cf.dialogs.PasswordDialogModel;
 import org.springframework.ide.eclipse.boot.dash.cf.dialogs.UpdatePasswordDialog;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.ManifestDiffDialog;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlFileInput;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlInput;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
@@ -33,6 +34,7 @@ import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel.Result;
 import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions.UIContext;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 public class DefaultCfUserInteractions implements CfUserInteractions {
@@ -192,4 +194,24 @@ public class DefaultCfUserInteractions implements CfUserInteractions {
 	private boolean hasDeletedService(YamlGraphDeploymentProperties newDeployment, CloudApplicationDeploymentProperties oldDeployment) {
 		return !newDeployment.getServices().containsAll(oldDeployment.getServices());
 	}
+
+	@Override
+	public Result openManifestDiffDialog(ManifestDiffDialogModel model) throws CoreException {
+		LiveVariable<Integer> resultCode = new LiveVariable<>();
+		LiveVariable<Throwable> error = new LiveVariable<>();
+		getShell().getDisplay().syncExec(() -> {
+			try {
+				resultCode.setValue(new ManifestDiffDialog(getShell(), model).open());
+			} catch (Exception e) {
+				error.setValue(e);
+			}
+		});
+		if (error.getValue()!=null) {
+			throw ExceptionUtil.coreException(error.getValue());
+		} else {
+			return ManifestDiffDialog.getResultForCode(resultCode.getValue());
+		}
+	}
+
+
 }

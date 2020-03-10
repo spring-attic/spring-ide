@@ -357,7 +357,7 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 		return (LocalBootDashModel) getRunTargetModel(RunTargetTypes.LOCAL);
 	}
 
-	public void answerManifestDiffDialog(UserInteractions ui, Function<ManifestDiffDialogModel, ManifestDiffDialogModel.Result> answerer) throws Exception {
+	public void answerManifestDiffDialog(CfUserInteractions ui, Function<ManifestDiffDialogModel, ManifestDiffDialogModel.Result> answerer) throws Exception {
 		when(ui.openManifestDiffDialog(any()))
 		.thenAnswer(new Answer<ManifestDiffDialogModel.Result>() {
 			@Override

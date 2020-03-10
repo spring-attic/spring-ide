@@ -735,7 +735,7 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 
 						input.run(monitor);
 						ManifestDiffDialogModel model = new ManifestDiffDialogModel(input);
-						Result result = ui.openManifestDiffDialog(model);
+						Result result = cfUi().openManifestDiffDialog(model);
 						switch (result) {
 						case CANCELED:
 							throw new OperationCanceledException();

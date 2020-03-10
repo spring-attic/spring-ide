@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment;
+package org.springframework.ide.eclipse.boot.dash.cf.deployment;
 
 import org.eclipse.compare.CompareEditorInput;
 import org.eclipse.core.runtime.Assert;

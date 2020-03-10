@@ -19,7 +19,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialog;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
-import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ToggleFiltersDialogModel;
 
 /**
@@ -70,8 +69,6 @@ public interface UserInteractions {
 	 *  @param toggleMessage Message for the 'togle switch'.
 	 */
 	boolean yesNoWithToggle(String propertyKey, String title, String message, String toggleMessage);
-
-	ManifestDiffDialogModel.Result openManifestDiffDialog(ManifestDiffDialogModel model) throws Exception;
 
 	/**
 	 * Opens a {@link EditTemplateDialog} on given dialog model.
