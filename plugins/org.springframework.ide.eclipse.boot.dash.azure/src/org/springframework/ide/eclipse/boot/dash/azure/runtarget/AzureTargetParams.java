@@ -20,9 +20,9 @@ public class AzureTargetParams {
 
 	private AzureCredential credentials;
 	private String subscriptionId;
+	private String subscriptionName;
 	private String clusterId;
 	private String clusterName;
-	private String subscriptionName;
 
 	public AzureTargetParams() {}
 
@@ -30,6 +30,7 @@ public class AzureTargetParams {
 		super();
 		this.credentials = credentials;
 		this.subscriptionId = subscriptionId;
+		this.subscriptionName = subscriptionName;
 		this.clusterId = clusterId;
 		this.clusterName = clusterName;
 	}
@@ -70,4 +71,7 @@ public class AzureTargetParams {
 		return this.subscriptionName;
 	}
 
+	public void setSubscriptionName(String subscriptionName) {
+		this.subscriptionName = subscriptionName;
+	}
 }
