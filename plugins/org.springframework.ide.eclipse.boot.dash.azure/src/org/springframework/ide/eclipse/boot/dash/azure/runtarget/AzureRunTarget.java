@@ -15,20 +15,19 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.azure.BootDashAzurePlugin;
 import org.springframework.ide.eclipse.boot.dash.azure.client.STSAzureClient;
 import org.springframework.ide.eclipse.boot.dash.azure.client.SpringServiceClient;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
-import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet.Builder;
+import com.microsoft.azure.management.appplatform.v2019_05_01_preview.AppResource;
 
 public class AzureRunTarget extends AbstractRunTarget<AzureTargetParams> implements RemoteRunTarget<SpringServiceClient, AzureTargetParams> {
 
@@ -40,7 +39,8 @@ public class AzureRunTarget extends AbstractRunTarget<AzureTargetParams> impleme
 	 */
 	public AzureRunTarget(AzureRunTargetType type, STSAzureClient client) {
 		this(type, client.getTargetParams());
-		this.client.setValue(client.getSpringServiceClient());
+		SpringServiceClient connection = client.getSpringServiceClient();
+		this.client.setValue(connection);
 	}
 
 	/**
@@ -102,14 +102,6 @@ public class AzureRunTarget extends AbstractRunTarget<AzureTargetParams> impleme
 		client.removeListener(l);
 	}
 
-	public ImmutableSet<AzureAppElement> fetchApps() {
-//		SpringServiceClient client = this.client.getValue();
-//		if (client!=null) {
-//			client.getSpringManager().apps().listAsync(resourceGroupName, serviceName);
-//		}
-		return ImmutableSet.of();
-	}
-
 	@Override
 	public String getDisplayName() {
 		return getResourceGroupName() + " : "+getClusterName() + " ["+getSubscriptionName()+"]";
@@ -119,11 +111,11 @@ public class AzureRunTarget extends AbstractRunTarget<AzureTargetParams> impleme
 		return params.getSubscriptionName();
 	}
 
-	private String getClusterName() {
+	String getClusterName() {
 		return params.getClusterName();
 	}
 
-	private String getResourceGroupName() {
+	String getResourceGroupName() {
 		String clusterId = params.getClusterId();
 		// Example clusterId="/subscriptions/9036e83e-2238-42a4-9b2a-ecd80d4cc38d/resourceGroups/resource-test-dc/providers/Microsoft.AppPlatform/Spring/piggymetrics"
 		String[] parts = StringUtils.splitPreserveAllTokens(clusterId, '/');
