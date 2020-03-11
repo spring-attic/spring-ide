@@ -374,14 +374,16 @@ public abstract class AbstractBootLaunchConfigurationDelegate extends JavaLaunch
 
 	protected ILaunchConfiguration configureClassPathProviders(ILaunchConfiguration conf) throws CoreException {
 		IProject project = BootLaunchConfigurationDelegate.getProject(conf);
-		if (project.hasNature(SpringBootCore.M2E_NATURE)) {
-			conf = modify(conf, (ILaunchConfigurationWorkingCopy wc) -> {
-				enableMavenClasspathProviders(wc);
-			});
-		} else if (project.hasNature(SpringBootCore.BUILDSHIP_NATURE)) {
-			conf = modify(conf, wc -> {
-				enableGradleClasspathProviders(wc);
-			});
+		if (project!=null) {
+			if (project.hasNature(SpringBootCore.M2E_NATURE)) {
+				conf = modify(conf, (ILaunchConfigurationWorkingCopy wc) -> {
+					enableMavenClasspathProviders(wc);
+				});
+			} else if (project.hasNature(SpringBootCore.BUILDSHIP_NATURE)) {
+				conf = modify(conf, wc -> {
+					enableGradleClasspathProviders(wc);
+				});
+			}
 		}
 		return conf;
 	}
