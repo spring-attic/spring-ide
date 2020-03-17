@@ -37,7 +37,7 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
-import org.eclipse.jdt.launching.JavaLaunchDelegate;
+import org.eclipse.jdt.launching.sourcelookup.advanced.AdvancedJavaLaunchDelegate;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
@@ -46,7 +46,7 @@ import org.springframework.ide.eclipse.boot.util.ProcessTracker;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
-public abstract class AbstractBootLaunchConfigurationDelegate extends JavaLaunchDelegate {
+public abstract class AbstractBootLaunchConfigurationDelegate extends AdvancedJavaLaunchDelegate {
 
 	private static final String JDT_JAVA_APPLICATION = "org.eclipse.jdt.launching.localJavaApplication";
 
