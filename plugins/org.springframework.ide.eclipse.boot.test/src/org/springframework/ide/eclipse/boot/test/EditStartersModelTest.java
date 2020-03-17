@@ -103,7 +103,7 @@ import junit.framework.AssertionFailedError;
 @SuppressWarnings("restriction")
 public class EditStartersModelTest {
 
-	private static final String BOOT_CURRENT_RELEASE = "2.2.4.RELEASE";
+	private static final String BOOT_CURRENT_RELEASE = "2.2.5.RELEASE";
 	private static final String REPOSITORY = "repository";
 	private static final String REPOSITORIES = "repositories";
 	private MockInitializrService initializr = new MockInitializrService();
