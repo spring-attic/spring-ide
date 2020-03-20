@@ -1,11 +1,14 @@
 package org.springframework.ide.eclipse.boot.dash.model.remote;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IProject;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.RemoteBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -14,12 +17,22 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunT
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 
 public class GenericRemoteBootDashModel<Client, Params> extends RemoteBootDashModel {
+
+	private LiveSetVariable<String> existingAppIds = new LiveSetVariable<>();
+
+	DisposingFactory<String, GenericRemoteAppElement> elementFactory = new DisposingFactory<String, GenericRemoteAppElement>(existingAppIds) {
+		@Override
+		protected GenericRemoteAppElement create(String appId) {
+			return new GenericRemoteAppElement(GenericRemoteBootDashModel.this, appId);
+		}
+	};
 
 	private final ObservableSet<BootDashElement> elements;
 
@@ -34,12 +47,23 @@ public class GenericRemoteBootDashModel<Client, Params> extends RemoteBootDashMo
 	}
 
 	private ImmutableSet<BootDashElement> fetchApps() {
+		boolean debugFilter = Math.random() > 0.5;
 		Collection<App> apps = getRunTarget().fetchApps();
-		Builder<BootDashElement> bde = ImmutableSet.builder();
-		for (App app : apps) {
-			bde.add(new GenericRemoteAppElement(this, app));
+		if (debugFilter) {
+			apps = apps.stream().filter(app -> !app.getName().contains("service")).collect(Collectors.toList());
 		}
-		return bde.build();
+		Set<String> validAppIds = new HashSet<>();
+		for (App app : apps) {
+			validAppIds.add(app.getId());
+		}
+		existingAppIds.replaceAll(validAppIds);
+		Builder<BootDashElement> bdes = ImmutableSet.builder();
+		for (App app : apps) {
+			GenericRemoteAppElement bde = elementFactory.createOrGet(app.getId());
+			bde.setAppData(app);
+			bdes.add(bde);
+		}
+		return bdes.build();
 	}
 
 	@Override

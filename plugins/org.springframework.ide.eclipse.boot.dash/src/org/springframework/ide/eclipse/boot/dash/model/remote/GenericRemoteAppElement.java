@@ -2,6 +2,7 @@ package org.springframework.ide.eclipse.boot.dash.model.remote;
 
 import java.util.EnumSet;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -15,31 +16,43 @@ import org.springframework.ide.eclipse.boot.dash.model.actuator.env.LiveEnvModel
 import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 
 public class GenericRemoteAppElement extends WrappingBootDashElement<String> {
 
-	private App app;
+	private static AtomicInteger instances = new AtomicInteger();
+
+	private LiveVariable<App> app = new LiveVariable<>();
 
 	private LiveExpression<RunState> runState = new AsyncLiveExpression<RunState>(RunState.UNKNOWN) {
-		@Override
-		protected RunState compute() {
-			RunState v = app.fetchRunState();
-			System.out.println(app.getName() + " => "+v);
-			return v;
+
+		{
+			dependsOn(app);
 		}
 
+		@Override
+		protected RunState compute() {
+			App data = app.getValue();
+			if (data!=null) {
+				RunState v = data.fetchRunState();
+				System.out.println(data.getName() + " => "+v);
+				return v;
+			}
+			return RunState.UNKNOWN;
+		}
 	};
 
+	public GenericRemoteAppElement(GenericRemoteBootDashModel<?, ?> parent, String appId) {
+		super(parent, appId);
+		System.out.println("New GenericRemoteAppElement instances = " +instances.incrementAndGet());
 
-	public GenericRemoteAppElement(GenericRemoteBootDashModel<?, ?> parent, App app) {
-		super(parent, app.getId());
-		this.app = app;
-
-		runState.dependsOn(parent.getRunTarget().getClientExp());
-		runState.dependsOn(getBootDashModel().refreshCount());
+		app.dependsOn(parent.getRunTarget().getClientExp());
+		app.dependsOn(getBootDashModel().refreshCount());
 		addDisposableChild(runState);
 		addElementNotifier(runState);
-
+		onDispose(d -> {
+			System.out.println("Dispose GenericRemoteAppElement instances = " +instances.decrementAndGet());
+		});
 	}
 
 	@Override
@@ -49,7 +62,12 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> {
 
 	@Override
 	public String getName() {
-		return app.getName();
+		App data = app.getValue();
+		return data!=null?data.getName():"Uknown";
+	}
+
+	public void setAppData(App appData) {
+		this.app.setValue(appData);
 	}
 
 	@Override
