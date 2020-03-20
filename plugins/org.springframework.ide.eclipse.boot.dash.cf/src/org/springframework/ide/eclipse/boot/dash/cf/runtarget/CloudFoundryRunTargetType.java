@@ -32,6 +32,7 @@ import org.springframework.ide.eclipse.boot.dash.model.DefaultWizardModelUserInt
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.WizardModelUserInteractions;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.AbstractRemoteRemoteRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.AbstractRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
@@ -45,7 +46,7 @@ import com.google.gson.Gson;
 /**
  * @author Kris De Volder
  */
-public class CloudFoundryRunTargetType extends AbstractRunTargetType<CloudFoundryTargetProperties> implements RemoteRunTargetType<CloudFoundryTargetProperties>, Disposable {
+public class CloudFoundryRunTargetType extends AbstractRemoteRemoteRunTargetType<CloudFoundryTargetProperties> implements Disposable {
 
 	private static final ImageDescriptor SMALL_ICON = BootDashActivator.getImageDescriptor("icons/cloud_obj.png");
 
@@ -87,11 +88,6 @@ public class CloudFoundryRunTargetType extends AbstractRunTargetType<CloudFoundr
 
 	private BootDashModelContext context() {
 		return injections.getBean(BootDashModelContext.class);
-	}
-
-	@Override
-	public boolean canInstantiate() {
-		return true;
 	}
 
 	@Override
