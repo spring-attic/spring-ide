@@ -135,7 +135,6 @@ import reactor.core.publisher.Mono;
 public class CloudFoundryBootDashModel extends RemoteBootDashModel implements ModifiableModel {
 
 	private DebugStrategyManager cfDebugStrategies;
-	private IPropertyStore modelStore;
 
 	public static final String APP_TO_PROJECT_MAPPING = "projectToAppMapping";
 
@@ -306,9 +305,6 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 	public CloudFoundryBootDashModel(CloudFoundryRunTarget target, BootDashModelContext context, BootDashViewModel parent) {
 		super(target, parent);
 		cfDebugStrategies = new DebugStrategyManager(getDiContext().getBeans(DebugSupport.class), getViewModel());
-		RunTargetType type = target.getType();
-		IPropertyStore typeStore = PropertyStores.createForScope(type, context.getRunTargetProperties());
-		this.modelStore = PropertyStores.createSubStore(target.getId(), typeStore);
 		this.elementFactory = new CloudDashElementFactory(context, modelStore, this);
 		this.consoleManager = new CloudAppLogManager(target);
 		this.unsupportedPushProperties = new UnsupportedPushProperties();
@@ -944,10 +940,6 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 
 	public CloudDashElementFactory getElementFactory() {
 		return elementFactory;
-	}
-
-	public IPropertyStore getPropertyStore() {
-		return modelStore;
 	}
 
 	public void disconnect() {
