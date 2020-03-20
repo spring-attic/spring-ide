@@ -76,6 +76,10 @@ public class InitializrUrlBuilder {
 
 	private final String initializrUrl;
 
+	public static final String GRADLE_PROJECT = "gradle-project";
+
+	public static final String MAVEN_PROJECT = "maven-project";
+
 	public InitializrUrlBuilder(String initializrUrl) {
 		this.initializrUrl = initializrUrl;
 	}

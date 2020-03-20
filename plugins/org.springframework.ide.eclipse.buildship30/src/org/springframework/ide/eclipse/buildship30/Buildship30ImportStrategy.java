@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2015 Pivotal, Inc.
+ *  Copyright (c) 2015, 2020 Pivotal, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -24,7 +24,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.springframework.ide.eclipse.boot.wizard.content.BuildType;
 import org.springframework.ide.eclipse.boot.wizard.importing.ImportConfiguration;
@@ -32,7 +32,7 @@ import org.springframework.ide.eclipse.boot.wizard.importing.ImportStrategy;
 import org.springframework.ide.eclipse.boot.wizard.importing.ImportStrategyFactory;
 import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
 import org.springsource.ide.eclipse.commons.core.util.NatureUtils;
-import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 
 /**
@@ -41,7 +41,6 @@ import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
  *
  * @author Kris De Volder
  */
-@SuppressWarnings("restriction")
 public class Buildship30ImportStrategy extends ImportStrategy {
 
 	public Buildship30ImportStrategy(BuildType buildType, String name, String notInstalledMessage) {
@@ -69,7 +68,7 @@ public class Buildship30ImportStrategy extends ImportStrategy {
 					conf.getCodeSet().createAt(loc);
 
 					GradleBuild build = GradleCore.getWorkspace().createBuild(BuildConfiguration.forRootProjectDirectory(loc).build());
-					SynchronizationResult buildResult = build.synchronize(new SubProgressMonitor(mon, 9));
+					SynchronizationResult buildResult = build.synchronize(SubMonitor.convert(mon, 9));
 					if (buildResult.getStatus().isOK()) {
 						//For STS3 we should add spring nature? But what project? The buildresult doesn't tell us what was imported.
 						//We try to work around this by looking for the project in the workspace by its location.

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+   <extension-point id="org.springframework.ide.eclipse.boot.project" name="Boot Project" schema="schema/org.springframework.ide.eclipse.boot.project.exsd"/>
   
  
   
@@ -266,6 +267,10 @@
          </visibleWhen>
       </command>
    </menuContribution>
+</extension>
+<extension
+      point="org.springframework.ide.eclipse.boot.project">
+      <project nature="org.eclipse.m2e.core.maven2Nature" projectClass="org.springframework.ide.eclipse.boot.core.internal.MavenSpringBootProject"></project>
 </extension>
 
 </plugin>

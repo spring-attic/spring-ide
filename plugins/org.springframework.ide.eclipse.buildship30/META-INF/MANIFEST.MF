@@ -16,4 +16,10 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jface,
  org.apache.commons.io,
  org.eclipse.buildship.core;bundle-version="[3.0.0,4.0.0)";resolution:=optional,
- org.eclipse.ui.workbench
+ org.eclipse.ui.workbench,
+ com.google.guava,
+ org.springsource.ide.eclipse.commons.livexp,
+ org.springframework.ide.eclipse.boot;bundle-version="3.9.12"
+Bundle-ClassPath: gradle-plugin/sts-gradle-model-plugin.jar,
+ .
+Bundle-Activator: org.springframework.ide.eclipse.buildship30.Buildship30Plugin

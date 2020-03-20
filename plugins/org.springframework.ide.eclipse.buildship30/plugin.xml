@@ -22,4 +22,11 @@
              name="Buildship 3.x">
        </import-strategy>
     </extension>
+    <extension
+          point="org.springframework.ide.eclipse.boot.project">
+       <project
+             nature="org.eclipse.buildship.core.gradleprojectnature"
+             projectClass="org.springframework.ide.eclipse.buildship30.GradleSpringBootProject">
+       </project>
+    </extension>
 </plugin>
