@@ -17,8 +17,6 @@ import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 
-import com.google.common.collect.ImmutableMap;
-
 /**
  * A RemoteAppsDataHolder provides the means to connect providers of RemoteAppData
  * with consumers of RemoteAppData. At present there is one consumer and two producers.

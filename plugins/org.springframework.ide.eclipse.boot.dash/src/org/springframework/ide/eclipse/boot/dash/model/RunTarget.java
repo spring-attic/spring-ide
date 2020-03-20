@@ -49,7 +49,7 @@ public interface RunTarget<Params> extends IdAble, Nameable, Disposable {
 	 * Factory method to create the model for the 'elements tabel' of this run
 	 * target.
 	 */
-	public abstract BootDashModel createSectionModel(BootDashModelContext context, BootDashViewModel parent);
+	public abstract BootDashModel createSectionModel(BootDashViewModel parent);
 
 	/**
 	 *

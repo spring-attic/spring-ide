@@ -87,7 +87,7 @@ public class BootDashModelManager implements Disposable {
 
 				for (Entry<String, RunTarget> entry : currentTargetsPerId.entrySet()) {
 					if (modelsPerTargetId.get(entry.getKey()) == null) {
-						BootDashModel model = entry.getValue().createSectionModel(context, viewModel);
+						BootDashModel model = entry.getValue().createSectionModel(viewModel);
 						if (model != null) {
 							modelsPerTargetId.put(entry.getKey(), model);
 							hasChanged = true;

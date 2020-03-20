@@ -149,10 +149,12 @@ public class CloudFoundryRunTarget extends AbstractRunTarget<CloudFoundryTargetP
 		return cachedClient.getValue() != null;
 	}
 
+	@Override
 	public void addConnectionStateListener(ValueListener<ClientRequests> l) {
 		cachedClient.addListener(l);
 	}
 
+	@Override
 	public void removeConnectionStateListener(ValueListener<ClientRequests> l) {
 		cachedClient.removeListener(l);
 	}
@@ -183,8 +185,8 @@ public class CloudFoundryRunTarget extends AbstractRunTarget<CloudFoundryTargetP
 	}
 
 	@Override
-	public AbstractBootDashModel createSectionModel(BootDashModelContext context, BootDashViewModel parent) {
-		return new CloudFoundryBootDashModel(this, context, parent);
+	public AbstractBootDashModel createSectionModel(BootDashViewModel parent) {
+		return new CloudFoundryBootDashModel(this, parent.getContext(), parent);
 	}
 
 	@Override

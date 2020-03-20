@@ -51,8 +51,8 @@ public class LocalRunTarget extends AbstractRunTarget<Void> {
 	}
 
 	@Override
-	public BootDashModel createSectionModel(BootDashModelContext context, BootDashViewModel viewModel) {
-		return new LocalBootDashModel(context, viewModel);
+	public BootDashModel createSectionModel(BootDashViewModel viewModel) {
+		return new LocalBootDashModel(viewModel.getContext(), viewModel);
 	}
 
 	@Override
