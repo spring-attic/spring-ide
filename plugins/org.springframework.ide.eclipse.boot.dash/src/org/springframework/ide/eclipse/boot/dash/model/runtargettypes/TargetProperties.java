@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.model.runtargettypes;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 

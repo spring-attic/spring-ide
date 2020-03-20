@@ -13,9 +13,9 @@ package org.springframework.ide.eclipse.boot.dash.metadata;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultSecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.pstore.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.pstore.PreferenceBasedStore;
 

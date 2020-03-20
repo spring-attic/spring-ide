@@ -15,7 +15,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.ArrayEncoder;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;

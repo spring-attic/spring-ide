@@ -38,6 +38,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.api.App;
+import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFBuildpack;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFSpace;
@@ -55,7 +57,6 @@ import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -63,6 +64,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 import org.springsource.ide.eclipse.commons.ui.UiUtil;
+
+import com.google.common.collect.ImmutableSet;
 
 public class CloudFoundryRunTarget extends AbstractRunTarget<CloudFoundryTargetProperties> implements RunTargetWithProperties<CloudFoundryTargetProperties>, RemoteRunTarget<ClientRequests, CloudFoundryTargetProperties> {
 
@@ -147,16 +150,6 @@ public class CloudFoundryRunTarget extends AbstractRunTarget<CloudFoundryTargetP
 	@Override
 	public boolean isConnected() {
 		return cachedClient.getValue() != null;
-	}
-
-	@Override
-	public void addConnectionStateListener(ValueListener<ClientRequests> l) {
-		cachedClient.addListener(l);
-	}
-
-	@Override
-	public void removeConnectionStateListener(ValueListener<ClientRequests> l) {
-		cachedClient.removeListener(l);
 	}
 
 	public Version getCCApiVersion() {
@@ -420,5 +413,12 @@ public class CloudFoundryRunTarget extends AbstractRunTarget<CloudFoundryTargetP
 	@Override
 	public CloudFoundryTargetProperties getParams() {
 		return this.targetProperties;
+	}
+
+	@Override
+	public Collection<App> fetchApps() {
+		//TODO: migrate CF to use GenericRemoteBootDashModel. And then this should be implement based on
+		// how CFBootDashModel fetches apps.
+		return ImmutableSet.of();
 	}
 }

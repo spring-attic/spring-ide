@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cf.runtarget;
 
+import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFClientParams;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFSpace;
@@ -17,7 +18,6 @@ import org.springframework.ide.eclipse.boot.dash.cf.dialogs.StoreCredentialsMode
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
 
 import com.google.gson.Gson;

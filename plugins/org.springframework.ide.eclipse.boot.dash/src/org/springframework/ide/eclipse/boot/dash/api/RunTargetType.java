@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.model.runtargettypes;
+package org.springframework.ide.eclipse.boot.dash.api;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;

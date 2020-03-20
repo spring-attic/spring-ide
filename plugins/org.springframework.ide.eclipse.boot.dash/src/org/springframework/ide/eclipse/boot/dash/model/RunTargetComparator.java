@@ -13,7 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.model;
 import java.util.Comparator;
 import java.util.List;
 
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.util.OrderBasedComparator;
 
 public class RunTargetComparator implements Comparator<RunTarget> {

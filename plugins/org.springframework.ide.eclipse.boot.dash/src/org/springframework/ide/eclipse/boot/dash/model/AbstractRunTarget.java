@@ -14,7 +14,7 @@ import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashC
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
 
 import org.eclipse.core.runtime.Assert;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.util.template.Template;
 import org.springframework.ide.eclipse.boot.dash.util.template.TemplateEnv;
 import org.springframework.ide.eclipse.boot.dash.util.template.Templates;

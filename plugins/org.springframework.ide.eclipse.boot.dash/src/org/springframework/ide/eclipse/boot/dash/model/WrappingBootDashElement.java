@@ -156,7 +156,7 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 	public final void setDefaultRequestMappingPath(String defaultPath) {
 		try {
 			getPersistentProperties().put(DEFAULT_RM_PATH_KEY, defaultPath);
-			bootDashModel.notifyElementChanged(this, "setDefaultRequestMappingPath");
+			getBootDashModel().notifyElementChanged(this, "setDefaultRequestMappingPath");
 		} catch (Exception e) {
 			BootDashActivator.log(e);
 		}

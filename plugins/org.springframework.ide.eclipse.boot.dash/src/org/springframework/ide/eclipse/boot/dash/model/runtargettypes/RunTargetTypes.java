@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model.runtargettypes;
 
+import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
+
 public class RunTargetTypes {
 
 	//TODO: Get rid of the 'LOCAL' contstants in this class.

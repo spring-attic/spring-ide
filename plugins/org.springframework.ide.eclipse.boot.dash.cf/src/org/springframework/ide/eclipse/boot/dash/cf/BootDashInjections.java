@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cf;
 
+import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cf.actions.CfBootDashActions;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.cf.client.v2.DefaultCloudFoundryClientFactoryV2;
@@ -27,7 +28,6 @@ import org.springframework.ide.eclipse.boot.dash.di.EclipseBeanLoader.Contributi
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.labels.BootDashLabels;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultBootDashModelContext;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.remoteapps.RemoteBootAppsDataHolder;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 

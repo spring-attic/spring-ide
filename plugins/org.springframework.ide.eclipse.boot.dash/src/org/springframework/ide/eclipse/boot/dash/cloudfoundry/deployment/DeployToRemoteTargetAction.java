@@ -54,7 +54,7 @@ public class DeployToRemoteTargetAction<Client, Params> extends AbstractBootDash
 			}
 		};
 
-		target.addConnectionStateListener(connectionListener);
+		target.getClientExp().addListener(connectionListener);
 		updateEnablement();
 	}
 
@@ -93,7 +93,7 @@ public class DeployToRemoteTargetAction<Client, Params> extends AbstractBootDash
 
 	@Override
 	public void dispose() {
-		target.removeConnectionStateListener(connectionListener);
+		target.getClientExp().removeListener(connectionListener);
 		super.dispose();
 	}
 

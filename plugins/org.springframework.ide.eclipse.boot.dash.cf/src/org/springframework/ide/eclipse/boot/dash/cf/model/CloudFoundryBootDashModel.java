@@ -56,6 +56,7 @@ import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFCloudDomain;
@@ -105,7 +106,6 @@ import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
@@ -313,7 +313,7 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 		this.consoleManager = new CloudAppLogManager(target);
 		this.unsupportedPushProperties = new UnsupportedPushProperties();
 		this.debugTargetDisconnector = DevtoolsUtil.createDebugTargetDisconnector(this);
-		getRunTarget().addConnectionStateListener(RUN_TARGET_CONNECTION_LISTENER);
+		getRunTarget().getClientExp().addListener(RUN_TARGET_CONNECTION_LISTENER);
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_CHANGE);
 		try {
 			if (getRunTarget().getTargetProperties().get(CloudFoundryTargetProperties.DISCONNECTED) == null
@@ -378,7 +378,7 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 
 	@Override
 	public void dispose() {
-		getRunTarget().removeConnectionStateListener(RUN_TARGET_CONNECTION_LISTENER);
+		getRunTarget().getClientExp().removeListener(RUN_TARGET_CONNECTION_LISTENER);
 		if (debugTargetDisconnector!=null) {
 			debugTargetDisconnector.dispose();
 			debugTargetDisconnector = null;

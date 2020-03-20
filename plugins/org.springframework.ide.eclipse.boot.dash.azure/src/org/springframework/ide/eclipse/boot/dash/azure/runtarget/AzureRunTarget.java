@@ -10,11 +10,14 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.azure.runtarget;
 
+import java.util.Collection;
+
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.azure.BootDashAzurePlugin;
 import org.springframework.ide.eclipse.boot.dash.azure.client.STSAzureClient;
 import org.springframework.ide.eclipse.boot.dash.azure.client.SpringServiceClient;
@@ -22,13 +25,21 @@ import org.springframework.ide.eclipse.boot.dash.model.AbstractRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.remote.GenericRemoteBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
-import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
+
+import com.google.common.collect.ImmutableSet;
+import com.microsoft.azure.management.appplatform.v2019_05_01_preview.AppResource;
 
 public class AzureRunTarget extends AbstractRunTarget<AzureTargetParams> implements RemoteRunTarget<SpringServiceClient, AzureTargetParams> {
 
 	private final AzureTargetParams params;
-	protected final LiveVariable<SpringServiceClient> client = new LiveVariable<>();
+	private final LiveVariable<SpringServiceClient> client = new LiveVariable<>();
+
+	@Override
+	public LiveExpression<SpringServiceClient> getClientExp() {
+		return client;
+	}
 
 	/**
 	 * Creates a target in 'connected' state.
@@ -83,22 +94,6 @@ public class AzureRunTarget extends AbstractRunTarget<AzureTargetParams> impleme
 	}
 
 	@Override
-	public boolean isConnected() {
-		SpringServiceClient connection = client.getValue();
-		return connection!=null;
-	}
-
-	@Override
-	public void addConnectionStateListener(ValueListener<SpringServiceClient> l) {
-		client.addListener(l);
-	}
-
-	@Override
-	public void removeConnectionStateListener(ValueListener<SpringServiceClient> l) {
-		client.removeListener(l);
-	}
-
-	@Override
 	public String getDisplayName() {
 		return getResourceGroupName() + " : "+getClusterName() + " ["+getSubscriptionName()+"]";
 	}
@@ -125,5 +120,23 @@ public class AzureRunTarget extends AbstractRunTarget<AzureTargetParams> impleme
 		} else {
 			return BootDashAzurePlugin.getImageDescriptor("icons/azure-inactive.png");
 		}
+	}
+
+	@Override
+	public Collection<App> fetchApps() {
+		SpringServiceClient client = this.getClient();
+		if (client!=null) {
+			String resourceGroupName = getResourceGroupName();
+			String serviceName = getClusterName();
+			Iterable<AppResource> apps = client.getSpringManager().apps().listAsync(resourceGroupName, serviceName).toBlocking().toIterable();
+			ImmutableSet.Builder<App> builder = ImmutableSet.builder();
+			for (AppResource appResource : apps) {
+				System.out.println(appResource);
+				System.out.println(appResource.properties().provisioningState());
+				builder.add(new AzureApp(this, appResource));
+			}
+			return builder.build();
+		}
+		return ImmutableSet.of();
 	}
 }

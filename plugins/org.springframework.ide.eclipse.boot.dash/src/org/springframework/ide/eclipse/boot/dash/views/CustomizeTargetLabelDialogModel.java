@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
+import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 
 /**
  * Model of the dialog opened by {@link CustmomizeTargetLabelAction}. Has all the functionality

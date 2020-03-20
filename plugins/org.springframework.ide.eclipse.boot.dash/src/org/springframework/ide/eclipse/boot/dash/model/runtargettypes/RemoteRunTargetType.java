@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model.runtargettypes;
 
+import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 
 public interface RemoteRunTargetType<P> extends RunTargetType<P> {

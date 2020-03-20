@@ -18,13 +18,13 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.DeletionCapabableModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
