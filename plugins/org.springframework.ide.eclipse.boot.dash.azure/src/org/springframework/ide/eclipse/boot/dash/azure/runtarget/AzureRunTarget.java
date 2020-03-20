@@ -25,10 +25,6 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunT
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSet.Builder;
-import com.microsoft.azure.management.appplatform.v2019_05_01_preview.AppResource;
-
 public class AzureRunTarget extends AbstractRunTarget<AzureTargetParams> implements RemoteRunTarget<SpringServiceClient, AzureTargetParams> {
 
 	private final AzureTargetParams params;
