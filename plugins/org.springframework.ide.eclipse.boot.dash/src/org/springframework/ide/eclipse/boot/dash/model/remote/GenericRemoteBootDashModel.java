@@ -3,7 +3,6 @@ package org.springframework.ide.eclipse.boot.dash.model.remote;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IProject;
 import org.springframework.ide.eclipse.boot.dash.api.App;
@@ -36,22 +35,20 @@ public class GenericRemoteBootDashModel<Client, Params> extends RemoteBootDashMo
 
 	private final ObservableSet<BootDashElement> elements;
 
+
 	public GenericRemoteBootDashModel(RemoteRunTarget<Client, Params> target, BootDashViewModel parent) {
 		super(target, parent);
 		elements = ObservableSet.<BootDashElement>builder()
 		.refresh(AsyncMode.ASYNC)
 		.compute(() -> fetchApps())
 		.build();
+		elements.dependsOn(getRunTarget().getClientExp());
 		//TODO: apps objects are never disposed. Should be disposed when they are removed as children from
 		// the 'apps' ObservableSet. Otherwise the are leaking listeners attached to the parent's liveexps.
 	}
 
 	private ImmutableSet<BootDashElement> fetchApps() {
-		boolean debugFilter = Math.random() > 0.5;
 		Collection<App> apps = getRunTarget().fetchApps();
-		if (debugFilter) {
-			apps = apps.stream().filter(app -> !app.getName().contains("service")).collect(Collectors.toList());
-		}
 		Set<String> validAppIds = new HashSet<>();
 		for (App app : apps) {
 			validAppIds.add(app.getId());
@@ -100,7 +97,7 @@ public class GenericRemoteBootDashModel<Client, Params> extends RemoteBootDashMo
 
 	@Override
 	public void connect() throws Exception {
-		throw new IllegalStateException("not yet implemented");
+		getRunTarget().connect();
 	}
 
 	@Override

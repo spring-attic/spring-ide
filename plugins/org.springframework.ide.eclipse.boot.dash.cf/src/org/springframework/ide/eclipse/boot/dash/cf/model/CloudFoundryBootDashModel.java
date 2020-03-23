@@ -272,8 +272,6 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 				for (CloudAppDashElement app : appsToRefresh) {
 					notifyElementChanged(app, "resourceChanged");
 				}
-			} catch (OperationCanceledException oce) {
-				Log.log(oce);
 			} catch (Exception e) {
 				Log.log(e);
 			}
@@ -284,13 +282,6 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 	public RefreshState getRefreshState() {
 		return refreshState.getValue();
 	}
-
-	final private ValueListener<ClientRequests> RUN_TARGET_CONNECTION_LISTENER = new ValueListener<ClientRequests>() {
-		@Override
-		public void gotValue(LiveExpression<ClientRequests> exp, ClientRequests value) {
-			CloudFoundryBootDashModel.this.notifyModelStateChanged();
-		}
-	};
 
 	private DisposingFactory<BootDashElement, LiveExpression<URI>> actuatorUrlFactory;
 
@@ -306,7 +297,6 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 		this.consoleManager = new CloudAppLogManager(target);
 		this.unsupportedPushProperties = new UnsupportedPushProperties();
 		this.debugTargetDisconnector = DevtoolsUtil.createDebugTargetDisconnector(this);
-		getRunTarget().getClientExp().addListener(RUN_TARGET_CONNECTION_LISTENER);
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_CHANGE);
 		try {
 			if (getRunTarget().getTargetProperties().get(CloudFoundryTargetProperties.DISCONNECTED) == null
@@ -371,7 +361,6 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 
 	@Override
 	public void dispose() {
-		getRunTarget().getClientExp().removeListener(RUN_TARGET_CONNECTION_LISTENER);
 		if (debugTargetDisconnector!=null) {
 			debugTargetDisconnector.dispose();
 			debugTargetDisconnector = null;

@@ -36,7 +36,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/azure-mgmt-msi-1.30.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/azure-mgmt-network-1.30.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/azure-mgmt-redis-1.30.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/azure-mgmt-resources-1.30.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/azure-mgmt-resources-1.30.0.jar" sourcepath="lib-src/azure-mgmt-resources-1.30.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/azure-mgmt-search-1.30.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/azure-mgmt-servicebus-1.30.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/azure-mgmt-sql-1.30.0.jar"/>

@@ -8,9 +8,12 @@ package org.springframework.ide.eclipse.boot.dash.azure.client;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.ide.eclipse.boot.dash.azure.runtarget.AzureRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.azure.runtarget.AzureTargetParams;
 
 import com.microsoft.azure.PagedList;
@@ -51,6 +54,14 @@ public class SpringServiceClient {
 //    public SpringAppClient newSpringAppClient(SpringConfiguration configuration) {
 //        return newSpringAppClient(configuration.getSubscriptionId(), configuration.getClusterName(), configuration.getAppName());
 //    }
+
+    public ServiceResourceInner getClusterById(String id) {
+    	String resourceGroupName = AzureRunTargetType.getResourceGroupName(id);
+    	String serviceName = AzureRunTargetType.getServiceName(id);
+
+    	return getSpringManager().inner().services()
+    			.getByResourceGroup(resourceGroupName, serviceName);
+    }
 
     public List<ServiceResourceInner> getAvailableClusters() {
         final PagedList<ServiceResourceInner> clusterList = getSpringManager().inner().services().list();

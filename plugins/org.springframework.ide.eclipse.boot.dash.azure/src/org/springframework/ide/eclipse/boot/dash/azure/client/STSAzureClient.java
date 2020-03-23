@@ -60,7 +60,9 @@ public class STSAzureClient {
 	private void getAuthTokens() throws Exception {
 		final AzureEnvironment environment = AzureEnvironment.AZURE;
 //        try {
+		if (this.credentials==null) {
             this.credentials = AzureAuthHelper.oAuthLogin(environment);
+		}
 
          // We can't use the deviceLogin helper as is because it prints to sysout to interact with the user
          // and instructing them to get paste a auth code into a browser.
@@ -80,15 +82,6 @@ public class STSAzureClient {
     private String getUserAgent() {
     	return "spring-tool-suite/4.1.5-testing";
 	}
-
-	private void selectAppCluster() throws Exception {
-        final List<ServiceResourceInner> clusters = getSpringServiceClient().getAvailableClusters();
-        for (ServiceResourceInner cluster : clusters) {
-        	System.out.println(cluster.name() +" [type: "+cluster.type()+"]");
-		}
-    }
-
-
 
 
 //	public STSAzureClient connect(UserInteractions ui) throws Exception {
@@ -125,7 +118,7 @@ public class STSAzureClient {
 	/**
 	 * Connect to azure with credentials obtained by prompting the user
 	 */
-	public boolean login(UserInteractions ui) {
+	static public boolean login(UserInteractions ui) {
 		try {
 			if (ui.confirmOperation("Obtaining Credentials via OAuth",
 					"To access your Azure Spring Cloud subscriptions, resources and services, " +
@@ -163,6 +156,17 @@ public class STSAzureClient {
 				cluster.id(),
 				cluster.name()
 		);
+	}
+
+	public void reconnect(AzureTargetParams params) throws Exception {
+		this.credentials = params.getCredentials();
+		this.authenticate();
+		this.setSubscription(azure.subscriptions().getById(params.getSubscriptionId()));
+		this.setCluster(getSpringServiceClient().getClusterById(params.getClusterId()));
+	}
+
+	private Subscription getSubsription(String subscriptionId) {
+		return azure.subscriptions().getById(subscriptionId);
 	}
 
 }

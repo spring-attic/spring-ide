@@ -19,5 +19,20 @@ public interface RemoteRunTarget<Client, Params> extends RunTarget<Params> {
 	 * Typically long-running (network access), avoid calling in UI thread).
 	 */
 	Collection<App> fetchApps();
+
+	/**
+	 * Disconnects the remote target and removes/disposes its
+	 * client.
+	 */
 	void disconnect();
+
+	/**
+	 * Attempts to connects to remote target. When succesful a 'client'
+	 * is created in the process and this client is subsequently available
+	 * as the value of the getClient LiveExp.
+	 * <p>
+	 * May throw an exception signaling that something went wrong
+	 * trying to connect.
+	 */
+	void connect() throws Exception;
 }

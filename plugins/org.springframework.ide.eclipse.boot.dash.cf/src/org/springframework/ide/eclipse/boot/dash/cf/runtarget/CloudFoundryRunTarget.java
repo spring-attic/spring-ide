@@ -17,7 +17,6 @@ import static org.springframework.ide.eclipse.boot.dash.model.RunState.RUNNING;
 import static org.springframework.ide.eclipse.boot.dash.model.RunState.STARTING;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.DEFAULT_PATH;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.INSTANCES;
-
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.NAME;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.PROJECT;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
@@ -51,7 +50,6 @@ import org.springframework.ide.eclipse.boot.dash.cf.model.CloudFoundryBootDashMo
 import org.springframework.ide.eclipse.boot.dash.livexp.OldValueDisposer;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractRunTarget;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
@@ -61,7 +59,6 @@ import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
-import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 import org.springsource.ide.eclipse.commons.ui.UiUtil;
 
@@ -99,6 +96,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget<CloudFoundryTargetP
 		return null;
 	}
 
+	@Override
 	public ClientRequests getClient() {
 		return cachedClient.getValue();
 	}
@@ -118,6 +116,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget<CloudFoundryTargetP
 		}
 	}
 
+	@Override
 	public void disconnect() {
 		this.domains = null;
 		this.spaces = null;
@@ -200,13 +199,6 @@ public class CloudFoundryRunTarget extends AbstractRunTarget<CloudFoundryTargetP
 	@Override
 	public boolean canDeployAppsFrom() {
 		return false;
-	}
-
-	@Override
-	public void refresh() throws Exception {
-		// Fetching a new client always validates the CF credentials
-		disconnect();
-		connect();
 	}
 
 	@Override
@@ -381,6 +373,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget<CloudFoundryTargetP
 		}
 	}
 
+	@Override
 	public LiveExpression<ClientRequests> getClientExp() {
 		return cachedClient;
 	}

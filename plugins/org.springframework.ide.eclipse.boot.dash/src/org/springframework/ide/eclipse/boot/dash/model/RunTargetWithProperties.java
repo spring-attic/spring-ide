@@ -22,14 +22,6 @@ public interface RunTargetWithProperties<Params> extends RunTarget<Params> {
 	public TargetProperties getTargetProperties();
 
 	/**
-	 * Refresh the target properties.
-	 *
-	 * @throws Exception
-	 *             if refresh failed or target properties are invalid
-	 */
-	public void refresh() throws Exception;
-
-	/**
 	 *
 	 * @return true if the target requires credentials. False otherwise
 	 */

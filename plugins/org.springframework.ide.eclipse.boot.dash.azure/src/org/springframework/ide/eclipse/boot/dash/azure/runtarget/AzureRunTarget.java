@@ -108,9 +108,7 @@ public class AzureRunTarget extends AbstractRunTarget<AzureTargetParams> impleme
 
 	String getResourceGroupName() {
 		String clusterId = params.getClusterId();
-		// Example clusterId="/subscriptions/9036e83e-2238-42a4-9b2a-ecd80d4cc38d/resourceGroups/resource-test-dc/providers/Microsoft.AppPlatform/Spring/piggymetrics"
-		String[] parts = StringUtils.splitPreserveAllTokens(clusterId, '/');
-		return parts[4];
+		return AzureRunTargetType.getResourceGroupName(clusterId);
 	}
 
 	@Override
@@ -144,5 +142,12 @@ public class AzureRunTarget extends AbstractRunTarget<AzureTargetParams> impleme
 	public void disconnect() {
 		//SpringServiceClient c = client.getValue();
 		client.setValue(null);
+	}
+
+	@Override
+	public void connect() throws Exception {
+		STSAzureClient c = new STSAzureClient();
+		c.reconnect(getParams());
+		client.setValue(c.getSpringServiceClient());
 	}
 }

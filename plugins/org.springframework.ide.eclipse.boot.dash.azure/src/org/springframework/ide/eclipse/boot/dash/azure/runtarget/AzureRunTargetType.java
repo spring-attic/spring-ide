@@ -33,9 +33,17 @@ import com.microsoft.azure.management.resources.Subscription;
 public class AzureRunTargetType extends AbstractRemoteRemoteRunTargetType<AzureTargetParams> {
 
 	public static String getResourceGroupName(String serviceId) {
+		// Example clusterId="/subscriptions/9036e83e-2238-42a4-9b2a-ecd80d4cc38d/resourceGroups/resource-test-dc/providers/Microsoft.AppPlatform/Spring/piggymetrics"
 		String[] parts = StringUtils.splitPreserveAllTokens(serviceId, '/');
 		return parts[4];
 	}
+
+	public static String getServiceName(String serviceId) {
+		// Example clusterId="/subscriptions/9036e83e-2238-42a4-9b2a-ecd80d4cc38d/resourceGroups/resource-test-dc/providers/Microsoft.AppPlatform/Spring/piggymetrics"
+		String[] parts = StringUtils.splitPreserveAllTokens(serviceId, '/');
+		return parts[8];
+	}
+
 
 	public AzureRunTargetType(SimpleDIContext injections) {
 		super(injections, "Azure Spring Cloud");
