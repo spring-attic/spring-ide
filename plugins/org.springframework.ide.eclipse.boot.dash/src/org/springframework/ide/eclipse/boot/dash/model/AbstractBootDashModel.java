@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.model;
 import java.util.Comparator;
 
 import org.eclipse.core.runtime.ListenerList;
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -138,5 +139,13 @@ public abstract class AbstractBootDashModel extends AbstractDisposable implement
 	@Override
 	public final void performDoubleClickAction(UserInteractions ui) {
 		getRunTarget().performDoubleClickAction(ui);
+	}
+
+	protected final SimpleDIContext injections() {
+		return getViewModel().getContext().injections;
+	}
+
+	protected final UserInteractions ui() {
+		return injections().getBean(UserInteractions.class);
 	}
 }

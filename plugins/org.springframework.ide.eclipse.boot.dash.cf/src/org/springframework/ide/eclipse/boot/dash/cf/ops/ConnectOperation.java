@@ -54,7 +54,6 @@ public class ConnectOperation extends CloudOperation {
 				try {
 					model.setBaseRefreshState(RefreshState.loading("Connecting..."));
 					model.getRunTarget().connect();
-					model.refresh(ui());
 					model.getRunTarget().getTargetProperties().put(CloudFoundryTargetProperties.DISCONNECTED, null);
 					model.getViewModel().updateTargetPropertiesInStore();
 					model.setBaseRefreshState(RefreshState.READY);

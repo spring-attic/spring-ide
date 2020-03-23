@@ -20,7 +20,6 @@ import org.springframework.ide.eclipse.boot.dash.livexp.MultiSelection;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
-import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 

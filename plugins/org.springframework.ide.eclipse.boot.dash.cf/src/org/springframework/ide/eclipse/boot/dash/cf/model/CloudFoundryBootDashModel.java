@@ -106,7 +106,6 @@ import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
-import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
@@ -120,6 +119,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 import org.yaml.snakeyaml.Yaml;
 
 import com.google.common.collect.ImmutableList;
@@ -285,18 +285,14 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 
 	private DisposingFactory<BootDashElement, LiveExpression<URI>> actuatorUrlFactory;
 
-
-	private SimpleDIContext getDiContext() {
-		return getViewModel().getContext().injections;
-	}
-
 	public CloudFoundryBootDashModel(CloudFoundryRunTarget target, BootDashModelContext context, BootDashViewModel parent) {
 		super(target, parent);
-		cfDebugStrategies = new DebugStrategyManager(getDiContext().getBeans(DebugSupport.class), getViewModel());
+		cfDebugStrategies = new DebugStrategyManager(injections().getBeans(DebugSupport.class), getViewModel());
 		this.elementFactory = new CloudDashElementFactory(context, modelStore, this);
 		this.consoleManager = new CloudAppLogManager(target);
 		this.unsupportedPushProperties = new UnsupportedPushProperties();
 		this.debugTargetDisconnector = DevtoolsUtil.createDebugTargetDisconnector(this);
+		addDisposableChild(target.getClientExp().onChange((e,v) -> this.refresh(ui())));
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_CHANGE);
 		try {
 			if (getRunTarget().getTargetProperties().get(CloudFoundryTargetProperties.DISCONNECTED) == null
@@ -832,7 +828,7 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 	}
 
 	private CfUserInteractions cfUi() {
-		return getDiContext().getBean(CfUserInteractions.class);
+		return injections().getBean(CfUserInteractions.class);
 	}
 
 	public void addApplicationArchive(IProject project, CloudApplicationDeploymentProperties properties, CloudData cloudData,
