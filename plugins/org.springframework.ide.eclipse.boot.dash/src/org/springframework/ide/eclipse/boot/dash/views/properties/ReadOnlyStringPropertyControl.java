@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Pivotal, Inc.
+ * Copyright (c) 2016, 2020 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,23 +10,17 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views.properties;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
-
-import javax.inject.Provider;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.forms.events.HyperlinkAdapter;
-import org.eclipse.ui.forms.events.HyperlinkEvent;
-import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springsource.ide.eclipse.commons.ui.UiUtil;
 
 /**
  * URL control for property section composite
@@ -40,11 +34,13 @@ public class ReadOnlyStringPropertyControl<T extends BootDashElement> extends Ab
 
 	private final Class<T> type;
 	private final Function<T, String> getter;
+	private final boolean asyncRefresh;
 
-	public ReadOnlyStringPropertyControl(Class<T> type, String label, Function<T, String> getter) {
+	public ReadOnlyStringPropertyControl(Class<T> type, String label, Function<T, String> getter, boolean asyncRefresh) {
 		this.type = type;
 		this.label = label;
 		this.getter = getter;
+		this.asyncRefresh = asyncRefresh;
 	}
 
 	@Override
@@ -61,11 +57,24 @@ public class ReadOnlyStringPropertyControl<T extends BootDashElement> extends Ab
 	@Override
 	public void refreshControl() {
 		BootDashElement element = getBootDashElement();
+		// This must on the UI thread
+		final Display display = Display.getCurrent();
+		if (asyncRefresh) {
+			CompletableFuture.supplyAsync(() -> fetchValue(element)).thenAccept(text -> {
+				if (!display.isDisposed()) {
+					display.asyncExec(() -> updateUI(text));
+				}
+			});
+		} else {
+			updateUI(fetchValue(element));
+		}
+	}
+
+	private void updateUI(String text) {
 		if (value != null && !value.isDisposed()) {
-			String text = fetchValue(element);
 			value.setText(text);
 			int width = value.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
-			GridData data = GridDataFactory.copyData(((GridData)value.getLayoutData()));
+			GridData data = GridDataFactory.copyData(((GridData) value.getLayoutData()));
 			data.widthHint = width;
 			value.setLayoutData(data);
 			value.getParent().layout();
