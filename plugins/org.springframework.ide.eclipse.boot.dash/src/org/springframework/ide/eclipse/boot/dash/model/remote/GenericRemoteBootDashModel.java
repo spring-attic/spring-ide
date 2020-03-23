@@ -43,8 +43,6 @@ public class GenericRemoteBootDashModel<Client, Params> extends RemoteBootDashMo
 		.compute(() -> fetchApps())
 		.build();
 		elements.dependsOn(getRunTarget().getClientExp());
-		//TODO: apps objects are never disposed. Should be disposed when they are removed as children from
-		// the 'apps' ObservableSet. Otherwise the are leaking listeners attached to the parent's liveexps.
 	}
 
 	private ImmutableSet<BootDashElement> fetchApps() {
