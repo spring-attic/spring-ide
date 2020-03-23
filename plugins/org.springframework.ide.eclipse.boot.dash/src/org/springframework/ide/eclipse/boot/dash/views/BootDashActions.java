@@ -100,6 +100,8 @@ public class BootDashActions {
 
 	private List<AbstractBootDashAction> injectedActions;
 
+	private ToggleBootDashModelConnection connectAction;
+
 	public interface Factory {
 		Collection<AbstractBootDashAction> create(BootDashActions actions, BootDashViewModel model, MultiSelection<BootDashElement> selection, LiveExpression<BootDashModel> section, SimpleDIContext context, LiveProcessCommandsExecutor liveProcessCmds);
 	}
@@ -198,6 +200,7 @@ public class BootDashActions {
 		deleteConfigsAction.setToolTipText("Permantently deletes Launch Configgurations from the workspace");
 
 		if (sectionSelection != null) {
+			connectAction = new ToggleBootDashModelConnection(sectionSelection, context);
 			refreshAction = new RefreshRunTargetAction(sectionSelection, context);
 			removeTargetAction = new RemoveRunTargetAction(sectionSelection, model, context);
 			customizeTargetLabelAction = new CustmomizeTargetLabelAction(sectionSelection, context);
@@ -363,6 +366,10 @@ public class BootDashActions {
 
 	public AddRunTargetAction[] getAddRunTargetActions() {
 		return addTargetActions;
+	}
+
+	public ToggleBootDashModelConnection getConnectAction() {
+		return connectAction;
 	}
 
 	public IAction getRemoveRunTargetAction() {

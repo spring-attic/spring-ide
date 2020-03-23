@@ -139,4 +139,10 @@ public class AzureRunTarget extends AbstractRunTarget<AzureTargetParams> impleme
 		}
 		return ImmutableSet.of();
 	}
+
+	@Override
+	public void disconnect() {
+		//SpringServiceClient c = client.getValue();
+		client.setValue(null);
+	}
 }

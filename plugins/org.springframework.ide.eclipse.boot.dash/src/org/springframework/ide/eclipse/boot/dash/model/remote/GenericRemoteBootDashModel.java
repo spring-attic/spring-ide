@@ -98,4 +98,14 @@ public class GenericRemoteBootDashModel<Client, Params> extends RemoteBootDashMo
 		return elements.refreshCount();
 	}
 
+	@Override
+	public void connect() throws Exception {
+		throw new IllegalStateException("not yet implemented");
+	}
+
+	@Override
+	public void disconnect() {
+		getRunTarget().disconnect();
+	}
+
 }

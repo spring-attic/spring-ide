@@ -18,6 +18,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashAction;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
+import org.springframework.ide.eclipse.boot.dash.views.ToggleBootDashModelConnection;
 import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashElementsAction.Params;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
@@ -49,7 +50,6 @@ public class CfBootDashActions {
 		if (section!=null) {
 			builder.add(new UpdatePasswordAction(section, context));
 			builder.add(new OpenCloudAdminConsoleAction(section, context));
-			builder.add(new ToggleBootDashModelConnection(section, context));
 			builder.add(new CustmomizeTargetAppManagerURLAction(section, context));
 		}
 		return builder.build();

@@ -9,7 +9,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/asm-5.0.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/azure-1.30.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/azure-annotations-1.7.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/azure-arm-client-runtime-1.6.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/azure-arm-client-runtime-1.6.5.jar" sourcepath="lib-src/azure-arm-client-runtime-1.6.5-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/azure-auth-helper-0.2.0.jar" sourcepath="lib-src/azure-auth-helper-0.2.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/azure-client-authentication-1.6.15.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/azure-client-runtime-1.7.0.jar"/>

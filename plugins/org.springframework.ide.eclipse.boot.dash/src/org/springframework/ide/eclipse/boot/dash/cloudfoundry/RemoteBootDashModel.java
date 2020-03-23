@@ -20,6 +20,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget;
 import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
 
@@ -40,4 +41,14 @@ public abstract class RemoteBootDashModel extends AbstractBootDashModel {
 	public final IPropertyStore getPropertyStore() {
 		return modelStore;
 	}
+
+	@Override
+	public RemoteRunTarget<?,?> getRunTarget() {
+		return (RemoteRunTarget<?, ?>) super.getRunTarget();
+	}
+
+	public abstract void connect() throws Exception;
+
+	public abstract void disconnect();
+
 }
