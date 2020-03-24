@@ -23,12 +23,15 @@ import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrUrlBuilders;
 import org.springframework.ide.eclipse.boot.wizard.InitializrFactoryModel;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 public class AddStartersWizardModel {
+	private static final long MODEL_CREATION_TIMEOUT = 30000;
+
 	// Factory that creates the model.
 	private final InitializrFactoryModel<AddStartersModel> initializrFactory;
 
@@ -62,7 +65,19 @@ public class AddStartersWizardModel {
 
 	public void loadFromInitializr() {
 
-		AddStartersModel model = this.initializrFactory.getModel().getValue();
+		LiveExpression<AddStartersModel> modelLiveExpression = this.initializrFactory.getModel();
+
+		// Gradle project may need to take a bit of time to extract boot version from the model
+		long startTime = System.currentTimeMillis();
+		while (modelLiveExpression.getValue() == null && System.currentTimeMillis() - startTime < MODEL_CREATION_TIMEOUT) {
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				// Ignore
+			}
+		}
+
+		AddStartersModel model = modelLiveExpression.getValue();
 		if (model != null) {
 			try {
 				this.modelLoadingValidator
