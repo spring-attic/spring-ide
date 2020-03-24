@@ -15,6 +15,7 @@ import java.util.function.Function;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -29,6 +30,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
  */
 public class ReadOnlyStringPropertyControl<T extends BootDashElement> extends AbstractBdePropertyControl {
 
+	private static final String PLACEHOLDER_TEXT = "Getting value...";
 	private final String label;
 	private StyledText value;
 
@@ -50,7 +52,8 @@ public class ReadOnlyStringPropertyControl<T extends BootDashElement> extends Ab
 		page.getWidgetFactory().createLabel(composite, label).setLayoutData(GridDataFactory.fillDefaults().create()); //$NON-NLS-1$
 		value = new StyledText(composite, SWT.READ_ONLY);
 		value.setCaret(null);
-		value.setText("Getting value...");
+		value.setText(PLACEHOLDER_TEXT);
+		value.setStyleRange(new StyleRange(0, PLACEHOLDER_TEXT.length(), value.getDisplay().getSystemColor(SWT.COLOR_GRAY), null));
 		value.setLayoutData(GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.FILL).create());
 	}
 
