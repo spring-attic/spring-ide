@@ -66,7 +66,8 @@ public class AddStartersWizard extends Wizard implements IWorkbenchWizard {
 
 	@Override
 	public boolean performFinish() {
-		return wizardModel.performFinish();
+		 wizardModel.performOk();
+		 return true;
 	}
 
 	@Override

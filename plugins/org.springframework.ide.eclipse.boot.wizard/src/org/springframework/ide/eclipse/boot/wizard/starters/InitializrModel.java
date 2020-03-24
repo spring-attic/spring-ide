@@ -39,12 +39,11 @@ import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.StringFieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
-import org.springsource.ide.eclipse.commons.livexp.ui.OkButtonHandler;
 
 /**
  *
  */
-public class InitializrModel implements OkButtonHandler {
+public class InitializrModel  {
 
 	public static final Object JOB_FAMILY = "EditStartersModel.JOB_FAMILY";
 
@@ -52,7 +51,6 @@ public class InitializrModel implements OkButtonHandler {
 	private final ISpringBootProject bootProject;
 	private final PopularityTracker popularities;
 	private final DefaultDependencies defaultDependencies;
-	private Runnable okRunnable;
 
 	public final HierarchicalMultiSelectionFieldModel<Dependency> dependencies = new HierarchicalMultiSelectionFieldModel<>(
 			Dependency.class, "dependencies").label("Dependencies:");
@@ -84,21 +82,13 @@ public class InitializrModel implements OkButtonHandler {
 		return bootProject.getProject().getName();
 	}
 
-	@Override
-	public void performOk() {
+
+	public void updateDependencyCount() {
 		List<Dependency> selected = dependencies.getCurrentSelection();
 
 		for (Dependency s : selected) {
 			popularities.incrementUsageCount(s);
 		}
-
-		if (this.okRunnable != null) {
-			this.okRunnable.run();
-		}
-	}
-
-	public void onOkPressed(Runnable okRunnable) {
-		this.okRunnable = okRunnable;
 	}
 
 	/**

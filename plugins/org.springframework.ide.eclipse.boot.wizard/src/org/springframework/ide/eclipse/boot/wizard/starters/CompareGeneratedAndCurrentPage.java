@@ -100,7 +100,7 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 			editorInput.getCompareConfiguration().setProperty(ResourceCompareInput.OPEN_DIFF_NODE_COMPARE_SETTING, model.getCompareModel().diffFileToOpenInitially());
 
 			// Save the editor on ok pressed
-			model.onOkPressed(() -> {
+			wizardModel.onOkPressed(() -> {
 				if (editorInput.isSaveNeeded()) {
 					// This will save changes in the editor.
 					editorInput.okPressed();

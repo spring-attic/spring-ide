@@ -26,16 +26,19 @@ import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLC
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
+import org.springsource.ide.eclipse.commons.livexp.ui.OkButtonHandler;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
-public class AddStartersWizardModel {
+public class AddStartersWizardModel implements OkButtonHandler {
 	private static final long MODEL_CREATION_TIMEOUT = 30000;
 
 	// Factory that creates the model.
 	private final InitializrFactoryModel<InitializrModel> initializrFactory;
 
 	private final LiveVariable<ValidationResult> modelLoadingValidator = new LiveVariable<ValidationResult>();
+
+	private Runnable okRunnable;
 
 	public AddStartersWizardModel(IProject project, IPreferenceStore preferenceStore) throws Exception {
 
@@ -61,6 +64,23 @@ public class AddStartersWizardModel {
 				return null;
 			}
 		});
+	}
+
+	@Override
+	public void performOk() {
+		LiveExpression<InitializrModel> modelLiveExpression = this.initializrFactory.getModel();
+		InitializrModel model = modelLiveExpression.getValue();
+		if (model != null) {
+			model.updateDependencyCount();
+		}
+
+		if (this.okRunnable != null) {
+			this.okRunnable.run();
+		}
+	}
+
+	public void onOkPressed(Runnable okRunnable) {
+		this.okRunnable = okRunnable;
 	}
 
 	public void loadFromInitializr() {
@@ -128,11 +148,6 @@ public class AddStartersWizardModel {
 			return ValidationResult.error(message.toString());
 		}
 		return ValidationResult.from(ExceptionUtil.status(e));
-	}
-
-	public boolean performFinish() {
-		getInitializrFactoryModel().getModel().getValue().performOk();
-		return true;
 	}
 
 	public boolean canFinish() {
