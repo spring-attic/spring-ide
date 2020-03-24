@@ -59,7 +59,7 @@ public class DependencyPage extends WizardPageWithSections {
 		this.modelValidator = wizardModel.getValidator();
 	}
 
-	private void refreshFrequentlyUsedDependencies(AddStartersModel model) {
+	private void refreshFrequentlyUsedDependencies(InitializrModel model) {
 		List<CheckBoxModel<Dependency>> dependenciesCheckboxes = model.getFrequentlyUsedDependencies(MAX_MOST_POPULAR);
 		if (frequentlyUsedCheckboxes.isCreated()) {
 			frequentlyUsedCheckboxes.setModel(dependenciesCheckboxes);
@@ -74,7 +74,7 @@ public class DependencyPage extends WizardPageWithSections {
 		// live exp to also be called.
 		LiveExpression<IPageSection> pageCreationExp = modelValidator.apply((result) -> {
 			if (result != null) {
-				AddStartersModel model = wizardModel.getInitializrFactoryModel().getModel().getValue();
+				InitializrModel model = wizardModel.getInitializrFactoryModel().getModel().getValue();
 				if (model != null) {
 					List<WizardPageSection> sections = new ArrayList<>();
 					sections.add(createBootInfoSection(model));
@@ -127,13 +127,13 @@ public class DependencyPage extends WizardPageWithSections {
 		}
 	}
 
-	protected void createDynamicSections(AddStartersModel model, List<WizardPageSection> sections) {
+	protected void createDynamicSections(InitializrModel model, List<WizardPageSection> sections) {
 		sections.add(createFrequentlyUsedSection(model));
 		sections.add(createTwoColumnSection(model));
 	}
 
 	@SuppressWarnings("resource")
-	public WizardPageSection createTwoColumnSection(final AddStartersModel model) {
+	public WizardPageSection createTwoColumnSection(final InitializrModel model) {
 		return new GroupSection(this,null,
 				new GroupSection(this, null,
 						new CommentSection(this, "Available:"),
@@ -168,7 +168,7 @@ public class DependencyPage extends WizardPageWithSections {
 				.grabVertical(true);
 	}
 
-	protected WizardPageSection getSearchSection(final AddStartersModel model) {
+	protected WizardPageSection getSearchSection(final InitializrModel model) {
 		final SearchBoxSection searchBoxSection = new SearchBoxSection(this, model.searchBox.getText()) {
 			@Override
 			protected String getSearchHint() {
@@ -180,7 +180,7 @@ public class DependencyPage extends WizardPageWithSections {
 	}
 
 	@SuppressWarnings("resource")
-	protected WizardPageSection createFrequentlyUsedSection(AddStartersModel model) {
+	protected WizardPageSection createFrequentlyUsedSection(InitializrModel model) {
 		List<CheckBoxModel<Dependency>> frequentDependencies = model.getFrequentlyUsedDependencies(MAX_MOST_POPULAR);
 		frequentlyUsedCheckboxes = new CheckBoxesSection<>(this, frequentDependencies).columns(NUM_COLUMNS_FREQUENTLY_USED);
 		GroupSection frequentlyUsedSection = new GroupSection(this,
@@ -191,7 +191,7 @@ public class DependencyPage extends WizardPageWithSections {
 		return frequentlyUsedSection;
 	}
 
-	protected WizardPageSection createBootInfoSection(AddStartersModel model) {
+	protected WizardPageSection createBootInfoSection(InitializrModel model) {
 		LabeledPropertySection section = new LabeledPropertySection(this, model.getBootVersion());
 		return section;
 	}

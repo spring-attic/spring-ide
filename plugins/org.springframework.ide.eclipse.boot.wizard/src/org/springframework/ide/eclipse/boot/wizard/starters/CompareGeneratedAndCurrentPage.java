@@ -77,13 +77,13 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 		setControl(contentsContainer);
 	}
 
-	private void connectModelToUi(AddStartersModel model) {
+	private void connectModelToUi(InitializrModel model) {
 		AddStartersCompareModel compareModel = model.getCompareModel();
 		compareModel.getCompareResult().addListener(compareResultListener);
 		compareModel.getDownloadTracker().addListener(downloadStateListener);
 	}
 
-	private void disconnectFromUi(AddStartersModel model) {
+	private void disconnectFromUi(InitializrModel model) {
 		AddStartersCompareModel compareModel = model.getCompareModel();
 		compareModel.getCompareResult().removeListener(compareResultListener);
 		compareModel.getDownloadTracker().removeListener(downloadStateListener);
@@ -92,7 +92,7 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 	private void setupCompareViewer() {
 		try {
 
-			AddStartersModel model = wizardModel.getInitializrFactoryModel().getModel().getValue();
+			InitializrModel model = wizardModel.getInitializrFactoryModel().getModel().getValue();
 
 			// Transform the compare result from the model into a compare editor input
 			final CompareEditorInput editorInput = createCompareEditorInput(model.getCompareModel().getCompareResult().getValue());
@@ -174,7 +174,7 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 		// Connect the model to the UI only when the page becomes visible.
 		// If this connection is done before, either the UI controls may not yet be created
 		// or the model may not yet be available.
-		AddStartersModel model = wizardModel.getInitializrFactoryModel().getModel().getValue();
+		InitializrModel model = wizardModel.getInitializrFactoryModel().getModel().getValue();
 		if (visible) {
 			model.getCompareModel().initTrackers();
 			connectModelToUi(model);
@@ -197,7 +197,7 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 	@Override
 	public void dispose() {
 		super.dispose();
-		AddStartersModel model = wizardModel.getInitializrFactoryModel().getModel().getValue();
+		InitializrModel model = wizardModel.getInitializrFactoryModel().getModel().getValue();
 		if (model != null) {
 			model.dispose();
 		}

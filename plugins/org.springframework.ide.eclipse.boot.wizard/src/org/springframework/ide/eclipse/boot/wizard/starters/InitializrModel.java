@@ -44,7 +44,7 @@ import org.springsource.ide.eclipse.commons.livexp.ui.OkButtonHandler;
 /**
  *
  */
-public class AddStartersModel implements OkButtonHandler {
+public class InitializrModel implements OkButtonHandler {
 
 	public static final Object JOB_FAMILY = "EditStartersModel.JOB_FAMILY";
 
@@ -66,7 +66,7 @@ public class AddStartersModel implements OkButtonHandler {
 	 * selection.
 	 *
 	 */
-	public AddStartersModel(AddStartersCompareModel compareModel, ISpringBootProject bootProject,
+	public InitializrModel(AddStartersCompareModel compareModel, ISpringBootProject bootProject,
 			IPreferenceStore store) throws Exception {
 		this.popularities = new PopularityTracker(store);
 		this.defaultDependencies = new DefaultDependencies(store);

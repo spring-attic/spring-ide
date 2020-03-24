@@ -33,7 +33,7 @@ public class AddStartersWizardModel {
 	private static final long MODEL_CREATION_TIMEOUT = 30000;
 
 	// Factory that creates the model.
-	private final InitializrFactoryModel<AddStartersModel> initializrFactory;
+	private final InitializrFactoryModel<InitializrModel> initializrFactory;
 
 	private final LiveVariable<ValidationResult> modelLoadingValidator = new LiveVariable<ValidationResult>();
 
@@ -54,7 +54,7 @@ public class AddStartersWizardModel {
 				ISpringBootProject bootProject = core.project(project);
 
 				AddStartersCompareModel compareModel = new AddStartersCompareModel(projectDownloader, bootProject);
-				AddStartersModel model = new AddStartersModel(compareModel, bootProject, preferenceStore);
+				InitializrModel model = new InitializrModel(compareModel, bootProject, preferenceStore);
 
 				return model;
 			} else {
@@ -65,7 +65,7 @@ public class AddStartersWizardModel {
 
 	public void loadFromInitializr() {
 
-		LiveExpression<AddStartersModel> modelLiveExpression = this.initializrFactory.getModel();
+		LiveExpression<InitializrModel> modelLiveExpression = this.initializrFactory.getModel();
 
 		// Gradle project may need to take a bit of time to extract boot version from the model
 		long startTime = System.currentTimeMillis();
@@ -77,7 +77,7 @@ public class AddStartersWizardModel {
 			}
 		}
 
-		AddStartersModel model = modelLiveExpression.getValue();
+		InitializrModel model = modelLiveExpression.getValue();
 		if (model != null) {
 			try {
 				this.modelLoadingValidator
@@ -100,7 +100,7 @@ public class AddStartersWizardModel {
 	 *
 	 * @return factory that creates add starter model which contains project information and dependencies
 	 */
-	public InitializrFactoryModel<AddStartersModel> getInitializrFactoryModel() {
+	public InitializrFactoryModel<InitializrModel> getInitializrFactoryModel() {
 		return this.initializrFactory;
 	}
 
@@ -108,7 +108,7 @@ public class AddStartersWizardModel {
 		return this.modelLoadingValidator;
 	}
 
-	private ValidationResult parseError(AddStartersModel model, Exception e) {
+	private ValidationResult parseError(InitializrModel model, Exception e) {
 		if (ExceptionUtil.getDeepestCause(e) instanceof FileNotFoundException) {
 			// Crude way to interpret that project boot version is not available in
 			// initializr
