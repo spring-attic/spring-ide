@@ -84,20 +84,7 @@ public class AddStartersWizardModel implements OkButtonHandler {
 	}
 
 	public void loadFromInitializr() {
-
-		LiveExpression<InitializrModel> modelLiveExpression = this.initializrFactory.getModel();
-
-		// Gradle project may need to take a bit of time to extract boot version from the model
-		long startTime = System.currentTimeMillis();
-		while (modelLiveExpression.getValue() == null && System.currentTimeMillis() - startTime < MODEL_CREATION_TIMEOUT) {
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-				// Ignore
-			}
-		}
-
-		InitializrModel model = modelLiveExpression.getValue();
+		InitializrModel model = this.initializrFactory.getModel().getValue();
 		if (model != null) {
 			try {
 				this.modelLoadingValidator
@@ -149,4 +136,19 @@ public class AddStartersWizardModel implements OkButtonHandler {
 		}
 		return ValidationResult.from(ExceptionUtil.status(e));
 	}
+
+	public void loadBootProjectModel() {
+		LiveExpression<InitializrModel> modelLiveExpression = getInitializrFactoryModel().getModel();
+
+		// Gradle project may need to take a bit of time to extract boot version from the model
+		long startTime = System.currentTimeMillis();
+		while (modelLiveExpression.getValue() == null && System.currentTimeMillis() - startTime < MODEL_CREATION_TIMEOUT) {
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				// Ignore
+			}
+		}
+	}
+
 }

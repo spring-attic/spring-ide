@@ -117,7 +117,11 @@ public class DependencyPage extends WizardPageWithSections {
 	private void loadWithProgress() {
 		try {
 			getContainer().run(true, false, monitor -> {
-				monitor.beginTask("Loading starters data from Initializr Service", IProgressMonitor.UNKNOWN);
+				monitor.beginTask("Loading starters data", IProgressMonitor.UNKNOWN);
+				monitor.subTask("Creating Boot project model...");
+				wizardModel.loadBootProjectModel();
+				String bootVersion = wizardModel.getInitializrFactoryModel().getModel().getValue().getBootVersion().getValue();
+				monitor.subTask("Fetching data for boot version '" +  bootVersion + "' from Initializr Service");
 				wizardModel.loadFromInitializr();
 				monitor.done();
 			});
