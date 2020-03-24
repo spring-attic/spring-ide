@@ -44,7 +44,7 @@ public class InitializrUrlBuilder {
 
 	private static final String ARTIFACT_ID = "artifactId";
 
-	private static final String JAVA_VERSION = "javaVerion";
+	private static final String JAVA_VERSION = "javaVersion";
 
 	private static final String VERSION = "version";
 
