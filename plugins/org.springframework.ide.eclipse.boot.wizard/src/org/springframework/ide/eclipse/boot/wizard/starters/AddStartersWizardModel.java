@@ -149,8 +149,4 @@ public class AddStartersWizardModel implements OkButtonHandler {
 		}
 		return ValidationResult.from(ExceptionUtil.status(e));
 	}
-
-	public boolean canFinish() {
-		return this.modelLoadingValidator.getValue() != null && this.modelLoadingValidator.getValue().isOk();
-	}
 }
