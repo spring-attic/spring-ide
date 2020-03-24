@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard.starters;
 
+import static org.springframework.ide.eclipse.boot.wizard.starters.PathSelectors.path;
 import static org.springframework.ide.eclipse.boot.wizard.starters.PathSelectors.pattern;
 import static org.springframework.ide.eclipse.boot.wizard.starters.PathSelectors.rootFiles;
-import static org.springframework.ide.eclipse.boot.wizard.starters.PathSelectors.path;
 import static org.springframework.ide.eclipse.boot.wizard.starters.eclipse.ResourceCompareInput.fromFile;
 import static org.springframework.ide.eclipse.boot.wizard.starters.eclipse.ResourceCompareInput.fromWorkspaceResource;
 
@@ -28,7 +28,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.springframework.ide.eclipse.boot.wizard.InitializrFactoryModel;
 import org.springframework.ide.eclipse.boot.wizard.starters.AddStartersCompareModel.AddStartersTrackerState;
 import org.springframework.ide.eclipse.boot.wizard.starters.eclipse.ResourceCompareInput;
 import org.springframework.ide.eclipse.maven.pom.PomPlugin;
@@ -38,7 +37,7 @@ import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 public class CompareGeneratedAndCurrentPage extends WizardPage {
 
-	private final InitializrFactoryModel<AddStartersModel> factoryModel;
+	private final AddStartersWizardModel wizardModel;
 	private Composite contentsContainer;
 	private Control compareViewer = null;
 
@@ -66,9 +65,9 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 		}
 	};
 
-	public CompareGeneratedAndCurrentPage(InitializrFactoryModel<AddStartersModel> factoryModel) {
+	public CompareGeneratedAndCurrentPage(AddStartersWizardModel wizardModel) {
 		super("Compare", "Compare local project with generated project from Spring Initializr", null);
-		this.factoryModel = factoryModel;
+		this.wizardModel = wizardModel;
 	}
 
 	@Override
@@ -93,7 +92,7 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 	private void setupCompareViewer() {
 		try {
 
-			AddStartersModel model = factoryModel.getModel().getValue();
+			AddStartersModel model = wizardModel.getInitializrFactoryModel().getModel().getValue();
 
 			// Transform the compare result from the model into a compare editor input
 			final CompareEditorInput editorInput = createCompareEditorInput(model.getCompareModel().getCompareResult().getValue());
@@ -175,7 +174,7 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 		// Connect the model to the UI only when the page becomes visible.
 		// If this connection is done before, either the UI controls may not yet be created
 		// or the model may not yet be available.
-		AddStartersModel model = factoryModel.getModel().getValue();
+		AddStartersModel model = wizardModel.getInitializrFactoryModel().getModel().getValue();
 		if (visible) {
 			model.getCompareModel().initTrackers();
 			connectModelToUi(model);
@@ -198,7 +197,7 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 	@Override
 	public void dispose() {
 		super.dispose();
-		AddStartersModel model = factoryModel.getModel().getValue();
+		AddStartersModel model = wizardModel.getInitializrFactoryModel().getModel().getValue();
 		if (model != null) {
 			model.dispose();
 		}

@@ -25,20 +25,13 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWizard;
 import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
-import org.springframework.ide.eclipse.boot.core.BootPreferences;
-import org.springframework.ide.eclipse.boot.core.SpringBootCore;
-import org.springframework.ide.eclipse.boot.core.initializr.InitializrProjectDownloader;
-import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
-import org.springframework.ide.eclipse.boot.core.initializr.InitializrUrlBuilders;
-import org.springframework.ide.eclipse.boot.wizard.InitializrFactoryModel;
 import org.springframework.ide.eclipse.boot.wizard.StartersWizardUtil;
-import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 public class AddStartersWizard extends Wizard implements IWorkbenchWizard {
 
-	private InitializrFactoryModel<AddStartersModel> fmodel;
+	private AddStartersWizardModel wizardModel;
 	private CompareGeneratedAndCurrentPage comparePage;
 
 	@Override
@@ -47,22 +40,7 @@ public class AddStartersWizard extends Wizard implements IWorkbenchWizard {
 			IProject project = StartersWizardUtil.getProject(selection);
 			if (project != null) {
 				IPreferenceStore preferenceStore = BootActivator.getDefault().getPreferenceStore();
-				fmodel = new InitializrFactoryModel<>((url) -> {
-					if (url!=null) {
-						URLConnectionFactory urlConnectionFactory = BootActivator.getUrlConnectionFactory();
-						String initializrUrl = BootPreferences.getInitializrUrl();
-
-						InitializrService initializr = InitializrService.create(urlConnectionFactory, () -> url);
-						SpringBootCore core = new SpringBootCore(initializr);
-
-						InitializrUrlBuilders urlBuilders = new InitializrUrlBuilders();
-						InitializrProjectDownloader projectDownloader = new InitializrProjectDownloader(
-								urlConnectionFactory, initializrUrl, urlBuilders);
-
-						return new AddStartersModel(projectDownloader, project, core, preferenceStore);
-					}
-					return null;
-				});
+				wizardModel = new AddStartersWizardModel(project, preferenceStore);
 			}
 		} catch (Exception e) {
 			MessageDialog.openError(workbench.getActiveWorkbenchWindow().getShell(), "Error opening the wizard",
@@ -78,6 +56,8 @@ public class AddStartersWizard extends Wizard implements IWorkbenchWizard {
 
 	@Override
 	public boolean canFinish() {
+		// TODO: can this logic be moved to the wizard model?
+		// Essential the wizard cannot finish unless the compare page is open and complete
 		if (this.comparePage != null) {
 			return this.comparePage.isPageComplete();
 		}
@@ -86,15 +66,14 @@ public class AddStartersWizard extends Wizard implements IWorkbenchWizard {
 
 	@Override
 	public boolean performFinish() {
-		fmodel.getModel().getValue().performOk();
-		return true;
+		return wizardModel.performFinish();
 	}
 
 	@Override
 	public void addPages() {
 		super.addPages();
-		addPage(new DependencyPage(fmodel));
-		this.comparePage = new CompareGeneratedAndCurrentPage(fmodel);
+		addPage(new DependencyPage(wizardModel));
+		this.comparePage = new CompareGeneratedAndCurrentPage(wizardModel);
 		addPage(comparePage);
 	}
 
@@ -128,6 +107,4 @@ public class AddStartersWizard extends Wizard implements IWorkbenchWizard {
 	public boolean needsProgressMonitor() {
 		return true;
 	}
-
-
 }

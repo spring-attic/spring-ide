@@ -10,12 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard.starters;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.swt.SWT;
@@ -27,7 +25,6 @@ import org.springframework.ide.eclipse.boot.livexp.ui.DynamicSection;
 import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection;
 import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
 import org.springframework.ide.eclipse.boot.wizard.FilteredDependenciesSection;
-import org.springframework.ide.eclipse.boot.wizard.InitializrFactoryModel;
 import org.springframework.ide.eclipse.boot.wizard.MakeDefaultSection;
 import org.springframework.ide.eclipse.boot.wizard.NewSpringBootWizard;
 import org.springframework.ide.eclipse.boot.wizard.SearchBoxSection;
@@ -37,10 +34,11 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.ui.CommentSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.GroupSection;
+import org.springsource.ide.eclipse.commons.livexp.ui.IPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.LabeledPropertySection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageWithSections;
-import org.springsource.ide.eclipse.commons.livexp.util.Log;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import com.google.common.collect.ImmutableList;
 
@@ -50,18 +48,15 @@ public class DependencyPage extends WizardPageWithSections {
 	private static final int MAX_MOST_POPULAR = 3 * NUM_COLUMNS_FREQUENTLY_USED;
 	private static final Point DEPENDENCY_SECTION_SIZE = new Point(SWT.DEFAULT, 300);
 
-	private static long TIMEOUT = 30000;
-
 	private CheckBoxesSection<Dependency> frequentlyUsedCheckboxes;
+	private LiveVariable<ValidationResult> modelValidator;
 
-	private LiveVariable<ValidationResult> initializrDataLoaded = new LiveVariable<>(ValidationResult.warning("Initializr data not yet loaded"));
-	private LiveVariable<ValidationResult> initializrProjectInfoLoaded = new LiveVariable<>();
+	protected final AddStartersWizardModel wizardModel;
 
-	protected final InitializrFactoryModel<AddStartersModel> factoryModel;
-
-	public DependencyPage(InitializrFactoryModel<AddStartersModel> factoryModel) {
+	public DependencyPage(AddStartersWizardModel wizardModel) {
 		super("Dependencies", "New Spring Starter Project Dependencies", null);
-		this.factoryModel = factoryModel;
+		this.wizardModel = wizardModel;
+		this.modelValidator = wizardModel.getValidator();
 	}
 
 	private void refreshFrequentlyUsedDependencies(AddStartersModel model) {
@@ -72,88 +67,69 @@ public class DependencyPage extends WizardPageWithSections {
 		reflow();
 	}
 
-	private void showProgress() {
-		LiveExpression<AddStartersModel> model = factoryModel.getModel();
-		LiveExpression<ValidationResult> serviceValidator = factoryModel.getServiceUrlField().getValidator();
-		if (serviceValidator.getValue().status != IStatus.ERROR) {
-			try {
-				getContainer().run(true, false, monitor -> {
-					long currentTime = System.currentTimeMillis();
-
-					monitor.beginTask("Loading starters data from Initializr Service", IProgressMonitor.UNKNOWN);
-
-
-					while (serviceValidator.getValue().status != IStatus.ERROR
-							&& model.getValue() == null
-							&& System.currentTimeMillis() - currentTime < TIMEOUT) {
-						Thread.sleep(500);
-					}
-
-					if (model.getValue() == null && serviceValidator.getValue().status != IStatus.ERROR) {
-						initializrDataLoaded.setValue(ValidationResult.error("Timed out waiting to fetch data from the Initializr Service"));
-					} else {
-						initializrDataLoaded.setValue(ValidationResult.OK);
-					}
-
-					monitor.done();
-				});
-			} catch (InvocationTargetException | InterruptedException e) {
-				Log.log(e);
-				initializrDataLoaded.setValue(ValidationResult.error("Failed fetching data from Initializr Service: " + e.getMessage()));
-			}
-		}
-	}
-
 	@Override
 	protected List<WizardPageSection> createSections() {
+		// "link" the page section creation live exp to the model validator live exp, so that page section creation DEPENDS
+		// on model validator. When the model validator validates the model, it will in turn cause the page section creation
+		// live exp to also be called.
+		LiveExpression<IPageSection> pageCreationExp = modelValidator.apply((result) -> {
+			if (result != null) {
+				AddStartersModel model = wizardModel.getInitializrFactoryModel().getModel().getValue();
+				if (model != null) {
+					List<WizardPageSection> sections = new ArrayList<>();
+					sections.add(createBootInfoSection(model));
 
-		LiveExpression<AddStartersModel> model = factoryModel.getModel();
-		DynamicSection dynamicSection = new DynamicSection(this, model.apply((dynamicModel) -> {
-			if (dynamicModel != null) {
-				ValidationResult result = dynamicModel.loadFromInitializr();
-				initializrProjectInfoLoaded.setValue(result);
+					if (result.isOk()) {
+						model.onDependencyChange(() -> {
+							Display.getDefault().asyncExec(() -> {
+								refreshWizardUi();
+							});
+						});
+						createDynamicSections(model, sections);
+					} else {
+						// TODO: create sections when an error occurs but the model is available
+					}
 
-				if (result.isOk()) {
-					return createDynamicSections(dynamicModel);
+					GroupSection groupSection = new GroupSection(this, null,
+							sections.toArray(new WizardPageSection[0]));
+					groupSection.grabVertical(true);
+					return groupSection;
 				}
 			}
 			return new CommentSection(this, NewSpringBootWizard.NO_CONTENT_AVAILABLE);
-		} ));
+		});
+		DynamicSection dynamicSection = new DynamicSection(this, pageCreationExp);
 
 		return ImmutableList.of(dynamicSection);
 	}
-
-
 
 	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 
-		validator.addChild(factoryModel.getServiceUrlField().getValidator());
-		validator.addChild(initializrDataLoaded);
-		validator.addChild(initializrProjectInfoLoaded);
+		// Add the model validator to the wizard page validator so that results for the model
+		// are automatically handled and displayed accordingly in the wizard page UI
+		validator.addChild(modelValidator);
 
-		// Show progress for fetching data from the Iitializr.
-		// Start it off on UI thread in async fashion
-		getControl().getDisplay().asyncExec(() -> showProgress());
+		getControl().getDisplay().asyncExec(() -> loadWithProgress());
 	}
 
-	protected WizardPageSection createDynamicSections(AddStartersModel model) {
-
-		model.onDependencyChange(() -> {
-			Display.getDefault().asyncExec(() -> {
-				refreshWizardUi();
+	private void loadWithProgress() {
+		try {
+			getContainer().run(true, false, monitor -> {
+				monitor.beginTask("Loading starters data from Initializr Service", IProgressMonitor.UNKNOWN);
+				wizardModel.loadFromInitializr();
+				monitor.done();
 			});
-		});
+		} catch (Exception e) {
+			modelValidator.setValue(ValidationResult
+					.error("Failed fetching data from Initializr Service: " + ExceptionUtil.getMessage(e)));
+		}
+	}
 
-		List<WizardPageSection> sections = new ArrayList<>();
-
-		sections.add(createBootInfoSection(model));
+	protected void createDynamicSections(AddStartersModel model, List<WizardPageSection> sections) {
 		sections.add(createFrequentlyUsedSection(model));
 		sections.add(createTwoColumnSection(model));
-		GroupSection groupSection = new GroupSection(this, null, sections.toArray(new WizardPageSection[0]));
-		groupSection.grabVertical(true);
-		return groupSection;
 	}
 
 	@SuppressWarnings("resource")

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2020 Pivotal, Inc.
+ * Copyright (c) 2020 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard.starters;
 
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -21,13 +20,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
-import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarters;
-import org.springframework.ide.eclipse.boot.core.initializr.InitializrProjectDownloader;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.DependencyGroup;
@@ -42,11 +38,8 @@ import org.springframework.ide.eclipse.boot.wizard.PopularityTracker;
 import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.StringFieldModel;
-import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.OkButtonHandler;
-import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
-import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 /**
  *
@@ -56,20 +49,13 @@ public class AddStartersModel implements OkButtonHandler {
 	public static final Object JOB_FAMILY = "EditStartersModel.JOB_FAMILY";
 
 	public final DependencyFilterBox searchBox = new DependencyFilterBox();
-	private final ISpringBootProject project;
+	private final ISpringBootProject bootProject;
 	private final PopularityTracker popularities;
 	private final DefaultDependencies defaultDependencies;
 	private Runnable okRunnable;
 
-
-	public final HierarchicalMultiSelectionFieldModel<Dependency> dependencies = new HierarchicalMultiSelectionFieldModel<>(Dependency.class, "dependencies")
-			.label("Dependencies:");
-
-	private SpringBootStarters starters;
-
-	protected final SpringBootCore springBootCore;
-
-	protected final InitializrProjectDownloader projectDownloader;
+	public final HierarchicalMultiSelectionFieldModel<Dependency> dependencies = new HierarchicalMultiSelectionFieldModel<>(
+			Dependency.class, "dependencies").label("Dependencies:");
 
 	private final AddStartersCompareModel compareModel;
 
@@ -80,14 +66,14 @@ public class AddStartersModel implements OkButtonHandler {
 	 * selection.
 	 *
 	 */
-	public AddStartersModel(InitializrProjectDownloader projectDownloader, IProject selectedProject,
-			SpringBootCore springBootCore, IPreferenceStore store) throws Exception {
-		this.projectDownloader = projectDownloader;
-		this.springBootCore = springBootCore;
+	public AddStartersModel(AddStartersCompareModel compareModel, ISpringBootProject bootProject,
+			IPreferenceStore store) throws Exception {
 		this.popularities = new PopularityTracker(store);
 		this.defaultDependencies = new DefaultDependencies(store);
-		this.project = springBootCore.project(selectedProject);
-		this.compareModel = new AddStartersCompareModel(projectDownloader, getProject());
+		this.bootProject = bootProject;
+		this.compareModel = compareModel;
+
+		this.bootVersion.setValue(bootProject.getBootVersion());
 	}
 
 	public FieldModel<String> getBootVersion() {
@@ -95,7 +81,7 @@ public class AddStartersModel implements OkButtonHandler {
 	}
 
 	public String getProjectName() {
-		return project.getProject().getName();
+		return bootProject.getProject().getName();
 	}
 
 	@Override
@@ -115,23 +101,14 @@ public class AddStartersModel implements OkButtonHandler {
 		this.okRunnable = okRunnable;
 	}
 
-	public ValidationResult loadFromInitializr() {
-		return  discoverOptions(dependencies);
-	}
-
 	/**
-	 * Dynamically discover input fields and 'style' options by parsing initializr form.
+	 * Dynamically discover input fields and 'style' options by parsing initializr
+	 * form.
 	 */
-	private ValidationResult discoverOptions(HierarchicalMultiSelectionFieldModel<Dependency> dependencies) {
-		try {
-			starters = project.getStarterInfos();
-		} catch (Exception e) {
-			return parseError(e);
-		}
+	public void loadFromInitializr() throws Exception {
 
-		bootVersion.setValue(project.getBootVersion());
-
-		if (starters!=null) {
+		SpringBootStarters starters = bootProject.getStarterInfos();
+		if (starters != null) {
 			for (DependencyGroup dgroup : starters.getDependencyGroups()) {
 				String catName = dgroup.getName();
 
@@ -139,14 +116,12 @@ public class AddStartersModel implements OkButtonHandler {
 				Map<String, String> variables = new HashMap<>();
 				variables.put(InitializrServiceSpec.BOOT_VERSION_LINK_TEMPLATE_VARIABLE, starters.getBootVersion());
 
-				//Create all dependency boxes
+				// Create all dependency boxes
 				for (Dependency dep : dgroup.getContent()) {
 					if (starters.contains(dep.getId())) {
 						dependencies.choice(catName, dep.getName(), dep,
 								() -> DependencyTooltipContent.generateHtmlDocumentation(dep, variables),
-								DependencyTooltipContent.generateRequirements(dep),
-								LiveExpression.constant(true)
-						);
+								DependencyTooltipContent.generateRequirements(dep), LiveExpression.constant(true));
 
 						boolean selected = false;
 
@@ -154,30 +129,7 @@ public class AddStartersModel implements OkButtonHandler {
 					}
 				}
 			}
-			return ValidationResult.OK;
-		} else {
-			return ValidationResult.error("Starter information not available for: " + project.getBootVersion());
 		}
-	}
-
-	public ValidationResult parseError(Exception e) {
-		if (ExceptionUtil.getDeepestCause(e) instanceof FileNotFoundException) {
-			// Crude way to interpret that project boot version is not available in initializr
-			StringBuffer message = new StringBuffer();
-
-			// Get the boot version from project directly as opposed from the starters info, as it may
-			// not be available.
-			String bootVersionFromProject = project.getBootVersion();
-			message.append("Unable to download content for boot version: ");
-			message.append(bootVersionFromProject);
-			message.append(". The version may not be available.  Consider updating to a newer version.");
-
-			// Log the full message
-			Log.log(e);
-
-			return ValidationResult.error(message.toString());
-		}
-		return ValidationResult.from(ExceptionUtil.status(e));
 	}
 
 	/**
@@ -285,7 +237,7 @@ public class AddStartersModel implements OkButtonHandler {
 	}
 
 	public ISpringBootProject getProject() {
-		return project;
+		return bootProject;
 	}
 
 	public void onDependencyChange(Runnable runnable) {
