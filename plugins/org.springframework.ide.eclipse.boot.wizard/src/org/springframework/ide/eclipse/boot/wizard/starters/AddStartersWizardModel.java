@@ -91,6 +91,8 @@ public class AddStartersWizardModel {
 				ValidationResult parseError = parseError(model, e);
 				this.modelLoadingValidator.setValue(parseError);
 			}
+		} else {
+			this.modelLoadingValidator.setValue(ValidationResult.error("Timeed out creating Spring Boot project's model"));
 		}
 	}
 
