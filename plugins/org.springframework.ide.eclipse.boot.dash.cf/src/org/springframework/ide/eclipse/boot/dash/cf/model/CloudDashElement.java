@@ -19,7 +19,6 @@ import javax.ws.rs.client.ClientBuilder;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModel;
 import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
-import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.WrappingBootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.ActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.RequestMapping;

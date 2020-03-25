@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
@@ -70,7 +71,6 @@ public class RunTargetPropertiesManager implements ValueListener<ImmutableSet<Ru
 				}
 			}
 		}
-
 		return targets;
 	}
 
@@ -89,19 +89,23 @@ public class RunTargetPropertiesManager implements ValueListener<ImmutableSet<Ru
 			}
 		}
 
-		for (RunTargetType type : targetsByType.keys()) {
-			try {
-				Collection<RunTarget<?>> targets = targetsByType.get(type);
-				List<String> strings = new ArrayList<>(targets.size());
-				for (RunTarget t : targets) {
-					String s = type.serialize(t.getParams());
-					if (s!=null) {
-						strings.add(s);
+		for (RunTargetType type : types) {
+			//Careful... must iterate all types, even when there are no more targets for a given type.
+			// See: https://www.pivotaltracker.com/story/show/171950112
+			if (type.canInstantiate()) {
+				try {
+					Collection<RunTarget<?>> targets = targetsByType.get(type);
+					List<String> strings = new ArrayList<>(targets.size());
+					for (RunTarget t : targets) {
+						String s = type.serialize(t.getParams());
+						if (s!=null) {
+							strings.add(s);
+						}
 					}
+					context.getRunTargetProperties().put(type, RUN_TARGET_KEY, ArrayEncoder.encode(strings.toArray(new String[strings.size()])));
+				} catch (Exception e) {
+					Log.log(e);
 				}
-				context.getRunTargetProperties().put(type, RUN_TARGET_KEY, ArrayEncoder.encode(strings.toArray(new String[strings.size()])));
-			} catch (Exception e) {
-				Log.log(e);
 			}
 		}
 	}
