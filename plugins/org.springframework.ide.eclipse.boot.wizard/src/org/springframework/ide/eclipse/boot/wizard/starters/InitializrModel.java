@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarters;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrProjectDownloader;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.DependencyGroup;
@@ -35,9 +36,7 @@ import org.springframework.ide.eclipse.boot.wizard.HierarchicalMultiSelectionFie
 import org.springframework.ide.eclipse.boot.wizard.MultiSelectionFieldModel;
 import org.springframework.ide.eclipse.boot.wizard.NewSpringBootWizardModel;
 import org.springframework.ide.eclipse.boot.wizard.PopularityTracker;
-import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.core.StringFieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
 /**
@@ -51,37 +50,25 @@ public class InitializrModel  {
 	private final ISpringBootProject bootProject;
 	private final PopularityTracker popularities;
 	private final DefaultDependencies defaultDependencies;
+	private AddStartersCompareModel compareModel;
+
 
 	public final HierarchicalMultiSelectionFieldModel<Dependency> dependencies = new HierarchicalMultiSelectionFieldModel<>(
 			Dependency.class, "dependencies").label("Dependencies:");
-
-	private final AddStartersCompareModel compareModel;
-
-	private final FieldModel<String> bootVersion = new StringFieldModel("Spring Boot Version:", "");
 
 	/**
 	 * Create EditStarters dialog model and initialize it based on a project
 	 * selection.
 	 *
 	 */
-	public InitializrModel(AddStartersCompareModel compareModel, ISpringBootProject bootProject,
+	public InitializrModel(ISpringBootProject bootProject,
+			InitializrProjectDownloader projectDownloader,
 			IPreferenceStore store) throws Exception {
 		this.popularities = new PopularityTracker(store);
 		this.defaultDependencies = new DefaultDependencies(store);
 		this.bootProject = bootProject;
-		this.compareModel = compareModel;
-
-		this.bootVersion.setValue(bootProject.getBootVersion());
+		this.compareModel = new AddStartersCompareModel(projectDownloader, bootProject);
 	}
-
-	public FieldModel<String> getBootVersion() {
-		return bootVersion;
-	}
-
-	public String getProjectName() {
-		return bootProject.getProject().getName();
-	}
-
 
 	public void updateDependencyCount() {
 		List<Dependency> selected = dependencies.getCurrentSelection();
@@ -241,15 +228,8 @@ public class InitializrModel  {
 		}
 	}
 
-	/**
-	 * The compare model that has two sides to compare. Note that the model may not
-	 * yet be populated as it may require asynch download of content from initializr.
-	 *
-	 * Call {@link #populateComparison()} to begin populating the compare model with both sides.
-	 *
-	 */
 	public AddStartersCompareModel getCompareModel() {
-		return compareModel;
+		return this.compareModel;
 	}
 
 	/**
@@ -257,10 +237,10 @@ public class InitializrModel  {
 	 * @param monitor
 	 */
 	public void populateComparison(IProgressMonitor monitor) {
-		getCompareModel().downloadProject(dependencies.getCurrentSelection(), monitor);
+		this.compareModel.downloadProject(dependencies.getCurrentSelection(), monitor);
 	}
 
 	public void dispose() {
-		compareModel.dispose();
+		this.compareModel.dispose();
 	}
 }

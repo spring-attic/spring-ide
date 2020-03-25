@@ -77,27 +77,25 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 		setControl(contentsContainer);
 	}
 
-	private void connectModelToUi(InitializrModel model) {
-		AddStartersCompareModel compareModel = model.getCompareModel();
+	private void connectModelToUi(AddStartersCompareModel compareModel) {
 		compareModel.getCompareResult().addListener(compareResultListener);
 		compareModel.getDownloadTracker().addListener(downloadStateListener);
 	}
 
-	private void disconnectFromUi(InitializrModel model) {
-		AddStartersCompareModel compareModel = model.getCompareModel();
+	private void disconnectFromUi(AddStartersCompareModel compareModel) {
 		compareModel.getCompareResult().removeListener(compareResultListener);
 		compareModel.getDownloadTracker().removeListener(downloadStateListener);
 	}
 
 	private void setupCompareViewer() {
 		try {
-
-			InitializrModel model = wizardModel.getInitializrFactoryModel().getModel().getValue();
+			InitializrModel initializrModel = wizardModel.getInitializrFactoryModel().getModel().getValue();
+			AddStartersCompareModel compareModel = initializrModel.getCompareModel();
 
 			// Transform the compare result from the model into a compare editor input
-			final CompareEditorInput editorInput = createCompareEditorInput(model.getCompareModel().getCompareResult().getValue());
+			final CompareEditorInput editorInput = createCompareEditorInput(compareModel.getCompareResult().getValue());
 			editorInput.getCompareConfiguration().setProperty(PomPlugin.POM_STRUCTURE_ADDITIONS_COMPARE_SETTING, true);
-			editorInput.getCompareConfiguration().setProperty(ResourceCompareInput.OPEN_DIFF_NODE_COMPARE_SETTING, model.getCompareModel().diffFileToOpenInitially());
+			editorInput.getCompareConfiguration().setProperty(ResourceCompareInput.OPEN_DIFF_NODE_COMPARE_SETTING, compareModel.diffFileToOpenInitially());
 
 			// Save the editor on ok pressed
 			wizardModel.onOkPressed(() -> {
@@ -174,19 +172,21 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 		// Connect the model to the UI only when the page becomes visible.
 		// If this connection is done before, either the UI controls may not yet be created
 		// or the model may not yet be available.
-		InitializrModel model = wizardModel.getInitializrFactoryModel().getModel().getValue();
+		InitializrModel initializrModel = wizardModel.getInitializrFactoryModel().getModel().getValue();
+		AddStartersCompareModel compareModel = initializrModel.getCompareModel();
+
 		if (visible) {
-			model.getCompareModel().initTrackers();
-			connectModelToUi(model);
+			compareModel.initTrackers();
+			connectModelToUi(compareModel);
 			try {
-				getWizard().getContainer().run(true, false, monitor -> model.populateComparison(monitor));
+				getWizard().getContainer().run(true, false, monitor -> initializrModel.populateComparison(monitor));
 			} catch (InvocationTargetException | InterruptedException e) {
 				setErrorMessage("Failed to download project from the Initializr Service");
 				Log.log(e);
 			}
 		} else {
-			disconnectFromUi(model);
-			model.getCompareModel().disposeTrackers();
+			disconnectFromUi(compareModel);
+			compareModel.disposeTrackers();
 			if (compareViewer != null) {
 				compareViewer.dispose();
 			}
@@ -197,9 +197,6 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 	@Override
 	public void dispose() {
 		super.dispose();
-		InitializrModel model = wizardModel.getInitializrFactoryModel().getModel().getValue();
-		if (model != null) {
-			model.dispose();
-		}
+		wizardModel.dispose();
 	}
 }

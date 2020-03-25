@@ -77,7 +77,7 @@ public class DependencyPage extends WizardPageWithSections {
 				InitializrModel model = wizardModel.getInitializrFactoryModel().getModel().getValue();
 				if (model != null) {
 					List<WizardPageSection> sections = new ArrayList<>();
-					sections.add(createBootInfoSection(model));
+					sections.add(createBootInfoSection());
 
 					if (result.isOk()) {
 						model.onDependencyChange(() -> {
@@ -120,7 +120,7 @@ public class DependencyPage extends WizardPageWithSections {
 				monitor.beginTask("Loading starters data", IProgressMonitor.UNKNOWN);
 				monitor.subTask("Creating Boot project model...");
 				wizardModel.loadBootProjectModel();
-				String bootVersion = wizardModel.getInitializrFactoryModel().getModel().getValue().getBootVersion().getValue();
+				String bootVersion = wizardModel.getBootVersion().getValue();
 				monitor.subTask("Fetching data for boot version '" +  bootVersion + "' from Initializr Service");
 				wizardModel.loadFromInitializr();
 				monitor.done();
@@ -195,8 +195,8 @@ public class DependencyPage extends WizardPageWithSections {
 		return frequentlyUsedSection;
 	}
 
-	protected WizardPageSection createBootInfoSection(InitializrModel model) {
-		LabeledPropertySection section = new LabeledPropertySection(this, model.getBootVersion());
+	protected WizardPageSection createBootInfoSection() {
+		LabeledPropertySection section = new LabeledPropertySection(this, wizardModel.getBootVersion());
 		return section;
 	}
 

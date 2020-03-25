@@ -23,8 +23,10 @@ import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrUrlBuilders;
 import org.springframework.ide.eclipse.boot.wizard.InitializrFactoryModel;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
+import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.core.StringFieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.ui.OkButtonHandler;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
@@ -37,6 +39,8 @@ public class AddStartersWizardModel implements OkButtonHandler {
 	private final InitializrFactoryModel<InitializrModel> initializrFactory;
 
 	private final LiveVariable<ValidationResult> modelLoadingValidator = new LiveVariable<ValidationResult>();
+
+	private final FieldModel<String> bootVersion = new StringFieldModel("Spring Boot Version:", "");
 
 	private Runnable okRunnable;
 
@@ -56,14 +60,19 @@ public class AddStartersWizardModel implements OkButtonHandler {
 
 				ISpringBootProject bootProject = core.project(project);
 
-				AddStartersCompareModel compareModel = new AddStartersCompareModel(projectDownloader, bootProject);
-				InitializrModel model = new InitializrModel(compareModel, bootProject, preferenceStore);
+				this.bootVersion.setValue(bootProject.getBootVersion());
+
+				InitializrModel model = new InitializrModel(bootProject, projectDownloader, preferenceStore);
 
 				return model;
 			} else {
 				return null;
 			}
 		});
+	}
+
+	public FieldModel<String> getBootVersion() {
+		return bootVersion;
 	}
 
 	@Override
@@ -151,4 +160,10 @@ public class AddStartersWizardModel implements OkButtonHandler {
 		}
 	}
 
+	public void dispose() {
+		InitializrModel model = getInitializrFactoryModel().getModel().getValue();
+		if (model != null) {
+			model.dispose();
+		}
+	}
 }
