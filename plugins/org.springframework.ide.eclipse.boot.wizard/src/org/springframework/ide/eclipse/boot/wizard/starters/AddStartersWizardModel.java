@@ -32,6 +32,25 @@ import org.springsource.ide.eclipse.commons.livexp.ui.OkButtonHandler;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
+/**
+ *
+ * Model for the add starters wizard that requires  a local project that will be used to:
+ *
+ * <p/>
+ *
+ * 1. Build a primary "initializr project model" that contains BOTH local project information, like boot version, as well  as information downloaded
+ * from initializr, like dependencies specific for that boot version. Wizard  dependency selections are also stored in this model. This  model also
+ * performs comparison between local project and downloaded project
+ *
+ * <p/>
+ *
+ * 2. Download Starter information from initializr like  dependencies, and add this information to the initializr project model.
+ *
+ * <p/>
+ *
+ * The  wizard  model is essentially a wrapper  around the initializr project model that  contains additional "wizard" functionality like dealing with "OK pressed"
+ *
+ */
 public class AddStartersWizardModel implements OkButtonHandler {
 	private static final long MODEL_CREATION_TIMEOUT = 30000;
 
@@ -92,14 +111,18 @@ public class AddStartersWizardModel implements OkButtonHandler {
 		this.okRunnable = okRunnable;
 	}
 
-	public void loadFromInitializr() {
+	/**
+	 * Download information  from  initializr, like available dependencies for a particular boot version.
+	 * Use {@link #getValidator()} to be  notified  when  information becomes available.
+	 */
+	public void downloadStarterInfos() {
 		InitializrModel model = this.initializrFactory.getModel().getValue();
 		if (model != null) {
 			try {
 				this.modelLoadingValidator
 						.setValue(ValidationResult.info("Fetching starter information from Spring Boot Initializr"));
 
-				model.loadFromInitializr();
+				model.downloadStarterInfos();
 
 				this.modelLoadingValidator.setValue(ValidationResult.OK);
 
@@ -120,6 +143,10 @@ public class AddStartersWizardModel implements OkButtonHandler {
 		return this.initializrFactory;
 	}
 
+	/**
+	 *
+	 * @return validator that notifies when model creation completes successfully, as well as information download from initializr, as well as any errors that occur
+	 */
 	public LiveVariable<ValidationResult> getValidator() {
 		return this.modelLoadingValidator;
 	}
@@ -146,7 +173,11 @@ public class AddStartersWizardModel implements OkButtonHandler {
 		return ValidationResult.from(ExceptionUtil.status(e));
 	}
 
-	public void loadBootProjectModel() {
+	/**
+	 * Creates the initializr model for the local project. This does NOT download anything from initializr. It just builds the model based on the local
+	 * project
+	 */
+	public void createInitializrModelForProject() {
 		LiveExpression<InitializrModel> modelLiveExpression = getInitializrFactoryModel().getModel();
 
 		// Gradle project may need to take a bit of time to extract boot version from the model

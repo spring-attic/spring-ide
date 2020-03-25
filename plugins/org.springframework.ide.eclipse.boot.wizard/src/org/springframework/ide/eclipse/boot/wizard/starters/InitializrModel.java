@@ -79,10 +79,11 @@ public class InitializrModel  {
 	}
 
 	/**
-	 * Dynamically discover input fields and 'style' options by parsing initializr
-	 * form.
+	 *
+	 * Download starter information from initializr, like available dependencies
+	 *
 	 */
-	public void loadFromInitializr() throws Exception {
+	public void downloadStarterInfos() throws Exception {
 
 		SpringBootStarters starters = bootProject.getStarterInfos();
 		if (starters != null) {
@@ -107,6 +108,15 @@ public class InitializrModel  {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Download a project from initializr to compare with the local project.
+	 *
+	 * @param monitor
+	 */
+	public void downloadProjectToCompare(IProgressMonitor monitor) {
+		this.compareModel.downloadProject(dependencies.getCurrentSelection(), monitor);
 	}
 
 	/**
@@ -230,14 +240,6 @@ public class InitializrModel  {
 
 	public AddStartersCompareModel getCompareModel() {
 		return this.compareModel;
-	}
-
-	/**
-	 * Begin populating the compare model.
-	 * @param monitor
-	 */
-	public void populateComparison(IProgressMonitor monitor) {
-		this.compareModel.downloadProject(dependencies.getCurrentSelection(), monitor);
 	}
 
 	public void dispose() {

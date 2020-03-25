@@ -119,10 +119,10 @@ public class DependencyPage extends WizardPageWithSections {
 			getContainer().run(true, false, monitor -> {
 				monitor.beginTask("Loading starters data", IProgressMonitor.UNKNOWN);
 				monitor.subTask("Creating Boot project model...");
-				wizardModel.loadBootProjectModel();
+				wizardModel.createInitializrModelForProject();
 				String bootVersion = wizardModel.getBootVersion().getValue();
 				monitor.subTask("Fetching data for boot version '" +  bootVersion + "' from Initializr Service");
-				wizardModel.loadFromInitializr();
+				wizardModel.downloadStarterInfos();
 				monitor.done();
 			});
 		} catch (Exception e) {

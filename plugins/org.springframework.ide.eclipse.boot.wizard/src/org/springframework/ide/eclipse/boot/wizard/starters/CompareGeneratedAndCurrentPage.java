@@ -179,7 +179,7 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 			compareModel.initTrackers();
 			connectModelToUi(compareModel);
 			try {
-				getWizard().getContainer().run(true, false, monitor -> initializrModel.populateComparison(monitor));
+				getWizard().getContainer().run(true, false, monitor -> initializrModel.downloadProjectToCompare(monitor));
 			} catch (InvocationTargetException | InterruptedException e) {
 				setErrorMessage("Failed to download project from the Initializr Service");
 				Log.log(e);
