@@ -130,8 +130,6 @@ public class AddStartersWizardModel implements OkButtonHandler {
 				ValidationResult parseError = parseError(model, e);
 				this.modelLoadingValidator.setValue(parseError);
 			}
-		} else {
-			this.modelLoadingValidator.setValue(ValidationResult.error("Timed out creating Spring Boot project's model"));
 		}
 	}
 
@@ -188,6 +186,10 @@ public class AddStartersWizardModel implements OkButtonHandler {
 			} catch (InterruptedException e) {
 				// Ignore
 			}
+		}
+
+		if (modelLiveExpression.getValue() == null) {
+			modelLoadingValidator.setValue(ValidationResult.error("Timed out creating Spring Boot project's model"));
 		}
 	}
 

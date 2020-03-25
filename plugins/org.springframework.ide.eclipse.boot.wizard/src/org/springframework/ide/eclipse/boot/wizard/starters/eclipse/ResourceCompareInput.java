@@ -26,18 +26,25 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Set;
 import java.util.function.Predicate;
 
 import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.compare.CompareEditorInput;
+import org.eclipse.compare.CompareUI;
 import org.eclipse.compare.IStreamContentAccessor;
 import org.eclipse.compare.ITypedElement;
+import org.eclipse.compare.contentmergeviewer.TextMergeViewer;
 import org.eclipse.compare.internal.BufferedResourceNode;
 import org.eclipse.compare.internal.CompareMessages;
 import org.eclipse.compare.internal.CompareUIPlugin;
+import org.eclipse.compare.internal.NullViewer;
 import org.eclipse.compare.internal.Utilities;
 import org.eclipse.compare.structuremergeviewer.DiffNode;
 import org.eclipse.compare.structuremergeviewer.DiffTreeViewer;
@@ -62,6 +69,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.osgi.util.NLS;
@@ -77,6 +85,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.common.io.Files;
 
@@ -207,6 +216,7 @@ public class ResourceCompareInput extends CompareEditorInput {
 	private DiffTreeViewer fDiffViewer;
 	private IAction fOpenAction;
 	private IAction fCreateResourceAction;
+	private IAction fAcceptChangesAction;
 
 	final private Predicate<String> filter;
 
@@ -335,6 +345,19 @@ public class ResourceCompareInput extends CompareEditorInput {
 					fCreateResourceAction.setToolTipText("Create missing resource in the local project");
 				}
 
+				if (fAcceptChangesAction == null) {
+					fAcceptChangesAction = new Action() {
+						@Override
+						public void run() {
+							acceptAllChanges();
+						}
+					};
+					fAcceptChangesAction.setText("Accept Changes");
+					fAcceptChangesAction.setToolTipText("Accept all non-conflicting changes into local project");
+				}
+
+				manager.add(fAcceptChangesAction);
+
 				ISelection selection= getSelection();
 				if (selection instanceof IStructuredSelection) {
 					IStructuredSelection ss= (IStructuredSelection)selection;
@@ -393,6 +416,56 @@ public class ResourceCompareInput extends CompareEditorInput {
 				}
 				super.initialSelection();
 			}
+
+			@SuppressWarnings("unchecked")
+			private void acceptAllChanges() {
+				Set<Object> visited = new HashSet<>();
+				Queue<Object> toVisit = new LinkedList<>(getStructuredSelection().toList());
+				// To avoid problems with currently opened TextMergeViewer close whatever was opened
+				fireOpen(new OpenEvent(this, StructuredSelection.EMPTY));
+				while (!toVisit.isEmpty()) {
+					Object o = toVisit.poll();
+					if (!visited.contains(o)) {
+						visited.add(o);
+						if (o instanceof MyDiffNode) {
+							MyDiffNode n = (MyDiffNode) o;
+							IDiffElement[] children = n.getChildren();
+							if (children == null || children.length == 0) {
+								if (n.getRight() == null) {
+									// Add missing resource
+									copyOne(n, true);
+								} else if (!ITypedElement.FOLDER_TYPE.equals(n.getId().getType())) {
+									Shell shell = new Shell();
+									shell.setVisible(false);
+									// Content difference
+									TextMergeViewer contentViewer = (TextMergeViewer) CompareUI.findContentViewer(new NullViewer(shell),
+											n, shell, getCompareConfiguration());
+									if (contentViewer != null) {
+										contentViewer.setInput(n);
+										try {
+											Method method = TextMergeViewer.class.getDeclaredMethod("copy", boolean.class);
+											method.setAccessible(true);
+											method.invoke(contentViewer, true);
+											contentViewer.flush(new NullProgressMonitor());
+											n.fireChange();
+										} catch (Exception e) {
+											Log.log(e);
+										}
+									} else {
+										Log.error("No Viewer created for " + n.getName());
+									}
+									shell.dispose();
+								}
+							} else {
+								toVisit.addAll(Arrays.asList(children));
+							}
+						}
+					}
+				}
+				// Reopen the TextMergeViewer whatever matches the current selection
+				handleOpen(null);
+			}
+
 
 		};
 		return fDiffViewer;
@@ -823,6 +896,10 @@ public class ResourceCompareInput extends CompareEditorInput {
 	@Override
 	public boolean canRunAsJob() {
 		return true;
+	}
+
+	public boolean hasDiffs() {
+		return fRoot.hasChildren();
 	}
 }
 
