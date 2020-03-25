@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.wizard.starters;
 
 import java.io.FileNotFoundException;
+import java.net.URL;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -20,6 +21,8 @@ import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrProjectDownloader;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Option;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrUrlBuilders;
 import org.springframework.ide.eclipse.boot.wizard.InitializrFactoryModel;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
@@ -75,12 +78,13 @@ public class AddStartersWizardModel implements OkButtonHandler {
 				InitializrUrlBuilders urlBuilders = new InitializrUrlBuilders();
 				InitializrProjectDownloader projectDownloader = new InitializrProjectDownloader(urlConnectionFactory,
 						initializrUrl, urlBuilders);
+				InitializrServiceSpec serviceSpec = InitializrServiceSpec.parseFrom(urlConnectionFactory, new URL(initializrUrl));
 
 				ISpringBootProject bootProject = core.project(project);
 
 				this.bootVersion.setValue(bootProject.getBootVersion());
 
-				InitializrModel model = new InitializrModel(bootProject, projectDownloader, preferenceStore);
+				InitializrModel model = new InitializrModel(bootProject, projectDownloader, serviceSpec, preferenceStore);
 
 				return model;
 			} else {
@@ -155,7 +159,15 @@ public class AddStartersWizardModel implements OkButtonHandler {
 		if (ExceptionUtil.getDeepestCause(e) instanceof FileNotFoundException) {
 			shortMessage = "Error encountered while resolving content";
 			detailsBuffer.append(
-					"Initializr content for the project's boot version is not available. Considering updating to a newer boot version.");
+					"Initializr content for the project's boot version is not available. Considering updating the project to a newer supported boot version:");
+			Option[] availableBootVersions = model.getAvailableBootVersions();
+			if (availableBootVersions != null) {
+				detailsBuffer.append('\n');
+				for (Option option : availableBootVersions) {
+					detailsBuffer.append('\n');
+					detailsBuffer.append(option.getId());
+				}
+			}
 		} else {
 			shortMessage = "Unknown problem occured while loading content for: " + model.getProject().getProject().getName();
 			detailsBuffer.append(shortMessage);

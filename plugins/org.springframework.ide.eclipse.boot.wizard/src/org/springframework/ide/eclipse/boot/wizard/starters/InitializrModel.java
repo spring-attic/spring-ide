@@ -28,6 +28,7 @@ import org.springframework.ide.eclipse.boot.core.initializr.InitializrProjectDow
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.DependencyGroup;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Option;
 import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
 import org.springframework.ide.eclipse.boot.wizard.DefaultDependencies;
 import org.springframework.ide.eclipse.boot.wizard.DependencyFilterBox;
@@ -51,7 +52,8 @@ public class InitializrModel  {
 	private final PopularityTracker popularities;
 	private final DefaultDependencies defaultDependencies;
 	private AddStartersCompareModel compareModel;
-
+	private final InitializrServiceSpec serviceSpec;
+	private Option[] availableBootVersions;
 
 	public final HierarchicalMultiSelectionFieldModel<Dependency> dependencies = new HierarchicalMultiSelectionFieldModel<>(
 			Dependency.class, "dependencies").label("Dependencies:");
@@ -63,11 +65,12 @@ public class InitializrModel  {
 	 */
 	public InitializrModel(ISpringBootProject bootProject,
 			InitializrProjectDownloader projectDownloader,
-			IPreferenceStore store) throws Exception {
+			InitializrServiceSpec serviceSpec, IPreferenceStore store) throws Exception {
 		this.popularities = new PopularityTracker(store);
 		this.defaultDependencies = new DefaultDependencies(store);
 		this.bootProject = bootProject;
 		this.compareModel = new AddStartersCompareModel(projectDownloader, bootProject);
+		this.serviceSpec = serviceSpec;
 	}
 
 	public void updateDependencyCount() {
@@ -84,6 +87,8 @@ public class InitializrModel  {
 	 *
 	 */
 	public void downloadStarterInfos() throws Exception {
+
+		this.availableBootVersions = downloadAvailableBootVersions();
 
 		SpringBootStarters starters = bootProject.getStarterInfos();
 		if (starters != null) {
@@ -108,6 +113,18 @@ public class InitializrModel  {
 				}
 			}
 		}
+	}
+
+	private Option[] downloadAvailableBootVersions() {
+		return serviceSpec.getSingleSelectOptions("bootVersion");
+	}
+
+	/**
+	 *
+	 * @return may be null if not yet available
+	 */
+	public Option[]	getAvailableBootVersions() {
+		return this.availableBootVersions;
 	}
 
 	/**
