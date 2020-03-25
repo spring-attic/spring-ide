@@ -111,7 +111,7 @@ public class DependencyPage extends WizardPageWithSections {
 		// are automatically handled and displayed accordingly in the wizard page UI
 		validator.addChild(modelValidator);
 
-		getControl().getDisplay().asyncExec(() -> loadWithProgress());
+		getWizard().getContainer().getShell().getDisplay().asyncExec(() -> loadWithProgress());
 	}
 
 	private void createErrorSection(List<WizardPageSection> sections) {
