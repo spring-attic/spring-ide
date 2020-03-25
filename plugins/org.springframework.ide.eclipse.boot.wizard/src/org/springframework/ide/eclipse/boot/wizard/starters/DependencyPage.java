@@ -87,7 +87,7 @@ public class DependencyPage extends WizardPageWithSections {
 						});
 						createDynamicSections(model, sections);
 					} else {
-						// TODO: create sections when an error occurs but the model is available
+						createErrorSection(sections);
 					}
 
 					GroupSection groupSection = new GroupSection(this, null,
@@ -112,6 +112,22 @@ public class DependencyPage extends WizardPageWithSections {
 		validator.addChild(modelValidator);
 
 		getControl().getDisplay().asyncExec(() -> loadWithProgress());
+	}
+
+	private void createErrorSection(List<WizardPageSection> sections) {
+
+		// IMPORTANT: this method may be called multiple times throughout the life cycle
+		// of the page, Only show
+		// error section IF there is an actual error
+		ValidationResult validation = modelValidator.getValue();
+
+		if (validation instanceof AddStartersError) {
+			AddStartersError addStartersError = (AddStartersError) validation;
+			GroupSection errorSection = new GroupSection(this, null, new CommentSection(this, "Error:"),
+					new GroupSection(this, "", new CommentSection(this, addStartersError.details)));
+
+			sections.add(errorSection);
+		}
 	}
 
 	private void loadWithProgress() {

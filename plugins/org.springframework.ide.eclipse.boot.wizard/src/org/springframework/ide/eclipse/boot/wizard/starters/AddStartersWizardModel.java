@@ -30,7 +30,6 @@ import org.springsource.ide.eclipse.commons.livexp.core.StringFieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.ui.OkButtonHandler;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
-import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 /**
  *
@@ -150,25 +149,27 @@ public class AddStartersWizardModel implements OkButtonHandler {
 	}
 
 	private ValidationResult parseError(InitializrModel model, Exception e) {
+		String shortMessage = null;
+		StringBuffer detailsBuffer = new StringBuffer();
+
 		if (ExceptionUtil.getDeepestCause(e) instanceof FileNotFoundException) {
-			// Crude way to interpret that project boot version is not available in
-			// initializr
-			StringBuffer message = new StringBuffer();
-
-			// Get the boot version from project directly as opposed from the starters info,
-			// as it may
-			// not be available.
-			String bootVersionFromProject = model.getProject().getBootVersion();
-			message.append("Unable to download content for boot version: ");
-			message.append(bootVersionFromProject);
-			message.append(". The version may not be available.  Consider updating to a newer version.");
-
-			// Log the full message
-			Log.log(e);
-
-			return ValidationResult.error(message.toString());
+			shortMessage = "Error encountered while resolving content";
+			detailsBuffer.append(
+					"Initializr content for the project's boot version is not available. Considering updating to a newer boot version.");
+		} else {
+			shortMessage = "Unknown problem occured while loading content for: " + model.getProject().getProject().getName();
+			detailsBuffer.append(shortMessage);
 		}
-		return ValidationResult.from(ExceptionUtil.status(e));
+
+		String exceptionMsg = ExceptionUtil.getMessage(e);
+		if (exceptionMsg != null) {
+			detailsBuffer.append('\n');
+			detailsBuffer.append('\n');
+			detailsBuffer.append("Full Error:");
+			detailsBuffer.append('\n');
+			detailsBuffer.append(exceptionMsg);
+		}
+		return AddStartersError.from(shortMessage, detailsBuffer.toString());
 	}
 
 	/**
