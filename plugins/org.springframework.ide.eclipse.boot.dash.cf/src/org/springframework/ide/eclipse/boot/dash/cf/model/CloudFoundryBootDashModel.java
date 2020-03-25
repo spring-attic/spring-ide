@@ -288,7 +288,7 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 	public CloudFoundryBootDashModel(CloudFoundryRunTarget target, BootDashModelContext context, BootDashViewModel parent) {
 		super(target, parent);
 		cfDebugStrategies = new DebugStrategyManager(injections().getBeans(DebugSupport.class), getViewModel());
-		this.elementFactory = new CloudDashElementFactory(context, modelStore, this);
+		this.elementFactory = new CloudDashElementFactory(context, target.getPropertyStore(), this);
 		this.consoleManager = new CloudAppLogManager(target);
 		this.unsupportedPushProperties = new UnsupportedPushProperties();
 		this.debugTargetDisconnector = DevtoolsUtil.createDebugTargetDisconnector(this);

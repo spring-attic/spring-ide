@@ -18,7 +18,7 @@ public interface RemoteRunTarget<Client, Params> extends RunTarget<Params> {
 	/**
 	 * Typically long-running (network access), avoid calling in UI thread).
 	 */
-	Collection<App> fetchApps();
+	Collection<App> fetchApps() throws Exception;
 
 	/**
 	 * Disconnects the remote target and removes/disposes its

@@ -13,25 +13,22 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
-import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
+import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget;
 import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
-import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
 @SuppressWarnings("rawtypes")
 public abstract class RemoteBootDashModel extends AbstractBootDashModel {
 
-	protected final IPropertyStore modelStore;
-
-	final private ValueListener RUN_TARGET_CONNECTION_LISTENER = new ValueListener() {
+	final protected ValueListener NOTIFY_MODEL_STATE_CHANGE = new ValueListener() {
 		@Override
 		public void gotValue(LiveExpression exp, Object value) {
 			RemoteBootDashModel.this.notifyModelStateChanged();
@@ -42,16 +39,13 @@ public abstract class RemoteBootDashModel extends AbstractBootDashModel {
 	public RemoteBootDashModel(RunTarget target, BootDashViewModel parent) {
 		super(target, parent);
 		BootDashModelContext context = parent.getContext();
-		RunTargetType type = target.getType();
-		IPropertyStore typeStore = PropertyStores.createForScope(type, context.getRunTargetProperties());
-		this.modelStore = PropertyStores.createSubStore(target.getId(), typeStore);
-		getRunTarget().getClientExp().addListener(RUN_TARGET_CONNECTION_LISTENER);
+		getRunTarget().getClientExp().addListener(NOTIFY_MODEL_STATE_CHANGE);
 	}
 
 	public abstract void performDeployment(Set<IProject> of, UserInteractions ui, RunState runOrDebug) throws Exception;
 
 	public final IPropertyStore getPropertyStore() {
-		return modelStore;
+		return getRunTarget().getPropertyStore();
 	}
 
 	@Override
@@ -65,8 +59,7 @@ public abstract class RemoteBootDashModel extends AbstractBootDashModel {
 
 	@Override
 	public void dispose() {
-		getRunTarget().getClientExp().removeListener(RUN_TARGET_CONNECTION_LISTENER);
+		getRunTarget().getClientExp().removeListener(NOTIFY_MODEL_STATE_CHANGE);
 		super.dispose();
 	}
-
 }
