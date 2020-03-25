@@ -21,6 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.compare.CompareEditorInput;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.wizard.WizardPage;
@@ -44,7 +45,7 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 	final private ValueListener<AddStartersCompareResult> compareResultListener = new ValueListener<AddStartersCompareResult>() {
 		@Override
 		public void gotValue(LiveExpression<AddStartersCompareResult> exp, AddStartersCompareResult compareResult) {
-			Display.getDefault().asyncExec(() -> {
+			getWizard().getContainer().getShell().getDisplay().asyncExec(() -> {
 				if (compareResult != null) {
 					setupCompareViewer();
 				}
@@ -55,7 +56,7 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 	final private ValueListener<AddStartersTrackerState> downloadStateListener = new ValueListener<AddStartersTrackerState>() {
 		@Override
 		public void gotValue(LiveExpression<AddStartersTrackerState> exp, AddStartersTrackerState downloadState) {
-			Display.getDefault().asyncExec(() -> {
+			getWizard().getContainer().getShell().getDisplay().asyncExec(() -> {
 				if (downloadState != null) {
 					setMessage(downloadState.getMessage());
 				} else {
@@ -144,6 +145,16 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 							+ resultFromModel.getLocalResource().getProject().getName() + "' and 'starter.zip'",
 					IProgressMonitor.UNKNOWN);
 			compareEditorInput.run(monitor);
+			Display display = getWizard().getContainer().getShell().getDisplay();
+			if (compareEditorInput.hasDiffs()) {
+				display.asyncExec(() -> setMessage(
+						"Differences detected between local project and project from Initializr Service",
+						IMessageProvider.INFORMATION));
+			} else {
+				display.asyncExec(() -> setMessage(
+						"No differences found between local project and project from Initializr Service",
+						IMessageProvider.WARNING));
+			}
 			monitor.done();
 		});
 
