@@ -80,7 +80,7 @@ import org.springframework.ide.eclipse.boot.core.internal.MavenSpringBootProject
 import org.springframework.ide.eclipse.boot.dash.cf.actions.EnableJmxSshTunnelAction;
 import org.springframework.ide.eclipse.boot.dash.cf.actions.RestartApplicationOnlyAction;
 import org.springframework.ide.eclipse.boot.dash.cf.actions.SelectManifestAction;
-import org.springframework.ide.eclipse.boot.dash.cf.actions.ToggleBootDashModelConnection;
+import org.springframework.ide.eclipse.boot.dash.views.ToggleBootDashModelConnection;
 import org.springframework.ide.eclipse.boot.dash.cf.actions.UpdatePasswordAction;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFClientParams;
@@ -110,7 +110,7 @@ import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.remoteapps.RemoteBootAppsDataHolder.RemoteAppData;
 import org.springframework.ide.eclipse.boot.dash.test.CloudFoundryTestHarness.DeploymentAnswerer;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockCFApplication;

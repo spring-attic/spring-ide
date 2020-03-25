@@ -25,7 +25,7 @@ import org.springframework.ide.eclipse.boot.dash.model.AbstractRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 
@@ -57,8 +57,8 @@ public class MockRunTarget extends AbstractRunTarget<CloudFoundryTargetPropertie
 	}
 
 	@Override
-	public MockBootDashModel createSectionModel(BootDashModelContext context, BootDashViewModel viewModel) {
-		return new MockBootDashModel(this, context, viewModel);
+	public MockBootDashModel createSectionModel(BootDashViewModel viewModel) {
+		return new MockBootDashModel(this, viewModel.getContext(), viewModel);
 	}
 
 	@Override
@@ -83,10 +83,6 @@ public class MockRunTarget extends AbstractRunTarget<CloudFoundryTargetPropertie
 	@Override
 	public TargetProperties getTargetProperties() {
 		return properties;
-	}
-
-	@Override
-	public void refresh() throws Exception {
 	}
 
 	@Override

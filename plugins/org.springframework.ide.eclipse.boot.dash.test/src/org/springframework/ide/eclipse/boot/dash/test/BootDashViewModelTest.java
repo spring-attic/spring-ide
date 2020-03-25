@@ -54,7 +54,7 @@ import org.springframework.ide.eclipse.boot.dash.model.RunTargets;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.ToggleFiltersModel.FilterChoice;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetType;
+import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockBootDashModel;
@@ -136,7 +136,7 @@ public class BootDashViewModelTest {
 
 		when(target.getId()).thenReturn("target_id");
 		when(target.getType()).thenReturn(targetType);
-		when(target.createSectionModel(harness.context, harness.model)).thenReturn(bootDashModel);
+		when(target.createSectionModel(harness.model)).thenReturn(bootDashModel);
 
 		when(targetType.canInstantiate()).thenReturn(true);
 		when(targetType.createRunTarget(any(TargetProperties.class))).thenReturn(target);
@@ -175,7 +175,7 @@ public class BootDashViewModelTest {
 
 		when(target.getId()).thenReturn("target_id");
 		when(target.getType()).thenReturn(targetType);
-		when(target.createSectionModel(harness.context, harness.model)).thenReturn(bdm);
+		when(target.createSectionModel(harness.model)).thenReturn(bdm);
 
 		//////Add target///////
 
@@ -225,7 +225,7 @@ public class BootDashViewModelTest {
 
 		when(target.getId()).thenReturn("target_id");
 		when(target.getType()).thenReturn(targetType);
-		when(target.createSectionModel(harness.context, harness.model)).thenReturn(bdm);
+		when(target.createSectionModel(harness.model)).thenReturn(bdm);
 
 		/////Add listener////////
 
@@ -276,7 +276,7 @@ public class BootDashViewModelTest {
 		when(target.getId()).thenReturn("target_id");
 		when(target.getName()).thenReturn("target_name");
 		when(target.getType()).thenReturn(targetType);
-		when(target.createSectionModel(harness.context, harness.model)).thenReturn(bdm);
+		when(target.createSectionModel(harness.model)).thenReturn(bdm);
 
 		//////Add target///////
 		harness.model.getRunTargets().add(target);
@@ -315,7 +315,7 @@ public class BootDashViewModelTest {
 		when(target.getId()).thenReturn("target_id");
 		when(target.getName()).thenReturn("target_name");
 		when(target.getType()).thenReturn(targetType);
-		when(target.createSectionModel(harness.context, harness.model)).thenReturn(bdm);
+		when(target.createSectionModel(harness.model)).thenReturn(bdm);
 
 		//////Add target///////
 		harness.model.getRunTargets().add(target);
@@ -357,7 +357,7 @@ public class BootDashViewModelTest {
 		when(target.getId()).thenReturn("target_id");
 		when(target.getName()).thenReturn("target_name");
 		when(target.getType()).thenReturn(targetType);
-		when(target.createSectionModel(harness.context, harness.model)).thenReturn(bdm);
+		when(target.createSectionModel(harness.model)).thenReturn(bdm);
 
 		when(otherTarget.getId()).thenReturn("other_id");
 
