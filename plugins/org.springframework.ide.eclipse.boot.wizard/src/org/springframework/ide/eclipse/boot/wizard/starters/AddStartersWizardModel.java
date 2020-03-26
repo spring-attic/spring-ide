@@ -61,7 +61,7 @@ public class AddStartersWizardModel implements OkButtonHandler {
 
 	private final LiveVariable<ValidationResult> modelLoadingValidator = new LiveVariable<ValidationResult>();
 
-	private final FieldModel<String> bootVersion = new StringFieldModel("Spring Boot Version:", "");
+	private final FieldModel<String> bootVersion = new StringFieldModel("Spring Boot Version:", "").validator(modelLoadingValidator);
 
 	private Runnable okRunnable;
 
