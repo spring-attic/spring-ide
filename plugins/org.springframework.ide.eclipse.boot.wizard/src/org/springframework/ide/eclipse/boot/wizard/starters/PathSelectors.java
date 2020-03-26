@@ -17,6 +17,8 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.function.Predicate;
 
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
+
 /**
  * Predicates for testing file paths. Paths should be always separated with '/' and folders assumed to have trailing '/'
  *
@@ -36,7 +38,13 @@ public class PathSelectors {
 	}
 
 	public static Predicate<String> pattern(String glob) {
-		final PathMatcher pathMatcher = FileSystems.getDefault().getPathMatcher("glob:" + glob);
+		PathMatcher matcher = null;
+		try {
+			matcher = FileSystems.getDefault().getPathMatcher("glob:" + glob);
+		} catch (Exception e) {
+			Log.error("Inavlid glob pattern: " + glob);
+		}
+		final PathMatcher pathMatcher = matcher;
 		return path -> {
 			String[] pathArray = path.split("/");
 			Path p = null;
@@ -48,8 +56,7 @@ public class PathSelectors {
 			if (p == null) {
 				return false;
 			} else {
-				boolean matches = pathMatcher.matches(p);
-				return matches;
+				return pathMatcher != null && pathMatcher.matches(p);
 			}
 		};
 	}

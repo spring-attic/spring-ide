@@ -17,6 +17,7 @@ import static org.springframework.ide.eclipse.boot.wizard.starters.eclipse.Resou
 import static org.springframework.ide.eclipse.boot.wizard.starters.eclipse.ResourceCompareInput.fromWorkspaceResource;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.function.Predicate;
 
 import org.eclipse.compare.CompareEditorInput;
 import org.eclipse.core.resources.IProject;
@@ -29,6 +30,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.springframework.ide.eclipse.boot.wizard.BootWizardActivator;
+import org.springframework.ide.eclipse.boot.wizard.preferences.PreferenceConstants;
 import org.springframework.ide.eclipse.boot.wizard.starters.AddStartersCompareModel.AddStartersTrackerState;
 import org.springframework.ide.eclipse.boot.wizard.starters.eclipse.ResourceCompareInput;
 import org.springframework.ide.eclipse.maven.pom.PomPlugin;
@@ -115,6 +118,11 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 		}
 	}
 
+	private String[] excludeGlobPatterns() {
+		String globStr = BootWizardActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.ADD_STARTERS_EXCLUDE_RESOURCES_FROM_COMPARE).trim();
+		return globStr.split("\\s*,\\s*");
+	}
+
 	/**
 	 * Creates the Eclipse compare editor input from the compare model results.
 	 *
@@ -124,16 +132,21 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 	 */
 	private CompareEditorInput createCompareEditorInput(AddStartersCompareResult resultFromModel) throws Exception {
 
-		ResourceCompareInput compareEditorInput = new ResourceCompareInput(resultFromModel.getConfiguration(),
-				rootFiles()
+		Predicate<String> filter = s -> true;
+		for (String glob : excludeGlobPatterns()) {
+			filter = filter.and(pattern(glob).negate());
+		}
+
+		filter.and(rootFiles()
 				.or(path("HELP.md"))
 				.or(path("src/main/resources/application.properties"))
 				.or(path("src/main/resources/application.yml"))
 				.or(path("src/main/resources/static/"))
 				.or(path("src/main/resources/templates/"))
 				.or(pattern("src/main/resources/static/*"))
-				.or(pattern("src/main/resources/templates/*"))
-		);
+				.or(pattern("src/main/resources/templates/*")));
+
+		ResourceCompareInput compareEditorInput = new ResourceCompareInput(resultFromModel.getConfiguration(), filter);
 		setResources(compareEditorInput, resultFromModel);
 
 		compareEditorInput.setTitle(
