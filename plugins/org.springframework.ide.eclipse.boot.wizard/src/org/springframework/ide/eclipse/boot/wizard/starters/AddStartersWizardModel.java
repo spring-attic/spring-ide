@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpe
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrUrlBuilders;
 import org.springframework.ide.eclipse.boot.wizard.InitializrFactoryModel;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
+import org.springsource.ide.eclipse.commons.livexp.core.CompositeValidator;
 import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -59,9 +60,24 @@ public class AddStartersWizardModel implements OkButtonHandler {
 	// Factory that creates the model.
 	private final InitializrFactoryModel<InitializrModel> initializrFactory;
 
+	// Use separate validators, and add them to a general model validator. The reason to have separate validators
+	// is to be more precise which validator to use in certain model components, for example, using a specific
+	// validator just for boot version that just notifies the boot version field model, but not any other unrelated
+	// model that shouldn't be notified to changes to boot version.
 	private final LiveVariable<ValidationResult> modelLoadingValidator = new LiveVariable<ValidationResult>();
+	private final LiveVariable<ValidationResult> bootVersionValidator = new LiveVariable<ValidationResult>();
 
-	private final FieldModel<String> bootVersion = new StringFieldModel("Spring Boot Version:", "").validator(modelLoadingValidator);
+
+	private  final CompositeValidator validator = new CompositeValidator();
+
+	{
+		validator.addChild(modelLoadingValidator);
+		validator.addChild(bootVersionValidator);
+	}
+
+
+
+	private final FieldModel<String> bootVersion = new StringFieldModel("Spring Boot Version:", "").validator(bootVersionValidator);
 
 	private Runnable okRunnable;
 
@@ -127,13 +143,16 @@ public class AddStartersWizardModel implements OkButtonHandler {
 
 				model.downloadStarterInfos();
 
-				this.modelLoadingValidator.setValue(ValidationResult.OK);
-
+				validateAll(ValidationResult.OK);
 			} catch (Exception e) {
-				ValidationResult parseError = parseError(model, e);
-				this.modelLoadingValidator.setValue(parseError);
+				 handleError(model, e);
 			}
 		}
+	}
+
+	private void validateAll(ValidationResult ok) {
+		this.modelLoadingValidator.setValue(ValidationResult.OK);
+		this.bootVersionValidator.setValue(ValidationResult.OK);
 	}
 
 	/**
@@ -148,14 +167,15 @@ public class AddStartersWizardModel implements OkButtonHandler {
 	 *
 	 * @return validator that notifies when model creation completes successfully, as well as information download from initializr, as well as any errors that occur
 	 */
-	public LiveVariable<ValidationResult> getValidator() {
-		return this.modelLoadingValidator;
+	public LiveExpression<ValidationResult> getValidator() {
+		return this.validator;
 	}
 
-	private ValidationResult parseError(InitializrModel model, Exception e) {
+	private void handleError(InitializrModel model, Exception e) {
 		String shortMessage = null;
 		StringBuffer detailsBuffer = new StringBuffer();
 
+		// This error is specific to boot version validator, so inform the boot version validator
 		if (ExceptionUtil.getDeepestCause(e) instanceof FileNotFoundException) {
 			shortMessage = "Error encountered while resolving content";
 			detailsBuffer.append(
@@ -168,12 +188,28 @@ public class AddStartersWizardModel implements OkButtonHandler {
 					detailsBuffer.append(option.getId());
 				}
 			}
+
+			AddStartersError result = createWithExceptionIncluded(shortMessage, detailsBuffer, e);
+
+			// Notify the boot  version validator only as the associated field model should only react
+			// when boot version problems are encountered,but not any other problem
+			this.bootVersionValidator.setValue(result);
+
 		} else {
 			shortMessage = "Unknown problem occured while loading content for: " + model.getProject().getProject().getName();
 			detailsBuffer.append(shortMessage);
-		}
 
+			AddStartersError result = createWithExceptionIncluded(shortMessage, detailsBuffer, e);
+
+			// This is some general unidentifiable error, so notify the loading validator
+			// for now that an error was encountered
+			this.modelLoadingValidator.setValue(result);
+		}
+	}
+
+	private AddStartersError createWithExceptionIncluded(String shortMessage,  StringBuffer detailsBuffer, Exception e) {
 		String exceptionMsg = ExceptionUtil.getMessage(e);
+
 		if (exceptionMsg != null) {
 			detailsBuffer.append('\n');
 			detailsBuffer.append('\n');

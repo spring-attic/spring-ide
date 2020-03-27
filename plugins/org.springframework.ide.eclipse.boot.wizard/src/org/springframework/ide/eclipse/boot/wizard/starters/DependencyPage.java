@@ -49,14 +49,18 @@ public class DependencyPage extends WizardPageWithSections {
 	private static final Point DEPENDENCY_SECTION_SIZE = new Point(SWT.DEFAULT, 300);
 
 	private CheckBoxesSection<Dependency> frequentlyUsedCheckboxes;
-	private LiveVariable<ValidationResult> modelValidator;
+
+	// A validator that generates UI-specific results that for some reason were not
+	// contained in the actual wizard model. For example, catching some wizard UI related
+	// exceptions. Should only be used for wizard UI issues. Any validation that occurs
+	// in the model should use the model's own validator
+	private LiveVariable<ValidationResult> pageValidator = new LiveVariable<>();
 
 	protected final AddStartersWizardModel wizardModel;
 
 	public DependencyPage(AddStartersWizardModel wizardModel) {
 		super("Dependencies", "New Spring Starter Project Dependencies", null);
 		this.wizardModel = wizardModel;
-		this.modelValidator = wizardModel.getValidator();
 	}
 
 	private void refreshFrequentlyUsedDependencies(InitializrModel model) {
@@ -69,10 +73,11 @@ public class DependencyPage extends WizardPageWithSections {
 
 	@Override
 	protected List<WizardPageSection> createSections() {
-		// "link" the page section creation live exp to the model validator live exp, so that page section creation DEPENDS
-		// on model validator. When the model validator validates the model, it will in turn cause the page section creation
+		// "link" the page section creation live exp to the wizard validator live exp, so that page section creation DEPENDS
+		// on wizard validation. For example, when the wizard validator validates the model (due to some other independent trigger)
+		//, it will in turn cause the page section creation
 		// live exp to also be called.
-		LiveExpression<IPageSection> pageCreationExp = modelValidator.apply((result) -> {
+		LiveExpression<IPageSection> pageCreationExp = validator.apply((result) -> {
 			if (result != null) {
 				InitializrModel model = wizardModel.getInitializrFactoryModel().getModel().getValue();
 				if (model != null) {
@@ -107,9 +112,12 @@ public class DependencyPage extends WizardPageWithSections {
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 
-		// Add the model validator to the wizard page validator so that results for the model
-		// are automatically handled and displayed accordingly in the wizard page UI
-		validator.addChild(modelValidator);
+		// Add any validators to the wizard validator. This is important
+		// as this "hooks" the separate validators to the wizards general validation
+		// mechanism, which among things is responsbile for showing errors from
+		// the various validators that exist
+		validator.addChild(wizardModel.getValidator());
+		validator.addChild(pageValidator);
 
 		getWizard().getContainer().getShell().getDisplay().asyncExec(() -> loadWithProgress());
 	}
@@ -119,7 +127,7 @@ public class DependencyPage extends WizardPageWithSections {
 		// IMPORTANT: this method may be called multiple times throughout the life cycle
 		// of the page, Only show
 		// error section IF there is an actual error
-		ValidationResult validation = modelValidator.getValue();
+		ValidationResult validation = validator.getValue();
 
 		if (validation instanceof AddStartersError) {
 			AddStartersError addStartersError = (AddStartersError) validation;
@@ -142,7 +150,7 @@ public class DependencyPage extends WizardPageWithSections {
 				monitor.done();
 			});
 		} catch (Exception e) {
-			modelValidator.setValue(ValidationResult
+			pageValidator.setValue(ValidationResult
 					.error("Failed fetching data from Initializr Service: " + ExceptionUtil.getMessage(e)));
 		}
 	}
