@@ -84,7 +84,7 @@ public class InitializrModel  {
 	}
 
 	public void downloadDependencies() throws Exception {
-		InitializrModel.this.availableBootVersions = downloadAvailableBootVersions();
+		InitializrModel.this.availableBootVersions = downloadReleaseBootVersions();
 		SpringBootStarters starters = bootProject.getStarterInfos();
 		if (starters != null) {
 			for (DependencyGroup dgroup : starters.getDependencyGroups()) {
@@ -110,8 +110,20 @@ public class InitializrModel  {
 		}
 	}
 
-	private Option[] downloadAvailableBootVersions() {
-		return serviceSpec.getSingleSelectOptions("bootVersion");
+	private Option[] downloadReleaseBootVersions() {
+		Option[] options = serviceSpec.getSingleSelectOptions("bootVersion");
+		List<Option> releasesOnly = new ArrayList<>();
+		int count = 0;
+		if (options != null) {
+			for (Option option : options) {
+				// PT 172040311 - Do not include snapshot versions
+				if (!option.getId().contains("BUILD-SNAPSHOT")) {
+					releasesOnly.add(option);
+					count++;
+				}
+			}
+		}
+		return releasesOnly.toArray(new Option[count]);
 	}
 
 	/**
