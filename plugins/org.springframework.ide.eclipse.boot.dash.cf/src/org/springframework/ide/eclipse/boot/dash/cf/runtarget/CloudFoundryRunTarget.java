@@ -92,15 +92,11 @@ public class CloudFoundryRunTarget extends AbstractRunTarget<CloudFoundryTargetP
 	private static final String BUILDPACKS = "BUILDPACKS";
 
 	@Override
-	public ILaunchConfiguration createLaunchConfig(IJavaProject jp, IType mainType) throws Exception {
-		return null;
-	}
-
-	@Override
 	public ClientRequests getClient() {
 		return cachedClient.getValue();
 	}
 
+	@Override
 	public void connect() throws Exception {
 		try {
 			this.domains = null;

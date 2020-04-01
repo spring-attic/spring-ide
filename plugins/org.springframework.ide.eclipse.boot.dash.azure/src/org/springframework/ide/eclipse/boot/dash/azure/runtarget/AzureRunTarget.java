@@ -60,11 +60,6 @@ public class AzureRunTarget extends AbstractRunTarget<AzureTargetParams> impleme
 	}
 
 	@Override
-	public ILaunchConfiguration createLaunchConfig(IJavaProject jp, IType mainType) throws Exception {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public GenericRemoteBootDashModel<?, ?> createSectionModel(BootDashViewModel parent) {
 		return new GenericRemoteBootDashModel<>(this, parent);
 	}

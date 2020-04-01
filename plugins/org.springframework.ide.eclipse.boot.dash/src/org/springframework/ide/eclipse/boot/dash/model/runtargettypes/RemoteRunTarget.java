@@ -3,7 +3,9 @@ package org.springframework.ide.eclipse.boot.dash.model.runtargettypes;
 import java.util.Collection;
 
 import org.springframework.ide.eclipse.boot.dash.api.App;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
+import org.springframework.ide.eclipse.boot.dash.model.remote.GenericRemoteBootDashModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 public interface RemoteRunTarget<Client, Params> extends RunTarget<Params> {
