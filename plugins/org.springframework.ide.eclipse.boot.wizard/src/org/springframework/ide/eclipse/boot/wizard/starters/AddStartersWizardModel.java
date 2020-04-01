@@ -124,7 +124,7 @@ public class AddStartersWizardModel implements OkButtonHandler {
 		if (ExceptionUtil.getDeepestCause(e) instanceof FileNotFoundException) {
 			shortMessage = "Error encountered while resolving content";
 			detailsBuffer.append(
-					"Initializr content for the project's boot version is not available. Considering updating the project to a newer supported boot version:");
+					"Initializr content for the project's boot version is not available. Consider updating the project to a newer version of Spring Boot:");
 			Option[] availableBootVersions = model.getAvailableBootVersions();
 			if (availableBootVersions != null) {
 				detailsBuffer.append('\n');
