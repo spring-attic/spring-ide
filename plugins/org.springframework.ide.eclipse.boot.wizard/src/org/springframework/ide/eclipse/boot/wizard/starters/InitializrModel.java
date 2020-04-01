@@ -42,6 +42,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
 /**
  *
+ * Model for a local project that contains relevant data downloaded from initializr relevant to this
+ * project. For example, it contains dependencies from initializr that pertain to the project's boot version.
  */
 public class InitializrModel  {
 
@@ -81,15 +83,8 @@ public class InitializrModel  {
 		}
 	}
 
-	/**
-	 *
-	 * Download starter information from initializr, like available dependencies
-	 *
-	 */
-	public void downloadStarterInfos() throws Exception {
-
-		this.availableBootVersions = downloadAvailableBootVersions();
-
+	public void downloadDependencies() throws Exception {
+		InitializrModel.this.availableBootVersions = downloadAvailableBootVersions();
 		SpringBootStarters starters = bootProject.getStarterInfos();
 		if (starters != null) {
 			for (DependencyGroup dgroup : starters.getDependencyGroups()) {

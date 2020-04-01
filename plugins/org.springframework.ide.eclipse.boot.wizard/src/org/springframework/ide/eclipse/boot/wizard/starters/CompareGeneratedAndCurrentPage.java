@@ -93,7 +93,7 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 
 	private void setupCompareViewer() {
 		try {
-			InitializrModel initializrModel = wizardModel.getInitializrFactoryModel().getModel().getValue();
+			InitializrModel initializrModel = wizardModel.getModel().getValue();
 			AddStartersCompareModel compareModel = initializrModel.getCompareModel();
 
 			// Transform the compare result from the model into a compare editor input
@@ -196,7 +196,7 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 		// Connect the model to the UI only when the page becomes visible.
 		// If this connection is done before, either the UI controls may not yet be created
 		// or the model may not yet be available.
-		InitializrModel initializrModel = wizardModel.getInitializrFactoryModel().getModel().getValue();
+		InitializrModel initializrModel = wizardModel.getModel().getValue();
 		AddStartersCompareModel compareModel = initializrModel.getCompareModel();
 
 		if (visible) {

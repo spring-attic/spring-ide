@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.swt.SWT;
@@ -32,6 +33,7 @@ import org.springframework.ide.eclipse.boot.wizard.SelectedDependenciesSection;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
+import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.CommentSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.GroupSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageSection;
@@ -47,6 +49,8 @@ public class DependencyPage extends WizardPageWithSections {
 	private static final int NUM_COLUMNS_FREQUENTLY_USED = 3;
 	private static final int MAX_MOST_POPULAR = 3 * NUM_COLUMNS_FREQUENTLY_USED;
 	private static final Point DEPENDENCY_SECTION_SIZE = new Point(SWT.DEFAULT, 300);
+	private static final long MODEL_CREATION_TIMEOUT = 30000;
+
 
 	private CheckBoxesSection<Dependency> frequentlyUsedCheckboxes;
 
@@ -73,33 +77,30 @@ public class DependencyPage extends WizardPageWithSections {
 
 	@Override
 	protected List<WizardPageSection> createSections() {
-		// "link" the page section creation live exp to the wizard validator live exp, so that page section creation DEPENDS
-		// on wizard validation. For example, when the wizard validator validates the model (due to some other independent trigger)
-		//, it will in turn cause the page section creation
+		// "link" the page section creation live exp to the wizard model live exp, so that page section creation DEPENDS
+		// on wizard model creation. This means the page creation will only happen when the model becomes available.
 		// live exp to also be called.
-		LiveExpression<IPageSection> pageCreationExp = validator.apply((result) -> {
-			if (result != null) {
-				InitializrModel model = wizardModel.getInitializrFactoryModel().getModel().getValue();
-				if (model != null) {
-					List<WizardPageSection> sections = new ArrayList<>();
-					sections.add(createBootInfoSection());
+		LiveExpression<IPageSection> pageCreationExp = wizardModel.getModel().apply((model) -> {
+			List<WizardPageSection> sections = new ArrayList<>();
+			sections.add(createBootInfoSection());
+			if (model != null) {
+				ValidationResult result = wizardModel.getValidator().getValue();
 
-					if (result.isOk()) {
-						model.onDependencyChange(() -> {
-							Display.getDefault().asyncExec(() -> {
-								refreshWizardUi();
-							});
+				if (result != null && result.isOk()) {
+					model.onDependencyChange(() -> {
+						Display.getDefault().asyncExec(() -> {
+							refreshWizardUi();
 						});
-						createDynamicSections(model, sections);
-					} else {
-						createErrorSection(sections);
-					}
-
-					GroupSection groupSection = new GroupSection(this, null,
-							sections.toArray(new WizardPageSection[0]));
-					groupSection.grabVertical(true);
-					return groupSection;
+					});
+					createDynamicSections(model, sections);
+				} else {
+					createErrorSection(sections);
 				}
+
+				GroupSection groupSection = new GroupSection(this, null,
+						sections.toArray(new WizardPageSection[0]));
+				groupSection.grabVertical(true);
+				return groupSection;
 			}
 			return new CommentSection(this, NewSpringBootWizard.NO_CONTENT_AVAILABLE);
 		});
@@ -142,12 +143,21 @@ public class DependencyPage extends WizardPageWithSections {
 		try {
 			getContainer().run(true, false, monitor -> {
 				monitor.beginTask("Loading starters data", IProgressMonitor.UNKNOWN);
-				monitor.subTask("Creating Boot project model...");
-				wizardModel.createInitializrModelForProject();
-				String bootVersion = wizardModel.getBootVersion().getValue();
-				monitor.subTask("Fetching data for boot version '" +  bootVersion + "' from Initializr Service");
-				wizardModel.downloadStarterInfos();
+				monitor.subTask("Creating Boot project model and fetching data from Initializr Service...");
+
+
+				ValueListener<ValidationResult> monitorListener = (exp, val) -> {
+					ValidationResult value = exp.getValue();
+					if (value != null && value.status == IStatus.INFO) {
+						monitor.subTask(value.msg);
+					}
+				};
+
+				wizardModel.getValidator().addListener(monitorListener);
+				wizardModel.load();
 				monitor.done();
+				wizardModel.getValidator().removeListener(monitorListener);
+
 			});
 		} catch (Exception e) {
 			pageValidator.setValue(ValidationResult

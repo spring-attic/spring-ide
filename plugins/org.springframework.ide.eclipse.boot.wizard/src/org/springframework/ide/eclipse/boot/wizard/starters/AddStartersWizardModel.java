@@ -19,12 +19,12 @@ import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
+import org.springframework.ide.eclipse.boot.core.initializr.HttpRedirectionException;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrProjectDownloader;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Option;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrUrlBuilders;
-import org.springframework.ide.eclipse.boot.wizard.InitializrFactoryModel;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
 import org.springsource.ide.eclipse.commons.livexp.core.CompositeValidator;
 import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
@@ -55,58 +55,40 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
  *
  */
 public class AddStartersWizardModel implements OkButtonHandler {
-	private static final long MODEL_CREATION_TIMEOUT = 30000;
 
-	// Factory that creates the model.
-	private final InitializrFactoryModel<InitializrModel> initializrFactory;
+
+
+	private Runnable okRunnable;
+	private IPreferenceStore preferenceStore;
+	private IProject project;
 
 	// Use separate validators, and add them to a general model validator. The reason to have separate validators
 	// is to be more precise which validator to use in certain model components, for example, using a specific
 	// validator just for boot version that just notifies the boot version field model, but not any other unrelated
 	// model that shouldn't be notified to changes to boot version.
-	private final LiveVariable<ValidationResult> modelLoadingValidator = new LiveVariable<ValidationResult>();
+	private final LiveVariable<ValidationResult> modelValidator = new LiveVariable<ValidationResult>();
 	private final LiveVariable<ValidationResult> bootVersionValidator = new LiveVariable<ValidationResult>();
 
+	private final FieldModel<String> bootVersion = new StringFieldModel("Spring Boot Version:", "").validator(bootVersionValidator);
+	private final StringFieldModel serviceUrlField = new StringFieldModel("Service URL", null);
 
-	private  final CompositeValidator validator = new CompositeValidator();
+	private final LiveVariable<InitializrModel> modelExp = new LiveVariable<InitializrModel>(null);
+
+
+	private final CompositeValidator validator = new CompositeValidator();
 
 	{
-		validator.addChild(modelLoadingValidator);
+		validator.addChild(modelValidator);
 		validator.addChild(bootVersionValidator);
+
+		modelExp.dependsOn(serviceUrlField.getVariable());
 	}
 
-
-
-	private final FieldModel<String> bootVersion = new StringFieldModel("Spring Boot Version:", "").validator(bootVersionValidator);
-
-	private Runnable okRunnable;
-
 	public AddStartersWizardModel(IProject project, IPreferenceStore preferenceStore) throws Exception {
-
-		initializrFactory = new InitializrFactoryModel<>((url) -> {
-			if (url != null) {
-				URLConnectionFactory urlConnectionFactory = BootActivator.getUrlConnectionFactory();
-				String initializrUrl = BootPreferences.getInitializrUrl();
-
-				InitializrService initializr = InitializrService.create(urlConnectionFactory, () -> url);
-				SpringBootCore core = new SpringBootCore(initializr);
-
-				InitializrUrlBuilders urlBuilders = new InitializrUrlBuilders();
-				InitializrProjectDownloader projectDownloader = new InitializrProjectDownloader(urlConnectionFactory,
-						initializrUrl, urlBuilders);
-				InitializrServiceSpec serviceSpec = InitializrServiceSpec.parseFrom(urlConnectionFactory, new URL(initializrUrl));
-
-				ISpringBootProject bootProject = core.project(project);
-
-				this.bootVersion.setValue(bootProject.getBootVersion());
-
-				InitializrModel model = new InitializrModel(bootProject, projectDownloader, serviceSpec, preferenceStore);
-
-				return model;
-			} else {
-				return null;
-			}
-		});
+		this.project = project;
+		this.preferenceStore = preferenceStore;
+		String initializrUrl = BootPreferences.getInitializrUrl();
+		serviceUrlField.getVariable().setValue(initializrUrl);
 	}
 
 	public FieldModel<String> getBootVersion() {
@@ -115,10 +97,13 @@ public class AddStartersWizardModel implements OkButtonHandler {
 
 	@Override
 	public void performOk() {
-		LiveExpression<InitializrModel> modelLiveExpression = this.initializrFactory.getModel();
-		InitializrModel model = modelLiveExpression.getValue();
+		InitializrModel model = modelExp.getValue();
 		if (model != null) {
 			model.updateDependencyCount();
+		}
+
+		if (serviceUrlField.getValue() != null) {
+			BootPreferences.addInitializrUrl(serviceUrlField.getValue());
 		}
 
 		if (this.okRunnable != null) {
@@ -130,52 +115,12 @@ public class AddStartersWizardModel implements OkButtonHandler {
 		this.okRunnable = okRunnable;
 	}
 
-	/**
-	 * Download information  from  initializr, like available dependencies for a particular boot version.
-	 * Use {@link #getValidator()} to be  notified  when  information becomes available.
-	 */
-	public void downloadStarterInfos() {
-		InitializrModel model = this.initializrFactory.getModel().getValue();
-		if (model != null) {
-			try {
-				this.modelLoadingValidator
-						.setValue(ValidationResult.info("Fetching starter information from Spring Boot Initializr"));
-
-				model.downloadStarterInfos();
-
-				validateAll(ValidationResult.OK);
-			} catch (Exception e) {
-				 handleError(model, e);
-			}
-		}
-	}
-
-	private void validateAll(ValidationResult ok) {
-		this.modelLoadingValidator.setValue(ValidationResult.OK);
-		this.bootVersionValidator.setValue(ValidationResult.OK);
-	}
-
-	/**
-	 *
-	 * @return factory that creates add starter model which contains project information and dependencies
-	 */
-	public InitializrFactoryModel<InitializrModel> getInitializrFactoryModel() {
-		return this.initializrFactory;
-	}
-
-	/**
-	 *
-	 * @return validator that notifies when model creation completes successfully, as well as information download from initializr, as well as any errors that occur
-	 */
-	public LiveExpression<ValidationResult> getValidator() {
-		return this.validator;
-	}
-
 	private void handleError(InitializrModel model, Exception e) {
 		String shortMessage = null;
 		StringBuffer detailsBuffer = new StringBuffer();
 
-		// This error is specific to boot version validator, so inform the boot version validator
+		// This error is specific to boot version validator, so inform the boot version
+		// validator
 		if (ExceptionUtil.getDeepestCause(e) instanceof FileNotFoundException) {
 			shortMessage = "Error encountered while resolving content";
 			detailsBuffer.append(
@@ -189,63 +134,95 @@ public class AddStartersWizardModel implements OkButtonHandler {
 				}
 			}
 
-			AddStartersError result = createWithExceptionIncluded(shortMessage, detailsBuffer, e);
+			AddStartersError result = AddStartersErrorUtil.getError(shortMessage, detailsBuffer.toString(), e);
 
-			// Notify the boot  version validator only as the associated field model should only react
+			// Notify the boot version validator only as the associated field model should
+			// only react
 			// when boot version problems are encountered,but not any other problem
 			this.bootVersionValidator.setValue(result);
 
 		} else {
-			shortMessage = "Unknown problem occured while loading content for: " + model.getProject().getProject().getName();
-			detailsBuffer.append(shortMessage);
-
-			AddStartersError result = createWithExceptionIncluded(shortMessage, detailsBuffer, e);
-
-			// This is some general unidentifiable error, so notify the loading validator
-			// for now that an error was encountered
-			this.modelLoadingValidator.setValue(result);
+			this.modelValidator.setValue(AddStartersErrorUtil.getError(model, e));
 		}
 	}
 
-	private AddStartersError createWithExceptionIncluded(String shortMessage,  StringBuffer detailsBuffer, Exception e) {
-		String exceptionMsg = ExceptionUtil.getMessage(e);
-
-		if (exceptionMsg != null) {
-			detailsBuffer.append('\n');
-			detailsBuffer.append('\n');
-			detailsBuffer.append("Full Error:");
-			detailsBuffer.append('\n');
-			detailsBuffer.append(exceptionMsg);
-		}
-		return AddStartersError.from(shortMessage, detailsBuffer.toString());
-	}
 
 	/**
-	 * Creates the initializr model for the local project. This does NOT download anything from initializr. It just builds the model based on the local
-	 * project
+	 * Triggers the initializr model creation and downloading of data into the model from initializr service
+	 *
+	 * This is a long-running synchronous operation
 	 */
-	public void createInitializrModelForProject() {
-		LiveExpression<InitializrModel> modelLiveExpression = getInitializrFactoryModel().getModel();
+	public void load() {
 
-		// Gradle project may need to take a bit of time to extract boot version from the model
-		long startTime = System.currentTimeMillis();
-		while (modelLiveExpression.getValue() == null && System.currentTimeMillis() - startTime < MODEL_CREATION_TIMEOUT) {
+		modelValidator.setValue(ValidationResult.info("Creating Boot project model..."));
+
+		InitializrModel  model = createModel();
+		if (model != null) {
 			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-				// Ignore
+				modelValidator.setValue(ValidationResult.info("Fetching starter information from Spring Boot Initializr..."));
+				model.downloadDependencies();
+				modelValidator.setValue(ValidationResult.OK);
+			} catch (Exception e) {
+				handleError(model, e);
 			}
-		}
-
-		if (modelLiveExpression.getValue() == null) {
-			modelLoadingValidator.setValue(ValidationResult.error("Timed out creating Spring Boot project's model"));
+			modelExp.setValue(model);
 		}
 	}
 
+	private InitializrModel createModel()  {
+
+		try {
+			String url = serviceUrlField.getValue();
+			if (url != null) {
+				URLConnectionFactory urlConnectionFactory = BootActivator.getUrlConnectionFactory();
+
+				InitializrService initializr = InitializrService.create(urlConnectionFactory, () -> url);
+				SpringBootCore core = new SpringBootCore(initializr);
+
+				InitializrUrlBuilders urlBuilders = new InitializrUrlBuilders();
+				InitializrProjectDownloader projectDownloader = new InitializrProjectDownloader(urlConnectionFactory,
+						url, urlBuilders);
+				InitializrServiceSpec serviceSpec = InitializrServiceSpec.parseFrom(urlConnectionFactory, new URL(url));
+
+				ISpringBootProject bootProject = core.project(project);
+
+				this.bootVersion.setValue(bootProject.getBootVersion());
+
+				InitializrModel model = new InitializrModel(bootProject, projectDownloader, serviceSpec, preferenceStore);
+				modelValidator.setValue(ValidationResult.OK);
+
+				return model;
+			} else {
+				return null;
+			}
+		} catch (Exception _e) {
+			Throwable e = ExceptionUtil.getDeepestCause(_e);
+			if (e instanceof HttpRedirectionException) {
+				serviceUrlField.getVariable().setValue(((HttpRedirectionException)e).redirectedTo);
+			} else {
+				modelValidator.setValue(ValidationResult.error(ExceptionUtil.getMessage(e)));
+			}
+		}
+		return null;
+	}
+
+
 	public void dispose() {
-		InitializrModel model = getInitializrFactoryModel().getModel().getValue();
+		InitializrModel model = modelExp.getValue();
 		if (model != null) {
 			model.dispose();
 		}
+	}
+
+	public LiveExpression<InitializrModel> getModel() {
+		return modelExp;
+	}
+
+	/**
+	 *
+	 * @return Validator that notifies when different stages of initializr model creation and data download complete, or any errors that may occur
+	 */
+	public LiveExpression<ValidationResult> getValidator() {
+		return this.validator;
 	}
 }
