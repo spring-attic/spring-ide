@@ -34,6 +34,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
+import org.springsource.ide.eclipse.commons.livexp.ui.ChooseOneSectionCombo;
 import org.springsource.ide.eclipse.commons.livexp.ui.CommentSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.GroupSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageSection;
@@ -41,6 +42,7 @@ import org.springsource.ide.eclipse.commons.livexp.ui.LabeledPropertySection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.Parser;
 
 import com.google.common.collect.ImmutableList;
 
@@ -82,7 +84,7 @@ public class DependencyPage extends WizardPageWithSections {
 		// live exp to also be called.
 		LiveExpression<IPageSection> pageCreationExp = wizardModel.getModel().apply((model) -> {
 			List<WizardPageSection> sections = new ArrayList<>();
-			sections.add(createBootInfoSection());
+			createBootInfoSection(sections);
 			if (model != null) {
 				ValidationResult result = wizardModel.getValidator().getValue();
 
@@ -229,9 +231,15 @@ public class DependencyPage extends WizardPageWithSections {
 		return frequentlyUsedSection;
 	}
 
-	protected WizardPageSection createBootInfoSection() {
+	protected void createBootInfoSection(List<WizardPageSection> sections) {
+		ChooseOneSectionCombo<String> serviceUrlSection  = new ChooseOneSectionCombo<String>(this, wizardModel.getServiceUrl(), wizardModel.getServiceUrlOptions())
+				.grabHorizontal(true)
+				.showErrorMarker(true);
+		serviceUrlSection.allowTextEdits(Parser.IDENTITY);
+
+		sections.add(serviceUrlSection);
 		LabeledPropertySection section = new LabeledPropertySection(this, wizardModel.getBootVersion());
-		return section;
+		sections.add(section);
 	}
 
 	@Override

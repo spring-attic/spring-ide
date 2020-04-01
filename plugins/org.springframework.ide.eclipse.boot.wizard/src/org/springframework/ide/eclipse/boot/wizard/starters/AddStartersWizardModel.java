@@ -68,18 +68,21 @@ public class AddStartersWizardModel implements OkButtonHandler {
 	// model that shouldn't be notified to changes to boot version.
 	private final LiveVariable<ValidationResult> modelValidator = new LiveVariable<ValidationResult>();
 	private final LiveVariable<ValidationResult> bootVersionValidator = new LiveVariable<ValidationResult>();
+	private final LiveVariable<ValidationResult> serviceUrlValidator = new  LiveVariable<ValidationResult>();
 
 	private final FieldModel<String> bootVersion = new StringFieldModel("Spring Boot Version:", "").validator(bootVersionValidator);
-	private final StringFieldModel serviceUrlField = new StringFieldModel("Service URL", null);
+	private final FieldModel<String> serviceUrlField = new StringFieldModel("Service URL:", null).validator(serviceUrlValidator);
 
 	private final LiveVariable<InitializrModel> modelExp = new LiveVariable<InitializrModel>(null);
 
+	private String[] serviceUrlOptions;
 
 	private final CompositeValidator validator = new CompositeValidator();
 
 	{
 		validator.addChild(modelValidator);
 		validator.addChild(bootVersionValidator);
+		validator.addChild(serviceUrlValidator);
 
 		modelExp.dependsOn(serviceUrlField.getVariable());
 	}
@@ -89,10 +92,28 @@ public class AddStartersWizardModel implements OkButtonHandler {
 		this.preferenceStore = preferenceStore;
 		String initializrUrl = BootPreferences.getInitializrUrl();
 		serviceUrlField.getVariable().setValue(initializrUrl);
+		String[] urls = BootPreferences.getInitializrUrls();
+		this.serviceUrlOptions = urls != null ? urls : new String[0];
 	}
 
 	public FieldModel<String> getBootVersion() {
 		return bootVersion;
+	}
+
+	public FieldModel<String> getServiceUrl() {
+		return serviceUrlField;
+	}
+
+	public LiveExpression<InitializrModel> getModel() {
+		return modelExp;
+	}
+
+	/**
+	 *
+	 * @return Validator that notifies when different stages of initializr model creation and data download complete, or any errors that may occur
+	 */
+	public LiveExpression<ValidationResult> getValidator() {
+		return this.validator;
 	}
 
 	@Override
@@ -214,15 +235,7 @@ public class AddStartersWizardModel implements OkButtonHandler {
 		}
 	}
 
-	public LiveExpression<InitializrModel> getModel() {
-		return modelExp;
-	}
-
-	/**
-	 *
-	 * @return Validator that notifies when different stages of initializr model creation and data download complete, or any errors that may occur
-	 */
-	public LiveExpression<ValidationResult> getValidator() {
-		return this.validator;
+	public String[] getServiceUrlOptions() {
+		return serviceUrlOptions;
 	}
 }
