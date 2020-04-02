@@ -2685,7 +2685,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		waitForJobsToComplete();
 
-		toggleTargetConnectionAction().run();
+		toggleTargetConnectionAction().run(); //disconnect
 
 		waitForJobsToComplete();
 		assertFalse(target.isConnected());
@@ -3049,7 +3049,7 @@ public class CloudFoundryBootDashModelMockingTest {
 	}
 
 	private ToggleBootDashModelConnection toggleTargetConnectionAction() {
-		return getInjectedAction(ToggleBootDashModelConnection.class);
+		return actions.getConnectAction();
 	}
 
 	private UpdatePasswordAction updatePasswordAction() {
