@@ -94,6 +94,7 @@ final public class BootDashViewModel extends AbstractDisposable {
 		}
 		models.dispose();
 		filterBox.dispose();
+		super.dispose();
 	}
 
 	public void addElementStateListener(ElementStateListener l) {

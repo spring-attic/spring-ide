@@ -91,6 +91,15 @@ public class CloudFoundryRunTarget extends AbstractRunTarget<CloudFoundryTargetP
 		this.clientFactory = clientFactory;
 		this.cachedClient = new LiveVariable<>();
 		new OldValueDisposer(cachedClient);
+		cachedClient.onChange((_e, v) -> {
+			try {
+				if (getClient() != null) {
+					persistBuildpacks(getClient().getBuildpacks());
+				}
+			} catch (Exception e) {
+				Log.log(e);
+			}
+		});
 	}
 
 	public static final EnumSet<RunState> RUN_GOAL_STATES = EnumSet.of(INACTIVE, STARTING, RUNNING, DEBUGGING);
@@ -116,9 +125,6 @@ public class CloudFoundryRunTarget extends AbstractRunTarget<CloudFoundryTargetP
 			}
  			if (createClient) {
 				cachedClient.setValue(createClient());
-			}
-			if (getClient() != null) {
-				persistBuildpacks(getClient().getBuildpacks());
 			}
 		} catch (Exception e) {
 			cachedClient.setValue(null);

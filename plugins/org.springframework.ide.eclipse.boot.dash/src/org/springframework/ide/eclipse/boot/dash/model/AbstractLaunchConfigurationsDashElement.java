@@ -774,11 +774,6 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 		}
 	}
 
-	@Override
-	public void dispose() {
-		super.dispose();
-	}
-
 	public void refreshLivePorts() {
 		refresh(livePort, actuatorPort);
 	}
