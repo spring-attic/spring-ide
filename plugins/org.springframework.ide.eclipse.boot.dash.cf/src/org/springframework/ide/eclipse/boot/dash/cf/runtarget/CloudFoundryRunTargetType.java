@@ -19,7 +19,6 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CloudFoundryClientFactory;
-import org.springframework.ide.eclipse.boot.dash.cf.client.v2.DefaultCloudFoundryClientFactoryV2;
 import org.springframework.ide.eclipse.boot.dash.cf.debug.SshTunnelFactory;
 import org.springframework.ide.eclipse.boot.dash.cf.devtools.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.cf.dialogs.CloudFoundryTargetWizardModel;
@@ -33,13 +32,13 @@ import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.WizardModelUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.AbstractRemoteRemoteRunTargetType;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.AbstractRunTargetType;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTargetType;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget.ConnectMode;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
 import org.springframework.ide.eclipse.boot.dash.util.UiUtil;
 import org.springframework.ide.eclipse.boot.util.ProcessTracker;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.gson.Gson;
 
@@ -67,18 +66,22 @@ public class CloudFoundryRunTargetType extends AbstractRemoteRemoteRunTargetType
 
 	@Override
 	public void openTargetCreationUi(LiveSetVariable<RunTarget> targets) {
-		CloudFoundryTargetWizardModel model = new CloudFoundryTargetWizardModel(this, clientFactory(),
-				targets.getValues(), context(), interactions);
-		RunTargetWizard wizard = new RunTargetWizard(model);
-		Shell shell = UiUtil.getShell();
-		if (shell != null) {
-			WizardDialog dialog = new WizardDialog(shell, wizard);
-			if (dialog.open() == Dialog.OK) {
-				RunTarget target = wizard.getRunTarget();
-				if (target != null) {
-					targets.add(target);
+		try {
+			CloudFoundryTargetWizardModel model = new CloudFoundryTargetWizardModel(this, clientFactory(),
+					targets.getValues(), context(), interactions);
+			RunTargetWizard wizard = new RunTargetWizard(model);
+			Shell shell = UiUtil.getShell();
+			if (shell != null) {
+				WizardDialog dialog = new WizardDialog(shell, wizard);
+				if (dialog.open() == Dialog.OK) {
+					CloudFoundryRunTarget target = wizard.getRunTarget();
+					if (target != null) {
+						targets.add(target);
+					}
 				}
 			}
+		} catch (Exception e) {
+			Log.log(e);
 		}
 	}
 

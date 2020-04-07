@@ -35,16 +35,6 @@ public interface RunTarget<Params> extends IdAble, Nameable, Disposable {
 
 	public abstract RunTargetType<Params> getType();
 
-	/**
-	 * Create a launch config for a given dash element and initialize it with
-	 * some suitable defaults.
-	 *
-	 * @param mainType,
-	 *            may be null if the main type can not be 'guessed'
-	 *            unambiguosly.
-	 */
-	public abstract ILaunchConfiguration createLaunchConfig(IJavaProject jp, IType mainType) throws Exception;
-
 	public abstract BootDashColumn[] getDefaultColumns();
 
 	/**

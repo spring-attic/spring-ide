@@ -51,30 +51,30 @@ public final class TargetApplicationsRefreshOperation extends CloudOperation {
 	@Override
 	synchronized protected void doCloudOp(IProgressMonitor monitor) throws Exception {
 		if (model.getRunTarget().isConnected()) {
-			model.setBaseRefreshState(RefreshState.loading("Fetching Apps..."));
-			for (CloudAppDashElement app : model.getApplicationValues()) {
-				app.setError(null); // clear old error states.
-			}
-			try {
+			model.refreshTracker.call("Fetching Apps...", () -> {
+				for (CloudAppDashElement app : model.getApplicationValues()) {
+					app.setError(null); // clear old error states.
+				}
+				try {
 
-				// 1. Fetch basic list of applications. Should be the "faster" of
-				// the
-				// two refresh operations
+					// 1. Fetch basic list of applications. Should be the "faster" of
+					// the
+					// two refresh operations
 
-				List<CFApplication> apps = model.getRunTarget().getClient().getApplicationsWithBasicInfo();
-				this.model.updateAppNames(getNames(apps));
+					List<CFApplication> apps = model.getRunTarget().getClient().getApplicationsWithBasicInfo();
+					this.model.updateAppNames(getNames(apps));
 
-				// 2. Launch the slower app stats/instances refresh operation.
-				this.model.runAsynch(new AppInstancesRefreshOperation(this.model, apps), ui);
-				model.setBaseRefreshState(RefreshState.READY);
-			} catch (Exception e) {
-				/*
-				 * Failed to obtain applications list from CF
-				 */
-				model.updateElements(null);
-				model.setBaseRefreshState(RefreshState.error(e));
-				throw e;
-			}
+					// 2. Launch the slower app stats/instances refresh operation.
+					this.model.runAsynch(new AppInstancesRefreshOperation(this.model, apps), ui);
+					return null;
+				} catch (Exception e) {
+					/*
+					 * Failed to obtain applications list from CF
+					 */
+					model.updateElements(null);
+					throw e;
+				}
+			});
 		} else {
 			model.updateElements(null);
 		}
@@ -88,6 +88,7 @@ public final class TargetApplicationsRefreshOperation extends CloudOperation {
 		return builder.build();
 	}
 
+	@Override
 	public ISchedulingRule getSchedulingRule() {
 		return new RefreshSchedulingRule(model.getRunTarget());
 	}

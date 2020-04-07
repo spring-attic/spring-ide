@@ -2607,7 +2607,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		toggleTargetConnectionAction().run();
 		waitForJobsToComplete();
 
-		assertFalse(model.isConnected());
+		assertTrue(model.isConnected());
 		assertEquals(RefreshState.READY, model.getRefreshState());
 		assertNull(model.getApplication(appName));
 

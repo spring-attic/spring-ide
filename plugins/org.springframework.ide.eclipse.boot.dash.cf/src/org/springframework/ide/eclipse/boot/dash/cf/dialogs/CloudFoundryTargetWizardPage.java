@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFCredentials.LoginMethod;
+import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.editor.support.util.CollectionUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.CompositeValidator;
@@ -128,7 +129,7 @@ public class CloudFoundryTargetWizardPage extends WizardPageWithSections {
 	}
 
 
-	private RunTarget runTarget = null;
+	private CloudFoundryRunTarget runTarget = null;
 
 	public CloudFoundryTargetWizardPage(CloudFoundryTargetWizardModel model) {
 		super("page1", "Add a Cloud Foundry Target", BootDashActivator.getImageDescriptor("icons/wizban_cloudfoundry.png"));
@@ -157,7 +158,7 @@ public class CloudFoundryTargetWizardPage extends WizardPageWithSections {
 	 * Creates a run target ONCE.
 	 * @return created run target. Returns cached target if already created.
 	 */
-	public RunTarget createRunTarget() {
+	public CloudFoundryRunTarget createRunTarget() {
 		// Cache to avoid creating run target multiple times in the same wizard session
 		if (runTarget == null) {
 			try {

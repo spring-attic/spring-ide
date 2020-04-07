@@ -43,9 +43,19 @@ public class RefreshStateTracker {
 			success(busyMessage);
 			return success;
 		} catch (Throwable e) {
-			error(busyMessage, ExceptionUtil.getMessage(e));
+			if (ExceptionUtil.isWarning(e)) {
+				warn(busyMessage, ExceptionUtil.getMessage(e));
+			} else {
+				error(busyMessage, ExceptionUtil.getMessage(e));
+			}
 			throw ExceptionUtil.exception(e);
 		}
+	}
+
+	private void warn(String busyMessage, String warningMessage) {
+		Assert.isLegal(inProgress.remove(busyMessage));
+		map.put(busyMessage, RefreshState.warning(warningMessage));
+		refreshState.refresh();
 	}
 
 	private synchronized void error(String busyMessage, String errorMessage) {

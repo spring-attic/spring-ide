@@ -14,6 +14,7 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.RemoteBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget.ConnectMode;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
@@ -66,7 +67,7 @@ public class ToggleBootDashModelConnection extends AbstractBootDashModelAction {
 				connectable.disconnect();
 			} else {
 				try {
-					connectable.connect();
+					connectable.connect(ConnectMode.INTERACTIVE);
 				} catch (Exception e) {
 					//TODO: show error on the view somehow? E.g. error marker on the target?
 					ui().errorPopup("Failed to connect to remote target", ExceptionUtil.getMessage(e));

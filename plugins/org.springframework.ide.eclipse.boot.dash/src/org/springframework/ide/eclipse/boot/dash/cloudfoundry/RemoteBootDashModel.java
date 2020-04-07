@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.core.resources.IProject;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
@@ -19,13 +20,22 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.model.remote.GenericRemoteBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.remote.RefreshStateTracker;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget.ConnectMode;
 import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 @SuppressWarnings("rawtypes")
 public abstract class RemoteBootDashModel extends AbstractBootDashModel {
+
+	protected static final String AUTO_CONNECT_PROP = GenericRemoteBootDashModel.class.getSimpleName()+".auto-connect";
+
+	public final RefreshStateTracker refreshTracker = new RefreshStateTracker(this);
 
 	final protected ValueListener NOTIFY_MODEL_STATE_CHANGE = new ValueListener() {
 		@Override
@@ -34,11 +44,17 @@ public abstract class RemoteBootDashModel extends AbstractBootDashModel {
 		}
 	};
 
-
 	public RemoteBootDashModel(RunTarget target, BootDashViewModel parent) {
 		super(target, parent);
 		BootDashModelContext context = parent.getContext();
 		getRunTarget().getClientExp().addListener(NOTIFY_MODEL_STATE_CHANGE);
+		refreshTracker.refreshState.addListener(NOTIFY_MODEL_STATE_CHANGE);
+		addDisposableChild(refreshTracker.refreshState);
+		if (getRunTarget().getPersistentProperties().get(AUTO_CONNECT_PROP, true)) {
+			if (!getRunTarget().isConnected()) {
+				Log.async(connect(ConnectMode.AUTOMATIC));
+			}
+		}
 	}
 
 	public abstract void performDeployment(Set<IProject> of, UserInteractions ui, RunState runOrDebug) throws Exception;
@@ -52,13 +68,35 @@ public abstract class RemoteBootDashModel extends AbstractBootDashModel {
 		return (RemoteRunTarget) super.getRunTarget();
 	}
 
-	public abstract void connect() throws Exception;
-
-	public abstract void disconnect();
-
 	@Override
 	public void dispose() {
 		getRunTarget().getClientExp().removeListener(NOTIFY_MODEL_STATE_CHANGE);
 		super.dispose();
 	}
+
+	final public CompletableFuture<Void> connect(ConnectMode mode) {
+		return refreshTracker.callAsync("Connecting...", () -> {
+			try {
+				getRunTarget().connect(mode);
+			} catch (Exception e) {
+				if (mode==ConnectMode.INTERACTIVE) {
+					ui().errorPopup("Failed to connect to " + getDisplayName() + ". ", ExceptionUtil.getMessage(e));
+				}
+				throw e;
+			}
+			getRunTarget().getPersistentProperties().put(AUTO_CONNECT_PROP, true);
+			return null;
+		});
+	}
+
+	final public void disconnect() {
+		try {
+			getRunTarget().getPersistentProperties().put(AUTO_CONNECT_PROP, false);
+		} catch (Exception e) {
+			Log.log(e);
+		}
+		getRunTarget().disconnect();
+	}
+
+
 }

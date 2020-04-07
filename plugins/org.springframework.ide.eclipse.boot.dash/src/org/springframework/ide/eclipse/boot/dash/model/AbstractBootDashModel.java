@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.ListenerList;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
+import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 
@@ -147,5 +148,9 @@ public abstract class AbstractBootDashModel extends AbstractDisposable implement
 
 	protected final UserInteractions ui() {
 		return injections().getBean(UserInteractions.class);
+	}
+
+	protected final PropertyStoreApi getPersistentProperties() {
+		return target.getPersistentProperties();
 	}
 }

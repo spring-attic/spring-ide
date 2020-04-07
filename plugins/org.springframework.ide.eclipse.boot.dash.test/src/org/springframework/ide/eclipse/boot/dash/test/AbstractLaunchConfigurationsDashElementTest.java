@@ -41,6 +41,7 @@ import org.hamcrest.Matcher;
 import org.junit.Test;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractLaunchConfigurationsDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.LocalRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
@@ -118,7 +119,7 @@ public class AbstractLaunchConfigurationsDashElementTest extends Mocks {
 
 	private static final IType[] NO_TYPES = {};
 
-	public static TestElement createElement(String testElementName, IProject project, IJavaProject javaProject, RunTarget runTarget) {
+	public static TestElement createElement(String testElementName, IProject project, IJavaProject javaProject, LocalRunTarget runTarget) {
 //		BootProjectDashElementFactory factory = mock(BootProjectDashElementFactory.class);
 //		LaunchConfDashElementFactory childFactory = mock(LaunchConfDashElementFactory.class);
 //		LaunchConfRunStateTracker runStateTracker = mock(LaunchConfRunStateTracker.class);
@@ -147,7 +148,7 @@ public class AbstractLaunchConfigurationsDashElementTest extends Mocks {
 		String projectName = "fooProject";
 		IProject project = mockProject(projectName, true);
 		IJavaProject javaProject = mockJavaProject(project);
-		RunTarget runTarget = mock(RunTarget.class);
+		LocalRunTarget runTarget = mock(LocalRunTarget.class);
 		TestElement element = createElement(projectName, project, javaProject, runTarget);
 		UserInteractions ui = mock(UserInteractions.class);
 
@@ -167,7 +168,7 @@ public class AbstractLaunchConfigurationsDashElementTest extends Mocks {
 		String projectName = "fooProject";
 		IProject project = mockProject(projectName, true);
 		IJavaProject javaProject = mockJavaProject(project);
-		RunTarget runTarget = mock(RunTarget.class);
+		LocalRunTarget runTarget = mock(LocalRunTarget.class);
 		TestElement element = createElement(projectName, project, javaProject, runTarget);
 		UserInteractions ui = mock(UserInteractions.class);
 
@@ -188,7 +189,7 @@ public class AbstractLaunchConfigurationsDashElementTest extends Mocks {
 		String projectName = "fooProject";
 		IProject project = mockProject(projectName, true);
 		IJavaProject javaProject = mockJavaProject(project);
-		RunTarget runTarget = mock(RunTarget.class);
+		LocalRunTarget runTarget = mock(LocalRunTarget.class);
 		TestElement element = createElement(projectName, project, javaProject, runTarget);
 		UserInteractions ui = mock(UserInteractions.class);
 		ILaunchConfiguration conf = mock(ILaunchConfiguration.class);
@@ -209,7 +210,7 @@ public class AbstractLaunchConfigurationsDashElementTest extends Mocks {
 		String projectName = "fooProject";
 		IProject project = mockProject(projectName, true);
 		IJavaProject javaProject = mockJavaProject(project);
-		RunTarget runTarget = mock(RunTarget.class);
+		LocalRunTarget runTarget = mock(LocalRunTarget.class);
 		TestElement element = createElement(projectName, project, javaProject, runTarget);
 		UserInteractions ui = mock(UserInteractions.class);
 		ILaunchConfiguration conf = mock(ILaunchConfiguration.class);
@@ -248,7 +249,7 @@ public class AbstractLaunchConfigurationsDashElementTest extends Mocks {
 		String projectName = "fooProject";
 		IProject project = mockProject(projectName, true);
 		IJavaProject javaProject = mockJavaProject(project);
-		RunTarget runTarget = mock(RunTarget.class);
+		LocalRunTarget runTarget = mock(LocalRunTarget.class);
 		TestElement element = createElement(projectName, project, javaProject, runTarget);
 		UserInteractions ui = mock(UserInteractions.class);
 		ILaunchConfiguration conf = mock(ILaunchConfiguration.class);
@@ -279,7 +280,7 @@ public class AbstractLaunchConfigurationsDashElementTest extends Mocks {
 		String projectName = "fooProject";
 		IProject project = mockProject(projectName, true);
 		IJavaProject javaProject = mockJavaProject(project);
-		RunTarget runTarget = mock(RunTarget.class);
+		LocalRunTarget runTarget = mock(LocalRunTarget.class);
 		TestElement element = createElement(projectName, project, javaProject, runTarget);
 		UserInteractions ui = mock(UserInteractions.class);
 		ILaunchConfiguration conf = mock(ILaunchConfiguration.class);
@@ -298,7 +299,7 @@ public class AbstractLaunchConfigurationsDashElementTest extends Mocks {
 		String projectName = "fooProject";
 		IProject project = mockProject(projectName, true);
 		IJavaProject javaProject = mockJavaProject(project);
-		RunTarget runTarget = mock(RunTarget.class);
+		LocalRunTarget runTarget = mock(LocalRunTarget.class);
 		TestElement element = createElement(projectName, project, javaProject, runTarget);
 		UserInteractions ui = mock(UserInteractions.class);
 		ILaunchConfiguration conf = mock(ILaunchConfiguration.class);
@@ -318,7 +319,7 @@ public class AbstractLaunchConfigurationsDashElementTest extends Mocks {
 		String projectName = "fooProject";
 		IProject project = mockProject(projectName, true);
 		IJavaProject javaProject = mockJavaProject(project);
-		RunTarget runTarget = mock(RunTarget.class);
+		LocalRunTarget runTarget = mock(LocalRunTarget.class);
 		TestElement element = createElement(projectName, project, javaProject, runTarget);
 		UserInteractions ui = mock(UserInteractions.class);
 		ILaunchConfiguration conf1 = mock(ILaunchConfiguration.class);

@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.cf.dialogs;
 
 import org.eclipse.jface.wizard.Wizard;
+import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 
 /**
@@ -45,7 +46,7 @@ public class RunTargetWizard extends Wizard {
 		return getRunTarget() != null;
 	}
 
-	public RunTarget getRunTarget() {
+	public CloudFoundryRunTarget getRunTarget() {
 		return page != null ? page.createRunTarget() : null;
 	}
 

@@ -37,6 +37,14 @@ public class LocalRunTarget extends AbstractRunTarget<Void> {
 		super(RunTargetTypes.LOCAL, "local");
 	}
 
+	/**
+	 * Create a launch config for a given dash element and initialize it with
+	 * some suitable defaults.
+	 *
+	 * @param mainType,
+	 *            may be null if the main type can not be 'guessed'
+	 *            unambiguosly.
+	 */
 	public ILaunchConfiguration createLaunchConfig(IJavaProject jp, IType mainType) throws Exception {
 		if (mainType != null) {
 			return BootLaunchConfigurationDelegate.createConf(mainType);

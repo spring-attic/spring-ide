@@ -47,11 +47,6 @@ public class MockRunTarget extends AbstractRunTarget<CloudFoundryTargetPropertie
 	private final BootDashColumn[] defaultColumns = { RUN_STATE_ICN, NAME, PROJECT, INSTANCES, DEFAULT_PATH, TAGS };
 
 	@Override
-	public ILaunchConfiguration createLaunchConfig(IJavaProject jp, IType mainType) throws Exception {
-		return null;
-	}
-
-	@Override
 	public BootDashColumn[] getDefaultColumns() {
 		return defaultColumns;
 	}

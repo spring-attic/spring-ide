@@ -120,4 +120,9 @@ public abstract class AbstractRunTargetType<Params> implements RunTargetType<Par
 	protected UserInteractions ui() {
 		return injections.getBean(UserInteractions.class);
 	}
+
+	public final SimpleDIContext injections() {
+		return injections;
+	}
+
 }

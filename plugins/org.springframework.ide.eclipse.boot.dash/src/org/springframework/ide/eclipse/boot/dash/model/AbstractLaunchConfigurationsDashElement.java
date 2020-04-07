@@ -252,7 +252,7 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 		if (configs.isEmpty()) {
 			IType mainType = chooseMainType(ui);
 			if (mainType!=null) {
-				RunTarget target = getTarget();
+				LocalRunTarget target = getTarget();
 				IJavaProject jp = getJavaProject();
 				conf = target.createLaunchConfig(jp, mainType);
 			}
@@ -378,7 +378,7 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 
 	public ILaunchConfiguration createLaunchConfigForEditing() throws Exception {
 		IJavaProject jp = getJavaProject();
-		RunTarget target = getTarget();
+		LocalRunTarget target = getTarget();
 		IType[] mainTypes = guessMainTypes();
 		return target.createLaunchConfig(jp, mainTypes.length==1?mainTypes[0]:null);
 	}
@@ -799,6 +799,11 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 	@Override
 	public EnumSet<RunState> supportedGoalStates() {
 		return RunTargets.LOCAL_RUN_GOAL_STATES;
+	}
+
+	@Override
+	public LocalRunTarget getTarget() {
+		return (LocalRunTarget) super.getTarget();
 	}
 
 }
