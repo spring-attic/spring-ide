@@ -1,4 +1,4 @@
-eclManifest-Version: 1.0
+Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Test
 Bundle-SymbolicName: org.springframework.ide.eclipse.boot.dash.test
