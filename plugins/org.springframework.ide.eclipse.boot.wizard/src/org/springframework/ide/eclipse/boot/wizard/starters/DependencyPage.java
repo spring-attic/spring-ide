@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.swt.SWT;
@@ -32,6 +33,8 @@ import org.springframework.ide.eclipse.boot.wizard.SelectedDependenciesSection;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
+import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
+import org.springsource.ide.eclipse.commons.livexp.ui.ChooseOneSectionCombo;
 import org.springsource.ide.eclipse.commons.livexp.ui.CommentSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.GroupSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageSection;
@@ -39,6 +42,7 @@ import org.springsource.ide.eclipse.commons.livexp.ui.LabeledPropertySection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.Parser;
 
 import com.google.common.collect.ImmutableList;
 
@@ -47,16 +51,22 @@ public class DependencyPage extends WizardPageWithSections {
 	private static final int NUM_COLUMNS_FREQUENTLY_USED = 3;
 	private static final int MAX_MOST_POPULAR = 3 * NUM_COLUMNS_FREQUENTLY_USED;
 	private static final Point DEPENDENCY_SECTION_SIZE = new Point(SWT.DEFAULT, 300);
+	private static final long MODEL_CREATION_TIMEOUT = 30000;
+
 
 	private CheckBoxesSection<Dependency> frequentlyUsedCheckboxes;
-	private LiveVariable<ValidationResult> modelValidator;
+
+	// A validator that generates UI-specific results that for some reason were not
+	// contained in the actual wizard model. For example, catching some wizard UI related
+	// exceptions. Should only be used for wizard UI issues. Any validation that occurs
+	// in the model should use the model's own validator
+	private LiveVariable<ValidationResult> pageValidator = new LiveVariable<>();
 
 	protected final AddStartersWizardModel wizardModel;
 
 	public DependencyPage(AddStartersWizardModel wizardModel) {
 		super("Dependencies", "New Spring Starter Project Dependencies", null);
 		this.wizardModel = wizardModel;
-		this.modelValidator = wizardModel.getValidator();
 	}
 
 	private void refreshFrequentlyUsedDependencies(InitializrModel model) {
@@ -69,32 +79,30 @@ public class DependencyPage extends WizardPageWithSections {
 
 	@Override
 	protected List<WizardPageSection> createSections() {
-		// "link" the page section creation live exp to the model validator live exp, so that page section creation DEPENDS
-		// on model validator. When the model validator validates the model, it will in turn cause the page section creation
+		// "link" the page section creation live exp to the wizard model live exp, so that page section creation DEPENDS
+		// on wizard model creation. This means the page creation will only happen when the model becomes available.
 		// live exp to also be called.
-		LiveExpression<IPageSection> pageCreationExp = modelValidator.apply((result) -> {
-			if (result != null) {
-				InitializrModel model = wizardModel.getInitializrFactoryModel().getModel().getValue();
-				if (model != null) {
-					List<WizardPageSection> sections = new ArrayList<>();
-					sections.add(createBootInfoSection());
+		LiveExpression<IPageSection> pageCreationExp = wizardModel.getModel().apply((model) -> {
+			List<WizardPageSection> sections = new ArrayList<>();
+			createBootInfoSection(sections);
+			if (model != null) {
+				ValidationResult result = wizardModel.getValidator().getValue();
 
-					if (result.isOk()) {
-						model.onDependencyChange(() -> {
-							Display.getDefault().asyncExec(() -> {
-								refreshWizardUi();
-							});
+				if (result != null && result.isOk()) {
+					model.onDependencyChange(() -> {
+						Display.getDefault().asyncExec(() -> {
+							refreshWizardUi();
 						});
-						createDynamicSections(model, sections);
-					} else {
-						// TODO: create sections when an error occurs but the model is available
-					}
-
-					GroupSection groupSection = new GroupSection(this, null,
-							sections.toArray(new WizardPageSection[0]));
-					groupSection.grabVertical(true);
-					return groupSection;
+					});
+					createDynamicSections(model, sections);
+				} else {
+					createErrorSection(sections);
 				}
+
+				GroupSection groupSection = new GroupSection(this, null,
+						sections.toArray(new WizardPageSection[0]));
+				groupSection.grabVertical(true);
+				return groupSection;
 			}
 			return new CommentSection(this, NewSpringBootWizard.NO_CONTENT_AVAILABLE);
 		});
@@ -107,26 +115,54 @@ public class DependencyPage extends WizardPageWithSections {
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 
-		// Add the model validator to the wizard page validator so that results for the model
-		// are automatically handled and displayed accordingly in the wizard page UI
-		validator.addChild(modelValidator);
+		// Add any validators to the wizard validator. This is important
+		// as this "hooks" the separate validators to the wizards general validation
+		// mechanism, which among things is responsbile for showing errors from
+		// the various validators that exist
+		validator.addChild(wizardModel.getValidator());
+		validator.addChild(pageValidator);
 
-		getControl().getDisplay().asyncExec(() -> loadWithProgress());
+		getWizard().getContainer().getShell().getDisplay().asyncExec(() -> loadWithProgress());
+	}
+
+	private void createErrorSection(List<WizardPageSection> sections) {
+
+		// IMPORTANT: this method may be called multiple times throughout the life cycle
+		// of the page, Only show
+		// error section IF there is an actual error
+		ValidationResult validation = validator.getValue();
+
+		if (validation instanceof AddStartersError) {
+			AddStartersError addStartersError = (AddStartersError) validation;
+			GroupSection errorSection = new GroupSection(this, null, new CommentSection(this, "Error:"),
+					new GroupSection(this, "", new CommentSection(this, addStartersError.details)));
+
+			sections.add(errorSection);
+		}
 	}
 
 	private void loadWithProgress() {
 		try {
 			getContainer().run(true, false, monitor -> {
 				monitor.beginTask("Loading starters data", IProgressMonitor.UNKNOWN);
-				monitor.subTask("Creating Boot project model...");
-				wizardModel.createInitializrModelForProject();
-				String bootVersion = wizardModel.getBootVersion().getValue();
-				monitor.subTask("Fetching data for boot version '" +  bootVersion + "' from Initializr Service");
-				wizardModel.downloadStarterInfos();
+				monitor.subTask("Creating Boot project model and fetching data from Initializr Service...");
+
+
+				ValueListener<ValidationResult> monitorListener = (exp, val) -> {
+					ValidationResult value = exp.getValue();
+					if (value != null && value.status == IStatus.INFO) {
+						monitor.subTask(value.msg);
+					}
+				};
+
+				wizardModel.getValidator().addListener(monitorListener);
+				wizardModel.load();
 				monitor.done();
+				wizardModel.getValidator().removeListener(monitorListener);
+
 			});
 		} catch (Exception e) {
-			modelValidator.setValue(ValidationResult
+			pageValidator.setValue(ValidationResult
 					.error("Failed fetching data from Initializr Service: " + ExceptionUtil.getMessage(e)));
 		}
 	}
@@ -195,9 +231,15 @@ public class DependencyPage extends WizardPageWithSections {
 		return frequentlyUsedSection;
 	}
 
-	protected WizardPageSection createBootInfoSection() {
+	protected void createBootInfoSection(List<WizardPageSection> sections) {
+		ChooseOneSectionCombo<String> serviceUrlSection  = new ChooseOneSectionCombo<String>(this, wizardModel.getServiceUrl(), wizardModel.getServiceUrlOptions())
+				.grabHorizontal(true)
+				.showErrorMarker(true);
+		serviceUrlSection.allowTextEdits(Parser.IDENTITY);
+
+		sections.add(serviceUrlSection);
 		LabeledPropertySection section = new LabeledPropertySection(this, wizardModel.getBootVersion());
-		return section;
+		sections.add(section);
 	}
 
 	@Override

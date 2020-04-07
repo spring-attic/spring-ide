@@ -40,16 +40,16 @@
 				<configuration>
 					<dependency-resolution>
 						<extraRequirements>
-    			             <requirement>
-    			                <type>eclipse-plugin</type>
-    			                <id>org.eclipse.equinox.event</id>
-    			                <versionRange>0.0.0</versionRange>
-    			             </requirement>
-    			             <requirement>
-    			                <type>eclipse-plugin</type>
-    			                <id>org.apache.felix.scr</id>
-    			                <versionRange>0.0.0</versionRange>
-    			             </requirement>
+							<requirement>
+								<type>eclipse-plugin</type>
+								<id>org.eclipse.equinox.event</id>
+								<versionRange>0.0.0</versionRange>
+							</requirement>
+							<requirement>
+								<type>eclipse-plugin</type>
+								<id>org.apache.felix.scr</id>
+								<versionRange>0.0.0</versionRange>
+							</requirement>
 							<requirement>
 								<type>eclipse-feature</type>
 								<id>org.springframework.ide.eclipse.feature</id>
@@ -63,6 +63,11 @@
 							<requirement>
 								<type>eclipse-feature</type>
 								<id>org.springframework.tooling.cloudfoundry.manifest.ls.feature</id>
+								<versionRange>0.0.0</versionRange>
+							</requirement>
+							<requirement>
+								<type>eclipse-plugin</type>
+								<id>org.springframework.ide.eclipse.boot.dash.cf</id>
 								<versionRange>0.0.0</versionRange>
 							</requirement>
 						</extraRequirements>
