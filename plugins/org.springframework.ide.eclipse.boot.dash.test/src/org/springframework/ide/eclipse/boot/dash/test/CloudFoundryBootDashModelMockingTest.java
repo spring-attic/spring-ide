@@ -2298,7 +2298,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		disconnectAction.run();
 		waitForApps(model);
 		assertFalse(model.isConnected());
-		assertEquals(RefreshState.READY, model.getRefreshState());
+		waitForModelReady(model);
 		assertEquals(0, clientFactory.instanceCount());
 	}
 
@@ -2327,7 +2327,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		assertNotNull(model.getApplication(appName));
 		assertTrue(model.isConnected());
-		assertEquals(RefreshState.READY, model.getRefreshState());
+		waitForModelReady(model);
 
 		// Clear out any mocks on the ui object set above
 		reset(ui());
@@ -2417,7 +2417,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		assertTrue(model.isConnected());
 		assertNotNull(model.getApplication(appName));
-		assertEquals(RefreshState.READY, model.getRefreshState());
+		waitForModelReady(model);
 
 		{
 			assertNull(harness.getCredentialsStore().getCredentials(harness.secureStoreKey(model)));
@@ -2435,15 +2435,16 @@ public class CloudFoundryBootDashModelMockingTest {
 		toggleTargetConnectionAction().run();
 		waitForJobsToComplete();
 
-		assertFalse(model.isConnected());
-		assertEquals(RefreshState.READY, model.getRefreshState());
-		assertNull(model.getApplication(appName));
+		assertTrue(model.isConnected());
+		waitForModelReady(model);
+		waitForApps(model, appName);
 
-		verify(ui()).openPasswordDialog(any());
 		verifyNoMoreInteractions(ui());
 	}
 
 	@Test public void updateTargetSsoAndStorePassword() throws Exception {
+		// In real PWS this scenario would use a 'single use' password that can be obtained
+		// from https://login.run.pivotal.io/passcode
 		String appName = "someApp";
 		CFClientParams targetParams = CfTestTargetParams.fromEnv();
 		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
@@ -2478,7 +2479,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		assertTrue(model.isConnected());
 		assertNotNull(model.getApplication(appName));
-		assertEquals(RefreshState.READY, model.getRefreshState());
+		waitForModelReady(model);
 		//store password is ignored and treated as 'STORE_NOTHING'
 		assertEquals(StoreCredentialsMode.STORE_NOTHING, model.getRunTarget().getTargetProperties().getStoreCredentials());
 		{
@@ -2497,11 +2498,10 @@ public class CloudFoundryBootDashModelMockingTest {
 		toggleTargetConnectionAction().run();
 		waitForJobsToComplete();
 
-		assertFalse(model.isConnected());
-		assertEquals(RefreshState.READY, model.getRefreshState());
-		assertNull(model.getApplication(appName));
+		assertTrue(model.isConnected());
+		waitForModelReady(model);
+		waitForApps(model, appName);
 
-		verify(ui()).openPasswordDialog(any());
 		verifyNoMoreInteractions(ui());
 	}
 
@@ -2535,7 +2535,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		assertTrue(model.isConnected());
 		assertNotNull(model.getApplication(appName));
-		assertEquals(RefreshState.READY, model.getRefreshState());
+		waitForModelReady(model);
 
 		assertEquals(StoreCredentialsMode.STORE_TOKEN, model.getRunTarget().getTargetProperties().getStoreCredentials());
 		{
@@ -2555,7 +2555,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		waitForJobsToComplete();
 
 		assertTrue(model.isConnected());
-		assertEquals(RefreshState.READY, model.getRefreshState());
+		waitForModelReady(model);
 		assertNotNull(model.getApplication(appName));
 
 		verifyZeroInteractions(ui()); //should have used stored token so no pw dialog!
@@ -2589,7 +2589,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		assertTrue(model.isConnected());
 		assertNotNull(model.getApplication(appName));
-		assertEquals(RefreshState.READY, model.getRefreshState());
+		waitForModelReady(model);
 
 		{
 			assertNull(harness.getCredentialsStore().getCredentials(harness.secureStoreKey(model)));
@@ -2608,10 +2608,9 @@ public class CloudFoundryBootDashModelMockingTest {
 		waitForJobsToComplete();
 
 		assertTrue(model.isConnected());
-		assertEquals(RefreshState.READY, model.getRefreshState());
-		assertNull(model.getApplication(appName));
+		waitForModelReady(model);
+		assertNotNull(model.getApplication(appName));
 
-		verify(ui()).openPasswordDialog(any());
 		verifyNoMoreInteractions(ui());
 	}
 
@@ -2653,7 +2652,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		waitForJobsToComplete();
 
 		assertTrue(model.isConnected());
-		assertEquals(RefreshState.READY, model.getRefreshState());
+		waitForModelReady(model);
 		assertNotNull(model.getApplication(appName));
 
 		verifyNoMoreInteractions(ui());
@@ -2930,6 +2929,12 @@ public class CloudFoundryBootDashModelMockingTest {
 			}
 		};
 		return model.getApplication(appName);
+	}
+
+	protected void waitForModelReady(CloudFoundryBootDashModel model) throws Exception {
+		ACondition.waitFor("Ready refresh state", 2_000, () -> {
+			assertEquals(RefreshState.READY, model.getRefreshState());
+		});
 	}
 
 	protected void waitForApps(final CloudFoundryBootDashModel target, final String... names) throws Exception {
