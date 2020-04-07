@@ -1014,7 +1014,7 @@ public class BootDashActionTests {
 
 	private CloudAppDashElement mockCfElement(String appGuid, String appName) {
 		CloudFoundryRunTarget cfTarget = mock(CloudFoundryRunTarget.class);
-		RunTargetType cfType = mock(CloudFoundryRunTargetType.class);
+		CloudFoundryRunTargetType cfType = mock(CloudFoundryRunTargetType.class);
 		when(cfTarget.getType()).thenReturn(cfType);
 
 		CloudFoundryBootDashModel model = mock(CloudFoundryBootDashModel.class);

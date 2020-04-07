@@ -12,10 +12,6 @@ package org.springframework.ide.eclipse.boot.dash.azure.runtarget;
 
 import java.util.Collection;
 
-import org.apache.commons.lang3.StringUtils;
-import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.azure.BootDashAzurePlugin;
@@ -140,7 +136,7 @@ public class AzureRunTarget extends AbstractRunTarget<AzureTargetParams> impleme
 	}
 
 	@Override
-	public void connect() throws Exception {
+	public void connect(ConnectMode mode) throws Exception {
 		STSAzureClient c = new STSAzureClient();
 		c.reconnect(getParams());
 		client.setValue(c.getSpringServiceClient());

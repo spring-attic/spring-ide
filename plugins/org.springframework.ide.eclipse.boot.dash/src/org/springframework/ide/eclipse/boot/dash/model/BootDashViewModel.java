@@ -34,7 +34,7 @@ import com.google.common.collect.ImmutableSet;
 /**
  * @author Kris De Volder
  */
-public class BootDashViewModel extends AbstractDisposable {
+final public class BootDashViewModel extends AbstractDisposable {
 
 	private LiveSetVariable<RunTarget> runTargets;
 	private BootDashModelManager models;

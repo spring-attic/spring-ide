@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.compare.CompareEditorInput;
@@ -46,6 +47,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.text.Document;
@@ -59,6 +61,7 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFCloudDomain;
+import org.springframework.ide.eclipse.boot.dash.cf.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.cf.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cf.client.v2.ReactorUtils;
 import org.springframework.ide.eclipse.boot.dash.cf.console.CloudAppLogManager;
@@ -73,8 +76,8 @@ import org.springframework.ide.eclipse.boot.dash.cf.devtools.DevtoolsDebugTarget
 import org.springframework.ide.eclipse.boot.dash.cf.devtools.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.cf.dialogs.DeploymentPropertiesDialog;
 import org.springframework.ide.eclipse.boot.dash.cf.dialogs.DeploymentPropertiesDialogModel;
+import org.springframework.ide.eclipse.boot.dash.cf.dialogs.StoreCredentialsMode;
 import org.springframework.ide.eclipse.boot.dash.cf.dialogs.DeploymentPropertiesDialogModel.ManifestType;
-import org.springframework.ide.eclipse.boot.dash.cf.ops.ConnectOperation;
 import org.springframework.ide.eclipse.boot.dash.cf.ops.JobBody;
 import org.springframework.ide.eclipse.boot.dash.cf.ops.Operation;
 import org.springframework.ide.eclipse.boot.dash.cf.ops.OperationsExecution;
@@ -105,6 +108,7 @@ import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget.ConnectMode;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
@@ -128,6 +132,7 @@ import com.google.common.collect.ImmutableSet.Builder;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import org.springframework.ide.eclipse.boot.dash.cf.dialogs.StoreCredentialsMode;
 
 public class CloudFoundryBootDashModel extends RemoteBootDashModel implements ModifiableModel {
 
@@ -171,47 +176,23 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 
 	private DevtoolsDebugTargetDisconnector debugTargetDisconnector;
 
-	private LiveVariable<RefreshState> baseRefeshState = new LiveVariable<>();
+//	private LiveVariable<RefreshState> baseRefeshState = new LiveVariable<>();
 
-	private LiveExpression<RefreshState> apiWarning = new AsyncLiveExpression<RefreshState>(RefreshState.READY, "Check CC api version") {
-		{
-			dependsOn(getClientExp());
-		}
-
-		@Override
-		protected RefreshState compute() {
-			try {
-				ClientRequests client = getClient();
-				if (client!=null) {
-					Version server = client.getApiVersion();
-					Version supported = client.getSupportedApiVersion();
-					if (server.compareTo(supported)<0) {
-						return RefreshState.warning(
-								"Client supports API version "+server+
-								" and is connected to server with API version "+supported+". "+
-								"Things may not work as expected."
-						);
-					}
+	private void checkApiVersion() {
+		this.refreshTracker.callAsync("Checking API version...", () -> {
+			ClientRequests client = getClient();
+			if (client!=null) {
+				Version server = client.getApiVersion();
+				Version supported = client.getSupportedApiVersion();
+				if (server.compareTo(supported)<0) {
+					throw ExceptionUtil.coreException(IStatus.WARNING, "Client supports API version "+server+
+							" and is connected to server with API version "+supported+". "+
+							"Things may not work as expected.");
 				}
-				return RefreshState.READY;
-			} catch (Exception e) {
-				return RefreshState.error(e);
 			}
-		}
-	};
-
-	private LiveExpression<RefreshState> refreshState = new LiveExpression<RefreshState>() {
-		{
-			dependsOn(baseRefeshState);
-			dependsOn(apiWarning);
-			addListener((e,v) -> notifyModelStateChanged());
-		}
-
-		@Override
-		protected RefreshState compute() {
-			return RefreshState.merge(baseRefeshState.getValue(), apiWarning.getValue());
-		}
-	};
+			return null;
+		});
+	}
 
 	final private IResourceChangeListener resourceChangeListener = new IResourceChangeListener() {
 		@Override
@@ -280,10 +261,12 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 
 	@Override
 	public RefreshState getRefreshState() {
-		return refreshState.getValue();
+		return refreshTracker.refreshState.getValue();
 	}
 
 	private DisposingFactory<BootDashElement, LiveExpression<URI>> actuatorUrlFactory;
+
+	private AtomicReference<reactor.core.Disposable> refreshTokenListener = new AtomicReference<>();
 
 	public CloudFoundryBootDashModel(CloudFoundryRunTarget target, BootDashModelContext context, BootDashViewModel parent) {
 		super(target, parent);
@@ -292,17 +275,43 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 		this.consoleManager = new CloudAppLogManager(target);
 		this.unsupportedPushProperties = new UnsupportedPushProperties();
 		this.debugTargetDisconnector = DevtoolsUtil.createDebugTargetDisconnector(this);
-		addDisposableChild(target.getClientExp().onChange((e,v) -> this.refresh(ui())));
-		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_CHANGE);
-		try {
-			if (getRunTarget().getTargetProperties().get(CloudFoundryTargetProperties.DISCONNECTED) == null
-					&& (getRunTarget().getTargetProperties().isStoreCredentials() || getRunTarget().getTargetProperties().getCredentials() != null)) {
-				// If CF target was connected previously and either password is stored or not stored but non-null then connect automatically
-				getOperationsExecution().runAsynch(new ConnectOperation(this, true, context.injections));
+		addDisposableChild(target.getClientExp().onChange((exp,v) -> {
+			this.refresh(ui());
+			ClientRequests client = exp.getValue();
+			reactor.core.Disposable newListener = null;
+			if (client!=null && this.getRunTarget().getTargetProperties().getStoreCredentials()==StoreCredentialsMode.STORE_TOKEN) {
+				newListener = client.getRefreshTokens().doOnNext(refreshToken -> {
+					try {
+						this.getRunTarget().getTargetProperties().setCredentials(CFCredentials.fromRefreshToken(refreshToken));
+					} catch (CannotAccessPropertyException e) {
+						Log.log(e);
+					}
+				})
+				.subscribe();
 			}
-		} catch (CannotAccessPropertyException e) {
-			// ignore shouldn't happen. Get password is called only if password not stored
-		}
+			reactor.core.Disposable oldListener = this.refreshTokenListener.getAndSet(newListener);
+			if (oldListener!=null) {
+				oldListener.dispose();
+			}
+			onDispose(d -> {
+				reactor.core.Disposable l = this.refreshTokenListener.get();
+				if (l!=null) {
+					l.dispose();
+				}
+			});
+			checkApiVersion();
+		}));
+		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_CHANGE);
+//		try {
+//			if (getRunTarget().getTargetProperties().get(CloudFoundryTargetProperties.DISCONNECTED) == null
+//					&& (getRunTarget().getTargetProperties().isStoreCredentials() || getRunTarget().getTargetProperties().getCredentials() != null)) {
+//				// If CF target was connected previously and either password is stored or not stored but non-null then connect automatically
+//				Log.async(this.connect(ConnectMode.AUTOMATIC));
+//			}
+//		} catch (CannotAccessPropertyException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
 	}
 
 	@Override
@@ -924,23 +933,8 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 		return elementFactory;
 	}
 
-	@Override
-	public void disconnect() {
-		getRunTarget().disconnect();
-	}
-
-	@Override
-	public void connect() throws Exception {
-		getRunTarget().connect();
-		apiWarning.refresh();
-	}
-
 	public ClientRequests getClient() {
 		return getRunTarget().getClient();
-	}
-
-	private LiveExpression<ClientRequests> getClientExp() {
-		return getRunTarget().getClientExp();
 	}
 
 	public List<CFCloudDomain> getCloudDomains(IProgressMonitor monitor) throws Exception {
@@ -976,10 +970,6 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 				services.remove(s);
 			}
 		}
-	}
-
-	public void setBaseRefreshState(RefreshState newState) {
-		baseRefeshState.setValue(newState);
 	}
 
 	public UnsupportedPushProperties getUnsupportedProperties() {

@@ -29,6 +29,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
@@ -41,12 +42,16 @@ import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFBuildpack;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFCloudDomain;
+import org.springframework.ide.eclipse.boot.dash.cf.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFSpace;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFStack;
 import org.springframework.ide.eclipse.boot.dash.cf.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CloudFoundryClientFactory;
 import org.springframework.ide.eclipse.boot.dash.cf.client.SshClientSupport;
+import org.springframework.ide.eclipse.boot.dash.cf.dialogs.PasswordDialogModel;
+import org.springframework.ide.eclipse.boot.dash.cf.dialogs.StoreCredentialsMode;
 import org.springframework.ide.eclipse.boot.dash.cf.model.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cf.ui.CfUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.livexp.OldValueDisposer;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractRunTarget;
@@ -54,11 +59,14 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget.ConnectMode;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 import org.springsource.ide.eclipse.commons.ui.UiUtil;
 
@@ -97,12 +105,18 @@ public class CloudFoundryRunTarget extends AbstractRunTarget<CloudFoundryTargetP
 	}
 
 	@Override
-	public void connect() throws Exception {
+	public void connect(ConnectMode mode) throws Exception {
 		try {
 			this.domains = null;
 			this.spaces = null;
 			this.stacks = null;
-			cachedClient.setValue(createClient());
+			boolean createClient = getTargetProperties().getCredentials()!=null;
+			if (mode==ConnectMode.INTERACTIVE && getTargetProperties().getCredentials()==null) {
+				updatePasswordAndConnect();
+			}
+ 			if (createClient) {
+				cachedClient.setValue(createClient());
+			}
 			if (getClient() != null) {
 				persistBuildpacks(getClient().getBuildpacks());
 			}
@@ -110,6 +124,38 @@ public class CloudFoundryRunTarget extends AbstractRunTarget<CloudFoundryTargetP
 			cachedClient.setValue(null);
 			throw e;
 		}
+	}
+
+	private CfUserInteractions cfUi() {
+		return getType().injections().getBean(CfUserInteractions.class);
+	}
+
+	private UserInteractions ui() {
+		return getType().injections().getBean(UserInteractions.class);
+	}
+
+	public boolean updatePasswordAndConnect() throws Exception {
+		final StoreCredentialsMode storePassword = this.getTargetProperties().getStoreCredentials();
+		PasswordDialogModel passwordDialogModel = new PasswordDialogModel(this.getClientFactory(), this.getTargetProperties(), storePassword);
+		cfUi().openPasswordDialog(passwordDialogModel);
+		if (passwordDialogModel.isOk()) {
+			this.getTargetProperties().setStoreCredentials(
+					passwordDialogModel.getEffectiveStoreMode());
+			CFCredentials credentials = passwordDialogModel.getCredentials();
+			// The credentials cannot be null or empty string - enforced by the dialog
+			try {
+				this.getTargetProperties().setCredentials(credentials);
+				cachedClient.setValue(createClient());
+			} catch (CannotAccessPropertyException e) {
+				ui().warningPopup("Failed Storing Password",
+						"Failed to store password in Secure Storage for " + this.getId()
+								+ ". Secure Storage is most likely locked. Current password will be kept until disconnect.");
+				// Set "remember password" to false. Password hasn't been stored.
+				this.getTargetProperties().setStoreCredentials(StoreCredentialsMode.STORE_NOTHING);
+			}
+			return true;
+		}
+		return false;
 	}
 
 	@Override
@@ -409,5 +455,10 @@ public class CloudFoundryRunTarget extends AbstractRunTarget<CloudFoundryTargetP
 		//TODO: migrate CF to use GenericRemoteBootDashModel. And then this should be implement based on
 		// how CFBootDashModel fetches apps.
 		return ImmutableSet.of();
+	}
+
+	@Override
+	public CloudFoundryRunTargetType getType() {
+		return (CloudFoundryRunTargetType) super.getType();
 	}
 }

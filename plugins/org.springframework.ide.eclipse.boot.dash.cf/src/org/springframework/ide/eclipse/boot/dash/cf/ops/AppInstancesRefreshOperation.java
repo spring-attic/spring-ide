@@ -41,8 +41,7 @@ public class AppInstancesRefreshOperation extends CloudOperation {
 
 	@Override
 	protected void doCloudOp(IProgressMonitor monitor) throws Exception {
-		this.model.setBaseRefreshState(RefreshState.loading("Fetching App Instances..."));
-		try {
+		this.model.refreshTracker.call("Fetching App Instances...", () -> {
 			if (!appsToLookUp.isEmpty()) {
 				Duration timeToWait = Duration.ofSeconds(30);
 				model.getRunTarget().getClient().getApplicationDetails(appsToLookUp)
@@ -50,13 +49,11 @@ public class AppInstancesRefreshOperation extends CloudOperation {
 				.then()
 				.block(timeToWait);
 			}
-			model.setBaseRefreshState(RefreshState.READY);
-		} catch (Exception e) {
-			this.model.setBaseRefreshState(RefreshState.error(e));
-			throw e;
-		}
+			return null;
+		});
 	}
 
+	@Override
 	public ISchedulingRule getSchedulingRule() {
 		return new RefreshSchedulingRule(model.getRunTarget());
 	}

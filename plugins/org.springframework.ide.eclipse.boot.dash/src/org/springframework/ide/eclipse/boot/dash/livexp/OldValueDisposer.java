@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.boot.dash.livexp;
 
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 /**
@@ -42,7 +41,7 @@ public class OldValueDisposer {
 
 	private Disposable lastObservedValue = null;
 
-	public OldValueDisposer(LiveVariable<? extends Disposable> target) {
+	public OldValueDisposer(LiveExpression<? extends Disposable> target) {
 		target.addListener((e, v) -> gotValue(v));
 		target.onDispose((e) -> gotValue(null));
 	}

@@ -24,8 +24,6 @@ import com.google.gson.Gson;
 
 public class CloudFoundryTargetProperties extends TargetProperties {
 
-	public final static String DISCONNECTED = "disconnected";
-
 	public final static String ORG_PROP = "organization";
 	public final static String SPACE_PROP = "space";
 	public final static String SELF_SIGNED_PROP = "selfsigned";
@@ -36,7 +34,6 @@ public class CloudFoundryTargetProperties extends TargetProperties {
 
 	public static final String USERNAME_PROP = "username";
 	public static final String URL_PROP = "url";
-	private static final String STORE_PASSWORD = "storePassword";
 	private static final String STORE_CREDENTIALS = "storeCredentials";
 
 	private CFCredentials credentials;
@@ -157,10 +154,7 @@ public class CloudFoundryTargetProperties extends TargetProperties {
 		if (s!=null) {
 			return StoreCredentialsMode.valueOf(s);
 		} else {
-			//Try to preserve mode saved from old workspaces which only had store password support
-			// and not store auth token.
-			s = map.get(STORE_PASSWORD);
-			return s == null ? StoreCredentialsMode.STORE_NOTHING : StoreCredentialsMode.STORE_PASSWORD;
+			return StoreCredentialsMode.STORE_NOTHING;
 		}
 	}
 
