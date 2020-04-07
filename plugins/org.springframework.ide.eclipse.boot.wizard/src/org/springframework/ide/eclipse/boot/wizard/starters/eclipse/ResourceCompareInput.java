@@ -356,8 +356,6 @@ public class ResourceCompareInput extends CompareEditorInput {
 					fAcceptChangesAction.setToolTipText("Accept all non-conflicting changes into local project");
 				}
 
-				manager.add(fAcceptChangesAction);
-
 				ISelection selection= getSelection();
 				if (selection instanceof IStructuredSelection) {
 					IStructuredSelection ss= (IStructuredSelection)selection;
@@ -370,7 +368,9 @@ public class ResourceCompareInput extends CompareEditorInput {
 							if (te != null) {
 								if (diffNode.getRight() == null) {
 									manager.add(fCreateResourceAction);
-									fCreateResourceAction.setEnabled(true);
+								} else {
+									// Accept Changes action whenever create resource action is not shown
+									manager.add(fAcceptChangesAction);
 								}
 								if (!ITypedElement.FOLDER_TYPE.equals(te.getType())) {
 									manager.add(fOpenAction);
@@ -378,7 +378,6 @@ public class ResourceCompareInput extends CompareEditorInput {
 							}
 						}
 					} else {
-						manager.add(fCreateResourceAction);
 						Object[] selectedElements = ss.toArray();
 						boolean enabled = true;
 						for (int i = 0; enabled && i < selectedElements.length; i++) {
@@ -389,7 +388,12 @@ public class ResourceCompareInput extends CompareEditorInput {
 								enabled = false;
 							}
 						}
-						fCreateResourceAction.setEnabled(enabled);
+						if (enabled) {
+							manager.add(fCreateResourceAction);
+						} else {
+							// Accept Changes action whenever create resource action is not shown
+							manager.add(fAcceptChangesAction);
+						}
 					}
 				}
 

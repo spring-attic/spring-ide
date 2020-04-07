@@ -300,6 +300,15 @@
             type="java.lang.Object">
       </propertyTester>
    </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="org.springframework.ide.eclipse.boot.ui.preferences.InitializrPreferencePage"
+            class="org.springframework.ide.eclipse.boot.wizard.preferences.AddStartersWizardPreferencePage"
+            id="org.springframework.ide.eclipse.boot.wizard.initializr"
+            name="Add Starters">
+      </page>
+   </extension>
  
     
 </plugin>
