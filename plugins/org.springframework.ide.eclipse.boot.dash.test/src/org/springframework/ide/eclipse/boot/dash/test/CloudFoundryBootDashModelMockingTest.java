@@ -99,6 +99,7 @@ import org.springframework.ide.eclipse.boot.dash.cf.jmxtunnel.JmxSshTunnelManage
 import org.springframework.ide.eclipse.boot.dash.cf.model.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cf.model.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryRunTargetType;
+import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryTargetProperties;
 import org.springframework.ide.eclipse.boot.dash.dialogs.EditTemplateDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
@@ -109,6 +110,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ModelStateL
 import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
+import org.springframework.ide.eclipse.boot.dash.model.RunTargetPropertiesManager;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.remoteapps.RemoteBootAppsDataHolder.RemoteAppData;
@@ -127,6 +129,7 @@ import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.test.AutobuildingEnablement;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.boot.test.util.TestBracketter;
+import org.springsource.ide.eclipse.commons.frameworks.core.util.ArrayEncoder;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.StringUtils;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
@@ -2562,12 +2565,36 @@ public class CloudFoundryBootDashModelMockingTest {
 	}
 
 	@Test public void updateTargetPasswordAndStoreNothing() throws Exception {
+		/*
+
+store.put(new Key(element, key), value);
+
+ key = from constant org.springframework.ide.eclipse.boot.dash.model.RunTargetPropertiesManager.RUN_TARGET_KEY
+ element = CloudFoundrryRuntargetTupe instance
+ value = array (vai ArrayEncoder of serialed CloudRuntargetProperties for example:
+
+ {
+      "storeCredentials":"STORE_PASSWORD",
+      "runTargetID":"kdevolder@gopivotal.com : https://api.run.pivotal.io : application-platform-testing : sts-20200309-kdvolder-xbctakulkwcy",
+      "selfsigned":"false","organization":"application-platform-testing",
+      "skipSslValidation":"false",
+      "organization_guid":"7508f3b4-ec6f-459a-b1e1-e209f72f6fe3",
+      "space_guid":"97124746-5c09-4e23-adda-7ed43410c0d4",
+      "url":"https://api.run.pivotal.io",
+      "space":"sts-20200309-kdvolder-xbctakulkwcy",
+      "username":"kdevolder@gopivotal.com"
+ };
+
+		 */
+
 		CFClientParams targetParams = CfTestTargetParams.fromEnv();
 		MockCFSpace space = clientFactory.defSpace(targetParams.getOrgName(), targetParams.getSpaceName());
 		String appName = "someApp";
 		space.defApp(appName);
 		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
 		waitForApps(model, appName);
+
+		assertStoredStoreMode(StoreCredentialsMode.STORE_PASSWORD, model);
 
 		harness.sectionSelection.setValue(model);
 		IAction updatePassword = updatePasswordAction();
@@ -2587,11 +2614,13 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		waitForJobsToComplete();
 
+
 		assertTrue(model.isConnected());
 		assertNotNull(model.getApplication(appName));
 		waitForModelReady(model);
 
 		{
+			assertStoredStoreMode(StoreCredentialsMode.STORE_NOTHING, model);
 			assertNull(harness.getCredentialsStore().getCredentials(harness.secureStoreKey(model)));
 			assertNull(harness.getPrivateStore().get(harness.privateStoreKey(model)));
 		}
@@ -2612,6 +2641,14 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertNotNull(model.getApplication(appName));
 
 		verifyNoMoreInteractions(ui());
+	}
+
+	private void assertStoredStoreMode(StoreCredentialsMode expectedStoreMode, CloudFoundryBootDashModel model) {
+		CloudFoundryRunTargetType cfType = model.getRunTarget().getType();
+		String[] runTargetsJson = ArrayEncoder.decode(harness.context.getRunTargetProperties().get(cfType, RunTargetPropertiesManager.RUN_TARGET_KEY));
+		assertEquals(1, runTargetsJson.length);
+		CloudFoundryTargetProperties storedParams = cfType.parseParams(runTargetsJson[0]);
+		assertEquals(expectedStoreMode, storedParams.getStoreCredentials());
 	}
 
 	@Test public void updateTargetPasswordAndStorePassword() throws Exception {
