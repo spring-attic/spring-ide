@@ -16,9 +16,9 @@ import static org.junit.Assert.fail;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.cloudfoundry.doppler.LogMessage;
 import org.springframework.ide.eclipse.boot.dash.cf.client.v2.DefaultClientRequestsV2;
-import org.springframework.ide.eclipse.boot.dash.cf.console.IApplicationLogConsole;
+import org.springframework.ide.eclipse.boot.dash.console.IApplicationLogConsole;
+import org.springframework.ide.eclipse.boot.dash.console.LogMessage;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;

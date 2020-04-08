@@ -16,7 +16,7 @@ import java.util.UUID;
 
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.cf.client.v2.CFPushArguments;
-import org.springframework.ide.eclipse.boot.dash.cf.console.IApplicationLogConsole;
+import org.springframework.ide.eclipse.boot.dash.console.IApplicationLogConsole;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 

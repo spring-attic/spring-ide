@@ -11,13 +11,11 @@
 package org.springframework.ide.eclipse.boot.dash.views;
 
 import java.util.Collection;
-import java.util.Iterator;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 
 @SuppressWarnings("restriction")
 public class OpenInPackageExplorer extends AbstractBootDashElementsAction {
@@ -52,27 +50,6 @@ public class OpenInPackageExplorer extends AbstractBootDashElementsAction {
 		if (project != null) {
 			PackageExplorerPart view= PackageExplorerPart.openInActivePerspective();
 			view.tryToReveal(project);
-		}
-	}
-
-	protected void doShowConsoles(Collection<BootDashElement> selectedElements) {
-
-		if (selectedElements != null) {
-
-			Iterator<BootDashElement> it = selectedElements.iterator();
-
-			// Show first element only for now
-			if (it.hasNext()) {
-				BootDashElement element = selectedElements.iterator().next();
-				BootDashModel model = element.getBootDashModel();
-				try {
-					if (model.getElementConsoleManager() != null) {
-						model.getElementConsoleManager().showConsole(element);
-					}
-				} catch (Exception e) {
-					ui().errorPopup("Open Console Failure", e.getMessage());
-				}
-			}
 		}
 	}
 }

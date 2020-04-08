@@ -40,6 +40,7 @@ import org.cloudfoundry.client.v2.stacks.GetStackResponse;
 import org.cloudfoundry.client.v2.userprovidedserviceinstances.DeleteUserProvidedServiceInstanceRequest;
 import org.cloudfoundry.client.v2.users.GetUserRequest;
 import org.cloudfoundry.doppler.LogMessage;
+import org.cloudfoundry.doppler.MessageType;
 import org.cloudfoundry.operations.CloudFoundryOperations;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.operations.applications.ApplicationDetail;
@@ -87,7 +88,8 @@ import org.springframework.ide.eclipse.boot.dash.cf.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cf.client.SshClientSupport;
 import org.springframework.ide.eclipse.boot.dash.cf.client.SshHost;
 import org.springframework.ide.eclipse.boot.dash.cf.client.v2.CloudFoundryClientCache.CFClientProvider;
-import org.springframework.ide.eclipse.boot.dash.cf.console.IApplicationLogConsole;
+import org.springframework.ide.eclipse.boot.dash.console.IApplicationLogConsole;
+import org.springframework.ide.eclipse.boot.dash.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springframework.ide.eclipse.boot.util.Log;
@@ -271,6 +273,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 				return stack;
 			}
 
+			@Override
 			public Mono<Integer> getTimeout() {
 				return timeout;
 			}
@@ -379,6 +382,7 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 				(m1, m2) -> Long.compare(m1.getTimestamp(), m2.getTimestamp()),
 				Duration.ofSeconds(1)
 		)
+		.map(this::convertMessageFromDoppler)
 		.subscribe(logConsole::onMessage, logConsole::onError);
 
 		return cancellation;
@@ -397,6 +401,23 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 	}
 
 
+	private org.springframework.ide.eclipse.boot.dash.console.LogMessage convertMessageFromDoppler(LogMessage msg) {
+		return new org.springframework.ide.eclipse.boot.dash.console.LogMessage(
+				convertMessageTypeFromDoppler(msg.getMessageType()),
+				msg.getMessage()
+		);
+	}
+
+	private LogType convertMessageTypeFromDoppler(MessageType mt) {
+		switch (mt) {
+		case OUT:
+			return LogType.APP_OUT;
+		case ERR:
+			return LogType.APP_ERROR;
+		default:
+			return LogType.APP_OUT;
+		}
+	}
 	/**
 	 * Creates a retry 'signal factory' to be used with Flux.retryWhen.
 	 * <p>

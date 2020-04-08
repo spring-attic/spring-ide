@@ -45,9 +45,9 @@ import org.springframework.ide.eclipse.boot.dash.cf.client.CFCredentials.CFCrede
 import org.springframework.ide.eclipse.boot.dash.cf.client.v2.CFCloudDomainData;
 import org.springframework.ide.eclipse.boot.dash.cf.client.v2.CFDomainStatus;
 import org.springframework.ide.eclipse.boot.dash.cf.client.v2.CFPushArguments;
-import org.springframework.ide.eclipse.boot.dash.cf.console.IApplicationLogConsole;
 import org.springframework.ide.eclipse.boot.dash.cf.routes.ParsedUri;
 import org.springframework.ide.eclipse.boot.dash.cf.routes.RouteBinding;
+import org.springframework.ide.eclipse.boot.dash.console.IApplicationLogConsole;
 import org.springframework.ide.eclipse.boot.dash.test.CfTestTargetParams;
 import org.springframework.ide.eclipse.boot.dash.test.util.LiveExpToFlux;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;

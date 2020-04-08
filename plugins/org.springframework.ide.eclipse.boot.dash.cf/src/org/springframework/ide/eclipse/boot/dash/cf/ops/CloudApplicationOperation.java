@@ -16,8 +16,8 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.cf.model.CloudAppDashElement;
 import org.springframework.ide.eclipse.boot.dash.cf.model.CloudFoundryBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
-import org.springframework.ide.eclipse.boot.dash.views.LogType;
 
 /**
  * A cloud operation that is performed on a Cloud application (for example,
@@ -40,6 +40,7 @@ public abstract class CloudApplicationOperation extends CloudOperation {
 		return model.getApplication(appName);
 	}
 
+	@Override
 	public ISchedulingRule getSchedulingRule() {
 		return this.schedulingRule;
 	}
@@ -50,7 +51,7 @@ public abstract class CloudApplicationOperation extends CloudOperation {
 
 	protected void log(String message) {
 		try {
-			model.getElementConsoleManager().writeToConsole(appName, message, LogType.LOCALSTDOUT);
+			model.getElementConsoleManager().writeToConsole(getDashElement(), message, LogType.STDOUT);
 		} catch (Exception e) {
 			BootDashActivator.log(e);
 		}
@@ -61,7 +62,7 @@ public abstract class CloudApplicationOperation extends CloudOperation {
 			monitor.setTaskName(message);
 		}
 		try {
-			model.getElementConsoleManager().writeToConsole(appName, message, LogType.LOCALSTDOUT);
+			model.getElementConsoleManager().writeToConsole(getDashElement(), message, LogType.STDOUT);
 		} catch (Exception e) {
 			BootDashActivator.log(e);
 		}

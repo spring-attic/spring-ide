@@ -68,6 +68,9 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.JmxSshTunnelStatus
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.OperationTracker;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.OperationTracker.Task;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentProperties;
+import org.springframework.ide.eclipse.boot.dash.console.ApplicationLogConsole;
+import org.springframework.ide.eclipse.boot.dash.console.LogSource;
+import org.springframework.ide.eclipse.boot.dash.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveDataCapableElement;
 import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveDataConnectionManagementActions.ExecuteCommandAction;
@@ -82,7 +85,6 @@ import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.Cancelat
 import org.springframework.ide.eclipse.boot.dash.util.LogSink;
 import org.springframework.ide.eclipse.boot.dash.util.Utils;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
-import org.springframework.ide.eclipse.boot.dash.views.LogType;
 import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
@@ -92,6 +94,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
+import reactor.core.Disposable;
+
 /**
  * A handle to a Cloud application. NOTE: This element should NOT hold Cloud
  * application state as it may be discarded and created multiple times for the
@@ -99,7 +103,7 @@ import org.springsource.ide.eclipse.commons.livexp.util.Log;
  * <p/>
  * Cloud application state should always be resolved from external sources
  */
-public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> implements Deletable, LogSink, LiveDataCapableElement {
+public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> implements Deletable, LogSink, LiveDataCapableElement, LogSource {
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 
@@ -192,8 +196,8 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 
 	protected void resetAndShowConsole() {
 		try {
-			getBootDashModel().getElementConsoleManager().resetConsole(getName());
-			getBootDashModel().getElementConsoleManager().showConsole(getName());
+			getBootDashModel().getElementConsoleManager().resetConsole(this);
+			getBootDashModel().getElementConsoleManager().showConsole(this);
 		} catch (Exception e) {
 			Log.log(e);
 		}
@@ -633,7 +637,7 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 
 	@Override
 	public void log(String message) {
-		log(message, LogType.LOCALSTDOUT);
+		log(message, LogType.STDOUT);
 	}
 
 	public void log(String message, LogType logType) {
@@ -750,14 +754,14 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 	 * Print a message to the console associated with this application.
 	 */
 	public void print(String msg) {
-		print(msg, LogType.LOCALSTDOUT);
+		print(msg, LogType.STDOUT);
 	}
 
 	/**
 	 * Print a message to the console associated with this application.
 	 */
 	public void printError(String string) {
-		print(string, LogType.LOCALSTDERROR);
+		print(string, LogType.STDERROR);
 	}
 
 	/**
@@ -879,7 +883,7 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 				// Delete from CF first. Do it outside of synch block to avoid
 				// deadlock
 				model.getRunTarget().getClient().deleteApplication(appName);
-				model.getElementConsoleManager().terminateConsole(cloudElement.getName());
+				model.getElementConsoleManager().terminateConsole(cloudElement);
 				model.removeApplication(cloudElement.getName());
 				cloudElement.setProject(null);
 			}
@@ -937,5 +941,19 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 	@Override
 	public Image getPropertiesTitleIconImage() {
 		return BootDashActivator.getDefault().getImageRegistry().get(BootDashActivator.CLOUD_ICON);
+	}
+
+	@Override
+	public Disposable connectLog(ApplicationLogConsole logConsole) {
+		if (logConsole.getLogStreamingToken() == null) {
+			try {
+				ClientRequests client = getClient();
+				return client.streamLogs(getName(), logConsole);
+			} catch (Exception e) {
+				logConsole.writeApplicationLog("Failed to stream contents from "+getTarget().getDisplayName()+" due to: " + e.getMessage(),
+						LogType.STDERROR);
+			}
+		}
+		return null;
 	}
 }

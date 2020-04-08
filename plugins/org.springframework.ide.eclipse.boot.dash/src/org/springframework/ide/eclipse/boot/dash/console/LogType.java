@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.views;
+package org.springframework.ide.eclipse.boot.dash.console;
 
 import org.eclipse.swt.SWT;
 
@@ -16,27 +16,18 @@ public class LogType {
 	/*
 	 * Local messages types
 	 */
-	public static final LogType LOCALSTDOUT = new LogType(SWT.COLOR_DARK_BLUE);
-	public static final LogType LOCALSTDERROR = new LogType(SWT.COLOR_RED);
+	public static final LogType STDOUT = new LogType(SWT.COLOR_DARK_BLUE);
+	public static final LogType STDERROR = new LogType(SWT.COLOR_RED);
+	public static final LogType APP_ERROR = new LogType(SWT.COLOR_RED);
+	public static final LogType APP_OUT = new LogType(SWT.COLOR_DARK_GREEN);
 
-	private final String type;
 	private final int displayColour;
 
-	public LogType(String type, int displayColour) {
-		this.displayColour = displayColour;
-		this.type = type;
-	}
-
 	public LogType(int displayColour) {
-		this(null, displayColour);
-	}
-
-	public String getMessageType() {
-		return this.type;
+		this.displayColour = displayColour;
 	}
 
 	public int getDisplayColour() {
 		return this.displayColour;
 	}
-
 }

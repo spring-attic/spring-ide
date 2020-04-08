@@ -8,13 +8,12 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cf.console;
+package org.springframework.ide.eclipse.boot.dash.console;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.cloudfoundry.doppler.LogMessage;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -26,7 +25,6 @@ import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.IOConsoleOutputStream;
 import org.eclipse.ui.console.MessageConsole;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.views.LogType;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import reactor.core.Disposable;
@@ -56,7 +54,7 @@ public class ApplicationLogConsole extends MessageConsole implements IPropertyCh
 		if (log == null) {
 			return;
 		}
-		final LogType logType = CfLogType.getLogType(log);
+		final LogType logType = log.getType();
 		writeApplicationLog(log.getMessage(), logType);
 	}
 
@@ -174,7 +172,7 @@ public class ApplicationLogConsole extends MessageConsole implements IPropertyCh
 
 	@Override
 	public void onError(Throwable exception) {
-		writeApplicationLog(exception.getMessage(), CfLogType.CFSTDERROR);
+		writeApplicationLog(exception.getMessage(), LogType.STDERROR);
 	}
 
 	@Override

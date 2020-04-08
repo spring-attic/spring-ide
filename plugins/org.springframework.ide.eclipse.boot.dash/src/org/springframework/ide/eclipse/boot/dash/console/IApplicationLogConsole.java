@@ -8,9 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cf.console;
-
-import org.cloudfoundry.doppler.LogMessage;
+package org.springframework.ide.eclipse.boot.dash.console;
 
 public interface IApplicationLogConsole {
 

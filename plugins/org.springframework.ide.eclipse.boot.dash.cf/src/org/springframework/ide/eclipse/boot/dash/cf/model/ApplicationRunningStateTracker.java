@@ -21,14 +21,14 @@ import org.springframework.ide.eclipse.boot.dash.cf.client.CFInstanceState;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFInstanceStats;
 import org.springframework.ide.eclipse.boot.dash.cf.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cf.client.v2.DefaultClientRequestsV2;
+import org.springframework.ide.eclipse.boot.dash.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
-import org.springframework.ide.eclipse.boot.dash.views.LogType;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 public class ApplicationRunningStateTracker {
 	// Give time for Diego-enabled apps with health check that may take a while to start
-	// Users can always manually stop the app if it is taking too long to check the run state of the app
+	// Users can always manually stop the element if it is taking too long to check the run state of the element
 	public static final long APP_START_TIMEOUT = DefaultClientRequestsV2.APP_START_TIMEOUT.toMillis();
 
 	public static final long WAIT_TIME = 1000;
@@ -43,7 +43,7 @@ public class ApplicationRunningStateTracker {
 
 	private final CancelationToken cancelationToken;
 
-	private final CloudAppDashElement app;
+	private final CloudAppDashElement element;
 
 
 	public ApplicationRunningStateTracker(CancelationToken cancelationToken, CloudAppDashElement app) {
@@ -52,25 +52,25 @@ public class ApplicationRunningStateTracker {
 		this.appName = app.getName();
 		this.timeout = APP_START_TIMEOUT;
 		this.cancelationToken = cancelationToken;
-		this.app = app;
+		this.element = app;
 	}
 
 	protected void checkTerminate(IProgressMonitor monitor)
 			throws OperationCanceledException {
-		this.app.checkTerminationRequested(cancelationToken, monitor);
+		this.element.checkTerminationRequested(cancelationToken, monitor);
 	}
 
 	/**
-	 * Polls cloudfoundry until app has succeeded or failed to start. Sending updates to console
+	 * Polls cloudfoundry until element has succeeded or failed to start. Sending updates to console
 	 * and return the final run state.
 	 */
 	public RunState startTracking(IProgressMonitor monitor) throws Exception, OperationCanceledException {
 
 		// fetch an updated Cloud Application that reflects changes that
 		// were
-		// performed on it. Make sure the element app reference is updated
+		// performed on it. Make sure the element element reference is updated
 		// as
-		// run state of the element depends on the app being up to date.
+		// run state of the element depends on the element being up to date.
 		// Wait for application to be started
 		RunState runState = RunState.UNKNOWN;
 
@@ -84,8 +84,8 @@ public class ApplicationRunningStateTracker {
 
 		monitor.beginTask(checkingMessage, estimatedAttempts);
 
-		model.getElementConsoleManager().writeToConsole(appName, checkingMessage + ". Please wait...",
-				LogType.LOCALSTDOUT);
+		model.getElementConsoleManager().writeToConsole(element, checkingMessage + ". Please wait...",
+				LogType.STDOUT);
 
 		CFApplicationDetail app = requests.getApplication(appName);
 
@@ -94,7 +94,7 @@ public class ApplicationRunningStateTracker {
 		}
 
 		// Get the guid, as it is more efficient for lookup
-		//UUID appGuid = app.getGuid();
+		//UUID appGuid = element.getGuid();
 
 		while (runState != RunState.RUNNING && runState != RunState.FLAPPING && runState != RunState.CRASHED
 				&& currentTime < totalTime) {
@@ -126,12 +126,12 @@ public class ApplicationRunningStateTracker {
 		if (runState != RunState.RUNNING) {
 			String warning = "Timed out waiting for application - " + appName
 					+ " to start. Please wait and manually refresh the target, or check if the application logs show any errors.";
-			model.getElementConsoleManager().writeToConsole(appName, warning, LogType.LOCALSTDERROR);
+			model.getElementConsoleManager().writeToConsole(this.element, warning, LogType.STDERROR);
 			throw ExceptionUtil.coreException(warning);
 
 		} else {
-			model.getElementConsoleManager().writeToConsole(appName, "Application appears to have started - " + appName,
-					LogType.LOCALSTDOUT);
+			model.getElementConsoleManager().writeToConsole(this.element, "Application appears to have started - " + appName,
+					LogType.STDOUT);
 		}
 		return runState;
 	}
@@ -167,7 +167,7 @@ public class ApplicationRunningStateTracker {
 	public static RunState getRunState(CFApplication app, List<CFInstanceStats> instances) {
 
 		RunState runState = RunState.UNKNOWN;
-		// if app desired state is "Stopped", return inactive
+		// if element desired state is "Stopped", return inactive
 		if ((instances == null || instances.isEmpty())
 				&& app.getState() == CFAppState.STOPPED) {
 			runState = RunState.INACTIVE;

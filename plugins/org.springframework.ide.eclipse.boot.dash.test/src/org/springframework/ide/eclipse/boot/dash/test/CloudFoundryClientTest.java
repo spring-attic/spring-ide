@@ -77,7 +77,7 @@ import org.springframework.ide.eclipse.boot.dash.cf.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cf.client.v2.DefaultClientRequestsV2;
 import org.springframework.ide.eclipse.boot.dash.cf.client.v2.DefaultCloudFoundryClientFactoryV2;
 import org.springframework.ide.eclipse.boot.dash.cf.client.v2.ReactorUtils;
-import org.springframework.ide.eclipse.boot.dash.cf.console.IApplicationLogConsole;
+import org.springframework.ide.eclipse.boot.dash.console.IApplicationLogConsole;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;

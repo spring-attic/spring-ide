@@ -64,7 +64,6 @@ import org.springframework.ide.eclipse.boot.dash.cf.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.cf.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cf.client.v2.ReactorUtils;
-import org.springframework.ide.eclipse.boot.dash.cf.console.CloudAppLogManager;
 import org.springframework.ide.eclipse.boot.dash.cf.debug.DebugStrategyManager;
 import org.springframework.ide.eclipse.boot.dash.cf.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cf.deployment.ApplicationManifestHandler;
@@ -93,6 +92,7 @@ import org.springframework.ide.eclipse.boot.dash.cf.ui.CfUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.RemoteBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlFileInput;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlInput;
+import org.springframework.ide.eclipse.boot.dash.console.CloudAppLogManager;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel.Result;
@@ -279,7 +279,7 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 		super(target, parent);
 		cfDebugStrategies = new DebugStrategyManager(injections().getBeans(DebugSupport.class), getViewModel());
 		this.elementFactory = new CloudDashElementFactory(context, target.getPropertyStore(), this);
-		this.consoleManager = new CloudAppLogManager(target);
+		this.consoleManager = new CloudAppLogManager();
 		this.unsupportedPushProperties = new UnsupportedPushProperties();
 		this.debugTargetDisconnector = DevtoolsUtil.createDebugTargetDisconnector(this);
 		addDisposableChild(target.getClientExp().onChange((exp,v) -> {
