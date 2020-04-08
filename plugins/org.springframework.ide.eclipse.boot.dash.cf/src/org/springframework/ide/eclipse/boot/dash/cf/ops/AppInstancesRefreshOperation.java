@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFApplicationDetail;
+import org.springframework.ide.eclipse.boot.dash.cf.client.ClientRequests;
 import org.springframework.ide.eclipse.boot.dash.cf.model.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -44,10 +45,13 @@ public class AppInstancesRefreshOperation extends CloudOperation {
 		this.model.refreshTracker.call("Fetching App Instances...", () -> {
 			if (!appsToLookUp.isEmpty()) {
 				Duration timeToWait = Duration.ofSeconds(30);
-				model.getRunTarget().getClient().getApplicationDetails(appsToLookUp)
-				.doOnNext(this.model::updateApplication)
-				.then()
-				.block(timeToWait);
+				ClientRequests client = model.getRunTarget().getClient();
+				if (client!=null) {
+					client.getApplicationDetails(appsToLookUp)
+					.doOnNext(this.model::updateApplication)
+					.then()
+					.block(timeToWait);
+				}
 			}
 			return null;
 		});

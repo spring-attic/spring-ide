@@ -75,7 +75,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget<CloudFoundryTargetP
 	private List<CFSpace> spaces;
 	private List<CFStack> stacks;
 
-	private LiveVariable<ClientRequests> cachedClient;
+	private OldValueDisposer<ClientRequests> cachedClientDisposer;
 	private CloudFoundryClientFactory clientFactory;
 
 	public CloudFoundryRunTarget(CloudFoundryTargetProperties targetProperties, CloudFoundryRunTargetType runTargetType, CloudFoundryClientFactory clientFactory) {
@@ -83,9 +83,8 @@ public class CloudFoundryRunTarget extends AbstractRunTarget<CloudFoundryTargetP
 				CloudFoundryTargetProperties.getName(targetProperties));
 		this.targetProperties = targetProperties;
 		this.clientFactory = clientFactory;
-		this.cachedClient = new LiveVariable<>();
-		new OldValueDisposer(cachedClient);
-		cachedClient.onChange((_e, v) -> {
+		this.cachedClientDisposer = new OldValueDisposer<>();
+		cachedClient().onChange((_e, v) -> {
 			try {
 				if (getClient() != null) {
 					persistBuildpacks(getClient().getBuildpacks());
@@ -96,6 +95,10 @@ public class CloudFoundryRunTarget extends AbstractRunTarget<CloudFoundryTargetP
 		});
 	}
 
+	private LiveVariable<ClientRequests> cachedClient() {
+		return cachedClientDisposer.getVar();
+	}
+
 	public static final EnumSet<RunState> RUN_GOAL_STATES = EnumSet.of(INACTIVE, STARTING, RUNNING, DEBUGGING);
 	private static final BootDashColumn[] DEFAULT_COLUMNS = { RUN_STATE_ICN, NAME, PROJECT, INSTANCES, DEFAULT_PATH, TAGS, JMX_SSH_TUNNEL };
 
@@ -104,7 +107,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget<CloudFoundryTargetP
 
 	@Override
 	public ClientRequests getClient() {
-		return cachedClient.getValue();
+		return cachedClient().getValue();
 	}
 
 	@Override
@@ -118,10 +121,10 @@ public class CloudFoundryRunTarget extends AbstractRunTarget<CloudFoundryTargetP
 				updatePasswordAndConnect();
 			}
  			if (createClient) {
-				cachedClient.setValue(createClient());
+				cachedClient().setValue(createClient());
 			}
 		} catch (Exception e) {
-			cachedClient.setValue(null);
+			cachedClient().setValue(null);
 			throw e;
 		}
 	}
@@ -145,7 +148,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget<CloudFoundryTargetP
 			// The credentials cannot be null or empty string - enforced by the dialog
 			try {
 				this.getTargetProperties().setCredentials(credentials);
-				cachedClient.setValue(createClient());
+				cachedClient().setValue(createClient());
 			} catch (CannotAccessPropertyException e) {
 				ui().warningPopup("Failed Storing Password",
 						"Failed to store password in Secure Storage for " + this.getId()
@@ -163,12 +166,12 @@ public class CloudFoundryRunTarget extends AbstractRunTarget<CloudFoundryTargetP
 		this.domains = null;
 		this.spaces = null;
 		this.stacks = null;
-		cachedClient.setValue(null);
+		cachedClient().setValue(null);
 	}
 	@Override
 	public void dispose() {
 		disconnect();
-		cachedClient.dispose();
+		cachedClientDisposer.dispose();
 	}
 
 	protected void persistBuildpacks(List<CFBuildpack> buildpacks) throws Exception {
@@ -190,7 +193,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget<CloudFoundryTargetP
 
 	@Override
 	public boolean isConnected() {
-		return cachedClient.getValue() != null;
+		return cachedClient().getValue() != null;
 	}
 
 	public Version getCCApiVersion() {
@@ -417,7 +420,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget<CloudFoundryTargetP
 
 	@Override
 	public LiveExpression<ClientRequests> getClientExp() {
-		return cachedClient;
+		return cachedClient();
 	}
 
 	@Override

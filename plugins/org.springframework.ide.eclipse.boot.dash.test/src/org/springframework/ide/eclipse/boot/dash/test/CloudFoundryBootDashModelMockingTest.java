@@ -2718,13 +2718,15 @@ store.put(new Key(element, key), value);
 		});
 
 		updatePassword.run();
-
 		waitForJobsToComplete();
+		assertTrue(target.isConnected());
+		assertEquals(1, target.activeRefreshTokenListeners.get());
 
 		toggleTargetConnectionAction().run(); //disconnect
 
 		waitForJobsToComplete();
 		assertFalse(target.isConnected());
+		assertEquals(0, target.activeRefreshTokenListeners.get());
 
 		// Clear out any mocks on the ui object to get the right count below
 		reset(ui());

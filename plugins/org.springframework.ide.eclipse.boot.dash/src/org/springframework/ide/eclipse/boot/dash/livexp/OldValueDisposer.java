@@ -10,19 +10,21 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.livexp;
 
-import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 /**
- * Helper class that can be attached to a LiveExpression to track its value
- * and, whenever the value is changed, call 'dispose' on the previous value.
+ * Wrapper around a LiveVariable. Tracks the live variable's value
+ * and, whenever the value is changed, calls 'dispose' on the previous value.
  * <p>
  * It also ensures that 'dispose' is called on the final value if the LiveExp
  * itself is disposed.
  * <p>
  * Note: The LiveExp framework's design as grown over time unfortunately doesn't
- * currently provide a strong guarantee that *all* values will be seen by a listener
- * So, some care should be taken with the helper class. It should *only* really be
+ * currently provide a strong guarantee that *all* values will be seen by a listener.
+ * <p>
+ * So, some care should be taken with the wrapped live expression. It should *only* really be
  * applied to a type of LiveExp that calls its value listeners synchronously (i.e.
  * listener is called immediately when the value changed.
  * <p>
@@ -34,20 +36,45 @@ import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
  * <p>
  * In the mean time, this class can be used safely to track the value of a simple
  * LiveVariable and dispose its old value whenever a new value is assigned.
+ * <p>
+ * As of STS 4.5.2 the OldValueDisposer because of these limitations, it is now tightly
+ * coupled to a LiveVarable instance that it creates itself. This automatically ensures
+ * that it is only ever used with a type of LiveExperssion that doesn't cause problems
+ * for its implementation.
  *
  * @author Kris De Volder
  */
-public class OldValueDisposer {
+public class OldValueDisposer<T> implements Disposable {
 
-	private Disposable lastObservedValue = null;
+	private Object lastObservedValue = null;
 
-	public OldValueDisposer(LiveExpression<? extends Disposable> target) {
+	private LiveVariable<T> target = new LiveVariable<>();
+
+	/**
+	 * When you call this constructor, then you are responsible for
+	 * calling the OldValueDisposer.getVar().dispose() method to ensure the
+	 * last value is disposed.
+	 *
+	 * This method is Deprecated, use the constructor that takes
+	 * a {@link AbstractDisposable} owner as parameter instead.
+	 */
+	@Deprecated
+	public OldValueDisposer() {
 		target.addListener((e, v) -> gotValue(v));
 		target.onDispose((e) -> gotValue(null));
 	}
 
-	private synchronized void gotValue(Disposable v) {
-		Disposable oldValue = lastObservedValue;
+	public OldValueDisposer(AbstractDisposable owner) {
+		this();
+		owner.addDisposableChild(target);
+	}
+
+	public void setValue(T newValue) {
+		this.target.setValue(newValue);
+	}
+
+	private synchronized void gotValue(Object v) {
+		Object oldValue = lastObservedValue;
 		lastObservedValue = v;
 		//Take care with spurious change events! Ideally these shouldn't happen, but livexp isn't perfectly avoiding them!
 		if (oldValue!=v) {
@@ -55,10 +82,20 @@ public class OldValueDisposer {
 		}
 	}
 
-	private void disposeValue(Disposable value) {
-		if (value!=null) {
-			value.dispose();
+	private void disposeValue(Object value) {
+		if (value instanceof Disposable) {
+			((Disposable) value).dispose();
+		} else if (value instanceof reactor.core.Disposable) {
+			((reactor.core.Disposable) value).dispose();
 		}
 	}
 
+	@Override
+	public void dispose() {
+		target.dispose();
+	}
+
+	public LiveVariable<T> getVar() {
+		return target;
+	}
 }

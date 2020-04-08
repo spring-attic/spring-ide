@@ -98,6 +98,7 @@ import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel.Result;
 import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
+import org.springframework.ide.eclipse.boot.dash.livexp.OldValueDisposer;
 import org.springframework.ide.eclipse.boot.dash.model.AsyncDeletable;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
@@ -266,7 +267,13 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 
 	private DisposingFactory<BootDashElement, LiveExpression<URI>> actuatorUrlFactory;
 
-	private AtomicReference<reactor.core.Disposable> refreshTokenListener = new AtomicReference<>();
+	private OldValueDisposer<reactor.core.Disposable> refreshTokenDisposer = new OldValueDisposer<>(this);
+
+	/**
+	 * This tracks the number of activeRefreshTokenListeners. It is used for debugging and testing purposes only. (To
+	 * observe whether the listeners are properly disposed).
+	 */
+	public final AtomicInteger activeRefreshTokenListeners = new AtomicInteger();
 
 	public CloudFoundryBootDashModel(CloudFoundryRunTarget target, BootDashModelContext context, BootDashViewModel parent) {
 		super(target, parent);
@@ -278,27 +285,18 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 		addDisposableChild(target.getClientExp().onChange((exp,v) -> {
 			this.refresh(ui());
 			ClientRequests client = exp.getValue();
-			reactor.core.Disposable newListener = null;
 			if (client!=null && this.getRunTarget().getTargetProperties().getStoreCredentials()==StoreCredentialsMode.STORE_TOKEN) {
-				newListener = client.getRefreshTokens().doOnNext(refreshToken -> {
+				activeRefreshTokenListeners.incrementAndGet();
+				refreshTokenDisposer.setValue(client.getRefreshTokens().doOnNext(refreshToken -> {
 					try {
 						this.getRunTarget().getTargetProperties().setCredentials(CFCredentials.fromRefreshToken(refreshToken));
 					} catch (CannotAccessPropertyException e) {
 						Log.log(e);
 					}
 				})
-				.subscribe();
+				.doOnTerminate(activeRefreshTokenListeners::decrementAndGet)
+				.subscribe());
 			}
-			reactor.core.Disposable oldListener = this.refreshTokenListener.getAndSet(newListener);
-			if (oldListener!=null) {
-				oldListener.dispose();
-			}
-			onDispose(d -> {
-				reactor.core.Disposable l = this.refreshTokenListener.get();
-				if (l!=null) {
-					l.dispose();
-				}
-			});
 			checkApiVersion();
 		}));
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_CHANGE);
