@@ -1997,6 +1997,12 @@ public class CloudFoundryBootDashModelMockingTest {
 				"applications:\n" +
 				"- name: "+appName+"\n"
 		);
+
+		harness.answerManifestDiffDialog(ui(), (ManifestDiffDialogModel dialog) -> {
+			//??? code to check what's in the dialog???
+			return ManifestDiffDialogModel.Result.CANCELED;
+		});
+
 		MockCFApplication deployedApp = space.defApp(appName);
 		deployedApp.start(CancelationTokens.NULL);
 
