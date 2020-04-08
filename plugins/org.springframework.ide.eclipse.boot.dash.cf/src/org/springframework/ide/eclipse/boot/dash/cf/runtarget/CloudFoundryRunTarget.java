@@ -29,17 +29,13 @@ import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.api.App;
-import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFBuildpack;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFCredentials;
@@ -61,12 +57,10 @@ import org.springframework.ide.eclipse.boot.dash.model.RunTargetWithProperties;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget.ConnectMode;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
-import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 import org.springsource.ide.eclipse.commons.ui.UiUtil;
 
@@ -84,7 +78,7 @@ public class CloudFoundryRunTarget extends AbstractRunTarget<CloudFoundryTargetP
 	private LiveVariable<ClientRequests> cachedClient;
 	private CloudFoundryClientFactory clientFactory;
 
-	public CloudFoundryRunTarget(CloudFoundryTargetProperties targetProperties, RunTargetType runTargetType, CloudFoundryClientFactory clientFactory) {
+	public CloudFoundryRunTarget(CloudFoundryTargetProperties targetProperties, CloudFoundryRunTargetType runTargetType, CloudFoundryClientFactory clientFactory) {
 		super(runTargetType, CloudFoundryTargetProperties.getId(targetProperties),
 				CloudFoundryTargetProperties.getName(targetProperties));
 		this.targetProperties = targetProperties;

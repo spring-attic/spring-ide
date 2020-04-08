@@ -37,18 +37,16 @@ public abstract class RemoteBootDashModel extends AbstractBootDashModel {
 
 	public final RefreshStateTracker refreshTracker = new RefreshStateTracker(this);
 
-	final protected ValueListener NOTIFY_MODEL_STATE_CHANGE = new ValueListener() {
-		@Override
-		public void gotValue(LiveExpression exp, Object value) {
-			RemoteBootDashModel.this.notifyModelStateChanged();
-		}
-	};
-
 	public RemoteBootDashModel(RunTarget target, BootDashViewModel parent) {
 		super(target, parent);
 		BootDashModelContext context = parent.getContext();
-		getRunTarget().getClientExp().addListener(NOTIFY_MODEL_STATE_CHANGE);
-		refreshTracker.refreshState.addListener(NOTIFY_MODEL_STATE_CHANGE);
+		getRunTarget().getClientExp().onChange(this, (e, v) -> {
+			RemoteBootDashModel.this.notifyModelStateChanged();
+			RemoteBootDashModel.this.getViewModel().updateTargetPropertiesInStore();
+		});
+		refreshTracker.refreshState.onChange(this, (e, v) -> {
+			RemoteBootDashModel.this.notifyModelStateChanged();
+		});
 		addDisposableChild(refreshTracker.refreshState);
 		if (getRunTarget().getPersistentProperties().get(AUTO_CONNECT_PROP, true)) {
 			if (!getRunTarget().isConnected()) {
@@ -66,12 +64,6 @@ public abstract class RemoteBootDashModel extends AbstractBootDashModel {
 	@Override
 	public RemoteRunTarget getRunTarget() {
 		return (RemoteRunTarget) super.getRunTarget();
-	}
-
-	@Override
-	public void dispose() {
-		getRunTarget().getClientExp().removeListener(NOTIFY_MODEL_STATE_CHANGE);
-		super.dispose();
 	}
 
 	final public CompletableFuture<Void> connect(ConnectMode mode) {
