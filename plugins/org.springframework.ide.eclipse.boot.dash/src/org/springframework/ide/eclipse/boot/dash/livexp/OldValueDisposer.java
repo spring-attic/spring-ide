@@ -52,8 +52,8 @@ public class OldValueDisposer<T> implements Disposable {
 
 	/**
 	 * When you call this constructor, then you are responsible for
-	 * calling the OldValueDisposer.getVar().dispose() method to ensure the
-	 * last value is disposed.
+	 * calling the OldValueDisposer.getVar().dispose() or OldValueDisposer.dispose()
+	 * method to ensure the last value is disposed.
 	 *
 	 * This method is Deprecated, use the constructor that takes
 	 * a {@link AbstractDisposable} owner as parameter instead.
