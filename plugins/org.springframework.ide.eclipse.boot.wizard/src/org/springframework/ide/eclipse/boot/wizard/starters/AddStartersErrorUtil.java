@@ -15,10 +15,7 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 public class AddStartersErrorUtil {
 
-	public static ValidationResult getError(InitializrModel model, Exception e) {
-
-		String shortMessage = "Unknown problem occured while getting content for: "
-				+ model.getProject().getProject().getName();
+	public static ValidationResult getError(String shortMessage, Throwable e) {
 
 		AddStartersError result = getError(shortMessage, shortMessage, e);
 
@@ -27,7 +24,7 @@ public class AddStartersErrorUtil {
 		return result;
 	}
 
-	public static AddStartersError getError(String shortMessage, String details, Exception e) {
+	public static AddStartersError getError(String shortMessage, String details, Throwable e) {
 		String exceptionMsg = ExceptionUtil.getMessage(e);
 
 		StringBuffer detailsBuffer = new StringBuffer(details);

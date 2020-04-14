@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.swt.SWT;
@@ -27,7 +28,6 @@ import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection;
 import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
 import org.springframework.ide.eclipse.boot.wizard.FilteredDependenciesSection;
 import org.springframework.ide.eclipse.boot.wizard.MakeDefaultSection;
-import org.springframework.ide.eclipse.boot.wizard.NewSpringBootWizard;
 import org.springframework.ide.eclipse.boot.wizard.SearchBoxSection;
 import org.springframework.ide.eclipse.boot.wizard.SelectedDependenciesSection;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -53,7 +53,6 @@ public class DependencyPage extends WizardPageWithSections {
 	private static final Point DEPENDENCY_SECTION_SIZE = new Point(SWT.DEFAULT, 300);
 	private static final long MODEL_CREATION_TIMEOUT = 30000;
 
-
 	private CheckBoxesSection<Dependency> frequentlyUsedCheckboxes;
 
 	// A validator that generates UI-specific results that for some reason were not
@@ -63,6 +62,43 @@ public class DependencyPage extends WizardPageWithSections {
 	private LiveVariable<ValidationResult> pageValidator = new LiveVariable<>();
 
 	protected final AddStartersWizardModel wizardModel;
+
+	/**
+	 *
+	 * Creates the dynamic sections of this wizard based on the wizard model's availability
+	 * and validation
+	 *
+	 */
+
+	final private LiveExpression<IPageSection> dynamicControlCreation = new LiveExpression<IPageSection>() {
+
+		@Override
+		protected IPageSection compute() {
+			List<WizardPageSection> sections = new ArrayList<>();
+			createBootInfoSection(sections);
+			// If model is available, model loading has been successful
+			InitializrModel model = wizardModel.getModel().getValue();
+			ValidationResult validation = wizardModel.getValidator().getValue();
+			if (validation != null && validation.status ==  IStatus.ERROR) {
+				createErrorSection(sections);
+			}
+			else if (model != null) {
+				model.onDependencyChange(() -> {
+					Display.getDefault().asyncExec(() -> {
+						refreshWizardUi();
+					});
+				});
+				createDynamicSections(model, sections);
+			}
+
+			GroupSection groupSection = new GroupSection(DependencyPage.this, null,
+					sections.toArray(new WizardPageSection[0]));
+			groupSection.grabVertical(true);
+			return groupSection;
+		}
+	};
+
+
 
 	public DependencyPage(AddStartersWizardModel wizardModel) {
 		super("Dependencies", "New Spring Starter Project Dependencies", null);
@@ -79,34 +115,10 @@ public class DependencyPage extends WizardPageWithSections {
 
 	@Override
 	protected List<WizardPageSection> createSections() {
-		// "link" the page section creation live exp to the wizard model live exp, so that page section creation DEPENDS
-		// on wizard model creation. This means the page creation will only happen when the model becomes available.
-		// live exp to also be called.
-		LiveExpression<IPageSection> pageCreationExp = wizardModel.getModel().apply((model) -> {
-			List<WizardPageSection> sections = new ArrayList<>();
-			createBootInfoSection(sections);
-			if (model != null) {
-				ValidationResult result = wizardModel.getValidator().getValue();
-
-				if (result != null && result.isOk()) {
-					model.onDependencyChange(() -> {
-						Display.getDefault().asyncExec(() -> {
-							refreshWizardUi();
-						});
-					});
-					createDynamicSections(model, sections);
-				} else {
-					createErrorSection(sections);
-				}
-
-				GroupSection groupSection = new GroupSection(this, null,
-						sections.toArray(new WizardPageSection[0]));
-				groupSection.grabVertical(true);
-				return groupSection;
-			}
-			return new CommentSection(this, NewSpringBootWizard.NO_CONTENT_AVAILABLE);
-		});
-		DynamicSection dynamicSection = new DynamicSection(this, pageCreationExp);
+		// "link" the page section creation to the wizard model. When the model gets validated,
+		// it will trigger dynamic page creation
+		dynamicControlCreation.dependsOn(wizardModel.getValidator());
+		DynamicSection dynamicSection = new DynamicSection(this, dynamicControlCreation);
 
 		return ImmutableList.of(dynamicSection);
 	}
@@ -122,49 +134,58 @@ public class DependencyPage extends WizardPageWithSections {
 		validator.addChild(wizardModel.getValidator());
 		validator.addChild(pageValidator);
 
-		getWizard().getContainer().getShell().getDisplay().asyncExec(() -> loadWithProgress());
+		wizardModel.startModelLoading((exp, val) -> {
+			loadWithProgress();
+		});
 	}
 
 	private void createErrorSection(List<WizardPageSection> sections) {
 
-		// IMPORTANT: this method may be called multiple times throughout the life cycle
-		// of the page, Only show
-		// error section IF there is an actual error
-		ValidationResult validation = validator.getValue();
-
+		ValidationResult validation = wizardModel.getValidator().getValue();
+		GroupSection errorSection = null;
 		if (validation instanceof AddStartersError) {
 			AddStartersError addStartersError = (AddStartersError) validation;
-			GroupSection errorSection = new GroupSection(this, null, new CommentSection(this, "Error:"),
+			 errorSection = new GroupSection(this, null, new CommentSection(this, "Error:"),
 					new GroupSection(this, "", new CommentSection(this, addStartersError.details)));
-
-			sections.add(errorSection);
+		} else {
+			 errorSection = new GroupSection(this, null, new CommentSection(this, "Details:"),
+						new GroupSection(this, "", new CommentSection(this, "No content available")));
 		}
+
+		sections.add(errorSection);
 	}
 
 	private void loadWithProgress() {
-		try {
-			getContainer().run(true, false, monitor -> {
-				monitor.beginTask("Loading starters data", IProgressMonitor.UNKNOWN);
-				monitor.subTask("Creating Boot project model and fetching data from Initializr Service...");
+		runWithWizardProgress(monitor -> {
 
+			monitor.beginTask("Loading starters data", IProgressMonitor.UNKNOWN);
+			monitor.subTask("Creating Boot project model and fetching data from Initializr Service...");
 
-				ValueListener<ValidationResult> monitorListener = (exp, val) -> {
-					ValidationResult value = exp.getValue();
-					if (value != null && value.status == IStatus.INFO) {
-						monitor.subTask(value.msg);
-					}
-				};
+			// Add temporary listener to the model that can notify the current
+			// Eclipse progress monitor when model loading messages are received
+			ValueListener<ValidationResult> monitorListener = (exp, val) -> {
+				ValidationResult value = exp.getValue();
+				if (value != null && value.status == IStatus.INFO) {
+					monitor.subTask(value.msg);
+				}
+			};
 
-				wizardModel.getValidator().addListener(monitorListener);
-				wizardModel.load();
-				monitor.done();
-				wizardModel.getValidator().removeListener(monitorListener);
+			wizardModel.getProgress().addListener(monitorListener);
+			wizardModel.loadModel();
+			monitor.done();
+			wizardModel.getProgress().removeListener(monitorListener);
+		});
+	}
 
-			});
-		} catch (Exception e) {
-			pageValidator.setValue(ValidationResult
-					.error("Failed fetching data from Initializr Service: " + ExceptionUtil.getMessage(e)));
-		}
+	private void runWithWizardProgress(IRunnableWithProgress runnable) {
+		getWizard().getContainer().getShell().getDisplay().asyncExec(() -> {
+			try {
+				getContainer().run(true, false, runnable);
+			} catch (Exception e) {
+				pageValidator.setValue(ValidationResult
+						.error(ExceptionUtil.getMessage(e)));
+			}
+		});
 	}
 
 	protected void createDynamicSections(InitializrModel model, List<WizardPageSection> sections) {
@@ -238,6 +259,7 @@ public class DependencyPage extends WizardPageWithSections {
 		serviceUrlSection.allowTextEdits(Parser.IDENTITY);
 
 		sections.add(serviceUrlSection);
+
 		LabeledPropertySection section = new LabeledPropertySection(this, wizardModel.getBootVersion());
 		sections.add(section);
 	}
@@ -268,5 +290,4 @@ public class DependencyPage extends WizardPageWithSections {
 			}
 		}
 	}
-
 }

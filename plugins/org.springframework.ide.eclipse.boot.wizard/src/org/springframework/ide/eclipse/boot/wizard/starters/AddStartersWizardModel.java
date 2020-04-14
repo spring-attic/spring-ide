@@ -11,7 +11,9 @@
 package org.springframework.ide.eclipse.boot.wizard.starters;
 
 import java.io.FileNotFoundException;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.UnknownHostException;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -26,12 +28,12 @@ import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpe
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Option;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrUrlBuilders;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
-import org.springsource.ide.eclipse.commons.livexp.core.CompositeValidator;
 import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.StringFieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
+import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.OkButtonHandler;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
@@ -43,12 +45,14 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
  *
  * 1. Build a primary "initializr project model" that contains BOTH local project information, like boot version, as well  as information downloaded
  * from initializr, like dependencies specific for that boot version. Wizard  dependency selections are also stored in this model. This  model also
- * performs comparison between local project and downloaded project
+ * performs comparison between local project and downloaded project.
  *
  * <p/>
  *
- * 2. Download Starter information from initializr like  dependencies, and add this information to the initializr project model.
- *
+ * 2. The model is designed such that the actual model is performed MANUALLY by an external caller. The external caller can register
+ * a initializr service URL change listener, that gets notified when service URL changes in the model. But it is up to the
+ * external caller to decide if, when service URL changes, whether to load the model. The reason for this delegation of model loading
+ * control to the external caller is that it allows the caller to invoke model loading within that external caller's progress service or mechanism.
  * <p/>
  *
  * The  wizard  model is essentially a wrapper  around the initializr project model that  contains additional "wizard" functionality like dealing with "OK pressed"
@@ -58,6 +62,7 @@ public class AddStartersWizardModel implements OkButtonHandler {
 
 
 
+	private static final String MISSING_INITIALIZR_SERVICE_URL = "Missing Initializr Service URL.";
 	private Runnable okRunnable;
 	private IPreferenceStore preferenceStore;
 	private IProject project;
@@ -68,7 +73,11 @@ public class AddStartersWizardModel implements OkButtonHandler {
 	// model that shouldn't be notified to changes to boot version.
 	private final LiveVariable<ValidationResult> modelValidator = new LiveVariable<ValidationResult>();
 	private final LiveVariable<ValidationResult> bootVersionValidator = new LiveVariable<ValidationResult>();
-	private final LiveVariable<ValidationResult> serviceUrlValidator = new  LiveVariable<ValidationResult>();
+	private final LiveVariable<ValidationResult> serviceUrlValidator = new LiveVariable<ValidationResult>();
+
+	// Separate "validator" used only for tracking INFO progress. Should not be used for error handling, as this is used
+	// to show progress in the wizard
+	private final LiveVariable<ValidationResult> modelLoadingProgress = new LiveVariable<ValidationResult>();
 
 	private final FieldModel<String> bootVersion = new StringFieldModel("Spring Boot Version:", "").validator(bootVersionValidator);
 	private final FieldModel<String> serviceUrlField = new StringFieldModel("Service URL:", null).validator(serviceUrlValidator);
@@ -77,23 +86,17 @@ public class AddStartersWizardModel implements OkButtonHandler {
 
 	private String[] serviceUrlOptions;
 
-	private final CompositeValidator validator = new CompositeValidator();
-
-	{
-		validator.addChild(modelValidator);
-		validator.addChild(bootVersionValidator);
-		validator.addChild(serviceUrlValidator);
-
-		modelExp.dependsOn(serviceUrlField.getVariable());
-	}
+	private ValueListener<String> serviceUrlChangeListener;
 
 	public AddStartersWizardModel(IProject project, IPreferenceStore preferenceStore) throws Exception {
 		this.project = project;
 		this.preferenceStore = preferenceStore;
-		String initializrUrl = BootPreferences.getInitializrUrl();
-		serviceUrlField.getVariable().setValue(initializrUrl);
+
 		String[] urls = BootPreferences.getInitializrUrls();
 		this.serviceUrlOptions = urls != null ? urls : new String[0];
+
+		String initializrUrl = BootPreferences.getInitializrUrl();
+		serviceUrlField.getVariable().setValue(initializrUrl);
 	}
 
 	public FieldModel<String> getBootVersion() {
@@ -110,10 +113,18 @@ public class AddStartersWizardModel implements OkButtonHandler {
 
 	/**
 	 *
-	 * @return Validator that notifies when different stages of initializr model creation and data download complete, or any errors that may occur
+	 * @return Validator that notifies when errors occur in any of the components of the  model.
 	 */
 	public LiveExpression<ValidationResult> getValidator() {
-		return this.validator;
+		return this.modelValidator;
+	}
+
+	/**
+	 * Models the "progress bar" in the wizard. Progress messages that need to be
+	 * displayed in a wizards progress bar are available through this live expression.
+	 */
+	public LiveExpression<ValidationResult> getProgress() {
+		return this.modelLoadingProgress;
 	}
 
 	@Override
@@ -136,95 +147,136 @@ public class AddStartersWizardModel implements OkButtonHandler {
 		this.okRunnable = okRunnable;
 	}
 
-	private void handleError(InitializrModel model, Exception e) {
-		String shortMessage = null;
+	private void handleError(InitializrModel model, Throwable e) {
 		StringBuffer detailsBuffer = new StringBuffer();
+		String shortMessage = "Error encountered while resolving initializr content for: " + project.getName();
 
 		// This error is specific to boot version validator, so inform the boot version
 		// validator
-		if (ExceptionUtil.getDeepestCause(e) instanceof FileNotFoundException) {
-			shortMessage = "Error encountered while resolving content";
+		Throwable deepestCause = ExceptionUtil.getDeepestCause(e);
+		ValidationResult addStartersError = AddStartersErrorUtil.getError(shortMessage, deepestCause);
+
+		if (deepestCause instanceof FileNotFoundException) {
 			detailsBuffer.append(
 					"Initializr content for the project's boot version is not available. Consider updating the project to a newer version of Spring Boot:");
-			Option[] availableBootVersions = model.getAvailableBootVersions();
-			if (availableBootVersions != null) {
-				detailsBuffer.append('\n');
-				for (Option option : availableBootVersions) {
+
+			if (model != null) {
+				Option[] availableBootVersions = model.getAvailableBootVersions();
+				if (availableBootVersions != null) {
 					detailsBuffer.append('\n');
-					detailsBuffer.append(option.getId());
+					for (Option option : availableBootVersions) {
+						detailsBuffer.append('\n');
+						detailsBuffer.append(option.getId());
+					}
 				}
 			}
 
-			AddStartersError result = AddStartersErrorUtil.getError(shortMessage, detailsBuffer.toString(), e);
+			addStartersError = AddStartersErrorUtil.getError(shortMessage, detailsBuffer.toString(), e);
 
-			// Notify the boot version validator only as the associated field model should
-			// only react
-			// when boot version problems are encountered,but not any other problem
-			this.bootVersionValidator.setValue(result);
+			// Notify the boot version validator to mark the boot version field with an error
+			this.bootVersionValidator.setValue(addStartersError);
 
-		} else {
-			this.modelValidator.setValue(AddStartersErrorUtil.getError(model, e));
+		} else if (deepestCause instanceof UnknownHostException || deepestCause instanceof MalformedURLException
+				|| deepestCause.getMessage().equals(MISSING_INITIALIZR_SERVICE_URL)) {
+			// Notify the service URL validator to mark the service URL field with an error
+			this.serviceUrlValidator.setValue(addStartersError);
 		}
-	}
 
+		// regardless of which component is associated with the error, set the error in the
+		// model validator with tracks all model errors
+		this.modelValidator.setValue(addStartersError);
+	}
 
 	/**
-	 * Triggers the initializr model creation and downloading of data into the model from initializr service
+	 * Starts the project model loading process. The given change listener will be invoked
+	 * upon subsequent service URL changes
 	 *
-	 * This is a long-running synchronous operation
 	 */
-	public void load() {
+	public void startModelLoading(ValueListener<String> _serviceUrlChangeListener) {
 
-		modelValidator.setValue(ValidationResult.info("Creating Boot project model..."));
+		LiveVariable<String> serviceUrlVariable = serviceUrlField.getVariable();
 
-		InitializrModel  model = createModel();
-		if (model != null) {
-			try {
-				modelValidator.setValue(ValidationResult.info("Fetching starter information from Spring Boot Initializr..."));
-				model.downloadDependencies();
-				modelValidator.setValue(ValidationResult.OK);
-			} catch (Exception e) {
-				handleError(model, e);
-			}
-			modelExp.setValue(model);
+		if (this.serviceUrlChangeListener != null) {
+			serviceUrlVariable.removeListener(this.serviceUrlChangeListener);
 		}
+
+		this.serviceUrlChangeListener = _serviceUrlChangeListener;
+
+		// model loading is triggered by the service URL field. Adding a listener
+		// will trigger initial loading as that is how Liveexp are designed.
+		serviceUrlVariable.addListener(_serviceUrlChangeListener);
 	}
 
-	private InitializrModel createModel()  {
+	/**
+	 * Synchronous model loading. Allows external trigger of model loading.
+	 */
+	public void loadModel() {
+		InitializrModel model = null;
 
+		// Clear the model first
+		modelExp.setValue(null);
+
+		// Clear or reset validators
+		modelValidator.setValue(null);
+		bootVersionValidator.setValue(null);
+		serviceUrlValidator.setValue(null);
+
+		Exception error = null;
 		try {
-			String url = serviceUrlField.getValue();
-			if (url != null) {
-				URLConnectionFactory urlConnectionFactory = BootActivator.getUrlConnectionFactory();
-
-				InitializrService initializr = InitializrService.create(urlConnectionFactory, () -> url);
-				SpringBootCore core = new SpringBootCore(initializr);
-
-				InitializrUrlBuilders urlBuilders = new InitializrUrlBuilders();
-				InitializrProjectDownloader projectDownloader = new InitializrProjectDownloader(urlConnectionFactory,
-						url, urlBuilders);
-				InitializrServiceSpec serviceSpec = InitializrServiceSpec.parseFrom(urlConnectionFactory, new URL(url));
-
-				ISpringBootProject bootProject = core.project(project);
-
-				this.bootVersion.setValue(bootProject.getBootVersion());
-
-				InitializrModel model = new InitializrModel(bootProject, projectDownloader, serviceSpec, preferenceStore);
-				modelValidator.setValue(ValidationResult.OK);
-
-				return model;
-			} else {
-				return null;
-			}
+			modelLoadingProgress.setValue(ValidationResult.info("Creating Boot project model..."));
+			model = createModel();
+			modelLoadingProgress.setValue(ValidationResult.info("Fetching starter information from Spring Boot Initializr..."));
+			model.downloadDependencies();
 		} catch (Exception _e) {
-			Throwable e = ExceptionUtil.getDeepestCause(_e);
+			error = _e;
+		}
+
+		// FIRST set the model even if there are errors
+		if (model != null) {
+			modelExp.setValue(model);
+		}
+
+		// Lastly, set the validator as this triggers external participants registered as listeners
+		// to react to model being valid (or having errors)
+		if (error != null) {
+			Throwable e = ExceptionUtil.getDeepestCause(error);
 			if (e instanceof HttpRedirectionException) {
 				serviceUrlField.getVariable().setValue(((HttpRedirectionException)e).redirectedTo);
 			} else {
-				modelValidator.setValue(ValidationResult.error(ExceptionUtil.getMessage(e)));
+				handleError(model, e);
 			}
+		} else {
+			modelValidator.setValue(ValidationResult.OK);
 		}
-		return null;
+
+		// Set OK regardless of errors as this just indicates that loading process is over
+		modelLoadingProgress.setValue(ValidationResult.OK);
+	}
+
+	private InitializrModel createModel() throws Exception {
+
+		String url = serviceUrlField.getValue();
+		if (url != null) {
+			URLConnectionFactory urlConnectionFactory = BootActivator.getUrlConnectionFactory();
+
+			InitializrService initializr = InitializrService.create(urlConnectionFactory, () -> url);
+			SpringBootCore core = new SpringBootCore(initializr);
+
+			InitializrUrlBuilders urlBuilders = new InitializrUrlBuilders();
+			InitializrProjectDownloader projectDownloader = new InitializrProjectDownloader(urlConnectionFactory,
+					url, urlBuilders);
+			InitializrServiceSpec serviceSpec = InitializrServiceSpec.parseFrom(urlConnectionFactory, new URL(url));
+
+			ISpringBootProject bootProject = core.project(project);
+
+			this.bootVersion.setValue(bootProject.getBootVersion());
+
+			InitializrModel model = new InitializrModel(bootProject, projectDownloader, serviceSpec, preferenceStore);
+
+			return model;
+		} else {
+			throw ExceptionUtil.coreException(MISSING_INITIALIZR_SERVICE_URL);
+		}
 	}
 
 
@@ -232,6 +284,9 @@ public class AddStartersWizardModel implements OkButtonHandler {
 		InitializrModel model = modelExp.getValue();
 		if (model != null) {
 			model.dispose();
+		}
+		if (this.serviceUrlChangeListener != null) {
+			serviceUrlField.getVariable().removeListener(this.serviceUrlChangeListener);
 		}
 	}
 
