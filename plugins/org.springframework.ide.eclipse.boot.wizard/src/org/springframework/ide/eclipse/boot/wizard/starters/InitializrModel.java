@@ -117,7 +117,7 @@ public class InitializrModel  {
 		if (options != null) {
 			for (Option option : options) {
 				// PT 172040311 - Do not include snapshot versions
-				if (!option.getId().contains("BUILD-SNAPSHOT")) {
+				if (!option.getId().contains("SNAPSHOT")) {
 					releasesOnly.add(option);
 					count++;
 				}
