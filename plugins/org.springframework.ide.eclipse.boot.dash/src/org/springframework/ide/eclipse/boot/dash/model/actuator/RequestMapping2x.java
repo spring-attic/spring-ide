@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Pivotal, Inc.
+ * Copyright (c) 2018, 2020 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -101,7 +101,7 @@ public class RequestMapping2x extends AbstractRequestMapping {
 
 				JSONObject requestMappingConditionals = details.optJSONObject("requestMappingConditions");
 				if (requestMappingConditionals != null) {
-					String[] paths = extractPaths(requestMappingConditionals);
+					String[] paths = extractPaths(requestMappingConditionals.getJSONArray("patterns"));
 					String fqClassName = null;
 					String methodName = null;
 					if (details.has("handlerMethod")) {
@@ -128,11 +128,28 @@ public class RequestMapping2x extends AbstractRequestMapping {
 		return Collections.emptyList();
 	}
 
-	private static String[] extractPaths(JSONObject rmConditionals) throws JSONException {
-		JSONArray jsonArray = rmConditionals.getJSONArray("patterns");
-		String[] paths = new String[jsonArray.length()];
-		for (int i = 0; i < jsonArray.length(); i++) {
-			paths[i] = jsonArray.getString(i);
+	public static Collection<? extends RequestMapping> createFromSimpleServlet(TypeLookup typeLookup,
+			JSONObject servlet) {
+		try {
+			String[] extractPaths = extractPaths(servlet.getJSONArray("mappings"));
+			String className = servlet.getString("className");
+
+			if (extractPaths.length > 0) {
+				return Arrays.stream(extractPaths)
+						.filter(path -> path.length() > 0 && !path.equals("/"))
+						.map(path -> new RequestMapping2x(typeLookup, path, className, null, className))
+						.collect(Collectors.toList());
+			}
+		} catch (JSONException e) {
+			Log.log(e);
+		}
+		return Collections.emptyList();
+	}
+
+	private static String[] extractPaths(JSONArray pathArray) throws JSONException {
+		String[] paths = new String[pathArray.length()];
+		for (int i = 0; i < pathArray.length(); i++) {
+			paths[i] = pathArray.getString(i);
 		}
 		return paths;
 	}

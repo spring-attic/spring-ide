@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2019 Pivotal, Inc.
+ * Copyright (c) 2015, 2020 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import static org.springsource.ide.eclipse.commons.ui.UiUtil.openUrl;
 
 import java.util.List;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
@@ -83,9 +84,13 @@ public class RequestMappingPropertiesSection extends AbstractBdePropertiesSectio
 						}
 						break;
 					case SRC:
-						IMethod method = rm.getMethod();
-						if (method!=null) {
-							SpringUIUtils.openInEditor(method);
+						IJavaElement javaElement = rm.getMethod();
+						if (javaElement == null) {
+							javaElement = rm.getType();
+						}
+
+						if (javaElement != null) {
+							SpringUIUtils.openInEditor(javaElement);
 						}
 					default:
 						break;

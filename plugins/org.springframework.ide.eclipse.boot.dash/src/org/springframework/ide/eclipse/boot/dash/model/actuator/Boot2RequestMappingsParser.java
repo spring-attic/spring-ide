@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Pivotal, Inc.
+ * Copyright (c) 2018, 2020 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,6 +50,14 @@ public class Boot2RequestMappingsParser implements RequestMappingsParser {
 							result.addAll(RequestMapping2x.create(typeLookup, servlet.getString("handler"), details));
 						}
 					}
+				}
+			}
+
+			if (mappings.has("servlets")) {
+				JSONArray servlets = mappings.getJSONArray("servlets");
+				for (int i = 0; i < servlets.length(); i++) {
+					JSONObject servlet = servlets.getJSONObject(i);
+					result.addAll(RequestMapping2x.createFromSimpleServlet(typeLookup, servlet));
 				}
 			}
 
