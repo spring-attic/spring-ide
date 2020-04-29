@@ -14,24 +14,6 @@
  -->
 <plugin>
 	
-    <extension
-          point="com.springsource.sts.ide.configurator.participant">
-       <participant
-             class="org.springframework.ide.eclipse.maven.internal.core.MavenRuntimeWorkspaceConfigurator"
-             id="com.springsource.sts.configurator.maven.runtime"
-             label="Maven Runtime">
-       </participant>
-    </extension>
-
-    <extension
-          point="com.springsource.sts.ide.configurator.participant">
-       <participant
-             class="org.springframework.ide.eclipse.maven.internal.core.MavenRepositoryWorkspaceConfigurator"
-             id="com.springsource.sts.configurator.maven.repository"
-             label="Maven Repository">
-       </participant>
-    </extension>
-    
      <extension
          point="org.eclipse.ui.popupMenus">
         <!-- 
