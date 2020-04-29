@@ -20,7 +20,6 @@ Require-Bundle: org.eclipse.ui,
  org.springframework.core;bundle-version="[4.0.0,4.4.0)",
  org.eclipse.ajdt.ui;bundle-version="2.0.0";resolution:=optional,
  org.eclipse.ajdt.core;bundle-version="2.0.0";resolution:=optional,
- org.springsource.ide.eclipse.commons.configurator,
  org.springframework.ide.eclipse.ui,
  org.springsource.ide.eclipse.commons.core,
  org.springsource.ide.eclipse.commons.frameworks.core
