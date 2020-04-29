@@ -471,16 +471,6 @@
 			<layout>p2</layout>
 			<url>https://download.eclipse.org/lsp4e/releases/latest/</url>
 		</repository>
-<!--		<repository> 
-			<id>lsp4e-releases</id> 
-			<layout>p2</layout> 
-			<url>https://download.eclipse.org/lsp4e/0.5.0milestone/</url> 
-		</repository> -->
-		<repository>
-			<id>mylyn-37</id>
-			<layout>p2</layout>
-			<url>https://download.eclipse.org/mylyn/releases/3.7</url>
-		</repository>
 		<repository>
 			<id>yedit</id>
 			<layout>p2</layout>
