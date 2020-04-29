@@ -261,11 +261,6 @@
 			</properties>
 			<repositories>
 				<repository>
-					<id>platform-e413</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/eclipse/updates/4.13/</url>
-				</repository>
-				<repository>
 					<id>2019-09</id>
 					<layout>p2</layout>
 					<url>https://download.eclipse.org/releases/2019-09/</url>
@@ -320,11 +315,6 @@
 			</properties>
 			<repositories>
 				<repository>
-					<id>platform-e414</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/eclipse/updates/4.14/</url>
-				</repository>
-				<repository>
 					<id>2019-12</id>
 					<layout>p2</layout>
 					<url>https://download.eclipse.org/releases/2019-12/</url>
@@ -378,11 +368,6 @@
 				<p2.repository.name>Spring IDE for Eclipse 4.15</p2.repository.name>
 			</properties>
 			<repositories>
-				<repository>
-					<id>platform-e415</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/eclipse/updates/4.15/</url>
-				</repository>
 				<repository>
 					<id>2020-03</id>
 					<layout>p2</layout>
