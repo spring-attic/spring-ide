@@ -75,7 +75,6 @@ public class DependencyPage extends WizardPageWithSections {
 		@Override
 		protected IPageSection compute() {
 			List<WizardPageSection> sections = new ArrayList<>();
-			createBootInfoSection(sections);
 			// If model is available, model loading has been successful
 			InitializrModel model = wizardModel.getModel().getValue();
 			ValidationResult validation = wizardModel.getValidator().getValue();
@@ -118,9 +117,26 @@ public class DependencyPage extends WizardPageWithSections {
 		// "link" the page section creation to the wizard model. When the model gets validated,
 		// it will trigger dynamic page creation
 		dynamicControlCreation.dependsOn(wizardModel.getValidator());
-		DynamicSection dynamicSection = new DynamicSection(this, dynamicControlCreation);
+		List<WizardPageSection> sections = new ArrayList<>();
 
-		return ImmutableList.of(dynamicSection);
+		// PT 172323896 - Focus is lost in the Service URL control every time
+		// a user types a new character and the model is reloaded.
+		// The reason is that, although the wizard dialog's built-in mechanism to
+		// restore focus on controls works (the dialog correctly remembers that the service URL
+		// control had focus PRIOR to starting background progress work, like model loading, and
+		// attempts to restore it after work is completed - see org.eclipse.jface.wizard.WizardDialog#stopped())
+		// this automatic restoration of focus on a control will NOT work if the control is disposed
+		// which would happen for dynamically created sections, which get recreated on each model loading.
+		// SOLUTION: EXCLUDE "static" controls like the service URL and boot version
+		// from being recreated every time (i.e. dont include their creation in the dynamic section).
+		// This ensures that when the wizard attempts to restore focus on the service URL control, it is
+		// still active and not disposed
+		createBootInfoSection(sections);
+
+		DynamicSection dynamicSection = new DynamicSection(this, dynamicControlCreation);
+		sections.add(dynamicSection);
+
+		return sections;
 	}
 
 	@Override
