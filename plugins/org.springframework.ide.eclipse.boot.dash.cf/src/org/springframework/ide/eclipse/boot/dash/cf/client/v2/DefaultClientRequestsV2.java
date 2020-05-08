@@ -386,18 +386,6 @@ public class DefaultClientRequestsV2 implements ClientRequests {
 		.subscribe(logConsole::onMessage, logConsole::onError);
 
 		return cancellation;
-
-//		ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-//		try {
-//
-//			// TODO: Retain this from old code. Not sure what bug it addresses
-//			Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
-//
-//		} catch (Exception e) {
-//			BootDashActivator.log(e);
-//		} finally {
-//			Thread.currentThread().setContextClassLoader(contextClassLoader);
-//		}
 	}
 
 

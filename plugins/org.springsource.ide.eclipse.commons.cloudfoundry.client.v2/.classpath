@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-client-4.3.0.RELEASE.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-client-reactor-4.3.0.RELEASE.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-operations-4.3.0.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-client-4.3.0.RELEASE.jar" sourcepath="/home/kdvolder/.m2/repository/org/cloudfoundry/cloudfoundry-client/4.3.0.RELEASE/cloudfoundry-client-4.3.0.RELEASE-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-client-reactor-4.3.0.RELEASE.jar" sourcepath="/home/kdvolder/.m2/repository/org/cloudfoundry/cloudfoundry-client-reactor/4.3.0.RELEASE/cloudfoundry-client-reactor-4.3.0.RELEASE-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-operations-4.3.0.RELEASE.jar" sourcepath="/home/kdvolder/.m2/repository/org/cloudfoundry/cloudfoundry-operations/4.3.0.RELEASE/cloudfoundry-operations-4.3.0.RELEASE-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/cloudfoundry-util-4.3.0.RELEASE.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/commons-compress-1.19.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependencies/evo-inflector-1.2.2.jar"/>
