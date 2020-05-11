@@ -66,4 +66,9 @@ public class MockRunTargetType extends AbstractRunTargetType<CloudFoundryTargetP
 	public String serialize(CloudFoundryTargetProperties props) {
 		return props.toJson();
 	}
+
+	@Override
+	public ImageDescriptor getDisconnectedIcon() {
+		return null;
+	}
 }

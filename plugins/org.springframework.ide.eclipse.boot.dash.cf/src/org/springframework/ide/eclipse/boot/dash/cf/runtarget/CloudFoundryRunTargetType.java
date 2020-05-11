@@ -31,7 +31,7 @@ import org.springframework.ide.eclipse.boot.dash.model.DefaultWizardModelUserInt
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.WizardModelUserInteractions;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.AbstractRemoteRemoteRunTargetType;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.AbstractRemoteRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget.ConnectMode;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
 import org.springframework.ide.eclipse.boot.dash.util.UiUtil;
@@ -45,7 +45,7 @@ import com.google.gson.Gson;
 /**
  * @author Kris De Volder
  */
-public class CloudFoundryRunTargetType extends AbstractRemoteRemoteRunTargetType<CloudFoundryTargetProperties> implements Disposable {
+public class CloudFoundryRunTargetType extends AbstractRemoteRunTargetType<CloudFoundryTargetProperties> implements Disposable {
 
 	private static final ImageDescriptor SMALL_ICON = BootDashActivator.getImageDescriptor("icons/cloud_obj.png");
 
@@ -110,7 +110,11 @@ public class CloudFoundryRunTargetType extends AbstractRemoteRemoteRunTargetType
 
 	@Override
 	public ImageDescriptor getIcon() {
-		return SMALL_ICON;
+		return BootDashActivator.getImageDescriptor("icons/cloud-ready.png");
+	}
+	@Override
+	public ImageDescriptor getDisconnectedIcon() {
+		return BootDashActivator.getImageDescriptor("icons/cloud-inactive.png");
 	}
 
 	@Override
@@ -156,4 +160,5 @@ public class CloudFoundryRunTargetType extends AbstractRemoteRemoteRunTargetType
 		// TODO Auto-generated method stub
 		return null;
 	}
+
 }

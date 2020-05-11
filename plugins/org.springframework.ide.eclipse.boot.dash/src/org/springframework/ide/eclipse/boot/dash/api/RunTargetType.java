@@ -88,4 +88,6 @@ public interface RunTargetType<Params> extends Nameable {
 
 	Params parseParams(String serializedTargetParams);
 	String serialize(Params serializedTargetParams);
+
+	ImageDescriptor getDisconnectedIcon();
 }

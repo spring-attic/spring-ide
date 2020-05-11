@@ -19,7 +19,7 @@ import org.springframework.ide.eclipse.boot.dash.azure.client.STSAzureClient;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.AbstractRemoteRemoteRunTargetType;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.AbstractRemoteRunTargetType;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
@@ -30,7 +30,7 @@ import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.appplatform.v2019_05_01_preview.implementation.ServiceResourceInner;
 import com.microsoft.azure.management.resources.Subscription;
 
-public class AzureRunTargetType extends AbstractRemoteRemoteRunTargetType<AzureTargetParams> {
+public class AzureRunTargetType extends AbstractRemoteRunTargetType<AzureTargetParams> {
 
 	public static String getResourceGroupName(String serviceId) {
 		// Example clusterId="/subscriptions/9036e83e-2238-42a4-9b2a-ecd80d4cc38d/resourceGroups/resource-test-dc/providers/Microsoft.AppPlatform/Spring/piggymetrics"
@@ -98,6 +98,11 @@ public class AzureRunTargetType extends AbstractRemoteRemoteRunTargetType<AzureT
 	@Override
 	public ImageDescriptor getIcon() {
 		return BootDashAzurePlugin.getImageDescriptor("/icons/azure.png");
+	}
+
+	@Override
+	public ImageDescriptor getDisconnectedIcon() {
+		return BootDashAzurePlugin.getImageDescriptor("icons/azure-inactive.png");
 	}
 
 	@Override

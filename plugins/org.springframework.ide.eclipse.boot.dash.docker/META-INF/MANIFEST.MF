@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.springframework.ide.eclipse.boot.dash.docker
+Bundle-SymbolicName: org.springframework.ide.eclipse.boot.dash.docker;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Automatic-Module-Name: org.springframework.ide.eclipse.boot.dash.docker
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: org.springframework.ide.eclipse.boot.dash,
+ org.springframework.ide.eclipse.boot,
+ org.springsource.ide.eclipse.commons.livexp,
+ org.eclipse.jface,
+ org.eclipse.ui.workbench,
+ org.eclipse.core.runtime;bundle-version="3.17.100",
+ com.spotify.docker.client;bundle-version="8.11.7",
+ org.springsource.ide.eclipse.commons.frameworks.core,
+ com.google.guava,
+ org.eclipse.core.resources

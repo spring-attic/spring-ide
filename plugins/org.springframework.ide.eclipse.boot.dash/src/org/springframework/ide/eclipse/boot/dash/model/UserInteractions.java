@@ -82,4 +82,9 @@ public interface UserInteractions {
 	 */
 	<T> T chooseElement(String title, String message, List<T> elemments, Function<T, String> labelProvider);
 
+	/**
+	 * Prompt user to enter a simple string value.
+	 */
+	String inputDialog(String dialogTitle, String prompt, String defaultValue);
+
 }

@@ -14,7 +14,10 @@ import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashC
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
+import org.springframework.ide.eclipse.boot.dash.model.remote.GenericRemoteBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget;
 import org.springframework.ide.eclipse.boot.dash.util.template.Template;
 import org.springframework.ide.eclipse.boot.dash.util.template.TemplateEnv;
 import org.springframework.ide.eclipse.boot.dash.util.template.Templates;
@@ -163,4 +166,17 @@ public abstract class AbstractRunTarget<Params> implements RunTarget<Params>, Te
 	public BootDashColumn[] getDefaultColumns() {
 		return DEFAULT_COLS;
 	}
+
+	@Override
+	public final ImageDescriptor getIcon() {
+		if (this instanceof RemoteRunTarget) {
+			if (((RemoteRunTarget<?,?>)this).isConnected()) {
+				return getType().getIcon();
+			} else {
+				return getType().getDisconnectedIcon();
+			}
+		}
+		return getType().getIcon();
+	}
+
 }

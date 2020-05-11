@@ -57,4 +57,9 @@ public class LocalRunTargetType extends AbstractRunTargetType<Void> {
 	public String serialize(Void serializedTargetParams) {
 		throw new UnsupportedOperationException();
 	}
+
+	@Override
+	public ImageDescriptor getDisconnectedIcon() {
+		return getIcon();
+	}
 }

@@ -103,15 +103,6 @@ public class AzureRunTarget extends AbstractRunTarget<AzureTargetParams> impleme
 	}
 
 	@Override
-	public ImageDescriptor getIcon() {
-		if (isConnected()) {
-			return getType().getIcon();
-		} else {
-			return BootDashAzurePlugin.getImageDescriptor("icons/azure-inactive.png");
-		}
-	}
-
-	@Override
 	public Collection<App> fetchApps() {
 		SpringServiceClient client = this.getClient();
 		if (client!=null) {

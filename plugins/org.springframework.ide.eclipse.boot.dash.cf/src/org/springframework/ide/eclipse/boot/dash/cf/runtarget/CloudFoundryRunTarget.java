@@ -440,15 +440,6 @@ public class CloudFoundryRunTarget extends AbstractRunTarget<CloudFoundryTargetP
 	}
 
 	@Override
-	public ImageDescriptor getIcon() {
-		if (isConnected()) {
-			return BootDashActivator.getImageDescriptor("icons/cloud-ready.png");
-		} else {
-			return BootDashActivator.getImageDescriptor("icons/cloud-inactive.png");
-		}
-	}
-
-	@Override
 	public CloudFoundryTargetProperties getParams() {
 		return this.targetProperties;
 	}

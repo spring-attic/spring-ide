@@ -12,7 +12,9 @@ package org.springframework.ide.eclipse.boot.dash.views;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -21,6 +23,7 @@ import org.eclipse.debug.ui.IDebugModelPresentation;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IInputValidator;
+import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -311,6 +314,21 @@ public class DefaultUserInteractions implements UserInteractions {
 			});
 			return chosen.getValue();
 		}
+	}
+
+	@Override
+	public String inputDialog(String dialogTitle, String prompt, String defaultValue) {
+		AtomicReference<String> result = new AtomicReference<>();
+		getShell().getDisplay().syncExec(new Runnable() {
+			public void run() {
+				InputDialog dlg = new InputDialog(getShell(), dialogTitle, prompt, defaultValue, null);
+				int code = dlg.open();
+				if (code==IDialogConstants.OK_ID) {
+					result.set(dlg.getValue());
+				}
+			}
+		});
+		return result.get();
 	}
 
 }
