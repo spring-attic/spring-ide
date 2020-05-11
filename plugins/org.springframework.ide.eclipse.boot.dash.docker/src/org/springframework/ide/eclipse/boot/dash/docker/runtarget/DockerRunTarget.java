@@ -68,7 +68,10 @@ public class DockerRunTarget extends AbstractRunTarget<DockerTargetParams> imple
 		
 		DockerClient client = this.client.getValue();
 		if (client!=null) {
-			List<Container> listContainers = client.listContainers(ListContainersParam.allContainers());
+			List<Container> listContainers = client.listContainers(
+					ListContainersParam.withLabel(DockerApp.APP_NAME),
+					ListContainersParam.allContainers()	
+			);
 			Builder<App> builder = ImmutableList.builder();
 			for (Container container : listContainers) {
 				builder.add(new DockerApp(container));

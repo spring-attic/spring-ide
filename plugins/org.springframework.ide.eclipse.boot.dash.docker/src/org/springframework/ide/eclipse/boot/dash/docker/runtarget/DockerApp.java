@@ -8,7 +8,7 @@ import com.spotify.docker.client.messages.Container;
 
 public class DockerApp implements App {
 
-	private static final String APP_NAME = "sts.app.name";
+	public static final String APP_NAME = "sts.app.name";
 	private final Container container;
 
 	public DockerApp(Container container) {
