@@ -19,6 +19,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
+import com.spotify.docker.client.DefaultDockerClient;
 import com.spotify.docker.client.DockerClient;
 import com.spotify.docker.client.DockerClient.ListContainersParam;
 import com.spotify.docker.client.messages.Container;
@@ -27,9 +28,11 @@ public class DockerRunTarget extends AbstractRunTarget<DockerTargetParams>
 implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentTarget {
 
 	LiveVariable<DockerClient> client = new LiveVariable<>();
+	private DockerTargetParams params;
 	
 	public DockerRunTarget(DockerRunTargetType type, DockerTargetParams params, DockerClient client) {
 		super(type, params.getUri());
+		this.params = params;
 		this.client.setValue(client);
 	}
 
@@ -50,8 +53,7 @@ implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentT
 
 	@Override
 	public DockerTargetParams getParams() {
-		// TODO Auto-generated method stub
-		return null;
+		return params;
 	}
 
 	@Override
@@ -104,10 +106,10 @@ implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentT
 	}
 
 	@Override
-	public void connect(ConnectMode mode) throws Exception {
-		throw new UnsupportedOperationException("Not yet implemented");
-		// TODO Auto-generated method stub
-		
+	public synchronized void connect(ConnectMode mode) throws Exception {
+		if (!isConnected()) {
+			this.client.setValue(DefaultDockerClient.builder().uri(params.getUri()).build());
+		}
 	}
 
 	@Override

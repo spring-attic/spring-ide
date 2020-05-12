@@ -58,9 +58,8 @@ public class DockerRunTargetType extends AbstractRemoteRunTargetType<DockerTarge
 	}
 
 	@Override
-	public RunTarget<DockerTargetParams> createRunTarget(DockerTargetParams properties) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Not implemented");
+	public RunTarget<DockerTargetParams> createRunTarget(DockerTargetParams params) {
+		return new DockerRunTarget(this, params, null);
 	}
 
 	@Override
@@ -75,15 +74,13 @@ public class DockerRunTargetType extends AbstractRemoteRunTargetType<DockerTarge
 
 
 	@Override
-	public DockerTargetParams parseParams(String serializedTargetParams) {
-		// TODO Auto-generated method stub
-		return null;
+	public DockerTargetParams parseParams(String uri) {
+		return new DockerTargetParams(uri);
 	}
 
 	@Override
-	public String serialize(DockerTargetParams serializedTargetParams) {
-		// TODO Auto-generated method stub
-		return null;
+	public String serialize(DockerTargetParams p) {
+		return p==null ? null : p.getUri();
 	}
 
 }
