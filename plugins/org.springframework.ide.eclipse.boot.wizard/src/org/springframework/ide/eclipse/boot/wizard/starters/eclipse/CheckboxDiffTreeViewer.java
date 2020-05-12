@@ -222,7 +222,7 @@ public class CheckboxDiffTreeViewer extends CheckboxTreeViewer {
 					setSelection(StructuredSelection.EMPTY);
 					flag = INavigatable.PREVIOUS_CHANGE;
 				}
-				// Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=20106
+				// Fix for https://dev.eclipse.org/bugs/show_bug.cgi?id=20106
 				return internalNavigate(flag == INavigatable.NEXT_CHANGE, true);
 			}
 			@Override
@@ -524,7 +524,7 @@ public class CheckboxDiffTreeViewer extends CheckboxTreeViewer {
 	 * @param next if {@code true} the next node is selected, otherwise the previous node
 	 */
 	protected void navigate(boolean next) {
-		// Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=20106
+		// Fix for https://dev.eclipse.org/bugs/show_bug.cgi?id=20106
 		internalNavigate(next, false);
 	}
 
@@ -670,7 +670,7 @@ public class CheckboxDiffTreeViewer extends CheckboxTreeViewer {
 		if (ti != null) {
 			Object data= ti.getData();
 			if (data != null) {
-				// Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=20106
+				// Fix for https://dev.eclipse.org/bugs/show_bug.cgi?id=20106
 				ISelection selection= new StructuredSelection(data);
 				setSelection(selection, true);
 				ISelection currentSelection= getSelection();
@@ -688,7 +688,7 @@ public class CheckboxDiffTreeViewer extends CheckboxTreeViewer {
 	}
 
 	/*
-	 * Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=20106
+	 * Fix for https://dev.eclipse.org/bugs/show_bug.cgi?id=20106
 	 */
 	private boolean internalOpen()  {
 		ISelection selection= getSelection();
