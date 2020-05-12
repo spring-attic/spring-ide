@@ -64,4 +64,10 @@ public class AzureApp implements App {
 	public String getId() {
 		return app.id();
 	}
+
+	@Override
+	public void setGoalState(RunState state) {
+		// TODO Auto-generated method stub
+
+	}
 }

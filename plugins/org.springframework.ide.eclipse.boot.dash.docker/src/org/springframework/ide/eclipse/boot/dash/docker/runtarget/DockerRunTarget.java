@@ -13,6 +13,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import com.spotify.docker.client.DockerClient;
 import com.spotify.docker.client.DockerClient.ListContainersParam;
 import com.spotify.docker.client.messages.Container;
@@ -72,10 +74,20 @@ public class DockerRunTarget extends AbstractRunTarget<DockerTargetParams> imple
 					ListContainersParam.withLabel(DockerApp.APP_NAME),
 					ListContainersParam.allContainers()	
 			);
+			
+			Multimap<String, Container> nameToApp = MultimapBuilder.hashKeys().arrayListValues().build();
+			
 			Builder<App> builder = ImmutableList.builder();
 			for (Container container : listContainers) {
-				builder.add(new DockerApp(container));
+				String appName = container.labels().get(DockerApp.APP_NAME);
+
+				nameToApp.put(appName, container);
 			}
+			
+			for (String name : nameToApp.keySet()) {
+				builder.add(new DockerApp(name, nameToApp.get(name)));
+			}
+			
 			return builder.build();
 		}
 		

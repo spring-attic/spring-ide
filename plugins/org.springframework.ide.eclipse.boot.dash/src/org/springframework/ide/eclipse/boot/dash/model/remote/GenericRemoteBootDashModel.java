@@ -46,7 +46,7 @@ public class GenericRemoteBootDashModel<Client, Params> extends RemoteBootDashMo
 	}
 
 	private ImmutableSet<BootDashElement> fetchApps() throws Exception {
-		return refreshTracker.call("Fecthing apps...", () ->  {
+		return refreshTracker.call("Fetching apps...", () ->  {
 			Collection<App> apps = getRunTarget().fetchApps();
 			Set<String> validAppIds = new HashSet<>();
 			for (App app : apps) {

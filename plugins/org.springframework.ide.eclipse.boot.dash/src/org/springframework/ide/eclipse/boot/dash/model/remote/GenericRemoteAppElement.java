@@ -8,6 +8,8 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModel;
 import org.springframework.ide.eclipse.boot.dash.api.App;
+import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.WrappingBootDashElement;
@@ -16,13 +18,57 @@ import org.springframework.ide.eclipse.boot.dash.model.actuator.env.LiveEnvModel
 import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
+
+import com.google.common.collect.ImmutableSet;
 
 public class GenericRemoteAppElement extends WrappingBootDashElement<String> {
 
 	private static AtomicInteger instances = new AtomicInteger();
 
 	private LiveVariable<App> app = new LiveVariable<>();
+
+	private final Object parent;
+
+	private LiveSetVariable<String> existingChildIds = new LiveSetVariable<>();
+
+	DisposingFactory<String, GenericRemoteAppElement> childFactory = new DisposingFactory<String, GenericRemoteAppElement>(existingChildIds) {
+		@Override
+		protected GenericRemoteAppElement create(String appId) {
+			return new GenericRemoteAppElement(GenericRemoteAppElement.this, appId);
+		}
+	};
+
+	private ObservableSet<BootDashElement> children = new ObservableSet<BootDashElement>() {
+
+		{
+			dependsOn(app);
+		}
+
+		@Override
+		protected ImmutableSet<BootDashElement> compute() {
+			App appVal = app.getValue();
+			if (appVal instanceof ChildBearing) {
+				List<App> children = ((ChildBearing)appVal).getChildren();
+				ImmutableSet.Builder<String> existingIds = ImmutableSet.builder();
+				for (App app : children) {
+					existingIds.add(app.getId());
+				}
+				existingChildIds.replaceAll(existingIds.build());
+
+				ImmutableSet.Builder<BootDashElement> builder = ImmutableSet.builder();
+				for (App child : children) {
+					GenericRemoteAppElement childElement = childFactory.createOrGet(child.getId());
+					childElement.setAppData(child);
+					builder.add(childElement);
+				}
+				return builder.build();
+			}
+			return ImmutableSet.of();
+		}
+	};
 
 	private LiveExpression<RunState> runState = new AsyncLiveExpression<RunState>(RunState.UNKNOWN) {
 
@@ -42,17 +88,26 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> {
 		}
 	};
 
-	public GenericRemoteAppElement(GenericRemoteBootDashModel<?, ?> parent, String appId) {
-		super(parent, appId);
+	public GenericRemoteAppElement(GenericRemoteBootDashModel<?, ?> model, String appId) {
+		this(model, model, appId);
+	}
+
+	public GenericRemoteAppElement(GenericRemoteBootDashModel<?, ?> model, Object parent, String appId) {
+		super(model, appId);
+		this.parent = parent;
 		System.out.println("New GenericRemoteAppElement instances = " +instances.incrementAndGet());
 
-		app.dependsOn(parent.getRunTarget().getClientExp());
+		app.dependsOn(model.getRunTarget().getClientExp());
 		app.dependsOn(getBootDashModel().refreshCount());
 		addDisposableChild(runState);
 		addElementNotifier(runState);
 		onDispose(d -> {
 			System.out.println("Dispose GenericRemoteAppElement instances = " +instances.decrementAndGet());
 		});
+	}
+
+	public GenericRemoteAppElement(GenericRemoteAppElement parent, String appId) {
+		this(parent.getBootDashModel(), parent, appId);
 	}
 
 	@Override
@@ -77,7 +132,8 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> {
 
 	@Override
 	public EnumSet<RunState> supportedGoalStates() {
-		return EnumSet.noneOf(RunState.class);
+		App app = this.app.getValue();
+		return app!=null?app.supportedGoalStates():EnumSet.noneOf(RunState.class);
 	}
 
 	@Override
@@ -154,14 +210,19 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> {
 
 	@Override
 	public Object getParent() {
-		// TODO Auto-generated method stub
-		return null;
+		return parent;
 	}
 
 	@Override
 	public PropertyStoreApi getPersistentProperties() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public ObservableSet<BootDashElement> getChildren() {
+
+		return children;
 	}
 
 }
