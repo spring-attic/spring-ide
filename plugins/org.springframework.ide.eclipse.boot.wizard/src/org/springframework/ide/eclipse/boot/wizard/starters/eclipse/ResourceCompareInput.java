@@ -25,10 +25,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -38,16 +40,17 @@ import java.util.function.Predicate;
 import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.compare.CompareEditorInput;
 import org.eclipse.compare.CompareUI;
+import org.eclipse.compare.CompareViewerSwitchingPane;
 import org.eclipse.compare.IStreamContentAccessor;
 import org.eclipse.compare.ITypedElement;
 import org.eclipse.compare.contentmergeviewer.TextMergeViewer;
 import org.eclipse.compare.internal.BufferedResourceNode;
 import org.eclipse.compare.internal.CompareMessages;
 import org.eclipse.compare.internal.CompareUIPlugin;
+import org.eclipse.compare.internal.IMergeViewerTestAdapter;
 import org.eclipse.compare.internal.NullViewer;
 import org.eclipse.compare.internal.Utilities;
 import org.eclipse.compare.structuremergeviewer.DiffNode;
-import org.eclipse.compare.structuremergeviewer.DiffTreeViewer;
 import org.eclipse.compare.structuremergeviewer.Differencer;
 import org.eclipse.compare.structuremergeviewer.IDiffContainer;
 import org.eclipse.compare.structuremergeviewer.IDiffElement;
@@ -67,6 +70,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ICheckStateProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.OpenEvent;
@@ -84,6 +88,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.ui.PlatformUI;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
@@ -213,40 +219,108 @@ public class ResourceCompareInput extends CompareEditorInput {
 	private IResource fAncestorResource;
 	private ResourceDescriptor fLeftResource;
 	private ResourceDescriptor fRightResource;
-	private DiffTreeViewer fDiffViewer;
+	private CustomDiffTreeViewer fDiffViewer;
 	private IAction fOpenAction;
 	private IAction fCreateResourceAction;
 	private IAction fAcceptChangesAction;
 
 	final private Predicate<String> filter;
 
+	enum DiffNodeState {
+		NONE,
+		PARTIAL,
+		ALL
+	}
+
 	class MyDiffNode extends DiffNode {
 
-		private boolean fDirty= false;
 		private ITypedElement fLastId;
 		private String fLastName;
 
+		/*
+		 * Turns on/off state update based on diff node right side content.
+		 */
+		boolean determineStateFromContent = true;
+
+		private DiffNodeState state = DiffNodeState.NONE;
+		// Keep original "right" essentially to check if it was "null" initially
+		private ITypedElement originalRight;
 
 		public MyDiffNode(IDiffContainer parent, int description, ITypedElement ancestor, ITypedElement left, ITypedElement right) {
 			super(parent, description, ancestor, left, right);
+			// Set the DiffNode whenever "left" changes to be able to call MyDiffNode#fireChange() when "left" content changes
+			if (left instanceof FilteredBufferedResourceNode) {
+				((FilteredBufferedResourceNode) left).diffNode = this;
+			}
+			// Set the DiffNode whenever "right" changes to be able to call MyDiffNode#fireChange() "right" when content changes
+			if (right instanceof FilteredBufferedResourceNode) {
+				((FilteredBufferedResourceNode) right).diffNode = this;
+			}
+			this.originalRight = right;
 		}
 		@Override
 		public void fireChange() {
 			super.fireChange();
 			setDirty(true);
-			fDirty= true;
-			if (fDiffViewer != null)
-				fDiffViewer.refresh(this);
+			/*
+			 * State update from content is off for "Accept All" and "Revert" when it is clear what state is going to become
+			 */
+			if (determineStateFromContent) {
+				setState(determineStateFromContent());
+				if (fDiffViewer != null)
+					fDiffViewer.refresh(this);
+			}
 		}
+
+		private DiffNodeState determineStateFromContent() {
+			if (getRight() == null) {
+				if (originalRight == null) {
+					return DiffNodeState.NONE;
+				} else if (getLeft() == null) {
+					return DiffNodeState.ALL;
+				} else {
+					return DiffNodeState.PARTIAL;
+				}
+			} else if (getRight() instanceof FilteredBufferedResourceNode) {
+				FilteredBufferedResourceNode right = (FilteredBufferedResourceNode) getRight();
+				try {
+					Shell shell = new Shell();
+					shell.setVisible(false);
+					// Content difference
+					try {
+						TextMergeViewer contentViewer = (TextMergeViewer) CompareUI.findContentViewer(new NullViewer(shell),
+								this, shell, getCompareConfiguration());
+						if (contentViewer != null) {
+							contentViewer.setInput(this);
+							IMergeViewerTestAdapter testAdapter = contentViewer.getAdapter(IMergeViewerTestAdapter.class);
+							if (testAdapter.getChangesCount() == 0) {
+								return DiffNodeState.ALL;
+							}
+						} else {
+							Log.error("No Viewer created for " + getName());
+						}
+					} finally {
+						shell.dispose();
+					}
+
+					if (Arrays.equals(right.getContent(), right.initialContent())) {
+						return DiffNodeState.NONE;
+					}
+				} catch (Exception e) {
+					Log.log(e);
+				}
+			}
+			return DiffNodeState.PARTIAL;
+		}
+
 		void clearDirty() {
-			fDirty= false;
+			setState(DiffNodeState.NONE);
 		}
+
 		@Override
 		public String getName() {
 			if (fLastName == null)
 				fLastName= super.getName();
-			if (fDirty)
-				return '<' + fLastName + '>';
 			return fLastName;
 		}
 
@@ -259,14 +333,129 @@ public class ResourceCompareInput extends CompareEditorInput {
 			return id;
 		}
 
+		public DiffNodeState getState() {
+			return state;
+		}
+
+		private void setState(DiffNodeState state) {
+			if (this.state != state) {
+				this.state = state;
+				if (getParent() instanceof MyDiffNode) {
+					MyDiffNode parent = (MyDiffNode) getParent();
+					parent.setState(calculateContainerState(parent));
+				}
+				if (fDiffViewer != null) {
+					if (Display.getCurrent() == null) {
+						if (!fDiffViewer.getControl().isDisposed()) {
+							fDiffViewer.getControl().getDisplay().asyncExec(() -> fDiffViewer.refresh(this));
+						}
+					} else {
+						fDiffViewer.refresh(this);
+					}
+				}
+			}
+		}
+
+		public void reset() {
+			determineStateFromContent = false;
+			try {
+				if (getChildren() == null || getChildren().length == 0) {
+					if (originalRight != getRight()) {
+						setRight(originalRight);
+						fireChange();
+					}
+					if (getRight() instanceof FilteredBufferedResourceNode) {
+						try {
+							((FilteredBufferedResourceNode)getRight()).reset();
+						} catch (CoreException e) {
+							Log.log(e);
+						}
+					}
+				} else {
+					for (IDiffElement e : getChildren()) {
+						if (e instanceof MyDiffNode) {
+							((MyDiffNode)e).reset();
+						}
+					}
+				}
+				getMergeContentViewer().refresh();
+				setState(DiffNodeState.NONE);
+			} finally {
+				determineStateFromContent = true;
+			}
+		}
+		@Override
+		public void setLeft(ITypedElement left) {
+			super.setLeft(left);
+			// Set the DiffNode whenever "left" changes to be able to call MyDiffNode#fireChange() when "left" content changes
+			if (left instanceof FilteredBufferedResourceNode) {
+				((FilteredBufferedResourceNode) left).diffNode = this;
+			}
+		}
+
+		@Override
+		public void setRight(ITypedElement right) {
+			super.setRight(right);
+			// Set the DiffNode whenever "right" changes to be able to call MyDiffNode#fireChange() "right" when content changes
+			if (right instanceof FilteredBufferedResourceNode) {
+				((FilteredBufferedResourceNode) right).diffNode = this;
+			}
+		}
+
+	}
+
+	/**
+	 * Calculates container diff node state based on states of its children
+	 * @param n the diff node
+	 * @return
+	 */
+	private static DiffNodeState calculateContainerState(MyDiffNode n) {
+		if (n.getChildren() == null || n.getChildren().length == 0) {
+			return n.getState();
+		} else {
+			int numberOfFull = 0;
+			for (int i = 0; i < n.getChildren().length; i++) {
+				IDiffElement e = n.getChildren()[i];
+				if (e instanceof MyDiffNode) {
+					DiffNodeState childState = ((MyDiffNode) e).getState();
+					if (childState == DiffNodeState.PARTIAL) {
+						// At least one child partial? Stop - the parent would be partial as well in this case.
+						return DiffNodeState.PARTIAL;
+					} else if (childState == DiffNodeState.ALL) {
+						// Guaranteed no partial changes for children prior to this one. Increase the number of full changes applied children
+						numberOfFull = i + 1;
+					} else {
+						// Encountered none state child. Guaranteed no partial changes for children prior to this one.
+						if (numberOfFull > 0) {
+							// If there were children with all changes applied previously return partial state right away.
+							return DiffNodeState.PARTIAL;
+						}
+						// else go to next element as all previous in initial state
+					}
+				}
+			}
+			return numberOfFull == 0 ? DiffNodeState.NONE : DiffNodeState.ALL;
+		}
 	}
 
 	static class FilteredBufferedResourceNode extends BufferedResourceNode {
+
 		private Predicate<String> filter;
+		MyDiffNode diffNode;
+
 		FilteredBufferedResourceNode(IResource resource, Predicate<String> filter) {
 			super(resource);
 			this.filter = filter;
 		}
+
+		public void reset() throws CoreException {
+			setContent(initialContent());
+		}
+
+		byte[] initialContent() throws CoreException {
+			return Utilities.readBytes(createStream());
+		}
+
 		@Override
 		protected IStructureComparator createChild(IResource child) {
 			String path = child.getType() == IResource.FILE ? child.getProjectRelativePath().toString()
@@ -307,6 +496,15 @@ public class ResourceCompareInput extends CompareEditorInput {
 			}
 			super.commit(pm);
 		}
+		@Override
+		public void setContent(byte[] contents) {
+			super.setContent(contents);
+			// Overridden to send to call MyDiffNode#foreChange()
+			if (diffNode != null) {
+				diffNode.fireChange();
+			}
+		}
+
 
 	}
 
@@ -318,126 +516,133 @@ public class ResourceCompareInput extends CompareEditorInput {
 		this.filter = filter;
 	}
 
-	@Override
-	public Viewer createDiffViewer(Composite parent) {
-		fDiffViewer= new DiffTreeViewer(parent, getCompareConfiguration()) {
-			@Override
-			protected void fillContextMenu(IMenuManager manager) {
+	class CustomDiffTreeViewer extends CheckboxDiffTreeViewer {
 
-				if (fOpenAction == null) {
-					fOpenAction= new Action() {
-						@Override
-						public void run() {
-							handleOpen(null);
-						}
-					};
-					Utilities.initAction(fOpenAction, getBundle(), "action.CompareContents."); //$NON-NLS-1$
-				}
+		CustomDiffTreeViewer(Composite parent, CompareConfiguration config) {
+			super(new Tree(parent, SWT.MULTI | SWT.CHECK), config);
+		}
 
-				if (fCreateResourceAction == null) {
-					fCreateResourceAction = new Action() {
-						@Override
-						public void run() {
-							copySelected(true);
-						}
-					};
-					fCreateResourceAction.setText("Create Resource in Workspace");
-					fCreateResourceAction.setToolTipText("Create missing resource in the local project");
-				}
+		@Override
+		protected void fillContextMenu(IMenuManager manager) {
 
-				if (fAcceptChangesAction == null) {
-					fAcceptChangesAction = new Action() {
-						@Override
-						public void run() {
-							acceptAllChanges();
-						}
-					};
-					fAcceptChangesAction.setText("Accept Changes");
-					fAcceptChangesAction.setToolTipText("Accept all non-conflicting changes into local project");
-				}
+			if (fOpenAction == null) {
+				fOpenAction= new Action() {
+					@Override
+					public void run() {
+						handleOpen(null);
+					}
+				};
+				Utilities.initAction(fOpenAction, getBundle(), "action.CompareContents."); //$NON-NLS-1$
+			}
 
-				ISelection selection= getSelection();
-				if (selection instanceof IStructuredSelection) {
-					IStructuredSelection ss= (IStructuredSelection)selection;
+			if (fCreateResourceAction == null) {
+				fCreateResourceAction = new Action() {
+					@Override
+					public void run() {
+						copySelected(true);
+					}
+				};
+				fCreateResourceAction.setText("Create Resource in Workspace");
+				fCreateResourceAction.setToolTipText("Create missing resource in the local project");
+			}
 
-					if (ss.size() == 1) {
-						Object element= ss.getFirstElement();
-						if (element instanceof MyDiffNode) {
-							MyDiffNode diffNode = (MyDiffNode) element;
-							ITypedElement te= diffNode.getId();
-							if (te != null) {
-								if (diffNode.getRight() == null) {
-									manager.add(fCreateResourceAction);
-								} else {
-									// Accept Changes action whenever create resource action is not shown
-									manager.add(fAcceptChangesAction);
-								}
-								if (!ITypedElement.FOLDER_TYPE.equals(te.getType())) {
-									manager.add(fOpenAction);
-								}
-							}
-						}
-					} else {
-						Object[] selectedElements = ss.toArray();
-						boolean enabled = true;
-						for (int i = 0; enabled && i < selectedElements.length; i++) {
-							if (selectedElements[i] instanceof MyDiffNode) {
-								MyDiffNode diffNode = (MyDiffNode) selectedElements[i];
-								enabled = diffNode.getRight() == null;
+			if (fAcceptChangesAction == null) {
+				fAcceptChangesAction = new Action() {
+					@Override
+					public void run() {
+						acceptAllChanges();
+					}
+				};
+				fAcceptChangesAction.setText("Accept Changes");
+				fAcceptChangesAction.setToolTipText("Accept all non-conflicting changes into local project");
+			}
+
+			ISelection selection= getSelection();
+			if (selection instanceof IStructuredSelection) {
+				IStructuredSelection ss= (IStructuredSelection)selection;
+
+
+				if (ss.size() == 1) {
+					Object element= ss.getFirstElement();
+					if (element instanceof MyDiffNode) {
+						MyDiffNode diffNode = (MyDiffNode) element;
+						ITypedElement te= diffNode.getId();
+						if (te != null) {
+							if (diffNode.getRight() == null) {
+								manager.add(fCreateResourceAction);
 							} else {
-								enabled = false;
+								// Accept Changes action whenever create resource action is not shown
+								manager.add(fAcceptChangesAction);
+							}
+							if (!ITypedElement.FOLDER_TYPE.equals(te.getType())) {
+								manager.add(fOpenAction);
 							}
 						}
-						if (enabled) {
-							manager.add(fCreateResourceAction);
+					}
+				} else {
+					Object[] selectedElements = ss.toArray();
+					boolean enabled = true;
+					for (int i = 0; enabled && i < selectedElements.length; i++) {
+						if (selectedElements[i] instanceof MyDiffNode) {
+							MyDiffNode diffNode = (MyDiffNode) selectedElements[i];
+							enabled = diffNode.getRight() == null;
 						} else {
-							// Accept Changes action whenever create resource action is not shown
-							manager.add(fAcceptChangesAction);
+							enabled = false;
 						}
 					}
-				}
-
-				super.fillContextMenu(manager);
-			}
-
-			@Override
-			protected void initialSelection() {
-				expandAll();
-				Object input = getInput();
-				Object diffNodeName = getCompareConfiguration().getProperty(OPEN_DIFF_NODE_COMPARE_SETTING);
-				if (input instanceof MyDiffNode && diffNodeName != null) {
-					MyDiffNode root = (MyDiffNode) input;
-					for (IDiffElement e : root.getChildren()) {
-						MyDiffNode child = (MyDiffNode) e;
-						if (child.getRight() != null && child.getRight().getName().equals(diffNodeName)) {
-							getControl().getDisplay().asyncExec(() -> {
-								setSelection(new StructuredSelection(new MyDiffNode[] { child }), true);
-								handleOpen(null);
-							});
-							return;
-						}
+					if (enabled) {
+						manager.add(fCreateResourceAction);
+					} else {
+						// Accept Changes action whenever create resource action is not shown
+						manager.add(fAcceptChangesAction);
 					}
 				}
-				super.initialSelection();
 			}
 
-			@SuppressWarnings("unchecked")
-			private void acceptAllChanges() {
-				Set<Object> visited = new HashSet<>();
-				Queue<Object> toVisit = new LinkedList<>(getStructuredSelection().toList());
-				// To avoid problems with currently opened TextMergeViewer close whatever was opened
-				fireOpen(new OpenEvent(this, StructuredSelection.EMPTY));
-				while (!toVisit.isEmpty()) {
-					Object o = toVisit.poll();
-					if (!visited.contains(o)) {
-						visited.add(o);
-						if (o instanceof MyDiffNode) {
-							MyDiffNode n = (MyDiffNode) o;
+			super.fillContextMenu(manager);
+		}
+
+		@Override
+		protected void initialSelection() {
+			expandAll();
+			Object input = getInput();
+			Object diffNodeName = getCompareConfiguration().getProperty(OPEN_DIFF_NODE_COMPARE_SETTING);
+			if (input instanceof MyDiffNode && diffNodeName != null) {
+				MyDiffNode root = (MyDiffNode) input;
+				for (IDiffElement e : root.getChildren()) {
+					MyDiffNode child = (MyDiffNode) e;
+					if (child.getRight() != null && child.getRight().getName().equals(diffNodeName)) {
+						getControl().getDisplay().asyncExec(() -> {
+							setSelection(new StructuredSelection(new MyDiffNode[] { child }), true);
+							handleOpen(null);
+						});
+						return;
+					}
+				}
+			}
+			super.initialSelection();
+		}
+
+		@SuppressWarnings("unchecked")
+		public void acceptAllChanges() {
+			Set<Object> visited = new HashSet<>();
+			Queue<Object> toVisit = new LinkedList<>(getStructuredSelection().toList());
+			// To avoid problems with currently opened TextMergeViewer close whatever was opened
+			fireOpen(new OpenEvent(this, StructuredSelection.EMPTY));
+			while (!toVisit.isEmpty()) {
+				Object o = toVisit.poll();
+				if (!visited.contains(o)) {
+					visited.add(o);
+					if (o instanceof MyDiffNode) {
+						MyDiffNode n = (MyDiffNode) o;
+						n.determineStateFromContent = false;
+						try {
 							IDiffElement[] children = n.getChildren();
 							if (children == null || children.length == 0) {
 								if (n.getRight() == null) {
 									// Add missing resource
 									copyOne(n, true);
+									n.setState(DiffNodeState.ALL);
 								} else if (!ITypedElement.FOLDER_TYPE.equals(n.getId().getType())) {
 									Shell shell = new Shell();
 									shell.setVisible(false);
@@ -451,7 +656,7 @@ public class ResourceCompareInput extends CompareEditorInput {
 											method.setAccessible(true);
 											method.invoke(contentViewer, true);
 											contentViewer.flush(new NullProgressMonitor());
-											n.fireChange();
+											n.setState(DiffNodeState.ALL);
 										} catch (Exception e) {
 											Log.log(e);
 										}
@@ -463,15 +668,64 @@ public class ResourceCompareInput extends CompareEditorInput {
 							} else {
 								toVisit.addAll(Arrays.asList(children));
 							}
+						} finally {
+							n.determineStateFromContent = true;
 						}
 					}
 				}
-				// Reopen the TextMergeViewer whatever matches the current selection
-				handleOpen(null);
+			}
+			// Reopen the TextMergeViewer whatever matches the current selection
+			handleOpen(null);
+		}
+
+
+	}
+
+	public Viewer getMergeContentViewer() {
+		try {
+			Field f = CompareEditorInput.class.getDeclaredField("fContentInputPane");
+			f.setAccessible(true);
+			CompareViewerSwitchingPane p = (CompareViewerSwitchingPane) f.get(ResourceCompareInput.this);
+			Viewer viewer = p.getViewer();
+			return viewer;
+		} catch (Exception e) {
+			Log.log(e);
+			return null;
+		}
+	}
+
+	@Override
+	public Viewer createDiffViewer(Composite parent) {
+		fDiffViewer= new CustomDiffTreeViewer(parent, getCompareConfiguration());
+		fDiffViewer.setCheckStateProvider(new ICheckStateProvider() {
+
+			@Override
+			public boolean isGrayed(Object element) {
+				if (element instanceof MyDiffNode) {
+					return ((MyDiffNode)element).getState() == DiffNodeState.PARTIAL;
+				}
+				return false;
 			}
 
-
-		};
+			@Override
+			public boolean isChecked(Object element) {
+				if (element instanceof MyDiffNode) {
+					return ((MyDiffNode)element).getState() != DiffNodeState.NONE ;
+				}
+				return false;
+			}
+		});
+		fDiffViewer.addCheckStateListener(event -> {
+			if (event.getElement() instanceof MyDiffNode) {
+				MyDiffNode n = (MyDiffNode) event.getElement();
+				fDiffViewer.setSelection(new StructuredSelection(Collections.singletonList(n)));
+				if (event.getChecked()) {
+					fDiffViewer.acceptAllChanges();
+				} else {
+					n.reset();
+				}
+			}
+		});
 		return fDiffViewer;
 	}
 
@@ -809,7 +1063,7 @@ public class ResourceCompareInput extends CompareEditorInput {
 	}
 
 	private void runInUI(Runnable runnable) {
-		Display.getDefault().syncExec(runnable);
+		PlatformUI.getWorkbench().getDisplay().syncExec(runnable);
 	}
 
 	/*
@@ -905,5 +1159,7 @@ public class ResourceCompareInput extends CompareEditorInput {
 	public boolean hasDiffs() {
 		return fRoot.hasChildren();
 	}
+
+
 }
 
