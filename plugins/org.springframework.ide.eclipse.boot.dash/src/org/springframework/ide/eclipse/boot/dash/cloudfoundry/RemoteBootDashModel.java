@@ -55,8 +55,6 @@ public abstract class RemoteBootDashModel extends AbstractBootDashModel {
 		}
 	}
 
-	public abstract void performDeployment(Set<IProject> of, UserInteractions ui, RunState runOrDebug) throws Exception;
-
 	public final IPropertyStore getPropertyStore() {
 		return getRunTarget().getPropertyStore();
 	}

@@ -66,11 +66,6 @@ public class AzureRunTarget extends AbstractRunTarget<AzureTargetParams> impleme
 	}
 
 	@Override
-	public boolean canDeployAppsTo() {
-		return true;
-	}
-
-	@Override
 	public boolean canDeployAppsFrom() {
 		return false;
 	}

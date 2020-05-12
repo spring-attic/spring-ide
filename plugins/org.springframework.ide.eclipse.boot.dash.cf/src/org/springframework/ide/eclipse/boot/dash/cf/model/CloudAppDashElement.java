@@ -44,6 +44,7 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.api.Deletable;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFInstanceStats;
@@ -76,7 +77,6 @@ import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveDataCapableElem
 import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveDataConnectionManagementActions.ExecuteCommandAction;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
-import org.springframework.ide.eclipse.boot.dash.model.Deletable;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
@@ -870,7 +870,7 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 	}
 
 	@Override
-	public void delete(UserInteractions ui) {
+	public void delete() {
 		CloudFoundryBootDashModel model = getBootDashModel();
 		CloudAppDashElement cloudElement = this;
 		cloudElement.cancelOperations();
@@ -892,7 +892,11 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 		// Allow deletions to occur concurrently with any other application
 		// operation
 		operation.setSchedulingRule(null);
-		getBootDashModel().runAsynch(operation, ui);
+		getBootDashModel().runAsynch(operation, ui());
+	}
+
+	private UserInteractions ui() {
+		return injections().getBean(UserInteractions.class);
 	}
 
 	@Override

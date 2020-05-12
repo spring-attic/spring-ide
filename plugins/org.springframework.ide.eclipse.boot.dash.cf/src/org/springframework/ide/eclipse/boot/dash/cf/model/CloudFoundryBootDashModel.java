@@ -29,7 +29,6 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.compare.CompareEditorInput;
@@ -58,6 +57,7 @@ import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.api.Deletable;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFApplicationDetail;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFCloudDomain;
@@ -75,8 +75,8 @@ import org.springframework.ide.eclipse.boot.dash.cf.devtools.DevtoolsDebugTarget
 import org.springframework.ide.eclipse.boot.dash.cf.devtools.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.cf.dialogs.DeploymentPropertiesDialog;
 import org.springframework.ide.eclipse.boot.dash.cf.dialogs.DeploymentPropertiesDialogModel;
-import org.springframework.ide.eclipse.boot.dash.cf.dialogs.StoreCredentialsMode;
 import org.springframework.ide.eclipse.boot.dash.cf.dialogs.DeploymentPropertiesDialogModel.ManifestType;
+import org.springframework.ide.eclipse.boot.dash.cf.dialogs.StoreCredentialsMode;
 import org.springframework.ide.eclipse.boot.dash.cf.ops.JobBody;
 import org.springframework.ide.eclipse.boot.dash.cf.ops.Operation;
 import org.springframework.ide.eclipse.boot.dash.cf.ops.OperationsExecution;
@@ -87,13 +87,11 @@ import org.springframework.ide.eclipse.boot.dash.cf.packaging.CloudApplicationAr
 import org.springframework.ide.eclipse.boot.dash.cf.packaging.CloudApplicationArchiverStrategy;
 import org.springframework.ide.eclipse.boot.dash.cf.packaging.ICloudApplicationArchiver;
 import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryRunTarget;
-import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryTargetProperties;
 import org.springframework.ide.eclipse.boot.dash.cf.ui.CfUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.RemoteBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlFileInput;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlInput;
 import org.springframework.ide.eclipse.boot.dash.console.CloudAppLogManager;
-import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel.Result;
 import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
@@ -101,27 +99,23 @@ import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
 import org.springframework.ide.eclipse.boot.dash.livexp.OldValueDisposer;
 import org.springframework.ide.eclipse.boot.dash.model.AsyncDeletable;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
-import org.springframework.ide.eclipse.boot.dash.model.Deletable;
 import org.springframework.ide.eclipse.boot.dash.model.ModifiableModel;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget.ConnectMode;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
-import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
-import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
@@ -133,7 +127,6 @@ import com.google.common.collect.ImmutableSet.Builder;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import org.springframework.ide.eclipse.boot.dash.cf.dialogs.StoreCredentialsMode;
 
 public class CloudFoundryBootDashModel extends RemoteBootDashModel implements ModifiableModel {
 
@@ -448,7 +441,6 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 		return true;
 	}
 
-	@Override
 	public void performDeployment(
 			final Set<IProject> projectsToDeploy,
 			final UserInteractions ui,
@@ -580,7 +572,7 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 			}
 			else if (element instanceof Deletable) {
 				try {
-					((Deletable) element).delete(ui);
+					((Deletable) element).delete();
 				} catch (Exception e) {
 					Log.log(e);
 				}

@@ -8,6 +8,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModel;
 import org.springframework.ide.eclipse.boot.dash.api.App;
+import org.springframework.ide.eclipse.boot.dash.api.Deletable;
 import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -24,7 +25,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 
 import com.google.common.collect.ImmutableSet;
 
-public class GenericRemoteAppElement extends WrappingBootDashElement<String> {
+public class GenericRemoteAppElement extends WrappingBootDashElement<String> implements Deletable {
 
 	private static AtomicInteger instances = new AtomicInteger();
 
@@ -94,6 +95,7 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> {
 
 	public GenericRemoteAppElement(GenericRemoteBootDashModel<?, ?> model, Object parent, String appId) {
 		super(model, appId);
+		addDisposableChild(this.childFactory);
 		this.parent = parent;
 		System.out.println("New GenericRemoteAppElement instances = " +instances.incrementAndGet());
 
@@ -223,6 +225,23 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> {
 	public ObservableSet<BootDashElement> getChildren() {
 
 		return children;
+	}
+
+	@Override
+	public boolean canDelete() {
+		App app = this.app.getValue();
+		if (app instanceof Deletable) {
+			return ((Deletable) app).canDelete();
+		}
+		return false;
+	}
+
+	@Override
+	public void delete() throws Exception {
+		App app = this.app.getValue();
+		if (app instanceof Deletable) {
+			((Deletable) app).delete();
+		}
 	}
 
 }

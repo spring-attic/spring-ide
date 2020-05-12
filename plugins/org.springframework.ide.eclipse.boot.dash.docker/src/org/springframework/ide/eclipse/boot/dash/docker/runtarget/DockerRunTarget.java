@@ -2,10 +2,14 @@ package org.springframework.ide.eclipse.boot.dash.docker.runtarget;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
+import org.eclipse.core.resources.IProject;
 import org.springframework.ide.eclipse.boot.dash.api.App;
+import org.springframework.ide.eclipse.boot.dash.api.ProjectDeploymentTarget;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
+import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.remote.GenericRemoteBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -19,7 +23,8 @@ import com.spotify.docker.client.DockerClient;
 import com.spotify.docker.client.DockerClient.ListContainersParam;
 import com.spotify.docker.client.messages.Container;
 
-public class DockerRunTarget extends AbstractRunTarget<DockerTargetParams> implements RemoteRunTarget<DockerClient, DockerTargetParams> {
+public class DockerRunTarget extends AbstractRunTarget<DockerTargetParams> 
+implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentTarget {
 
 	LiveVariable<DockerClient> client = new LiveVariable<>();
 	
@@ -35,11 +40,6 @@ public class DockerRunTarget extends AbstractRunTarget<DockerTargetParams> imple
 	
 	@Override
 	public boolean canRemove() {
-		return true;
-	}
-
-	@Override
-	public boolean canDeployAppsTo() {
 		return true;
 	}
 
@@ -85,7 +85,7 @@ public class DockerRunTarget extends AbstractRunTarget<DockerTargetParams> imple
 			}
 			
 			for (String name : nameToApp.keySet()) {
-				builder.add(new DockerApp(name, nameToApp.get(name)));
+				builder.add(new DockerApp(client, name, nameToApp.get(name)));
 			}
 			
 			return builder.build();
@@ -108,5 +108,15 @@ public class DockerRunTarget extends AbstractRunTarget<DockerTargetParams> imple
 		throw new UnsupportedOperationException("Not yet implemented");
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public void performDeployment(Set<IProject> of, RunState runOrDebug) throws Exception {
+		try {
+			Thread.sleep(10_000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

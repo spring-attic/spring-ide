@@ -52,12 +52,6 @@ public interface RunTarget<Params> extends IdAble, Nameable, Disposable {
 
 	/**
 	 *
-	 * @return true if this run target accepts application deployments. False otherwise.
-	 */
-	public abstract boolean canDeployAppsTo();
-
-	/**
-	 *
 	 * @return true if applications can be deployed from this run target to other run targets. False otherwise.
 	 */
 	public abstract boolean canDeployAppsFrom();

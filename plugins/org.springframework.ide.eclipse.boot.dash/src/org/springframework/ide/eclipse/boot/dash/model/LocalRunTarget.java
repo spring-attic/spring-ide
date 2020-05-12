@@ -69,11 +69,6 @@ public class LocalRunTarget extends AbstractRunTarget<Void> {
 	}
 
 	@Override
-	public boolean canDeployAppsTo() {
-		return false;
-	}
-
-	@Override
 	public boolean canDeployAppsFrom() {
 		return true;
 	}

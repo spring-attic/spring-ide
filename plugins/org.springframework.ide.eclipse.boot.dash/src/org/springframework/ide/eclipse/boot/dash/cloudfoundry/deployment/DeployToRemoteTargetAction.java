@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.swt.widgets.Display;
+import org.springframework.ide.eclipse.boot.dash.api.ProjectDeploymentTarget;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.RemoteBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
@@ -81,9 +82,9 @@ public class DeployToRemoteTargetAction<Client, Params> extends AbstractBootDash
 			if (element != null) {
 				final IProject project = element.getProject();
 				if (project != null) {
-					RemoteBootDashModel cfModel = (RemoteBootDashModel) model.getSectionByTargetId(target.getId());
-					//No need to wrap this in a job as it already does that itself:
-					cfModel.performDeployment(ImmutableSet.of(project), ui(), runOrDebug);
+					if (target instanceof ProjectDeploymentTarget) {
+						((ProjectDeploymentTarget) target).performDeployment(ImmutableSet.of(project), runOrDebug);
+					}
 				}
 			}
 		} catch (Exception e) {

@@ -12,8 +12,10 @@ package org.springframework.ide.eclipse.boot.dash.model;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.springframework.ide.eclipse.boot.dash.api.Deletable;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
@@ -92,13 +94,8 @@ public class LaunchConfDashElement extends AbstractLaunchConfigurationsDashEleme
 	}
 
 	@Override
-	public void delete(UserInteractions ui) {
-		try {
-			delegate.delete();
-		} catch (Exception e) {
-			Log.log(e);
-			ui.errorPopup("Could not delete: '"+getName()+"'", ExceptionUtil.getMessage(e));
-		}
+	public void delete() throws CoreException {
+		delegate.delete();
 	}
 
 }

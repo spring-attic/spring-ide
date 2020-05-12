@@ -62,11 +62,6 @@ public class MockRunTarget extends AbstractRunTarget<CloudFoundryTargetPropertie
 	}
 
 	@Override
-	public boolean canDeployAppsTo() {
-		return true;
-	}
-
-	@Override
 	public boolean canDeployAppsFrom() {
 		return false;
 	}

@@ -237,11 +237,6 @@ public class CloudFoundryRunTarget extends AbstractRunTarget<CloudFoundryTargetP
 	}
 
 	@Override
-	public boolean canDeployAppsTo() {
-		return true;
-	}
-
-	@Override
 	public boolean canDeployAppsFrom() {
 		return false;
 	}

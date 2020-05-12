@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
+import org.springframework.ide.eclipse.boot.dash.api.Deletable;
 import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.devtools.DevtoolsPortRefresher;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
@@ -270,16 +271,20 @@ public class LocalBootDashModel extends AbstractBootDashModel implements Deletio
 
 	@Override
 	public void delete(Collection<BootDashElement> elements, UserInteractions ui) {
-		for (BootDashElement e : elements) {
-			if (e instanceof Deletable) {
-				((Deletable)e).delete(ui);
+		for (BootDashElement el : elements) {
+			if (el instanceof Deletable) {
+				try {
+					((Deletable)el).delete();
+				} catch (Exception e) {
+					Log.log(e);
+				}
 			}
 		}
 	}
 
 	@Override
 	public boolean canDelete(BootDashElement element) {
-		return element instanceof Deletable;
+		return element instanceof Deletable && ((Deletable)element).canDelete();
 	}
 
 	@Override
