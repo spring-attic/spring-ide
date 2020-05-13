@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
@@ -15,6 +14,7 @@ import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.Deletable;
 import org.springframework.ide.eclipse.boot.dash.api.ProjectDeploymentTarget;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.RemoteBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.console.CloudAppLogManager;
 import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
@@ -45,6 +45,8 @@ public class GenericRemoteBootDashModel<Client, Params> extends RemoteBootDashMo
 	};
 
 	private final ObservableSet<BootDashElement> elements;
+
+	private final CloudAppLogManager consoleManager = new CloudAppLogManager();
 
 	public GenericRemoteBootDashModel(RemoteRunTarget<Client, Params> target, BootDashViewModel parent) {
 		super(target, parent);
@@ -79,9 +81,8 @@ public class GenericRemoteBootDashModel<Client, Params> extends RemoteBootDashMo
 	}
 
 	@Override
-	public BootDashModelConsoleManager getElementConsoleManager() {
-		// TODO Auto-generated method stub
-		return null;
+	public synchronized BootDashModelConsoleManager getElementConsoleManager() {
+		return consoleManager;
 	}
 
 	@Override
@@ -206,9 +207,8 @@ public class GenericRemoteBootDashModel<Client, Params> extends RemoteBootDashMo
 			}
 		}
 		if (!toDeploy.isEmpty()) {
-			refreshTracker.call("Creating deployment", () -> {
+			refreshTracker.run("Creating deployment", () -> {
 				target.performDeployment(toDeploy, RunState.RUNNING);
-				return null;
 			});
 			refresh(ui());
 		}

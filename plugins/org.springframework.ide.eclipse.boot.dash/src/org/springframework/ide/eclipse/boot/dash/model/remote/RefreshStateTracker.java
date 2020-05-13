@@ -9,6 +9,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.core.runtime.Assert;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
+import org.springframework.ide.eclipse.boot.dash.util.RunnableWithException;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.OnDispose;
@@ -35,6 +36,13 @@ public class RefreshStateTracker {
 			return merged;
 		}
 	};
+
+	public void run(String busyMessage, RunnableWithException runner) throws Exception {
+		call(busyMessage, () -> {
+			runner.run();
+			return null;
+		});
+	}
 
 	public <T> T call(String busyMessage, Callable<T> callable) throws Exception {
 		start(busyMessage);
