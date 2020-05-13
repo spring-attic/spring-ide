@@ -6,6 +6,6 @@ import org.springframework.ide.eclipse.boot.dash.api.App;
 
 public interface ChildBearing {
 
-	List<App> getChildren();
+	List<App> fetchChildren() throws Exception;
 
 }

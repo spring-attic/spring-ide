@@ -1,10 +1,13 @@
 package org.springframework.ide.eclipse.boot.dash.docker.runtarget;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.swt.internal.DPIUtil;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.ProjectDeploymentTarget;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractRunTarget;
@@ -13,27 +16,53 @@ import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.remote.GenericRemoteBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import com.spotify.docker.client.DefaultDockerClient;
 import com.spotify.docker.client.DockerClient;
 import com.spotify.docker.client.DockerClient.ListContainersParam;
 import com.spotify.docker.client.messages.Container;
+import com.spotify.docker.client.messages.Image;
 
 public class DockerRunTarget extends AbstractRunTarget<DockerTargetParams> 
 implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentTarget {
 
+	private static final String[] NO_STRINGS = new String[0];
+	private static final String DEPLOYMENTS = "deployments";
+	
 	LiveVariable<DockerClient> client = new LiveVariable<>();
 	private DockerTargetParams params;
+	
+	LiveSetVariable<String> deployments = new LiveSetVariable<>();
+	private List<Disposable> disposables = new ArrayList<>();
 	
 	public DockerRunTarget(DockerRunTargetType type, DockerTargetParams params, DockerClient client) {
 		super(type, params.getUri());
 		this.params = params;
 		this.client.setValue(client);
+		try {
+			String[] restoredDeployments = getPersistentProperties().get(DEPLOYMENTS, NO_STRINGS);
+			if (restoredDeployments!=null) {
+				deployments.replaceAll(ImmutableList.copyOf(restoredDeployments));
+			}
+			disposables.add(deployments.onChange((_e, v) -> {
+				try {
+					getPersistentProperties().put(DEPLOYMENTS, deployments.getValues().toArray(NO_STRINGS));
+				} catch (Exception e) {
+					Log.log(e);
+				}
+			}));
+		} catch (Exception e) {
+			Log.log(e);
+		}
 	}
 
 	@Override
@@ -58,8 +87,10 @@ implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentT
 
 	@Override
 	public void dispose() {
-		// TODO Auto-generated method stub
-		
+		for (Disposable d : disposables) {
+			d.dispose();
+		}
+		disposables.clear();
 	}
 
 	@Override
@@ -69,30 +100,16 @@ implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentT
 
 	@Override
 	public Collection<App> fetchApps() throws Exception {
-		
-		DockerClient client = this.client.getValue();
+		DockerClient client = this.getClient();
 		if (client!=null) {
-			List<Container> listContainers = client.listContainers(
-					ListContainersParam.withLabel(DockerApp.APP_NAME),
-					ListContainersParam.allContainers()	
-			);
-			
-			Multimap<String, Container> nameToApp = MultimapBuilder.hashKeys().arrayListValues().build();
-			
+			ImmutableSet<String> projectNames = deployments.getValues();
 			Builder<App> builder = ImmutableList.builder();
-			for (Container container : listContainers) {
-				String appName = container.labels().get(DockerApp.APP_NAME);
-
-				nameToApp.put(appName, container);
+			for (String name : projectNames) {
+				IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(name);
+				builder.add(new DockerApp(deployments, client, project));
 			}
-			
-			for (String name : nameToApp.keySet()) {
-				builder.add(new DockerApp(client, name, nameToApp.get(name)));
-			}
-			
-			return builder.build();
+			return  builder.build();
 		}
-		
 		return ImmutableList.of();
 	}
 
@@ -113,12 +130,9 @@ implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentT
 	}
 
 	@Override
-	public void performDeployment(Set<IProject> of, RunState runOrDebug) throws Exception {
-		try {
-			Thread.sleep(10_000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	public void performDeployment(Set<IProject> projects, RunState runOrDebug) throws Exception {
+		for (IProject p : projects) {
+			deployments.add(p.getName());
 		}
 	}
 }

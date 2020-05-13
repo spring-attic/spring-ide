@@ -5,10 +5,12 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModel;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.Deletable;
+import org.springframework.ide.eclipse.boot.dash.api.RunStateProvider;
 import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -22,6 +24,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -52,42 +55,54 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		protected ImmutableSet<BootDashElement> compute() {
 			App appVal = app.getValue();
 			if (appVal instanceof ChildBearing) {
-				List<App> children = ((ChildBearing)appVal).getChildren();
-				ImmutableSet.Builder<String> existingIds = ImmutableSet.builder();
-				for (App app : children) {
-					existingIds.add(app.getId());
-				}
-				existingChildIds.replaceAll(existingIds.build());
+				try {
+					List<App> children = ((ChildBearing)appVal).fetchChildren();
+					ImmutableSet.Builder<String> existingIds = ImmutableSet.builder();
+					for (App app : children) {
+						existingIds.add(app.getId());
+					}
+					existingChildIds.replaceAll(existingIds.build());
 
-				ImmutableSet.Builder<BootDashElement> builder = ImmutableSet.builder();
-				for (App child : children) {
-					GenericRemoteAppElement childElement = childFactory.createOrGet(child.getId());
-					childElement.setAppData(child);
-					builder.add(childElement);
+					ImmutableSet.Builder<BootDashElement> builder = ImmutableSet.builder();
+					for (App child : children) {
+						GenericRemoteAppElement childElement = childFactory.createOrGet(child.getId());
+						childElement.setAppData(child);
+						builder.add(childElement);
+					}
+					return builder.build();
+				} catch (Exception e) {
+					Log.log(e);
 				}
-				return builder.build();
 			}
 			return ImmutableSet.of();
 		}
 	};
 
 	private LiveExpression<RunState> runState = new AsyncLiveExpression<RunState>(RunState.UNKNOWN) {
-
 		{
 			dependsOn(app);
+			dependsOn(children);
 		}
 
 		@Override
 		protected RunState compute() {
 			App data = app.getValue();
-			if (data!=null) {
-				RunState v = data.fetchRunState();
+			Assert.isLegal(!(data instanceof RunStateProvider && data instanceof ChildBearing));
+			if (data instanceof RunStateProvider) {
+				RunState v = ((RunStateProvider) data).fetchRunState();
 				System.out.println(data.getName() + " => "+v);
+				return v;
+			} else if (data instanceof ChildBearing) {
+				RunState v = RunState.INACTIVE;
+				for (BootDashElement child : children.getValues()) {
+					v = v.merge(child.getRunState());
+				}
 				return v;
 			}
 			return RunState.UNKNOWN;
 		}
 	};
+
 
 	public GenericRemoteAppElement(GenericRemoteBootDashModel<?, ?> model, String appId) {
 		this(model, model, appId);

@@ -7,8 +7,6 @@ import org.springframework.ide.eclipse.boot.dash.model.Nameable;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 
 public interface App extends Nameable, IdAble {
-	RunState fetchRunState();
-
 	default EnumSet<RunState> supportedGoalStates() {
 		return EnumSet.noneOf(RunState.class);
 	}

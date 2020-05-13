@@ -1,11 +1,12 @@
 package org.springframework.ide.eclipse.boot.dash.docker.runtarget;
 
 import org.springframework.ide.eclipse.boot.dash.api.App;
+import org.springframework.ide.eclipse.boot.dash.api.RunStateProvider;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 
 import com.spotify.docker.client.messages.Container;
 
-public class DockerContainer implements App {
+public class DockerContainer implements App, RunStateProvider {
 
 	private final Container container;
 
@@ -25,16 +26,6 @@ public class DockerContainer implements App {
 
 	@Override
 	public RunState fetchRunState() {
-		return getRunState(container);
-	}
-
-	@Override
-	public void setGoalState(RunState state) {
-		// TODO Auto-generated method stub
-
-	}
-	
-	public static RunState getRunState(Container container) {
 		String state = container.state();
 		if ("running".equals(state)) {
 			return RunState.RUNNING;
@@ -44,4 +35,9 @@ public class DockerContainer implements App {
 		return RunState.UNKNOWN;
 	}
 
+	@Override
+	public void setGoalState(RunState state) {
+		// TODO Auto-generated method stub
+
+	}
 }

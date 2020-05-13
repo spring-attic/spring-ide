@@ -3,6 +3,7 @@ package org.springframework.ide.eclipse.boot.dash.azure.runtarget;
 import java.util.Set;
 
 import org.springframework.ide.eclipse.boot.dash.api.App;
+import org.springframework.ide.eclipse.boot.dash.api.RunStateProvider;
 import org.springframework.ide.eclipse.boot.dash.azure.client.SpringServiceClient;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 
@@ -11,7 +12,7 @@ import com.microsoft.azure.management.appplatform.v2019_05_01_preview.AppResourc
 import com.microsoft.azure.management.appplatform.v2019_05_01_preview.DeploymentResource;
 import com.microsoft.azure.management.appplatform.v2019_05_01_preview.DeploymentResourceProvisioningState;
 
-public class AzureApp implements App {
+public class AzureApp implements App, RunStateProvider {
 
 	public static final Set<DeploymentResourceProvisioningState> BUSY = ImmutableSet.of(
 			DeploymentResourceProvisioningState.CREATING,

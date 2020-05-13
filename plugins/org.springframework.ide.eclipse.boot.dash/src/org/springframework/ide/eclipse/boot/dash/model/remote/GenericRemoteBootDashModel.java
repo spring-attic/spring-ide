@@ -206,7 +206,11 @@ public class GenericRemoteBootDashModel<Client, Params> extends RemoteBootDashMo
 			}
 		}
 		if (!toDeploy.isEmpty()) {
-			target.performDeployment(toDeploy, RunState.RUNNING);
+			refreshTracker.call("Creating deployment", () -> {
+				target.performDeployment(toDeploy, RunState.RUNNING);
+				return null;
+			});
+			refresh(ui());
 		}
 	}
 
