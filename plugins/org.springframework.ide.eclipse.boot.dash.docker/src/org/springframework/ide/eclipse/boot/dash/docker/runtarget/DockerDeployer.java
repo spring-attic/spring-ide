@@ -3,12 +3,14 @@ package org.springframework.ide.eclipse.boot.dash.docker.runtarget;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.livexp.ElementwiseListener;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
+import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
@@ -26,7 +28,7 @@ public class DockerDeployer extends AbstractDisposable {
 	private final LiveExpression<DockerClient> client;
 	private Map<String, App> apps = new HashMap<>();
 	private final DockerRunTarget target;
-
+	
 	public DockerDeployer(DockerRunTarget target, ObservableSet<String> deployments, LiveExpression<DockerClient> client) {
 		this.target = target;
 		this.deployments = deployments;
@@ -49,14 +51,12 @@ public class DockerDeployer extends AbstractDisposable {
 	}
 	
 
-	synchronized private void createDeployment(String projectName) {
+	synchronized private CompletableFuture<Void> createDeployment(String projectName) {
 		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-		DockerClient clientVal = client.getValue();
-		DockerApp app = new DockerApp(target, clientVal, project);
+		DockerApp app = new DockerApp(target, client::getValue, project);
 		apps.put(projectName, app);
 		
-		app.startAsync();
-		
+		return app.startAsync();
 	}
 	
 	

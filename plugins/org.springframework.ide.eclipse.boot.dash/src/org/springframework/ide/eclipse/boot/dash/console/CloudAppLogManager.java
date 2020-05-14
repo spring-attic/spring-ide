@@ -172,6 +172,11 @@ public class CloudAppLogManager extends BootDashModelConsoleManager implements A
 		return new AppConsole() {
 
 			@Override
+			public String toString() {
+				return "AppConsole("+app.getName()+")";
+			}
+
+			@Override
 			public void write(String message, LogType type) {
 				try {
 					showConsole(app);

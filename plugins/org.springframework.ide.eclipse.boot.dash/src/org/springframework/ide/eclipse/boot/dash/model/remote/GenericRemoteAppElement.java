@@ -54,6 +54,7 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 
 		{
 			dependsOn(app);
+			dependsOn(refreshTracker.refreshState);
 		}
 
 		@Override

@@ -34,7 +34,7 @@ implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentT
 	LiveVariable<DockerClient> client = new LiveVariable<>();
 	private DockerTargetParams params;
 	
-	LiveSetVariable<String> deployments = new LiveSetVariable<>();
+	LiveSetVariable<String> deployedProjects = new LiveSetVariable<>();
 	private List<Disposable> disposables = new ArrayList<>();
 	private final DockerDeployer deployer;
 	
@@ -45,11 +45,11 @@ implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentT
 		try {
 			String[] restoredDeployments = getPersistentProperties().get(DEPLOYMENTS, NO_STRINGS);
 			if (restoredDeployments!=null) {
-				deployments.replaceAll(ImmutableList.copyOf(restoredDeployments));
+				deployedProjects.replaceAll(ImmutableList.copyOf(restoredDeployments));
 			}
-			disposables.add(deployments.onChange((_e, v) -> {
+			disposables.add(deployedProjects.onChange((_e, v) -> {
 				try {
-					getPersistentProperties().put(DEPLOYMENTS, deployments.getValues().toArray(NO_STRINGS));
+					getPersistentProperties().put(DEPLOYMENTS, deployedProjects.getValues().toArray(NO_STRINGS));
 				} catch (Exception e) {
 					Log.log(e);
 				}
@@ -58,7 +58,7 @@ implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentT
 		} catch (Exception e) {
 			Log.log(e);
 		}
-		this.deployer = new DockerDeployer(this, deployments, this.client);
+		this.deployer = new DockerDeployer(this, deployedProjects, this.client);
 	}
 
 	public SimpleDIContext injections() {
@@ -127,7 +127,7 @@ implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentT
 	@Override
 	public void performDeployment(Set<IProject> projects, RunState runOrDebug) throws Exception {
 		for (IProject p : projects) {
-			deployments.add(p.getName());
+			deployedProjects.add(p.getName());
 		}
 	}
 }
