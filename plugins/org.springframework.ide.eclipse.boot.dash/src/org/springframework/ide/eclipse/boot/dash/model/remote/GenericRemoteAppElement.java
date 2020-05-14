@@ -9,10 +9,13 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModel;
 import org.springframework.ide.eclipse.boot.dash.api.App;
+import org.springframework.ide.eclipse.boot.dash.api.AppContext;
 import org.springframework.ide.eclipse.boot.dash.api.Deletable;
 import org.springframework.ide.eclipse.boot.dash.api.RunStateProvider;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.RemoteBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.WrappingBootDashElement;
@@ -28,7 +31,7 @@ import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.common.collect.ImmutableSet;
 
-public class GenericRemoteAppElement extends WrappingBootDashElement<String> implements Deletable {
+public class GenericRemoteAppElement extends WrappingBootDashElement<String> implements Deletable, AppContext {
 
 	private static AtomicInteger instances = new AtomicInteger();
 
@@ -37,6 +40,8 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 	private final Object parent;
 
 	private LiveSetVariable<String> existingChildIds = new LiveSetVariable<>();
+
+	private final RefreshStateTracker refreshTracker = new RefreshStateTracker(this);
 
 	DisposingFactory<String, GenericRemoteAppElement> childFactory = new DisposingFactory<String, GenericRemoteAppElement>(existingChildIds) {
 		@Override
@@ -59,13 +64,14 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 					List<App> children = ((ChildBearing)appVal).fetchChildren();
 					ImmutableSet.Builder<String> existingIds = ImmutableSet.builder();
 					for (App app : children) {
-						existingIds.add(app.getId());
+						existingIds.add(app.getName());
 					}
 					existingChildIds.replaceAll(existingIds.build());
 
 					ImmutableSet.Builder<BootDashElement> builder = ImmutableSet.builder();
 					for (App child : children) {
-						GenericRemoteAppElement childElement = childFactory.createOrGet(child.getId());
+						GenericRemoteAppElement childElement = childFactory.createOrGet(child.getName());
+						child.setContext(childElement);
 						childElement.setAppData(child);
 						builder.add(childElement);
 					}
@@ -82,10 +88,15 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		{
 			dependsOn(app);
 			dependsOn(children);
+			dependsOn(refreshTracker.refreshState);
 		}
 
 		@Override
 		protected RunState compute() {
+			RefreshState r = refreshTracker.refreshState.getValue();
+			if (r.isLoading()) {
+				return RunState.STARTING;
+			}
 			App data = app.getValue();
 			Assert.isLegal(!(data instanceof RunStateProvider && data instanceof ChildBearing));
 			if (data instanceof RunStateProvider) {
@@ -104,11 +115,11 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 	};
 
 
-	public GenericRemoteAppElement(GenericRemoteBootDashModel<?, ?> model, String appId) {
+	public GenericRemoteAppElement(RemoteBootDashModel model, String appId) {
 		this(model, model, appId);
 	}
 
-	public GenericRemoteAppElement(GenericRemoteBootDashModel<?, ?> model, Object parent, String appId) {
+	public GenericRemoteAppElement(RemoteBootDashModel model, Object parent, String appId) {
 		super(model, appId);
 		addDisposableChild(this.childFactory);
 		this.parent = parent;
@@ -145,6 +156,11 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 	@Override
 	public RunState getRunState() {
 		return runState.getValue();
+	}
+
+	@Override
+	public RefreshStateTracker getRefreshTracker() {
+		return refreshTracker;
 	}
 
 	@Override

@@ -96,4 +96,10 @@ public class RefreshStateTracker {
 		return result;
 	}
 
+	public CompletableFuture<Void> runAsync(String busyMessage, RunnableWithException runnable) {
+		return callAsync(busyMessage, () -> {
+			runnable.run();
+			return null;
+		});
+	}
 }

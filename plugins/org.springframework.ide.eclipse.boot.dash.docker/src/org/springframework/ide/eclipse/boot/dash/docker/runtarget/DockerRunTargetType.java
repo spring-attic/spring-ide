@@ -19,9 +19,6 @@ import com.spotify.docker.client.DefaultDockerClient;
 public class DockerRunTargetType extends AbstractRemoteRunTargetType<DockerTargetParams> {
 	
 	private static final String PLUGIN_ID = "org.springframework.ide.eclipse.boot.dash.docker";
-	private static final String[] DEFAULT_DOCKER_URLS = {
-			
-	};
 
 	public DockerRunTargetType(SimpleDIContext injections) {
 		super(injections, "Docker");

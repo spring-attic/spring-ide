@@ -91,7 +91,6 @@ import org.springframework.ide.eclipse.boot.dash.cf.ui.CfUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.RemoteBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlFileInput;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlInput;
-import org.springframework.ide.eclipse.boot.dash.console.CloudAppLogManager;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel.Result;
 import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
@@ -165,8 +164,6 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 	private final LiveSetVariable<CloudServiceInstanceDashElement> services = new LiveSetVariable<>(AsyncMode.SYNC);
 	private final CloudDashApplications applications = new CloudDashApplications(this);
 	private final ObservableSet<BootDashElement> allElements = LiveSets.union(applications.getApplications(), services);
-
-	private BootDashModelConsoleManager consoleManager;
 
 	private DevtoolsDebugTargetDisconnector debugTargetDisconnector;
 
@@ -272,7 +269,7 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 		super(target, parent);
 		cfDebugStrategies = new DebugStrategyManager(injections().getBeans(DebugSupport.class), getViewModel());
 		this.elementFactory = new CloudDashElementFactory(context, target.getPropertyStore(), this);
-		this.consoleManager = new CloudAppLogManager();
+
 		this.unsupportedPushProperties = new UnsupportedPushProperties();
 		this.debugTargetDisconnector = DevtoolsUtil.createDebugTargetDisconnector(this);
 		addDisposableChild(target.getClientExp().onChange((exp,v) -> {
@@ -607,11 +604,6 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 	@Override
 	public String toString() {
 		return this.getClass().getName() + "(" + getRunTarget().getName() + ")";
-	}
-
-	@Override
-	public BootDashModelConsoleManager getElementConsoleManager() {
-		return this.consoleManager;
 	}
 
 	private static ITextFileBuffer getDirtyBuffer(IFile file) {

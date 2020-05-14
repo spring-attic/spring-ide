@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModel;
+import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.env.LiveEnvModel;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
@@ -26,11 +27,11 @@ import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 
 import com.google.common.collect.ImmutableSet;
 
-public interface BootDashElement extends Nameable, Taggable {
+public interface BootDashElement extends App, Taggable {
 	IJavaProject getJavaProject();
 	IProject getProject();
 	RunState getRunState();
-	RunTarget getTarget();
+
 
 	/**
 	 * Return the port this element is running on. If the port can not

@@ -17,6 +17,7 @@ import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.azure.BootDashAzurePlugin;
 import org.springframework.ide.eclipse.boot.dash.azure.client.STSAzureClient;
 import org.springframework.ide.eclipse.boot.dash.azure.client.SpringServiceClient;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.RemoteBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.remote.GenericRemoteBootDashModel;
@@ -56,7 +57,7 @@ public class AzureRunTarget extends AbstractRunTarget<AzureTargetParams> impleme
 	}
 
 	@Override
-	public GenericRemoteBootDashModel<?, ?> createSectionModel(BootDashViewModel parent) {
+	public RemoteBootDashModel createSectionModel(BootDashViewModel parent) {
 		return new GenericRemoteBootDashModel<>(this, parent);
 	}
 

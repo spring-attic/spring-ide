@@ -9,18 +9,15 @@ import com.spotify.docker.client.messages.Container;
 public class DockerContainer implements App, RunStateProvider {
 
 	private final Container container;
+	private final DockerRunTarget target;
 
-	public DockerContainer(Container container) {
+	public DockerContainer(DockerRunTarget target, Container container) {
+		this.target = target;
 		this.container = container;
 	}
 
 	@Override
 	public String getName() {
-		return getId();
-	}
-
-	@Override
-	public String getId() {
 		return container.id();
 	}
 
@@ -36,8 +33,7 @@ public class DockerContainer implements App, RunStateProvider {
 	}
 
 	@Override
-	public void setGoalState(RunState state) {
-		// TODO Auto-generated method stub
-
+	public DockerRunTarget getTarget() {
+		return this.target;
 	}
 }

@@ -23,7 +23,6 @@ import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget;
-import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
@@ -46,8 +45,6 @@ public class GenericRemoteBootDashModel<Client, Params> extends RemoteBootDashMo
 
 	private final ObservableSet<BootDashElement> elements;
 
-	private final CloudAppLogManager consoleManager = new CloudAppLogManager();
-
 	public GenericRemoteBootDashModel(RemoteRunTarget<Client, Params> target, BootDashViewModel parent) {
 		super(target, parent);
 		elements = ObservableSet.<BootDashElement>builder()
@@ -62,12 +59,13 @@ public class GenericRemoteBootDashModel<Client, Params> extends RemoteBootDashMo
 			Collection<App> apps = getRunTarget().fetchApps();
 			Set<String> validAppIds = new HashSet<>();
 			for (App app : apps) {
-				validAppIds.add(app.getId());
+				validAppIds.add(app.getName());
 			}
 			existingAppIds.replaceAll(validAppIds);
 			Builder<BootDashElement> bdes = ImmutableSet.builder();
 			for (App app : apps) {
-				GenericRemoteAppElement bde = elementFactory.createOrGet(app.getId());
+				GenericRemoteAppElement bde = elementFactory.createOrGet(app.getName());
+				app.setContext(bde);
 				bde.setAppData(app);
 				bdes.add(bde);
 			}
@@ -78,11 +76,6 @@ public class GenericRemoteBootDashModel<Client, Params> extends RemoteBootDashMo
 	@Override
 	public ObservableSet<BootDashElement> getElements() {
 		return elements;
-	}
-
-	@Override
-	public synchronized BootDashModelConsoleManager getElementConsoleManager() {
-		return consoleManager;
 	}
 
 	@Override

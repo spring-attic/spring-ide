@@ -3,6 +3,7 @@ package org.springframework.ide.eclipse.boot.dash.azure.runtarget;
 import java.util.Set;
 
 import org.springframework.ide.eclipse.boot.dash.api.App;
+import org.springframework.ide.eclipse.boot.dash.api.AppContext;
 import org.springframework.ide.eclipse.boot.dash.api.RunStateProvider;
 import org.springframework.ide.eclipse.boot.dash.azure.client.SpringServiceClient;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -62,13 +63,13 @@ public class AzureApp implements App, RunStateProvider {
 	}
 
 	@Override
-	public String getId() {
-		return app.id();
+	public AzureRunTarget getTarget() {
+		return target;
 	}
 
 	@Override
-	public void setGoalState(RunState state) {
+	public void setContext(AppContext context) {
 		// TODO Auto-generated method stub
-
+		
 	}
 }

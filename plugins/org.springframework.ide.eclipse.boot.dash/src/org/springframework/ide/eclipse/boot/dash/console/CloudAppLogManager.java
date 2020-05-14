@@ -14,24 +14,28 @@ import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.MessageConsole;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.api.App;
+import org.springframework.ide.eclipse.boot.dash.api.AppConsole;
+import org.springframework.ide.eclipse.boot.dash.api.AppConsoleProvider;
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import reactor.core.Disposable;
 
-public class CloudAppLogManager extends BootDashModelConsoleManager {
+public class CloudAppLogManager extends BootDashModelConsoleManager implements AppConsoleProvider {
 
 	static final String CONSOLE_TYPE = "org.springframework.ide.eclipse.boot.dash.console";
 	static final String APP_CONSOLE_ID = "consoleId";
 
 	private IConsoleManager consoleManager;
 
-	public CloudAppLogManager() {
+	public CloudAppLogManager(SimpleDIContext injections) {
 		consoleManager = ConsolePlugin.getDefault().getConsoleManager();
 	}
 
 	@Override
-	protected void doWriteToConsole(BootDashElement element, String message, LogType type) throws Exception {
+	protected void doWriteToConsole(App element, String message, LogType type) throws Exception {
 		ApplicationLogConsole console = getExisitingConsole(element);
 		if (console != null) {
 			console.writeApplicationLog(message, type);
@@ -55,7 +59,7 @@ public class CloudAppLogManager extends BootDashModelConsoleManager {
 	}
 
 	@Override
-	public synchronized void resetConsole(BootDashElement element) {
+	public synchronized void resetConsole(App element) {
 		ApplicationLogConsole console = getExisitingConsole(element);
 		if (console != null) {
 			console.clearConsole();
@@ -69,7 +73,7 @@ public class CloudAppLogManager extends BootDashModelConsoleManager {
 	 * @param appName
 	 * @return existing console, or null if it does not exist.
 	 */
-	protected synchronized ApplicationLogConsole getExisitingConsole(BootDashElement element) {
+	protected synchronized ApplicationLogConsole getExisitingConsole(App element) {
 		IConsole[] consoles = ConsolePlugin.getDefault().getConsoleManager().getConsoles();
 		if (consoles != null) {
 			for (IConsole console : consoles) {
@@ -89,7 +93,7 @@ public class CloudAppLogManager extends BootDashModelConsoleManager {
 	}
 
 	@Override
-	public synchronized void terminateConsole(BootDashElement element) throws Exception {
+	public synchronized void terminateConsole(App element) throws Exception {
 		ApplicationLogConsole console = getExisitingConsole(element);
 		if (console != null) {
 			console.close();
@@ -104,7 +108,7 @@ public class CloudAppLogManager extends BootDashModelConsoleManager {
 	 * @throws Exception
 	 *             if console was not created or found
 	 */
-	protected synchronized ApplicationLogConsole getOrCreateConsole(BootDashElement element) throws Exception {
+	protected synchronized ApplicationLogConsole getOrCreateConsole(App element) throws Exception {
 		ApplicationLogConsole appConsole = getExisitingConsole(element);
 
 		if (appConsole == null) {
@@ -119,7 +123,7 @@ public class CloudAppLogManager extends BootDashModelConsoleManager {
 		return appConsole;
 	}
 
-	protected void connect(ApplicationLogConsole logConsole, BootDashElement element) {
+	protected void connect(ApplicationLogConsole logConsole, App element) {
 		if (logConsole == null) {
 			return;
 		}
@@ -132,22 +136,22 @@ public class CloudAppLogManager extends BootDashModelConsoleManager {
 		}
 	}
 
-	public static String getConsoleId(BootDashElement element) {
+	public static String getConsoleId(App element) {
 		return element.getTarget().getId()+":"+element.getName();
 	}
 
-	public static String getConsoleDisplayName(BootDashElement element) {
+	public static String getConsoleDisplayName(App element) {
 		return element.getName() +" @ "+ element.getTarget().getDisplayName();
 	}
 
 	@Override
-	public void showConsole(BootDashElement element) throws Exception {
+	public void showConsole(App element) throws Exception {
 		ApplicationLogConsole console = getOrCreateConsole(element);
 		consoleManager.showConsoleView(console);
 	}
 
 	@Override
-	public void reconnect(BootDashElement element) throws Exception {
+	public void reconnect(App element) throws Exception {
 		ApplicationLogConsole console = getOrCreateConsole(element);
 		console.setLogStreamingToken(null);
 		connect(console, element);
@@ -155,11 +159,27 @@ public class CloudAppLogManager extends BootDashModelConsoleManager {
 	}
 
 	@Override
-	public boolean hasConsole(BootDashElement element) {
+	public boolean hasConsole(App element) {
 		try {
 			return getOrCreateConsole(element) != null;
 		} catch (Exception e) {
 			return false;
 		}
+	}
+
+	@Override
+	public AppConsole getConsole(App app) {
+		return new AppConsole() {
+
+			@Override
+			public void write(String message, LogType type) {
+				try {
+					showConsole(app);
+					writeToConsole(app, message, type);
+				} catch (Exception e) {
+					Log.log(e);
+				}
+			}
+		};
 	}
 }

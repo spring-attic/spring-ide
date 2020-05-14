@@ -14,9 +14,10 @@ import java.io.StringWriter;
 import java.text.DateFormat;
 import java.util.Date;
 
+import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.console.LogType;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 /**
  * Console manager for elements in a {@link BootDashModel}.
@@ -35,7 +36,7 @@ public abstract class BootDashModelConsoleManager {
 	 *             if failure occurred while opening console (e.g. failed to
 	 *             create console, underlying process is terminated, etc..)
 	 */
-	public abstract void showConsole(BootDashElement element) throws Exception;
+	public abstract void showConsole(App element) throws Exception;
 
 	/**
 	 * Write a message to an EXISTING console for the associated element.
@@ -43,14 +44,18 @@ public abstract class BootDashModelConsoleManager {
 	 * @param element
 	 * @param message
 	 */
-	public void writeToConsole(BootDashElement element, String message, LogType type) throws Exception {
+	public void writeToConsole(App element, String message, LogType type){
 		if (message != null) {
 			String bootMessage = asBootDashLog(message);
-			doWriteToConsole(element, bootMessage, type);
+			try {
+				doWriteToConsole(element, bootMessage, type);
+			} catch (Exception e) {
+				Log.log(e);
+			}
 		}
 	}
 
-	protected abstract void doWriteToConsole(BootDashElement element, String bootDashMessage, LogType type)
+	protected abstract void doWriteToConsole(App element, String bootDashMessage, LogType type)
 			throws Exception;
 
 	/**
@@ -62,13 +67,13 @@ public abstract class BootDashModelConsoleManager {
 	 *
 	 * @param appName
 	 */
-	public abstract void resetConsole(BootDashElement element);
+	public abstract void resetConsole(App element);
 
-	public abstract void terminateConsole(BootDashElement element) throws Exception;
+	public abstract void terminateConsole(App element) throws Exception;
 
-	public abstract void reconnect(BootDashElement element) throws Exception;
+	public abstract void reconnect(App element) throws Exception;
 
-	public abstract boolean hasConsole(BootDashElement element);
+	public abstract boolean hasConsole(App element);
 
 	protected String asBootDashLog(String message) {
 		Date date = new Date(System.currentTimeMillis());

@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.swt.internal.DPIUtil;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.ProjectDeploymentTarget;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.RemoteBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -22,15 +22,8 @@ import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.MultimapBuilder;
 import com.spotify.docker.client.DefaultDockerClient;
 import com.spotify.docker.client.DockerClient;
-import com.spotify.docker.client.DockerClient.ListContainersParam;
-import com.spotify.docker.client.messages.Container;
-import com.spotify.docker.client.messages.Image;
 
 public class DockerRunTarget extends AbstractRunTarget<DockerTargetParams> 
 implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentTarget {
@@ -43,6 +36,7 @@ implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentT
 	
 	LiveSetVariable<String> deployments = new LiveSetVariable<>();
 	private List<Disposable> disposables = new ArrayList<>();
+	private final DockerDeployer deployer;
 	
 	public DockerRunTarget(DockerRunTargetType type, DockerTargetParams params, DockerClient client) {
 		super(type, params.getUri());
@@ -60,13 +54,24 @@ implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentT
 					Log.log(e);
 				}
 			}));
+
 		} catch (Exception e) {
 			Log.log(e);
 		}
+		this.deployer = new DockerDeployer(this, deployments, this.client);
+	}
+
+	public SimpleDIContext injections() {
+		return getType().injections();
+	}
+	
+	@Override
+	public DockerRunTargetType getType() {
+		return (DockerRunTargetType) super.getType();
 	}
 
 	@Override
-	public GenericRemoteBootDashModel<?, ?> createSectionModel(BootDashViewModel parent) {
+	public RemoteBootDashModel createSectionModel(BootDashViewModel parent) {
 		return new GenericRemoteBootDashModel<>(this, parent);
 	}
 	
@@ -100,17 +105,7 @@ implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentT
 
 	@Override
 	public Collection<App> fetchApps() throws Exception {
-		DockerClient client = this.getClient();
-		if (client!=null) {
-			ImmutableSet<String> projectNames = deployments.getValues();
-			Builder<App> builder = ImmutableList.builder();
-			for (String name : projectNames) {
-				IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(name);
-				builder.add(new DockerApp(deployments, client, project));
-			}
-			return  builder.build();
-		}
-		return ImmutableList.of();
+		return deployer.getApps();
 	}
 
 	@Override
