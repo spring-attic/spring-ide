@@ -110,7 +110,7 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 		console.write("Starting container: "+c.id(), LogType.STDOUT);
 		client.startContainer(c.id());
 		LogStream appOutput = client.logs(c.id(), LogsParam.stdout(), LogsParam.follow());
-		JobUtil.runQueitlyInJob("Tracking output for docker container "+c.id(), mon -> {
+		JobUtil.runQuietlyInJob("Tracking output for docker container "+c.id(), mon -> {
 			appOutput.attach(console.getOutputStream(LogType.APP_OUT), console.getOutputStream(LogType.APP_OUT));
 		});
 	}
