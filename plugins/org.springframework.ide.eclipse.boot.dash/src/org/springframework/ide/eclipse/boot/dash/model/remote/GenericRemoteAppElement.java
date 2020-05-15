@@ -214,14 +214,14 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 
 	@Override
 	public void stopAsync(UserInteractions ui) throws Exception {
-		// TODO Auto-generated method stub
-
+		App a = this.app.getValue();
+		a.setGoalState(RunState.INACTIVE);
 	}
 
 	@Override
 	public void restart(RunState runingOrDebugging, UserInteractions ui) throws Exception {
-		// TODO Auto-generated method stub
-
+		App a = this.app.getValue();
+		a.restart(runingOrDebugging);
 	}
 
 	@Override

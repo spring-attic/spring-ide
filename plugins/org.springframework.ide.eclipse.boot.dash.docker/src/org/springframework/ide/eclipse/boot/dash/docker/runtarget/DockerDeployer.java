@@ -6,13 +6,10 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import org.springframework.ide.eclipse.boot.dash.api.App;
-import org.springframework.ide.eclipse.boot.dash.livexp.ElementwiseListener;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.spotify.docker.client.DockerClient;
 import com.spotify.docker.client.DockerClient.ListContainersParam;
 import com.spotify.docker.client.DockerClient.RemoveContainerParam;
@@ -29,25 +26,26 @@ public class DockerDeployer extends AbstractDisposable {
 		this.target = target;
 		this.deployments = deployments;
 		this.client = client;
-		this.deployments.getDeployments().onChange(this, new ElementwiseListener<DockerDeployment>() {
-
+		this.deployments.addListener(this, new DockerDeployments.Listener() {
 			@Override
-			protected void added(LiveExpression<ImmutableSet<DockerDeployment>> exp, DockerDeployment d) {	
-				createDeployment(d);
+			public void added(DockerDeployment d) {
+				createOrUpdateApp(d);
 			}
-
-
+			
 			@Override
-			protected void removed(LiveExpression<ImmutableSet<DockerDeployment>> exp, DockerDeployment d) {
+			public void updated(DockerDeployment d) {
+				createOrUpdateApp(d);
+			}
+			
+			@Override
+			public void removed(DockerDeployment d) {
 				destroyDeployment(d);
 			}
-		});
+		}); 
 	}
-	
 
-	synchronized private CompletableFuture<Void> createDeployment(DockerDeployment d) {
-		DockerApp app = new DockerApp(target, client, d);
-		apps.put(d.getName(), app);
+	synchronized private CompletableFuture<Void> createOrUpdateApp(DockerDeployment d) {
+		DockerApp app = (DockerApp) apps.computeIfAbsent(d.getName(), name -> new DockerApp(name, target, client));
 		return app.synchronizeWithDeployment();
 	}
 

@@ -2,11 +2,12 @@ package org.springframework.ide.eclipse.boot.dash.docker.runtarget;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,7 +19,6 @@ import org.springframework.ide.eclipse.boot.dash.api.AppConsole;
 import org.springframework.ide.eclipse.boot.dash.api.AppConsoleProvider;
 import org.springframework.ide.eclipse.boot.dash.api.AppContext;
 import org.springframework.ide.eclipse.boot.dash.api.Deletable;
-import org.springframework.ide.eclipse.boot.dash.api.RunStateProvider;
 import org.springframework.ide.eclipse.boot.dash.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -43,24 +43,35 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 	private DockerClient client;
 	private final IProject project;
 	private DockerRunTarget target;
+	private final String name;
 	
 	public static final String APP_NAME = "sts.app.name";
+	public static final String BUILD_ID = "sts.app.build-id";
+	
 	private static final int STOP_WAIT_TIME_IN_SECONDS = 20;
 	public final CompletableFuture<RefreshStateTracker> refreshTracker = new CompletableFuture<>();
-	private DockerDeployment deployment;
 
-	public DockerApp(DockerRunTarget target, DockerClient client, DockerDeployment deployment) {
-		this.client = client;
-		this.deployment = deployment;
-		this.project = ResourcesPlugin.getWorkspace().getRoot().getProject(deployment.getName());
+	public DockerApp(String name, DockerRunTarget target, DockerClient client) {
 		this.target = target;
+		this.name = name;
+		this.client = client;
+		this.project = ResourcesPlugin.getWorkspace().getRoot().getProject(deployment().getName());
 		AppConsole console = target.injections().getBean(AppConsoleProvider.class).getConsole(this);
 		console.write("Creating app node" + getName(), LogType.STDOUT);
 	}
 
+	private DockerDeployment deployment() {
+		return target.deployments.get(name);
+	}
+
+	@Override
+	public EnumSet<RunState> supportedGoalStates() {
+		return EnumSet.of(RunState.RUNNING, RunState.INACTIVE);
+	}
+	
 	@Override
 	public String getName() {
-		return deployment.getName();
+		return name;
 	}
 
 	@Override
@@ -83,25 +94,33 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 	public DockerRunTarget getTarget() {
 		return this.target;
 	}
-
+	
 	public CompletableFuture<Void> synchronizeWithDeployment() {
 		return this.refreshTracker.thenComposeAsync(refreshTracker -> {
+			DockerDeployment deployment = deployment();
 			return refreshTracker.runAsync("Synchronizing deployment "+deployment.getName(), () -> {
-
 				RunState desiredRunState = deployment.getRunState();
 				List<Container> containers = client.listContainers(ListContainersParam.allContainers(), ListContainersParam.withLabel(APP_NAME, getName()));
-				RunState actualRunState = RunState.INACTIVE;
-				for (Container _c : containers) {
-					DockerContainer c = new DockerContainer(getTarget(), _c);
-					actualRunState = actualRunState.merge(c.fetchRunState());
-				}
-				if (actualRunState==desiredRunState) {
-					return;
-				}
-				if (desiredRunState==RunState.RUNNING) {
-					start();
-				} else if (desiredRunState==RunState.INACTIVE) {
+				if (desiredRunState==RunState.INACTIVE) {
 					stop(containers);
+				} else if (desiredRunState==RunState.RUNNING) {
+					String desiredBuildId = deployment.getBuildId();
+					List<Container> toStop = new ArrayList<>(containers.size());
+					boolean runningContainer = false;
+					List<Container> toRun = new ArrayList<>(containers.size());
+					for (Container c : containers) {
+						if (desiredBuildId.equals(c.labels().get(BUILD_ID))) {
+							if (new DockerContainer(getTarget(), c).fetchRunState()==RunState.RUNNING) {
+								runningContainer = true;
+							}
+						} else {
+							toStop.add(c);
+						}
+					}
+					stop(toStop);
+					if (!runningContainer) {
+						start(desiredBuildId);
+					}
 				}
 			});
 		});
@@ -109,14 +128,14 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 
 	private void stop(List<Container> containers) throws Exception {
 		RefreshStateTracker refreshTracker = this.refreshTracker.get();
-		refreshTracker.run("Stopping containers for deployment "+deployment.getName(), () -> {
+		refreshTracker.run("Stopping containers for app "+name, () -> {
 			for (Container container : containers) {
 				client.stopContainer(container.id(), STOP_WAIT_TIME_IN_SECONDS);
 			}
 		});
 	}
 
-	public void start() throws Exception {
+	public void start(String desiredBuildId) throws Exception {
 		RefreshStateTracker refreshTracker = this.refreshTracker.get();
 		refreshTracker.run("Deploying " + getName() + "...", () -> {
 			AppConsole console = target.injections().getBean(AppConsoleProvider.class).getConsole(this);
@@ -125,19 +144,22 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 			}
 			console.write("Deploying Docker app " + getName() +"...", LogType.STDOUT);
 			String image = build(console);
-			run(console, image);
+			run(console, image, desiredBuildId);
 			console.write("DONE Deploying Docker app " + getName(), LogType.STDOUT);
 		});
 	}
 
-	private void run(AppConsole console, String image) throws Exception {
+	private void run(AppConsole console, String image, String desiredBuildId) throws Exception {
 		if (client==null) {
 			console.write("Cannot start container... Docker client is disconnected!", LogType.STDERROR);
 		}
 		console.write("Running container with '"+image+"'", LogType.STDOUT);
 		ContainerCreation c = client.createContainer(ContainerConfig.builder()
 				.image(image)
-				.labels(ImmutableMap.of(APP_NAME, getName()))
+				.labels(ImmutableMap.of(
+						APP_NAME, getName(),
+						BUILD_ID, desiredBuildId
+				))
 				.build()
 		);
 		console.write("Container created: "+c.id(), LogType.STDOUT);
@@ -178,6 +200,22 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 	@Override
 	public void setContext(AppContext context) {
 		this.refreshTracker.complete(context.getRefreshTracker());
+	}
+
+	@Override
+	public void restart(RunState runningOrDebugging) {
+		DockerDeployment d = deployment();
+		d.setBuildId(UUID.randomUUID().toString());
+		d.setRunState(runningOrDebugging);
+		target.deployments.createOrUpdate(d);
+	}
+
+	@Override
+	public void setGoalState(RunState newGoalState) {
+		DockerDeployment deployment = deployment();
+		if (deployment.getRunState()!=newGoalState) {
+			target.deployments.createOrUpdate(deployment.withGoalState(newGoalState));
+		}
 	}
 
 }

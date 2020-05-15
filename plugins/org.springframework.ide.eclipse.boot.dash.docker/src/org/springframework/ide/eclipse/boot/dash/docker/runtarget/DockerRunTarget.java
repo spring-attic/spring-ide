@@ -1,9 +1,8 @@
 package org.springframework.ide.eclipse.boot.dash.docker.runtarget;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import org.eclipse.core.resources.IProject;
 import org.springframework.ide.eclipse.boot.dash.api.App;
@@ -15,14 +14,8 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.remote.GenericRemoteBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget;
-import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
-import org.springsource.ide.eclipse.commons.livexp.core.OnDispose;
-import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
-import org.springsource.ide.eclipse.commons.livexp.util.Log;
-import org.springsource.ide.eclipse.commons.livexp.util.OldValueDisposer;
 
 import com.google.common.collect.ImmutableList;
 import com.spotify.docker.client.DefaultDockerClient;
@@ -112,6 +105,7 @@ implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentT
 			DockerDeployment d = new DockerDeployment();
 			d.setName(p.getName());
 			d.setRunState(RunState.RUNNING);
+			d.setBuildId(UUID.randomUUID().toString());
 			deployments.createOrUpdate(d);
 		}
 	}

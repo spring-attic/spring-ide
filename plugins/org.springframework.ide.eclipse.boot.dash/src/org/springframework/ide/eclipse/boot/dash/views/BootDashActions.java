@@ -40,6 +40,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.model.remote.GenericRemoteAppElement;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.LocalRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTargetType;
@@ -326,12 +327,18 @@ public class BootDashActions {
 		}
 
 		private void addTargetsFor(Builder<BootDashElement> builder, BootDashElement s) {
-			ImmutableSet<BootDashElement> children = s.getChildren().getValues();
-			if (children.isEmpty()) {
-				//No children, add s itself
+			if (s instanceof GenericRemoteAppElement) { //TODO: yuck!!! smelly.
+														// should refactor so that the special logci below which is
+														// applicale only to local elelements is somehow moved into that instead.
 				builder.add(s);
 			} else {
-				addTargetsFor(builder, children);
+				ImmutableSet<BootDashElement> children = s.getChildren().getValues();
+				if (children.isEmpty()) {
+					//No children, add s itself
+					builder.add(s);
+				} else {
+					addTargetsFor(builder, children);
+				}
 			}
 		}
 	}

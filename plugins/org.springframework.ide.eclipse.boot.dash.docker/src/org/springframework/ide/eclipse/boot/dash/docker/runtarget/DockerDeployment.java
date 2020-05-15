@@ -18,6 +18,14 @@ public class DockerDeployment implements Nameable {
 	
 	private String name; // name of the deployment, currently this is also the name of the deployed project.
 	private RunState runState;
+	private String buildId;
+	
+	public DockerDeployment() {}
+
+	public DockerDeployment(DockerDeployment copyFrom) {
+		this.name = copyFrom.name;
+		this.runState = copyFrom.runState;
+	}
 	
 	public String getName() {
 		return name;
@@ -30,5 +38,19 @@ public class DockerDeployment implements Nameable {
 	}
 	public void setRunState(RunState runState) {
 		this.runState = runState;
+	}
+
+	public DockerDeployment withGoalState(RunState newGoalState) {
+		DockerDeployment d = new DockerDeployment(this);
+		d.setRunState(newGoalState);
+		return d;
+	}
+
+	public String getBuildId() {
+		return buildId;
+	}
+
+	public void setBuildId(String buildId) {
+		this.buildId = buildId;
 	}
 }
