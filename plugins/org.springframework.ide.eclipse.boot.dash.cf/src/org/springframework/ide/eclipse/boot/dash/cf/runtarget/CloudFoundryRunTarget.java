@@ -48,7 +48,6 @@ import org.springframework.ide.eclipse.boot.dash.cf.dialogs.PasswordDialogModel;
 import org.springframework.ide.eclipse.boot.dash.cf.dialogs.StoreCredentialsMode;
 import org.springframework.ide.eclipse.boot.dash.cf.model.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cf.ui.CfUserInteractions;
-import org.springframework.ide.eclipse.boot.dash.livexp.OldValueDisposer;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
@@ -62,6 +61,7 @@ import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
+import org.springsource.ide.eclipse.commons.livexp.util.OldValueDisposer;
 import org.springsource.ide.eclipse.commons.ui.UiUtil;
 
 import com.google.common.collect.ImmutableSet;

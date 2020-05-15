@@ -5,14 +5,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.livexp.ElementwiseListener;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
-import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.common.collect.ImmutableList;
@@ -24,54 +20,47 @@ import com.spotify.docker.client.messages.Container;
 
 public class DockerDeployer extends AbstractDisposable {
 
-	private final ObservableSet<String> deployments;
-	private final LiveExpression<DockerClient> client;
+	private final DockerDeployments deployments;
+	private final DockerClient client;
 	private Map<String, App> apps = new HashMap<>();
 	private final DockerRunTarget target;
 	
-	public DockerDeployer(DockerRunTarget target, ObservableSet<String> deployments, LiveExpression<DockerClient> client) {
+	public DockerDeployer(DockerRunTarget target, DockerDeployments deployments, DockerClient client) {
 		this.target = target;
 		this.deployments = deployments;
 		this.client = client;
-		this.deployments.onChange(this, new ElementwiseListener<String>() {
+		this.deployments.getDeployments().onChange(this, new ElementwiseListener<DockerDeployment>() {
 
 			@Override
-			protected void added(LiveExpression<ImmutableSet<String>> exp, String projectName) {	
-				createDeployment(projectName);
+			protected void added(LiveExpression<ImmutableSet<DockerDeployment>> exp, DockerDeployment d) {	
+				createDeployment(d);
 			}
 
 
 			@Override
-			protected void removed(LiveExpression<ImmutableSet<String>> exp, String projectName) {
-				destroyDeployment(projectName);
+			protected void removed(LiveExpression<ImmutableSet<DockerDeployment>> exp, DockerDeployment d) {
+				destroyDeployment(d);
 			}
-
 		});
-
 	}
 	
 
-	synchronized private CompletableFuture<Void> createDeployment(String projectName) {
-		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-		DockerApp app = new DockerApp(target, client::getValue, project);
-		apps.put(projectName, app);
-		
-		return app.startAsync();
+	synchronized private CompletableFuture<Void> createDeployment(DockerDeployment d) {
+		DockerApp app = new DockerApp(target, client, d);
+		apps.put(d.getName(), app);
+		return app.synchronizeWithDeployment();
 	}
-	
-	
 
-	synchronized private void destroyDeployment(String projectName) {
-		App app = apps.get(projectName);
+	synchronized private void destroyDeployment(DockerDeployment d) {
+		App app = apps.get(d.getName());
 		if (app != null) {
-			DockerClient clientVal = client.getValue();
-			if (clientVal != null) {
+			if (client != null) {
 				try {
-					for (Container container : clientVal.listContainers(ListContainersParam.allContainers(),
-							ListContainersParam.withLabel(DockerApp.APP_NAME, projectName))) {
-						clientVal.removeContainer(container.id(), RemoveContainerParam.forceKill());
+					for (Container container : client.listContainers(ListContainersParam.allContainers(),
+							ListContainersParam.withLabel(DockerApp.APP_NAME, d.getName()))) {
+						client.removeContainer(container.id(), RemoveContainerParam.forceKill());
 					}
-					apps.remove(projectName);
+					apps.remove(d.getName());
 				} catch (Exception e) {
 					Log.log(e);
 				}

@@ -11,13 +11,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.swt.internal.DPIUtil;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.AppConsole;
 import org.springframework.ide.eclipse.boot.dash.api.AppConsoleProvider;
 import org.springframework.ide.eclipse.boot.dash.api.AppContext;
 import org.springframework.ide.eclipse.boot.dash.api.Deletable;
+import org.springframework.ide.eclipse.boot.dash.api.RunStateProvider;
 import org.springframework.ide.eclipse.boot.dash.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
+import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.remote.ChildBearing;
 import org.springframework.ide.eclipse.boot.dash.model.remote.RefreshStateTracker;
 import org.springframework.ide.eclipse.boot.dash.util.LineBasedStreamGobler;
@@ -36,16 +40,19 @@ import com.spotify.docker.client.messages.ContainerCreation;
 
 public class DockerApp extends AbstractDisposable implements App, ChildBearing, Deletable  {
 
-	private Supplier<DockerClient> client;
+	private DockerClient client;
 	private final IProject project;
 	private DockerRunTarget target;
 	
 	public static final String APP_NAME = "sts.app.name";
+	private static final int STOP_WAIT_TIME_IN_SECONDS = 20;
 	public final CompletableFuture<RefreshStateTracker> refreshTracker = new CompletableFuture<>();
+	private DockerDeployment deployment;
 
-	public DockerApp(DockerRunTarget target, Supplier<DockerClient> client, IProject project) {
+	public DockerApp(DockerRunTarget target, DockerClient client, DockerDeployment deployment) {
 		this.client = client;
-		this.project = project;
+		this.deployment = deployment;
+		this.project = ResourcesPlugin.getWorkspace().getRoot().getProject(deployment.getName());
 		this.target = target;
 		AppConsole console = target.injections().getBean(AppConsoleProvider.class).getConsole(this);
 		console.write("Creating app node" + getName(), LogType.STDOUT);
@@ -53,13 +60,12 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 
 	@Override
 	public String getName() {
-		return project.getName();
+		return deployment.getName();
 	}
 
 	@Override
 	public List<App> fetchChildren() throws Exception {
 		Builder<App> builder = ImmutableList.builder();
-		DockerClient client = this.client.get();
 		if (client!=null) {
 			for (Container container : client.listContainers(ListContainersParam.allContainers(), ListContainersParam.withLabel(APP_NAME, getName()))) {
 				builder.add(new DockerContainer(target, container));
@@ -70,7 +76,7 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 
 	@Override
 	public void delete() throws Exception {
-		target.deployedProjects.remove(project.getName());
+		target.deployments.remove(project.getName());
 	}
 
 	@Override
@@ -78,25 +84,53 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 		return this.target;
 	}
 
-	public CompletableFuture<Void> startAsync() {
-		Function<RefreshStateTracker, CompletableFuture<Void>> fun = (refreshTracker) -> {
-			return refreshTracker.runAsync("Deploying " + getName() + "...", () -> {
-				AppConsole console = target.injections().getBean(AppConsoleProvider.class).getConsole(this);
-				if (!project.isAccessible()) {
-					throw new IllegalStateException("The project '"+project.getName()+"' is not accessible");
+	public CompletableFuture<Void> synchronizeWithDeployment() {
+		return this.refreshTracker.thenComposeAsync(refreshTracker -> {
+			return refreshTracker.runAsync("Synchronizing deployment "+deployment.getName(), () -> {
+
+				RunState desiredRunState = deployment.getRunState();
+				List<Container> containers = client.listContainers(ListContainersParam.allContainers(), ListContainersParam.withLabel(APP_NAME, getName()));
+				RunState actualRunState = RunState.INACTIVE;
+				for (Container _c : containers) {
+					DockerContainer c = new DockerContainer(getTarget(), _c);
+					actualRunState = actualRunState.merge(c.fetchRunState());
 				}
-				console.write("Deploying Docker app " + getName() +"...", LogType.STDOUT);
-				String image = build(console);
-				run(console, image);
-				console.write("DONE Deploying Docker app " + getName(), LogType.STDOUT);
+				if (actualRunState==desiredRunState) {
+					return;
+				}
+				if (desiredRunState==RunState.RUNNING) {
+					start();
+				} else if (desiredRunState==RunState.INACTIVE) {
+					stop(containers);
+				}
 			});
-		};
-		
-		return refreshTracker.thenComposeAsync(fun);
+		});
+	}
+
+	private void stop(List<Container> containers) throws Exception {
+		RefreshStateTracker refreshTracker = this.refreshTracker.get();
+		refreshTracker.run("Stopping containers for deployment "+deployment.getName(), () -> {
+			for (Container container : containers) {
+				client.stopContainer(container.id(), STOP_WAIT_TIME_IN_SECONDS);
+			}
+		});
+	}
+
+	public void start() throws Exception {
+		RefreshStateTracker refreshTracker = this.refreshTracker.get();
+		refreshTracker.run("Deploying " + getName() + "...", () -> {
+			AppConsole console = target.injections().getBean(AppConsoleProvider.class).getConsole(this);
+			if (!project.isAccessible()) {
+				throw new IllegalStateException("The project '"+project.getName()+"' is not accessible");
+			}
+			console.write("Deploying Docker app " + getName() +"...", LogType.STDOUT);
+			String image = build(console);
+			run(console, image);
+			console.write("DONE Deploying Docker app " + getName(), LogType.STDOUT);
+		});
 	}
 
 	private void run(AppConsole console, String image) throws Exception {
-		DockerClient client = this.client.get(); 
 		if (client==null) {
 			console.write("Cannot start container... Docker client is disconnected!", LogType.STDERROR);
 		}
@@ -145,4 +179,5 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 	public void setContext(AppContext context) {
 		this.refreshTracker.complete(context.getRefreshTracker());
 	}
+
 }

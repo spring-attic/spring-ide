@@ -14,4 +14,5 @@ Require-Bundle: org.springframework.ide.eclipse.boot.dash,
  com.spotify.docker.client;bundle-version="8.11.7",
  org.springsource.ide.eclipse.commons.frameworks.core,
  com.google.guava,
- org.eclipse.core.resources
+ org.eclipse.core.resources,
+ org.yaml.snakeyaml
