@@ -151,6 +151,7 @@ public class DependencyPage extends WizardPageWithSections {
 				monitor.beginTask("Loading starters data", IProgressMonitor.UNKNOWN);
 				monitor.subTask("Creating Boot project model and fetching data from Initializr Service...");
 				wizardModel.createInitializrModel(monitor);
+				monitor.done();
 			});
 		});
 	}

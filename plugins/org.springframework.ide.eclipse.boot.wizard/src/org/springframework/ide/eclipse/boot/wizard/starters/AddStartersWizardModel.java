@@ -263,8 +263,6 @@ public class AddStartersWizardModel implements OkButtonHandler, Disposable {
 			error = _e;
 		}
 
-		writeToMonitor(monitor, null);
-
 		// FIRST set the model even if there are errors
 		if (model != null) {
 			initializrModel.setValue(model);
