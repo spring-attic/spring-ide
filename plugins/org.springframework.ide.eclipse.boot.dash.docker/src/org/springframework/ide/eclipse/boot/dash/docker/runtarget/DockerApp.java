@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2020 Pivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Pivotal, Inc. - initial API and implementation
+ *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.docker.runtarget;
 
 import java.io.File;
@@ -5,6 +15,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
@@ -13,13 +24,13 @@ import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.swt.internal.DPIUtil;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.AppConsole;
 import org.springframework.ide.eclipse.boot.dash.api.AppConsoleProvider;
 import org.springframework.ide.eclipse.boot.dash.api.AppContext;
 import org.springframework.ide.eclipse.boot.dash.api.Deletable;
 import org.springframework.ide.eclipse.boot.dash.console.LogType;
+import org.springframework.ide.eclipse.boot.dash.docker.jmx.JmxSupport;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.remote.ChildBearing;
@@ -37,6 +48,8 @@ import com.spotify.docker.client.LogStream;
 import com.spotify.docker.client.messages.Container;
 import com.spotify.docker.client.messages.ContainerConfig;
 import com.spotify.docker.client.messages.ContainerCreation;
+import com.spotify.docker.client.messages.HostConfig;
+import com.spotify.docker.client.messages.PortBinding;
 
 public class DockerApp extends AbstractDisposable implements App, ChildBearing, Deletable  {
 
@@ -50,14 +63,16 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 	
 	private static final int STOP_WAIT_TIME_IN_SECONDS = 20;
 	public final CompletableFuture<RefreshStateTracker> refreshTracker = new CompletableFuture<>();
+	private final JmxSupport jmx;
 
 	public DockerApp(String name, DockerRunTarget target, DockerClient client) {
 		this.target = target;
 		this.name = name;
 		this.client = client;
+		this.jmx = new JmxSupport();
 		this.project = ResourcesPlugin.getWorkspace().getRoot().getProject(deployment().getName());
 		AppConsole console = target.injections().getBean(AppConsoleProvider.class).getConsole(this);
-		console.write("Creating app node" + getName(), LogType.STDOUT);
+		console.write("Creating app node " + getName(), LogType.STDOUT);
 	}
 
 	private DockerDeployment deployment() {
@@ -152,23 +167,38 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 	private void run(AppConsole console, String image, String desiredBuildId) throws Exception {
 		if (client==null) {
 			console.write("Cannot start container... Docker client is disconnected!", LogType.STDERROR);
+		} else {
+			console.write("Running container with '"+image+"'", LogType.STDOUT);
+			String jmxUrl = jmx.getJmxUrl();
+			if (jmxUrl!=null) {
+				console.write("JMX URL = "+jmxUrl, LogType.STDOUT);
+			}
+			ContainerConfig.Builder cb = ContainerConfig.builder()
+					.image(image)
+					.labels(ImmutableMap.of(
+							APP_NAME, getName(),
+							BUILD_ID, desiredBuildId
+					));
+			if (jmxUrl!=null) {
+				String port = ""+jmx.getPort();
+				cb.hostConfig(HostConfig.builder()
+						.portBindings(ImmutableMap.of(
+								port, ImmutableList.of(PortBinding.of("0.0.0.0", port))
+						))
+						.build()
+				);
+				cb.exposedPorts(port);
+				cb.env("JAVA_OPTS="+jmx.getJavaOpts());
+			}
+			ContainerCreation c = client.createContainer(cb.build());
+			console.write("Container created: "+c.id(), LogType.STDOUT);
+			console.write("Starting container: "+c.id(), LogType.STDOUT);
+			client.startContainer(c.id());
+			LogStream appOutput = client.logs(c.id(), LogsParam.stdout(), LogsParam.follow());
+			JobUtil.runQuietlyInJob("Tracking output for docker container "+c.id(), mon -> {
+				appOutput.attach(console.getOutputStream(LogType.APP_OUT), console.getOutputStream(LogType.APP_OUT));
+			});
 		}
-		console.write("Running container with '"+image+"'", LogType.STDOUT);
-		ContainerCreation c = client.createContainer(ContainerConfig.builder()
-				.image(image)
-				.labels(ImmutableMap.of(
-						APP_NAME, getName(),
-						BUILD_ID, desiredBuildId
-				))
-				.build()
-		);
-		console.write("Container created: "+c.id(), LogType.STDOUT);
-		console.write("Starting container: "+c.id(), LogType.STDOUT);
-		client.startContainer(c.id());
-		LogStream appOutput = client.logs(c.id(), LogsParam.stdout(), LogsParam.follow());
-		JobUtil.runQuietlyInJob("Tracking output for docker container "+c.id(), mon -> {
-			appOutput.attach(console.getOutputStream(LogType.APP_OUT), console.getOutputStream(LogType.APP_OUT));
-		});
 	}
 
 	private static final Pattern BUILT_IMAGE_MESSAGE = Pattern.compile("Successfully built image.*\\'(.*)\\'");

@@ -52,6 +52,7 @@ public class GenericRemoteBootDashModel<Client, Params> extends RemoteBootDashMo
 		.compute(() -> fetchApps())
 		.build();
 		elements.dependsOn(getRunTarget().getClientExp());
+		addElementStateListener(element -> refresh(ui()));
 	}
 
 	private ImmutableSet<BootDashElement> fetchApps() throws Exception {

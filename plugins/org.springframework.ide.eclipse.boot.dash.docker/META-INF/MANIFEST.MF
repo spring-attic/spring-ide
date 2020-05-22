@@ -15,4 +15,5 @@ Require-Bundle: org.springframework.ide.eclipse.boot.dash,
  org.springsource.ide.eclipse.commons.frameworks.core,
  com.google.guava,
  org.eclipse.core.resources,
- org.yaml.snakeyaml
+ org.yaml.snakeyaml,
+ org.springframework.ide.eclipse.boot.launch

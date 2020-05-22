@@ -116,12 +116,14 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 	};
 
 
-	public GenericRemoteAppElement(RemoteBootDashModel model, String appId) {
+	public GenericRemoteAppElement(GenericRemoteBootDashModel<?, ?> model, String appId) {
 		this(model, model, appId);
 	}
 
-	public GenericRemoteAppElement(RemoteBootDashModel model, Object parent, String appId) {
+	public GenericRemoteAppElement(GenericRemoteBootDashModel<?,?> model, Object parent, String appId) {
 		super(model, appId);
+		children.dependsOn(model.refreshCount());
+		runState.dependsOn(model.refreshCount());
 		addDisposableChild(this.childFactory);
 		this.parent = parent;
 		System.out.println("New GenericRemoteAppElement instances = " +instances.incrementAndGet());

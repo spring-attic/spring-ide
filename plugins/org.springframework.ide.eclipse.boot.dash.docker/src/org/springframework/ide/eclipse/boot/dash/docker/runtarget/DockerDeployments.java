@@ -54,7 +54,7 @@ public class DockerDeployments extends AbstractDisposable {
 
 	private synchronized void persist() {
 		Yaml yaml = yaml();
-		String serialized = yaml.dump(byName);
+		String serialized = yaml.dump(new DockerDeploymentList(byName.values()));
 		try {
 			persistentProperties.put(PERSISTENCE_KEY, serialized);
 		} catch (Exception e) {
@@ -80,6 +80,7 @@ public class DockerDeployments extends AbstractDisposable {
 				l.updated(deployment);
 			}
 		}
+		persistTrigger.increment();
 	}
 
 	public void remove(String name) {
@@ -94,6 +95,7 @@ public class DockerDeployments extends AbstractDisposable {
 		for (Listener l : listeners ) {
 			l.removed(removed);
 		}
+		persistTrigger.increment();
 	}
 
 	public void addListener(OnDispose owner, Listener l) {
