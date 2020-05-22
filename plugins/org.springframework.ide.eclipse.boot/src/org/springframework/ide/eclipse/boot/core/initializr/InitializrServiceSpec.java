@@ -85,6 +85,28 @@ public class InitializrServiceSpec {
 		}
 	}
 
+	public static void checkBasicConnection(URLConnectionFactory urlConnectionFactory, URL url) throws Exception {
+		URLConnection conn = null;
+		InputStream input = null;
+		try {
+			conn = urlConnectionFactory.createConnection(url);
+			conn.addRequestProperty("Accept", JSON_CONTENT_TYPE_HEADER);
+			conn.connect();
+			String redirectedTo = getRedirected(conn);
+			// Don't handle redirect on basic connection check.
+			if (!StringUtil.hasText(redirectedTo)) {
+				input = conn.getInputStream();
+			}
+		} finally {
+			if (input!=null) {
+				try {
+					input.close();
+				} catch (IOException e) {
+				}
+			}
+		}
+	}
+
 	private static String getRedirected(URLConnection _conn) throws IOException {
 		if (_conn instanceof HttpURLConnection) {
 			HttpURLConnection conn = (HttpURLConnection) _conn;

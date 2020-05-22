@@ -19,6 +19,9 @@ import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.BootPreferences;
@@ -68,6 +71,7 @@ public class AddStartersWizardModel implements OkButtonHandler, Disposable {
 	private Runnable okRunnable;
 	private IPreferenceStore preferenceStore;
 	private IProject project;
+	private Job asyncModelLoadJob;
 
 
 	private List<Disposable> disposables = new ArrayList<>();
@@ -107,7 +111,7 @@ public class AddStartersWizardModel implements OkButtonHandler, Disposable {
 		// When service URL changes, load the model
 		LiveVariable<String> variable = urlField.getVariable();
 		addDisposable(variable.onChange((exp, val) -> {
-			loadModel(this.externalModelLoader);
+			asyncLoadModel();
 		}));
 
 		// Link the error markers to the initializr validator, so that errors are propagated to the initializr validator
@@ -215,16 +219,33 @@ public class AddStartersWizardModel implements OkButtonHandler, Disposable {
 
 	public void addModelLoader(Runnable externalModelLoader) {
 		this.externalModelLoader = externalModelLoader;
-		loadModel(this.externalModelLoader);
+		asyncLoadModel();
 	}
 
-	private void loadModel(Runnable modelLoader) {
-		clearPreviousModel();
+	private void asyncLoadModel() {
+		if (asyncModelLoadJob == null) {
+			asyncModelLoadJob = new Job("Loading initializr model") {
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					clearPreviousModel();
 
-		ValidationResult result = basicUrlValidation();
-		if (result.isOk() && modelLoader != null) {
-			modelLoader.run();
+					// Perform basic URL and connection validation BEFORE invoking the
+					// external model loader, as model loading could be slow.
+					// This is to fix a bug where we want a "fast"
+					// typing experience when a user enters a URL in the URL field, and
+					// want basic validation on each character typed to be fast.
+					ValidationResult result = basicUrlValidation();
+					if (result.isOk()) {
+						result = basicUrlConnection();
+						if (result.isOk() && AddStartersWizardModel.this.externalModelLoader != null) {
+							AddStartersWizardModel.this.externalModelLoader.run();
+						}
+					}
+					return Status.OK_STATUS;
+				};
+			};
 		}
+		asyncModelLoadJob.schedule();
 	}
 
 	/**
@@ -302,6 +323,24 @@ public class AddStartersWizardModel implements OkButtonHandler, Disposable {
 		}
 
 		return  result;
+	}
+
+	private ValidationResult basicUrlConnection() {
+		URLConnectionFactory urlConnectionFactory = BootActivator.getUrlConnectionFactory();
+
+		String url = urlField.getValue();
+		try {
+			InitializrServiceSpec.checkBasicConnection(urlConnectionFactory, new URL(url));
+		} catch (Exception e) {
+			Throwable deepestCause = ExceptionUtil.getDeepestCause(e);
+			String shortMessage = "Error encountered while resolving initializr content for: " + project.getName();
+
+			ValidationResult addStartersError = AddStartersErrorUtil.getError(shortMessage, deepestCause);
+			urlErrorMarker.setValue(addStartersError);
+			return addStartersError;
+
+		}
+		return ValidationResult.OK;
 	}
 
 	private InitializrModel createModel() throws Exception {
