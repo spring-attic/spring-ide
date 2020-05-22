@@ -224,6 +224,7 @@ public class AddStartersWizardModel implements OkButtonHandler, Disposable {
 
 	private void asyncLoadModel() {
 		if (asyncModelLoadJob == null) {
+			// Load the model async as it can be long running or potentially block on connection to initializr
 			asyncModelLoadJob = new Job("Loading initializr model") {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {

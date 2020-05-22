@@ -37,6 +37,7 @@ import org.springsource.ide.eclipse.commons.livexp.ui.ChooseOneSectionCombo;
 import org.springsource.ide.eclipse.commons.livexp.ui.CommentSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.GroupSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageSection;
+import org.springsource.ide.eclipse.commons.livexp.ui.IPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.LabeledPropertySection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageWithSections;
@@ -59,6 +60,8 @@ public class DependencyPage extends WizardPageWithSections {
 
 	protected final AddStartersWizardModel wizardModel;
 
+	private ErrorGroupSection errorSection;
+
 	/**
 	 *
 	 * Creates the dynamic sections of this wizard based on the wizard model's availability
@@ -75,11 +78,21 @@ public class DependencyPage extends WizardPageWithSections {
 			InitializrModel model = wizardModel.getModel().getValue();
 			ValidationResult validation = wizardModel.getValidator().getValue();
 			if (validation != null && validation.status ==  IStatus.ERROR) {
-				createErrorSection(sections);
+				syncInUi(() -> {
+					if (DependencyPage.this.errorSection != null)  {
+						DependencyPage.this.errorSection.setDetailsAndShow(validation);
+					}
+				});
 			}
 			else if (model != null) {
+				syncInUi(() -> {
+					if (DependencyPage.this.errorSection != null)  {
+						DependencyPage.this.errorSection.hide();
+					}
+				});
+
 				model.onDependencyChange(() -> {
-					Display.getDefault().asyncExec(() -> {
+					asyncInUi(() -> {
 						refreshWizardUi();
 					});
 				});
@@ -93,7 +106,17 @@ public class DependencyPage extends WizardPageWithSections {
 		}
 	};
 
+	protected void syncInUi(Runnable runnable) {
+		Display.getDefault().syncExec(() -> {
+			runnable.run();
+		});
+	}
 
+	protected void asyncInUi(Runnable runnable) {
+		Display.getDefault().asyncExec(() -> {
+			runnable.run();
+		});
+	}
 
 	public DependencyPage(AddStartersWizardModel wizardModel) {
 		super("Dependencies", "New Spring Starter Project Dependencies", null);
@@ -128,6 +151,7 @@ public class DependencyPage extends WizardPageWithSections {
 		// This ensures that when the wizard attempts to restore focus on the service URL control, it is
 		// still active and not disposed
 		createBootInfoSection(sections);
+		createErrorSection(sections);
 
 		DynamicSection dynamicSection = new DynamicSection(this, dynamicControlCreation);
 		sections.add(dynamicSection);
@@ -157,19 +181,8 @@ public class DependencyPage extends WizardPageWithSections {
 	}
 
 	private void createErrorSection(List<WizardPageSection> sections) {
-
-		ValidationResult validation = wizardModel.getValidator().getValue();
-		GroupSection errorSection = null;
-		if (validation instanceof AddStartersError) {
-			AddStartersError addStartersError = (AddStartersError) validation;
-			 errorSection = new GroupSection(this, null, new CommentSection(this, "Error:"),
-					new GroupSection(this, "", new CommentSection(this, addStartersError.details)));
-		} else {
-			 errorSection = new GroupSection(this, null, new CommentSection(this, "Details:"),
-						new GroupSection(this, "", new CommentSection(this, "No content available")));
-		}
-
-		sections.add(errorSection);
+		errorSection = new ErrorGroupSection(this);
+		sections.add(errorSection.getGroupSection());
 	}
 
 
@@ -285,5 +298,37 @@ public class DependencyPage extends WizardPageWithSections {
 				container.updateButtons();
 			}
 		}
+	}
+
+	private static class ErrorGroupSection {
+
+		private static final String NO_CONTENT = "No content available";
+		private final GroupSection section;
+		private final CommentSection comments;
+
+		public ErrorGroupSection(IPageWithSections owner) {
+			comments = new CommentSection(owner, NO_CONTENT);
+			section = new GroupSection(owner, null, new CommentSection(owner, "Details:"),
+					new GroupSection(owner, "", comments));
+		}
+
+		public GroupSection getGroupSection() {
+			return this.section;
+		}
+
+		public void setDetailsAndShow(ValidationResult results) {
+			if (results instanceof AddStartersError) {
+				String details = ((AddStartersError) results).details;
+				comments.setText(details);
+			} else {
+				comments.setText(NO_CONTENT);
+			}
+			section.isVisible.setValue(true);
+		}
+
+		public void hide() {
+			section.isVisible.setValue(false);
+		}
+
 	}
 }
