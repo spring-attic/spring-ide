@@ -33,7 +33,6 @@ import org.springframework.ide.eclipse.boot.wizard.SelectedDependenciesSection;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
-import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.ChooseOneSectionCombo;
 import org.springsource.ide.eclipse.commons.livexp.ui.CommentSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.GroupSection;
@@ -44,14 +43,11 @@ import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Parser;
 
-import com.google.common.collect.ImmutableList;
-
 public class DependencyPage extends WizardPageWithSections {
 
 	private static final int NUM_COLUMNS_FREQUENTLY_USED = 3;
 	private static final int MAX_MOST_POPULAR = 3 * NUM_COLUMNS_FREQUENTLY_USED;
 	private static final Point DEPENDENCY_SECTION_SIZE = new Point(SWT.DEFAULT, 300);
-	private static final long MODEL_CREATION_TIMEOUT = 30000;
 
 	private CheckBoxesSection<Dependency> frequentlyUsedCheckboxes;
 
@@ -150,8 +146,12 @@ public class DependencyPage extends WizardPageWithSections {
 		validator.addChild(wizardModel.getValidator());
 		validator.addChild(pageValidator);
 
-		wizardModel.startModelLoading((exp, val) -> {
-			loadWithProgress();
+		wizardModel.addModelLoader(() -> {
+			runWithWizardProgress(monitor -> {
+				monitor.beginTask("Loading starters data", IProgressMonitor.UNKNOWN);
+				monitor.subTask("Creating Boot project model and fetching data from Initializr Service...");
+				wizardModel.createInitializrModel(monitor);
+			});
 		});
 	}
 
@@ -171,27 +171,6 @@ public class DependencyPage extends WizardPageWithSections {
 		sections.add(errorSection);
 	}
 
-	private void loadWithProgress() {
-		runWithWizardProgress(monitor -> {
-
-			monitor.beginTask("Loading starters data", IProgressMonitor.UNKNOWN);
-			monitor.subTask("Creating Boot project model and fetching data from Initializr Service...");
-
-			// Add temporary listener to the model that can notify the current
-			// Eclipse progress monitor when model loading messages are received
-			ValueListener<ValidationResult> monitorListener = (exp, val) -> {
-				ValidationResult value = exp.getValue();
-				if (value != null && value.status == IStatus.INFO) {
-					monitor.subTask(value.msg);
-				}
-			};
-
-			wizardModel.getProgress().addListener(monitorListener);
-			wizardModel.loadModel();
-			monitor.done();
-			wizardModel.getProgress().removeListener(monitorListener);
-		});
-	}
 
 	private void runWithWizardProgress(IRunnableWithProgress runnable) {
 		getWizard().getContainer().getShell().getDisplay().asyncExec(() -> {

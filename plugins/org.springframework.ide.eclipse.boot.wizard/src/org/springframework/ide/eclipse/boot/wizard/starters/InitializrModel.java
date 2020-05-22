@@ -39,13 +39,14 @@ import org.springframework.ide.eclipse.boot.wizard.NewSpringBootWizardModel;
 import org.springframework.ide.eclipse.boot.wizard.PopularityTracker;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
+import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 /**
  *
  * Model for a local project that contains relevant data downloaded from initializr relevant to this
  * project. For example, it contains dependencies from initializr that pertain to the project's boot version.
  */
-public class InitializrModel  {
+public class InitializrModel  implements Disposable {
 
 	public static final Object JOB_FAMILY = "EditStartersModel.JOB_FAMILY";
 
@@ -266,6 +267,7 @@ public class InitializrModel  {
 		return this.compareModel;
 	}
 
+	@Override
 	public void dispose() {
 		this.compareModel.dispose();
 	}
