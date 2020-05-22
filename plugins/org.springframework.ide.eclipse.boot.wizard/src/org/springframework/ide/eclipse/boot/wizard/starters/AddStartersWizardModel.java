@@ -278,7 +278,7 @@ public class AddStartersWizardModel implements OkButtonHandler, Disposable {
 		String url = urlField.getValue();
 		ValidationResult result = null;
 		if (!StringUtil.hasText(url)) {
-			String msg = "Missing Initializr Service URL.";
+			String msg = "Missing initializr service URL";
 			 result = AddStartersError.from(msg, msg);
 		} else {
 			try {
