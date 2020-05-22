@@ -11,7 +11,9 @@
 package org.springframework.ide.eclipse.boot.wizard.starters;
 
 import java.io.FileNotFoundException;
+import java.net.ConnectException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -202,6 +204,8 @@ public class AddStartersWizardModel implements OkButtonHandler, Disposable {
 			// Notify that this boot version is unsupported
 			this.bootVersionErrorMarker.setValue(addStartersError);
 
+		} else if (deepestCause instanceof UnknownHostException || deepestCause instanceof ConnectException) {
+		   this.urlErrorMarker.setValue(addStartersError);
 		} else {
 			// some other  error unrelated to the boot version or URL
 			this.initializrValidator.setValue(addStartersError);
