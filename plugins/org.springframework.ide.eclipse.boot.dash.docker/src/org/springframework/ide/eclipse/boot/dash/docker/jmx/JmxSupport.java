@@ -10,15 +10,14 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.docker.jmx;
 
-import java.io.IOException;
-import java.util.List;
+import java.util.EnumSet;
 import java.util.Map;
 
+import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport;
 import org.springframework.ide.eclipse.boot.launch.util.PortFinder;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
+import static org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport.Feature.*;
 
 /**
  * Helper class providing functionality to connect to JMX on a remote spring boot app
@@ -38,17 +37,24 @@ public class JmxSupport {
 			"-D(com\\.sun\\.management\\.jmxremote|java\\.rmi\\.server|spring\\.jmx)\\.[a-z\\.]*=\\S*\\s*";
 
 	private static final String JMX_ARGS(int port) {
+//		return JmxBeanSupport.jmxBeanVmArgs(port, EnumSet.of(JMX, LIFE_CYCLE));
 		return "-Dcom.sun.management.jmxremote.ssl=false " +
 			   "-Dcom.sun.management.jmxremote.authenticate=false " +
 			   "-Dcom.sun.management.jmxremote.port="+port+" " +
 			   "-Dcom.sun.management.jmxremote.rmi.port="+port+" " +
 			   "-Djava.rmi.server.hostname=localhost " +
 			   "-Dcom.sun.management.jmxremote.local.only=false "+
-			   "-Dspring.jmx.enabled=true";
+			   "-Dspring.jmx.enabled=true " +
+			   "-Dspring.application.admin.enabled=true";
 	}
 	
 	int port;
 
+	
+	public JmxSupport(int port) {
+		this.port = port;
+	}
+	
 	public JmxSupport() {
 		try {
 			port = PortFinder.findFreePort();

@@ -61,8 +61,8 @@ public class BootLaunchUtils {
 					&& BootLaunchConfigurationDelegate.canUseLifeCycle(conf)
 			) {
 				SpringApplicationLifeCycleClientManager clientMgr = new SpringApplicationLifeCycleClientManager(l);
-				SpringApplicationLifecycleClient client = clientMgr.getLifeCycleClient();
 				try {
+					SpringApplicationLifecycleClient client = clientMgr.getLifeCycleClient();
 					if (client!=null) {
 						client.stop();
 						whenTerminated(l).get(BootLaunchConfigurationDelegate.getTerminationTimeoutAsLong(l), TimeUnit.MILLISECONDS);

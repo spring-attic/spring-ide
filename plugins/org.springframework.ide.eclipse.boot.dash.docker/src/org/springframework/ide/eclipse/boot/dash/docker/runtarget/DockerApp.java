@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
@@ -60,16 +59,15 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 	
 	public static final String APP_NAME = "sts.app.name";
 	public static final String BUILD_ID = "sts.app.build-id";
+	public static final String JMX_PORT = "sts.app.jmx.port";
 	
 	private static final int STOP_WAIT_TIME_IN_SECONDS = 20;
 	public final CompletableFuture<RefreshStateTracker> refreshTracker = new CompletableFuture<>();
-	private final JmxSupport jmx;
 
 	public DockerApp(String name, DockerRunTarget target, DockerClient client) {
 		this.target = target;
 		this.name = name;
 		this.client = client;
-		this.jmx = new JmxSupport();
 		this.project = ResourcesPlugin.getWorkspace().getRoot().getProject(deployment().getName());
 		AppConsole console = target.injections().getBean(AppConsoleProvider.class).getConsole(this);
 		console.write("Creating app node " + getName(), LogType.STDOUT);
@@ -169,16 +167,17 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 			console.write("Cannot start container... Docker client is disconnected!", LogType.STDERROR);
 		} else {
 			console.write("Running container with '"+image+"'", LogType.STDOUT);
+			JmxSupport jmx = new JmxSupport();
 			String jmxUrl = jmx.getJmxUrl();
 			if (jmxUrl!=null) {
 				console.write("JMX URL = "+jmxUrl, LogType.STDOUT);
 			}
+			ImmutableMap.Builder<String,String> labels = ImmutableMap.<String,String>builder()
+					.put(APP_NAME, getName())
+					.put(BUILD_ID, desiredBuildId);
+			
 			ContainerConfig.Builder cb = ContainerConfig.builder()
-					.image(image)
-					.labels(ImmutableMap.of(
-							APP_NAME, getName(),
-							BUILD_ID, desiredBuildId
-					));
+					.image(image);
 			if (jmxUrl!=null) {
 				String port = ""+jmx.getPort();
 				cb.hostConfig(HostConfig.builder()
@@ -189,7 +188,9 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 				);
 				cb.exposedPorts(port);
 				cb.env("JAVA_OPTS="+jmx.getJavaOpts());
+				labels.put(JMX_PORT, port);
 			}
+			cb.labels(labels.build());
 			ContainerCreation c = client.createContainer(cb.build());
 			console.write("Container created: "+c.id(), LogType.STDOUT);
 			console.write("Starting container: "+c.id(), LogType.STDOUT);
@@ -206,7 +207,7 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 	
 	private String build(AppConsole console) throws Exception {
 		AtomicReference<String> image = new AtomicReference<>();
-		ProcessBuilder builder = new ProcessBuilder("./mvnw", "spring-boot:build-image")
+		ProcessBuilder builder = new ProcessBuilder("./mvnw", "spring-boot:build-image", "-DskipTests")
 				.directory(new File(project.getLocation().toString()));
 		
 		Process process = builder.start();

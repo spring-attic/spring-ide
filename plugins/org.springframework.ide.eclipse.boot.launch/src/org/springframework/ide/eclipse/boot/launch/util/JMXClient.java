@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.launch.util;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
@@ -98,6 +99,10 @@ public class JMXClient implements Disposable {
 	 */
 	public static JMXConnector createLocalJmxConnector(int port) throws IOException {
 		String url = "service:jmx:rmi:///jndi/rmi://127.0.0.1:" + port + "/jmxrmi";
+		return createJmxConnectorFromUrl(url);
+	}
+
+	public static JMXConnector createJmxConnectorFromUrl(String url) throws MalformedURLException, IOException {
 		JMXServiceURL serviceUrl = new JMXServiceURL(url);
 		return JMXConnectorFactory.connect(serviceUrl, null);
 	}

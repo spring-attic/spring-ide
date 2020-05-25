@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2020 Pivotal Software, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Pivotal Software, Inc. - initial API and implementation
+ *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model.remote;
 
 import java.util.EnumSet;
@@ -12,7 +22,6 @@ import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.AppContext;
 import org.springframework.ide.eclipse.boot.dash.api.Deletable;
 import org.springframework.ide.eclipse.boot.dash.api.RunStateProvider;
-import org.springframework.ide.eclipse.boot.dash.cloudfoundry.RemoteBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
@@ -72,9 +81,13 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 					ImmutableSet.Builder<BootDashElement> builder = ImmutableSet.builder();
 					for (App child : children) {
 						GenericRemoteAppElement childElement = childFactory.createOrGet(child.getName());
-						child.setContext(childElement);
-						childElement.setAppData(child);
-						builder.add(childElement);
+						if (childElement!=null) {
+							child.setContext(childElement);
+							childElement.setAppData(child);
+							builder.add(childElement);
+						} else {
+							Log.warn("No boot dash element for child: "+child);
+						}
 					}
 					return builder.build();
 				} catch (Exception e) {
@@ -85,7 +98,7 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		}
 	};
 
-	private LiveExpression<RunState> runState = new AsyncLiveExpression<RunState>(RunState.UNKNOWN) {
+	private LiveExpression<RunState> baseRunState = new AsyncLiveExpression<RunState>(RunState.UNKNOWN) {
 		{
 			dependsOn(app);
 			dependsOn(children);
@@ -115,6 +128,7 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		}
 	};
 
+	private JmxRunStateTracker jmxRunStateTracker = new JmxRunStateTracker(this, baseRunState, app);
 
 	public GenericRemoteAppElement(GenericRemoteBootDashModel<?, ?> model, String appId) {
 		this(model, model, appId);
@@ -123,15 +137,16 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 	public GenericRemoteAppElement(GenericRemoteBootDashModel<?,?> model, Object parent, String appId) {
 		super(model, appId);
 		children.dependsOn(model.refreshCount());
-		runState.dependsOn(model.refreshCount());
+		baseRunState.dependsOn(model.refreshCount());
 		addDisposableChild(this.childFactory);
 		this.parent = parent;
 		System.out.println("New GenericRemoteAppElement instances = " +instances.incrementAndGet());
 
 		app.dependsOn(model.getRunTarget().getClientExp());
 		app.dependsOn(getBootDashModel().refreshCount());
-		addDisposableChild(runState);
-		addElementNotifier(runState);
+		addDisposableChild(baseRunState);
+		addDisposableChild(jmxRunStateTracker);
+		addElementNotifier(jmxRunStateTracker.augmentedRunState);
 		onDispose(d -> {
 			System.out.println("Dispose GenericRemoteAppElement instances = " +instances.decrementAndGet());
 		});
@@ -158,7 +173,7 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 
 	@Override
 	public RunState getRunState() {
-		return runState.getValue();
+		return jmxRunStateTracker.augmentedRunState.getValue();
 	}
 
 	@Override
