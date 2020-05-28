@@ -130,12 +130,6 @@ public class AddStartersWizardModel implements OkButtonHandler, Disposable {
 	public AddStartersWizardModel(IProject project, IPreferenceStore preferenceStore) throws Exception {
 		this.project = project;
 		this.preferenceStore = preferenceStore;
-
-		String[] urls = BootPreferences.getInitializrUrls();
-		this.serviceUrlOptions = urls != null ? urls : new String[0];
-
-		String initializrUrl = BootPreferences.getInitializrUrl();
-		urlField.getVariable().setValue(initializrUrl);
 	}
 
 	public FieldModel<String> getBootVersion() {
@@ -216,13 +210,26 @@ public class AddStartersWizardModel implements OkButtonHandler, Disposable {
 		}
 	}
 
-
-	public void addModelLoader(Runnable externalModelLoader) {
+	synchronized public void addModelLoader(Runnable externalModelLoader) {
 		this.externalModelLoader = externalModelLoader;
-		asyncLoadModel();
+
+		// Setting URL will trigger model loading.
+		setUrlValues();
 	}
 
-	private void asyncLoadModel() {
+	private void setUrlValues() {
+		String[] urls = BootPreferences.getInitializrUrls();
+		this.serviceUrlOptions = urls;
+
+		String initializrUrl = BootPreferences.getInitializrUrl();
+		urlField.getVariable().setValue(initializrUrl);
+	}
+
+	synchronized private void asyncLoadModel() {
+		// If the model loader is not yet available, don't do anything
+		if (AddStartersWizardModel.this.externalModelLoader == null) {
+			return;
+		}
 		if (asyncModelLoadJob == null) {
 			// Load the model async as it can be long running or potentially block on connection to initializr
 			asyncModelLoadJob = new Job("Loading initializr model") {
@@ -238,7 +245,7 @@ public class AddStartersWizardModel implements OkButtonHandler, Disposable {
 					ValidationResult result = basicUrlValidation();
 					if (result.isOk()) {
 						result = basicUrlConnection();
-						if (result.isOk() && AddStartersWizardModel.this.externalModelLoader != null) {
+						if (result.isOk()) {
 							AddStartersWizardModel.this.externalModelLoader.run();
 						}
 					}
@@ -379,6 +386,6 @@ public class AddStartersWizardModel implements OkButtonHandler, Disposable {
 	}
 
 	public String[] getServiceUrlOptions() {
-		return serviceUrlOptions;
+		return this.serviceUrlOptions != null ? serviceUrlOptions : new String[0];
 	}
 }

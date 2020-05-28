@@ -121,6 +121,15 @@ public class DependencyPage extends WizardPageWithSections {
 	public DependencyPage(AddStartersWizardModel wizardModel) {
 		super("Dependencies", "New Spring Starter Project Dependencies", null);
 		this.wizardModel = wizardModel;
+		// Add the model loader before UI is created, so that it can be invoked as UI is created (e.g. URL field is created)
+		wizardModel.addModelLoader(() -> {
+			runWithWizardProgress(monitor -> {
+				monitor.beginTask("Loading starters data", IProgressMonitor.UNKNOWN);
+				monitor.subTask("Creating Boot project model and fetching data from Initializr Service...");
+				wizardModel.createInitializrModel(monitor);
+				monitor.done();
+			});
+		});
 	}
 
 	private void refreshFrequentlyUsedDependencies(InitializrModel model) {
@@ -169,15 +178,6 @@ public class DependencyPage extends WizardPageWithSections {
 		// the various validators that exist
 		validator.addChild(wizardModel.getValidator());
 		validator.addChild(pageValidator);
-
-		wizardModel.addModelLoader(() -> {
-			runWithWizardProgress(monitor -> {
-				monitor.beginTask("Loading starters data", IProgressMonitor.UNKNOWN);
-				monitor.subTask("Creating Boot project model and fetching data from Initializr Service...");
-				wizardModel.createInitializrModel(monitor);
-				monitor.done();
-			});
-		});
 	}
 
 	private void createErrorSection(List<WizardPageSection> sections) {
