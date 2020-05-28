@@ -31,7 +31,6 @@ import org.springframework.ide.eclipse.boot.wizard.MakeDefaultSection;
 import org.springframework.ide.eclipse.boot.wizard.SearchBoxSection;
 import org.springframework.ide.eclipse.boot.wizard.SelectedDependenciesSection;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.ui.ChooseOneSectionCombo;
 import org.springsource.ide.eclipse.commons.livexp.ui.CommentSection;
@@ -42,6 +41,7 @@ import org.springsource.ide.eclipse.commons.livexp.ui.LabeledPropertySection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.WizardPageWithSections;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 import org.springsource.ide.eclipse.commons.livexp.util.Parser;
 
 public class DependencyPage extends WizardPageWithSections {
@@ -52,11 +52,6 @@ public class DependencyPage extends WizardPageWithSections {
 
 	private CheckBoxesSection<Dependency> frequentlyUsedCheckboxes;
 
-	// A validator that generates UI-specific results that for some reason were not
-	// contained in the actual wizard model. For example, catching some wizard UI related
-	// exceptions. Should only be used for wizard UI issues. Any validation that occurs
-	// in the model should use the model's own validator
-	private LiveVariable<ValidationResult> pageValidator = new LiveVariable<>();
 
 	protected final AddStartersWizardModel wizardModel;
 
@@ -177,7 +172,6 @@ public class DependencyPage extends WizardPageWithSections {
 		// mechanism, which among things is responsbile for showing errors from
 		// the various validators that exist
 		validator.addChild(wizardModel.getValidator());
-		validator.addChild(pageValidator);
 	}
 
 	private void createErrorSection(List<WizardPageSection> sections) {
@@ -191,8 +185,9 @@ public class DependencyPage extends WizardPageWithSections {
 			try {
 				getContainer().run(true, false, runnable);
 			} catch (Exception e) {
-				pageValidator.setValue(ValidationResult
-						.error(ExceptionUtil.getMessage(e)));
+				String message = ExceptionUtil.getMessage(e);
+				setErrorMessage(message);
+				Log.log(e);
 			}
 		});
 	}
@@ -287,7 +282,8 @@ public class DependencyPage extends WizardPageWithSections {
 	}
 
 	private boolean isValid() {
-		return validator.getValue() != null && validator.getValue().isOk();
+		LiveExpression<ValidationResult> wizardModelValidator = wizardModel.getValidator();
+		return wizardModelValidator.getValue() != null && wizardModelValidator.getValue().isOk();
 	}
 
 	private void refreshWizardUi() {
