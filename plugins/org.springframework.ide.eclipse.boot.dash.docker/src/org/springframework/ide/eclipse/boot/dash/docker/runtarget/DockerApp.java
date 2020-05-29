@@ -13,8 +13,11 @@ package org.springframework.ide.eclipse.boot.dash.docker.runtarget;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
@@ -35,23 +38,30 @@ import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.remote.ChildBearing;
 import org.springframework.ide.eclipse.boot.dash.model.remote.RefreshStateTracker;
 import org.springframework.ide.eclipse.boot.dash.util.LineBasedStreamGobler;
+import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.spotify.docker.client.DockerClient;
 import com.spotify.docker.client.DockerClient.ListContainersParam;
+import com.spotify.docker.client.DockerClient.ListImagesParam;
 import com.spotify.docker.client.DockerClient.LogsParam;
 import com.spotify.docker.client.LogStream;
 import com.spotify.docker.client.messages.Container;
 import com.spotify.docker.client.messages.ContainerConfig;
 import com.spotify.docker.client.messages.ContainerCreation;
 import com.spotify.docker.client.messages.HostConfig;
+import com.spotify.docker.client.messages.Image;
 import com.spotify.docker.client.messages.PortBinding;
 
 public class DockerApp extends AbstractDisposable implements App, ChildBearing, Deletable  {
 
+	private static final String DOCKER_IO_LIBRARY = "docker.io/library/";
+	private static final String[] NO_STRINGS = new String[0];
 	private DockerClient client;
 	private final IProject project;
 	private DockerRunTarget target;
@@ -72,6 +82,10 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 		AppConsole console = target.injections().getBean(AppConsoleProvider.class).getConsole(this);
 		console.write("Creating app node " + getName(), LogType.STDOUT);
 	}
+	
+	public DockerClient getClient() {
+		return this.client;
+	}
 
 	private DockerDeployment deployment() {
 		return target.deployments.get(name);
@@ -91,8 +105,18 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 	public List<App> fetchChildren() throws Exception {
 		Builder<App> builder = ImmutableList.builder();
 		if (client!=null) {
-			for (Container container : client.listContainers(ListContainersParam.allContainers(), ListContainersParam.withLabel(APP_NAME, getName()))) {
-				builder.add(new DockerContainer(target, container));
+			List<Image> images = client.listImages(ListImagesParam.allImages());
+			
+			synchronized (this) {
+				Set<String> persistedImages = new HashSet<>(Arrays.asList(getPersistedImages()));
+				Set<String> existingImages = new HashSet<>();
+				for (Image image : images) {
+					if (persistedImages.contains(image.id())) {
+						builder.add(new DockerImage(this, image));
+						existingImages.add(image.id());
+					}
+				}
+				setPersistedImages(existingImages);
 			}
 		}
 		return builder.build();
@@ -225,7 +249,53 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 			throw new IOException("Command execution failed!");
 		}
 		outputGobler.join();
-		return image.get();
+		
+		String imageTag = image.get();
+		if (imageTag.startsWith(DOCKER_IO_LIBRARY)) {
+			imageTag = imageTag.substring(DOCKER_IO_LIBRARY.length());
+		}
+		List<Image> images = client.listImages(ListImagesParam.byName(imageTag));
+		
+		for (Image img : images) {
+			addPersistedImage(img.id());
+		}
+		
+		return imageTag;
+	}
+
+	synchronized private void addPersistedImage(String imageId) {
+		String key = imagesKey();
+		try {
+			ImmutableSet.Builder<String> builder = ImmutableSet.builder();
+			PropertyStoreApi props = getTarget().getPersistentProperties();
+			builder.addAll(Arrays.asList(props.get(key, NO_STRINGS)));
+			builder.add(imageId);
+			props.put(key, builder.build().toArray(NO_STRINGS));
+
+		} catch (Exception e) {
+			Log.log(e);
+		}
+	}
+	
+	private void setPersistedImages(Set<String> existingImages) {
+		try {
+			getTarget().getPersistentProperties().put(imagesKey(), existingImages.toArray(NO_STRINGS));
+		} catch (Exception e) {
+			Log.log(e);
+		}		
+	}
+
+	private String[] getPersistedImages() {
+		try {
+			return getTarget().getPersistentProperties().get(imagesKey(), NO_STRINGS);
+		} catch (Exception e) {
+			Log.log(e);
+		}
+		return NO_STRINGS;
+	}
+
+	private String imagesKey() {
+		return getName() + ".images";
 	}
 
 	@Override

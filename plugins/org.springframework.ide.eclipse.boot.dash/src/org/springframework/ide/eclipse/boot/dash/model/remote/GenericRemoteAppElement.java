@@ -36,6 +36,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
+import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.common.collect.ImmutableSet;
@@ -59,44 +60,41 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		}
 	};
 
-	private ObservableSet<BootDashElement> children = new ObservableSet<BootDashElement>() {
+	private ObservableSet<BootDashElement> children = ObservableSet.<BootDashElement>builder().refresh(AsyncMode.ASYNC).compute(() -> {
 
-		{
-			dependsOn(app);
-			dependsOn(refreshTracker.refreshState);
-		}
-
-		@Override
-		protected ImmutableSet<BootDashElement> compute() {
-			App appVal = app.getValue();
-			if (appVal instanceof ChildBearing) {
-				try {
-					List<App> children = ((ChildBearing)appVal).fetchChildren();
-					ImmutableSet.Builder<String> existingIds = ImmutableSet.builder();
-					for (App app : children) {
-						existingIds.add(app.getName());
-					}
-					existingChildIds.replaceAll(existingIds.build());
-
-					ImmutableSet.Builder<BootDashElement> builder = ImmutableSet.builder();
-					for (App child : children) {
-						GenericRemoteAppElement childElement = childFactory.createOrGet(child.getName());
-						if (childElement!=null) {
-							child.setContext(childElement);
-							childElement.setAppData(child);
-							builder.add(childElement);
-						} else {
-							Log.warn("No boot dash element for child: "+child);
-						}
-					}
-					return builder.build();
-				} catch (Exception e) {
-					Log.log(e);
+		App appVal = app.getValue();
+		if (appVal instanceof ChildBearing) {
+			try {
+				List<App> children = ((ChildBearing)appVal).fetchChildren();
+				ImmutableSet.Builder<String> existingIds = ImmutableSet.builder();
+				for (App app : children) {
+					existingIds.add(app.getName());
 				}
+				existingChildIds.replaceAll(existingIds.build());
+
+				ImmutableSet.Builder<BootDashElement> builder = ImmutableSet.builder();
+				for (App child : children) {
+					GenericRemoteAppElement childElement = childFactory.createOrGet(child.getName());
+					if (childElement!=null) {
+						child.setContext(childElement);
+						childElement.setAppData(child);
+						builder.add(childElement);
+					} else {
+						Log.warn("No boot dash element for child: "+child);
+					}
+				}
+				return builder.build();
+			} catch (Exception e) {
+				Log.log(e);
 			}
-			return ImmutableSet.of();
 		}
-	};
+		return ImmutableSet.of();
+	}).build();
+
+	{
+		children.dependsOn(app);
+		children.dependsOn(refreshTracker.refreshState);
+	}
 
 	private LiveExpression<RunState> baseRunState = new AsyncLiveExpression<RunState>(RunState.UNKNOWN) {
 		{
