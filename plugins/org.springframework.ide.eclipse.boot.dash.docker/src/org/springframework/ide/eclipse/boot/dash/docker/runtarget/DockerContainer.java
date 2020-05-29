@@ -10,16 +10,21 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.docker.runtarget;
 
+import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.swt.SWT;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.JmxConnectable;
 import org.springframework.ide.eclipse.boot.dash.api.RunStateProvider;
+import org.springframework.ide.eclipse.boot.dash.api.Styleable;
 import org.springframework.ide.eclipse.boot.dash.docker.jmx.JmxSupport;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
+import org.springsource.ide.eclipse.commons.core.util.StringUtil;
+import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.spotify.docker.client.messages.Container;
 
-public class DockerContainer implements App, RunStateProvider, JmxConnectable {
+public class DockerContainer implements App, RunStateProvider, JmxConnectable, Styleable {
 
 	private final Container container;
 	private final DockerRunTarget target;
@@ -66,5 +71,23 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable {
 	@Override
 	public String toString() {
 		return "DockerContainer("+container.id()+")";
+	}
+
+	@Override
+	public StyledString getStyledName(Stylers stylers) {
+		StyledString styledString = new StyledString();
+		if (container.names() != null && !container.names().isEmpty()) {
+			styledString = styledString.append(StringUtil.removePrefix(container.names().get(0), "/")).append(" ");
+		}
+		styledString = styledString.append(getShortHash(), stylers.italicColoured(SWT.COLOR_DARK_GRAY));
+		return styledString;
+	}
+
+	private String getShortHash() {
+		String id = container.id();
+		if (id.length() > 12) {
+			id = id.substring(0, 12);
+		}		
+		return id;
 	}
 }

@@ -37,6 +37,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.api.Styleable;
 //import org.springframework.ide.eclipse.boot.dash.cloudfoundry.CloudServiceInstanceDashElement;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractLaunchConfigurationsDashElement;
@@ -353,13 +354,15 @@ public class BootDashLabels implements Disposable {
 					}
 				}
 			} else if (column==NAME) {
-				styledLabel = new StyledString();
-
-				if (element.getName() != null) {
-					styledLabel.append(element.getName());
-				}
-				else {
-					styledLabel.append(UNKNOWN_LABEL);
+				styledLabel = getStyleableName(element);
+				if (styledLabel == null) {
+					styledLabel = new StyledString();
+					if (element.getName() != null) {
+						styledLabel.append(element.getName());
+					}
+					else {
+						styledLabel.append(UNKNOWN_LABEL);
+					}
 				}
 			} else if (column==DEVTOOLS) {
 				if (element.hasDevtools()) {
@@ -450,6 +453,13 @@ public class BootDashLabels implements Disposable {
 			return new StyledString(label);
 		}
 		return new StyledString("");
+	}
+
+	private StyledString getStyleableName(BootDashElement element) {
+		if (element instanceof Styleable) {
+			return ((Styleable)element).getStyledName(stylers);
+		}
+		return null;
 	}
 
 	private StyledString styledTextFromContributions(BootDashElement element, BootDashColumn col) {

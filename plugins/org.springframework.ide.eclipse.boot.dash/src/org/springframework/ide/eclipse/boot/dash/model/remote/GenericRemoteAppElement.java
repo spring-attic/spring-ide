@@ -17,11 +17,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.jface.viewers.StyledString;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModel;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.AppContext;
 import org.springframework.ide.eclipse.boot.dash.api.Deletable;
 import org.springframework.ide.eclipse.boot.dash.api.RunStateProvider;
+import org.springframework.ide.eclipse.boot.dash.api.Styleable;
 import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
@@ -36,12 +38,13 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
+import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.common.collect.ImmutableSet;
 
-public class GenericRemoteAppElement extends WrappingBootDashElement<String> implements Deletable, AppContext {
+public class GenericRemoteAppElement extends WrappingBootDashElement<String> implements Deletable, AppContext, Styleable {
 
 	private static AtomicInteger instances = new AtomicInteger();
 
@@ -289,6 +292,15 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		if (app instanceof Deletable) {
 			((Deletable) app).delete();
 		}
+	}
+
+	@Override
+	public StyledString getStyledName(Stylers stylers) {
+		App app = this.app.getValue();
+		if (app instanceof Styleable) {
+			return ((Styleable) app).getStyledName(stylers);
+		}
+		return null;
 	}
 
 }

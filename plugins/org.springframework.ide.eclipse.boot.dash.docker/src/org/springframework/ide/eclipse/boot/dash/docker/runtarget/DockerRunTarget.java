@@ -15,6 +15,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.remote.GenericRemoteBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget;
+import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 
@@ -109,5 +110,13 @@ implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentT
 			d.setBuildId(UUID.randomUUID().toString());
 			deployments.createOrUpdate(d);
 		}
+	}
+	
+	@Override
+	public BootDashColumn[] getDefaultColumns() {
+		return new BootDashColumn[] { 
+				BootDashColumn.NAME,
+//				BootDashColumn.LIVE_PORT
+		};
 	}
 }
