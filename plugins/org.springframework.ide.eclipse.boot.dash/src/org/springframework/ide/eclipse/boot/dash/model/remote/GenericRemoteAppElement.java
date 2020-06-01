@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.model.remote;
 
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.resources.IProject;
@@ -22,10 +23,12 @@ import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModel;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.AppContext;
 import org.springframework.ide.eclipse.boot.dash.api.Deletable;
+import org.springframework.ide.eclipse.boot.dash.api.PortConnectable;
 import org.springframework.ide.eclipse.boot.dash.api.RunStateProvider;
 import org.springframework.ide.eclipse.boot.dash.api.Styleable;
 import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
@@ -34,17 +37,19 @@ import org.springframework.ide.eclipse.boot.dash.model.actuator.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.env.LiveEnvModel;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
-import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.common.collect.ImmutableSet;
 
-public class GenericRemoteAppElement extends WrappingBootDashElement<String> implements Deletable, AppContext, Styleable {
+public class GenericRemoteAppElement extends WrappingBootDashElement<String> implements Deletable, AppContext, Styleable, ElementStateListener {
+
+	private static final boolean DEBUG = false;
 
 	private static AtomicInteger instances = new AtomicInteger();
 
@@ -93,7 +98,6 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		}
 		return ImmutableSet.of();
 	}).build();
-
 	{
 		children.dependsOn(app);
 		children.dependsOn(refreshTracker.refreshState);
@@ -131,8 +135,59 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 
 	private JmxRunStateTracker jmxRunStateTracker = new JmxRunStateTracker(this, baseRunState, app);
 
+
+	private ObservableSet<Integer> livePorts = ObservableSet.<Integer>builder().refresh(AsyncMode.ASYNC).compute(() -> {
+
+		ImmutableSet.Builder<Integer> builder = ImmutableSet.builder();
+
+		if (getRunState() == RunState.RUNNING || getRunState() == RunState.DEBUGGING) {
+			App appVal = app.getValue();
+			debug("appVal: " + appVal);
+			if (appVal instanceof PortConnectable) {
+
+				Set<Integer> appLivePorts = ((PortConnectable) appVal).getPorts();
+
+				debug("from PortConnectable: " +appLivePorts);
+
+				if (appLivePorts != null) {
+					builder.addAll(appLivePorts);
+				}
+			}
+			else {
+				debug("not PortConnectable");
+			}
+
+			ImmutableSet<BootDashElement> children = this.children.getValue();
+			if (children != null && !children.isEmpty()) {
+				for (BootDashElement child : children) {
+					ImmutableSet<Integer> childPorts = child.getLivePorts();
+					debug("from child: " + child.getName() + " - " + childPorts);
+					if (childPorts != null) {
+						builder.addAll(childPorts);
+					}
+				}
+			}
+			else {
+				debug("No Children");
+			}
+		}
+		return builder.build();
+	}).build();
+	{
+		livePorts.dependsOn(children);
+		livePorts.dependsOn(app);
+		livePorts.dependsOn(getRunStateExp());
+	}
+
+
 	public GenericRemoteAppElement(GenericRemoteBootDashModel<?, ?> model, String appId) {
 		this(model, model, appId);
+	}
+
+	private void debug(String message) {
+		if (DEBUG) {
+			System.out.println(this + ": " + message);
+		}
 	}
 
 	public GenericRemoteAppElement(GenericRemoteBootDashModel<?,?> model, Object parent, String appId) {
@@ -147,9 +202,15 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		app.dependsOn(getBootDashModel().refreshCount());
 		addDisposableChild(baseRunState);
 		addDisposableChild(jmxRunStateTracker);
-		addElementNotifier(jmxRunStateTracker.augmentedRunState);
+		addElementNotifier(getRunStateExp());
+		addDisposableChild(livePorts);
+		addElementNotifier(livePorts);
+
+		model.addElementStateListener(this);
+
 		onDispose(d -> {
 			System.out.println("Dispose GenericRemoteAppElement instances = " +instances.decrementAndGet());
+			model.removeElementStateListener(this);
 		});
 	}
 
@@ -164,8 +225,7 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 
 	@Override
 	public String getName() {
-		App data = app.getValue();
-		return data!=null?data.getName():"Uknown";
+		return super.delegate;
 	}
 
 	public void setAppData(App appData) {
@@ -174,7 +234,11 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 
 	@Override
 	public RunState getRunState() {
-		return jmxRunStateTracker.augmentedRunState.getValue();
+		return getRunStateExp().getValue();
+	}
+
+	private LiveExpression<RunState> getRunStateExp() {
+		return jmxRunStateTracker.augmentedRunState;
 	}
 
 	@Override
@@ -196,14 +260,21 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 
 	@Override
 	public int getLivePort() {
-		// TODO Auto-generated method stub
+		ImmutableSet<Integer> ports = getLivePorts();
+		if (ports != null && !ports.isEmpty()) {
+			return ports.iterator().next();
+		}
 		return 0;
 	}
 
 	@Override
+	public ImmutableSet<Integer> getLivePorts() {
+		return livePorts.getValue();
+	}
+
+	@Override
 	public String getLiveHost() {
-		// TODO Auto-generated method stub
-		return null;
+		return "localhost";
 	}
 
 	@Override
@@ -273,7 +344,6 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 
 	@Override
 	public ObservableSet<BootDashElement> getChildren() {
-
 		return children;
 	}
 
@@ -301,6 +371,11 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 			return ((Styleable) app).getStyledName(stylers);
 		}
 		return null;
+	}
+
+	@Override
+	public void stateChanged(BootDashElement e) {
+		this.livePorts.refresh();
 	}
 
 }

@@ -38,6 +38,7 @@ import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.remote.ChildBearing;
 import org.springframework.ide.eclipse.boot.dash.model.remote.RefreshStateTracker;
 import org.springframework.ide.eclipse.boot.dash.util.LineBasedStreamGobler;
+import org.springframework.ide.eclipse.boot.launch.util.PortFinder;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
@@ -70,6 +71,7 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 	public static final String APP_NAME = "sts.app.name";
 	public static final String BUILD_ID = "sts.app.build-id";
 	public static final String JMX_PORT = "sts.app.jmx.port";
+	public static final String APP_LOCAL_PORT = "sts.app.port.local";
 	
 	private static final int STOP_WAIT_TIME_IN_SECONDS = 20;
 	public final CompletableFuture<RefreshStateTracker> refreshTracker = new CompletableFuture<>();
@@ -200,25 +202,45 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 					.put(APP_NAME, getName())
 					.put(BUILD_ID, desiredBuildId);
 			
+			ImmutableSet.Builder<String> exposedPorts = ImmutableSet.builder();
+			ImmutableMap.Builder<String, List<PortBinding>> portBindings = ImmutableMap.builder();
+
 			ContainerConfig.Builder cb = ContainerConfig.builder()
 					.image(image);
-			if (jmxUrl!=null) {
-				String port = ""+jmx.getPort();
-				cb.hostConfig(HostConfig.builder()
-						.portBindings(ImmutableMap.of(
-								port, ImmutableList.of(PortBinding.of("0.0.0.0", port))
-						))
-						.build()
-				);
-				cb.exposedPorts(port);
-				cb.env("JAVA_OPTS="+jmx.getJavaOpts());
-				labels.put(JMX_PORT, port);
+			
+			int appLocalPort = PortFinder.findFreePort();
+			int appContainerPort = 8080;
+			
+			if (appLocalPort > 0) {
+				labels.put(APP_LOCAL_PORT, ""+appLocalPort);
+				portBindings.put("" + appContainerPort, ImmutableList.of(PortBinding.of("0.0.0.0", appLocalPort)));
+				exposedPorts.add(""+appContainerPort);
 			}
+			
+
+			if (jmxUrl!=null) {
+				String jmxPort = ""+jmx.getPort();
+				
+				portBindings.put(jmxPort, ImmutableList.of(PortBinding.of("0.0.0.0", jmxPort)));
+				exposedPorts.add(jmxPort);
+				
+				cb.env("JAVA_OPTS="+jmx.getJavaOpts());
+				labels.put(JMX_PORT, jmxPort);
+			}
+			
+			cb.hostConfig(HostConfig.builder()
+					.portBindings(portBindings.build())
+					.build()
+			);
+			cb.exposedPorts(exposedPorts.build());
+
 			cb.labels(labels.build());
 			ContainerCreation c = client.createContainer(cb.build());
 			console.write("Container created: "+c.id(), LogType.STDOUT);
 			console.write("Starting container: "+c.id(), LogType.STDOUT);
+			console.write("Ports: "+appLocalPort+"->"+appContainerPort, LogType.STDOUT);
 			client.startContainer(c.id());
+			
 			LogStream appOutput = client.logs(c.id(), LogsParam.stdout(), LogsParam.follow());
 			JobUtil.runQuietlyInJob("Tracking output for docker container "+c.id(), mon -> {
 				appOutput.attach(console.getOutputStream(LogType.APP_OUT), console.getOutputStream(LogType.APP_OUT));
@@ -318,5 +340,4 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 			target.deployments.createOrUpdate(deployment.withGoalState(newGoalState));
 		}
 	}
-
 }

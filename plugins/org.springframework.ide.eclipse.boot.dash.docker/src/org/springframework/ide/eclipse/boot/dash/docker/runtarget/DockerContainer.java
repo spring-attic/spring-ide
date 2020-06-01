@@ -10,10 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.docker.runtarget;
 
+import java.util.Set;
+
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.SWT;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.JmxConnectable;
+import org.springframework.ide.eclipse.boot.dash.api.PortConnectable;
 import org.springframework.ide.eclipse.boot.dash.api.RunStateProvider;
 import org.springframework.ide.eclipse.boot.dash.api.Styleable;
 import org.springframework.ide.eclipse.boot.dash.docker.jmx.JmxSupport;
@@ -22,9 +25,10 @@ import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
+import com.google.common.collect.ImmutableSet;
 import com.spotify.docker.client.messages.Container;
 
-public class DockerContainer implements App, RunStateProvider, JmxConnectable, Styleable {
+public class DockerContainer implements App, RunStateProvider, JmxConnectable, Styleable, PortConnectable {
 
 	private final Container container;
 	private final DockerRunTarget target;
@@ -89,5 +93,15 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 			id = id.substring(0, 12);
 		}		
 		return id;
+	}
+
+	@Override
+	public Set<Integer> getPorts() {
+		ImmutableSet.Builder<Integer> livePorts = ImmutableSet.builder();
+		String portVal = container.labels().get(DockerApp.APP_LOCAL_PORT);
+		if (portVal != null) {
+			livePorts.add(Integer.parseInt(portVal));
+		}
+		return livePorts.build();
 	}
 }

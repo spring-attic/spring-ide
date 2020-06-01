@@ -35,12 +35,15 @@ public class JmxRunStateTracker extends AbstractDisposable {
 
 	private static final long APP_STARTUP_TIMEOUT = 60_000;
 	private static final long POLLING_INTERVAL = 500;
+	private static final boolean DEBUG = false;
 
 	long creationTime = System.currentTimeMillis();
 
 
 	private void debug(String string) {
-		System.out.println(this+" : "+string);
+		if (DEBUG) {
+			System.out.println(this+" : "+string);
+		}
 	}
 
 	public final LiveExpression<RunState> augmentedRunState = new AsyncLiveExpression<RunState>(RunState.INACTIVE) {

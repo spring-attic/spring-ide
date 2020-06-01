@@ -116,7 +116,7 @@ implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentT
 	public BootDashColumn[] getDefaultColumns() {
 		return new BootDashColumn[] { 
 				BootDashColumn.NAME,
-//				BootDashColumn.LIVE_PORT
+				BootDashColumn.LIVE_PORT
 		};
 	}
 }
