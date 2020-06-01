@@ -70,6 +70,7 @@ public class JmxRunStateTracker extends AbstractDisposable {
 				} catch (Exception e) {
 					// failed to connect
 					error = e;
+					clientMgr.disposeClient();
 				}
 				// failed to connect or client.isReady -> false
 				try {

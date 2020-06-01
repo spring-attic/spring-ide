@@ -120,7 +120,6 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 			Assert.isLegal(!(data instanceof RunStateProvider && data instanceof ChildBearing));
 			if (data instanceof RunStateProvider) {
 				RunState v = ((RunStateProvider) data).fetchRunState();
-				System.out.println(data.getName() + " => "+v);
 				return v;
 			} else if (data instanceof ChildBearing) {
 				RunState v = RunState.INACTIVE;
