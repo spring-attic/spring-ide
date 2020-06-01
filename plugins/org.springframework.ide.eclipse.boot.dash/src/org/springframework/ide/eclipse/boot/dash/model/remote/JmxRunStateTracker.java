@@ -13,7 +13,6 @@ package org.springframework.ide.eclipse.boot.dash.model.remote;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeoutException;
 
-import javax.inject.Provider;
 import javax.management.remote.JMXConnector;
 
 import org.springframework.ide.eclipse.boot.dash.api.App;
@@ -31,7 +30,6 @@ public class JmxRunStateTracker extends AbstractDisposable {
 
 	private final GenericRemoteAppElement bde;
 	private final LiveExpression<RunState> _baseRunState;
-	private final LiveExpression<App> app;
 	private final Callable<JMXConnector> connectionProvider;
 	private SpringApplicationLifeCycleClientManager clientMgr;
 
@@ -58,6 +56,7 @@ public class JmxRunStateTracker extends AbstractDisposable {
 			RunState baseRunState = _baseRunState.getValue();
 			debug("baseRunState = "+baseRunState);
 			if (baseRunState==RunState.RUNNING) {
+				Exception error = null;
 				try {
 					SpringApplicationLifecycleClient client = clientMgr.getLifeCycleClient();
 					if (client==null || client.isReady()) {
@@ -67,13 +66,14 @@ public class JmxRunStateTracker extends AbstractDisposable {
 					//client.isReady() => false
 				} catch (Exception e) {
 					// failed to connect
-					e.printStackTrace();
+					error = e;
 				}
 				// failed to connect or client.isReady -> false
 				try {
-					refreshMaybe();
+					refreshMaybe(error);
 					return RunState.STARTING;
-				} catch (TimeoutException e1) {
+				} catch (Exception e1) {
+					Log.log(e1);
 					return RunState.UNKNOWN;
 				}
 			} else {
@@ -82,14 +82,19 @@ public class JmxRunStateTracker extends AbstractDisposable {
 		}
 
 
-		private void refreshMaybe() throws TimeoutException {
+		private void refreshMaybe(Exception error) throws Exception {
 			if (!isDisposed()) {
 				long age = System.currentTimeMillis()-creationTime;
 				debug("age = "+ age);
 				if (age < APP_STARTUP_TIMEOUT) {
 					refresh();
 				} else {
-					throw new TimeoutException();
+					if (error != null) {
+						throw error;
+					}
+					else {
+						throw new TimeoutException();
+					}
 				}
 			}
 		}
@@ -98,7 +103,6 @@ public class JmxRunStateTracker extends AbstractDisposable {
 	public JmxRunStateTracker(GenericRemoteAppElement bde, LiveExpression<RunState> baseRunState, LiveExpression<App> app) {
 		this.bde = bde;
 		this._baseRunState = baseRunState;
-		this.app = app;
 		this.connectionProvider = () -> {
 			App data = app.getValue();
 			if (data instanceof JmxConnectable) {
