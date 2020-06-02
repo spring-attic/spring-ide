@@ -191,7 +191,7 @@ public class GenericRemoteBootDashModel<Client, Params> extends RemoteBootDashMo
 
 
 	@Override
-	public void add(List<Object> sources, UserInteractions ui) throws Exception {
+	public void add(List<Object> sources) throws Exception {
 		ProjectDeploymentTarget target = (ProjectDeploymentTarget) getRunTarget();
 		Set<IProject> toDeploy = new HashSet<>();
 		for (Object dropped : sources) {

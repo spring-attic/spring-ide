@@ -31,6 +31,7 @@ import org.springframework.ide.eclipse.boot.dash.api.AppConsole;
 import org.springframework.ide.eclipse.boot.dash.api.AppConsoleProvider;
 import org.springframework.ide.eclipse.boot.dash.api.AppContext;
 import org.springframework.ide.eclipse.boot.dash.api.Deletable;
+import org.springframework.ide.eclipse.boot.dash.api.ProjectRelatable;
 import org.springframework.ide.eclipse.boot.dash.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.docker.jmx.JmxSupport;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
@@ -59,7 +60,7 @@ import com.spotify.docker.client.messages.HostConfig;
 import com.spotify.docker.client.messages.Image;
 import com.spotify.docker.client.messages.PortBinding;
 
-public class DockerApp extends AbstractDisposable implements App, ChildBearing, Deletable  {
+public class DockerApp extends AbstractDisposable implements App, ChildBearing, Deletable, ProjectRelatable {
 
 	private static final String DOCKER_IO_LIBRARY = "docker.io/library/";
 	private static final String[] NO_STRINGS = new String[0];
@@ -339,5 +340,10 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 		if (deployment.getRunState()!=newGoalState) {
 			target.deployments.createOrUpdate(deployment.withGoalState(newGoalState));
 		}
+	}
+
+	@Override
+	public IProject getProject() {
+		return project;
 	}
 }

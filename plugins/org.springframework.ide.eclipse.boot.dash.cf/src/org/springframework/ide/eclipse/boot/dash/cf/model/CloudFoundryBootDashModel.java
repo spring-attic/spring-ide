@@ -400,8 +400,7 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 	}
 
 	@Override
-	public void add(List<Object> sources, UserInteractions ui) throws Exception {
-
+	public void add(List<Object> sources) throws Exception {
 		Builder<IProject> projects = ImmutableSet.builder();
 		if (sources != null) {
 			for (Object obj : sources) {
@@ -410,7 +409,7 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 					projects.add(project);
 				}
 			}
-			performDeployment(projects.build(), ui, RunState.RUNNING);
+			performDeployment(projects.build(), ui(), RunState.RUNNING);
 		}
 	}
 

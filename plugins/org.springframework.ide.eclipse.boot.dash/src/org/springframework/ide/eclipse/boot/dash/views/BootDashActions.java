@@ -390,7 +390,7 @@ public class BootDashActions {
 		return refreshAction;
 	}
 
-	public IAction getDeleteAppsAction() {
+	public DeleteElementsAction<?> getDeleteAppsAction() {
 		return deleteAppsAction;
 	}
 
