@@ -177,6 +177,8 @@ public class DependencyPage extends WizardPageWithSections {
 	private void createErrorSection(List<WizardPageSection> sections) {
 		errorSection = new ErrorGroupSection(this);
 		sections.add(errorSection.getGroupSection());
+		// Hide initially until validation dictates when to show the section
+		errorSection.hide();
 	}
 
 
