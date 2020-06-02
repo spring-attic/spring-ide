@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.cf.runtarget;
 
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -40,6 +41,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
+import com.google.common.util.concurrent.Futures;
 import com.google.gson.Gson;
 
 /**
@@ -65,7 +67,7 @@ public class CloudFoundryRunTargetType extends AbstractRemoteRunTargetType<Cloud
 	}
 
 	@Override
-	public void openTargetCreationUi(LiveSetVariable<RunTarget> targets) {
+	public CompletableFuture<?> openTargetCreationUi(LiveSetVariable<RunTarget> targets) {
 		try {
 			CloudFoundryTargetWizardModel model = new CloudFoundryTargetWizardModel(this, clientFactory(),
 					targets.getValues(), context(), interactions);
@@ -80,8 +82,12 @@ public class CloudFoundryRunTargetType extends AbstractRemoteRunTargetType<Cloud
 					}
 				}
 			}
+			return CompletableFuture.completedFuture(null);
 		} catch (Exception e) {
 			Log.log(e);
+			CompletableFuture<Void> f = new CompletableFuture<Void>();
+			f.completeExceptionally(e);
+			return f;
 		}
 	}
 

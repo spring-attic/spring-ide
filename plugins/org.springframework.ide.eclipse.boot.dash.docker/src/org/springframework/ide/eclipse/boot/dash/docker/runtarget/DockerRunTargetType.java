@@ -4,6 +4,7 @@ import static org.eclipse.ui.plugin.AbstractUIPlugin.imageDescriptorFromPlugin;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
@@ -25,8 +26,8 @@ public class DockerRunTargetType extends AbstractRemoteRunTargetType<DockerTarge
 	}
 
 	@Override
-	public void openTargetCreationUi(LiveSetVariable<RunTarget> targets) {
-		JobUtil.runInJob("Azure Target Creation", mon -> {
+	public CompletableFuture<?> openTargetCreationUi(LiveSetVariable<RunTarget> targets) {
+		return JobUtil.runInJob("Docker Target Creation", mon -> {
 			DockerRunTarget target = login(targets);
 			if (target!=null) {
 				targets.add(target);

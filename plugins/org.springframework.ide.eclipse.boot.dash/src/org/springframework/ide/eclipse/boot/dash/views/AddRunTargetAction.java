@@ -10,16 +10,24 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
+import java.time.Duration;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 public class AddRunTargetAction extends AbstractBootDashAction {
 
 	private LiveSetVariable<RunTarget> targets;
-	private RunTargetType runTargetType;
+	public final RunTargetType runTargetType;
+	private CompletableFuture<?> lastRun;
 
 	public AddRunTargetAction(RunTargetType runTargetType, LiveSetVariable<RunTarget> targets, SimpleDIContext context) {
 		super(context);
@@ -35,7 +43,19 @@ public class AddRunTargetAction extends AbstractBootDashAction {
 
 	@Override
 	public void run() {
-		runTargetType.openTargetCreationUi(targets);
+		Log.async(lastRun = runTargetType.openTargetCreationUi(targets));
+	}
+
+	public void waitFor() throws Exception {
+		lastRun.get();
+	}
+
+	/**
+	 * For testing code to allow proper synchronisation (i.e. execute the actiona and
+	 * then wait for the result.
+	 */
+	public void waitFor(Duration timeout) throws Exception {
+		lastRun.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
 	}
 
 }

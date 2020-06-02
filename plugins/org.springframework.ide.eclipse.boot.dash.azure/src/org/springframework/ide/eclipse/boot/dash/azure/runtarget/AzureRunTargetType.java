@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.azure.runtarget;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -50,8 +51,8 @@ public class AzureRunTargetType extends AbstractRemoteRunTargetType<AzureTargetP
 	}
 
 	@Override
-	public void openTargetCreationUi(LiveSetVariable<RunTarget> targets) {
-		JobUtil.runInJob("Azure Target Creation", mon -> {
+	public CompletableFuture<?> openTargetCreationUi(LiveSetVariable<RunTarget> targets) {
+		return JobUtil.runInJob("Azure Target Creation", mon -> {
 			STSAzureClient client = login(ui());
 			if (client!=null) {
 				Subscription sub = chooseSubscription(client);

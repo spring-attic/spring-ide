@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.test.mocks;
 
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryTargetProperties;
@@ -37,7 +38,8 @@ public class MockRunTargetType extends AbstractRunTargetType<CloudFoundryTargetP
 	}
 
 	@Override
-	public void openTargetCreationUi(LiveSetVariable<RunTarget> targets) {
+	public CompletableFuture<?> openTargetCreationUi(LiveSetVariable<RunTarget> targets) {
+		return CompletableFuture.completedFuture(null);
 	}
 
 	@Override

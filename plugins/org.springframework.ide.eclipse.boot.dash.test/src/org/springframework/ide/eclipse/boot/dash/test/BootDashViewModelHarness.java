@@ -54,7 +54,7 @@ public class BootDashViewModelHarness {
 	/**
 	 * This is private now. Use the Builder instead for a convenient way to create a harness with some targets in it.
 	 */
-	public BootDashViewModelHarness(TestBootDashModelContext context) throws Exception {
+	public BootDashViewModelHarness(TestBootDashModelContext context) {
 		this.context = context;
 		this.model = context.injections.getBean(BootDashViewModel.class);
 	}

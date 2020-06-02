@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model.runtargettypes;
 
+import java.util.concurrent.CompletableFuture;
+
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
@@ -33,7 +35,7 @@ public class LocalRunTargetType extends AbstractRunTargetType<Void> {
 	}
 
 	@Override
-	public void openTargetCreationUi(LiveSetVariable<RunTarget> targets) {
+	public CompletableFuture<?> openTargetCreationUi(LiveSetVariable<RunTarget> targets) {
 		throw new UnsupportedOperationException(
 				this + " is a Singleton, it is not possible to create additional targets of this type.");
 	}
