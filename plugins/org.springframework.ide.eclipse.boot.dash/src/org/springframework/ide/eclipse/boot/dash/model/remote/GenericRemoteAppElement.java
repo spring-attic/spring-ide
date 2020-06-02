@@ -192,6 +192,9 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 	public GenericRemoteAppElement(GenericRemoteBootDashModel<?,?> model, Object parent, String appId) {
 		super(model, appId);
 		children.dependsOn(model.refreshCount());
+		addDisposableChild(children);
+		addElementNotifier(children);
+
 		baseRunState.dependsOn(model.refreshCount());
 		addDisposableChild(this.childFactory);
 		this.parent = parent;

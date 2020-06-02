@@ -19,6 +19,7 @@ import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.SWT;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.AppContext;
+import org.springframework.ide.eclipse.boot.dash.api.Deletable;
 import org.springframework.ide.eclipse.boot.dash.api.JmxConnectable;
 import org.springframework.ide.eclipse.boot.dash.api.PortConnectable;
 import org.springframework.ide.eclipse.boot.dash.api.RunStateProvider;
@@ -33,12 +34,13 @@ import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.common.collect.ImmutableSet;
 import com.spotify.docker.client.DockerClient;
+import com.spotify.docker.client.exceptions.ContainerNotFoundException;
 import com.spotify.docker.client.messages.Container;
 
-public class DockerContainer implements App, RunStateProvider, JmxConnectable, Styleable, PortConnectable {
+public class DockerContainer implements App, RunStateProvider, JmxConnectable, Styleable, PortConnectable, Deletable {
 
 	private static final Duration WAIT_BEFORE_KILLING = Duration.ofSeconds(10);
-	private static final boolean DEBUG = false;
+	private static final boolean DEBUG = true;
 	private final Container container;
 	private final DockerRunTarget target;
 	public final CompletableFuture<RefreshStateTracker> refreshTracker = new CompletableFuture<>();
@@ -181,5 +183,30 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 	@Override
 	public void setContext(AppContext context) {
 		this.refreshTracker.complete(context.getRefreshTracker());
+	}
+
+	@Override
+	public void delete() throws Exception {
+		DockerClient client = getTarget().getClient();
+		if (client != null) {
+			RefreshStateTracker rt = this.refreshTracker.get();
+			rt.run("Deleting " + getShortHash(), () -> {
+				debug("Deleting");
+				client.removeContainer(container.id());
+				debug("Waiting for Deleting");
+
+				RetryUtil.until(100, WAIT_BEFORE_KILLING.toMillis(),
+						exception -> exception instanceof ContainerNotFoundException, () -> {
+							try {
+								client.stats(container.id());
+							} catch (Exception e) {
+								return e;
+							}
+							return null;
+						});
+				debug("Deleted");
+
+			});
+		}
 	}
 }
