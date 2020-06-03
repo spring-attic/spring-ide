@@ -12,16 +12,6 @@
 	<artifactId>org.springframework.ide.eclipse.boot.dash.docker</artifactId>
 	<packaging>eclipse-plugin</packaging>
 	
-	<repositories>
-		<repository>
-			<!-- the 'new' docker client is only in the currently latest orbit drop. -->
-			<!-- Once it is in all the orbits used by parent pom.xml, we can delete this -->
-			<id>orbit-docker-client</id>
-			<layout>p2</layout>
-			<url>https://download.eclipse.org/tools/orbit/downloads/drops/R20200529191137/repository</url>
-		</repository>
-	</repositories>
-
 	<build>
 		<plugins>
 

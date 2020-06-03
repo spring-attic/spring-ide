@@ -18,13 +18,6 @@
 			<layout>p2</layout>
 			<url>https://dist.springsource.com/snapshot/TOOLS/sts4-language-servers/nightly/</url>
 		</repository>
-		<repository>
-			<!-- the 'new' docker client is only in the currently latest orbit drop. -->
-			<!-- Once it is in all the orbits used by parent pom.xml, we can delete this -->
-			<id>orbit-docker-client</id>
-			<layout>p2</layout>
-			<url>https://download.eclipse.org/tools/orbit/downloads/drops/R20200529191137/repository</url>
-		</repository>
 	</repositories>
 
 	<build>
