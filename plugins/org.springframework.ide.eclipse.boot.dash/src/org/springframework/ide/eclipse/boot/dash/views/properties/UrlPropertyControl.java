@@ -12,8 +12,6 @@ package org.springframework.ide.eclipse.boot.dash.views.properties;
 
 import java.util.function.Function;
 
-import javax.inject.Provider;
-
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;

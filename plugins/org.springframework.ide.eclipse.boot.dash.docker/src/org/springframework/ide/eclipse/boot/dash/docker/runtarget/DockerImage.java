@@ -12,10 +12,10 @@ import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
-import com.spotify.docker.client.DockerClient;
-import com.spotify.docker.client.DockerClient.ListContainersParam;
-import com.spotify.docker.client.messages.Container;
-import com.spotify.docker.client.messages.Image;
+import org.mandas.docker.client.DockerClient;
+import org.mandas.docker.client.DockerClient.ListContainersParam;
+import org.mandas.docker.client.messages.Container;
+import org.mandas.docker.client.messages.Image;
 
 public class DockerImage implements App, ChildBearing, Styleable {
 	
@@ -54,7 +54,7 @@ public class DockerImage implements App, ChildBearing, Styleable {
 
 	@Override
 	public StyledString getStyledName(Stylers stylers) {
-		ImmutableList<String> repoTags = image.repoTags();
+		List<String> repoTags = image.repoTags();
 		if (repoTags != null && !repoTags.isEmpty()) {
 			StyledString styledString = new StyledString(repoTags.get(0))
 					.append(" ")

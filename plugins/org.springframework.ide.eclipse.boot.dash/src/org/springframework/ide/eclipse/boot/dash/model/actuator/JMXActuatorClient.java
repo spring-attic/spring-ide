@@ -11,8 +11,8 @@
 package org.springframework.ide.eclipse.boot.dash.model.actuator;
 
 import java.util.Set;
+import java.util.function.Supplier;
 
-import javax.inject.Provider;
 import javax.management.InstanceNotFoundException;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -31,7 +31,7 @@ import com.google.common.collect.ImmutableSet;
  */
 public class JMXActuatorClient extends ActuatorClient {
 
-	private final Provider<Integer> portProvider;
+	private final Supplier<Integer> portProvider;
 
 	static class OperationInfo {
 		final String objectName;
@@ -62,7 +62,7 @@ public class JMXActuatorClient extends ActuatorClient {
 	private JMXClient client = null;
 	private Integer port = null;
 
-	public JMXActuatorClient(TypeLookup typeLookup, Provider<Integer> jmxPort) {
+	public JMXActuatorClient(TypeLookup typeLookup, Supplier<Integer> jmxPort) {
 		super(typeLookup);
 		this.portProvider = jmxPort;
 	}

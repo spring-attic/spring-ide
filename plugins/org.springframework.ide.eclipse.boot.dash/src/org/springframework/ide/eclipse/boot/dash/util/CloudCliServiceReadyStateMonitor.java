@@ -13,8 +13,8 @@ package org.springframework.ide.eclipse.boot.dash.util;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
-import javax.inject.Provider;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
@@ -37,11 +37,11 @@ import org.springsource.ide.eclipse.commons.core.util.ProcessUtils;
  */
 public class CloudCliServiceReadyStateMonitor extends AbstractPollingAppReadyStateMonitor {
 
-	private Provider<JMXConnector> jmxConnectionProvider;
+	private Supplier<JMXConnector> jmxConnectionProvider;
 	private JMXConnector connector;
 	private String serviceId;
 
-	public CloudCliServiceReadyStateMonitor(Provider<JMXConnector> jmxConnectionProvider, String serviceId) {
+	public CloudCliServiceReadyStateMonitor(Supplier<JMXConnector> jmxConnectionProvider, String serviceId) {
 		super();
 		this.jmxConnectionProvider = jmxConnectionProvider;
 		this.serviceId = serviceId;

@@ -15,7 +15,7 @@ import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.StringUtils;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 
-import com.spotify.docker.client.DefaultDockerClient;
+import org.mandas.docker.client.DefaultDockerClient;
 
 public class DockerRunTargetType extends AbstractRemoteRunTargetType<DockerTargetParams> {
 	

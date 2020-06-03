@@ -11,8 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.livexp;
 
 import java.time.Duration;
-
-import javax.inject.Provider;
+import java.util.function.Supplier;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -30,7 +29,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
  */
 public abstract class PollingLiveExp<T> extends LiveExpression<T> {
 
-	private static final Provider<Boolean> STOP_REFRESHING = () -> false;
+	private static final Supplier<Boolean> STOP_REFRESHING = () -> false;
 
 	private Job refreshJob = createRefreshJob();
 
@@ -39,7 +38,7 @@ public abstract class PollingLiveExp<T> extends LiveExpression<T> {
 	 */
 	private long sleepBetweenRefreshes = 500;
 
-	private Provider<Boolean> continueRefreshing = STOP_REFRESHING;
+	private Supplier<Boolean> continueRefreshing = STOP_REFRESHING;
 
 	/**
 	 * Override the default 'sleepBetweenRefreshes' value.
@@ -105,7 +104,7 @@ public abstract class PollingLiveExp<T> extends LiveExpression<T> {
 	public PollingLiveExp<T> refreshOnce() {
 		Job job = refreshJob;
 		if (job!=null) {
-			continueRefreshing = new Provider<Boolean>() {
+			continueRefreshing = new Supplier<Boolean>() {
 
 				boolean firstTime = true;
 
@@ -126,7 +125,7 @@ public abstract class PollingLiveExp<T> extends LiveExpression<T> {
 	/**
 	 * Lambda-friendly way of creating a PollingLiveExp instance.
 	 */
-	public static <T> PollingLiveExp<T> create(Provider<T> computer) {
+	public static <T> PollingLiveExp<T> create(Supplier<T> computer) {
 		return new PollingLiveExp<T>() {
 			@Override
 			protected T compute() {

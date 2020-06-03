@@ -48,17 +48,17 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.spotify.docker.client.DockerClient;
-import com.spotify.docker.client.DockerClient.ListContainersParam;
-import com.spotify.docker.client.DockerClient.ListImagesParam;
-import com.spotify.docker.client.DockerClient.LogsParam;
-import com.spotify.docker.client.LogStream;
-import com.spotify.docker.client.messages.Container;
-import com.spotify.docker.client.messages.ContainerConfig;
-import com.spotify.docker.client.messages.ContainerCreation;
-import com.spotify.docker.client.messages.HostConfig;
-import com.spotify.docker.client.messages.Image;
-import com.spotify.docker.client.messages.PortBinding;
+import org.mandas.docker.client.DockerClient;
+import org.mandas.docker.client.DockerClient.ListContainersParam;
+import org.mandas.docker.client.DockerClient.ListImagesParam;
+import org.mandas.docker.client.DockerClient.LogsParam;
+import org.mandas.docker.client.LogStream;
+import org.mandas.docker.client.messages.Container;
+import org.mandas.docker.client.messages.ContainerConfig;
+import org.mandas.docker.client.messages.ContainerCreation;
+import org.mandas.docker.client.messages.HostConfig;
+import org.mandas.docker.client.messages.Image;
+import org.mandas.docker.client.messages.PortBinding;
 
 public class DockerApp extends AbstractDisposable implements App, ChildBearing, Deletable, ProjectRelatable {
 

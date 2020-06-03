@@ -33,9 +33,9 @@ import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.common.collect.ImmutableSet;
-import com.spotify.docker.client.DockerClient;
-import com.spotify.docker.client.exceptions.ContainerNotFoundException;
-import com.spotify.docker.client.messages.Container;
+import org.mandas.docker.client.DockerClient;
+import org.mandas.docker.client.exceptions.ContainerNotFoundException;
+import org.mandas.docker.client.messages.Container;
 
 public class DockerContainer implements App, RunStateProvider, JmxConnectable, Styleable, PortConnectable, Deletable {
 

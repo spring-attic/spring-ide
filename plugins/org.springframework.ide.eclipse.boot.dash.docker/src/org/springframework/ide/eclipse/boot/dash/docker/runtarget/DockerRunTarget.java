@@ -20,8 +20,8 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 
 import com.google.common.collect.ImmutableList;
-import com.spotify.docker.client.DefaultDockerClient;
-import com.spotify.docker.client.DockerClient;
+import org.mandas.docker.client.DefaultDockerClient;
+import org.mandas.docker.client.DockerClient;
 
 public class DockerRunTarget extends AbstractRunTarget<DockerTargetParams> 
 implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentTarget {

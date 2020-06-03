@@ -10,29 +10,23 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash;
 
-import java.lang.reflect.Method;
-import java.util.Map;
 import java.util.function.Supplier;
 
 import org.eclipse.core.net.proxy.IProxyService;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultBootDashModelContext;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.common.base.Suppliers;
-import com.google.common.collect.ImmutableSet;
 
 /**
  * The activator class controls the plug-in life cycle
