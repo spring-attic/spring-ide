@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2019 Pivotal, Inc.
+ * Copyright (c) 2015, 2020 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -806,7 +806,7 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 		CloudApplicationDeploymentProperties props = null;
 		if (ui != null) {
 			DeploymentPropertiesDialogModel dialogModel;
-			dialogModel = new DeploymentPropertiesDialogModel(ui, cloudData, project, null);
+			dialogModel = new DeploymentPropertiesDialogModel(ui, cloudData, project, null, true);
 			IFile foundManifestFile = DeploymentPropertiesDialog.findManifestYamlFile(project);
 			dialogModel.setSelectedManifest(foundManifestFile);
 			dialogModel.setManifestType(foundManifestFile == null ? ManifestType.MANUAL : ManifestType.FILE);

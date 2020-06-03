@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Pivotal, Inc.
+ * Copyright (c) 2016, 2020 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,7 +19,6 @@ import org.springframework.ide.eclipse.boot.dash.cf.deployment.CloudData;
 import org.springframework.ide.eclipse.boot.dash.cf.dialogs.DeploymentPropertiesDialogModel;
 import org.springframework.ide.eclipse.boot.dash.cf.dialogs.DeploymentPropertiesDialogModel.ManifestType;
 import org.springframework.ide.eclipse.boot.dash.cf.model.CloudAppDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 public class SelectManifestOp extends CloudOperation {
@@ -54,7 +53,7 @@ public class SelectManifestOp extends CloudOperation {
 
 		CloudData cloudData = model.buildOperationCloudData(monitor, project);
 
-		DeploymentPropertiesDialogModel dialogModel = new DeploymentPropertiesDialogModel(ui(), cloudData, project, cde.getSummaryData());
+		DeploymentPropertiesDialogModel dialogModel = new DeploymentPropertiesDialogModel(ui(), cloudData, project, cde.getSummaryData(), false);
 		dialogModel.setSelectedManifest(manifest);
 		dialogModel.setManifestType(manifest == null ? ManifestType.MANUAL : ManifestType.FILE);
 		CloudApplicationDeploymentProperties props = cfUi().promptApplicationDeploymentProperties(dialogModel);

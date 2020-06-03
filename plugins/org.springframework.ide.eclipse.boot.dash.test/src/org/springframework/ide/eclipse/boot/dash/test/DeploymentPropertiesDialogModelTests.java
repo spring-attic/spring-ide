@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2019 Pivotal, Inc.
+ * Copyright (c) 2016, 2020 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -262,7 +262,7 @@ public class DeploymentPropertiesDialogModelTests {
 	}
 
 	private void createDialogModel(IProject project, CFApplication deployedApp) throws Exception {
-		model = new DeploymentPropertiesDialogModel(ui, createCloudData(), project, deployedApp);
+		model = new DeploymentPropertiesDialogModel(ui, createCloudData(), project, deployedApp, true);
 		model.initFileModel();
 		model.initManualModel();
 		shell = new Shell(PlatformUI.getWorkbench().getDisplay());

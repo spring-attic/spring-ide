@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2019 Pivotal, Inc.
+ * Copyright (c) 2016, 2020 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -704,8 +704,11 @@ public class DeploymentPropertiesDialogModel extends AbstractDisposable {
 
 	final private Validator validator;
 
-	public DeploymentPropertiesDialogModel(UserInteractions ui, CloudData cloudData, IProject project, CFApplication deployedApp) {
+	final public boolean supportsSsh;
+
+	public DeploymentPropertiesDialogModel(UserInteractions ui, CloudData cloudData, IProject project, CFApplication deployedApp, boolean supportsSsh) {
 		super();
+		this.supportsSsh = supportsSsh;
 		this.ui = ui;
 		this.deployedApp = deployedApp;
 		this.cloudData = cloudData;
