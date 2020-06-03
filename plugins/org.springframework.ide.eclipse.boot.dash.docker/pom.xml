@@ -18,7 +18,7 @@
 			<!-- Once it is in all the orbits used by parent pom.xml, we can delete this -->
 			<id>orbit-docker-client</id>
 			<layout>p2</layout>
-			<url>https://download.eclipse.org/tools/orbit/downloads/drops/R20190827152740/repository</url>
+			<url>https://download.eclipse.org/tools/orbit/downloads/drops/R20200529191137/repository</url>
 		</repository>
 	</repositories>
 
