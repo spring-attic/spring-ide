@@ -31,6 +31,7 @@ import org.springframework.ide.eclipse.boot.dash.cf.debug.DebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cf.debug.SshDebugSupport;
 import org.springframework.ide.eclipse.boot.dash.cf.debug.SshTunnelFactory;
 import org.springframework.ide.eclipse.boot.dash.cf.jmxtunnel.JmxSshTunnelManager;
+import org.springframework.ide.eclipse.boot.dash.console.CloudAppLogManager;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.docker.runtarget.DockerRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
@@ -87,6 +88,7 @@ public class TestBootDashModelContext extends BootDashModelContext {
 		injections.defInstance(SshTunnelFactory.class, MockSshTunnel::new);
 		injections.defInstance(JmxSshTunnelManager.class, new JmxSshTunnelManager());
 		injections.def(DockerRunTargetType.class, DockerRunTargetType::new);
+		injections.def(CloudAppLogManager.class, CloudAppLogManager::new); //TODO: replace with a mock?
 		return injections;
 	}
 

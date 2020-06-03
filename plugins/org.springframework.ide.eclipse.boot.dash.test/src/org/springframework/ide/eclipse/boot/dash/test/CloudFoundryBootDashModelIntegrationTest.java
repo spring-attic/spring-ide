@@ -180,7 +180,7 @@ public class CloudFoundryBootDashModelIntegrationTest {
 		final String appName = appHarness.randomAppName();
 
 		harness.answerDeploymentPrompt(ui(), appName, appName);
-		model.add(ImmutableList.<Object>of(project), ui());
+		model.add(ImmutableList.<Object>of(project));
 
 		//The resulting deploy is asynchronous
 		new ACondition("wait for app '"+ appName +"'to appear", APP_IS_VISIBLE_TIMEOUT) {

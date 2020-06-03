@@ -14,5 +14,5 @@ import java.util.List;
 
 public interface ModifiableModel extends DeletionCapabableModel {
 	boolean canBeAdded(List<Object> sources);
-	void add(List<Object> sources, UserInteractions ui) throws Exception;
+	void add(List<Object> sources) throws Exception;
 }

@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.docker.runtarget;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -29,7 +30,7 @@ public class DockerDeployer extends AbstractDisposable {
 
 	private final DockerDeployments deployments;
 	private final DockerClient client;
-	private Map<String, App> apps = new HashMap<>();
+	private Map<String, DockerApp> apps = new HashMap<>();
 	private final DockerRunTarget target;
 	
 	public DockerDeployer(DockerRunTarget target, DockerDeployments deployments, DockerClient client) {
@@ -55,18 +56,29 @@ public class DockerDeployer extends AbstractDisposable {
 	}
 
 	synchronized private CompletableFuture<Void> createOrUpdateApp(DockerDeployment d) {
-		DockerApp app = (DockerApp) apps.computeIfAbsent(d.getName(), name -> new DockerApp(name, target, client));
+		DockerApp app = apps.computeIfAbsent(d.getName(), name -> new DockerApp(name, target, client));
 		return app.synchronizeWithDeployment();
 	}
 
 	synchronized private void destroyDeployment(DockerDeployment d) {
-		App app = apps.get(d.getName());
+		DockerApp app = apps.get(d.getName());
 		if (app != null) {
 			if (client != null) {
 				try {
-					for (Container container : client.listContainers(ListContainersParam.allContainers(),
-							ListContainersParam.withLabel(DockerApp.APP_NAME, d.getName()))) {
+					List<App> images = app.fetchChildren();
+					for (Container container : client.listContainers(
+							ListContainersParam.allContainers(), 
+							ListContainersParam.withLabel(DockerApp.APP_NAME, d.getName())
+					)) {
 						client.removeContainer(container.id(), RemoveContainerParam.forceKill());
+					}
+					for (App _img : images) {
+						DockerImage img = (DockerImage) _img;
+						try {
+							client.removeImage(img.getName(), /*force*/true, /*npPrune*/false);
+						} catch (Exception e) {
+							Log.log(e);
+						}
 					}
 					apps.remove(d.getName());
 				} catch (Exception e) {

@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jface.viewers.StyledString;
@@ -24,6 +25,7 @@ import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.AppContext;
 import org.springframework.ide.eclipse.boot.dash.api.Deletable;
 import org.springframework.ide.eclipse.boot.dash.api.PortConnectable;
+import org.springframework.ide.eclipse.boot.dash.api.ProjectRelatable;
 import org.springframework.ide.eclipse.boot.dash.api.RunStateProvider;
 import org.springframework.ide.eclipse.boot.dash.api.Styleable;
 import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
@@ -230,6 +232,10 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		return super.delegate;
 	}
 
+	public App getAppData() {
+		return this.app.getValue();
+	}
+
 	public void setAppData(App appData) {
 		this.app.setValue(appData);
 	}
@@ -256,7 +262,10 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 
 	@Override
 	public IProject getProject() {
-		// TODO Auto-generated method stub
+		App data = this.app.getValue();
+		if (data instanceof ProjectRelatable) {
+			return ((ProjectRelatable) data).getProject();
+		}
 		return null;
 	}
 

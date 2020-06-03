@@ -722,7 +722,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 							protected IStatus run(IProgressMonitor monitor) {
 								if (modifiableModel != null && selection != null) {
 									try {
-										modifiableModel.add(Arrays.asList(elements), ui());
+										modifiableModel.add(Arrays.asList(elements));
 
 									} catch (Exception e) {
 										ui().errorPopup("Failed to Add Element", e.getMessage());
