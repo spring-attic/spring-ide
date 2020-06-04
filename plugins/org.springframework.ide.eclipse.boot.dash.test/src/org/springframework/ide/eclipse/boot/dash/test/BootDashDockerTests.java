@@ -52,13 +52,13 @@ import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 
 import com.google.common.collect.ImmutableList;
-import com.spotify.docker.client.DefaultDockerClient;
-import com.spotify.docker.client.DockerClient;
-import com.spotify.docker.client.DockerClient.ListContainersParam;
-import com.spotify.docker.client.DockerClient.ListImagesParam;
-import com.spotify.docker.client.DockerClient.RemoveContainerParam;
-import com.spotify.docker.client.messages.Container;
-import com.spotify.docker.client.messages.Image;
+import org.mandas.docker.client.DefaultDockerClient;
+import org.mandas.docker.client.DockerClient;
+import org.mandas.docker.client.DockerClient.ListContainersParam;
+import org.mandas.docker.client.DockerClient.ListImagesParam;
+import org.mandas.docker.client.DockerClient.RemoveContainerParam;
+import org.mandas.docker.client.messages.Container;
+import org.mandas.docker.client.messages.Image;
 
 public class BootDashDockerTests {
 
