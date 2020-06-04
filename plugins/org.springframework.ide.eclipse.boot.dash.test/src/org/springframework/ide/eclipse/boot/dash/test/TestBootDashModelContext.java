@@ -87,7 +87,6 @@ public class TestBootDashModelContext extends BootDashModelContext {
 		injections.def(BootDashViewModel.class, BootDashViewModel::new);
 		injections.defInstance(SshTunnelFactory.class, MockSshTunnel::new);
 		injections.defInstance(JmxSshTunnelManager.class, new JmxSshTunnelManager());
-		injections.def(DockerRunTargetType.class, DockerRunTargetType::new);
 		injections.def(CloudAppLogManager.class, CloudAppLogManager::new); //TODO: replace with a mock?
 		return injections;
 	}

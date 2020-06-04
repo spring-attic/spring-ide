@@ -252,6 +252,9 @@ public class BootDashDockerTests {
 			ResourcesPlugin.getWorkspace(),
 			DebugPlugin.getDefault().getLaunchManager()
 	);
+	{
+		context.injections.def(DockerRunTargetType.class, DockerRunTargetType::new);
+	}
 	BootDashViewModelHarness harness = new BootDashViewModelHarness(context);
 	BootProjectTestHarness projects = new BootProjectTestHarness(ResourcesPlugin.getWorkspace());
 	BootDashActions actions;
