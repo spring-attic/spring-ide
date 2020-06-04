@@ -17,15 +17,16 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.Util;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.FontData;
-import org.osgi.framework.Version;
-import org.osgi.framework.VersionRange;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Link;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Links;
-import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 import org.springsource.ide.eclipse.commons.ui.HTMLPrinter;
+import org.springframework.ide.eclipse.boot.util.version.Version;
+import org.springframework.ide.eclipse.boot.util.version.VersionParser;
+import org.springframework.ide.eclipse.boot.util.version.VersionRange;
 
 /**
  * Utility class containing static method for creating HTML help/tooltip content for dependency
@@ -33,7 +34,6 @@ import org.springsource.ide.eclipse.commons.ui.HTMLPrinter;
  * @author Alex Boyko
  *
  */
-@SuppressWarnings("restriction")
 public class DependencyTooltipContent {
 
 	private static final String UNIT; // See https://bugs.eclipse.org/bugs/show_bug.cgi?id=155993
@@ -156,18 +156,18 @@ public class DependencyTooltipContent {
 			String rangeString = dep.getVersionRange();
 			if (StringUtil.hasText(rangeString)) { //check to avoid logging errors on empty string or null
 				try {
-					VersionRange versionRange = new VersionRange(rangeString);
-					Version l = versionRange.getLeft();
-					Version r = versionRange.getRight();
+					VersionRange versionRange = VersionParser.DEFAULT.parseRange(rangeString);
+					Version l = versionRange.getLowerVersion();
+					Version r = versionRange.getHigherVersion();
 					if (l!=null && r!=null) {
 						return "Requires Spring Boot "+
-								rangeText(l, versionRange.getLeftType()) + " and " + rangeText(r, versionRange.getRightType());
+								rangeText(l, getLeftChar(versionRange)) + " and " + rangeText(r, getRightChar(versionRange));
 					} else if (l!=null) {
 						return "Requires Spring Boot "+
-								rangeText(l, versionRange.getLeftType());
+								rangeText(l, getLeftChar(versionRange));
 					} else if (r!=null) {
 						return "Requires Spring Boot "+
-								rangeText(r, versionRange.getRightType());
+								rangeText(r, getRightChar(versionRange));
 					}
 				} catch (Exception e) {
 					Log.log(e);
@@ -177,19 +177,27 @@ public class DependencyTooltipContent {
 		return null;
 	}
 
+	private static char getRightChar(VersionRange versionRange) {
+		return versionRange.isHigherInclusive() ? ']' : ')';
+	}
+
+	private static char getLeftChar(VersionRange versionRange) {
+		return versionRange.isLowerInclusive() ? '[' : '(';
+	}
+
 	private static String rangeText(Version range, char type) {
 		return rangeTypeText(type) + range.toString();
 	}
 
 	private static String rangeTypeText(char type) {
 		switch (type) {
-		case VersionRange.LEFT_CLOSED:
+		case '[':
 			return ">=";
-		case VersionRange.LEFT_OPEN:
+		case '(':
 			return ">";
-		case VersionRange.RIGHT_CLOSED:
+		case ']':
 			return "<=";
-		case VersionRange.RIGHT_OPEN:
+		case ')':
 			return "<";
 		default:
 			//Shouldn't happen... but anyhow.

@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IProject;
@@ -49,8 +50,10 @@ import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 import org.springsource.ide.eclipse.commons.livexp.util.Filters;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 import junit.framework.TestCase;
@@ -64,6 +67,11 @@ public class NewSpringBootWizardModelTest extends TestCase {
 
 	//private static final String INITIALIZR_JSON = "initializr.json";
 	private static final String INITIALIZR_JSON = "initializr-v2.1.json";
+	private static final String INITIALIZR_V_2_2_JSON = "initializr-v2.2.json";
+
+	private static final String[] testDataFiles = {
+			INITIALIZR_JSON, INITIALIZR_V_2_2_JSON
+	};
 
 	@Override
 	protected void setUp() throws Exception {
@@ -72,13 +80,25 @@ public class NewSpringBootWizardModelTest extends TestCase {
 	}
 
 	public static NewSpringBootWizardModel parseFrom(String resourcePath, IPreferenceStore store) throws Exception {
-		URL formUrl = resourceUrl(resourcePath);
-		return new NewSpringBootWizardModel(new URLConnectionFactory(), formUrl.toString(), store) {
-			@Override
-			protected void importProject(org.eclipse.core.runtime.IProgressMonitor mon) throws java.lang.reflect.InvocationTargetException ,InterruptedException {
-				//do nothing (this is a fake wizard, not meant to create real projects).
-			}
+		AtomicReference<Throwable> firstError = new AtomicReference<>();
+		Log.errorHandler = error -> {
+			firstError.getAndUpdate(existing -> existing!=null?existing:error);
 		};
+		try {
+			URL formUrl = resourceUrl(resourcePath);
+			return new NewSpringBootWizardModel(new URLConnectionFactory(), formUrl.toString(), store) {
+
+				@Override
+				protected void importProject(org.eclipse.core.runtime.IProgressMonitor mon) throws java.lang.reflect.InvocationTargetException ,InterruptedException {
+					//do nothing (this is a fake wizard, not meant to create real projects).
+				}
+			};
+		} finally {
+			Log.errorHandler = null;
+			if (firstError.get()!=null) {
+				throw ExceptionUtil.exception(firstError.get());
+			}
+		}
 	}
 
 	public static NewSpringBootWizardModel parseFrom(String resourcePath) throws Exception {
@@ -97,41 +117,46 @@ public class NewSpringBootWizardModelTest extends TestCase {
 	}
 
 	public void testPackagingRadios() throws Exception {
-		NewSpringBootWizardModel model = parseFrom(INITIALIZR_JSON);
-		RadioGroup packagingTypes = model.getRadioGroups().getGroup("packaging");
-		assertNotNull(packagingTypes);
-		assertGroupValues(packagingTypes, "jar", "war");
-		assertEquals("jar", packagingTypes.getDefaultValue().getValue());
+		for (String f : testDataFiles) {
+			NewSpringBootWizardModel model = parseFrom(f);
+			RadioGroup packagingTypes = model.getRadioGroups().getGroup("packaging");
+			assertNotNull(packagingTypes);
+			assertGroupValues(packagingTypes, "jar", "war");
+			assertEquals("jar", packagingTypes.getDefaultValue().getValue());
+		}
 	}
 
 	public void testJavaVersionRadios() throws Exception {
-		NewSpringBootWizardModel model = parseFrom(INITIALIZR_JSON);
-		RadioGroup group = model.getRadioGroups().getGroup("javaVersion");
-		assertNotNull(group);
-		assertGroupValues(group, "1.6", "1.7", "1.8");
-		assertEquals("1.8", group.getDefaultValue().getValue());
+		for (String f : testDataFiles) {
+			NewSpringBootWizardModel model = parseFrom(f);
+			RadioGroup group = model.getRadioGroups().getGroup("javaVersion");
+			assertNotNull(group);
+			assertGroupValues(group, "1.6", "1.7", "1.8");
+			assertEquals("1.8", group.getDefaultValue().getValue());
+		}
 	}
 
 	public void testBuildTypeRadios() throws Exception {
-		String jsonFile = INITIALIZR_JSON;
-		NewSpringBootWizardModel model = parseFrom(jsonFile);
-		String starterZipUrl = resourceUrl(jsonFile).toURI().resolve("/starter.zip").toString();
-		assertEquals(starterZipUrl, model.baseUrl.getValue());
-
-		RadioGroup group = model.getRadioGroups().getGroup("type");
-		assertNotNull(group);
-		assertGroupValues(group, "MAVEN", "GRADLE-Buildship 2.x", "GRADLE-Buildship 3.x");
-		assertEquals("MAVEN", group.getDefaultValue().getValue());
-
-		group.getSelection().selection.setValue(group.getRadio("MAVEN"));
-		assertEquals(BuildType.MAVEN, model.getBuildType());
-		assertEquals(starterZipUrl, model.baseUrl.getValue());
-
-		for (ImportStrategy gradleStrategy : BuildType.GRADLE.getImportStrategies()) {
-			group.getSelection().selection.setValue(group.getRadio(gradleStrategy.getId()));
-			assertEquals(BuildType.GRADLE, model.getBuildType());
-			assertEquals(gradleStrategy, model.getImportStrategy());
+		for (String jsonFile : testDataFiles) {
+			NewSpringBootWizardModel model = parseFrom(jsonFile);
+			String starterZipUrl = resourceUrl(jsonFile).toURI().resolve("/starter.zip").toString();
 			assertEquals(starterZipUrl, model.baseUrl.getValue());
+
+			RadioGroup group = model.getRadioGroups().getGroup("type");
+			assertNotNull(group);
+			assertGroupValues(group, "MAVEN", "GRADLE-Buildship 2.x", "GRADLE-Buildship 3.x");
+			assertEquals("MAVEN", group.getDefaultValue().getValue());
+
+			group.getSelection().selection.setValue(group.getRadio("MAVEN"));
+			assertEquals(BuildType.MAVEN, model.getBuildType());
+			assertEquals(starterZipUrl, model.baseUrl.getValue());
+
+			for (ImportStrategy gradleStrategy : BuildType.GRADLE.getImportStrategies()) {
+				group.getSelection().selection.setValue(group.getRadio(gradleStrategy.getId()));
+				assertEquals(BuildType.GRADLE, model.getBuildType());
+				assertEquals(gradleStrategy, model.getImportStrategy());
+				assertEquals(starterZipUrl, model.baseUrl.getValue());
+			}
 		}
 	}
 
@@ -164,22 +189,24 @@ public class NewSpringBootWizardModelTest extends TestCase {
 	}
 
 	public void testStarters() throws Exception {
-		NewSpringBootWizardModel model = parseFrom(INITIALIZR_JSON);
+		for (String jsonFile : testDataFiles) {
+			NewSpringBootWizardModel model = parseFrom(jsonFile);
 
-		Collection<Dependency> styles = getAllChoices(model.dependencies);
-		assertNotNull(styles);
-		assertTrue(styles.size()>10);
+			Collection<Dependency> styles = getAllChoices(model.dependencies);
+			assertNotNull(styles);
+			assertTrue(styles.size()>7);
 
-		for (String catName : model.dependencies.getCategories()) {
-			String lastLabel = null; //check that style labels are sorted within each category
-			MultiSelectionFieldModel<Dependency> cat = model.dependencies.getContents(catName);
-			for (Dependency choice : cat.getChoices()) {
-				String label = cat.getLabel(choice);
-				if (lastLabel!=null) {
-					assertTrue("Labels not sorted: '"+lastLabel+"' > '"+label+"'", lastLabel.compareTo(label)<0);
+			for (String catName : model.dependencies.getCategories()) {
+				String lastLabel = null; //check that style labels are sorted within each category
+				MultiSelectionFieldModel<Dependency> cat = model.dependencies.getContents(catName);
+				for (Dependency choice : cat.getChoices()) {
+					String label = cat.getLabel(choice);
+					if (lastLabel!=null) {
+						assertTrue("Labels not sorted: '"+lastLabel+"' > '"+label+"'", lastLabel.compareTo(label)<0);
+					}
+					lastLabel = label;
+					assertNotNull("No tooltip for: "+choice+" ["+label+"]", cat.getTooltipHtml(choice).get());
 				}
-				lastLabel = label;
-				assertNotNull("No tooltip for: "+choice+" ["+label+"]", cat.getTooltipHtml(choice).get());
 			}
 		}
 	}
@@ -218,6 +245,7 @@ public class NewSpringBootWizardModelTest extends TestCase {
 
 	public void testVersionRanges() throws Exception {
 		NewSpringBootWizardModel model = parseFrom(INITIALIZR_JSON);
+
 		Dependency bitronix = getDependencyById(model, "jta-bitronix");
 		Dependency thymeleaf = getDependencyById(model, "thymeleaf");
 		assertEquals("1.2.0.M1", bitronix.getVersionRange());
@@ -262,6 +290,54 @@ public class NewSpringBootWizardModelTest extends TestCase {
 		String url = model.downloadUrl.getValue();
 		assertContains("thymeleaf", url);
 		assertFalse(url.contains("bitronix"));
+	}
+
+	public void testVersionRanges_V2_2() throws Exception {
+		NewSpringBootWizardModel model = parseFrom(INITIALIZR_V_2_2_JSON);
+
+		Dependency acmeBiz = getDependencyById(model, "org.acme:biz");
+		Dependency web = getDependencyById(model, "web");
+		assertEquals("2.2.0.BUILD-SNAPSHOT", acmeBiz.getVersionRange());
+		assertFalse(StringUtils.hasText(web.getVersionRange()));
+
+		RadioGroup bootVersion = model.getBootVersion();
+		assertNotNull(bootVersion);
+
+		assertGroupValues(bootVersion,
+		      "2.4.0-SNAPSHOT",
+		      "2.1.4.RELEASE",
+		      "1.5.17.RELEASE"
+		);
+
+		RadioInfo older = bootVersion.getRadio("1.5.17.RELEASE");
+		RadioInfo newer = bootVersion.getRadio("2.4.0-SNAPSHOT");
+
+		LiveExpression<Boolean> acmeBizEnabled  = getEnablement(model.dependencies, acmeBiz);
+		LiveExpression<Boolean> webEnabled = getEnablement(model.dependencies, web);
+
+		bootVersion.setValue(older);
+		assertFalse(acmeBizEnabled.getValue());
+		CheckBoxModel<Dependency> acmeBizChekbox = getCheckboxById(model.dependencies.getAllBoxes(), "org.acme:biz");
+		assertEquals("Requires Spring Boot >=2.2.0.BUILD-SNAPSHOT", acmeBizChekbox.getRequirementTooltip());
+		assertTrue(webEnabled.getValue());
+
+		bootVersion.setValue(newer);
+		assertTrue(acmeBizEnabled.getValue());
+		assertTrue(webEnabled.getValue());
+
+		bootVersion.setValue(older);
+
+		Set<Dependency> selectedDepedencies = getSelecteds(model.dependencies);
+		assertTrue(selectedDepedencies.isEmpty());
+		select(model.dependencies, acmeBiz);
+		select(model.dependencies, web);
+
+		selectedDepedencies = getSelecteds(model.dependencies);
+		assertEquals(2, selectedDepedencies.size());
+
+		String url = model.downloadUrl.getValue();
+		assertContains("web", url);
+		assertFalse(url.contains("acme"));
 	}
 
 	public void testPopularityTracking() throws Exception {
@@ -317,31 +393,33 @@ public class NewSpringBootWizardModelTest extends TestCase {
 
 
 	public void testPopularCheckboxSharesSelectionState() throws Exception {
-		IPreferenceStore store = new MockPrefsStore();
-		NewSpringBootWizardModel model = parseFrom(INITIALIZR_JSON, store);
-		assertTrue(model.getMostPopular(10).isEmpty());
-		Dependency web = getDependencyById(model, "web");
+		for (String f : testDataFiles) {
+			IPreferenceStore store = new MockPrefsStore();
+			NewSpringBootWizardModel model = parseFrom(f, store);
+			assertTrue(model.getMostPopular(10).isEmpty());
+			Dependency web = getDependencyById(model, "web");
 
-		PopularityTracker tracker = new PopularityTracker(store);
-		tracker.incrementUsageCount(web);
+			PopularityTracker tracker = new PopularityTracker(store);
+			tracker.incrementUsageCount(web);
 
-		String webCat = getCategory(model.dependencies, web);
-		MultiSelectionFieldModel<Dependency> webGroup = model.dependencies.getContents(webCat);
-		List<CheckBoxModel<Dependency>> allWebBoxes = webGroup.getCheckBoxModels();
+			String webCat = getCategory(model.dependencies, web);
+			MultiSelectionFieldModel<Dependency> webGroup = model.dependencies.getContents(webCat);
+			List<CheckBoxModel<Dependency>> allWebBoxes = webGroup.getCheckBoxModels();
 
-		CheckBoxModel<Dependency> normalBox = getCheckboxById(allWebBoxes, web.getId());
-		CheckBoxModel<Dependency> popularBox = getCheckboxById(model.getMostPopular(10), web.getId());
+			CheckBoxModel<Dependency> normalBox = getCheckboxById(allWebBoxes, web.getId());
+			CheckBoxModel<Dependency> popularBox = getCheckboxById(model.getMostPopular(10), web.getId());
 
-		assertFalse(normalBox.getSelection().getValue());
-		assertFalse(popularBox.getSelection().getValue());
+			assertFalse(normalBox.getSelection().getValue());
+			assertFalse(popularBox.getSelection().getValue());
 
-		normalBox.getSelection().setValue(true);
-		assertTrue(normalBox.getSelection().getValue());
-		assertTrue(popularBox.getSelection().getValue());
+			normalBox.getSelection().setValue(true);
+			assertTrue(normalBox.getSelection().getValue());
+			assertTrue(popularBox.getSelection().getValue());
 
-		popularBox.getSelection().setValue(false);
-		assertFalse(normalBox.getSelection().getValue());
-		assertFalse(popularBox.getSelection().getValue());
+			popularBox.getSelection().setValue(false);
+			assertFalse(normalBox.getSelection().getValue());
+			assertFalse(popularBox.getSelection().getValue());
+		}
 	}
 
 	public void testDefaultDependencies() throws Exception {
@@ -628,7 +706,9 @@ public class NewSpringBootWizardModelTest extends TestCase {
 	 * json spec document and doesn't crash on it.
 	 */
 	public void testInitializrSpecParser() throws Exception {
-		doParseTest(INITIALIZR_JSON);
+		for (String f : testDataFiles) {
+			doParseTest(f);
+		}
 	}
 
 	private void doParseTest(String resource) throws IOException, Exception {

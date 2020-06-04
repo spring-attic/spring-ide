@@ -22,16 +22,7 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 public class Log {
 
 	public static void log(Throwable e) {
-		if (ExceptionUtil.isCancelation(e)) {
-			//Don't log canceled operations, those aren't real errors.
-			return;
-		}
-		try {
-			BootActivator.getDefault().getLog().log(ExceptionUtil.status(e));
-		} catch (NullPointerException npe) {
-			//Can happen if errors are trying to be logged during Eclipse's shutdown
-			e.printStackTrace();
-		}
+		org.springsource.ide.eclipse.commons.livexp.util.Log.log(e);
 	}
 
 	public static void info(String msg) {

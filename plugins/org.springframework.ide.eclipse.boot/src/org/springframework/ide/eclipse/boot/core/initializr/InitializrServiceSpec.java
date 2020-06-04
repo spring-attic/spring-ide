@@ -28,12 +28,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-import org.osgi.framework.Version;
-import org.osgi.framework.VersionRange;
-import org.springframework.ide.eclipse.boot.util.Log;
+import org.springframework.ide.eclipse.boot.util.version.Version;
+import org.springframework.ide.eclipse.boot.util.version.VersionParser;
+import org.springframework.ide.eclipse.boot.util.version.VersionRange;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 /**
  * This class is the 'parsed' form of the json metadata for spring intializr service.
@@ -46,6 +47,9 @@ public class InitializrServiceSpec {
 
 	private JSONObject data;
 	public static final String JSON_CONTENT_TYPE_HEADER = "application/vnd.initializr.v2.1+json";
+	//	TODO: activate v2.2 when the time is right (parser already handles the new format so all that should be
+	//  required it to uncomment the constant below to request the new format from the backend service.
+	// public static final String JSON_CONTENT_TYPE_HEADER = "application/vnd.initializr.v2.2+json";
 
 	/**
 	 * Boot version link template variable
@@ -224,12 +228,12 @@ public class InitializrServiceSpec {
 		public boolean isSupportedFor(String bootVersion) {
 			try {
 				if (StringUtils.isNotBlank(versionRange)) {
-					final VersionRange range = new VersionRange(versionRange);
+					final VersionRange range = VersionParser.DEFAULT.parseRange(versionRange);
 					String versionStr = bootVersion;
 					if (versionStr!=null) {
-						Version version = new Version(versionStr.replace("BUILD-SNAPSHOT", "ZZZZZZZZZZZZZ"));
+						Version version = VersionParser.DEFAULT.parse(versionStr);
 						//replacement of BS -> ZZ: see bug https://www.pivotaltracker.com/story/show/100963226
-						return range.includes(version);
+						return range.match(version);
 					}
 				}
 			} catch (Exception e) {

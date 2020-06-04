@@ -64,6 +64,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.validators.NewProjectNam
 import org.springsource.ide.eclipse.commons.livexp.core.validators.UrlValidator;
 import org.springsource.ide.eclipse.commons.livexp.ui.ProjectLocationSection;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.common.base.Objects;
 
@@ -625,6 +626,4 @@ public class NewSpringBootWizardModel {
 		}
 		throw new NoSuchElementException("No dependency with id: "+id);
 	}
-
-
 }
