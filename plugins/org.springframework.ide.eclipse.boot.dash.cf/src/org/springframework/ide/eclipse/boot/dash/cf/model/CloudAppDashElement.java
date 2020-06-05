@@ -11,24 +11,12 @@
 package org.springframework.ide.eclipse.boot.dash.cf.model;
 
 import java.net.URI;
-import java.security.GeneralSecurityException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-
-import org.apache.http.conn.ssl.SSLContextBuilder;
-import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -64,7 +52,6 @@ import org.springframework.ide.eclipse.boot.dash.cf.ops.RemoteDevClientStartOper
 import org.springframework.ide.eclipse.boot.dash.cf.ops.SetHealthCheckOperation;
 import org.springframework.ide.eclipse.boot.dash.cf.routes.ParsedUri;
 import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryRunTarget;
-import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryTargetProperties;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.JmxSshTunnelStatus;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.OperationTracker;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.OperationTracker.Task;
@@ -177,6 +164,20 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 			} else {
 				return JmxSshTunnelStatus.DISABLED;
 			}
+		}
+	};
+	private LiveExpression<String> activeJmxUrl = new LiveExpression<String>() {
+		{
+			dependsOn(jmxSshTunnelStatus);
+		}
+
+		@Override
+		protected String compute() {
+			JmxSshTunnelStatus status = jmxSshTunnelStatus.getValue();
+			if (status==JmxSshTunnelStatus.ACTIVE) {
+				return JmxSupport.getJmxUrl(jmxSupport.getPort());
+			}
+			return null;
 		}
 	};
 
@@ -654,51 +655,9 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 	}
 
 	@Override
-	protected LiveExpression<URI> getActuatorUrl() {
-		LiveExpression<URI> urlExp = getBootDashModel().getActuatorUrlFactory().createOrGet(this);
-		if (urlExp!=null) {
-			return urlExp;
-		}
-		//only happens when this element is not valid anymore, but return something harmless / usable anyhow
-		return LiveExpression.constant(null);
+	protected LiveExpression<String> getActuatorUrl() {
+		return activeJmxUrl;
 	}
-
-	@Override
-	protected Client getRestClient() {
-		CloudFoundryTargetProperties props = getTarget().getTargetProperties();
-		boolean skipSsl = props.isSelfsigned() || props.skipSslValidation();
-		if (skipSsl) {
-			try {
-				SSLContext sslContext = SSLContext.getInstance("TLS");
-				sslContext.init(null, new TrustManager[]{new X509TrustManager() {
-					@Override
-					public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {}
-					@Override
-					public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {}
-					@Override
-					public X509Certificate[] getAcceptedIssuers() { return new X509Certificate[0]; }
-				}}, new java.security.SecureRandom());
-				HostnameVerifier verifier = (a1, a2) -> true;
-				return ClientBuilder.newBuilder()
-					.sslContext(sslContext)
-					.hostnameVerifier(verifier)
-					.build();
-			} catch (Exception e) {
-				Log.log(e);
-			}
-		}
-		//This worked before so lets not try to fix that case.
-		return super.getRestClient();
-	}
-
-	private javax.net.ssl.SSLContext buildSslContext()  {
-		try {
-			return new SSLContextBuilder().useSSL().loadTrustMaterial(null, new TrustSelfSignedStrategy()).build();
-		} catch (GeneralSecurityException gse) {
-			throw new RuntimeException("An error occurred setting up the SSLContext", gse);
-		}
-	}
-
 
 	public IFile getDeploymentManifestFile() {
 		String text = getPersistentProperties().get(DEPLOYMENT_MANIFEST_FILE_PATH);

@@ -40,6 +40,11 @@ import org.springsource.ide.eclipse.commons.livexp.util.Log;
 public abstract class ActuatorClient {
 
 	private static final VersionRange BEANS_PARSER_VERSION_1_RANGE = new VersionRange("[1.0.0, 2.0.0)");
+		//Note: this use of osgi.framework.VersionRange appears to be okay for now.
+		//  It is not applied to a version derived from spring boot itself but to a version from
+		// 'org.springframework.ide.eclipse.boot.dash.model.actuator.JMXActuatorClient.OperationInfo'
+		// This is data fully produced by us amd just consisting of a simple number like "1" or "2" at the moment,
+		// OSGI version parser handles it fine. (Whereas spring-boot specific version parser actually does not).
 
 	private final TypeLookup typeLookup;
 

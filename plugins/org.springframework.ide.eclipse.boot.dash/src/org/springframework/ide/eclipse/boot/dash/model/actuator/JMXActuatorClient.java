@@ -31,7 +31,9 @@ import com.google.common.collect.ImmutableSet;
  */
 public class JMXActuatorClient extends ActuatorClient {
 
-	private final Supplier<Integer> portProvider;
+	private final Supplier<String> urlProvider;
+
+	private String url;
 
 	static class OperationInfo {
 		final String objectName;
@@ -60,11 +62,18 @@ public class JMXActuatorClient extends ActuatorClient {
 	};
 
 	private JMXClient client = null;
-	private Integer port = null;
 
-	public JMXActuatorClient(TypeLookup typeLookup, Supplier<Integer> jmxPort) {
+	public static JMXActuatorClient forPort(TypeLookup typeLookup, Supplier<Integer> jmxPort) {
+		return new JMXActuatorClient(typeLookup, () -> JMXClient.createLocalJmxUrl(jmxPort.get()));
+	}
+
+	public static JMXActuatorClient forUrl(TypeLookup typeLookup, Supplier<String> jmxUrl) {
+		return new JMXActuatorClient(typeLookup, jmxUrl);
+	}
+
+	private JMXActuatorClient(TypeLookup typeLookup, Supplier<String> jmxUrl) {
 		super(typeLookup);
-		this.portProvider = jmxPort;
+		this.urlProvider = jmxUrl;
 	}
 
 	@Override
@@ -118,12 +127,12 @@ public class JMXActuatorClient extends ActuatorClient {
 	}
 
 	private synchronized JMXClient getClient() throws Exception {
-		Integer currentPort = portProvider.get();
-		if (currentPort==null) return null;
-		if (!currentPort.equals(port) || client==null) {
+		String currentUrl = urlProvider.get();
+		if (currentUrl==null) return null;
+		if (!currentUrl.equals(this.url) || client==null) {
 			disposeClient();
-			port = currentPort;
-			client = new JMXClient(currentPort);
+			url = currentUrl;
+			client = new JMXClient(currentUrl);
 		}
 		return client;
 	}

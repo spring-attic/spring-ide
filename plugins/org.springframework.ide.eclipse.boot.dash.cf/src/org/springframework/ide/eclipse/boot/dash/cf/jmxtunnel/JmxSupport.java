@@ -172,8 +172,11 @@ public class JmxSupport {
 		}
 	}
 
-	public static String getJmxUrl(int port) {
-		return "service:jmx:rmi://localhost:"+port+"/jndi/rmi://localhost:"+port+"/jmxrmi";
+	public static String getJmxUrl(Integer port) {
+		if (port!=null && port>0) {
+			return "service:jmx:rmi://localhost:"+port+"/jndi/rmi://localhost:"+port+"/jmxrmi";
+		}
+		return null;
 	}
 
 	public boolean isTunnelActive() {

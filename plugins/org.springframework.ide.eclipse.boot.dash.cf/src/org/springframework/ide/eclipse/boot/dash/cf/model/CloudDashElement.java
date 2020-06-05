@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.cf.model;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -21,6 +22,7 @@ import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryRunTar
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.WrappingBootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.ActuatorClient;
+import org.springframework.ide.eclipse.boot.dash.model.actuator.JMXActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.env.LiveEnvModel;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
@@ -38,25 +40,17 @@ public abstract class CloudDashElement<T> extends WrappingBootDashElement<T> {
 	private LiveExpression<LiveBeansModel> liveBeans;
 	private LiveExpression<LiveEnvModel> liveEnv;
 
-	protected ActuatorClient getActuatorClient(URI target) {
-		return new RestActuatorClient(target, getTypeLookup(), getRestClient());
-	}
-
-	protected Client getRestClient() {
-		return ClientBuilder.newClient();
-	}
-
 	@Override
 	public List<RequestMapping> getLiveRequestMappings() {
 		synchronized (this) {
 			if (liveRequestMappings==null) {
-				final LiveExpression<URI> actuatorUrl = getActuatorUrl();
+				final LiveExpression<String> actuatorUrl = getActuatorUrl();
 				liveRequestMappings = new AsyncLiveExpression<ImmutableList<RequestMapping>>(null, "Fetch request mappings for '"+getName()+"'") {
 					@Override
 					protected ImmutableList<RequestMapping> compute() {
-						URI target = actuatorUrl.getValue();
+						String target = actuatorUrl.getValue();
 						if (target!=null) {
-							ActuatorClient client = getActuatorClient(target);
+							ActuatorClient client = JMXActuatorClient.forUrl(getTypeLookup(), () -> target);
 							List<RequestMapping> list = client.getRequestMappings();
 							if (list!=null) {
 								return ImmutableList.copyOf(client.getRequestMappings());
@@ -78,13 +72,13 @@ public abstract class CloudDashElement<T> extends WrappingBootDashElement<T> {
 	public LiveBeansModel getLiveBeans() {
 		synchronized (this) {
 			if (liveBeans == null) {
-				final LiveExpression<URI> actuatorUrl = getActuatorUrl();
+				final LiveExpression<String> actuatorUrl = getActuatorUrl();
 				liveBeans = new AsyncLiveExpression<LiveBeansModel>(null, "Fetch beans for '"+getName()+"'") {
 					@Override
 					protected LiveBeansModel compute() {
-						URI target = actuatorUrl.getValue();
+						String target = actuatorUrl.getValue();
 						if (target != null) {
-							ActuatorClient client = getActuatorClient(target);
+							ActuatorClient client = JMXActuatorClient.forUrl(getTypeLookup(), () -> target);
 							return client.getBeans();
 						}
 						return null;
@@ -103,13 +97,13 @@ public abstract class CloudDashElement<T> extends WrappingBootDashElement<T> {
 	public LiveEnvModel getLiveEnv() {
 		synchronized (this) {
 			if (liveEnv == null) {
-				final LiveExpression<URI> actuatorUrl = getActuatorUrl();
+				final LiveExpression<String> actuatorUrl = getActuatorUrl();
 				liveEnv = new AsyncLiveExpression<LiveEnvModel>(null, "Fetch env for '"+getName()+"'") {
 					@Override
 					protected LiveEnvModel compute() {
-						URI target = actuatorUrl.getValue();
+						String target = actuatorUrl.getValue();
 						if (target != null) {
-							ActuatorClient client = getActuatorClient(target);
+							ActuatorClient client = JMXActuatorClient.forUrl(getTypeLookup(), () -> target);
 							return client.getEnv();
 						}
 						return null;
@@ -124,7 +118,7 @@ public abstract class CloudDashElement<T> extends WrappingBootDashElement<T> {
 		return liveEnv.getValue();
 	}
 
-	protected LiveExpression<URI> getActuatorUrl() {
+	protected LiveExpression<String> getActuatorUrl() {
 		return LiveExpression.constant(null);
 	}
 

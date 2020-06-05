@@ -255,8 +255,6 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 		return refreshTracker.refreshState.getValue();
 	}
 
-	private DisposingFactory<BootDashElement, LiveExpression<URI>> actuatorUrlFactory;
-
 	private OldValueDisposer<reactor.core.Disposable> refreshTokenDisposer = new OldValueDisposer<>(this);
 
 	/**
@@ -305,51 +303,6 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 	@Override
 	public ObservableSet<BootDashElement> getElements() {
 		return allElements;
-	}
-
-	public DisposingFactory<BootDashElement, LiveExpression<URI>> getActuatorUrlFactory() {
-		if (actuatorUrlFactory==null) {
-			this.actuatorUrlFactory = new DisposingFactory<BootDashElement,LiveExpression<URI>>(getElements()) {
-				@Override
-				protected LiveExpression<URI> create(final BootDashElement key) {
-					final LiveExpression<URI> uriExp = new LiveExpression<URI>() {
-						@Override
-						protected URI compute() {
-							try {
-								RunState runstate = key.getRunState();
-								if (READY_STATES.contains(runstate)) {
-									String host = key.getLiveHost();
-									if (StringUtil.hasText(host)) {
-										return new URI("https://"+host);
-									}
-								}
-							} catch (URISyntaxException e) {
-								Log.log(e);
-							}
-							return null;
-						}
-					};
-					final ElementStateListener elementListener = new ElementStateListener() {
-						@Override
-						public void stateChanged(BootDashElement e) {
-							if (e.equals(key)) {
-								uriExp.refresh();
-							}
-						}
-					};
-					uriExp.onDispose(new DisposeListener() {
-						@Override
-						public void disposed(Disposable disposed) {
-							removeElementStateListener(elementListener);
-						}
-					});
-					addElementStateListener(elementListener);
-					return uriExp;
-				}
-			};
-			addDisposableChild(actuatorUrlFactory);
-		}
-		return actuatorUrlFactory;
 	}
 
 	@Override

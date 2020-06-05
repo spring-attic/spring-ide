@@ -527,7 +527,7 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 	}
 
 	protected ActuatorClient getActuatorClient() {
-		return new JMXActuatorClient(getTypeLookup(), this::getJmxPort);
+		return JMXActuatorClient.forPort(getTypeLookup(), this::getJmxPort);
 	}
 
 	@Override

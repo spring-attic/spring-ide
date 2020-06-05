@@ -24,7 +24,9 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.springsource.ide.eclipse.commons.frameworks.core.util.StringUtils;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 /**
  * A JMX client for interacting with mbeans.
@@ -40,8 +42,8 @@ public class JMXClient implements Disposable {
 	private JMXConnector connector;
 	private MBeanServerConnection connection;
 
-	public JMXClient(int port) throws IOException {
-		this(createLocalJmxConnector(port));
+	public JMXClient(String url) throws IOException {
+		this(createJmxConnectorFromUrl(url));
 	}
 
 	private JMXClient(JMXConnector connector) throws IOException {
@@ -97,14 +99,35 @@ public class JMXClient implements Disposable {
 	 * @return a connection
 	 * @throws IOException if the connection to that server failed
 	 */
-	public static JMXConnector createLocalJmxConnector(int port) throws IOException {
-		String url = "service:jmx:rmi:///jndi/rmi://127.0.0.1:" + port + "/jmxrmi";
-		return createJmxConnectorFromUrl(url);
+	public static String createLocalJmxUrl(String portStr) {
+		if (StringUtils.hasText(portStr)) {
+			try {
+				int port = Integer.valueOf(portStr);
+				return createLocalJmxUrl(port);
+			} catch (Exception e) {
+				Log.log(e);
+			}
+		}
+		return null;
+	}
+
+	public static String createLocalJmxUrl(Integer port) {
+		if (port!=null && port>0) {
+			return "service:jmx:rmi:///jndi/rmi://127.0.0.1:" + port + "/jmxrmi";
+		}
+		return null;
 	}
 
 	public static JMXConnector createJmxConnectorFromUrl(String url) throws MalformedURLException, IOException {
 		JMXServiceURL serviceUrl = new JMXServiceURL(url);
 		return JMXConnectorFactory.connect(serviceUrl, null);
+	}
+
+	public static JMXConnector createLocalJmxConnector(int port) throws MalformedURLException, IOException {
+		if (port>0) {
+			return createJmxConnectorFromUrl(createLocalJmxUrl(""+port));
+		}
+		return null;
 	}
 
 }
