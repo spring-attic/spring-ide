@@ -95,33 +95,6 @@
     </perspectiveExtension>
  </extension>
     
-    <extension
-          point="org.springsource.ide.browser.function.browserToEclipse">
-       <function
-             class="org.springframework.ide.eclipse.boot.wizard.guides.ext.OpenGSFunction"
-             id="org.springframework.openGuideWizard"
-             urlExpression=".*\.html">
-       </function>
-    </extension>
-
-    <extension
-          point="org.springsource.ide.browser.function.eclipseToBrowser">
-       <provider
-             class="org.springframework.ide.eclipse.boot.wizard.guides.ext.OpenGSWizardButtonProvider"
-             functionName="addHtml"
-             invokeOnLoad="true"
-             urlExpression=".*org\.springsource\.ide\.eclipse\.commons\.gettingstarted.*/index.html">
-          <argument
-                dynamic="false"
-                id="divId"
-                literal="gettingStarted">
-          </argument>
-          <argument
-                dynamic="true"
-                id="html">
-          </argument>
-       </provider>
-    </extension>
        <extension
          point="org.eclipse.ui.handlers">
       <handler
