@@ -35,7 +35,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.compare,
  org.eclipse.core.contenttype,
  org.springframework.ide.eclipse.maven.pom,
- org.eclipse.core.expressions
+ org.eclipse.core.expressions,
+ org.glassfish.jersey.inject.jersey-hk2;bundle-version="2.30.1"
 Bundle-Activator: org.springframework.ide.eclipse.boot.wizard.BootWizardActivator
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.boot.wizard,
@@ -43,7 +44,6 @@ Export-Package: org.springframework.ide.eclipse.boot.wizard,
  org.springframework.ide.eclipse.boot.wizard.github,
  org.springframework.ide.eclipse.boot.wizard.github.auth,
  org.springframework.ide.eclipse.boot.wizard.guides,
- org.springframework.ide.eclipse.boot.wizard.guides.ext,
  org.springframework.ide.eclipse.boot.wizard.importing,
  org.springframework.ide.eclipse.boot.wizard.util
 Bundle-Vendor: Pivotal Inc.
