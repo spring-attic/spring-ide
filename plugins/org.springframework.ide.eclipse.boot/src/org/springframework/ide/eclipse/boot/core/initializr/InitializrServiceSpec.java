@@ -46,10 +46,9 @@ import org.springsource.ide.eclipse.commons.livexp.util.Log;
 public class InitializrServiceSpec {
 
 	private JSONObject data;
-	public static final String JSON_CONTENT_TYPE_HEADER = "application/vnd.initializr.v2.1+json";
-	//	TODO: activate v2.2 when the time is right (parser already handles the new format so all that should be
-	//  required it to uncomment the constant below to request the new format from the backend service.
-	// public static final String JSON_CONTENT_TYPE_HEADER = "application/vnd.initializr.v2.2+json";
+
+	//Prefer v2.2 format but fallback on v2.1 if the service does not yet support it.
+	public static final String JSON_CONTENT_TYPE_HEADER = "application/vnd.initializr.v2.2+json,application/vnd.initializr.v2.1+json;q=0.9";
 
 	/**
 	 * Boot version link template variable
