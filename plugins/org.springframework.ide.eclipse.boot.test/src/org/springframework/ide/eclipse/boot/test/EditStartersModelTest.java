@@ -36,8 +36,6 @@ import static org.springframework.ide.eclipse.boot.util.PomUtils.getScope;
 import static org.springframework.ide.eclipse.boot.util.PomUtils.getTextChild;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -50,12 +48,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.core.resources.IProject;
@@ -77,10 +69,8 @@ import org.springframework.ide.eclipse.boot.core.MavenId;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarters;
-import org.springframework.ide.eclipse.boot.core.initializr.InitializrDependencySpec;
-import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
-import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
+import org.springframework.ide.eclipse.boot.test.InitializrWizardModelHarness.MockInitializrService;
 import org.springframework.ide.eclipse.boot.test.util.TestBracketter;
 import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
 import org.springframework.ide.eclipse.boot.wizard.EditStartersModel;
@@ -106,7 +96,8 @@ public class EditStartersModelTest {
 	private static final String BOOT_CURRENT_RELEASE = "2.3.0.RELEASE";
 	private static final String REPOSITORY = "repository";
 	private static final String REPOSITORIES = "repositories";
-	private MockInitializrService initializr = new MockInitializrService();
+	private InitializrWizardModelHarness initializrHarness = new InitializrWizardModelHarness();
+	private MockInitializrService initializr =  initializrHarness.getInitializrService();
 	private SpringBootCore springBootCore = new SpringBootCore(initializr);
 	private BootProjectTestHarness harness = new BootProjectTestHarness(ResourcesPlugin.getWorkspace());
 	private IPreferenceStore prefs = new MockPrefsStore();
@@ -143,7 +134,7 @@ public class EditStartersModelTest {
 		EditStartersModel wizard = createWizard(project);
 
 		assertEquals(bootProject.getBootVersion(), wizard.getBootVersion());
-		assertStarterDeps(wizard.dependencies.getCurrentSelection(), "web", "actuator");
+		initializrHarness.assertStarterDeps(wizard.dependencies.getCurrentSelection(), "web", "actuator");
 	}
 
 
@@ -156,15 +147,15 @@ public class EditStartersModelTest {
 		final ISpringBootProject bootProject = springBootCore.project(project);
 		EditStartersModel wizard = createWizard(project);
 		assertEquals(bootProject.getBootVersion(), wizard.getBootVersion());
-		assertStarterDeps(wizard.dependencies.getCurrentSelection(), "web", "actuator");
+		initializrHarness.assertStarterDeps(wizard.dependencies.getCurrentSelection(), "web", "actuator");
 
 		wizard.removeDependency("web");
-		assertStarterDeps(wizard.dependencies.getCurrentSelection(), /* removed: "web",*/ "actuator");
+		initializrHarness.assertStarterDeps(wizard.dependencies.getCurrentSelection(), /* removed: "web",*/ "actuator");
 		performOk(wizard);
 
 		StsTestUtil.assertNoErrors(project); //force project build
 
-		assertStarters(bootProject.getBootStarters(), "actuator");
+		initializrHarness.assertStarters(bootProject.getBootStarters(), "actuator");
 	}
 
 	private void performOk(EditStartersModel wizard) throws Exception {
@@ -177,19 +168,19 @@ public class EditStartersModelTest {
 		//Test case derived from bug report: https://www.pivotaltracker.com/story/show/157257493
 
 		IProject project = harness.createBootProject("cross-select", withStarters());
-		assertMavenDeps(project,
+		initializrHarness.assertMavenDeps(project,
 				"org.springframework.boot:spring-boot-starter",
 				"org.springframework.boot:spring-boot-starter-test@test"
 		);
 
 		{	//Add 'cloud-stream'
 			EditStartersModel wizard = createWizard(project);
-			assertStarterDeps(wizard.dependencies.getCurrentSelection() /*NONE*/);
+			initializrHarness.assertStarterDeps(wizard.dependencies.getCurrentSelection() /*NONE*/);
 			wizard.addDependency("cloud-stream");
 			performOk(wizard);
 			StsTestUtil.assertNoErrors(project); //force project build
 
-			assertMavenDeps(project,
+			initializrHarness.assertMavenDeps(project,
 					"org.springframework.cloud:spring-cloud-stream",
 					"org.springframework.boot:spring-boot-starter-test@test",
 					"org.springframework.cloud:spring-cloud-stream-test-support@test" //comes in automatically with spring-cloud-stream
@@ -199,12 +190,12 @@ public class EditStartersModelTest {
 
 		{	//Add 'rabbitmq'
 			EditStartersModel wizard = createWizard(project);
-			assertStarterDeps(wizard.dependencies.getCurrentSelection(), "cloud-stream");
+			initializrHarness.assertStarterDeps(wizard.dependencies.getCurrentSelection(), "cloud-stream");
 			wizard.addDependency("amqp");
 			performOk(wizard);
 			StsTestUtil.assertNoErrors(project); //force project build
 
-			assertMavenDeps(project,
+			initializrHarness.assertMavenDeps(project,
 					//old:
 					"org.springframework.cloud:spring-cloud-stream",
 					"org.springframework.boot:spring-boot-starter-test@test",
@@ -223,12 +214,12 @@ public class EditStartersModelTest {
 		IProject project;
 
 		project = harness.createBootProject("web-function", withStarters("webflux"));
-		assertMavenDeps(project,
+		initializrHarness.assertMavenDeps(project,
 				"io.projectreactor:reactor-test@test",
 				"org.springframework.boot:spring-boot-starter-test@test",
 				"org.springframework.boot:spring-boot-starter-webflux"
 		);
-		assertBoms(project /*NONE*/);
+		initializrHarness.assertBoms(project /*NONE*/);
 
 		EditStartersModel wizard = createWizard(project);
 		wizard.addDependency("cloud-function");
@@ -240,14 +231,14 @@ public class EditStartersModelTest {
 
 		StsTestUtil.assertNoErrors(project); //force project build
 
-		assertMavenDeps(project,
+		initializrHarness.assertMavenDeps(project,
 				"io.projectreactor:reactor-test@test",
 				"org.springframework.boot:spring-boot-starter-test@test",
 				"org.springframework.boot:spring-boot-starter-webflux",
 				"org.springframework.cloud:spring-cloud-function-web"
 		);
 
-		assertBoms(project, "org.springframework.cloud:spring-cloud-dependencies");
+		initializrHarness.assertBoms(project, "org.springframework.cloud:spring-cloud-dependencies");
 	}
 
 	//Unfortunately this test takes much too long to run to be practical. There's 6961 pairs to check,
@@ -415,25 +406,25 @@ public class EditStartersModelTest {
 		final ISpringBootProject bootProject = springBootCore.project(project);
 		EditStartersModel wizard = createWizard(project);
 		assertEquals(bootProject.getBootVersion(), wizard.getBootVersion());
-		assertStarterDeps(wizard.dependencies.getCurrentSelection(), "web");
+		initializrHarness.assertStarterDeps(wizard.dependencies.getCurrentSelection(), "web");
 
 		PopularityTracker popularities = new PopularityTracker(prefs);
-		assertUsageCounts(bootProject, popularities  /*none*/);
+		initializrHarness.assertUsageCounts(bootProject, popularities  /*none*/);
 
 		wizard.addDependency("actuator");
-		assertStarterDeps(wizard.dependencies.getCurrentSelection(), "web", "actuator");
+		initializrHarness.assertStarterDeps(wizard.dependencies.getCurrentSelection(), "web", "actuator");
 		performOk(wizard);
 
-		assertUsageCounts(bootProject, popularities, "actuator:1");
+		initializrHarness.assertUsageCounts(bootProject, popularities, "actuator:1");
 
 		StsTestUtil.assertNoErrors(project); //force project build
 
-		assertStarters(bootProject.getBootStarters(), "web", "actuator");
+		initializrHarness.assertStarters(bootProject.getBootStarters(), "web", "actuator");
 
 		//check that the 'scope' is not set in the pom.xml:
-		IDOMDocument pom = parsePom(project);
+		IDOMDocument pom = initializrHarness.parsePom(project);
 
-		Element depEl = findDependency(bootProject, pom, "actuator");
+		Element depEl = initializrHarness.findDependency(bootProject, pom, "actuator");
 		assertEquals("org.springframework.boot", getGroupId(depEl));
 		assertEquals("spring-boot-starter-actuator", getArtifactId(depEl));
 		assertEquals(null, getScope(depEl));
@@ -449,11 +440,11 @@ public class EditStartersModelTest {
 
 		StsTestUtil.assertNoErrors(project); //force project build
 
-		assertStarters(bootProject.getBootStarters(), "web", "restdocs");
+		initializrHarness.assertStarters(bootProject.getBootStarters(), "web", "restdocs");
 
 		//check that the 'scope' is set properly
-		IDOMDocument pom = parsePom(project);
-		Element depEl = findDependency(bootProject, pom, "restdocs");
+		IDOMDocument pom = initializrHarness.parsePom(project);
+		Element depEl = initializrHarness.findDependency(bootProject, pom, "restdocs");
 		assertEquals("spring-restdocs-mockmvc", getArtifactId(depEl));
 		assertEquals("test", getScope(depEl));
 	}
@@ -479,7 +470,7 @@ public class EditStartersModelTest {
 
 		StsTestUtil.assertNoErrors(project); //force project build
 
-		assertStarters(bootProject.getBootStarters(), "web", "cloud-eureka");
+		initializrHarness.assertStarters(bootProject.getBootStarters(), "web", "cloud-eureka");
 	}
 
 	@Test
@@ -491,7 +482,7 @@ public class EditStartersModelTest {
 		);
 		initializr.setInputs("sample"); // sample intializr json captured for this version
 		final ISpringBootProject bootProject = springBootCore.project(project);
-		int initialBomCount = getBomCount(parsePom(project));
+		int initialBomCount = getBomCount(initializrHarness.parsePom(project));
 
 		EditStartersModel wizard = createWizard(project);
 		wizard.addDependency("cloud-eureka");
@@ -500,9 +491,9 @@ public class EditStartersModelTest {
 
 		StsTestUtil.assertNoErrors(project); //force project build
 
-		assertStarters(bootProject.getBootStarters(), "web", "cloud-eureka", "cloud-config-client");
+		initializrHarness.assertStarters(bootProject.getBootStarters(), "web", "cloud-eureka", "cloud-config-client");
 
-		IDOMDocument pom = parsePom(project);
+		IDOMDocument pom = initializrHarness.parsePom(project);
 		int finalBomCount = getBomCount(pom);
 		assertEquals(initialBomCount+1, finalBomCount);
 
@@ -532,7 +523,7 @@ public class EditStartersModelTest {
 		initializr.setInputs("sample"); // sample intializr json captured for this version
 		initializr.enableFakePomGenerator();
 		final ISpringBootProject bootProject = springBootCore.project(project);
-		int initialBomCount = getBomCount(parsePom(project));
+		int initialBomCount = getBomCount(initializrHarness.parsePom(project));
 		StsTestUtil.assertNoErrors(project); //force project build
 
 		EditStartersModel wizard = createWizard(project);
@@ -548,8 +539,8 @@ public class EditStartersModelTest {
 //		StsTestUtil.assertNoErrors(project); //force project build
 //		assertStarters(bootProject.getBootStarters(), "web", "cloud-eureka", "vaadin");
 
-		IDOMDocument pom = parsePom(project);
-		assertMavenDeps(project,
+		IDOMDocument pom = initializrHarness.parsePom(project);
+		initializrHarness.assertMavenDeps(project,
 				"org.springframework.boot:spring-boot-starter-web",
 				"org.springframework.boot:spring-boot-starter-test@test",
 				"org.springframework.cloud:spring-cloud-starter-netflix-eureka-client",
@@ -596,10 +587,10 @@ public class EditStartersModelTest {
 		//!!! problem so don't check for build errors in this test
 
 		//check that only ONE repo got added
-		IDOMDocument pom = parsePom(project);
+		IDOMDocument pom = initializrHarness.parsePom(project);
 
 		//check the dependency got added to the pom
-		assertNotNull(findDependency(pom, new MavenId("org.springframework.cloud", "spring-cloud-starter-eureka")));
+		assertNotNull(initializrHarness.findDependency(pom, new MavenId("org.springframework.cloud", "spring-cloud-starter-eureka")));
 
 		//check that both repos got added
 		assertRepoCount(2, pom);
@@ -636,10 +627,10 @@ public class EditStartersModelTest {
 		//!!! fake data may not produce a project that builds without
 		//!!! problem so don't check for build errors in this test
 
-		IDOMDocument pom = parsePom(project);
+		IDOMDocument pom = initializrHarness.parsePom(project);
 
 		//check the dependency got added to the pom
-		assertNotNull(findDependency(pom, new MavenId("org.springframework.fake", "spring-fake-dep")));
+		assertNotNull(initializrHarness.findDependency(pom, new MavenId("org.springframework.fake", "spring-fake-dep")));
 
 		//check that just the expected repo got added
 		assertNotNull(getRepo(pom, "spring-milestones"));
@@ -661,10 +652,10 @@ public class EditStartersModelTest {
 
 		final ISpringBootProject bootProject = springBootCore.project(project);
 		StsTestUtil.assertNoErrors(project);
-		assertStarters(bootProject.getBootStarters() /*NONE*/);
+		initializrHarness.assertStarters(bootProject.getBootStarters() /*NONE*/);
 
-		IDOMDocument pom = parsePom(project);
-		assertNotNull(findDependency(pom, new MavenId("org.springframework.boot", "spring-boot-starter")));
+		IDOMDocument pom = initializrHarness.parsePom(project);
+		assertNotNull(initializrHarness.findDependency(pom, new MavenId("org.springframework.boot", "spring-boot-starter")));
 	}
 
 	@Test
@@ -673,11 +664,11 @@ public class EditStartersModelTest {
 		IProject project = harness.createBootProject("projectToUnselectoAll");
 		final ISpringBootProject bootProject = springBootCore.project(project);
 		StsTestUtil.assertNoErrors(project); //force project build
-		assertStarters(bootProject.getBootStarters() /*NONE*/);
+		initializrHarness.assertStarters(bootProject.getBootStarters() /*NONE*/);
 		{	//Check the state of the default dependencies
-			IDOMDocument pom = parsePom(project);
-			assertNotNull(findDependency(pom, new MavenId("org.springframework.boot", "spring-boot-starter")));
-			assertEquals("test", getScope(findDependency(pom, new MavenId("org.springframework.boot", "spring-boot-starter-test"))));
+			IDOMDocument pom = initializrHarness.parsePom(project);
+			assertNotNull(initializrHarness.findDependency(pom, new MavenId("org.springframework.boot", "spring-boot-starter")));
+			assertEquals("test", getScope(initializrHarness.findDependency(pom, new MavenId("org.springframework.boot", "spring-boot-starter-test"))));
 		}
 
 		EditStartersModel wizard = createWizard(project);
@@ -693,11 +684,11 @@ public class EditStartersModelTest {
 //		System.out.println(IOUtil.toString(project.getFile("pom.xml").getContents()));
 
 		StsTestUtil.assertNoErrors(project);
-		assertStarters(bootProject.getBootStarters(), "web", "actuator");
+		initializrHarness.assertStarters(bootProject.getBootStarters(), "web", "actuator");
 		{	//Check the state of the default dependencies
-			IDOMDocument pom = parsePom(project);
-			assertNull(findDependency(pom, new MavenId("org.springframework.boot", "spring-boot-starter")));
-			assertEquals("test", getScope(findDependency(pom, new MavenId("org.springframework.boot", "spring-boot-starter-test"))));
+			IDOMDocument pom = initializrHarness.parsePom(project);
+			assertNull(initializrHarness.findDependency(pom, new MavenId("org.springframework.boot", "spring-boot-starter")));
+			assertEquals("test", getScope(initializrHarness.findDependency(pom, new MavenId("org.springframework.boot", "spring-boot-starter-test"))));
 		}
 	}
 
@@ -740,29 +731,6 @@ public class EditStartersModelTest {
 		return null;
 	}
 
-	public IDOMDocument parsePom(IProject project) throws IOException, CoreException {
-		return ((IDOMModel) StructuredModelManager.getModelManager().createUnManagedStructuredModelFor(project.getFile("pom.xml"))).getDocument();
-	}
-
-	private Element findDependency(ISpringBootProject project, Document pom, String id) {
-		try {
-			SpringBootStarters starters = project.getStarterInfos();
-			MavenId mid = starters.getMavenId(id);
-			if (mid!=null) {
-				return findDependency(pom, mid);
-			}
-		} catch (Exception e) {
-			Log.log(e);
-		}
-		return null;
-	}
-
-	public static Element findDependency(Document document, MavenId dependency) {
-		Element dependenciesElement = findChild(document.getDocumentElement(), DEPENDENCIES);
-		return findChild(dependenciesElement, DEPENDENCY, childEquals(GROUP_ID, dependency.getGroupId()),
-				childEquals(ARTIFACT_ID, dependency.getArtifactId()));
-	}
-
 
 	private EditStartersModel createWizard(IProject project) throws Exception {
 
@@ -773,35 +741,7 @@ public class EditStartersModelTest {
 		);
 	}
 
-	private void assertStarters(List<SpringBootStarter> starters, String... expectedIds) {
-		Set<String> expecteds = new HashSet<>(Arrays.asList(expectedIds));
-		for (SpringBootStarter starter : starters) {
-			String id = starter.getId();
-			if (expecteds.remove(id)) {
-				//okay
-			} else {
-				fail("Unexpected starter found: "+starter);
-			}
-		}
-		if (!expecteds.isEmpty()) {
-			fail("Expected starters not found: "+expecteds);
-		}
-	}
 
-	private void assertStarterDeps(List<Dependency> starters, String... expectedIds) {
-		Set<String> expecteds = new HashSet<>(Arrays.asList(expectedIds));
-		for (Dependency starter : starters) {
-			String id = starter.getId();
-			if (expecteds.remove(id)) {
-				//okay
-			} else {
-				fail("Unexpected starter found: "+starter);
-			}
-		}
-		if (!expecteds.isEmpty()) {
-			fail("Expected starters not found: "+expecteds);
-		}
-	}
 
 	private void assertRepoCount(int expect, IDOMDocument pom) {
 		assertEquals(expect, getRepoCount(pom));
@@ -847,180 +787,13 @@ public class EditStartersModelTest {
 		return 0;
 	}
 
-	private void assertUsageCounts(ISpringBootProject project, PopularityTracker popularities, String... idAndCount) throws Exception {
-		Map<String, Integer> expect = new HashMap<>();
-		for (String pair : idAndCount) {
-			String[] pieces = pair.split(":");
-			assertEquals(2, pieces.length);
-			String id = pieces[0];
-			int count = Integer.parseInt(pieces[1]);
-			expect.put(id, count);
-		}
 
 
-		List<SpringBootStarter> knownStarters = project.getKnownStarters();
-		assertFalse(knownStarters.isEmpty());
-		for (SpringBootStarter starter : knownStarters) {
-			String id = starter.getId();
-			Integer expectedCountOrNull = expect.get(id);
-			int expectedCount = expectedCountOrNull==null ? 0 : expectedCountOrNull;
-			assertEquals("Usage count for '"+id+"'", expectedCount, popularities.getUsageCount(id));
-			expect.remove(id);
-		}
 
-		assertTrue("Expected usage counts not found: "+expect, expect.isEmpty());
-	}
 
-	public class MockInitializrService implements InitializrService {
 
-		private SpringBootStarters starters;
-		private boolean unavailable = false;
-		private boolean generateFakePom = false;
 
-		/**
-		 * Causes the mock to parse input from given input streams instead of calling out to
-		 * the real web service.
-		 */
-		public void setInputs(InputStream main, InputStream dependencies) throws Exception {
-			starters = new SpringBootStarters(
-					InitializrServiceSpec.parseFrom(main),
-					InitializrDependencySpec.parseFrom(dependencies)
-			);
-		}
 
-		public void enableFakePomGenerator() {
-			generateFakePom = true;
-		}
-
-		/**
-		 * Causes the mock to parse input from some resources located relative to the test
-		 * class.
-		 */
-		public void setInputs(String name) throws Exception {
-			setInputs(getResource(name, "main"), getResource(name, "dependencies"));
-		}
-
-		private InputStream getResource(String name, String endPoint) {
-			return getClass().getResourceAsStream("edit-starters-test-inputs/"+name+"-"+endPoint+".json");
-		}
-
-		@Override
-		public SpringBootStarters getStarters(String bootVersion) throws Exception {
-			if (unavailable) {
-				throw new IOException("Initializr Service Unavailable");
-			} else if (starters!=null) {
-				return starters;
-			} else {
-				return InitializrService.DEFAULT.getStarters(bootVersion);
-			}
-		}
-
-		/**
-		 * Make the mock behave as if the 'dependencies' endpoint is not available (either the service is down,
-		 * there is no internet connection, or this is an old service that doesn't implement the endpoint yet).
-		 */
-		public void makeUnavailable() {
-			this.unavailable = true;
-		}
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public String getPom(Map<String, ?> parameters) throws Exception {
-			if (unavailable) {
-				throw new IOException("Initializr Service Unavailable");
-			} else if (generateFakePom) {
-				return generateFakePom((String) parameters.get("bootVersion"), (List<String>) parameters.get("dependencies"));
-			} else {
-				return InitializrService.DEFAULT.getPom(parameters);
-			}
-		}
-
-		private String generateFakePom(String bootVersion, List<String> starters) throws Exception {
-			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			Document pom = dbf.newDocumentBuilder().newDocument();
-			Element rootElement = pom.createElement("project");
-			pom.appendChild(rootElement);
-
-			Element depsEl = pom.createElement(DEPENDENCIES);
-			rootElement.appendChild(depsEl);
-
-			SpringBootStarters knownStarters = getStarters(bootVersion);
-			for (String starterId : starters) {
-				SpringBootStarter starter = knownStarters.getStarter(starterId);
-				Element dep = pom.createElement(DEPENDENCY);
-				depsEl.appendChild(dep);
-
-				{
-					Element gid = pom.createElement(GROUP_ID);
-					gid.appendChild(pom.createTextNode(starter.getGroupId()));
-					dep.appendChild(gid);
-				}
-				{
-					Element aid = pom.createElement(ARTIFACT_ID);
-					aid.appendChild(pom.createTextNode(starter.getArtifactId()));
-					dep.appendChild(aid);
-				}
-			}
-
-			Transformer tf = TransformerFactory.newInstance().newTransformer();
-			StringWriter stringWriter = new StringWriter();
-			tf.transform(new DOMSource(pom), new StreamResult(stringWriter));
-			return stringWriter.toString();
-		}
-	}
-
-	private void assertBoms(IProject project, String... _expectedDeps) throws IOException, CoreException {
-		IDOMDocument pom = parsePom(project);
-		Element depsEl = getChild(pom.getDocumentElement(), DEPENDENCY_MANAGEMENT, DEPENDENCIES);
-		List<Element> depNodes = findChilds(depsEl, DEPENDENCY);
-		List<String> actualDeps = new ArrayList<>();
-		for (Element depEl : depNodes) {
-			String dep = getGroupId(depEl) + ":" + getArtifactId(depEl);
-			if ("import".equals(getTextChild(depEl, "scope")) && "pom".equals(getTextChild(depEl, "type"))) {
-				actualDeps.add(dep);
-			}
-		}
-		Collections.sort(actualDeps);
-		List<String> expectedDeps = new ArrayList<>(Arrays.asList(_expectedDeps));
-		Collections.sort(expectedDeps);
-
-		assertEquals(onePerLine(expectedDeps), onePerLine(actualDeps));
-
-	}
-
-	/**
-	 * Deps are string in this format "<gid>:<aid>@<scope>". The '@<scope>' part can be omited
-	 * to indicate a dependency with default scope.
-	 */
-	private void assertMavenDeps(IProject project, String... _expectedDeps) throws IOException, CoreException {
-		IDOMDocument pom = parsePom(project);
-		Element depsEl = findChild(pom.getDocumentElement(), DEPENDENCIES);
-		List<Element> depNodes = findChilds(depsEl, DEPENDENCY);
-		List<String> actualDeps = new ArrayList<>();
-		for (Element depEl : depNodes) {
-			String dep = getGroupId(depEl) + ":" + getArtifactId(depEl);
-			String scope = getScope(depEl) ;
-			if (scope!=null) {
-				dep = dep + "@" + scope;
-			}
-			actualDeps.add(dep);
-		}
-
-		Collections.sort(actualDeps);
-		List<String> expectedDeps = new ArrayList<>(Arrays.asList(_expectedDeps));
-		Collections.sort(expectedDeps);
-
-		assertEquals(onePerLine(expectedDeps), onePerLine(actualDeps));
-	}
-
-	private String onePerLine(List<String> strings) {
-		StringBuilder builder = new StringBuilder();
-		for (String string : strings) {
-			builder.append(string);
-			builder.append('\n');
-		}
-		return builder.toString();
-	}
 
 
 }
