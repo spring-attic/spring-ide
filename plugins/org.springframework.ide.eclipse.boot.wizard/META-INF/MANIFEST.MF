@@ -35,8 +35,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.compare,
  org.eclipse.core.contenttype,
  org.springframework.ide.eclipse.maven.pom,
- org.eclipse.core.expressions,
- org.glassfish.jersey.inject.jersey-hk2;bundle-version="2.30.1"
+ org.eclipse.core.expressions
 Bundle-Activator: org.springframework.ide.eclipse.boot.wizard.BootWizardActivator
 Bundle-ActivationPolicy: lazy
 Export-Package: org.springframework.ide.eclipse.boot.wizard,
