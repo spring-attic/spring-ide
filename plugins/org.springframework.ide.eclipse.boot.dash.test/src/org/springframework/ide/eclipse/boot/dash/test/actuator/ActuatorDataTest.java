@@ -15,6 +15,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
+import java.io.InputStream;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,6 +31,7 @@ import org.springframework.ide.eclipse.boot.dash.model.actuator.env.LiveEnvModel
 import org.springframework.ide.eclipse.boot.dash.model.actuator.env.Profile;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.env.Property;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.env.PropertySource;
+import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -91,20 +93,28 @@ public class ActuatorDataTest {
 
 	}
 
+
+	public static String getContents(String resourcePath) throws Exception {
+		InputStream input = ActuatorDataTest.class.getResourceAsStream(resourcePath);
+		String s = IOUtil.toString(input);
+		System.out.println(s);
+		return s;
+	}
+
 	@Test public void testModelEquality() throws Exception {
-		TestActuatorClient client = new TestActuatorClient(null).beansJson(ActuatorClientTest.getContents("beans-sample.json")).version("1");
+		TestActuatorClient client = new TestActuatorClient(null).beansJson(getContents("beans-sample.json")).version("1");
 		LiveBeansModel liveBeans = client.getBeans();
 		assertEquals(liveBeans, client.getBeans());
 	}
 
 	@Test public void testModelIneuality_1() throws Exception {
-		TestActuatorClient client = new TestActuatorClient(null).beansJson(ActuatorClientTest.getContents("beans-sample.json")).version("1");
-		TestActuatorClient otherClient = new TestActuatorClient(null).beansJson(ActuatorClientTest.getContents("beans-sample-diff1.json")).version("1");
+		TestActuatorClient client = new TestActuatorClient(null).beansJson(getContents("beans-sample.json")).version("1");
+		TestActuatorClient otherClient = new TestActuatorClient(null).beansJson(getContents("beans-sample-diff1.json")).version("1");
 		assertNotEquals(client.getBeans(), otherClient.getBeans());
 	}
 
 	@Test public void testModelContent() throws Exception {
-		TestActuatorClient client = new TestActuatorClient(null).beansJson(ActuatorClientTest.getContents("beans-sample.json")).version("1");
+		TestActuatorClient client = new TestActuatorClient(null).beansJson(getContents("beans-sample.json")).version("1");
 		LiveBeansModel liveBeans = client.getBeans();
 		assertEquals(1, liveBeans.getBeansByContext().size());
 		LiveBeansContext context = liveBeans.getBeansByContext().get(0);
@@ -128,7 +138,7 @@ public class ActuatorDataTest {
 	}
 
 	@Test public void testModelContentBoot2() throws Exception {
-		TestActuatorClient client = new TestActuatorClient(null).beansJson(ActuatorClientTest.getContents("beans-sample-boot2-1.json")).version("2");
+		TestActuatorClient client = new TestActuatorClient(null).beansJson(getContents("beans-sample-boot2-1.json")).version("2");
 		LiveBeansModel liveBeans = client.getBeans();
 		assertEquals(1, liveBeans.getBeansByContext().size());
 		LiveBeansContext context = liveBeans.getBeansByContext().get(0);
@@ -156,7 +166,7 @@ public class ActuatorDataTest {
 	}
 
 	@Test public void testRequestMappingsBoot2() throws Exception {
-		TestActuatorClient client = new TestActuatorClient(null).version("2").requestMappingJson(ActuatorClientTest.getContents("requestmappings-sample-boot2.json"));
+		TestActuatorClient client = new TestActuatorClient(null).version("2").requestMappingJson(getContents("requestmappings-sample-boot2.json"));
 		List<RequestMapping> mappings = client.getRequestMappings();
 		System.out.println(mappings);
 		ImmutableSet<String> expected = ImmutableSet.of(
@@ -178,7 +188,7 @@ public class ActuatorDataTest {
 	}
 
 	@Test public void testRequestMappingsBoot2WebFlux() throws Exception {
-		TestActuatorClient client = new TestActuatorClient(null).version("2").requestMappingJson(ActuatorClientTest.getContents("requestmappings-boot2-webflux.json"));
+		TestActuatorClient client = new TestActuatorClient(null).version("2").requestMappingJson(getContents("requestmappings-boot2-webflux.json"));
 		List<RequestMapping> mappings = client.getRequestMappings();
 		System.out.println(mappings);
 		ImmutableSet<String> expected = ImmutableSet.of(
@@ -199,7 +209,7 @@ public class ActuatorDataTest {
 	}
 
 	@Test public void testRequestMappingsBoot2WebFluxFunctional() throws Exception {
-		TestActuatorClient client = new TestActuatorClient(null).version("2").requestMappingJson(ActuatorClientTest.getContents("requestmappings-boot2-webflux-functional.json"));
+		TestActuatorClient client = new TestActuatorClient(null).version("2").requestMappingJson(getContents("requestmappings-boot2-webflux-functional.json"));
 		List<RequestMapping> mappings = client.getRequestMappings();
 		System.out.println(mappings);
 		ImmutableSet<String> expected = ImmutableSet.of(
@@ -218,7 +228,7 @@ public class ActuatorDataTest {
 	}
 
 	@Test public void testRequestMappingsWithManualServletRegistration() throws Exception {
-		TestActuatorClient client = new TestActuatorClient(null).version("2").requestMappingJson(ActuatorClientTest.getContents("requestmappings-with-manual-servlet-registration.json"));
+		TestActuatorClient client = new TestActuatorClient(null).version("2").requestMappingJson(getContents("requestmappings-with-manual-servlet-registration.json"));
 		List<RequestMapping> mappings = client.getRequestMappings();
 		System.out.println(mappings);
 		ImmutableSet<String> expected = ImmutableSet.of(
@@ -239,16 +249,16 @@ public class ActuatorDataTest {
 	}
 
 	@Test public void testEnvModelEquality() throws Exception {
-		TestActuatorClient client = new TestActuatorClient(null).envJson(ActuatorClientTest.getContents("env-sample-boot2.json")).version("2");
+		TestActuatorClient client = new TestActuatorClient(null).envJson(getContents("env-sample-boot2.json")).version("2");
 		LiveEnvModel env = client.getEnv();
 		assertEquals(env, client.getEnv());
 	}
 
 	@Test public void testEnvModelInequality() throws Exception {
 		TestActuatorClient client = new TestActuatorClient(null)
-				.envJson(ActuatorClientTest.getContents("env-sample-boot2.json")).version("2");
+				.envJson(getContents("env-sample-boot2.json")).version("2");
 		TestActuatorClient otherClient = new TestActuatorClient(null)
-				.envJson(ActuatorClientTest.getContents("env-sample-boot2-diff.json")).version("2");
+				.envJson(getContents("env-sample-boot2-diff.json")).version("2");
 
 		LiveEnvModel env = client.getEnv();
 		LiveEnvModel otherEnv = otherClient.getEnv();
@@ -261,7 +271,7 @@ public class ActuatorDataTest {
 
 	@Test public void testEnvModelContent() throws Exception {
 		TestActuatorClient client = new TestActuatorClient(null)
-				.envJson(ActuatorClientTest.getContents("env-sample-boot2.json")).version("2");
+				.envJson(getContents("env-sample-boot2.json")).version("2");
 		LiveEnvModel env = client.getEnv();
 		assertEquals(ImmutableList.of(new Profile("production"), new Profile("staging")),
 				env.getActiveProfiles().getProfiles());
@@ -289,14 +299,14 @@ public class ActuatorDataTest {
 	}
 
 	@Test public void testEnvModelEqualityBoot1x() throws Exception {
-		TestActuatorClient client = new TestActuatorClient(null).envJson(ActuatorClientTest.getContents("env-sample-boot1.json")).version("1");
+		TestActuatorClient client = new TestActuatorClient(null).envJson(getContents("env-sample-boot1.json")).version("1");
 		LiveEnvModel env = client.getEnv();
 		assertEquals(env, client.getEnv());
 	}
 
 	@Test public void testEnvModelContentBoot1x() throws Exception {
 		TestActuatorClient client = new TestActuatorClient(null)
-				.envJson(ActuatorClientTest.getContents("env-sample-boot1.json")).version("1");
+				.envJson(getContents("env-sample-boot1.json")).version("1");
 		LiveEnvModel env = client.getEnv();
 
 		PropertySource propertySource = env.getPropertySources().getPropertySources().stream()
