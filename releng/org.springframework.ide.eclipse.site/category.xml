@@ -388,6 +388,6 @@
 		<bundle id="org.glassfish.jersey.core.jersey-client" version="0.0.0"/>
 		<bundle id="org.glassfish.jersey.core.jersey-common" version="0.0.0"/>
 		<bundle id="javax.ws.rs" version="0.0.0"/>
-		<bundle id="org.apache.commons.compress.archivers" version="0.0.0"/>
+		<bundle id="org.apache.commons.compress" version="0.0.0"/>
 
 </site>
