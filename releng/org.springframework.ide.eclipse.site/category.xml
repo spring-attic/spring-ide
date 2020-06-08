@@ -380,6 +380,7 @@
 		<bundle id="org.glassfish.jersey.media.jersey-media-json-jackson" version="0.0.0"/>
 		<bundle id="org.mandas.docker-client" version="0.0.0"/>
 		<bundle id="org.objectweb.asm.analysis" version="0.0.0"/>
+		<bundle id="org.objectweb.asm.tree" version="0.0.0"/>
 		<bundle id="org.objectweb.asm.util" version="0.0.0"/>
 		<bundle id="org.glassfish.hk2.api" version="0.0.0"/>
 		<bundle id="org.glassfish.hk2.locator" version="0.0.0"/>
