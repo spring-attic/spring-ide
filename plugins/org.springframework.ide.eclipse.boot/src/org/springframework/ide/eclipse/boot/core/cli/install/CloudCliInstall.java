@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2017 Pivotal Software, Inc.
+ *  Copyright (c) 2017, 2020 Pivotal Software, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -15,20 +15,20 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import org.osgi.framework.Version;
-import org.osgi.framework.VersionRange;
 import org.springframework.ide.eclipse.boot.core.cli.BootCliCommand;
-import org.springframework.ide.eclipse.boot.util.Log;
+import org.springframework.ide.eclipse.boot.util.version.Version;
+import org.springframework.ide.eclipse.boot.util.version.VersionRange;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 /**
  * Cloud CLI extension of Spring Boot CLI
- * 
+ *
  * @author Alex Boyko
  *
  */
 public class CloudCliInstall implements IBootInstallExtension {
-	
+
 	private static final Pattern VERSION_PATTERN = Pattern.compile("^Spring Cloud CLI v(\\d+\\.\\d+\\.\\d+\\.[\\w-]+)$");
 
 	private IBootInstall bootInstall;
@@ -51,8 +51,8 @@ public class CloudCliInstall implements IBootInstallExtension {
 	/**
 	 * Range of Cloud CLI versions that support JVM parameters for cloud services
 	 */
-	public static final VersionRange CLOUD_CLI_JAVA_OPTS_SUPPORTING_VERSIONS = new VersionRange("1.2.0");
-	
+	public static final VersionRange CLOUD_CLI_JAVA_OPTS_SUPPORTING_VERSIONS = new VersionRange(new Version(1, 2, 0, null));
+
 	/**
 	 * Creates instance of Cloud CLI install based on Boot CLI install
 	 * @param bootInstall
@@ -60,7 +60,7 @@ public class CloudCliInstall implements IBootInstallExtension {
 	public CloudCliInstall(IBootInstall bootInstall) {
 		this.bootInstall = bootInstall;
 	}
-	
+
 	@Override
 	public BootCliCommand createCommand() throws Exception {
 		return new BootCliCommand(bootInstall.getHome()) {
@@ -72,7 +72,7 @@ public class CloudCliInstall implements IBootInstallExtension {
 
 		};
 	}
-	
+
 	/**
 	 * Returns ids/names of supported cloud services
 	 * @return array of ids/names of cloud services
@@ -102,6 +102,7 @@ public class CloudCliInstall implements IBootInstallExtension {
 	 * Version of Spring Cloud CLI
 	 * @return the version
 	 */
+	@Override
 	public Version getVersion() {
 		try {
 			BootCliCommand cmd = createCommand();
@@ -109,14 +110,14 @@ public class CloudCliInstall implements IBootInstallExtension {
 			if (result == 0 && !isCommandOutputErroneous(cmd.getOutput())) {
 				Matcher matcher = VERSION_PATTERN.matcher(cmd.getOutput());
 				if (matcher.find()) {
-					return Version.valueOf(matcher.group(1));
+					return Version.safeParse(matcher.group(1));
 				}
 			}
 			Log.log(ExceptionUtil.coreException("Failed to determine Spring Cloud CLI version"));
 		} catch (Throwable t) {
 			Log.log(t);
 		}
- 		return null;		
+ 		return null;
 	}
 
 	private static boolean isCommandOutputErroneous(String output) {

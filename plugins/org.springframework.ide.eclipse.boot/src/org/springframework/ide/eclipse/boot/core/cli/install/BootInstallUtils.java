@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2017, 2019 Pivotal Software, Inc.
+ *  Copyright (c) 2017, 2020 Pivotal Software, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -13,8 +13,8 @@ package org.springframework.ide.eclipse.boot.core.cli.install;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.osgi.framework.Version;
-import org.osgi.framework.VersionRange;
+import org.springframework.ide.eclipse.boot.util.version.Version;
+import org.springframework.ide.eclipse.boot.util.version.VersionParser;
 import org.springsource.ide.eclipse.commons.core.preferences.StsProperties;
 
 import com.google.common.collect.ImmutableMap;
@@ -53,32 +53,21 @@ public class BootInstallUtils {
 	 */
 	public static Version getCloudCliVersion(Version bootVersion) {
 		if (bootVersion == null) {
-			throw new IllegalArgumentException();
-		}
-		if (VersionRange.valueOf("2.1.0").includes(bootVersion)) {
-			return Version.valueOf(StsProperties.getInstance().get("spring.boot.cloud.default.version"));
-		} else if (VersionRange.valueOf("[2.0.0,2.1.0)").includes(bootVersion)) {
-			return Version.valueOf("2.0.0.RELEASE");
-		} else if (VersionRange.valueOf("[1.5.3,2.0.0)").includes(bootVersion)) {
-			return Version.valueOf("1.4.0.RELEASE");
-		} else if (VersionRange.valueOf("[1.4.4,1.5.3)").includes(bootVersion)) {
-			return Version.valueOf("1.3.2.RELEASE");
-		} else if (VersionRange.valueOf("[1.2.2,1.4.4)").includes(bootVersion)) {
-			return Version.valueOf("1.2.2.RELEASE");
-//		} else if (VersionRange.valueOf("[1.3.7, 1.4.1)").includes(bootVersion)) {
-//			return Version.valueOf("1.1.6.RELEASE");
-//		} else if (VersionRange.valueOf("[1.3.5,1.3.7)").includes(bootVersion)) {
-//			return Version.valueOf("1.1.5.RELEASE");
-//		} else if (VersionRange.valueOf("[1.2.8,1.3.5)").includes(bootVersion)) {
-//			return Version.valueOf("1.0.6.RELEASE");
-//		} else if (VersionRange.valueOf("[1.2.6,1.2.8)").includes(bootVersion)) {
-//			return Version.valueOf("1.0.4.RELEASE");
-//		} else if (VersionRange.valueOf("[1.2.4,1.2.6)").includes(bootVersion)) {
-//			return Version.valueOf("1.0.3.RELEASE");
-//		} else if (VersionRange.valueOf("[1.2.3,1.2.4)").includes(bootVersion)) {
-//			return Version.valueOf("1.0.2.RELEASE");
-//		} else if (VersionRange.valueOf("[1.2.2,1.2.3)").includes(bootVersion)) {
-//			return Version.valueOf("1.0.0.RELEASE");
+			return null;
+		} else if (VersionParser.DEFAULT.parseRange("2.3.0").match(bootVersion)) {
+			return Version.parse(StsProperties.getInstance().get("spring.boot.cloud.default.version"));
+		} else if (VersionParser.DEFAULT.parseRange("[2.2.0,2.3.0)").match(bootVersion)) {
+			return Version.parse("2.2.1.RELEASE");
+		} else if (VersionParser.DEFAULT.parseRange("[2.1.0,2.2.0)").match(bootVersion)) {
+			return Version.parse("2.1.0.RELEASE");
+		} else if (VersionParser.DEFAULT.parseRange("[2.0.0,2.1.0)").match(bootVersion)) {
+			return Version.parse("2.0.0.RELEASE");
+		} else if (VersionParser.DEFAULT.parseRange("[1.5.3,2.0.0)").match(bootVersion)) {
+			return Version.parse("1.4.0.RELEASE");
+		} else if (VersionParser.DEFAULT.parseRange("[1.4.4,1.5.3)").match(bootVersion)) {
+			return Version.parse("1.3.2.RELEASE");
+		} else if (VersionParser.DEFAULT.parseRange("[1.2.2,1.4.4)").match(bootVersion)) {
+			return Version.parse("1.2.2.RELEASE");
 		} else {
 			return null;
 		}

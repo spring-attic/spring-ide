@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Pivotal, Inc.
+ * Copyright (c) 2017, 2020 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,7 +19,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.core.cli.install.CloudCliInstall;
 import org.springframework.ide.eclipse.boot.core.cli.install.IBootInstall;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
@@ -32,12 +31,13 @@ import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.ToggleFiltersModel;
 import org.springframework.ide.eclipse.boot.dash.model.ToggleFiltersModel.FilterChoice;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
-import org.springframework.ide.eclipse.boot.util.Log;
+import org.springframework.ide.eclipse.boot.util.version.Version;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 /**
  * This contain the bits and pieces of the LocalBootDashModel that pertain to local services.
@@ -158,7 +158,7 @@ public class LocalServicesModel extends AbstractDisposable {
 				if (cloudCliInstall != null) {
 					Version cloudCliVersion = cloudCliInstall.getVersion();
 					if (cloudCliVersion != null
-							&& CloudCliInstall.CLOUD_CLI_JAVA_OPTS_SUPPORTING_VERSIONS.includes(cloudCliVersion)) {
+							&& CloudCliInstall.CLOUD_CLI_JAVA_OPTS_SUPPORTING_VERSIONS.match(cloudCliVersion)) {
 						return Arrays.stream(cloudCliInstall.getCloudServices()).map(serviceId -> new LocalCloudServiceDashElement(bootDashModel, serviceId)).collect(Collectors.toList());
 					}
 				}

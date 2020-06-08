@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2017 Pivotal Software, Inc.
+ *  Copyright (c) 2017, 2020 Pivotal Software, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -39,11 +39,11 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
-import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.core.cli.install.BootInstallUtils;
 import org.springframework.ide.eclipse.boot.core.cli.install.IBootInstall;
 import org.springframework.ide.eclipse.boot.core.cli.install.IBootInstallExtension;
 import org.springframework.ide.eclipse.boot.core.cli.install.ZippedBootInstall;
+import org.springframework.ide.eclipse.boot.util.version.Version;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
@@ -52,29 +52,30 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 /**
  * Dialog for managing Spring Boot CLI extensions
- * 
+ *
  * @author Alex Boyko
  *
  */
 final class ExtensionsDialog extends TitleAreaDialog {
-	
+
 	private static final ExtensionsContentProvider EXTENSIONS_CONTENT_PROVIDER_INSTANCE = new ExtensionsContentProvider();
 	private static final String LOADING_LABEL = "Loading...";
-	
+
 	private final IBootInstall install;
 	private Button installButton;
 	private Button uninstallButton;
 	private TreeViewer extensionsList;
 	private Stylers stylers;
 	private ExtensionItemModel selected;
-	
+
 	private ValueListener<ExtensionItemState> stateListener = (exp, value) -> updateButtons();
 
 	ExtensionsDialog(Shell parentShell, IBootInstall install) {
 		super(parentShell);
 		this.install = install;
 	}
-	
+
+	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		// Create OK button only
 		createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL,
@@ -92,7 +93,7 @@ final class ExtensionsDialog extends TitleAreaDialog {
 		layout.makeColumnsEqualWidth = false;
 		composite.setLayout(layout);
 		composite.setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
-		
+
 		extensionsList = new TreeViewer(composite, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
 		stylers = new Stylers(extensionsList.getTree().getFont());
 		extensionsList.getTree().addDisposeListener(e -> stylers.dispose());
@@ -116,7 +117,7 @@ final class ExtensionsDialog extends TitleAreaDialog {
 				}
 			}
 		});
-		
+
 		uninstallButton = new Button(actionsComposite, SWT.PUSH);
 		uninstallButton.setText("Uninstall");
 		uninstallButton.setLayoutData(GridDataFactory.fillDefaults().create());
@@ -128,26 +129,26 @@ final class ExtensionsDialog extends TitleAreaDialog {
 				}
 			}
 		});
-		
+
 		GridData gridData = GridDataFactory.copyData((GridData) actionsComposite.getLayoutData());
 		gridData.widthHint = actionsComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
 		actionsComposite.setLayoutData(gridData);
-		
+
 		updateButtons();
-				
+
 		setTitle("Spring Boot CLI Extensions");
-		
+
 		if (install instanceof ZippedBootInstall) {
 			setMessage("Read-only list of extensions installed automatically", IMessageProvider.INFORMATION);
 		} else {
 			setMessage("Manage extensions for Spring Boot CLI installations");
 		}
-		
+
 		loadExtensions();
-		
+
 		return parentComposite;
 	}
-	
+
 	private void loadExtensions() {
 		extensionsList.setInput(Collections.singleton(LOADING_LABEL));
 		extensionsList.getTree().setEnabled(false);
@@ -168,7 +169,7 @@ final class ExtensionsDialog extends TitleAreaDialog {
 			}
 		}.schedule();
 	}
-	
+
 	private void selectionChanged() {
 		if (selected != null) {
 			selected.getState().removeListener(stateListener);
@@ -180,7 +181,7 @@ final class ExtensionsDialog extends TitleAreaDialog {
 			updateButtons();
 		}
 	}
-	
+
 	private void updateButtons() {
 		if (selected == null) {
 			updateButton(installButton, false, false);
@@ -203,7 +204,7 @@ final class ExtensionsDialog extends TitleAreaDialog {
 				updateButton(installButton, false, false);
 				updateButton(uninstallButton, true, false);
 				break;
-			case ERROR:	
+			case ERROR:
 				updateButton(installButton, false, false);
 				updateButton(uninstallButton, false, false);
 				break;
@@ -211,7 +212,7 @@ final class ExtensionsDialog extends TitleAreaDialog {
 		}
 		installButton.getParent().layout(true);
 	}
-	
+
 	private static void updateButton(Button button, boolean visible, boolean enabled) {
 		button.setVisible(visible);
 		button.setEnabled(enabled);
@@ -219,7 +220,7 @@ final class ExtensionsDialog extends TitleAreaDialog {
 		gridData.exclude = !visible;
 		button.setLayoutData(gridData);
 	}
-	
+
 	private enum ExtensionItemState {
 		UNINSTALLED,
 		INSTALLING,
@@ -227,22 +228,22 @@ final class ExtensionsDialog extends TitleAreaDialog {
 		UNINSTALLING,
 		ERROR
 	}
-	
+
 	private class ExtensionItemModel {
-		
+
 		private Class<? extends IBootInstallExtension> extensionType;
 		private IBootInstallExtension extension;
 		private Version version;
 		private String name;
 		private LiveVariable<ExtensionItemState> stateVar;
-		
+
 		ExtensionItemModel(Class<? extends IBootInstallExtension> extensionType, String name) {
 			this.extensionType= extensionType;
 			this.name = name;
 			stateVar = new LiveVariable<>(ExtensionItemState.UNINSTALLED);
 			init();
 		}
-		
+
 		private void init() {
 			extension = install.getExtension(extensionType);
 			version = extension == null ? null : extension.getVersion();
@@ -254,7 +255,7 @@ final class ExtensionsDialog extends TitleAreaDialog {
 				stateVar.setValue(ExtensionItemState.INSTALLED);
 			}
 		}
-		
+
 		void install() {
 			if (stateVar.getValue() != ExtensionItemState.UNINSTALLED) {
 				throw new IllegalStateException();
@@ -278,7 +279,7 @@ final class ExtensionsDialog extends TitleAreaDialog {
 				}
 			}.schedule();
 		}
-		
+
 		void uninstall() {
 			if (stateVar.getValue() != ExtensionItemState.INSTALLED) {
 				throw new IllegalStateException();
@@ -302,11 +303,11 @@ final class ExtensionsDialog extends TitleAreaDialog {
 				}
 			}.schedule();
 		}
-		
+
 		LiveExpression<ExtensionItemState> getState() {
 			return stateVar;
 		}
-		
+
 		StyledString getLabel() {
 			StyledString label = new StyledString();
 			switch (stateVar.getValue()) {
@@ -317,7 +318,7 @@ final class ExtensionsDialog extends TitleAreaDialog {
 				label.append(name, stylers.italic());
 				label.append(" Installing...", stylers.italicColoured(SWT.COLOR_BLUE));
 				break;
-			case UNINSTALLING:	
+			case UNINSTALLING:
 				label.append(name, stylers.italic());
 				if (version != null) {
 					label.append(" [" + version.toString() + "]", stylers.italicColoured(SWT.COLOR_DARK_GRAY));
@@ -338,7 +339,7 @@ final class ExtensionsDialog extends TitleAreaDialog {
 			}
 			return label;
 		}
-		
+
 	}
 
 	private class ExtensionLabelProvider extends StyledCellLabelProvider {
@@ -358,9 +359,9 @@ final class ExtensionsDialog extends TitleAreaDialog {
 		}
 
 	}
-	
+
 	private static class ExtensionsContentProvider extends ArrayContentProvider implements ITreeContentProvider {
-		
+
 		@Override
 		public Object[] getChildren(Object parentElement) {
 			return new Object[0];
@@ -375,7 +376,7 @@ final class ExtensionsDialog extends TitleAreaDialog {
 		public boolean hasChildren(Object element) {
 			return false;
 		}
-		
+
 	}
-	
+
 }
