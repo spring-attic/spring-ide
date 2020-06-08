@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2013, 2017 GoPivotal, Inc.
+ *  Copyright (c) 2013, 2020 Pivotal Software, Inc.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -21,13 +21,13 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
-import org.osgi.framework.Version;
-import org.osgi.framework.VersionRange;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.cli.BootCliCommand;
-import org.springframework.ide.eclipse.boot.util.Log;
+import org.springframework.ide.eclipse.boot.util.version.Version;
+import org.springframework.ide.eclipse.boot.util.version.VersionRange;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -228,8 +228,8 @@ public abstract class BootInstall implements IBootInstall {
 	public ImmutableList<Class<? extends IBootInstallExtension>> supportedExtensions() {
 		com.google.common.collect.ImmutableList.Builder<Class<? extends IBootInstallExtension>> builder = ImmutableList
 				.<Class<? extends IBootInstallExtension>>builder();
-		Version version = Version.valueOf(getVersion());
-		if (VersionRange.valueOf("1.2.2").includes(version)) {
+		Version version = Version.safeParse(getVersion());
+		if (new VersionRange(new Version(1, 2, 2, null)).match(version)) {
 			builder.add(CloudCliInstall.class);
 		}
 		return builder.build();
@@ -266,7 +266,7 @@ public abstract class BootInstall implements IBootInstall {
 
 	private Version getLatestVersion(Class<? extends IBootInstallExtension> extension) {
 		if (CloudCliInstall.class.isAssignableFrom(extension)) {
-			return BootInstallUtils.getCloudCliVersion(Version.valueOf(getVersion()));
+			return BootInstallUtils.getCloudCliVersion(Version.safeParse(getVersion()));
 		}
 		return null;
 	}
@@ -278,7 +278,7 @@ public abstract class BootInstall implements IBootInstall {
 			if (existing != null) {
 				return AutoInstallDescription.impossible("Spring Cloud CLI version "+existing.getVersion()+" is already installed.");
 			}
-			Version bootVersion = Version.valueOf(getVersion());
+			Version bootVersion = Version.safeParse(getVersion());
 			Version cliVersion = BootInstallUtils.getCloudCliVersion(bootVersion);
 			if (cliVersion!=null) {
 				return AutoInstallDescription.describe("Spring Cloud CLI version "+cliVersion+" will be installed into "+getName()+".");

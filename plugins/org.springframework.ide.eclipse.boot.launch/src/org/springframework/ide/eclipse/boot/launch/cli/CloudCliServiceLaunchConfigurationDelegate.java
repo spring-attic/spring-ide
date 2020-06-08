@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Pivotal Software, Inc.
+ * Copyright (c) 2017, 2020 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,8 +30,6 @@ import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
-import org.osgi.framework.Version;
-import org.osgi.framework.VersionRange;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
 import org.springframework.ide.eclipse.boot.core.cli.install.CloudCliInstall;
@@ -40,10 +38,11 @@ import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelega
 import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport;
 import org.springframework.ide.eclipse.boot.launch.process.BootProcessFactory;
 import org.springframework.ide.eclipse.boot.launch.util.PortFinder;
-import org.springframework.ide.eclipse.boot.util.Log;
+import org.springframework.ide.eclipse.boot.util.version.Version;
+import org.springframework.ide.eclipse.boot.util.version.VersionParser;
+import org.springframework.ide.eclipse.boot.util.version.VersionRange;
 import org.springsource.ide.eclipse.commons.core.util.ProcessUtils;
-
-import org.springframework.ide.eclipse.boot.launch.util.PortFinder;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 /**
  * Spring Cloud CLI service launch configuration
@@ -53,7 +52,8 @@ import org.springframework.ide.eclipse.boot.launch.util.PortFinder;
  */
 public class CloudCliServiceLaunchConfigurationDelegate extends BootCliLaunchConfigurationDelegate {
 
-	private static final VersionRange SPRING_CLOUD_CLI_SINGLE_PROCESS_VERSION_RANGE = new VersionRange("1.3.0");
+	private static final VersionRange SPRING_CLOUD_CLI_SINGLE_PROCESS_VERSION_RANGE = new VersionRange(new Version(1, 3, 0, null));
+	private static final VersionRange SPRING_CLOUD_CLI_SUPPORTS_THIN_LAUNCH_PARAM = VersionParser.DEFAULT.parseRange("[1.3.0, 2.1.0)");
 
 	public final static String TYPE_ID = "org.springframework.ide.eclipse.boot.launch.cloud.cli.service";
 
@@ -88,7 +88,7 @@ public class CloudCliServiceLaunchConfigurationDelegate extends BootCliLaunchCon
 				args.add(CloudCliInstall.COMMAND_PREFIX);
 				args.add(serviceId);
 
-				if (cloudCliVersion != null && SPRING_CLOUD_CLI_SINGLE_PROCESS_VERSION_RANGE.includes(cloudCliVersion)) {
+				if (cloudCliVersion != null && SPRING_CLOUD_CLI_SUPPORTS_THIN_LAUNCH_PARAM.match(cloudCliVersion)) {
 					args.add("--deployer=thin");
 				}
 
@@ -100,11 +100,11 @@ public class CloudCliServiceLaunchConfigurationDelegate extends BootCliLaunchCon
 					vmArgs.add("-Dspring.output.ansi.enabled=always");
 				}
 
-				if (CloudCliServiceLaunchConfigurationDelegate.SPRING_CLOUD_CLI_SINGLE_PROCESS_VERSION_RANGE.includes(cloudCliVersion)) {
+				if (CloudCliServiceLaunchConfigurationDelegate.SPRING_CLOUD_CLI_SINGLE_PROCESS_VERSION_RANGE.match(cloudCliVersion)) {
 					if (!vmArgs.isEmpty()) {
 						args.add("--spring.cloud.launcher.deployables." + serviceId + ".properties.spring.cloud.deployer.local.javaOpts=" + String.join(",", vmArgs));
 					}
-				} else if (CloudCliInstall.CLOUD_CLI_JAVA_OPTS_SUPPORTING_VERSIONS.includes(cloudCliVersion)) {
+				} else if (CloudCliInstall.CLOUD_CLI_JAVA_OPTS_SUPPORTING_VERSIONS.match(cloudCliVersion)) {
 					int jmxPort = getJmxPort(configuration);
 					// Set the JMX port for launch
 					launch.setAttribute(BootLaunchConfigurationDelegate.JMX_PORT, String.valueOf(jmxPort));
@@ -178,7 +178,7 @@ public class CloudCliServiceLaunchConfigurationDelegate extends BootCliLaunchCon
 				IBootInstall bootInstall = BootInstallManager.getInstance().getDefaultInstall();
 				if (bootInstall != null) {
 					Version cloudCliVersion = bootInstall.getExtension(CloudCliInstall.class) == null ? null : bootInstall.getExtension(CloudCliInstall.class).getVersion();
-					return SPRING_CLOUD_CLI_SINGLE_PROCESS_VERSION_RANGE.includes(cloudCliVersion);
+					return SPRING_CLOUD_CLI_SINGLE_PROCESS_VERSION_RANGE.match(cloudCliVersion);
 				}
 			}
 		} catch (Exception e) {
@@ -210,7 +210,7 @@ public class CloudCliServiceLaunchConfigurationDelegate extends BootCliLaunchCon
 			if (!canUseLifeCycle(cloudCliVersion)) {
 				return false;
 			}
-			return SPRING_CLOUD_CLI_SINGLE_PROCESS_VERSION_RANGE.includes(cloudCliVersion) || BootLaunchConfigurationDelegate.getEnableLifeCycle(conf);
+			return SPRING_CLOUD_CLI_SINGLE_PROCESS_VERSION_RANGE.match(cloudCliVersion) || BootLaunchConfigurationDelegate.getEnableLifeCycle(conf);
 		} catch (Exception e) {
 			// Ignore
 		}
@@ -220,8 +220,8 @@ public class CloudCliServiceLaunchConfigurationDelegate extends BootCliLaunchCon
 	private static boolean canUseLifeCycle(Version cloudCliVersion) {
 		// Cloud CLI version below 1.2.0 and over 1.3.0 can't have JMX connection to cloud service hence life cycle should be disabled.
 		if (cloudCliVersion == null
-				|| !CloudCliInstall.CLOUD_CLI_JAVA_OPTS_SUPPORTING_VERSIONS.includes(cloudCliVersion)
-				|| SPRING_CLOUD_CLI_SINGLE_PROCESS_VERSION_RANGE.includes(cloudCliVersion)) {
+				|| !CloudCliInstall.CLOUD_CLI_JAVA_OPTS_SUPPORTING_VERSIONS.match(cloudCliVersion)
+				|| SPRING_CLOUD_CLI_SINGLE_PROCESS_VERSION_RANGE.match(cloudCliVersion)) {
 			return false;
 		}
 		return true;
