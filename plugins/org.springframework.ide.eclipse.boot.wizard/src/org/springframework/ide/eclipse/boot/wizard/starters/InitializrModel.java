@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarters;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrProjectDownloader;
@@ -68,9 +67,9 @@ public class InitializrModel  implements Disposable {
 	 */
 	public InitializrModel(ISpringBootProject bootProject,
 			InitializrProjectDownloader projectDownloader,
-			InitializrServiceSpec serviceSpec, IPreferenceStore store) throws Exception {
-		this.popularities = new PopularityTracker(store);
-		this.defaultDependencies = new DefaultDependencies(store);
+			InitializrServiceSpec serviceSpec, AddStartersPreferences preferences) throws Exception {
+		this.popularities = new PopularityTracker(preferences.getPreferenceStore());
+		this.defaultDependencies = new DefaultDependencies(preferences.getPreferenceStore());
 		this.bootProject = bootProject;
 		this.compareModel = new AddStartersCompareModel(projectDownloader, bootProject);
 		this.serviceSpec = serviceSpec;
