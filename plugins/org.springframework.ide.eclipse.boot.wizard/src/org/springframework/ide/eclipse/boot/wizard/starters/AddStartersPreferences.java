@@ -13,6 +13,12 @@ package org.springframework.ide.eclipse.boot.wizard.starters;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.springframework.ide.eclipse.boot.core.BootPreferences;
 
+/**
+ * Wrapper around preference store that is injected into the Add Starters wizard model.
+ *
+ * The wrapper allows mocking for testing.
+ *
+ */
 public class AddStartersPreferences {
 
 	private final IPreferenceStore preferenceStore;

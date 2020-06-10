@@ -23,11 +23,9 @@ import java.util.Set;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarters;
-import org.springframework.ide.eclipse.boot.core.initializr.InitializrProjectDownloader;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.DependencyGroup;
-import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Option;
 import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
 import org.springframework.ide.eclipse.boot.wizard.DefaultDependencies;
 import org.springframework.ide.eclipse.boot.wizard.DependencyFilterBox;
@@ -54,8 +52,6 @@ public class InitializrModel  implements Disposable {
 	private final PopularityTracker popularities;
 	private final DefaultDependencies defaultDependencies;
 	private AddStartersCompareModel compareModel;
-	private final InitializrServiceSpec serviceSpec;
-	private Option[] availableBootVersions;
 
 	public final HierarchicalMultiSelectionFieldModel<Dependency> dependencies = new HierarchicalMultiSelectionFieldModel<>(
 			Dependency.class, "dependencies").label("Dependencies:");
@@ -66,13 +62,12 @@ public class InitializrModel  implements Disposable {
 	 *
 	 */
 	public InitializrModel(ISpringBootProject bootProject,
-			InitializrProjectDownloader projectDownloader,
-			InitializrServiceSpec serviceSpec, AddStartersPreferences preferences) throws Exception {
+			AddStartersCompareModel compareModel,
+			AddStartersPreferences preferences) throws Exception {
 		this.popularities = new PopularityTracker(preferences.getPreferenceStore());
 		this.defaultDependencies = new DefaultDependencies(preferences.getPreferenceStore());
 		this.bootProject = bootProject;
-		this.compareModel = new AddStartersCompareModel(projectDownloader, bootProject);
-		this.serviceSpec = serviceSpec;
+		this.compareModel = compareModel;
 	}
 
 	public void updateDependencyCount() {
@@ -84,7 +79,6 @@ public class InitializrModel  implements Disposable {
 	}
 
 	public void downloadDependencies() throws Exception {
-		InitializrModel.this.availableBootVersions = downloadReleaseBootVersions();
 		SpringBootStarters starters = bootProject.getStarterInfos();
 		if (starters != null) {
 			for (DependencyGroup dgroup : starters.getDependencyGroups()) {
@@ -108,30 +102,6 @@ public class InitializrModel  implements Disposable {
 				}
 			}
 		}
-	}
-
-	private Option[] downloadReleaseBootVersions() {
-		Option[] options = serviceSpec.getSingleSelectOptions("bootVersion");
-		List<Option> releasesOnly = new ArrayList<>();
-		int count = 0;
-		if (options != null) {
-			for (Option option : options) {
-				// PT 172040311 - Do not include snapshot versions
-				if (!option.getId().contains("SNAPSHOT")) {
-					releasesOnly.add(option);
-					count++;
-				}
-			}
-		}
-		return releasesOnly.toArray(new Option[count]);
-	}
-
-	/**
-	 *
-	 * @return may be null if not yet available
-	 */
-	public Option[]	getAvailableBootVersions() {
-		return this.availableBootVersions;
 	}
 
 	/**
