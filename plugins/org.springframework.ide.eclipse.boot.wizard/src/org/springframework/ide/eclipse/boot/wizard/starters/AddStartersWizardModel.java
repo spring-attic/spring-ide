@@ -22,19 +22,12 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.springframework.ide.eclipse.boot.core.BootActivator;
-import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.initializr.HttpRedirectionException;
-import org.springframework.ide.eclipse.boot.core.initializr.InitializrProjectDownloader;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
-import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Option;
-import org.springframework.ide.eclipse.boot.core.initializr.InitializrUrlBuilders;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
-import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
 import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -43,6 +36,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.ui.OkButtonHandler;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 /**
  *
@@ -67,10 +61,12 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 public class AddStartersWizardModel implements OkButtonHandler, Disposable {
 
 
+	private final AddStartersPreferences preferences;
+	private final IProject project;
+	private final AddStartersInitializrService initializrService;
+
 
 	private Runnable okRunnable;
-	private IPreferenceStore preferenceStore;
-	private IProject project;
 	private Job asyncModelLoadJob;
 
 
@@ -127,9 +123,10 @@ public class AddStartersWizardModel implements OkButtonHandler, Disposable {
 	private String[] serviceUrlOptions;
 
 
-	public AddStartersWizardModel(IProject project, IPreferenceStore preferenceStore) throws Exception {
+	public AddStartersWizardModel(IProject project, AddStartersPreferences preferences, AddStartersInitializrService initializrService) throws Exception {
 		this.project = project;
-		this.preferenceStore = preferenceStore;
+		this.preferences = preferences;
+		this.initializrService = initializrService;
 	}
 
 	public FieldModel<String> getBootVersion() {
@@ -161,7 +158,7 @@ public class AddStartersWizardModel implements OkButtonHandler, Disposable {
 		}
 
 		if (urlField.getValue() != null) {
-			BootPreferences.addInitializrUrl(urlField.getValue());
+			preferences.addInitializrUrl(urlField.getValue());
 		}
 
 		if (this.okRunnable != null) {
@@ -173,7 +170,7 @@ public class AddStartersWizardModel implements OkButtonHandler, Disposable {
 		this.okRunnable = okRunnable;
 	}
 
-	private void handleLoadingError(InitializrModel model, Throwable e) {
+	private void handleLoadingError(InitializrModel model, String url, Throwable e) {
 		StringBuffer detailsBuffer = new StringBuffer();
 		String shortMessage = "Error encountered while resolving initializr content for: " + project.getName();
 
@@ -187,8 +184,9 @@ public class AddStartersWizardModel implements OkButtonHandler, Disposable {
 					"Initializr content for the project's boot version is not available. Consider updating the project to a newer version of Spring Boot:");
 
 			if (model != null) {
-				Option[] availableBootVersions = model.getAvailableBootVersions();
-				if (availableBootVersions != null) {
+				// Try fetching available boot versions
+				Option[] availableBootVersions = getSupportedBootVersions(url);
+				if (availableBootVersions != null && availableBootVersions.length > 0) {
 					detailsBuffer.append('\n');
 					for (Option option : availableBootVersions) {
 						detailsBuffer.append('\n');
@@ -218,10 +216,10 @@ public class AddStartersWizardModel implements OkButtonHandler, Disposable {
 	}
 
 	private void setUrlValues() {
-		String[] urls = BootPreferences.getInitializrUrls();
+		String[] urls = preferences.getInitializrUrls();
 		this.serviceUrlOptions = urls;
 
-		String initializrUrl = BootPreferences.getInitializrUrl();
+		String initializrUrl = preferences.getInitializrUrl();
 		urlField.getVariable().setValue(initializrUrl);
 	}
 
@@ -262,9 +260,11 @@ public class AddStartersWizardModel implements OkButtonHandler, Disposable {
 	public void createInitializrModel(IProgressMonitor monitor) {
 		InitializrModel model = null;
 		Exception error = null;
+		String url = urlField.getValue();
+
 		try {
 			writeToMonitor(monitor, "Creating Boot project model...");
-			model = createModel();
+			model = createModel(url);
 			writeToMonitor(monitor, "Fetching starter information from Spring Boot Initializr...");
 			model.downloadDependencies();
 		} catch (Exception _e) {
@@ -281,11 +281,20 @@ public class AddStartersWizardModel implements OkButtonHandler, Disposable {
 			if (e instanceof HttpRedirectionException) {
 				urlField.getVariable().setValue(((HttpRedirectionException)e).redirectedTo);
 			} else {
-				handleLoadingError(model, e);
+				handleLoadingError(model, url, e);
 			}
 		} else {
 			initializrValidator.setValue(ValidationResult.OK);
 		}
+	}
+
+	private Option[] getSupportedBootVersions(String url)  {
+		try {
+			return initializrService.getSupportedBootReleaseVersions(url);
+		} catch (Exception e) {
+			Log.log(e);
+		}
+		return null;
 	}
 
 	private void clearPreviousModel() {
@@ -332,11 +341,10 @@ public class AddStartersWizardModel implements OkButtonHandler, Disposable {
 	}
 
 	private ValidationResult basicUrlConnection() {
-		URLConnectionFactory urlConnectionFactory = BootActivator.getUrlConnectionFactory();
 
 		String url = urlField.getValue();
 		try {
-			InitializrServiceSpec.checkBasicConnection(urlConnectionFactory, new URL(url));
+			initializrService.checkBasicConnection(new URL(url));
 		} catch (Exception e) {
 			Throwable deepestCause = ExceptionUtil.getDeepestCause(e);
 			String shortMessage = "Error encountered while resolving initializr content for: " + project.getName();
@@ -349,24 +357,16 @@ public class AddStartersWizardModel implements OkButtonHandler, Disposable {
 		return ValidationResult.OK;
 	}
 
-	private InitializrModel createModel() throws Exception {
+	private InitializrModel createModel(String url) throws Exception {
 
-		String url = urlField.getValue();
-		URLConnectionFactory urlConnectionFactory = BootActivator.getUrlConnectionFactory();
-
-		InitializrService initializr = InitializrService.create(urlConnectionFactory, () -> url);
+		InitializrService initializr = initializrService.getService(() -> url);
 		SpringBootCore core = new SpringBootCore(initializr);
-
-		InitializrUrlBuilders urlBuilders = new InitializrUrlBuilders();
-		InitializrProjectDownloader projectDownloader = new InitializrProjectDownloader(urlConnectionFactory,
-				url, urlBuilders);
-		InitializrServiceSpec serviceSpec = InitializrServiceSpec.parseFrom(urlConnectionFactory, new URL(url));
-
 		ISpringBootProject bootProject = core.project(project);
 
 		this.bootVersionField.setValue(bootProject.getBootVersion());
 
-		InitializrModel model = new InitializrModel(bootProject, projectDownloader, serviceSpec, preferenceStore);
+		AddStartersCompareModel compareModel = new AddStartersCompareModel(initializrService.getProjectDownloader(url), bootProject);
+		InitializrModel model = new InitializrModel(bootProject, compareModel, preferences);
 		addDisposable(model);
 
 		return model;

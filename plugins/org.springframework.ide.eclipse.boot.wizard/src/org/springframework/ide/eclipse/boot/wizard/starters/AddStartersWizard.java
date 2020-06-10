@@ -26,6 +26,7 @@ import org.eclipse.ui.IWorkbenchWizard;
 import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.wizard.StartersWizardUtil;
+import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
@@ -40,7 +41,10 @@ public class AddStartersWizard extends Wizard implements IWorkbenchWizard {
 			IProject project = StartersWizardUtil.getProject(selection);
 			if (project != null) {
 				IPreferenceStore preferenceStore = BootActivator.getDefault().getPreferenceStore();
-				wizardModel = new AddStartersWizardModel(project, preferenceStore);
+				URLConnectionFactory urlConnectionFactory = BootActivator.getUrlConnectionFactory();
+				AddStartersPreferences preferences = new AddStartersPreferences(preferenceStore);
+				AddStartersInitializrService initializrService = new AddStartersInitializrService(urlConnectionFactory);
+				wizardModel = new AddStartersWizardModel(project, preferences, initializrService);
 			}
 		} catch (Exception e) {
 			MessageDialog.openError(workbench.getActiveWorkbenchWindow().getShell(), "Error opening the wizard",
