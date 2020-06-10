@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IProject;
@@ -19,11 +18,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.boot.core.BootPreferences;
 import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
@@ -40,7 +34,6 @@ import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
 import org.springframework.ide.eclipse.boot.pstore.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
-import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 /**
@@ -62,28 +55,7 @@ public class DefaultBootDashModelContext extends BootDashModelContext {
 
 	public static BootDashModelContext create() {
 		SimpleDIContext injections = new SimpleDIContext();
-		injections.defInstance(UIContext.class, () -> {
-			try {
-				IWorkbench wb = PlatformUI.getWorkbench();
-				CompletableFuture<Shell> shell = new CompletableFuture<>();
-				Display d = wb.getDisplay();
-				d.syncExec(() -> {
-					try {
-						IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
-						if (win!=null) {
-							shell.complete(win.getShell());
-						} else {
-							shell.complete(d.getActiveShell());
-						}
-					} catch (Throwable e) {
-						shell.completeExceptionally(e);
-					}
-				});
-				return shell.get();
-			} catch (Exception e) {
-				throw ExceptionUtil.unchecked(e);
-			}
-		});
+		injections.defInstance(UIContext.class, UIContext.DEFAULT);
 		injections.defInstance(UserInteractions.class, new DefaultUserInteractions(injections));
 		injections.def(BootDashViewModel.class, BootDashViewModel::new);
 		injections.def(RemoteBootAppsDataHolder.class, RemoteBootAppsDataHolder::new);

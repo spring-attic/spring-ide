@@ -32,8 +32,12 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
@@ -46,6 +50,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashTreeContentProvider;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.ui.UiUtil;
 
 /**
@@ -59,6 +64,29 @@ public class DefaultUserInteractions implements UserInteractions {
 	private final SimpleDIContext context;
 
 	public interface UIContext {
+		UIContext DEFAULT = () -> {
+			try {
+				IWorkbench wb = PlatformUI.getWorkbench();
+				CompletableFuture<Shell> shell = new CompletableFuture<>();
+				Display d = wb.getDisplay();
+				d.syncExec(() -> {
+					try {
+						IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
+						if (win!=null) {
+							shell.complete(win.getShell());
+						} else {
+							shell.complete(d.getActiveShell());
+						}
+					} catch (Throwable e) {
+						shell.completeExceptionally(e);
+					}
+				});
+				return shell.get();
+			} catch (Exception e) {
+				throw ExceptionUtil.unchecked(e);
+			}
+		};
+
 		Shell getShell();
 	}
 
