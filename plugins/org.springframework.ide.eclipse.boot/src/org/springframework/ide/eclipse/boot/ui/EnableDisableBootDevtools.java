@@ -21,13 +21,13 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.osgi.framework.Version;
-import org.osgi.framework.VersionRange;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.MavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
+import org.springframework.ide.eclipse.boot.util.version.VersionParser;
+import org.springframework.ide.eclipse.boot.util.version.VersionRange;
 import org.springsource.ide.eclipse.commons.frameworks.ui.internal.utils.ProjectFilter;
 import org.springsource.ide.eclipse.commons.frameworks.ui.internal.utils.SelectionUtils;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
@@ -35,7 +35,7 @@ import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 public class EnableDisableBootDevtools extends AbstractHandler {
 
-	private static final VersionRange DEVTOOLS_SUPPORTED = new VersionRange("1.3.0");
+	private static final VersionRange DEVTOOLS_SUPPORTED = VersionParser.DEFAULT.parseRange("1.3.0");
 	private static final SpringBootStarter DEVTOOLS_STARTER = new SpringBootStarter("devtools",
 		new MavenCoordinates(BootPropertyTester.SPRING_BOOT_DEVTOOLS_GID, BootPropertyTester.SPRING_BOOT_DEVTOOLS_AID, null),
 		"compile", /*bom*/null, /*repo*/null
@@ -76,7 +76,7 @@ public class EnableDisableBootDevtools extends AbstractHandler {
 	private SpringBootStarter getAvaibleDevtools(ISpringBootProject project) {
 		try {
 			String versionString = project.getBootVersion();
-			if (StringUtils.isNotBlank(versionString) && DEVTOOLS_SUPPORTED.includes(new Version(versionString))) {
+			if (StringUtils.isNotBlank(versionString) && DEVTOOLS_SUPPORTED.match(VersionParser.DEFAULT.parse(versionString))) {
 				return DEVTOOLS_STARTER;
 			}
 		} catch (Exception e) {

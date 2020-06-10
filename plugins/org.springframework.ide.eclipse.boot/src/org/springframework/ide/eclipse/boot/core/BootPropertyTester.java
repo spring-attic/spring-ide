@@ -32,8 +32,8 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.Version;
-import org.osgi.framework.VersionRange;
+import org.springframework.ide.eclipse.boot.util.version.Version;
+import org.springframework.ide.eclipse.boot.util.version.VersionParser;
 import org.springsource.ide.eclipse.commons.internal.core.CorePlugin;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
@@ -42,7 +42,8 @@ import org.springsource.ide.eclipse.commons.livexp.util.Log;
  */
 public class BootPropertyTester extends PropertyTester {
 
-	private static final Pattern JAR_VERSION_REGEXP = Pattern.compile(".*\\-([^.]+\\.[^.]+\\.[^.]+\\.[^.]+)\\.jar");
+	private static final Pattern JAR_VERSION_REGEXP = Pattern.compile(
+			".*\\-([0-9]+\\.[0-9]+\\.[0-9]+((\\.|\\-)[^.]+)?)\\.jar");
 
 	public static final String SPRING_BOOT_DEVTOOLS_AID = "spring-boot-devtools";
 	public static final String SPRING_BOOT_DEVTOOLS_GID = "org.springframework.boot";
@@ -234,7 +235,7 @@ public class BootPropertyTester extends PropertyTester {
 					if (isBootJar(e)) {
 						String version = getJarVersion(e);
 						if (version!=null) {
-							return new Version(version);
+							return VersionParser.DEFAULT.parse(version);
 						}
 					}
 				}
@@ -245,10 +246,15 @@ public class BootPropertyTester extends PropertyTester {
 		return null;
 	}
 
-
 	private static String getJarVersion(IClasspathEntry e) {
 		String name = e.getPath().lastSegment();
-		//Example: spring-boot-starter-web-1.2.3.RELEASE.jar
+		return getVersionFromJarName(name);
+	}
+
+	public static String getVersionFromJarName(String name) {
+		//Example: (old format) spring-boot-starter-web-1.2.3.RELEASE.jar
+		//         (new format) spring-boot-starter-web-2.4.0.jar
+		//         (new format) spring-boot-starter-web-2.4.0-SNAPSHOT.jar
 
 		//Pattern regexp = Pattern.compile(".*\\-([^.]+\\.[^.]+\\.[^.]+\\.[^.]+)\\.jar");
 		Pattern regexp = JAR_VERSION_REGEXP;
@@ -262,9 +268,13 @@ public class BootPropertyTester extends PropertyTester {
 	}
 
 	public static boolean supportsLifeCycleManagement(IProject project) {
-		Version version = BootPropertyTester.getBootVersion(project);
-		if (version!=null) {
-			return new VersionRange("1.3.0").includes(version);
+		try {
+			Version version = BootPropertyTester.getBootVersion(project);
+			if (version!=null) {
+				return VersionParser.DEFAULT.parseRange("1.3.0").match(version);
+			}
+		} catch (Exception e) {
+			Log.log(e);
 		}
 		return false;
 	}
