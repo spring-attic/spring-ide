@@ -19,7 +19,7 @@ import org.springframework.ide.eclipse.boot.core.initializr.InitializrProjectDow
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Option;
-import org.springframework.ide.eclipse.boot.core.initializr.InitializrUrlBuilders;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrUrl;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
 
 /**
@@ -31,7 +31,6 @@ import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLC
 public class AddStartersInitializrService {
 
 	protected final URLConnectionFactory urlConnectionFactory;
-	protected final InitializrUrlBuilders urlBuilders = new InitializrUrlBuilders();
 
 	public AddStartersInitializrService(URLConnectionFactory urlConnectionFactory) {
 		this.urlConnectionFactory = urlConnectionFactory;
@@ -41,8 +40,8 @@ public class AddStartersInitializrService {
 		return InitializrService.create(urlConnectionFactory, url);
 	}
 
-	public InitializrProjectDownloader getProjectDownloader(String url) {
-		return new InitializrProjectDownloader(urlConnectionFactory, url, urlBuilders);
+	public InitializrProjectDownloader getProjectDownloader(InitializrUrl url) {
+		return new InitializrProjectDownloader(urlConnectionFactory, url);
 	}
 
 	public Option[] getSupportedBootReleaseVersions(String url) throws Exception {

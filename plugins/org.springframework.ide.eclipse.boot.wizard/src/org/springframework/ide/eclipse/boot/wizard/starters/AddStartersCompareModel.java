@@ -18,7 +18,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrProjectDownloader;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
-import org.springframework.ide.eclipse.boot.core.initializr.InitializrUrlBuilder;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrUrl;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
@@ -84,9 +84,9 @@ public class AddStartersCompareModel implements Disposable {
 	String diffFileToOpenInitially() {
 		if (bootProject != null) {
 			switch (bootProject.buildType()) {
-			case InitializrUrlBuilder.MAVEN_PROJECT:
+			case InitializrUrl.MAVEN_PROJECT:
 				return "pom.xml";
-			case InitializrUrlBuilder.GRADLE_PROJECT:
+			case InitializrUrl.GRADLE_PROJECT:
 				return "build.gradle";
 			}
 		}

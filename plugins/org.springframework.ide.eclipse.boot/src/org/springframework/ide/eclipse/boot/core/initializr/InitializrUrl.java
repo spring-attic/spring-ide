@@ -10,12 +10,15 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.core.initializr;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.SimpleUriBuilder;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 /**
  * Builds a URL for downloading content from Initializr. For example, this
@@ -24,7 +27,7 @@ import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpe
  * existing project (e.g. the project's name, build type, boot version...)
  *
  */
-public class InitializrUrlBuilder {
+public class InitializrUrl {
 
 	private static final String DEPENDENCIES = "dependencies";
 
@@ -80,7 +83,9 @@ public class InitializrUrlBuilder {
 
 	public static final String MAVEN_PROJECT = "maven-project";
 
-	public InitializrUrlBuilder(String initializrUrl) {
+	public static final String DEFAULT_ENDPOINT = "/starter.zip";
+
+	public InitializrUrl(String initializrUrl) {
 		this.initializrUrl = initializrUrl;
 	}
 
@@ -94,13 +99,30 @@ public class InitializrUrlBuilder {
 		return bUrl;
 	}
 
-	public InitializrUrlBuilder dependencies(List<Dependency> dependencies) {
+	protected String addEndpoint(String url) {
+		try {
+			String endpoint = getEndpoint();
+			URI base = new URI(url);
+			URI resolved = base.resolve(endpoint);
+			url = resolved.toString();
+		} catch (URISyntaxException e) {
+			Log.log(e);
+		}
+
+		return url;
+	}
+
+	private String getEndpoint() {
+		return DEFAULT_ENDPOINT;
+	}
+
+	public InitializrUrl dependencies(List<Dependency> dependencies) {
 		this.dependencies = dependencies;
 		return this;
 	}
 
 
-	public InitializrUrlBuilder project(ISpringBootProject bootProject) {
+	public InitializrUrl project(ISpringBootProject bootProject) {
 		try {
 			this.name = bootProject.getProject().getName();
 			this.groupId = bootProject.groupId();
@@ -120,6 +142,7 @@ public class InitializrUrlBuilder {
 
 	public String build() throws Exception {
 		String baseUrl = resolveBaseUrl(initializrUrl);
+		baseUrl = addEndpoint(baseUrl);
 
 		SimpleUriBuilder uriBuilder = new SimpleUriBuilder(baseUrl);
 
@@ -176,52 +199,52 @@ public class InitializrUrlBuilder {
 		return uriBuilder.toString();
 	}
 
-	public InitializrUrlBuilder bootVersion(String bootVersion) {
+	public InitializrUrl bootVersion(String bootVersion) {
 		this.bootVersion = bootVersion;
 		return this;
 	}
 
-	public InitializrUrlBuilder packaging(String packaging) {
+	public InitializrUrl packaging(String packaging) {
 		this.packaging = packaging;
 		return this;
 	}
 
-	public InitializrUrlBuilder name(String name) {
+	public InitializrUrl name(String name) {
 		this.name = name;
 		return this;
 	}
 
-	public InitializrUrlBuilder buildType(String buildType) {
+	public InitializrUrl buildType(String buildType) {
 		this.buildType = buildType;
 		return this;
 	}
 
-	public InitializrUrlBuilder groupId(String groupId) {
+	public InitializrUrl groupId(String groupId) {
 		this.groupId = groupId;
 		return this;
 	}
 
-	public InitializrUrlBuilder artifactId(String artifactId) {
+	public InitializrUrl artifactId(String artifactId) {
 		this.artifactId = artifactId;
 		return this;
 	}
 
-	public InitializrUrlBuilder version(String version) {
+	public InitializrUrl version(String version) {
 		this.version = version;
 		return this;
 	}
 
-	public InitializrUrlBuilder description(String description) {
+	public InitializrUrl description(String description) {
 		this.description = description;
 		return this;
 	}
 
-	public InitializrUrlBuilder javaVersion(String javaVersion) {
+	public InitializrUrl javaVersion(String javaVersion) {
 		this.javaVersion = javaVersion;
 		return this;
 	}
 
-	public InitializrUrlBuilder packageName(String packageName) {
+	public InitializrUrl packageName(String packageName) {
 		this.packageName = packageName;
 		return this;
 	}

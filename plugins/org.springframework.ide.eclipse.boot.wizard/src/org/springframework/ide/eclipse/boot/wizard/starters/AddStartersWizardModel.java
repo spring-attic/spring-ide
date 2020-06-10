@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.initializr.HttpRedirectionException;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrUrl;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Option;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
@@ -365,7 +366,8 @@ public class AddStartersWizardModel implements OkButtonHandler, Disposable {
 
 		this.bootVersionField.setValue(bootProject.getBootVersion());
 
-		AddStartersCompareModel compareModel = new AddStartersCompareModel(initializrService.getProjectDownloader(url), bootProject);
+		InitializrUrl initializrUrl = new InitializrUrl(url);
+		AddStartersCompareModel compareModel = new AddStartersCompareModel(initializrService.getProjectDownloader(initializrUrl), bootProject);
 		InitializrModel model = new InitializrModel(bootProject, compareModel, preferences);
 		addDisposable(model);
 
