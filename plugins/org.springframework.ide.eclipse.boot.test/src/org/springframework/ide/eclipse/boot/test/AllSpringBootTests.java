@@ -22,4 +22,6 @@ import org.junit.runners.Suite.SuiteClasses;
 })
 public class AllSpringBootTests {
 
+	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.boot.test";
+
 }
