@@ -89,7 +89,7 @@ import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarters;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
-import org.springframework.ide.eclipse.boot.core.initializr.InitializrUrlBuilder;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrUrl;
 import org.springframework.ide.eclipse.boot.util.DependencyDelta;
 import org.springframework.ide.eclipse.boot.util.DumpOutput;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
@@ -652,7 +652,7 @@ public class MavenSpringBootProject extends SpringBootProject {
 			List<org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency> initialDependencies)
 			throws Exception {
 		Map<String, Object> parameters = super.pomGenerationParameters(initialDependencies);
-		parameters.put("type", InitializrUrlBuilder.MAVEN_PROJECT);
+		parameters.put("type", InitializrUrl.MAVEN_PROJECT);
 		parameters.put("language", "java");
 		MavenProject mavenProject = getMavenProject();
 		if (mavenProject != null) {
@@ -668,7 +668,7 @@ public class MavenSpringBootProject extends SpringBootProject {
 
 	@Override
 	public String buildType() {
-		return InitializrUrlBuilder.MAVEN_PROJECT;
+		return InitializrUrl.MAVEN_PROJECT;
 	}
 
 	@Override

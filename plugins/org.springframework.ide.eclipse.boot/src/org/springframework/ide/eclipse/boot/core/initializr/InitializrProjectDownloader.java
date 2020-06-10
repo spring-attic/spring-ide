@@ -30,16 +30,13 @@ public class InitializrProjectDownloader implements Disposable {
 
 	private DownloadManager downloadManager;
 
-	private final String initializrUrl;
+	private final InitializrUrl initializrUrl;
 	private final URLConnectionFactory urlConnectionFactory;
-	private final InitializrUrlBuilders urlBuilders;
 
 	public InitializrProjectDownloader(URLConnectionFactory urlConnectionFactory,
-			String initializrUrl,
-			InitializrUrlBuilders urlBuilders) {
+			InitializrUrl initializrUrl) {
 		this.initializrUrl = initializrUrl;
 		this.urlConnectionFactory = urlConnectionFactory;
-		this.urlBuilders = urlBuilders;
 	}
 
 	/**
@@ -53,8 +50,8 @@ public class InitializrProjectDownloader implements Disposable {
 	public File getProject(List<Dependency> dependencies, ISpringBootProject bootProject) throws Exception {
 		DownloadManager manager = getDownloadManager();
 
-		InitializrUrlBuilder builder = urlBuilders.getBuilder(bootProject, initializrUrl);
-		String url = builder
+		String url = initializrUrl
+				.project(bootProject)
 				.dependencies(dependencies)
 				.build();
 
