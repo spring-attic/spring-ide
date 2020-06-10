@@ -20,6 +20,15 @@ public class DockerDeployment implements Nameable {
 	private RunState runState;
 	private String buildId;
 	
+	/**
+	 * Records the DockerRunTarget 'sessionId' that was in effect when this deployment was created.
+	 * This allows for deployment synchronization to distinguish between a deployment created in the
+	 * current session or an older deployment (restored from persistent data). 
+	 * <p>
+	 * See: https://www.pivotaltracker.com/story/show/173136687
+	 */
+	private String sessionId;
+	
 	public DockerDeployment() {}
 
 	public DockerDeployment(DockerDeployment copyFrom) {
@@ -50,7 +59,19 @@ public class DockerDeployment implements Nameable {
 		return buildId;
 	}
 
+	/**
+	 * When you set a buildId you should *also* set the session id as well. These two id's are pair that
+	 * allways belong together. The only scenario were this method is called 'by itself' is by Yaml deserialization.
+	 */
 	public void setBuildId(String buildId) {
 		this.buildId = buildId;
+	}
+
+	public void setSessionId(String sessionId) {
+		this.sessionId = sessionId;
+	}
+	
+	public String getSessionId() {
+		return sessionId;
 	}
 }

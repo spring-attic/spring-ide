@@ -27,6 +27,8 @@ public class DockerRunTarget extends AbstractRunTarget<DockerTargetParams>
 implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentTarget {
 
 	LiveVariable<DockerClient> client = new LiveVariable<>();
+	LiveExpression<String> sessionId = client.apply(c -> c!=null ? UUID.randomUUID().toString() : null);
+	
 	private DockerTargetParams params;
 	
 	final DockerDeployments deployments;
@@ -107,6 +109,7 @@ implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentT
 			DockerDeployment d = new DockerDeployment();
 			d.setName(p.getName());
 			d.setRunState(RunState.RUNNING);
+			d.setSessionId(sessionId.getValue());
 			d.setBuildId(UUID.randomUUID().toString());
 			deployments.createOrUpdate(d);
 		}
