@@ -25,6 +25,10 @@ import org.springframework.ide.eclipse.boot.dash.test.yaml.Yaml2DeploymentProper
 	//Tests suites are put in order roughly based on
 	// how long it takes to run them. Faster ones at the top.
 
+
+	// Raised up temporarily to be run first.
+	BootDashDockerTests.class, //50 seconds
+
 	//New: (move down the chain later based on runtime)
 	JmxSupportTest.class,
 	PropertyFileStoreTest.class,
