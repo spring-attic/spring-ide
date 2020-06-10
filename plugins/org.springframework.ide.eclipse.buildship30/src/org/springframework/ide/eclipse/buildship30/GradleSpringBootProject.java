@@ -34,7 +34,7 @@ import org.gradle.tooling.model.eclipse.EclipseProjectNature;
 import org.springframework.ide.eclipse.boot.core.IMavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.MavenId;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
-import org.springframework.ide.eclipse.boot.core.initializr.InitializrUrlBuilder;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrUrl;
 import org.springframework.ide.eclipse.boot.core.internal.SpringBootProject;
 import org.springframework.ide.eclipse.boot.util.DependencyDelta;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
@@ -192,7 +192,7 @@ public class GradleSpringBootProject extends SpringBootProject {
 
 	@Override
 	public String buildType() {
-		return InitializrUrlBuilder.GRADLE_PROJECT;
+		return InitializrUrl.GRADLE_PROJECT;
 	}
 
 	@Override
