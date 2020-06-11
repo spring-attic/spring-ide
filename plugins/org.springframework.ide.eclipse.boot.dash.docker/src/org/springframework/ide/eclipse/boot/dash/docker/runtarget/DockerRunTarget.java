@@ -122,4 +122,8 @@ implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentT
 				BootDashColumn.LIVE_PORT
 		};
 	}
+
+	public String getSessionId() {
+		return sessionId.getValue();
+	}
 }

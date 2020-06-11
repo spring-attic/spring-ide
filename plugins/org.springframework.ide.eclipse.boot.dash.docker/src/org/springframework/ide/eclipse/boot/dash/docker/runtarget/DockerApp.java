@@ -90,7 +90,7 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 		return this.client;
 	}
 
-	private DockerDeployment deployment() {
+	public DockerDeployment deployment() {
 		return target.deployments.get(name);
 	}
 

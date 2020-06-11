@@ -23,10 +23,13 @@ import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.b
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.debug.core.DebugPlugin;
 import org.junit.After;
 import org.junit.Test;
@@ -36,7 +39,9 @@ import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.docker.runtarget.DockerApp;
 import org.springframework.ide.eclipse.boot.dash.docker.runtarget.DockerContainer;
+import org.springframework.ide.eclipse.boot.dash.docker.runtarget.DockerDeployment;
 import org.springframework.ide.eclipse.boot.dash.docker.runtarget.DockerImage;
+import org.springframework.ide.eclipse.boot.dash.docker.runtarget.DockerRunTarget;
 import org.springframework.ide.eclipse.boot.dash.docker.runtarget.DockerRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.docker.runtarget.DockerTargetParams;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -44,6 +49,8 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.remote.GenericRemoteAppElement;
 import org.springframework.ide.eclipse.boot.dash.model.remote.GenericRemoteBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.remote.RefreshStateTracker;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget.ConnectMode;
 import org.springframework.ide.eclipse.boot.dash.views.AddRunTargetAction;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.DeleteElementsAction;
@@ -58,6 +65,7 @@ import org.mandas.docker.client.DockerClient.ListContainersParam;
 import org.mandas.docker.client.DockerClient.ListImagesParam;
 import org.mandas.docker.client.DockerClient.RemoveContainerParam;
 import org.mandas.docker.client.messages.Container;
+import org.mandas.docker.client.messages.ContainerInfo;
 import org.mandas.docker.client.messages.Image;
 
 public class BootDashDockerTests {
@@ -67,27 +75,6 @@ public class BootDashDockerTests {
 	@Test
 	public void testCreateDockerTarget() throws Exception {
 		createDockerTarget();
-	}
-
-	private GenericRemoteBootDashModel<DockerClient, DockerTargetParams> createDockerTarget() throws Exception {
-		DockerRunTargetType target = injections().getBean(DockerRunTargetType.class);
-		AddRunTargetAction createTarget = getCreateTargetAction(target);
-		assertNotNull(createTarget);
-		assertTrue(createTarget.isEnabled());
-
-		when(ui().inputDialog(eq("Connect to Docker Daemon"), eq("Enter docker url:"), anyString())).then(invocation -> {
-			Object[] args = invocation.getArguments();
-			assertEquals(DEFAULT_DOCKER_URL, args[2]);
-			return args[2];
-		});
-		createTarget.run();
-		createTarget.waitFor(/*Duration.ofMillis(2000)*/);
-
-		BootDashModel model;
-			//		ACondition.waitFor("Run target model to appear", 2000, () -> {
-			assertNotNull(model = harness.getRunTargetModel(target));
-//		});
-		return (GenericRemoteBootDashModel<DockerClient, DockerTargetParams>) model;
 	}
 
 	@Test
@@ -158,6 +145,101 @@ public class BootDashDockerTests {
 		});
 	}
 
+	@Test
+	public void noAutoStartForMismatchingSession() throws Exception {
+		GenericRemoteBootDashModel<DockerClient, DockerTargetParams> model = createDockerTarget();
+		Mockito.reset(ui());
+		IProject project = projects.createBootWebProject("webby", bootVersionAtLeast("2.3.0"));
+
+		dragAndDrop(project, model);
+		{
+			GenericRemoteAppElement dep = waitForDeployment(model, project);
+			GenericRemoteAppElement img = waitForChild(dep, d -> d instanceof DockerImage);
+			GenericRemoteAppElement con = waitForChild(img, d -> d instanceof DockerContainer);
+
+			ACondition.waitFor("all started", 5_000, () -> {
+				assertEquals(RunState.RUNNING, dep.getRunState());
+				assertEquals(RunState.RUNNING, img.getRunState());
+				assertEquals(RunState.RUNNING, con.getRunState());
+			});
+
+			verifyNoMoreInteractions(ui());
+			Mockito.reset(ui());
+
+			String sessionId = getSessionId(model);
+			assertNotNull(sessionId);
+			assertEquals(sessionId, getSessionId(dep));
+
+			String containerId = con.getName();
+			client().stopContainer(containerId, 2);
+			ACondition.waitFor("Container stopped", 5_000, () -> {
+				ContainerInfo info = client().inspectContainer(containerId);
+				String status = info.state().status();
+				System.out.println("status = "+status);
+				assertEquals("exited", status);
+			});
+		}
+
+		model.disconnect();
+
+		ACondition.waitFor("Docker app dispaeared", 2_000, () -> {
+			assertTrue(model.getElements().getValues().isEmpty());
+		});
+
+		CompletableFuture<Void> deploymentSynchronized = RefreshStateTracker.waitForOperation("Synchronizing deployment "+project.getName());
+		model.connect(ConnectMode.INTERACTIVE);
+
+		GenericRemoteAppElement dep = waitForDeployment(model, project);
+		GenericRemoteAppElement img = waitForChild(dep, d -> d instanceof DockerImage);
+		GenericRemoteAppElement con = waitForChild(img, d -> d instanceof DockerContainer);
+
+		deploymentSynchronized.get(1, TimeUnit.SECONDS);
+
+		assertEquals(RunState.INACTIVE, dep.getRunState());
+		assertEquals(RunState.INACTIVE, img.getRunState());
+		assertEquals(RunState.INACTIVE, con.getRunState());
+	}
+
+	//////////////////////////////////////////////
+	/// harness
+
+	@After
+	public void cleanup() {
+		RefreshStateTracker.clearDebugObservers();
+	}
+
+	private String getSessionId(GenericRemoteAppElement dep) {
+		App data = dep.getAppData();
+		assertTrue(data instanceof DockerApp);
+		return ((DockerApp)data).deployment().getSessionId();
+	}
+
+	private String getSessionId(GenericRemoteBootDashModel<DockerClient, DockerTargetParams> model) {
+		DockerRunTarget target = (DockerRunTarget) model.getRunTarget();
+		return target.getSessionId();
+	}
+
+	private GenericRemoteBootDashModel<DockerClient, DockerTargetParams> createDockerTarget() throws Exception {
+		DockerRunTargetType target = injections().getBean(DockerRunTargetType.class);
+		AddRunTargetAction createTarget = getCreateTargetAction(target);
+		assertNotNull(createTarget);
+		assertTrue(createTarget.isEnabled());
+
+		when(ui().inputDialog(eq("Connect to Docker Daemon"), eq("Enter docker url:"), anyString())).then(invocation -> {
+			Object[] args = invocation.getArguments();
+			assertEquals(DEFAULT_DOCKER_URL, args[2]);
+			return args[2];
+		});
+		createTarget.run();
+		createTarget.waitFor(/*Duration.ofMillis(2000)*/);
+
+		BootDashModel model;
+			//		ACondition.waitFor("Run target model to appear", 2000, () -> {
+			assertNotNull(model = harness.getRunTargetModel(target));
+//		});
+		return (GenericRemoteBootDashModel<DockerClient, DockerTargetParams>) model;
+	}
+
 	private void assertNoImage(String imageId) throws Exception {
 		for (Image img : client().listImages(ListImagesParam.allImages())) {
 			assertFalse(imageId.equals(img.id()));
@@ -194,9 +276,6 @@ public class BootDashDockerTests {
 		GenericRemoteAppElement d = getDeployment(model, project);
 		return d;
 	}
-
-	//////////////////////////////////////////////
-	/// harness
 
 	DockerClient _client;
 
