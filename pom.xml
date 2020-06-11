@@ -147,7 +147,7 @@
 
 		<module>plugins/org.springframework.ide.eclipse.metadata</module>
 		<module>plugins/org.springframework.ide.eclipse.bestpractices</module>
-		<module>plugins/org.springframework.ide.eclipse.bestpractices.tests</module>
+		<!-- <module>plugins/org.springframework.ide.eclipse.bestpractices.tests</module> -->
 		<module>plugins/org.springframework.ide.eclipse.config.core</module>
 		<module>plugins/org.springframework.ide.eclipse.config.graph</module>
 		<module>plugins/org.springframework.ide.eclipse.config.ui</module>
