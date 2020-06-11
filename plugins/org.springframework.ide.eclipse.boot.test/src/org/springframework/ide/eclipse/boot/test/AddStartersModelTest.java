@@ -29,6 +29,7 @@ import java.util.function.Supplier;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -49,6 +50,7 @@ import org.springframework.ide.eclipse.boot.test.util.TestBracketter;
 import org.springframework.ide.eclipse.boot.test.util.TestResourcesUtil;
 import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
 import org.springframework.ide.eclipse.boot.wizard.HierarchicalMultiSelectionFieldModel;
+import org.springframework.ide.eclipse.boot.wizard.starters.AddStartersError;
 import org.springframework.ide.eclipse.boot.wizard.starters.AddStartersInitializrService;
 import org.springframework.ide.eclipse.boot.wizard.starters.AddStartersPreferences;
 import org.springframework.ide.eclipse.boot.wizard.starters.AddStartersWizardModel;
@@ -109,11 +111,11 @@ public class AddStartersModelTest {
 		// zip file containing the "downloaded" project, and the supported boot versions
 		// for the service
 		String starterZipFile = "/initializr/boot-230-web-actuator/starter.zip";
-		String initializrUrl = MOCK_VALID_INITIALIZR_URL;
+		String validInitializrUrl = MOCK_VALID_INITIALIZR_URL;
 		String[] supportedBootVersions = SUPPORTED_BOOT_VERSIONS_230;
 		setMockInitializrInfo();
 
-		AddStartersWizardModel wizard = createWizard(project, starterZipFile, initializrUrl, supportedBootVersions);
+		AddStartersWizardModel wizard = createWizard(project, starterZipFile, validInitializrUrl, supportedBootVersions);
 		InitializrModel initializrModel = wizard.getModel().getValue();
 		// Initializr Model should not be available yet until it is loaded
 		assertNull(initializrModel);
@@ -121,7 +123,7 @@ public class AddStartersModelTest {
 		loadInitializrModel(wizard);
 
 		// Verify the fields and model are set in the wizard after loading
-		assertEquals(initializrUrl, wizard.getServiceUrl().getValue());
+		assertEquals(validInitializrUrl, wizard.getServiceUrl().getValue());
 		assertEquals(projectBootVersion, wizard.getBootVersion().getValue());
 		initializrModel = wizard.getModel().getValue();
 		assertNotNull(initializrModel);
@@ -131,6 +133,178 @@ public class AddStartersModelTest {
 		HierarchicalMultiSelectionFieldModel<Dependency> dependencies = initializrModel.dependencies;
 		List<CheckBoxModel<Dependency>> allDependencies = dependencies.getAllBoxes();
 		assertTrue(!allDependencies.isEmpty());
+	}
+
+
+	@Test
+	public void changeBetweenInvalidAndValidUrl() throws Exception {
+		String projectBootVersion = CURRENT_BOOT_VERSION;
+		IProject project = harness.createBootProject("changeBetweenInvalidAndValidUrl", bootVersion(projectBootVersion));
+
+		String starterZipFile = "/initializr/boot-230-web-actuator/starter.zip";
+		String validInitializrUrl = MOCK_VALID_INITIALIZR_URL;
+		String[] supportedBootVersions = SUPPORTED_BOOT_VERSIONS_230;
+		setMockInitializrInfo();
+
+		AddStartersWizardModel wizard = createWizard(project, starterZipFile, validInitializrUrl, supportedBootVersions);
+		InitializrModel initializrModel = wizard.getModel().getValue();
+		// Initializr Model should not be available yet until it is loaded
+		assertNull(initializrModel);
+
+		// Will load with valid values first (this is what happens in real case too...the wizard initially will
+		// load with a valid URL. We are going to test setting an invalid URL after the wizard opens.
+		loadInitializrModel(wizard);
+
+		// Verify the fields and model are set in the wizard after loading
+		assertEquals(validInitializrUrl, wizard.getServiceUrl().getValue());
+		assertEquals(projectBootVersion, wizard.getBootVersion().getValue());
+		initializrModel = wizard.getModel().getValue();
+		assertNotNull(initializrModel);
+		assertEquals(ValidationResult.OK, wizard.getValidator().getValue());
+
+		// Set a valid URL that is not a valid initializr URL
+		wizard.getServiceUrl().setValue("http://www.google.ca");
+		waitForWizardJob();
+
+		// There should be no valid initializr model available
+		initializrModel = wizard.getModel().getValue();
+		assertNull(initializrModel);
+		AddStartersError result = (AddStartersError)wizard.getValidator().getValue();
+		assertTrue(result.status == IStatus.ERROR);
+		assertTrue(result.details.contains("ConnectException"));
+
+		// Set a valid URL again. Should load a valid model and validate
+		wizard.getServiceUrl().setValue(validInitializrUrl);
+		waitForWizardJob();
+		initializrModel = wizard.getModel().getValue();
+		assertNotNull(initializrModel);
+		assertEquals(ValidationResult.OK, wizard.getValidator().getValue());
+	}
+
+
+	@Test
+	public void malformedUrlError() throws Exception {
+		String projectBootVersion = CURRENT_BOOT_VERSION;
+		IProject project = harness.createBootProject("malformedUrlError", bootVersion(projectBootVersion));
+
+		String starterZipFile = "/initializr/boot-230-web-actuator/starter.zip";
+		String validInitializrUrl = MOCK_VALID_INITIALIZR_URL;
+		String[] supportedBootVersions = SUPPORTED_BOOT_VERSIONS_230;
+		setMockInitializrInfo();
+
+		AddStartersWizardModel wizard = createWizard(project, starterZipFile, validInitializrUrl, supportedBootVersions);
+		InitializrModel initializrModel = wizard.getModel().getValue();
+		// Initializr Model should not be available yet until it is loaded
+		assertNull(initializrModel);
+
+		// Will load with valid values first (this is what happens in real case too...the wizard initially will
+		// load with a valid URL. We are going to test setting an invalid URL after the wizard opens.
+		loadInitializrModel(wizard);
+
+		// Verify the fields and model are set in the wizard after loading
+		assertEquals(validInitializrUrl, wizard.getServiceUrl().getValue());
+		assertEquals(projectBootVersion, wizard.getBootVersion().getValue());
+		initializrModel = wizard.getModel().getValue();
+		assertNotNull(initializrModel);
+		assertEquals(ValidationResult.OK, wizard.getValidator().getValue());
+
+		// Set a malformed URL
+		wizard.getServiceUrl().setValue("wlwlwlw");
+		waitForWizardJob();
+
+		// There should be no valid initializr model available
+		initializrModel = wizard.getModel().getValue();
+		assertNull(initializrModel);
+		AddStartersError result = (AddStartersError)wizard.getValidator().getValue();
+		assertTrue(result.status == IStatus.ERROR);
+		assertTrue(result.details.contains("MalformedURLException"));
+
+		// Set a valid URL again. Should load a valid model and validate
+		wizard.getServiceUrl().setValue(validInitializrUrl);
+		waitForWizardJob();
+		initializrModel = wizard.getModel().getValue();
+		assertNotNull(initializrModel);
+		assertEquals(ValidationResult.OK, wizard.getValidator().getValue());
+	}
+
+
+	@Test
+	public void missingUrlError() throws Exception {
+		String projectBootVersion = CURRENT_BOOT_VERSION;
+		IProject project = harness.createBootProject("missingUrlError", bootVersion(projectBootVersion));
+
+		String starterZipFile = "/initializr/boot-230-web-actuator/starter.zip";
+		String validInitializrUrl = MOCK_VALID_INITIALIZR_URL;
+		String[] supportedBootVersions = SUPPORTED_BOOT_VERSIONS_230;
+		setMockInitializrInfo();
+
+		AddStartersWizardModel wizard = createWizard(project, starterZipFile, validInitializrUrl, supportedBootVersions);
+		InitializrModel initializrModel = wizard.getModel().getValue();
+		// Initializr Model should not be available yet until it is loaded
+		assertNull(initializrModel);
+
+		// Will load with valid values first (this is what happens in real case too...the wizard initially will
+		// load with a valid URL. We are going to test setting an invalid URL after the wizard opens.
+		loadInitializrModel(wizard);
+
+		// Verify the fields and model are set in the wizard after loading
+		assertEquals(validInitializrUrl, wizard.getServiceUrl().getValue());
+		assertEquals(projectBootVersion, wizard.getBootVersion().getValue());
+		initializrModel = wizard.getModel().getValue();
+		assertNotNull(initializrModel);
+		assertEquals(ValidationResult.OK, wizard.getValidator().getValue());
+
+		// Set empty URL
+		wizard.getServiceUrl().setValue("");
+		waitForWizardJob();
+
+		// There should be no valid initializr model available
+		initializrModel = wizard.getModel().getValue();
+		assertNull(initializrModel);
+		AddStartersError result = (AddStartersError)wizard.getValidator().getValue();
+		assertTrue(result.status == IStatus.ERROR);
+		assertTrue(result.details.contains("Missing initializr service URL"));
+
+		// Set a valid URL again. Should load a valid model and validate
+		wizard.getServiceUrl().setValue(validInitializrUrl);
+		waitForWizardJob();
+		initializrModel = wizard.getModel().getValue();
+		assertNotNull(initializrModel);
+		assertEquals(ValidationResult.OK, wizard.getValidator().getValue());
+	}
+
+
+	@Test
+	public void unsupportedBootVersionError() throws Exception {
+
+		// Create a project with a valid boot version as the harness
+		// doesn't allow creating a project with old unsupported boot version
+		// However we will change the list of supported boot versions to exclude this boot version
+		// to simulate a case where there is a unsupported boot version in the add starters wizard
+		IProject project = harness.createBootProject("unsupportedBootVersionError", bootVersion(CURRENT_BOOT_VERSION));
+
+		String starterZipFile = "/initializr/boot-230-web-actuator/starter.zip";
+		String validInitializrUrl = MOCK_VALID_INITIALIZR_URL;
+
+		// List supported versions that do not include the version used to create the project
+		String[] supportedBootVersions = new String[] { "4.4.0.RELEASE", "1.1.0.RELEASE", "1.5.3.RELEASE"};
+		setMockInitializrInfo();
+
+		AddStartersWizardModel wizard = createWizard(project, starterZipFile, validInitializrUrl, supportedBootVersions);
+		InitializrModel initializrModel = wizard.getModel().getValue();
+		// Initializr Model should not be available yet until it is loaded
+		assertNull(initializrModel);
+
+		loadInitializrModel(wizard);
+
+		AddStartersError result = (AddStartersError)wizard.getValidator().getValue();
+		assertTrue(result.status == IStatus.ERROR);
+		assertTrue(result.details.contains("FileNotFoundException"));
+
+		// Also verify that the error message details lists all the supported boot versions that a user should update to
+		assertTrue(result.details.contains("4.4.0.RELEASE"));
+		assertTrue(result.details.contains("1.1.0.RELEASE"));
+		assertTrue(result.details.contains("1.5.3.RELEASE"));
 	}
 
 	/*
@@ -200,7 +374,7 @@ public class AddStartersModelTest {
 		public Option[] getSupportedBootReleaseVersions(String url) throws Exception {
 
 			Builder<Object> options = ImmutableList.builder();
-			for (String v : SUPPORTED_BOOT_VERSIONS_230) {
+			for (String v : supportedBootVersions) {
 				Option option = new Option();
 				option.setId(v);
 				options.add(option);
