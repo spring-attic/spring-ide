@@ -136,7 +136,7 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 			filter = filter.and(pattern(glob).negate());
 		}
 
-		filter.and(rootFiles()
+		filter = filter.and(rootFiles()
 				.or(path("HELP.md"))
 				.or(path("src/main/resources/application.properties"))
 				.or(path("src/main/resources/application.yml"))
