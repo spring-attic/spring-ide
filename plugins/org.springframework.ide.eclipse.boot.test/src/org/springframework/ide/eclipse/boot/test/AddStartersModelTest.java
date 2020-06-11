@@ -51,6 +51,7 @@ import org.springframework.ide.eclipse.boot.test.util.TestResourcesUtil;
 import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
 import org.springframework.ide.eclipse.boot.wizard.HierarchicalMultiSelectionFieldModel;
 import org.springframework.ide.eclipse.boot.wizard.starters.AddStartersCompareModel;
+import org.springframework.ide.eclipse.boot.wizard.starters.AddStartersCompareResult;
 import org.springframework.ide.eclipse.boot.wizard.starters.AddStartersError;
 import org.springframework.ide.eclipse.boot.wizard.starters.AddStartersInitializrService;
 import org.springframework.ide.eclipse.boot.wizard.starters.AddStartersPreferences;
@@ -291,6 +292,41 @@ public class AddStartersModelTest {
 		assertTrue(result.details.contains("4.4.0.RELEASE"));
 		assertTrue(result.details.contains("1.1.0.RELEASE"));
 		assertTrue(result.details.contains("1.5.3.RELEASE"));
+	}
+
+	@Test
+	public void basicComparison() throws Exception {
+		String projectBootVersion = CURRENT_BOOT_VERSION;
+		IProject project = harness.createBootProject("basicComparison", bootVersion(projectBootVersion));
+
+		// Set up the properties to mock the initializr service: a "valid" initializr
+		// URL, a
+		// zip file containing the "downloaded" project, and the supported boot versions
+		// for the service
+		String starterZipFile = "/initializr/boot-230-web-actuator/starter.zip";
+		String validInitializrUrl = MOCK_VALID_INITIALIZR_URL;
+		String[] supportedBootVersions = SUPPORTED_BOOT_VERSIONS_230;
+		setMockInitializrInfo();
+
+		AddStartersWizardModel wizard = createWizard(project, starterZipFile, validInitializrUrl,
+				supportedBootVersions);
+		assertInitializrAndCompareModelsNull(wizard);
+
+		loadInitializrModel(wizard);
+
+		assertInitializrAndCompareModelsNotNull(wizard);
+
+		AddStartersCompareModel compareModel = wizard.getCompareModel().getValue();
+		AddStartersCompareResult comparison = compareModel.getCompareResult().getValue();
+		assertNull(comparison);
+
+		compareModel.createComparison(new NullProgressMonitor());
+		comparison = compareModel.getCompareResult().getValue();
+		assertNotNull(comparison);
+		// Verify that the comparison contains the "mocked" downloaded zip file as a comparison source
+		assertTrue(comparison.getDownloadedProject().getPath().contains(starterZipFile));
+		// Verify that the comparison contains the local project as a comparison source
+		assertTrue(comparison.getLocalResource().getProject().equals(project));
 	}
 
 
