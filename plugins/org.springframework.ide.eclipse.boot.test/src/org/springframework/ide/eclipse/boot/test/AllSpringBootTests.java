@@ -18,7 +18,8 @@ import org.junit.runners.Suite.SuiteClasses;
 		GSGWizardModelTest.class,
 		InitializrFactoryModelTest.class,
 		DependencyTooltipContentTest.class,
-		BootPropertyTesterTest.class
+		BootPropertyTesterTest.class,
+		AddStartersModelTest.class
 })
 public class AllSpringBootTests {
 

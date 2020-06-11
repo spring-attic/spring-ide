@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 import org.eclipse.core.runtime.Assert;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
@@ -16,6 +17,25 @@ import org.springsource.ide.eclipse.commons.livexp.core.OnDispose;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 public class RefreshStateTracker {
+
+	private static Map<String, CompletableFuture<Void>> debugObservers = null;
+
+	public static void clearDebugObservers() {
+		debugObservers = null;
+	}
+	public static CompletableFuture<Void> waitForOperation(String message) {
+		if (debugObservers==null) {
+			debugObservers = new HashMap<>();
+		}
+		return debugObservers.computeIfAbsent(message, s -> new CompletableFuture<>());
+	}
+
+	private CompletableFuture<Void> getObserver(String message) {
+		if (debugObservers!=null) {
+			return debugObservers.get(message);
+		}
+		return null;
+	}
 
 	private final Map<String, RefreshState> map = new HashMap<>();
 
@@ -85,12 +105,19 @@ public class RefreshStateTracker {
 	}
 
 	public <T> CompletableFuture<T> callAsync(String busyMessage, Callable<T> callable) {
+		CompletableFuture<Void> observer = getObserver(busyMessage);
 		CompletableFuture<T> result = new CompletableFuture<>();
 		JobUtil.runInJob(busyMessage, (mon) -> {
 			try {
 				result.complete(this.call(busyMessage, callable));
+				if (observer!=null) {
+					observer.complete(null);
+				}
 			} catch (Throwable e) {
 				result.completeExceptionally(e);
+				if (observer!=null) {
+					observer.complete(null);
+				}
 			}
 		});
 		return result;

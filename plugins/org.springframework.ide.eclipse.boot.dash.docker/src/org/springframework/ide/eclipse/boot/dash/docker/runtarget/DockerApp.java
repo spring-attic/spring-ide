@@ -90,7 +90,7 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 		return this.client;
 	}
 
-	private DockerDeployment deployment() {
+	public DockerDeployment deployment() {
 		return target.deployments.get(name);
 	}
 
@@ -139,27 +139,30 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 		return this.refreshTracker.thenComposeAsync(refreshTracker -> {
 			DockerDeployment deployment = deployment();
 			return refreshTracker.runAsync("Synchronizing deployment "+deployment.getName(), () -> {
-				RunState desiredRunState = deployment.getRunState();
-				List<Container> containers = client.listContainers(ListContainersParam.allContainers(), ListContainersParam.withLabel(APP_NAME, getName()));
-				if (desiredRunState==RunState.INACTIVE) {
-					stop(containers);
-				} else if (desiredRunState==RunState.RUNNING) {
-					String desiredBuildId = deployment.getBuildId();
-					List<Container> toStop = new ArrayList<>(containers.size());
-					boolean runningContainer = false;
-					List<Container> toRun = new ArrayList<>(containers.size());
-					for (Container c : containers) {
-						if (desiredBuildId.equals(c.labels().get(BUILD_ID))) {
-							if (new DockerContainer(getTarget(), c).fetchRunState()==RunState.RUNNING) {
-								runningContainer = true;
+				String currentSession = this.target.sessionId.getValue();
+				if (currentSession.equals(deployment.getSessionId())) {
+					RunState desiredRunState = deployment.getRunState();
+					List<Container> containers = client.listContainers(ListContainersParam.allContainers(), ListContainersParam.withLabel(APP_NAME, getName()));
+					if (desiredRunState==RunState.INACTIVE) {
+						stop(containers);
+					} else if (desiredRunState==RunState.RUNNING) {
+						String desiredBuildId = deployment.getBuildId();
+						List<Container> toStop = new ArrayList<>(containers.size());
+						boolean runningContainer = false;
+						List<Container> toRun = new ArrayList<>(containers.size());
+						for (Container c : containers) {
+							if (desiredBuildId.equals(c.labels().get(BUILD_ID))) {
+								if (new DockerContainer(getTarget(), c).fetchRunState()==RunState.RUNNING) {
+									runningContainer = true;
+								}
+							} else {
+								toStop.add(c);
 							}
-						} else {
-							toStop.add(c);
 						}
-					}
-					stop(toStop);
-					if (!runningContainer) {
-						start(desiredBuildId);
+						stop(toStop);
+						if (!runningContainer) {
+							start(desiredBuildId);
+						}
 					}
 				}
 			});
@@ -330,6 +333,7 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 	public void restart(RunState runningOrDebugging) {
 		DockerDeployment d = deployment();
 		d.setBuildId(UUID.randomUUID().toString());
+		d.setSessionId(target.sessionId.getValue());
 		d.setRunState(runningOrDebugging);
 		target.deployments.createOrUpdate(d);
 	}

@@ -561,7 +561,7 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		wc.setAttribute(ANSI_CONSOLE_OUTPUT, enable);
 	}
 
-	//@Override Don't add override tag. Method doesn't exist in older eclipse api
+	@Override
 	public String[][] getClasspathAndModulepath(ILaunchConfiguration conf) throws CoreException {
 		//with Java 9 Beta installed we need this method, because getClasspath is no longer called.
 		try {
@@ -571,14 +571,7 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 					new String[] {}
 				};
 	 		};
-	 		//Can't 'just' do super call because that wouldn't compile on older Eclipse. So we use 'MethodHandles' to
-	 		//call super dynamically. See https://stackoverflow.com/questions/5411434/how-to-call-a-superclass-method-using-java-reflection
-			MethodHandle m = MethodHandles.lookup().findSpecial(BootLaunchConfigurationDelegate.class.getSuperclass(),
-					"getClasspathAndModulepath",
-					MethodType.methodType(String[][].class, ILaunchConfiguration.class),
-					BootLaunchConfigurationDelegate.class
-			);
-			return (String[][]) m.invoke(this, conf);
+	 		return super.getClasspathAndModulepath(conf);
 		} catch (Throwable e) {
 			throw ExceptionUtil.coreException(e);
 		}
