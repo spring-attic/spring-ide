@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2019 Pivotal, Inc.
+ * Copyright (c) 2015, 2020 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -74,7 +74,6 @@ import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
-import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.core.IMavenCoordinates;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
@@ -108,6 +107,7 @@ import org.springframework.ide.eclipse.boot.test.AutobuildingEnablement;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.WizardConfigurer;
 import org.springframework.ide.eclipse.boot.test.util.TestBracketter;
+import org.springframework.ide.eclipse.boot.util.version.Version;
 import org.springsource.ide.eclipse.commons.core.ZipFileUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.maintype.MainTypeFinder;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
@@ -289,7 +289,7 @@ public class BootDashModelTest {
 
 		IBootInstall defaultInstall = spy(context.getBootInstallManager().getDefaultInstall());
 		CloudCliInstall mockCloudCliInstall = spy(new CloudCliInstall(defaultInstall));
-		doReturn(new Version("1.5.1")).when(mockCloudCliInstall).getVersion();
+		doReturn(new Version(1, 5, 1, null)).when(mockCloudCliInstall).getVersion();
 		doReturn(mockCommand).when(mockCloudCliInstall).createCommand();
 		doReturn(mockCloudCliInstall).when(defaultInstall).getExtension(CloudCliInstall.class);
 

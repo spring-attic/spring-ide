@@ -61,6 +61,7 @@ import org.springsource.ide.eclipse.commons.livexp.util.Log;
  */
 public class AddStartersWizardModel implements OkButtonHandler, Disposable {
 
+	public static final Object JOB_FAMILY = "AddStartersWizardModel.JOB_FAMILY";
 
 	private final AddStartersPreferences preferences;
 	private final IProject project;
@@ -250,6 +251,11 @@ public class AddStartersWizardModel implements OkButtonHandler, Disposable {
 					}
 					return Status.OK_STATUS;
 				};
+
+				@Override
+				public boolean belongsTo(Object family) {
+					return family==JOB_FAMILY;
+				}
 			};
 		}
 		asyncModelLoadJob.schedule();
