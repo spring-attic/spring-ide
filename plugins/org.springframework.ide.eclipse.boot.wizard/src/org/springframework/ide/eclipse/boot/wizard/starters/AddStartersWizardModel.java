@@ -45,18 +45,20 @@ import org.springsource.ide.eclipse.commons.livexp.util.Log;
  *
  * <p/>
  *
- * 1. Build a primary "initializr project model" that contains BOTH local project information, like boot version, as well  as information downloaded
- * from initializr, like dependencies specific for that boot version. Wizard  dependency selections are also stored in this model. This  model also
- * performs comparison between local project and downloaded project.
+ * 1. Build a primary "initializr model" that contains BOTH local project information, like boot version, as well  as information downloaded
+ * from initializr, like dependencies specific for that boot version. Wizard  dependency selections are also stored in this model.
  *
  * <p/>
  *
- * 2. The initializr model creation is performed via an  external model loader, such
- * that the external participant (e.g. the wizard dialogue) can integrate with a progress monitor. Changes to the service URL will call this external model loader, but if no
- * external model loader is specified, nothing happens.
+ * 2. Build a compare model that manages comparison between the local project and a project downloaded from initializr. The compare model depends on the initializr model,
+ * as initializr model information is required to do a comparison.
+ *
  * <p/>
  *
- * The  wizard  model is essentially a wrapper  around the initializr project model that  contains additional "wizard" functionality like dealing with "OK pressed"
+ * NOTE: the wizard model creates the initializr and compare models ON DEMAND or when the service URL changes, rather than when the wizard model is first created, via an external model loader. The reason for this is to allow
+ * integration into the wizard's UI progress mechanism.
+ *
+ *
  *
  */
 public class AddStartersWizardModel implements OkButtonHandler, Disposable {
@@ -83,7 +85,7 @@ public class AddStartersWizardModel implements OkButtonHandler, Disposable {
 	private final FieldModel<String> bootVersionField = new StringFieldModel("Spring Boot Version:", "");
 	private final FieldModel<String> urlField = new StringFieldModel("Service URL:", null);
 	private final LiveVariable<InitializrModel> initializrModel = new LiveVariable<InitializrModel>(null);
-
+	private final LiveVariable<AddStartersCompareModel> compareModel = new LiveVariable<AddStartersCompareModel>(null);
 
 	// Use ObservableSet
 	/*
@@ -129,6 +131,18 @@ public class AddStartersWizardModel implements OkButtonHandler, Disposable {
 		this.project = project;
 		this.preferences = preferences;
 		this.initializrService = initializrService;
+
+		// Link the initializr Model with the compare model
+		initializrModel.onChange((exp, val) -> {
+			InitializrModel initializrModel = exp.getValue();
+			if (initializrModel == null) {
+				compareModel.setValue(null);
+			} else {
+				InitializrUrl initializrUrl = new InitializrUrl(urlField.getValue());
+				AddStartersCompareModel compareModel = new AddStartersCompareModel(initializrService.getProjectDownloader(initializrUrl), initializrModel);
+				this.compareModel.setValue(compareModel);
+			}
+		});
 	}
 
 	public FieldModel<String> getBootVersion() {
@@ -139,8 +153,12 @@ public class AddStartersWizardModel implements OkButtonHandler, Disposable {
 		return urlField;
 	}
 
-	public LiveExpression<InitializrModel> getModel() {
+	public LiveExpression<InitializrModel> getInitializrModel() {
 		return initializrModel;
+	}
+
+	public LiveExpression<AddStartersCompareModel> getCompareModel() {
+		return compareModel;
 	}
 
 	/**
@@ -265,22 +283,25 @@ public class AddStartersWizardModel implements OkButtonHandler, Disposable {
 	 * Synchronous initializr model creation with info from initializr
 	 */
 	public void createInitializrModel(IProgressMonitor monitor) {
-		InitializrModel model = null;
+		InitializrModel initializrModel = null;
 		Exception error = null;
 		String url = urlField.getValue();
 
 		try {
-			writeToMonitor(monitor, "Creating Boot project model...");
-			model = createModel(url);
+			writeToMonitor(monitor, "Getting Boot project...");
+			ISpringBootProject bootProject = getBootProject(url);
+			bootVersionField.setValue(bootProject.getBootVersion());
+			writeToMonitor(monitor, "Creating Initializr model...");
+			initializrModel = new InitializrModel(bootProject, preferences);
 			writeToMonitor(monitor, "Fetching starter information from Spring Boot Initializr...");
-			model.downloadDependencies();
+			initializrModel.downloadDependencies();
 		} catch (Exception _e) {
 			error = _e;
 		}
 
 		// FIRST set the model even if there are errors
-		if (model != null) {
-			initializrModel.setValue(model);
+		if (initializrModel != null) {
+			this.initializrModel.setValue(initializrModel);
 		}
 
 		if (error != null) {
@@ -288,7 +309,7 @@ public class AddStartersWizardModel implements OkButtonHandler, Disposable {
 			if (e instanceof HttpRedirectionException) {
 				urlField.getVariable().setValue(((HttpRedirectionException)e).redirectedTo);
 			} else {
-				handleLoadingError(model, url, e);
+				handleLoadingError(initializrModel, url, e);
 			}
 		} else {
 			initializrValidator.setValue(ValidationResult.OK);
@@ -364,20 +385,11 @@ public class AddStartersWizardModel implements OkButtonHandler, Disposable {
 		return ValidationResult.OK;
 	}
 
-	private InitializrModel createModel(String url) throws Exception {
 
+	private ISpringBootProject getBootProject(String url) throws Exception {
 		InitializrService initializr = initializrService.getService(() -> url);
 		SpringBootCore core = new SpringBootCore(initializr);
-		ISpringBootProject bootProject = core.project(project);
-
-		this.bootVersionField.setValue(bootProject.getBootVersion());
-
-		InitializrUrl initializrUrl = new InitializrUrl(url);
-		AddStartersCompareModel compareModel = new AddStartersCompareModel(initializrService.getProjectDownloader(initializrUrl), bootProject);
-		InitializrModel model = new InitializrModel(bootProject, compareModel, preferences);
-		addDisposable(model);
-
-		return model;
+		return core.project(project);
 	}
 
 	protected void addDisposable(Disposable d) {

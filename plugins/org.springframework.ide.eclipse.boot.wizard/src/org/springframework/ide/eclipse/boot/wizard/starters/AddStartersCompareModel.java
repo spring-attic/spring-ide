@@ -36,10 +36,12 @@ public class AddStartersCompareModel implements Disposable {
 	private LiveVariable<AddStartersCompareResult> compareInputModel = new LiveVariable<>(null);
 	private LiveVariable<AddStartersTrackerState> downloadTracker = new LiveVariable<>(
 			AddStartersTrackerState.NOT_STARTED);
+	private final InitializrModel initializrModel;
 
-	public AddStartersCompareModel(InitializrProjectDownloader projectDownloader, ISpringBootProject bootProject) {
-		this.bootProject = bootProject;
+	public AddStartersCompareModel(InitializrProjectDownloader projectDownloader, InitializrModel initializrModel) {
+		this.bootProject = initializrModel.getProject();
 		this.projectDownloader = projectDownloader;
+		this.initializrModel = initializrModel;
 	}
 
 	public void initTrackers() {
@@ -66,10 +68,15 @@ public class AddStartersCompareModel implements Disposable {
 		this.projectDownloader.dispose();
 	}
 
-	public void downloadProject(List<Dependency> dependencies, IProgressMonitor monitor) {
+	/**
+	 * Creates a comparison between a local project and a project downloaded from initializr
+	 * @param monitor
+	 */
+	public void createComparison(IProgressMonitor monitor) {
 		try {
 			monitor.beginTask("Downloading 'starter.zip' from Initializr Service", IProgressMonitor.UNKNOWN);
 			downloadTracker.setValue(AddStartersTrackerState.IS_DOWNLOADING);
+			List<Dependency> dependencies = initializrModel.dependencies.getCurrentSelection();
 			File generatedProject = projectDownloader.getProject(dependencies, bootProject);
 			generateCompareResult(generatedProject, dependencies);
 			downloadTracker.setValue(AddStartersTrackerState.DOWNLOADING_COMPLETED);

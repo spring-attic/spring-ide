@@ -116,7 +116,7 @@ public class AddStartersModelTest {
 		setMockInitializrInfo();
 
 		AddStartersWizardModel wizard = createWizard(project, starterZipFile, validInitializrUrl, supportedBootVersions);
-		InitializrModel initializrModel = wizard.getModel().getValue();
+		InitializrModel initializrModel = wizard.getInitializrModel().getValue();
 		// Initializr Model should not be available yet until it is loaded
 		assertNull(initializrModel);
 
@@ -125,7 +125,7 @@ public class AddStartersModelTest {
 		// Verify the fields and model are set in the wizard after loading
 		assertEquals(validInitializrUrl, wizard.getServiceUrl().getValue());
 		assertEquals(projectBootVersion, wizard.getBootVersion().getValue());
-		initializrModel = wizard.getModel().getValue();
+		initializrModel = wizard.getInitializrModel().getValue();
 		assertNotNull(initializrModel);
 		assertEquals(ValidationResult.OK, wizard.getValidator().getValue());
 
@@ -147,7 +147,7 @@ public class AddStartersModelTest {
 		setMockInitializrInfo();
 
 		AddStartersWizardModel wizard = createWizard(project, starterZipFile, validInitializrUrl, supportedBootVersions);
-		InitializrModel initializrModel = wizard.getModel().getValue();
+		InitializrModel initializrModel = wizard.getInitializrModel().getValue();
 		// Initializr Model should not be available yet until it is loaded
 		assertNull(initializrModel);
 
@@ -158,7 +158,7 @@ public class AddStartersModelTest {
 		// Verify the fields and model are set in the wizard after loading
 		assertEquals(validInitializrUrl, wizard.getServiceUrl().getValue());
 		assertEquals(projectBootVersion, wizard.getBootVersion().getValue());
-		initializrModel = wizard.getModel().getValue();
+		initializrModel = wizard.getInitializrModel().getValue();
 		assertNotNull(initializrModel);
 		assertEquals(ValidationResult.OK, wizard.getValidator().getValue());
 
@@ -167,7 +167,7 @@ public class AddStartersModelTest {
 		waitForWizardJob();
 
 		// There should be no valid initializr model available
-		initializrModel = wizard.getModel().getValue();
+		initializrModel = wizard.getInitializrModel().getValue();
 		assertNull(initializrModel);
 		AddStartersError result = (AddStartersError)wizard.getValidator().getValue();
 		assertTrue(result.status == IStatus.ERROR);
@@ -176,7 +176,7 @@ public class AddStartersModelTest {
 		// Set a valid URL again. Should load a valid model and validate
 		wizard.getServiceUrl().setValue(validInitializrUrl);
 		waitForWizardJob();
-		initializrModel = wizard.getModel().getValue();
+		initializrModel = wizard.getInitializrModel().getValue();
 		assertNotNull(initializrModel);
 		assertEquals(ValidationResult.OK, wizard.getValidator().getValue());
 	}
@@ -193,7 +193,7 @@ public class AddStartersModelTest {
 		setMockInitializrInfo();
 
 		AddStartersWizardModel wizard = createWizard(project, starterZipFile, validInitializrUrl, supportedBootVersions);
-		InitializrModel initializrModel = wizard.getModel().getValue();
+		InitializrModel initializrModel = wizard.getInitializrModel().getValue();
 		// Initializr Model should not be available yet until it is loaded
 		assertNull(initializrModel);
 
@@ -204,7 +204,7 @@ public class AddStartersModelTest {
 		// Verify the fields and model are set in the wizard after loading
 		assertEquals(validInitializrUrl, wizard.getServiceUrl().getValue());
 		assertEquals(projectBootVersion, wizard.getBootVersion().getValue());
-		initializrModel = wizard.getModel().getValue();
+		initializrModel = wizard.getInitializrModel().getValue();
 		assertNotNull(initializrModel);
 		assertEquals(ValidationResult.OK, wizard.getValidator().getValue());
 
@@ -213,7 +213,7 @@ public class AddStartersModelTest {
 		waitForWizardJob();
 
 		// There should be no valid initializr model available
-		initializrModel = wizard.getModel().getValue();
+		initializrModel = wizard.getInitializrModel().getValue();
 		assertNull(initializrModel);
 		AddStartersError result = (AddStartersError)wizard.getValidator().getValue();
 		assertTrue(result.status == IStatus.ERROR);
@@ -222,7 +222,7 @@ public class AddStartersModelTest {
 		// Set a valid URL again. Should load a valid model and validate
 		wizard.getServiceUrl().setValue(validInitializrUrl);
 		waitForWizardJob();
-		initializrModel = wizard.getModel().getValue();
+		initializrModel = wizard.getInitializrModel().getValue();
 		assertNotNull(initializrModel);
 		assertEquals(ValidationResult.OK, wizard.getValidator().getValue());
 	}
@@ -239,7 +239,7 @@ public class AddStartersModelTest {
 		setMockInitializrInfo();
 
 		AddStartersWizardModel wizard = createWizard(project, starterZipFile, validInitializrUrl, supportedBootVersions);
-		InitializrModel initializrModel = wizard.getModel().getValue();
+		InitializrModel initializrModel = wizard.getInitializrModel().getValue();
 		// Initializr Model should not be available yet until it is loaded
 		assertNull(initializrModel);
 
@@ -250,7 +250,7 @@ public class AddStartersModelTest {
 		// Verify the fields and model are set in the wizard after loading
 		assertEquals(validInitializrUrl, wizard.getServiceUrl().getValue());
 		assertEquals(projectBootVersion, wizard.getBootVersion().getValue());
-		initializrModel = wizard.getModel().getValue();
+		initializrModel = wizard.getInitializrModel().getValue();
 		assertNotNull(initializrModel);
 		assertEquals(ValidationResult.OK, wizard.getValidator().getValue());
 
@@ -259,7 +259,7 @@ public class AddStartersModelTest {
 		waitForWizardJob();
 
 		// There should be no valid initializr model available
-		initializrModel = wizard.getModel().getValue();
+		initializrModel = wizard.getInitializrModel().getValue();
 		assertNull(initializrModel);
 		AddStartersError result = (AddStartersError)wizard.getValidator().getValue();
 		assertTrue(result.status == IStatus.ERROR);
@@ -268,7 +268,7 @@ public class AddStartersModelTest {
 		// Set a valid URL again. Should load a valid model and validate
 		wizard.getServiceUrl().setValue(validInitializrUrl);
 		waitForWizardJob();
-		initializrModel = wizard.getModel().getValue();
+		initializrModel = wizard.getInitializrModel().getValue();
 		assertNotNull(initializrModel);
 		assertEquals(ValidationResult.OK, wizard.getValidator().getValue());
 	}
@@ -291,7 +291,7 @@ public class AddStartersModelTest {
 		setMockInitializrInfo();
 
 		AddStartersWizardModel wizard = createWizard(project, starterZipFile, validInitializrUrl, supportedBootVersions);
-		InitializrModel initializrModel = wizard.getModel().getValue();
+		InitializrModel initializrModel = wizard.getInitializrModel().getValue();
 		// Initializr Model should not be available yet until it is loaded
 		assertNull(initializrModel);
 

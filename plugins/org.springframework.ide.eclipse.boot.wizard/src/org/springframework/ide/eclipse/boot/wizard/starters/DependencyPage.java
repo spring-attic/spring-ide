@@ -70,7 +70,7 @@ public class DependencyPage extends WizardPageWithSections {
 		protected IPageSection compute() {
 			List<WizardPageSection> sections = new ArrayList<>();
 			// If model is available, model loading has been successful
-			InitializrModel model = wizardModel.getModel().getValue();
+			InitializrModel model = wizardModel.getInitializrModel().getValue();
 			ValidationResult validation = wizardModel.getValidator().getValue();
 			if (validation != null && validation.status ==  IStatus.ERROR) {
 				syncInUi(() -> {

@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarters;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec;
@@ -36,14 +35,13 @@ import org.springframework.ide.eclipse.boot.wizard.NewSpringBootWizardModel;
 import org.springframework.ide.eclipse.boot.wizard.PopularityTracker;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
-import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 /**
  *
  * Model for a local project that contains relevant data downloaded from initializr relevant to this
  * project. For example, it contains dependencies from initializr that pertain to the project's boot version.
  */
-public class InitializrModel  implements Disposable {
+public class InitializrModel  {
 
 	public static final Object JOB_FAMILY = "EditStartersModel.JOB_FAMILY";
 
@@ -51,7 +49,6 @@ public class InitializrModel  implements Disposable {
 	private final ISpringBootProject bootProject;
 	private final PopularityTracker popularities;
 	private final DefaultDependencies defaultDependencies;
-	private AddStartersCompareModel compareModel;
 
 	public final HierarchicalMultiSelectionFieldModel<Dependency> dependencies = new HierarchicalMultiSelectionFieldModel<>(
 			Dependency.class, "dependencies").label("Dependencies:");
@@ -62,12 +59,10 @@ public class InitializrModel  implements Disposable {
 	 *
 	 */
 	public InitializrModel(ISpringBootProject bootProject,
-			AddStartersCompareModel compareModel,
 			AddStartersPreferences preferences) throws Exception {
 		this.popularities = new PopularityTracker(preferences.getPreferenceStore());
 		this.defaultDependencies = new DefaultDependencies(preferences.getPreferenceStore());
 		this.bootProject = bootProject;
-		this.compareModel = compareModel;
 	}
 
 	public void updateDependencyCount() {
@@ -104,14 +99,6 @@ public class InitializrModel  implements Disposable {
 		}
 	}
 
-	/**
-	 * Download a project from initializr to compare with the local project.
-	 *
-	 * @param monitor
-	 */
-	public void downloadProjectToCompare(IProgressMonitor monitor) {
-		this.compareModel.downloadProject(dependencies.getCurrentSelection(), monitor);
-	}
 
 	/**
 	 * Retrieves the most popular dependencies based on the number of times they have
@@ -230,14 +217,5 @@ public class InitializrModel  implements Disposable {
 			MultiSelectionFieldModel<Dependency> dependencyGroup = dependencies.getContents(cat);
 			dependencyGroup.addSelectionListener(selectionListener);
 		}
-	}
-
-	public AddStartersCompareModel getCompareModel() {
-		return this.compareModel;
-	}
-
-	@Override
-	public void dispose() {
-		this.compareModel.dispose();
 	}
 }
