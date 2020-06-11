@@ -42,6 +42,7 @@ import org.springframework.ide.eclipse.boot.wizard.github.auth.Credentials;
 import org.springframework.ide.eclipse.boot.wizard.github.auth.NullCredentials;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -239,7 +240,14 @@ public class GithubClient {
 		public T readFrom(Class<T> type, Type genericType, Annotation[] annotations, MediaType mediaType,
 				MultivaluedMap<String, String> httpHeaders, InputStream entityStream)
 				throws IOException, WebApplicationException {
-			return mapper.readerFor(type).readValue(new InputStreamReader(entityStream, mediaType.getParameters().get(MediaType.CHARSET_PARAMETER)));
+			String charset = mediaType.getParameters().get(MediaType.CHARSET_PARAMETER);
+			InputStreamReader input;
+			if (charset!=null) {
+				input = new InputStreamReader(entityStream, charset);
+			} else {
+				input = new InputStreamReader(entityStream, "utf8"); //parsing json, so it's probably UTF8
+			}
+			return mapper.readerFor(type).readValue(input);
 		}
 	}
 
