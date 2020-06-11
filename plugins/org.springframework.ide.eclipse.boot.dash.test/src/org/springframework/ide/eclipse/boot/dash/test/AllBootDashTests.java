@@ -27,7 +27,7 @@ import org.springframework.ide.eclipse.boot.dash.test.yaml.Yaml2DeploymentProper
 
 
 	// Raised up temporarily to be run first.
-	BootDashDockerTests.class, //50 seconds
+	//BootDashDockerTests.class, //50 seconds
 
 	//New: (move down the chain later based on runtime)
 	JmxSupportTest.class,
