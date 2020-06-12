@@ -165,7 +165,7 @@ public class AddStartersModelTest {
 		assertInitializrAndCompareModelsNotNull(wizard);
 
 		// Set a valid URL that is not a valid initializr URL
-		wizard.getServiceUrl().setValue("http://www.google.ca");
+		wizard.getServiceUrl().setValue("https://www.google.ca");
 		waitForWizardJob();
 		// There should be no valid initializr model available
 		assertInitializrAndCompareModelsNull(wizard);
@@ -408,7 +408,7 @@ public class AddStartersModelTest {
 
 		@Override
 		public void checkBasicConnection(URL url) throws Exception {
-			// Tests an actual error thrown by initializr service: a valid URL (e.g. http://www.google.com) that is
+			// Tests an actual error thrown by initializr service: a valid URL (e.g. https://www.google.com) that is
 			// not an initializr URL
 			if (!validInitializrUrl.equals(url.toString())) {
 				throw new ConnectException();
