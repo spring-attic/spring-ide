@@ -54,7 +54,6 @@ import org.hamcrest.Matcher;
 import org.springframework.ide.eclipse.config.tests.util.gef.StsBotGefEditor;
 import org.springframework.ide.eclipse.config.ui.editors.SpringConfigEditor;
 
-
 /**
  * @author Terry Denney
  * @author Leo Dos Santos
@@ -81,7 +80,7 @@ public class StsBotConfigEditor extends SWTBotEditor {
 
 	/**
 	 * This activates the popup shell.
-	 * 
+	 *
 	 * @return The shell.
 	 */
 	private Shell activatePopupShell() {
@@ -143,7 +142,7 @@ public class StsBotConfigEditor extends SWTBotEditor {
 
 	/**
 	 * Auto completes the given proposal.
-	 * 
+	 *
 	 * @param insertText the text to be inserted before activating the
 	 * auto-complete.
 	 * @param proposalText the auto-completion proposal to select from the list.
@@ -157,7 +156,7 @@ public class StsBotConfigEditor extends SWTBotEditor {
 
 	/**
 	 * Gets the background color of the widget.
-	 * 
+	 *
 	 * @return the background color on the widget, or <code>null</code> if the
 	 * widget is not an instance of {@link Control}.
 	 * @since 1.3
@@ -169,7 +168,7 @@ public class StsBotConfigEditor extends SWTBotEditor {
 
 	/**
 	 * Gets the context menu in the editor.
-	 * 
+	 *
 	 * @param text the context menu item.
 	 * @return the menu
 	 * @throws WidgetNotFoundException if the menu with the specified text could
@@ -183,7 +182,7 @@ public class StsBotConfigEditor extends SWTBotEditor {
 	/**
 	 * Gets the current position of the cursor. The returned position will
 	 * contain a 0-based line and column.
-	 * 
+	 *
 	 * @return the position of the cursor.
 	 * @see SWTBotStyledText#cursorPosition()
 	 */
@@ -193,7 +192,7 @@ public class StsBotConfigEditor extends SWTBotEditor {
 
 	/**
 	 * Gets the foreground color of the widget.
-	 * 
+	 *
 	 * @return the foreground color on the widget, or <code>null</code> if the
 	 * widget is not an instance of {@link Control}.
 	 * @since 1.3
@@ -205,7 +204,7 @@ public class StsBotConfigEditor extends SWTBotEditor {
 
 	/**
 	 * Gets the auto completion proposal matching the given text..
-	 * 
+	 *
 	 * @param insertText the proposal text to type before auto completing
 	 * @return the list of proposals
 	 * @throws TimeoutException if the autocomplete shell did not close in time.
@@ -214,7 +213,8 @@ public class StsBotConfigEditor extends SWTBotEditor {
 	@SuppressWarnings("all")
 	public List<String> getAutoCompleteProposals(String insertText) {
 		typeText(insertText);
-		WaitForObjectCondition<SWTBotTable> autoCompleteAppears = autoCompleteAppears(tableWithRowIgnoringCase(insertText));
+		WaitForObjectCondition<SWTBotTable> autoCompleteAppears = autoCompleteAppears(
+				tableWithRowIgnoringCase(insertText));
 		waitUntil(autoCompleteAppears);
 		final SWTBotTable autoCompleteTable = autoCompleteAppears.get(0);
 		List<String> proposals = getRows(autoCompleteTable);
@@ -248,7 +248,7 @@ public class StsBotConfigEditor extends SWTBotEditor {
 
 	/**
 	 * Gets the color of the background on the specified line.
-	 * 
+	 *
 	 * @param line the line number, 0 based.
 	 * @return the RGB of the line background color of the specified line.
 	 * @since 1.3
@@ -260,7 +260,7 @@ public class StsBotConfigEditor extends SWTBotEditor {
 
 	/**
 	 * Gets the number of lines in the {@link StyledText}.
-	 * 
+	 *
 	 * @return the number of lines in the {@link StyledText}.
 	 */
 	public int getLineCount() {
@@ -269,7 +269,7 @@ public class StsBotConfigEditor extends SWTBotEditor {
 
 	/**
 	 * Gets all the lines in the editor.
-	 * 
+	 *
 	 * @return the lines in the editor.
 	 */
 	public List<String> getLines() {
@@ -278,7 +278,7 @@ public class StsBotConfigEditor extends SWTBotEditor {
 
 	/**
 	 * Gets the quick fix table.
-	 * 
+	 *
 	 * @param proposalShell the shell containing the quickfixes.
 	 * @return the table containing the quickfix.
 	 */
@@ -297,7 +297,7 @@ public class StsBotConfigEditor extends SWTBotEditor {
 
 	/**
 	 * Finds all the quickfixes in the quickfix list.
-	 * 
+	 *
 	 * @return the list of all available quickfixes.
 	 * @since 1.2
 	 */
@@ -312,7 +312,7 @@ public class StsBotConfigEditor extends SWTBotEditor {
 
 	/**
 	 * Gets the quick fix item count.
-	 * 
+	 *
 	 * @return the number of quickfix items in the quickfix proposals.
 	 * @since 1.2
 	 */
@@ -334,7 +334,7 @@ public class StsBotConfigEditor extends SWTBotEditor {
 
 	/**
 	 * Gets the current selection.
-	 * 
+	 *
 	 * @return The selected string.
 	 */
 	public String getSelection() {
@@ -343,7 +343,7 @@ public class StsBotConfigEditor extends SWTBotEditor {
 
 	/**
 	 * Gets the style text.
-	 * 
+	 *
 	 * @param line the line number, 0 based.
 	 * @param column the column number, 0 based.
 	 * @return the {@link StyleRange} at the specified location
@@ -373,7 +373,7 @@ public class StsBotConfigEditor extends SWTBotEditor {
 
 	/**
 	 * Gets the text of this object's widget.
-	 * 
+	 *
 	 * @return the text on the styledtext.
 	 * @see org.eclipse.swtbot.swt.finder.widgets.AbstractSWTBot#getText()
 	 */
@@ -400,7 +400,7 @@ public class StsBotConfigEditor extends SWTBotEditor {
 
 	/**
 	 * Gets the tooltip of this object's widget.
-	 * 
+	 *
 	 * @return the tooltip on the widget.
 	 * @see org.eclipse.swtbot.swt.finder.widgets.AbstractSWTBot#getToolTipText()
 	 * @since 1.3
@@ -418,7 +418,7 @@ public class StsBotConfigEditor extends SWTBotEditor {
 	 * making this call. If the view is not active, then this method will throw
 	 * a {@link WidgetNotFoundException}.
 	 * </p>
-	 * 
+	 *
 	 * @return the parent widget in the view.
 	 * @see #findWidget(org.hamcrest.Matcher)
 	 * @see #assertActive()
@@ -482,7 +482,7 @@ public class StsBotConfigEditor extends SWTBotEditor {
 
 	/**
 	 * Gets if the object's widget is enabled.
-	 * 
+	 *
 	 * @return <code>true</code> if the widget is enabled.
 	 * @see org.eclipse.swtbot.swt.finder.widgets.AbstractSWTBot#isEnabled()
 	 */
@@ -507,7 +507,7 @@ public class StsBotConfigEditor extends SWTBotEditor {
 
 	/**
 	 * Sets the caret at the specified location.
-	 * 
+	 *
 	 * @param position the position of the caret.
 	 */
 	public void navigateTo(Position position) {
@@ -520,7 +520,7 @@ public class StsBotConfigEditor extends SWTBotEditor {
 	 * FIXME need some work for CTRL|SHIFT + 1 the 1 is to be sent as '!' in
 	 * this case.
 	 * </p>
-	 * 
+	 *
 	 * @param modificationKeys the modification keys.
 	 * @param c the character.
 	 * @see Event#character
@@ -530,12 +530,12 @@ public class StsBotConfigEditor extends SWTBotEditor {
 	 */
 	@Deprecated
 	public void notifyKeyboardEvent(int modificationKeys, char c) {
-		styledText.notifyKeyboardEvent(modificationKeys, c);
+		styledText.pressShortcut(modificationKeys, c);
 	}
 
 	/**
 	 * Notifies of keyboard event.
-	 * 
+	 *
 	 * @param modificationKeys the modification key.
 	 * @param c the character.
 	 * @param keyCode any special keys (function keys, arrow or navigation keys
@@ -548,12 +548,12 @@ public class StsBotConfigEditor extends SWTBotEditor {
 	 */
 	@Deprecated
 	public void notifyKeyboardEvent(int modificationKeys, char c, int keyCode) {
-		styledText.notifyKeyboardEvent(modificationKeys, c, keyCode);
+		styledText.pressShortcut(modificationKeys, keyCode, c);
 	}
 
 	/**
 	 * Presses the shortcut specified by the given keys.
-	 * 
+	 *
 	 * @param modificationKeys the combination of {@link SWT#ALT} |
 	 * {@link SWT#CTRL} | {@link SWT#SHIFT} | {@link SWT#COMMAND}.
 	 * @param c the character.
@@ -566,7 +566,7 @@ public class StsBotConfigEditor extends SWTBotEditor {
 
 	/**
 	 * Presses the shortcut specified by the given keys.
-	 * 
+	 *
 	 * @param modificationKeys the combination of {@link SWT#ALT} |
 	 * {@link SWT#CTRL} | {@link SWT#SHIFT} | {@link SWT#COMMAND}.
 	 * @param keyCode the keyCode, these may be special keys like F1-F12, or
@@ -580,7 +580,7 @@ public class StsBotConfigEditor extends SWTBotEditor {
 
 	/**
 	 * Presses the shortcut specified by the given keys.
-	 * 
+	 *
 	 * @param keys the keys to press
 	 * @see Keyboard#pressShortcut(KeyStroke...)
 	 * @see Keystrokes
@@ -591,7 +591,7 @@ public class StsBotConfigEditor extends SWTBotEditor {
 
 	/**
 	 * Applys a quick fix item at the given index.
-	 * 
+	 *
 	 * @param quickFixIndex the index of the quickfix item to apply.
 	 * @throws WidgetNotFoundException if the quickfix could not be found.
 	 */
@@ -604,7 +604,7 @@ public class StsBotConfigEditor extends SWTBotEditor {
 
 	/**
 	 * Applys a quick fix item with the given name.
-	 * 
+	 *
 	 * @param quickFixName the name of the quick fix to apply.
 	 */
 	public void quickfix(String quickFixName) {
@@ -646,7 +646,7 @@ public class StsBotConfigEditor extends SWTBotEditor {
 
 	/**
 	 * Selects the text on the current line.
-	 * 
+	 *
 	 * @see SWTBotStyledText#selectCurrentLine()
 	 * @since 1.1
 	 */
@@ -665,7 +665,7 @@ public class StsBotConfigEditor extends SWTBotEditor {
 
 	/**
 	 * Applies the specified quickfix.
-	 * 
+	 *
 	 * @param proposalTable the table containing the quickfix.
 	 * @param proposalIndex the index of the quickfix.
 	 */
@@ -674,9 +674,8 @@ public class StsBotConfigEditor extends SWTBotEditor {
 		UIThreadRunnable.asyncExec(new VoidResult() {
 			public void run() {
 				Table table = proposalTable.widget;
-				System.err.println(MessageFormat.format(
-						"Selecting row [{0}] {1} in {2}", proposalIndex, table.getItem(proposalIndex).getText(), //$NON-NLS-1$
-						table));
+				System.err.println(MessageFormat.format("Selecting row [{0}] {1} in {2}", proposalIndex, //$NON-NLS-1$
+						table.getItem(proposalIndex).getText(), table));
 				table.setSelection(proposalIndex);
 				Event event = new Event();
 				event.type = SWT.Selection;
@@ -693,7 +692,7 @@ public class StsBotConfigEditor extends SWTBotEditor {
 	 * <p>
 	 * FIXME: this needs a lot of optimization.
 	 * </p>
-	 * 
+	 *
 	 * @param proposalTable the table containing the quickfix.
 	 * @param proposalText the name of the quickfix to apply.
 	 */
