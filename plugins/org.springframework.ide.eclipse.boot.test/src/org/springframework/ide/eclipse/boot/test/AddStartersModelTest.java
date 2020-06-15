@@ -59,6 +59,7 @@ import org.springframework.ide.eclipse.boot.wizard.starters.AddStartersWizardMod
 import org.springframework.ide.eclipse.boot.wizard.starters.InitializrModel;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
 import com.google.common.collect.ImmutableList;
@@ -316,18 +317,40 @@ public class AddStartersModelTest {
 
 		private final String validInitializrUrl;
 
+		private final String initializrInfoInput;
+
+		/**
+		 *
+		 * @param starterZipPath        path to an starter zip file representing a
+		 *                              project that would otherwise be downloaded from
+		 *                              the actual initializr `/starter.zip` endpoint
+		 * @param validInitializrUrl    an initializr service URL that is considered
+		 *                              "valid" for the wizard (does not have to be a
+		 *                              real-life initializr URL as no connection will
+		 *                              be attempted)
+		 * @param supportedBootVersions list of supported boot versions associated with
+		 *                              the "valid" initializr URL. This is used by the
+		 *                              wizard to check against the boot version of the
+		 *                              local project.
+		 * @param initializrInfoInput   a JSON test file that contains initializr info,
+		 *                              like all available dependencies, that would
+		 *                              otherwise be downloaded from a real initializr
+		 *                              service.
+		 */
 		public MockAddStartersInitializrService(String starterZipPath,
 				String validInitializrUrl,
-				String[] supportedBootVersions) {
+				String[] supportedBootVersions,
+				String initializrInfoInput) {
 			super(EMPTY_URL_FACTORY);
 			this.starterZipPath = starterZipPath;
 			this.validInitializrUrl = validInitializrUrl;
 			this.supportedBootVersions = ImmutableSet.copyOf(supportedBootVersions);
+			this.initializrInfoInput = initializrInfoInput;
 		}
 
 		@Override
 		public InitializrService getService(Supplier<String> url) {
-			return new MockInitializrService() {
+			MockInitializrService mockWrappedService = new MockInitializrService() {
 				@Override
 				public SpringBootStarters getStarters(String bootVersion) throws Exception {
 					// Mock unsupported boot version. This is an actual error thrown in the real wizard
@@ -338,6 +361,16 @@ public class AddStartersModelTest {
 					}
 				}
 			};
+
+			// This sets initializr info from a JSON file that captures data that would
+			// otherwise be downloaded from initializr.
+			try {
+				mockWrappedService.setInputs(initializrInfoInput);
+			} catch (Exception e) {
+				Log.log(e);
+				return null;
+			}
+			return mockWrappedService;
 		}
 
 		@Override
@@ -404,16 +437,6 @@ public class AddStartersModelTest {
 
 	}
 
-	/**
-	 * Mocks initializr info that in the real scenario would be downloaded from initializr service
-	 */
-	private void setMockInitializrInfo() throws Exception {
-		// This sets initializr info from a JSON file that captures data that would
-		// otherwise be downloaded from initializr. This is using the old edit starter testing harness
-		// which is also applicable to add starters
-		initializr.setInputs("sample");
-	}
-
 	private void loadInitializrModel(AddStartersWizardModel wizard) throws Exception {
 		wizard.addModelLoader(() -> wizard.createInitializrModel(new NullProgressMonitor()));
 		// Wait for it to finish
@@ -443,10 +466,10 @@ public class AddStartersModelTest {
 			String starterZipFile,
 			String validInitializrUrl,
 			String[] supportedBootVersions) throws Exception {
+		String initializrInfoInput = "sample";
 		AddStartersInitializrService initializrService = new MockAddStartersInitializrService(starterZipFile,
-				validInitializrUrl, supportedBootVersions);
+				validInitializrUrl, supportedBootVersions, initializrInfoInput);
 		AddStartersPreferences preferences = new MockAddStartersPreferences(validInitializrUrl);
-		setMockInitializrInfo();
 		AddStartersWizardModel wizard = new AddStartersWizardModel(project, preferences, initializrService);
 
 		// Wizard model is not available until it is loaded
