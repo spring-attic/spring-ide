@@ -115,11 +115,8 @@ public class AddStartersModelTest {
 		String starterZipFile = "/initializr/boot-230-web-actuator/starter.zip";
 		String validInitializrUrl = MOCK_VALID_INITIALIZR_URL;
 		String[] supportedBootVersions = SUPPORTED_BOOT_VERSIONS;
-		AddStartersWizardModel wizard = createWizard(project, starterZipFile, validInitializrUrl,
+		AddStartersWizardModel wizard = createAndLoadWizard(project, starterZipFile, validInitializrUrl,
 				supportedBootVersions);
-		assertInitializrAndCompareModelsNull(wizard);
-
-		loadInitializrModel(wizard);
 
 		// Verify the fields and model are set in the wizard after loading
 		assertEquals(validInitializrUrl, wizard.getServiceUrl().getValue());
@@ -147,12 +144,7 @@ public class AddStartersModelTest {
 		String starterZipFile = "/initializr/boot-230-web-actuator/starter.zip";
 		String validInitializrUrl = MOCK_VALID_INITIALIZR_URL;
 		String[] supportedBootVersions = SUPPORTED_BOOT_VERSIONS;
-		AddStartersWizardModel wizard = createWizard(project, starterZipFile, validInitializrUrl, supportedBootVersions);
-		assertInitializrAndCompareModelsNull(wizard);
-
-		// Will load with valid values first (this is what happens in real case too...the wizard initially will
-		// load with a valid URL. We are going to test setting an invalid URL after the wizard opens.
-		loadInitializrModel(wizard);
+		AddStartersWizardModel wizard = createAndLoadWizard(project, starterZipFile, validInitializrUrl, supportedBootVersions);
 
 		// Verify the fields and model are set in the wizard after loading
 		assertEquals(validInitializrUrl, wizard.getServiceUrl().getValue());
@@ -185,12 +177,7 @@ public class AddStartersModelTest {
 		String starterZipFile = "/initializr/boot-230-web-actuator/starter.zip";
 		String validInitializrUrl = MOCK_VALID_INITIALIZR_URL;
 		String[] supportedBootVersions = SUPPORTED_BOOT_VERSIONS;
-		AddStartersWizardModel wizard = createWizard(project, starterZipFile, validInitializrUrl, supportedBootVersions);
-		assertInitializrAndCompareModelsNull(wizard);
-
-		// Will load with valid values first (this is what happens in real case too...the wizard initially will
-		// load with a valid URL. We are going to test setting an invalid URL after the wizard opens.
-		loadInitializrModel(wizard);
+		AddStartersWizardModel wizard = createAndLoadWizard(project, starterZipFile, validInitializrUrl, supportedBootVersions);
 
 		// Verify the fields and model are set in the wizard after loading
 		assertEquals(validInitializrUrl, wizard.getServiceUrl().getValue());
@@ -225,12 +212,7 @@ public class AddStartersModelTest {
 		String validInitializrUrl = MOCK_VALID_INITIALIZR_URL;
 		String[] supportedBootVersions = SUPPORTED_BOOT_VERSIONS;
 
-		AddStartersWizardModel wizard = createWizard(project, starterZipFile, validInitializrUrl, supportedBootVersions);
-		assertInitializrAndCompareModelsNull(wizard);
-
-		// Will load with valid values first (this is what happens in real case too...the wizard initially will
-		// load with a valid URL. We are going to test setting an invalid URL after the wizard opens.
-		loadInitializrModel(wizard);
+		AddStartersWizardModel wizard = createAndLoadWizard(project, starterZipFile, validInitializrUrl, supportedBootVersions);
 
 		// Verify the fields and model are set in the wizard after loading
 		assertEquals(validInitializrUrl, wizard.getServiceUrl().getValue());
@@ -271,10 +253,7 @@ public class AddStartersModelTest {
 		// List supported versions that do not include the version used to create the project
 		String[] supportedBootVersions = new String[] { "4.4.0.RELEASE", "1.1.0.RELEASE", "1.5.3.RELEASE"};
 
-		AddStartersWizardModel wizard = createWizard(project, starterZipFile, validInitializrUrl, supportedBootVersions);
-		assertInitializrAndCompareModelsNull(wizard);
-
-		loadInitializrModel(wizard);
+		AddStartersWizardModel wizard = createAndLoadWizard(project, starterZipFile, validInitializrUrl, supportedBootVersions);
 
 		AddStartersError result = (AddStartersError)wizard.getValidator().getValue();
 		assertTrue(result.status == IStatus.ERROR);
@@ -299,11 +278,8 @@ public class AddStartersModelTest {
 		String validInitializrUrl = MOCK_VALID_INITIALIZR_URL;
 		String[] supportedBootVersions = SUPPORTED_BOOT_VERSIONS;
 
-		AddStartersWizardModel wizard = createWizard(project, starterZipFile, validInitializrUrl,
+		AddStartersWizardModel wizard = createAndLoadWizard(project, starterZipFile, validInitializrUrl,
 				supportedBootVersions);
-		assertInitializrAndCompareModelsNull(wizard);
-
-		loadInitializrModel(wizard);
 
 		assertInitializrAndCompareModelsNotNull(wizard);
 
@@ -469,18 +445,24 @@ public class AddStartersModelTest {
 		assertNotNull(compareModel);
 	}
 
-	private void performOk(AddStartersWizardModel wizard) throws Exception {
-		wizard.performOk();
-		waitForWizardJob();
-	}
-
-	private AddStartersWizardModel createWizard(IProject project, String starterZipFile, String validInitializrUrl,
-			String[] supportedBootVersions) throws Exception {
+	private AddStartersWizardModel createAndLoadWizard(IProject project, String starterZipFile,
+			String validInitializrUrl, String[] supportedBootVersions) throws Exception {
 		AddStartersInitializrService initializrService = new MockAddStartersInitializrService(starterZipFile,
 				validInitializrUrl, supportedBootVersions);
 		AddStartersPreferences preferences = new MockAddStartersPreferences(validInitializrUrl);
 		setMockInitializrInfo();
-		return new AddStartersWizardModel(project, preferences, initializrService);
+		AddStartersWizardModel wizard = new AddStartersWizardModel(project, preferences, initializrService);
+
+		// Wizard model is not available until it is loaded
+		assertInitializrAndCompareModelsNull(wizard);
+
+		loadInitializrModel(wizard);
+		return wizard;
+	}
+
+	private void performOk(AddStartersWizardModel wizard) throws Exception {
+		wizard.performOk();
+		waitForWizardJob();
 	}
 
 }
