@@ -69,9 +69,6 @@ import com.google.common.collect.ImmutableSet;
 @SuppressWarnings("restriction")
 public class AddStartersModelTest {
 
-	private InitializrWizardModelHarness initializrHarness = new InitializrWizardModelHarness();
-	private MockInitializrService initializr = initializrHarness.getInitializrService();
-
 	private BootProjectTestHarness harness = new BootProjectTestHarness(ResourcesPlugin.getWorkspace());
 	private IPreferenceStore prefs = new MockPrefsStore();
 
@@ -321,17 +318,27 @@ public class AddStartersModelTest {
 
 		/**
 		 *
+		 * Provides the Add Starters wizard with mock versions of any intializr
+		 * component or information that would otherwise be downloaded from a real
+		 * initializr service, like initializr info containing dependencies to show in
+		 * the wizard, as well as a downloaded project from `/starter.zip` endpoint.
+		 *
 		 * @param starterZipPath        path to an starter zip file representing a
 		 *                              project that would otherwise be downloaded from
-		 *                              the actual initializr `/starter.zip` endpoint
+		 *                              an actual initializr `/starter.zip` endpoint
 		 * @param validInitializrUrl    an initializr service URL that is considered
 		 *                              "valid" for the wizard (does not have to be a
 		 *                              real-life initializr URL as no connection will
-		 *                              be attempted)
+		 *                              be attempted), and read by the wizard when it
+		 *                              initially is created. Mocks having a valid URL
+		 *                              like "https://start.spring.io " in an actual
+		 *                              boot initializr preference that is initially
+		 *                              read by the real wizard when it opens.
 		 * @param supportedBootVersions list of supported boot versions associated with
 		 *                              the "valid" initializr URL. This is used by the
 		 *                              wizard to check against the boot version of the
-		 *                              local project.
+		 *                              local project. Used for testing error conditions (e.g. unsupported
+		 *                              boot version errors that a wizard may throw)
 		 * @param initializrInfoInput   a JSON test file that contains initializr info,
 		 *                              like all available dependencies, that would
 		 *                              otherwise be downloaded from a real initializr
