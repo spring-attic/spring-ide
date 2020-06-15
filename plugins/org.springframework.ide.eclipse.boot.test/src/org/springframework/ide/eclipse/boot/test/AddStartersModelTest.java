@@ -76,8 +76,8 @@ public class AddStartersModelTest {
 
 
 	private static final String MOCK_VALID_INITIALIZR_URL = "https://add.starters.start.spring.io";
-	private static final String[] SUPPORTED_BOOT_VERSIONS_230 = new String[] {"2.3.0.RELEASE","2.2.7.RELEASE", "2.1.14.RELEASE"};
-	private static final String CURRENT_BOOT_VERSION = "2.3.0.RELEASE";
+	private static final String[] SUPPORTED_BOOT_VERSIONS = new String[] {"2.3.1.RELEASE","2.2.7.RELEASE", "2.1.14.RELEASE"};
+	private static final String CURRENT_BOOT_VERSION = "2.3.1.RELEASE";
 
 	private static boolean wasAutobuilding;
 
@@ -114,9 +114,7 @@ public class AddStartersModelTest {
 		// for the service
 		String starterZipFile = "/initializr/boot-230-web-actuator/starter.zip";
 		String validInitializrUrl = MOCK_VALID_INITIALIZR_URL;
-		String[] supportedBootVersions = SUPPORTED_BOOT_VERSIONS_230;
-		setMockInitializrInfo();
-
+		String[] supportedBootVersions = SUPPORTED_BOOT_VERSIONS;
 		AddStartersWizardModel wizard = createWizard(project, starterZipFile, validInitializrUrl,
 				supportedBootVersions);
 		assertInitializrAndCompareModelsNull(wizard);
@@ -148,9 +146,7 @@ public class AddStartersModelTest {
 
 		String starterZipFile = "/initializr/boot-230-web-actuator/starter.zip";
 		String validInitializrUrl = MOCK_VALID_INITIALIZR_URL;
-		String[] supportedBootVersions = SUPPORTED_BOOT_VERSIONS_230;
-		setMockInitializrInfo();
-
+		String[] supportedBootVersions = SUPPORTED_BOOT_VERSIONS;
 		AddStartersWizardModel wizard = createWizard(project, starterZipFile, validInitializrUrl, supportedBootVersions);
 		assertInitializrAndCompareModelsNull(wizard);
 
@@ -188,9 +184,7 @@ public class AddStartersModelTest {
 
 		String starterZipFile = "/initializr/boot-230-web-actuator/starter.zip";
 		String validInitializrUrl = MOCK_VALID_INITIALIZR_URL;
-		String[] supportedBootVersions = SUPPORTED_BOOT_VERSIONS_230;
-		setMockInitializrInfo();
-
+		String[] supportedBootVersions = SUPPORTED_BOOT_VERSIONS;
 		AddStartersWizardModel wizard = createWizard(project, starterZipFile, validInitializrUrl, supportedBootVersions);
 		assertInitializrAndCompareModelsNull(wizard);
 
@@ -229,8 +223,7 @@ public class AddStartersModelTest {
 
 		String starterZipFile = "/initializr/boot-230-web-actuator/starter.zip";
 		String validInitializrUrl = MOCK_VALID_INITIALIZR_URL;
-		String[] supportedBootVersions = SUPPORTED_BOOT_VERSIONS_230;
-		setMockInitializrInfo();
+		String[] supportedBootVersions = SUPPORTED_BOOT_VERSIONS;
 
 		AddStartersWizardModel wizard = createWizard(project, starterZipFile, validInitializrUrl, supportedBootVersions);
 		assertInitializrAndCompareModelsNull(wizard);
@@ -277,7 +270,6 @@ public class AddStartersModelTest {
 
 		// List supported versions that do not include the version used to create the project
 		String[] supportedBootVersions = new String[] { "4.4.0.RELEASE", "1.1.0.RELEASE", "1.5.3.RELEASE"};
-		setMockInitializrInfo();
 
 		AddStartersWizardModel wizard = createWizard(project, starterZipFile, validInitializrUrl, supportedBootVersions);
 		assertInitializrAndCompareModelsNull(wizard);
@@ -305,8 +297,7 @@ public class AddStartersModelTest {
 		// for the service
 		String starterZipFile = "/initializr/boot-230-web-actuator/starter.zip";
 		String validInitializrUrl = MOCK_VALID_INITIALIZR_URL;
-		String[] supportedBootVersions = SUPPORTED_BOOT_VERSIONS_230;
-		setMockInitializrInfo();
+		String[] supportedBootVersions = SUPPORTED_BOOT_VERSIONS;
 
 		AddStartersWizardModel wizard = createWizard(project, starterZipFile, validInitializrUrl,
 				supportedBootVersions);
@@ -488,6 +479,7 @@ public class AddStartersModelTest {
 		AddStartersInitializrService initializrService = new MockAddStartersInitializrService(starterZipFile,
 				validInitializrUrl, supportedBootVersions);
 		AddStartersPreferences preferences = new MockAddStartersPreferences(validInitializrUrl);
+		setMockInitializrInfo();
 		return new AddStartersWizardModel(project, preferences, initializrService);
 	}
 
