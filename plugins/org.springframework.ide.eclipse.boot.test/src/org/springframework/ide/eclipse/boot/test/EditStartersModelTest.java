@@ -93,7 +93,7 @@ import junit.framework.AssertionFailedError;
 @SuppressWarnings("restriction")
 public class EditStartersModelTest {
 
-	private static final String BOOT_CURRENT_RELEASE = "2.3.0.RELEASE";
+	private static final String BOOT_CURRENT_RELEASE = "2.3.1.RELEASE";
 	private static final String REPOSITORY = "repository";
 	private static final String REPOSITORIES = "repositories";
 	private InitializrWizardModelHarness initializrHarness = new InitializrWizardModelHarness();
