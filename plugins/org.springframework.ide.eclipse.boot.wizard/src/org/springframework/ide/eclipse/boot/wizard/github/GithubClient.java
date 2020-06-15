@@ -36,13 +36,13 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.MessageBodyReader;
 
+import org.glassfish.jersey.client.ClientConfig;
 import org.springframework.ide.eclipse.boot.wizard.BootWizardActivator;
 import org.springframework.ide.eclipse.boot.wizard.github.auth.BasicAuthCredentials;
 import org.springframework.ide.eclipse.boot.wizard.github.auth.Credentials;
 import org.springframework.ide.eclipse.boot.wizard.github.auth.NullCredentials;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -213,7 +213,6 @@ public class GithubClient {
 	protected static String getNormalisedProtocol(String protocol) {
 		return protocol.toUpperCase();
 	}
-
 	public static class SimpleJacksonBodyReader<T> implements MessageBodyReader<T> {
 
 		//Note: There's a bit of 'wheel reinventing' going on here. Jersey framework has a 'JacksonFeature' to support
@@ -264,7 +263,11 @@ public class GithubClient {
 			//
 			Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
 
-			Client client = ClientBuilder.newClient();
+			ClientConfig clientConfig = new ClientConfig();
+			//Add json parsing capability using Jackson mapper.
+			clientConfig.register(ObjectMapperProvider.class);
+			clientConfig.register(SimpleJacksonBodyReader.class);
+
 
 			//		IProxyService proxyService = GettingStartedActivator.getDefault().getProxyService();
 			//		if (proxyService!=null && proxyService.isProxiesEnabled()) {
@@ -277,11 +280,9 @@ public class GithubClient {
 			//			}
 			//		}
 
+			Client client = ClientBuilder.newClient(clientConfig);
 			//Add authentication
 			client = credentials.apply(client);
-
-			//Add json parsing capability using Jackson mapper.
-			client.register(SimpleJacksonBodyReader.class);
 
 			//Add rate limit logging
 			//		if (LOG_GITHUB_RATE_LIMIT) {
