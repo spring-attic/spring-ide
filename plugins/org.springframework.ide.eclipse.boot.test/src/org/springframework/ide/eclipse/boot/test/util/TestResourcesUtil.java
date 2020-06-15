@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.test.util;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.eclipse.core.runtime.FileLocator;
@@ -27,7 +28,11 @@ public class TestResourcesUtil {
 		File bundleFile = FileLocator.getBundleFile(bundle);
 		Assert.assertNotNull(bundleFile);
 		Assert.assertTrue("The bundle "+bundle.getBundleId()+" must be unpacked to allow using the embedded test resources", bundleFile.isDirectory());
-		return new File(bundleFile, path);
+		File file = new File(bundleFile, path);
+		if (!file.exists()) {
+			throw new FileNotFoundException("Test file : " + file.getAbsolutePath() + " not found");
+		}
+		return file;
 	}
 
 }
