@@ -43,6 +43,7 @@ import org.springframework.ide.eclipse.boot.wizard.github.auth.BasicAuthCredenti
 import org.springframework.ide.eclipse.boot.wizard.github.auth.Credentials;
 import org.springframework.ide.eclipse.boot.wizard.github.auth.NullCredentials;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
@@ -348,6 +349,7 @@ public class GithubClient {
 			conn.setConnectTimeout(CONNECT_TIMEOUT);
 			conn.setRequestProperty("Accept", "*/*");
 			credentials.apply(conn);
+			Log.info("Fetching content from: "+url);
 			if (DEBUG) {
 				Map<String, List<String>> reqHeaders = conn.getRequestProperties();
 				System.out.println(">>> request:  "+url);
