@@ -16,6 +16,7 @@ import java.util.List;
 import org.eclipse.core.runtime.Assert;
 import org.springframework.ide.eclipse.boot.wizard.github.GithubClient;
 import org.springframework.ide.eclipse.boot.wizard.github.Repo;
+import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.UIThreadDownloadDisallowed;
 
@@ -114,15 +115,20 @@ public class ReferenceApp extends GithubRepoContent {
 		return getCodeSet().getBuildTypes();
 	}
 
-//	@Override
+	@Override
 	public String getDisplayName() {
 		//TODO: beatify the name
 		return getName();
 	}
 
-//	@Override
+	@Override
 	public List<CodeSet> getCodeSets() throws UIThreadDownloadDisallowed {
 		return Arrays.asList(getCodeSet());
 	}
 
+	@Override
+	protected String getBranch() {
+		String b = this.metadata.getBranch();
+		return StringUtil.hasText(b) ? b : "master";
+	}
 }

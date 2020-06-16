@@ -37,6 +37,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.MessageBodyReader;
 
 import org.glassfish.jersey.client.ClientConfig;
+import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.wizard.BootWizardActivator;
 import org.springframework.ide.eclipse.boot.wizard.github.auth.BasicAuthCredentials;
 import org.springframework.ide.eclipse.boot.wizard.github.auth.Credentials;
@@ -343,12 +344,23 @@ public class GithubClient {
 		URLConnection conn = null;
 		InputStream input = null;
 		try {
-			conn = url.openConnection();
+			conn = BootActivator.getUrlConnectionFactory().createConnection(url);
 			conn.setConnectTimeout(CONNECT_TIMEOUT);
+			conn.setRequestProperty("Accept", "*/*");
 			credentials.apply(conn);
+			if (DEBUG) {
+				Map<String, List<String>> reqHeaders = conn.getRequestProperties();
+				System.out.println(">>> request:  "+url);
+				for (Entry<String, List<String>> e : reqHeaders.entrySet()) {
+					System.out.println(e.getKey()+" = ");
+					for (String s : e.getValue()) {
+						System.out.println("   "+s);
+					}
+				}
+			}
 			conn.connect();
 			if (DEBUG) {
-				System.out.println(">>> "+url);
+				System.out.println(">>> response:  "+url);
 				Map<String, List<String>> headers = conn.getHeaderFields();
 				for (Entry<String, List<String>> header : headers.entrySet()) {
 					System.out.println(header.getKey()+":");

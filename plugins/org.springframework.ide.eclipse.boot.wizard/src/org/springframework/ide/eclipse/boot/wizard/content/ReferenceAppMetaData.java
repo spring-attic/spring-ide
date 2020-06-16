@@ -37,6 +37,9 @@ public class ReferenceAppMetaData {
 	@JsonProperty("repo")
 	private String repo; ///mandatory:  repo name
 
+	@JsonProperty("branch")
+	private String branch; ///optional:  branch name (if not set, we'll assume 'master')
+
 	public String getType() {
 		return type;
 	}
@@ -49,6 +52,14 @@ public class ReferenceAppMetaData {
 	}
 	public String getRepo() {
 		return repo;
+	}
+
+	public String getBranch() {
+		return branch;
+	}
+
+	public void setBranch(String branch) {
+		this.branch = branch;
 	}
 
 }

@@ -28,6 +28,7 @@ public abstract class GithubRepoContent extends AGSContent {
 		super(dl);
 	}
 
+	@Override
 	public URL getHomePage() {
 		try {
 			return new URL(getRepo().getHtmlUrl());
@@ -43,13 +44,14 @@ public abstract class GithubRepoContent extends AGSContent {
 	 * Get a URL pointing to zip file where the entire contents of this
 	 * repo (master branch) can be downloaded.
 	 */
+	@Override
 	public DownloadableItem getZip() {
 		if (zip==null) {
 			String repoUrl = getRepo().getHtmlUrl();
 			//repoUrl is something like "https://github.com/springframework-meta/gs-consuming-rest-android"
 			//zipUrl is something like  "https://github.com/springframework-meta/gs-consuming-rest-android/archive/master.zip"
 			try {
-				DownloadableItem item = new DownloadableItem(new URL(repoUrl+"/archive/master.zip"), downloader);
+				DownloadableItem item = new DownloadableItem(getZipDownloadUrl(repoUrl), downloader);
 				item.setFileName(getRepo().getName());
 				zip = item;
 			} catch (MalformedURLException e) {
@@ -60,6 +62,11 @@ public abstract class GithubRepoContent extends AGSContent {
 		return zip;
 	}
 
+	private URL getZipDownloadUrl(String repoUrl) throws MalformedURLException {
+		return new URL(repoUrl+"/archive/"+getBranch()+".zip");
+	}
+
+	@Override
 	public String getName() {
 		return getRepo().getName();
 	}
@@ -73,9 +80,14 @@ public abstract class GithubRepoContent extends AGSContent {
 	 * access this data.
 	 */
 	public IPath getRootPath() {
-		return new Path(getRepo().getName()+"-master");
+		return new Path(getRepo().getName()+"-"+getBranch());
 	}
 
+	protected String getBranch() {
+		return "master";
+	}
+
+	@Override
 	public String getDescription() {
 		return getRepo().getDescription();
 	}
