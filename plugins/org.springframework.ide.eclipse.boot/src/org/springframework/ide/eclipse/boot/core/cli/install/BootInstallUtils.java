@@ -15,7 +15,6 @@ import java.util.Map;
 
 import org.springframework.ide.eclipse.boot.util.version.Version;
 import org.springframework.ide.eclipse.boot.util.version.VersionParser;
-import org.springsource.ide.eclipse.commons.core.preferences.StsProperties;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
@@ -55,7 +54,7 @@ public class BootInstallUtils {
 		if (bootVersion == null) {
 			return null;
 		} else if (VersionParser.DEFAULT.parseRange("2.3.0").match(bootVersion)) {
-			return Version.parse(StsProperties.getInstance().get("spring.boot.cloud.default.version"));
+			return Version.parse("2.2.1.RELEASE");
 		} else if (VersionParser.DEFAULT.parseRange("[2.2.0,2.3.0)").match(bootVersion)) {
 			return Version.parse("2.2.1.RELEASE");
 		} else if (VersionParser.DEFAULT.parseRange("[2.1.0,2.2.0)").match(bootVersion)) {

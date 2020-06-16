@@ -53,7 +53,7 @@ import org.springsource.ide.eclipse.commons.livexp.util.Log;
 public class CloudCliServiceLaunchConfigurationDelegate extends BootCliLaunchConfigurationDelegate {
 
 	private static final VersionRange SPRING_CLOUD_CLI_SINGLE_PROCESS_VERSION_RANGE = new VersionRange(new Version(1, 3, 0, null));
-	private static final VersionRange SPRING_CLOUD_CLI_SUPPORTS_THIN_LAUNCH_PARAM = VersionParser.DEFAULT.parseRange("[1.3.0, 2.1.0)");
+	private static final VersionRange SPRING_CLOUD_CLI_SUPPORTS_THIN_LAUNCH_PARAM = VersionParser.DEFAULT.parseRange("[1.3.0, 2.2.0)");
 
 	public final static String TYPE_ID = "org.springframework.ide.eclipse.boot.launch.cloud.cli.service";
 
