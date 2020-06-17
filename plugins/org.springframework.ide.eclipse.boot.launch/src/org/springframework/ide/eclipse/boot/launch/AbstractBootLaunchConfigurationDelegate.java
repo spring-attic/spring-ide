@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2018 Pivotal, Inc.
+ * Copyright (c) 2015, 2020 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -430,7 +430,6 @@ public abstract class AbstractBootLaunchConfigurationDelegate extends AdvancedJa
 	public static void enableMavenClasspathProviders(ILaunchConfigurationWorkingCopy wc) {
 		setAttribute(wc, IJavaLaunchConfigurationConstants.ATTR_SOURCE_PATH_PROVIDER, BOOT_MAVEN_SOURCE_PATH_PROVIDER);
 		setAttribute(wc, IJavaLaunchConfigurationConstants.ATTR_CLASSPATH_PROVIDER, BOOT_MAVEN_CLASS_PATH_PROVIDER);
-		setAttribute(wc, IJavaLaunchConfigurationConstants.ATTR_EXCLUDE_TEST_CODE, true);
 	}
 
 	public static void enableGradleClasspathProviders(ILaunchConfigurationWorkingCopy wc) {
@@ -441,7 +440,6 @@ public abstract class AbstractBootLaunchConfigurationDelegate extends AdvancedJa
 		 * <stringAttribute key="org.eclipse.jdt.launching.CLASSPATH_PROVIDER" value="org.eclipse.buildship.core.classpathprovider"/>
 		 */
 		setAttribute(wc, IJavaLaunchConfigurationConstants.ATTR_CLASSPATH_PROVIDER, BUILDSHIP_CLASS_PATH_PROVIDER);
-		setAttribute(wc, IJavaLaunchConfigurationConstants.ATTR_EXCLUDE_TEST_CODE, true);
 	}
 
 	private ILaunchConfiguration modify(ILaunchConfiguration conf, Consumer<ILaunchConfigurationWorkingCopy> mutator) throws CoreException {

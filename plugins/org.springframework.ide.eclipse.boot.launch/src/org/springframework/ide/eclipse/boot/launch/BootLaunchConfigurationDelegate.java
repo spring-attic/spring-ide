@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2018 Pivotal Software, Inc.
+ * Copyright (c) 2015, 2020 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,9 +16,6 @@ import static org.springsource.ide.eclipse.commons.core.util.StringUtil.hasText;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -43,6 +40,7 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.osgi.framework.Bundle;
@@ -55,10 +53,10 @@ import org.springframework.ide.eclipse.boot.launch.livebean.JmxBeanSupport.Featu
 import org.springframework.ide.eclipse.boot.launch.process.BootProcessFactory;
 import org.springframework.ide.eclipse.boot.launch.profiles.ProfileHistory;
 import org.springframework.ide.eclipse.boot.launch.util.PortFinder;
-import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.core.util.OsUtils;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 /**
  * @author Kris De Volder
@@ -352,6 +350,7 @@ public class BootLaunchConfigurationDelegate extends AbstractBootLaunchConfigura
 		} else if (project!=null && project.hasNature(SpringBootCore.BUILDSHIP_NATURE)) {
 			enableGradleClasspathProviders(wc);
 		}
+		wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_EXCLUDE_TEST_CODE, true);
 		if (mainType!=null) {
 			setMainType(wc, mainType);
 		}
