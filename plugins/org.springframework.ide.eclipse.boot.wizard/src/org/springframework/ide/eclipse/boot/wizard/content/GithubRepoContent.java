@@ -16,9 +16,13 @@ import java.net.URL;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.springframework.ide.eclipse.boot.wizard.BootWizardActivator;
+import org.springframework.ide.eclipse.boot.wizard.content.CodeSet.CodeSetEntry;
+import org.springframework.ide.eclipse.boot.wizard.content.CodeSet.Processor;
 import org.springframework.ide.eclipse.boot.wizard.github.Repo;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadableItem;
+import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.UIThreadDownloadDisallowed;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 public abstract class GithubRepoContent extends AGSContent {
 
@@ -79,12 +83,29 @@ public abstract class GithubRepoContent extends AGSContent {
 	 * need to get at this information. Rather they should rely on the 'CodeSets' to
 	 * access this data.
 	 */
-	public IPath getRootPath() {
-		return new Path(getRepo().getName()+"-"+getBranch());
+	public final IPath getRootPath() throws UIThreadDownloadDisallowed {
+		//tmp codeset to aid in discovering the real root path.
+		CodeSet tmp = CodeSet.fromZip("TEMP", zip, Path.ROOT);
+		Path guessedRoot = new Path(getRepo().getName()+"-"+getBranch());
+		if (tmp.hasFolder(guessedRoot)) {
+			return guessedRoot;
+		}
+		try {
+			return tmp.each(new Processor<IPath>() {
+				@Override
+				public IPath doit(CodeSetEntry e) throws Exception {
+					return e.isDirectory() ? e.getPath() : null;
+				}
+			});
+		} catch (UIThreadDownloadDisallowed e) {
+			throw e;
+		} catch (Exception e) {
+			throw ExceptionUtil.unchecked(e);
+		}
 	}
 
 	protected String getBranch() {
-		return "master";
+		return "HEAD";
 	}
 
 	@Override

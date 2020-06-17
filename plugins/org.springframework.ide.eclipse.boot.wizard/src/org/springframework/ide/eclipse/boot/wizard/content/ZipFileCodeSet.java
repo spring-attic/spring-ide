@@ -111,6 +111,8 @@ public class ZipFileCodeSet extends CodeSet {
 		try {
 			ensureEntryCache();
 			return entries.containsKey(folderKey(path));
+		} catch (UIThreadDownloadDisallowed e) {
+			//ignore. Sort of expected in some scenarios (waiting for download).
 		} catch (Exception e) {
 			BootWizardActivator.log(e);
 		}

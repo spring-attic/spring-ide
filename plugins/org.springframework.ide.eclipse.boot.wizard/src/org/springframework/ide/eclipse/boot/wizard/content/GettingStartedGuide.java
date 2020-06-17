@@ -23,6 +23,7 @@ import org.springframework.ide.eclipse.boot.wizard.content.CodeSet.CodeSetEntry;
 import org.springframework.ide.eclipse.boot.wizard.github.Repo;
 import org.springsource.ide.eclipse.commons.core.preferences.StsProperties;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager;
+import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadableItem;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.UIThreadDownloadDisallowed;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -98,9 +99,10 @@ public class GettingStartedGuide extends GithubRepoContent {
 	@Override
 	public List<CodeSet> getCodeSets() throws UIThreadDownloadDisallowed {
 		if (codesets==null) {
-			CodeSet root = CodeSet.fromZip("ROOT", getZip(), getRootPath());
-			if (root.hasFile(CODE_SET_METADATA)) {
-				try {
+			DownloadableItem zip = getZip();
+			try {
+				CodeSet root = CodeSet.fromZip("ROOT", zip, getRootPath());
+				if (root.hasFile(CODE_SET_METADATA)) {
 					//TODO: we have to parse the metadata file and extract the codeset names and locations from it.
 					CodeSetMetaData[] metadata = root.readFileEntry(CODE_SET_METADATA, new CodeSet.Processor<CodeSetMetaData[]>() {
 						@Override
@@ -133,9 +135,11 @@ public class GettingStartedGuide extends GithubRepoContent {
 					//Success parsing .codesets.json and initialising codesets field.
 					codesets = Arrays.asList(array);
 					return codesets;
-				} catch (Throwable e) {
-					BootWizardActivator.log(e);
 				}
+			} catch (UIThreadDownloadDisallowed e) {
+				throw e;
+			} catch (Throwable e) {
+				BootWizardActivator.log(e);
 			}
 			//We get here if either
 			//   - there's no .codeset.json

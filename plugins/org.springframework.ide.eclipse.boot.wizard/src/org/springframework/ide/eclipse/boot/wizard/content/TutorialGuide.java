@@ -132,7 +132,7 @@ public class TutorialGuide extends GithubRepoContent {
 		return codesets;
 	}
 
-	private CodeSet[] defaultCodeSets(CodeSet root) {
+	private CodeSet[] defaultCodeSets(CodeSet root) throws UIThreadDownloadDisallowed {
 		List<CodeSet> codesets = new ArrayList<CodeSet>();
 		codesets.add(CodeSet.fromZip("initial", getZip(), getRootPath().append("initial")));
 

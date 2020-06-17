@@ -91,9 +91,9 @@ public class ReferenceApp extends GithubRepoContent {
 		return this.repo;
 	}
 
-	public CodeSet getCodeSet() {
+	public CodeSet getCodeSet() throws UIThreadDownloadDisallowed {
 		if (codeset==null) {
-			codeset = CodeSet.fromZip(getName(), getZip(),getRootPath());
+			codeset = CodeSet.fromZip(getName(), getZip(), getRootPath());
 		}
 		return codeset;
 	}
@@ -129,6 +129,6 @@ public class ReferenceApp extends GithubRepoContent {
 	@Override
 	protected String getBranch() {
 		String b = this.metadata.getBranch();
-		return StringUtil.hasText(b) ? b : "master";
+		return StringUtil.hasText(b) ? b : "HEAD";
 	}
 }
