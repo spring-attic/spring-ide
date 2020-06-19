@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-Vendor: %providerName
 Bundle-SymbolicName: org.springframework.ide.eclipse.cloudfoundry.manifest.editor;singleton:=true
-Bundle-Version: 3.9.13.qualifier
+Bundle-Version: 3.9.14.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.cloudfoundry.manifest.editor.ManifestEditorActivator
 Bundle-Localization: plugin
 Require-Bundle: org.eclipse.core.runtime,

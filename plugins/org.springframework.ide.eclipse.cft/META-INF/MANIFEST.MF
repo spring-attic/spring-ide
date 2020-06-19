@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Spring IDE CFT Integration
 Bundle-SymbolicName: org.springframework.ide.eclipse.cft;singleton:=true
 Bundle-Vendor: Pivotal Software Inc.
-Bundle-Version: 3.9.13.qualifier
+Bundle-Version: 3.9.14.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.springframework.ide.eclipse.cft.SpringCFTActivator
