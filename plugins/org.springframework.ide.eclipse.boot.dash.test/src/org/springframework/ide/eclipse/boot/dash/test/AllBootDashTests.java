@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import org.springframework.ide.eclipse.boot.dash.docker.ui.SelectDockerDaemonDialog;
 import org.springframework.ide.eclipse.boot.dash.test.actuator.ActuatorDataTest;
 import org.springframework.ide.eclipse.boot.dash.test.yaml.AppNameReconcilerTest;
 import org.springframework.ide.eclipse.boot.dash.test.yaml.CFRouteTests;
@@ -27,7 +28,8 @@ import org.springframework.ide.eclipse.boot.dash.test.yaml.Yaml2DeploymentProper
 
 
 	// Raised up temporarily to be run first.
-	//BootDashDockerTests.class, //50 seconds
+	BootDashDockerTests.class, //50 seconds
+	SelectDockerDaemonDialogTest.class,
 
 	//New: (move down the chain later based on runtime)
 	JmxSupportTest.class,

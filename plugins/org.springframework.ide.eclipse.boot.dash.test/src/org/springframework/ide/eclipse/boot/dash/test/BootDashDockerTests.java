@@ -14,12 +14,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.bootVersionAtLeast;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -29,21 +29,29 @@ import java.util.function.Predicate;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.debug.core.DebugPlugin;
 import org.junit.After;
 import org.junit.Test;
+import org.mandas.docker.client.DefaultDockerClient;
+import org.mandas.docker.client.DockerClient;
+import org.mandas.docker.client.DockerClient.ListContainersParam;
+import org.mandas.docker.client.DockerClient.ListImagesParam;
+import org.mandas.docker.client.DockerClient.RemoveContainerParam;
+import org.mandas.docker.client.messages.Container;
+import org.mandas.docker.client.messages.ContainerInfo;
+import org.mandas.docker.client.messages.Image;
+import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.docker.runtarget.DockerApp;
 import org.springframework.ide.eclipse.boot.dash.docker.runtarget.DockerContainer;
-import org.springframework.ide.eclipse.boot.dash.docker.runtarget.DockerDeployment;
 import org.springframework.ide.eclipse.boot.dash.docker.runtarget.DockerImage;
 import org.springframework.ide.eclipse.boot.dash.docker.runtarget.DockerRunTarget;
 import org.springframework.ide.eclipse.boot.dash.docker.runtarget.DockerRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.docker.runtarget.DockerTargetParams;
+import org.springframework.ide.eclipse.boot.dash.docker.ui.SelectDockerDaemonDialog.Model;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -59,14 +67,6 @@ import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 
 import com.google.common.collect.ImmutableList;
-import org.mandas.docker.client.DefaultDockerClient;
-import org.mandas.docker.client.DockerClient;
-import org.mandas.docker.client.DockerClient.ListContainersParam;
-import org.mandas.docker.client.DockerClient.ListImagesParam;
-import org.mandas.docker.client.DockerClient.RemoveContainerParam;
-import org.mandas.docker.client.messages.Container;
-import org.mandas.docker.client.messages.ContainerInfo;
-import org.mandas.docker.client.messages.Image;
 
 public class BootDashDockerTests {
 
@@ -200,6 +200,25 @@ public class BootDashDockerTests {
 		assertEquals(RunState.INACTIVE, con.getRunState());
 	}
 
+	@Test
+	public void canceledDockerTargetCreation() throws Exception {
+		DockerRunTargetType target = injections().getBean(DockerRunTargetType.class);
+		AddRunTargetAction createTarget = getCreateTargetAction(target);
+		assertNotNull(createTarget);
+		assertTrue(createTarget.isEnabled());
+
+		doAnswer(invocation -> {
+			Model model = (Model) invocation.getArguments()[0];
+			//model.performOk(); //no clicking ok, so dialog that's like when dialog is 'canceled'.
+			return null;
+		}).when(ui()).selectDockerDaemonDialog(Matchers.any());
+
+		createTarget.run();
+		createTarget.waitFor(Duration.ofMillis(2000));
+
+		assertTrue(harness.getRunTargetModels(target).isEmpty());
+	}
+
 	//////////////////////////////////////////////
 	/// harness
 
@@ -225,13 +244,14 @@ public class BootDashDockerTests {
 		assertNotNull(createTarget);
 		assertTrue(createTarget.isEnabled());
 
-		when(ui().inputDialog(eq("Connect to Docker Daemon"), eq("Enter docker url:"), anyString())).then(invocation -> {
-			Object[] args = invocation.getArguments();
-			assertEquals(DEFAULT_DOCKER_URL, args[2]);
-			return args[2];
-		});
+		doAnswer(invocation -> {
+			Model model = (Model) invocation.getArguments()[0];
+			model.performOk();
+			return null;
+		}).when(ui()).selectDockerDaemonDialog(Matchers.any());
+
 		createTarget.run();
-		createTarget.waitFor(/*Duration.ofMillis(2000)*/);
+		createTarget.waitFor(Duration.ofMillis(2000));
 
 		BootDashModel model;
 			//		ACondition.waitFor("Run target model to appear", 2000, () -> {

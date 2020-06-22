@@ -8,11 +8,8 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.test;
+package org.springframework.ide.eclipse.boot.dash.docker.ui;
 
-import org.springframework.ide.eclipse.boot.dash.cf.ui.CfUserInteractions;
-import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
-import org.springframework.ide.eclipse.boot.dash.docker.ui.DockerUserInteractions;
-
-public interface AllUserInteractions extends UserInteractions, CfUserInteractions, DockerUserInteractions {
+public interface DockerUserInteractions {
+	void selectDockerDaemonDialog(SelectDockerDaemonDialog.Model model);
 }
