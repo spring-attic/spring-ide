@@ -17,7 +17,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.bootVersionAtLeast;
+import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.*;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -82,6 +82,26 @@ public class BootDashDockerTests {
 		GenericRemoteBootDashModel<DockerClient, DockerTargetParams> model = createDockerTarget();
 		Mockito.reset(ui());
 		IProject project = projects.createBootWebProject("webby", bootVersionAtLeast("2.3.0"));
+
+		dragAndDrop(project, model);
+		GenericRemoteAppElement dep = waitForDeployment(model, project);
+		GenericRemoteAppElement img = waitForChild(dep, d -> d instanceof DockerImage);
+		GenericRemoteAppElement con = waitForChild(img, d -> d instanceof DockerContainer);
+
+		ACondition.waitFor("all started", 5_000, () -> {
+			assertEquals(RunState.RUNNING, dep.getRunState());
+			assertEquals(RunState.RUNNING, img.getRunState());
+			assertEquals(RunState.RUNNING, con.getRunState());
+		});
+
+		verifyNoMoreInteractions(ui());
+	}
+
+	@Test
+	public void dragAndDropGradleProject() throws Exception {
+		GenericRemoteBootDashModel<DockerClient, DockerTargetParams> model = createDockerTarget();
+		Mockito.reset(ui());
+		IProject project = projects.createBootWebProject("webby", bootVersionAtLeast("2.3.0"), withImportStrategy("GRADLE-Buildship 3.x"));
 
 		dragAndDrop(project, model);
 		GenericRemoteAppElement dep = waitForDeployment(model, project);

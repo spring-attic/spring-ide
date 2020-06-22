@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.docker.runtarget;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -26,6 +27,17 @@ import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.mandas.docker.client.DockerClient;
+import org.mandas.docker.client.DockerClient.ListContainersParam;
+import org.mandas.docker.client.DockerClient.ListImagesParam;
+import org.mandas.docker.client.DockerClient.LogsParam;
+import org.mandas.docker.client.LogStream;
+import org.mandas.docker.client.messages.Container;
+import org.mandas.docker.client.messages.ContainerConfig;
+import org.mandas.docker.client.messages.ContainerCreation;
+import org.mandas.docker.client.messages.HostConfig;
+import org.mandas.docker.client.messages.Image;
+import org.mandas.docker.client.messages.PortBinding;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.AppConsole;
 import org.springframework.ide.eclipse.boot.dash.api.AppConsoleProvider;
@@ -48,17 +60,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import org.mandas.docker.client.DockerClient;
-import org.mandas.docker.client.DockerClient.ListContainersParam;
-import org.mandas.docker.client.DockerClient.ListImagesParam;
-import org.mandas.docker.client.DockerClient.LogsParam;
-import org.mandas.docker.client.LogStream;
-import org.mandas.docker.client.messages.Container;
-import org.mandas.docker.client.messages.ContainerConfig;
-import org.mandas.docker.client.messages.ContainerCreation;
-import org.mandas.docker.client.messages.HostConfig;
-import org.mandas.docker.client.messages.Image;
-import org.mandas.docker.client.messages.PortBinding;
 
 public class DockerApp extends AbstractDisposable implements App, ChildBearing, Deletable, ProjectRelatable {
 
@@ -257,8 +258,17 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 	
 	private String build(AppConsole console) throws Exception {
 		AtomicReference<String> image = new AtomicReference<>();
-		ProcessBuilder builder = new ProcessBuilder("./mvnw", "spring-boot:build-image", "-DskipTests")
-				.directory(new File(project.getLocation().toString()));
+		File directory = new File(project.getLocation().toString());
+		String[] command;
+		if (Files.exists(directory.toPath().resolve("mvnw"))) {
+			command = new String[] {"./mvnw", "spring-boot:build-image", "-DskipTests"};
+		} else if (Files.exists(directory.toPath().resolve("gradlew"))) {
+			command = new String[] {"./gradlew", "bootBuildImage", "-x", "test" };
+		} else {
+			throw new IllegalStateException("Neither Gradle nor Maven wrapper was found!");
+		}
+		
+		ProcessBuilder builder = new ProcessBuilder(command).directory(directory);
 		
 		Process process = builder.start();
 		LineBasedStreamGobler outputGobler = new LineBasedStreamGobler(process.getInputStream(), (line) -> {
