@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2020 Pivotal Software, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Pivotal Software, Inc. - initial API and implementation
+ *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model.remote;
 
 import java.util.ArrayList;
@@ -14,7 +24,6 @@ import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.Deletable;
 import org.springframework.ide.eclipse.boot.dash.api.ProjectDeploymentTarget;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.RemoteBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.console.CloudAppLogManager;
 import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
@@ -39,7 +48,8 @@ public class GenericRemoteBootDashModel<Client, Params> extends RemoteBootDashMo
 	DisposingFactory<String, GenericRemoteAppElement> elementFactory = new DisposingFactory<String, GenericRemoteAppElement>(existingAppIds) {
 		@Override
 		protected GenericRemoteAppElement create(String appId) {
-			return new GenericRemoteAppElement(GenericRemoteBootDashModel.this, appId);
+			return new GenericRemoteAppElement(GenericRemoteBootDashModel.this, GenericRemoteBootDashModel.this, appId,
+					GenericRemoteBootDashModel.this.getPropertyStore());
 		}
 	};
 

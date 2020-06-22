@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2020 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,7 +30,7 @@ public class AppPropertyControl extends AbstractBdePropertyControl {
 	@Override
 	public void createControl(Composite composite, TabbedPropertySheetPage page) {
 		super.createControl(composite, page);
-		page.getWidgetFactory().createLabel(composite, "Application:").setLayoutData(GridDataFactory.fillDefaults().create()); //$NON-NLS-1$
+		page.getWidgetFactory().createLabel(composite, "Name:").setLayoutData(GridDataFactory.fillDefaults().create()); //$NON-NLS-1$
 		app = page.getWidgetFactory().createLabel(composite, ""); //$NON-NLS-1$
 		app.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
 	}

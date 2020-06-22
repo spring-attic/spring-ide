@@ -16,7 +16,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jface.viewers.StyledString;
@@ -37,7 +36,9 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.WrappingBootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.env.LiveEnvModel;
+import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
+import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
@@ -63,10 +64,12 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 
 	private final RefreshStateTracker refreshTracker = new RefreshStateTracker(this);
 
+	final protected IPropertyStore backingStore;
+
 	DisposingFactory<String, GenericRemoteAppElement> childFactory = new DisposingFactory<String, GenericRemoteAppElement>(existingChildIds) {
 		@Override
 		protected GenericRemoteAppElement create(String appId) {
-			return new GenericRemoteAppElement(GenericRemoteAppElement.this, appId);
+			return new GenericRemoteAppElement(getBootDashModel(), GenericRemoteAppElement.this, appId, backingStore);
 		}
 	};
 
@@ -174,6 +177,7 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		}
 		return builder.build();
 	}).build();
+
 	{
 		livePorts.dependsOn(children);
 		livePorts.dependsOn(app);
@@ -181,18 +185,15 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 	}
 
 
-	public GenericRemoteAppElement(GenericRemoteBootDashModel<?, ?> model, String appId) {
-		this(model, model, appId);
-	}
-
 	private void debug(String message) {
 		if (DEBUG) {
 			System.out.println(this + ": " + message);
 		}
 	}
 
-	public GenericRemoteAppElement(GenericRemoteBootDashModel<?,?> model, Object parent, String appId) {
+	public GenericRemoteAppElement(GenericRemoteBootDashModel<?,?> model, Object parent, String appId, IPropertyStore parentPropertyStore) {
 		super(model, appId);
+		backingStore = PropertyStores.createSubStore(getName(), parentPropertyStore);
 		children.dependsOn(model.refreshCount());
 		addDisposableChild(children);
 		addElementNotifier(children);
@@ -216,10 +217,6 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 			System.out.println("Dispose GenericRemoteAppElement instances = " +instances.decrementAndGet());
 			model.removeElementStateListener(this);
 		});
-	}
-
-	public GenericRemoteAppElement(GenericRemoteAppElement parent, String appId) {
-		this(parent.getBootDashModel(), parent, appId);
 	}
 
 	@Override
@@ -349,8 +346,7 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 
 	@Override
 	public PropertyStoreApi getPersistentProperties() {
-		// TODO Auto-generated method stub
-		return null;
+		return PropertyStores.createApi(backingStore);
 	}
 
 	@Override
