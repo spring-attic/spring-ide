@@ -944,10 +944,7 @@ public class BootDashModelTest {
 	}
 
 	private void assertInstancesLabel(String expect, BootDashElement e) {
-		try (BootDashLabels labels = new BootDashLabels(context.injections, null)) {
-			String actual = labels.getStyledText(e, BootDashColumn.INSTANCES).toString();
-			assertEquals(expect, actual);
-		}
+		harness.assertInstancesLabel(expect, e);
 	}
 
 	@Test public void livePort() throws Exception {

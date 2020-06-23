@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
@@ -22,6 +23,7 @@ import java.util.List;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.junit.Assert;
+import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.labels.BootDashLabels;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
@@ -31,7 +33,6 @@ import org.springframework.ide.eclipse.boot.dash.model.ButtonModel;
 import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargets;
-import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockMultiSelection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
@@ -250,5 +251,31 @@ public class BootDashViewModelHarness {
 		}
 		return null;
 	}
+
+	@SuppressWarnings("rawtypes")
+	public BootDashModel getRunTargetModel(Class<? extends RunTargetType> runTargetClass) {
+		RunTargetType target = context.injections.getBean(runTargetClass);
+		return getRunTargetModel(target);
+	}
+
+	public void assertInstancesLabel(String expect, BootDashElement e) {
+		try (BootDashLabels labels = new BootDashLabels(context.injections, null)) {
+			String actual = labels.getStyledText(e, BootDashColumn.INSTANCES).toString();
+			assertEquals(expect, actual);
+		}
+	}
+
+	public void assertInstancesLabel(String expect, String expectDecluttered, BootDashElement e) {
+		try (BootDashLabels labels = new BootDashLabels(context.injections, null)) {
+			labels.setDeclutter(false);
+			String actual = labels.getStyledText(e, BootDashColumn.INSTANCES).toString();
+			assertEquals(expect, actual);
+
+			labels.setDeclutter(true);
+			String actualDecluttered = labels.getStyledText(e, BootDashColumn.INSTANCES).toString();
+			assertEquals(expectDecluttered, actualDecluttered);
+		}
+	}
+
 
 }

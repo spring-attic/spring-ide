@@ -14,13 +14,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.*;
+import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.bootVersionAtLeast;
+import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withImportStrategy;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.CompletableFuture;
@@ -55,6 +58,7 @@ import org.springframework.ide.eclipse.boot.dash.docker.ui.SelectDockerDaemonDia
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
+import org.springframework.ide.eclipse.boot.dash.model.Taggable;
 import org.springframework.ide.eclipse.boot.dash.model.remote.GenericRemoteAppElement;
 import org.springframework.ide.eclipse.boot.dash.model.remote.GenericRemoteBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.remote.RefreshStateTracker;
@@ -62,14 +66,17 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunT
 import org.springframework.ide.eclipse.boot.dash.views.AddRunTargetAction;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.DeleteElementsAction;
+import org.springframework.ide.eclipse.boot.dash.views.RunStateAction;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 
 public class BootDashDockerTests {
 
+	private static final int BUILD_IMAGE_TIMEOUT = 30_000;
 	private static final String DEFAULT_DOCKER_URL = "unix:///var/run/docker.sock";
 
 	@Test
@@ -88,7 +95,7 @@ public class BootDashDockerTests {
 		GenericRemoteAppElement img = waitForChild(dep, d -> d instanceof DockerImage);
 		GenericRemoteAppElement con = waitForChild(img, d -> d instanceof DockerContainer);
 
-		ACondition.waitFor("all started", 5_000, () -> {
+		ACondition.waitFor("all started", BUILD_IMAGE_TIMEOUT, () -> {
 			assertEquals(RunState.RUNNING, dep.getRunState());
 			assertEquals(RunState.RUNNING, img.getRunState());
 			assertEquals(RunState.RUNNING, con.getRunState());
@@ -108,13 +115,191 @@ public class BootDashDockerTests {
 		GenericRemoteAppElement img = waitForChild(dep, d -> d instanceof DockerImage);
 		GenericRemoteAppElement con = waitForChild(img, d -> d instanceof DockerContainer);
 
-		ACondition.waitFor("all started", 5_000, () -> {
+		ACondition.waitFor("all started", BUILD_IMAGE_TIMEOUT, () -> {
 			assertEquals(RunState.RUNNING, dep.getRunState());
 			assertEquals(RunState.RUNNING, img.getRunState());
 			assertEquals(RunState.RUNNING, con.getRunState());
 		});
 
 		verifyNoMoreInteractions(ui());
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void tagsPersistence() throws Exception {
+	IProject project = projects.createBootWebProject("webby", bootVersionAtLeast("2.3.0"));
+
+	{
+			GenericRemoteBootDashModel<DockerClient, DockerTargetParams> model = createDockerTarget();
+			Mockito.reset(ui());
+
+			dragAndDrop(project, model);
+			GenericRemoteAppElement dep = waitForDeployment(model, project);
+			GenericRemoteAppElement img = waitForChild(dep, d -> d instanceof DockerImage);
+			GenericRemoteAppElement con = waitForChild(img, d -> d instanceof DockerContainer);
+
+			assertTrue("Tags empty initally", dep.getTags().isEmpty());
+			assertTrue("Tags empty initally", img.getTags().isEmpty());
+			assertTrue("Tags empty initally", con.getTags().isEmpty());
+
+			setTags(dep, "tag1", "tag2");
+			assertTags(dep, "tag1", "tag2");
+			harness.assertLabelContains("[tag1, tag2]", dep);
+		}
+
+		harness.reload();
+
+		{
+			GenericRemoteBootDashModel<DockerClient, DockerTargetParams> model = (GenericRemoteBootDashModel<DockerClient, DockerTargetParams>) harness
+					.getRunTargetModel(DockerRunTargetType.class);
+			GenericRemoteAppElement dep = waitForDeployment(model, project);
+			GenericRemoteAppElement img = waitForChild(dep, d -> d instanceof DockerImage);
+			GenericRemoteAppElement con = waitForChild(img, d -> d instanceof DockerContainer);
+			assertTags(dep, "tag1", "tag2");
+			assertTrue("Should be still empty", img.getTags().isEmpty());
+			assertTrue("Should be still empty", con.getTags().isEmpty());
+			harness.assertLabelContains("[tag1, tag2]", dep);
+		}
+
+	}
+
+	@Test
+	public void urlComputation() throws Exception {
+		IProject project = projects.createBootWebProject("webby", bootVersionAtLeast("2.3.0"));
+
+		GenericRemoteBootDashModel<DockerClient, DockerTargetParams> model = createDockerTarget();
+		Mockito.reset(ui());
+
+		dragAndDrop(project, model);
+		GenericRemoteAppElement dep = waitForDeployment(model, project);
+		GenericRemoteAppElement img = waitForChild(dep, d -> d instanceof DockerImage);
+		GenericRemoteAppElement con = waitForChild(img, d -> d instanceof DockerContainer);
+
+		img.setDefaultRequestMappingPath("/hello");
+
+		ACondition.waitFor("Wait for port to be defined", BUILD_IMAGE_TIMEOUT, () -> {
+			assertEquals(1, con.getLivePorts().size());
+			assertEquals(1, img.getLivePorts().size());
+			assertEquals(1, dep.getLivePorts().size());
+		});
+
+		int port = con.getLivePort();
+		assertEquals(ImmutableSet.of(port), img.getLivePorts());
+		assertEquals(ImmutableSet.of(port), dep.getLivePorts());
+		assertEquals(ImmutableSet.of(port), con.getLivePorts());
+
+		assertEquals("http" + "://localhost:" + port + "/", dep.getUrl());
+		assertEquals("http" + "://localhost:" + port + "/hello", img.getUrl());
+
+		harness.assertLabelContains("/hello", img);
+
+	}
+
+	@Test
+	public void instanceCount() throws Exception {
+		IProject project = projects.createBootWebProject("webby", bootVersionAtLeast("2.3.0"));
+		GenericRemoteBootDashModel<DockerClient, DockerTargetParams> model = createDockerTarget();
+		Mockito.reset(ui());
+
+		dragAndDrop(project, model);
+		GenericRemoteAppElement dep = waitForDeployment(model, project);
+		GenericRemoteAppElement img = waitForChild(dep, d -> d instanceof DockerImage);
+		GenericRemoteAppElement con = waitForChild(img, d -> d instanceof DockerContainer);
+
+		ACondition.waitFor("Previous container stopped and deployment started", BUILD_IMAGE_TIMEOUT, () -> {
+			assertTrue(dep.getRunState() == RunState.RUNNING);
+			assertEquals(1, dep.getDesiredInstances());
+			assertEquals(-1, img.getDesiredInstances());
+			assertEquals(-1, con.getDesiredInstances());
+			assertEquals(1, dep.getActualInstances());
+			assertEquals(1, img.getActualInstances());
+			assertEquals(1, con.getActualInstances());
+		});
+
+		harness.selection.setElements(dep);
+		getRestartAction().run();
+
+		ACondition.waitFor("Second container to appear", BUILD_IMAGE_TIMEOUT, () -> {
+			assertEquals(2, img.getChildren().getValues().size());
+		});
+
+		String id = con.getName();
+
+		GenericRemoteAppElement con2 = getChild(img, d -> d instanceof DockerContainer && !id.equals(d.getName()));
+
+		ACondition.waitFor("Previous container stopped and deployment started", BUILD_IMAGE_TIMEOUT, () -> {
+			assertTrue(con.getRunState() == RunState.INACTIVE);
+			assertTrue(con2.getRunState() == RunState.RUNNING);
+			// No diffs in project hence same image but another container started
+			assertEquals(1, dep.getChildren().getValues().size());
+
+			assertEquals(1, dep.getDesiredInstances());
+			assertEquals(-1, img.getDesiredInstances());
+			assertEquals(-1, con.getDesiredInstances());
+			assertEquals(-1, con2.getDesiredInstances());
+			assertEquals(1, dep.getActualInstances());
+			assertEquals(1, img.getActualInstances());
+			assertEquals(0, con.getActualInstances());
+			assertEquals(1, con2.getActualInstances());
+
+		});
+
+		harness.assertInstancesLabel("1/1", "", dep);
+		harness.assertInstancesLabel("1", "", img);
+		harness.assertInstancesLabel("0", "", con);
+		harness.assertInstancesLabel("1", "", con2);
+
+		harness.selection.setElements(con);
+		getRestartAction().run();
+
+		ACondition.waitFor("Both containers running", BUILD_IMAGE_TIMEOUT, () -> {
+			assertTrue(con.getRunState() == RunState.RUNNING);
+			assertTrue(con2.getRunState() == RunState.RUNNING);
+			// No diffs in project hence same image but another container started
+			assertEquals(1, dep.getChildren().getValues().size());
+
+			assertEquals(1, dep.getDesiredInstances());
+			assertEquals(-1, img.getDesiredInstances());
+			assertEquals(-1, con.getDesiredInstances());
+			assertEquals(-1, con2.getDesiredInstances());
+			assertEquals(2, dep.getActualInstances());
+			assertEquals(2, img.getActualInstances());
+			assertEquals(1, con.getActualInstances());
+			assertEquals(1, con2.getActualInstances());
+
+		});
+
+		harness.assertInstancesLabel("2/1", "2/1", dep);
+		harness.assertInstancesLabel("2", "2", img);
+		harness.assertInstancesLabel("1", "", con);
+		harness.assertInstancesLabel("1", "", con2);
+	}
+
+	private RunStateAction getRestartAction() {
+		for (RunStateAction a : actions().getRunStateActions()) {
+			if (a.getGoalState() == RunState.RUNNING) {
+				assertEquals("(Re)start", a.getText());
+				return a;
+			}
+		}
+		fail("Cannot find Restart action!");
+		return null;
+	}
+
+	private void setTags(Taggable e, String... tags) {
+		LinkedHashSet<String> tagSet = new LinkedHashSet<>();
+		for (String tag : tags) {
+			tagSet.add(tag);
+		}
+		e.setTags(tagSet);
+	}
+
+	private void assertTags(Taggable e, String... tags) {
+		LinkedHashSet<String> tagSet = new LinkedHashSet<>();
+		for (String tag : tags) {
+			tagSet.add(tag);
+		}
+		assertEquals(tagSet, e.getTags());
 	}
 
 	@Test
@@ -128,7 +313,7 @@ public class BootDashDockerTests {
 		GenericRemoteAppElement img = waitForChild(dep, d -> d instanceof DockerImage);
 		GenericRemoteAppElement con = waitForChild(img, d -> d instanceof DockerContainer);
 
-		ACondition.waitFor("all started", 5_000, () -> {
+		ACondition.waitFor("all started", BUILD_IMAGE_TIMEOUT, () -> {
 			assertEquals(RunState.RUNNING, dep.getRunState());
 			assertEquals(RunState.RUNNING, img.getRunState());
 			assertEquals(RunState.RUNNING, con.getRunState());
@@ -177,7 +362,7 @@ public class BootDashDockerTests {
 			GenericRemoteAppElement img = waitForChild(dep, d -> d instanceof DockerImage);
 			GenericRemoteAppElement con = waitForChild(img, d -> d instanceof DockerContainer);
 
-			ACondition.waitFor("all started", 5_000, () -> {
+			ACondition.waitFor("all started", BUILD_IMAGE_TIMEOUT, () -> {
 				assertEquals(RunState.RUNNING, dep.getRunState());
 				assertEquals(RunState.RUNNING, img.getRunState());
 				assertEquals(RunState.RUNNING, con.getRunState());
@@ -271,7 +456,7 @@ public class BootDashDockerTests {
 		}).when(ui()).selectDockerDaemonDialog(Matchers.any());
 
 		createTarget.run();
-		createTarget.waitFor(Duration.ofMillis(2000));
+		createTarget.waitFor(Duration.ofMillis(5000));
 
 		BootDashModel model;
 			//		ACondition.waitFor("Run target model to appear", 2000, () -> {
@@ -287,7 +472,7 @@ public class BootDashDockerTests {
 	}
 
 	private GenericRemoteAppElement waitForChild(GenericRemoteAppElement dep, Predicate<App> selector) throws Exception {
-		ACondition.waitFor("image node to appear", 60_000, () -> {
+		ACondition.waitFor("node to appear", 60_000, () -> {
 			getChild(dep, selector);
 		});
 		return getChild(dep, selector);
