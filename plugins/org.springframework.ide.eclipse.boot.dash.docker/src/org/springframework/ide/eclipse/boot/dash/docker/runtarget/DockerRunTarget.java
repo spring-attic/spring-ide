@@ -1,15 +1,33 @@
+/*******************************************************************************
+ * Copyright (c) 2020 Pivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Pivotal, Inc. - initial API and implementation
+ *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.docker.runtarget;
+
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.DEFAULT_PATH;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.INSTANCES;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.NAME;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.PROJECT;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.TAGS;
 
 import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
 
 import org.eclipse.core.resources.IProject;
+import org.mandas.docker.client.DefaultDockerClient;
+import org.mandas.docker.client.DockerClient;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.ProjectDeploymentTarget;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.RemoteBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
-import org.springframework.ide.eclipse.boot.dash.docker.jmx.JmxSupport;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -20,8 +38,6 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 
 import com.google.common.collect.ImmutableList;
-import org.mandas.docker.client.DefaultDockerClient;
-import org.mandas.docker.client.DockerClient;
 
 public class DockerRunTarget extends AbstractRunTarget<DockerTargetParams> 
 implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentTarget {
@@ -117,9 +133,13 @@ implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentT
 	
 	@Override
 	public BootDashColumn[] getDefaultColumns() {
-		return new BootDashColumn[] { 
-				BootDashColumn.NAME,
-				BootDashColumn.LIVE_PORT
+		return new BootDashColumn[] {
+				RUN_STATE_ICN,
+				NAME,
+				PROJECT,
+				INSTANCES,
+				DEFAULT_PATH,
+				TAGS
 		};
 	}
 

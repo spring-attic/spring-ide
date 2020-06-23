@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2019 Pivotal, Inc.
+ * Copyright (c) 2015, 2020 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -410,12 +410,12 @@ public class BootDashLabels implements Disposable {
 			} else if (column==INSTANCES) {
 				int actual = element.getActualInstances();
 				int desired = element.getDesiredInstances();
-				if (!declutter || desired!=1 || actual > 1) { //Don't show: less clutter, you can already see whether a single instance is running or not
-					if (stylers == null) {
-						label = actual + "/" + desired;
-					} else {
+				boolean showDesired = desired >= 0;
+				if (!declutter || desired > 1 || actual > 1) { //Don't show: less clutter, you can already see whether a single instance is running or not
+					label = actual + ( showDesired ? "/" + desired : "");
+					if (stylers != null) {
 						Color instancesColor = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry().get(ALT_TEXT_DECORATION_COLOR_THEME);
-						styledLabel = new StyledString(actual+"/"+desired,stylers.color(instancesColor));
+						styledLabel = new StyledString(label, stylers.color(instancesColor));
 					}
 				}
 			} else if (column==EXPOSED_URL) {

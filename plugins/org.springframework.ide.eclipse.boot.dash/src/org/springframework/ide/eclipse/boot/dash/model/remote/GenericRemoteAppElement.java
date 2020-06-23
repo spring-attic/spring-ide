@@ -20,9 +20,11 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jface.viewers.StyledString;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModel;
+import org.springframework.ide.eclipse.boot.dash.api.ActualInstanceCount;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.AppContext;
 import org.springframework.ide.eclipse.boot.dash.api.Deletable;
+import org.springframework.ide.eclipse.boot.dash.api.DesiredInstanceCount;
 import org.springframework.ide.eclipse.boot.dash.api.PortConnectable;
 import org.springframework.ide.eclipse.boot.dash.api.ProjectRelatable;
 import org.springframework.ide.eclipse.boot.dash.api.RunStateProvider;
@@ -184,6 +186,38 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		livePorts.dependsOn(getRunStateExp());
 	}
 
+	private LiveExpression<Integer> actualInstanceCounts = new AsyncLiveExpression<Integer>(0) {
+
+		{
+			dependsOn(children);
+			dependsOn(app);
+			dependsOn(getRunStateExp());
+		}
+
+		@Override
+		protected Integer compute() {
+			int count = 0;
+
+			if (getRunState() == RunState.RUNNING || getRunState() == RunState.DEBUGGING) {
+				App appVal = app.getValue();
+				debug("appVal: " + appVal);
+
+				if (appVal instanceof ActualInstanceCount) {
+					count += ((ActualInstanceCount) appVal).getActualInstances();
+				}
+
+				ImmutableSet<BootDashElement> children = GenericRemoteAppElement.this.children.getValue();
+				if (children != null && !children.isEmpty()) {
+					for (BootDashElement child : children) {
+						count += child.getActualInstances();
+					}
+				}
+			}
+			return count;
+		}
+
+	};
+
 
 	private void debug(String message) {
 		if (DEBUG) {
@@ -210,6 +244,8 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		addElementNotifier(getRunStateExp());
 		addDisposableChild(livePorts);
 		addElementNotifier(livePorts);
+		addDisposableChild(actualInstanceCounts);
+		addElementNotifier(actualInstanceCounts);
 
 		model.addElementStateListener(this);
 
@@ -329,14 +365,16 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 
 	@Override
 	public int getActualInstances() {
-		// TODO Auto-generated method stub
-		return 0;
+		return actualInstanceCounts.getValue();
 	}
 
 	@Override
 	public int getDesiredInstances() {
-		// TODO Auto-generated method stub
-		return 0;
+		App data = getAppData();
+		if (data instanceof DesiredInstanceCount) {
+			return ((DesiredInstanceCount)data).getDesiredInstances();
+		}
+		return -1;
 	}
 
 	@Override
@@ -383,6 +421,7 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 	@Override
 	public void stateChanged(BootDashElement e) {
 		this.livePorts.refresh();
+		this.actualInstanceCounts.refresh();
 	}
 
 }

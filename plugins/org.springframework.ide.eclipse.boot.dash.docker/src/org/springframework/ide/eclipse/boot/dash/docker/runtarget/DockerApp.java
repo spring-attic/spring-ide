@@ -43,6 +43,7 @@ import org.springframework.ide.eclipse.boot.dash.api.AppConsole;
 import org.springframework.ide.eclipse.boot.dash.api.AppConsoleProvider;
 import org.springframework.ide.eclipse.boot.dash.api.AppContext;
 import org.springframework.ide.eclipse.boot.dash.api.Deletable;
+import org.springframework.ide.eclipse.boot.dash.api.DesiredInstanceCount;
 import org.springframework.ide.eclipse.boot.dash.api.ProjectRelatable;
 import org.springframework.ide.eclipse.boot.dash.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.docker.jmx.JmxSupport;
@@ -61,7 +62,7 @@ import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
-public class DockerApp extends AbstractDisposable implements App, ChildBearing, Deletable, ProjectRelatable {
+public class DockerApp extends AbstractDisposable implements App, ChildBearing, Deletable, ProjectRelatable, DesiredInstanceCount {
 
 	private static final String DOCKER_IO_LIBRARY = "docker.io/library/";
 	private static final String[] NO_STRINGS = new String[0];
@@ -359,5 +360,14 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 	@Override
 	public IProject getProject() {
 		return project;
+	}
+
+	@Override
+	public int getDesiredInstances() {
+		DockerDeployment deployment = deployment();
+		if (deployment != null) {
+			return deployment.getDesiredInstances();
+		}
+		return 0;
 	}
 }

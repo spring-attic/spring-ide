@@ -1,5 +1,16 @@
+/*******************************************************************************
+ * Copyright (c) 2020 Pivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Pivotal, Inc. - initial API and implementation
+ *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.docker.runtarget;
 
+import org.springframework.ide.eclipse.boot.dash.api.DesiredInstanceCount;
 import org.springframework.ide.eclipse.boot.dash.model.Nameable;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 
@@ -14,7 +25,7 @@ import org.springframework.ide.eclipse.boot.dash.model.RunState;
  * This object must be easy to serialize as it needs to be persisted across Eclipse
  * restarts.
  */
-public class DockerDeployment implements Nameable {
+public class DockerDeployment implements Nameable, DesiredInstanceCount {
 	
 	private String name; // name of the deployment, currently this is also the name of the deployed project.
 	private RunState runState;
@@ -73,5 +84,9 @@ public class DockerDeployment implements Nameable {
 	
 	public String getSessionId() {
 		return sessionId;
+	}
+
+	public int getDesiredInstances() {
+		return 1;
 	}
 }

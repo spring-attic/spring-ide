@@ -17,6 +17,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.SWT;
+import org.springframework.ide.eclipse.boot.dash.api.ActualInstanceCount;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.AppContext;
 import org.springframework.ide.eclipse.boot.dash.api.Deletable;
@@ -37,7 +38,7 @@ import org.mandas.docker.client.DockerClient;
 import org.mandas.docker.client.exceptions.ContainerNotFoundException;
 import org.mandas.docker.client.messages.Container;
 
-public class DockerContainer implements App, RunStateProvider, JmxConnectable, Styleable, PortConnectable, Deletable {
+public class DockerContainer implements App, RunStateProvider, JmxConnectable, Styleable, PortConnectable, Deletable, ActualInstanceCount {
 
 	private static final Duration WAIT_BEFORE_KILLING = Duration.ofSeconds(10);
 	private static final boolean DEBUG = true;
@@ -208,5 +209,10 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 
 			});
 		}
+	}
+
+	@Override
+	public int getActualInstances() {
+		return fetchRunState().isActive() ? 1 : 0;
 	}
 }
