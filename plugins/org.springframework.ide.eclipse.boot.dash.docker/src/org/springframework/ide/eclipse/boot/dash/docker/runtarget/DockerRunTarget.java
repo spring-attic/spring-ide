@@ -25,6 +25,7 @@ import org.eclipse.core.resources.IProject;
 import org.mandas.docker.client.DefaultDockerClient;
 import org.mandas.docker.client.DockerClient;
 import org.springframework.ide.eclipse.boot.dash.api.App;
+import org.springframework.ide.eclipse.boot.dash.api.DebuggableTarget;
 import org.springframework.ide.eclipse.boot.dash.api.ProjectDeploymentTarget;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.RemoteBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
@@ -40,7 +41,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import com.google.common.collect.ImmutableList;
 
 public class DockerRunTarget extends AbstractRunTarget<DockerTargetParams> 
-implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentTarget {
+implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentTarget, DebuggableTarget {
 
 	LiveVariable<DockerClient> client = new LiveVariable<>();
 	LiveExpression<String> sessionId = client.apply(c -> c!=null ? UUID.randomUUID().toString() : null);
@@ -124,7 +125,7 @@ implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentT
 		for (IProject p : projects) {
 			DockerDeployment d = new DockerDeployment();
 			d.setName(p.getName());
-			d.setRunState(RunState.RUNNING);
+			d.setRunState(runOrDebug);
 			d.setSessionId(sessionId.getValue());
 			d.setBuildId(UUID.randomUUID().toString());
 			deployments.createOrUpdate(d);
@@ -145,5 +146,10 @@ implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentT
 
 	public String getSessionId() {
 		return sessionId.getValue();
+	}
+
+	@Override
+	public boolean isDebuggingSupported() {
+		return true;
 	}
 }

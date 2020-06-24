@@ -55,6 +55,7 @@ import org.springframework.ide.eclipse.boot.dash.util.LineBasedStreamGobler;
 import org.springframework.ide.eclipse.boot.launch.util.PortFinder;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
+import org.springsource.ide.eclipse.commons.frameworks.core.util.StringUtils;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.common.collect.ImmutableList;
@@ -74,10 +75,15 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 	public static final String APP_NAME = "sts.app.name";
 	public static final String BUILD_ID = "sts.app.build-id";
 	public static final String JMX_PORT = "sts.app.jmx.port";
+	public static final String DEBUG_PORT = "sts.app.debug.port";
 	public static final String APP_LOCAL_PORT = "sts.app.port.local";
 	
 	private static final int STOP_WAIT_TIME_IN_SECONDS = 20;
 	public final CompletableFuture<RefreshStateTracker> refreshTracker = new CompletableFuture<>();
+
+	private static final String DEBUG_JVM_ARGS(String debugPort) {
+		return "-Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n,address="+debugPort;
+	}
 
 	public DockerApp(String name, DockerRunTarget target, DockerClient client) {
 		this.target = target;
@@ -98,7 +104,7 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 
 	@Override
 	public EnumSet<RunState> supportedGoalStates() {
-		return EnumSet.of(RunState.RUNNING, RunState.INACTIVE);
+		return DockerContainer.SUPPORTED_GOAL_STATES;
 	}
 	
 	@Override
@@ -138,6 +144,7 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 	}
 	
 	public CompletableFuture<Void> synchronizeWithDeployment() {
+		System.out.println(refreshTracker.isDone());
 		return this.refreshTracker.thenComposeAsync(refreshTracker -> {
 			DockerDeployment deployment = deployment();
 			return refreshTracker.runAsync("Synchronizing deployment "+deployment.getName(), () -> {
@@ -147,23 +154,22 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 					List<Container> containers = client.listContainers(ListContainersParam.allContainers(), ListContainersParam.withLabel(APP_NAME, getName()));
 					if (desiredRunState==RunState.INACTIVE) {
 						stop(containers);
-					} else if (desiredRunState==RunState.RUNNING) {
+					} else if (desiredRunState.isActive()) {
 						String desiredBuildId = deployment.getBuildId();
 						List<Container> toStop = new ArrayList<>(containers.size());
-						boolean runningContainer = false;
-						List<Container> toRun = new ArrayList<>(containers.size());
+						boolean desiredContainerFound = false;
 						for (Container c : containers) {
 							if (desiredBuildId.equals(c.labels().get(BUILD_ID))) {
-								if (new DockerContainer(getTarget(), c).fetchRunState()==RunState.RUNNING) {
-									runningContainer = true;
+								if (new DockerContainer(getTarget(), c).fetchRunState()==desiredRunState) {
+									desiredContainerFound = true;
 								}
 							} else {
 								toStop.add(c);
 							}
 						}
 						stop(toStop);
-						if (!runningContainer) {
-							start(desiredBuildId);
+						if (!desiredContainerFound) {
+							start(desiredBuildId, desiredRunState);
 						}
 					}
 				}
@@ -180,7 +186,7 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 		});
 	}
 
-	public void start(String desiredBuildId) throws Exception {
+	public void start(String desiredBuildId, RunState desiredRunState) throws Exception {
 		RefreshStateTracker refreshTracker = this.refreshTracker.get();
 		refreshTracker.run("Deploying " + getName() + "...", () -> {
 			AppConsole console = target.injections().getBean(AppConsoleProvider.class).getConsole(this);
@@ -189,12 +195,12 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 			}
 			console.write("Deploying Docker app " + getName() +"...", LogType.STDOUT);
 			String image = build(console);
-			run(console, image, desiredBuildId);
+			run(console, image, desiredBuildId, desiredRunState);
 			console.write("DONE Deploying Docker app " + getName(), LogType.STDOUT);
 		});
 	}
 
-	private void run(AppConsole console, String image, String desiredBuildId) throws Exception {
+	private void run(AppConsole console, String image, String desiredBuildId, RunState desiredRunState) throws Exception {
 		if (client==null) {
 			console.write("Cannot start container... Docker client is disconnected!", LogType.STDERROR);
 		} else {
@@ -222,16 +228,35 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 				portBindings.put("" + appContainerPort, ImmutableList.of(PortBinding.of("0.0.0.0", appLocalPort)));
 				exposedPorts.add(""+appContainerPort);
 			}
-			
+
+			StringBuilder javaOpts = new StringBuilder();
 
 			if (jmxUrl!=null) {
 				String jmxPort = ""+jmx.getPort();
+				labels.put(JMX_PORT, jmxPort);
 				
 				portBindings.put(jmxPort, ImmutableList.of(PortBinding.of("0.0.0.0", jmxPort)));
 				exposedPorts.add(jmxPort);
 				
-				cb.env("JAVA_OPTS="+jmx.getJavaOpts());
-				labels.put(JMX_PORT, jmxPort);
+				javaOpts.append(jmx.getJavaOpts());
+				javaOpts.append(" ");
+			}
+			
+			if (desiredRunState==RunState.DEBUGGING) {
+				String debugPort = ""+PortFinder.findFreePort();
+				labels.put(DockerApp.DEBUG_PORT, debugPort);
+				
+				portBindings.put(debugPort, ImmutableList.of(PortBinding.of("0.0.0.0", debugPort)));
+				exposedPorts.add(debugPort);
+				
+				javaOpts.append(DEBUG_JVM_ARGS(debugPort));
+				console.write("Debug Port = "+debugPort, LogType.STDOUT);
+			}
+			
+			String javaOptsStr = javaOpts.toString();
+			if (StringUtils.hasText(javaOptsStr)) {
+				cb.env("JAVA_OPTS="+javaOptsStr.trim());
+				console.write("JAVA_OPTS="+javaOptsStr.trim(), LogType.STDOUT);
 			}
 			
 			cb.hostConfig(HostConfig.builder()

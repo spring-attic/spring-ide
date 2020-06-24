@@ -10,6 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.api;
 
-public interface DesiredInstanceCount {
-	int getDesiredInstances();
+public interface DebuggableTarget {
+	boolean isDebuggingSupported();
 }

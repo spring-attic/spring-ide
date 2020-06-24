@@ -16,9 +16,12 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertContains;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -36,6 +39,7 @@ import org.springframework.ide.eclipse.boot.dash.model.RunTargets;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockMultiSelection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
+import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
@@ -275,6 +279,20 @@ public class BootDashViewModelHarness {
 			String actualDecluttered = labels.getStyledText(e, BootDashColumn.INSTANCES).toString();
 			assertEquals(expectDecluttered, actualDecluttered);
 		}
+	}
+
+	public <T> T waitForCallable(String name, long timeout, Callable<T> callable) throws Exception {
+		AtomicReference<T> result = new AtomicReference<>();
+		ACondition.waitFor(name, timeout, () -> {
+			T _result = callable.call();
+			assertNotNull(result);
+			result.set(_result);
+		});
+		return result.get();
+	}
+
+	public BootProjectDashElement waitForElement(long timeout, IProject project) throws Exception {
+		return waitForCallable("Element for project "+project.getName(), timeout, () -> getElementFor(project));
 	}
 
 

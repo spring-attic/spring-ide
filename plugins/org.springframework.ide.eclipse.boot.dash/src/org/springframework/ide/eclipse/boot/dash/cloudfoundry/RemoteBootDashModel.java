@@ -10,11 +10,20 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cloudfoundry;
 
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jdt.core.IJavaProject;
+import org.springframework.ide.eclipse.boot.dash.api.ProjectDeploymentTarget;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
+import org.springframework.ide.eclipse.boot.dash.model.ModifiableModel;
+import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.remote.GenericRemoteBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.remote.RefreshStateTracker;
@@ -25,8 +34,11 @@ import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet.Builder;
+
 @SuppressWarnings("rawtypes")
-public abstract class RemoteBootDashModel extends AbstractBootDashModel {
+public abstract class RemoteBootDashModel extends AbstractBootDashModel implements ModifiableModel, ProjectDeploymentTarget {
 
 	protected static final String AUTO_CONNECT_PROP = GenericRemoteBootDashModel.class.getSimpleName()+".auto-connect";
 
@@ -82,6 +94,35 @@ public abstract class RemoteBootDashModel extends AbstractBootDashModel {
 		}
 		getRunTarget().disconnect();
 	}
+
+	@Override
+	public final void add(List<Object> sources) throws Exception {
+		Builder<IProject> projects = ImmutableSet.builder();
+		if (sources != null) {
+			for (Object obj : sources) {
+				IProject project = getProject(obj);
+				if (project != null) {
+					projects.add(project);
+				}
+			}
+			performDeployment(projects.build(), RunState.RUNNING);
+		}
+	}
+
+	final protected IProject getProject(Object obj) {
+		IProject project = null;
+		if (obj instanceof IProject) {
+			project = (IProject) obj;
+		} else if (obj instanceof IJavaProject) {
+			project = ((IJavaProject) obj).getProject();
+		} else if (obj instanceof IAdaptable) {
+			project = (IProject) ((IAdaptable) obj).getAdapter(IProject.class);
+		} else if (obj instanceof BootDashElement) {
+			project = ((BootDashElement) obj).getProject();
+		}
+		return project;
+	}
+
 
 	@Override
 	final public BootDashModelConsoleManager getElementConsoleManager() {

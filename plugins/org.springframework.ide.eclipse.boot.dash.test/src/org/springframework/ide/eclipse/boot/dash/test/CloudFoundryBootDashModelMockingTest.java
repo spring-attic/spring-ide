@@ -876,7 +876,7 @@ public class CloudFoundryBootDashModelMockingTest {
 				"  domain: tcp.domain.com"
 		);
 		harness.answerDeploymentPrompt(ui(), manifest);
-		target.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
+		target.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
 		waitForApps(target, appName);
 		CloudAppDashElement app = getApplication(target, project);
 		waitForState(app, RunState.RUNNING, 10_000);
@@ -907,7 +907,7 @@ public class CloudFoundryBootDashModelMockingTest {
 				properties.setEnableJmxSshTunnel(false);
 			}
 		});
-		target.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
+		target.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
 		waitForApps(target, appName);
 		CloudAppDashElement app = getApplication(target, project);
 		waitForState(app, RunState.RUNNING, 10_000);
@@ -929,7 +929,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		});
 
 		Mockito.doReturn(ManifestDiffDialogModel.Result.USE_MANIFEST).when(ui()).confirmReplaceApp(any(), any(), any(), any());
-		target.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
+		target.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
 
 		ACondition.waitFor("app restart", 20000, () -> {
 			assertEquals(RunState.RUNNING, app.getRunState());
@@ -977,7 +977,7 @@ public class CloudFoundryBootDashModelMockingTest {
 				properties.setEnableJmxSshTunnel(false);
 			}
 		});
-		target.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
+		target.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
 		waitForApps(target, appName);
 		CloudAppDashElement app = getApplication(target, project);
 		waitForState(app, RunState.RUNNING, 10_000);
@@ -1033,7 +1033,7 @@ public class CloudFoundryBootDashModelMockingTest {
 				properties.setManifestFile(manifest);
 			}
 		});
-		target.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
+		target.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
 		waitForApps(target, appName);
 		CloudAppDashElement app = getApplication(target, project);
 		waitForState(app, RunState.RUNNING, 10_000);
@@ -1133,7 +1133,7 @@ public class CloudFoundryBootDashModelMockingTest {
 				properties.setEnableJmxSshTunnel(true);
 			}
 		});
-		target.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
+		target.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
 		waitForApps(target, appName);
 		CloudAppDashElement app = getApplication(target, project);
 		waitForState(app, RunState.RUNNING, 10_000);
@@ -1182,7 +1182,7 @@ public class CloudFoundryBootDashModelMockingTest {
 					properties.setEnableJmxSshTunnel(true);
 				}
 			});
-			target.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
+			target.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
 			waitForApps(target, appName);
 			CloudAppDashElement app = getApplication(target, project);
 			waitForState(app, RunState.RUNNING, 10_000);
@@ -1246,7 +1246,7 @@ public class CloudFoundryBootDashModelMockingTest {
 				"- name: "+appName+"\n"
 		);
 		harness.answerDeploymentPrompt(ui(), manifest); //Note: don't need to disable explictly because its the default.
-		target.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
+		target.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
 		waitForApps(target, appName);
 		CloudAppDashElement app = getApplication(target, project);
 		waitForState(app, RunState.RUNNING, 10_000);
@@ -1273,7 +1273,7 @@ public class CloudFoundryBootDashModelMockingTest {
 				"  - route: tcp.domain.com:61001\n"
 		);
 		harness.answerDeploymentPrompt(ui(), manifest);
-		target.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
+		target.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
 		waitForApps(target, appName);
 		CloudAppDashElement app = getApplication(target, project);
 		waitForState(app, RunState.RUNNING, 10_000);
@@ -1305,7 +1305,7 @@ public class CloudFoundryBootDashModelMockingTest {
 				"  random-route: true\n"
 		);
 		harness.answerDeploymentPrompt(ui(), manifest);
-		target.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
+		target.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
 		waitForApps(target, appName);
 		CloudAppDashElement app = getApplication(target, project);
 		waitForState(app, RunState.RUNNING, 10_000);
@@ -1456,7 +1456,7 @@ public class CloudFoundryBootDashModelMockingTest {
 				"  health-check-http-endpoint: /health\n"
 		);
 		harness.answerDeploymentPrompt(ui(), manifest);
-		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
+		model.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
 
 		ACondition.waitFor("wait for app '"+ appName +"'to be RUNNING", 30000, () -> {
 			CloudAppDashElement app = model.getApplication(appName);
@@ -1481,7 +1481,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		env.put("FOO", "something");
 		harness.answerDeploymentPrompt(ui(), appName, appName, env);
 
-		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
+		model.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
 
 		new ACondition("wait for app '"+ appName +"'to be RUNNING", 30000) { //why so long? JDT searching for main type.
 			public boolean test() throws Exception {
@@ -1670,7 +1670,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		final String appName = appHarness.randomAppName();
 
 		harness.answerDeploymentPrompt(ui(), appName, appName);
-		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
+		model.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
 		waitForApps(model, appName);
 
 		CloudAppDashElement app = model.getApplication(appName);
@@ -1699,7 +1699,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		harness.answerDeploymentPrompt(ui(), manifestFile);
 
-		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
+		model.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
 
 		waitForApps(model, appName);
 
@@ -1769,7 +1769,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		harness.answerDeploymentPrompt(ui(), new DeploymentAnswerer());
 
-		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
+		model.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
 
 		waitForApps(model, appName);
 
@@ -1802,7 +1802,7 @@ public class CloudFoundryBootDashModelMockingTest {
 			String appName = project.getName();
 			harness.answerDeploymentPrompt(ui(), new DeploymentAnswerer());
 
-			model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
+			model.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
 			waitForApps(model, appName);
 
 			CloudAppDashElement app = model.getApplication(appName);
@@ -1833,7 +1833,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		clientFactory.setAppStartDelay(TimeUnit.MINUTES, 2);
 		harness.answerDeploymentPrompt(ui(), appName, appName);
-		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
+		model.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
 		waitForApps(model, appName);
 
 		CloudAppDashElement app = model.getApplication(appName);
@@ -1922,7 +1922,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		harness.answerDeploymentPrompt(ui(), appName, appName);
 		Mockito.doReturn(ManifestDiffDialogModel.Result.USE_MANIFEST).when(ui()).confirmReplaceApp(any(), any(), any(), any());
-		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
+		model.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
 
 		System.out.println(app.getRunState());
 		waitForJobsToComplete();
@@ -1949,7 +1949,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		harness.answerDeploymentPrompt(ui(), appName, appName);
 		doReturn(ManifestDiffDialogModel.Result.CANCELED).when(ui()).confirmReplaceApp(any(), any(), any(), any());
-		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
+		model.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
 
 		waitForJobsToComplete();
 		assertNull(app.getProject()); // since op was canceled it should not have set the project on the app.
@@ -1970,7 +1970,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		);
 		harness.answerDeploymentPrompt(ui(), manifest);
 		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
-		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
+		model.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
 		waitForApps(model, appName);
 		CloudAppDashElement app = model.getApplication(appName);
 		waitForState(app, RunState.RUNNING, 10_000);
@@ -2042,7 +2042,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		harness.answerDeploymentPrompt(ui(), manifest);
 
 		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
-		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
+		model.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
 
 		waitForApps(model, appName);
 		CloudAppDashElement app = model.getApplication(appName);
@@ -2091,7 +2091,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		harness.answerDeploymentPrompt(ui(), manifest);
 
 		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
-		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
+		model.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
 
 		waitForApps(model, appName);
 		CloudAppDashElement app = model.getApplication(appName);
@@ -2138,7 +2138,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
 
 		harness.answerDeploymentPrompt(ui(), manifestFile);
-		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
+		model.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
 
 		waitForApps(model, "foo");
 
@@ -2175,7 +2175,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
 
 		harness.answerDeploymentPrompt(ui(), manifestFile);
-		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
+		model.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
 
 		waitForApps(model, "foo");
 
@@ -2204,7 +2204,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		File referenceJar = BootJarPackagingTest.packageAsJar(project, ui());
 
 		harness.answerDeploymentPrompt(ui(), manifestFile);
-		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
+		model.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
 		waitForApps(model, appName);
 
 		CloudAppDashElement app = model.getApplication(appName);
@@ -2382,7 +2382,7 @@ public class CloudFoundryBootDashModelMockingTest {
 							(specified==null?"":"  health-check-type: "+specified+"\n");
 
 		harness.answerDeploymentPrompt(ui(), new DeploymentAnswerer(yaml));
-		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
+		model.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
 		waitForApps(model, appName);
 		waitForState(model.getApplication(appName), RunState.RUNNING, 4000);
 		waitForJobsToComplete();
@@ -2851,7 +2851,7 @@ store.put(new Key(element, key), value);
 				"  - route: "+host+".cfmockapps.io"+appPath
 		);
 		harness.answerDeploymentPrompt(ui(), manifest);
-		target.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
+		target.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
 		waitForApps(target, appName);
 
 		CloudAppDashElement app = target.getApplication(appName);
@@ -2962,7 +2962,7 @@ store.put(new Key(element, key), value);
 	protected CloudAppDashElement deployApp(final CloudFoundryBootDashModel model, final String appName, IProject project)
 			throws Exception {
 		harness.answerDeploymentPrompt(ui(), appName, appName);
-		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
+		model.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
 
 		waitForApps(model, appName);
 

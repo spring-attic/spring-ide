@@ -187,7 +187,6 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 	}
 
 	private LiveExpression<Integer> actualInstanceCounts = new AsyncLiveExpression<Integer>(0) {
-
 		{
 			dependsOn(children);
 			dependsOn(app);
@@ -215,9 +214,7 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 			}
 			return count;
 		}
-
 	};
-
 
 	private void debug(String message) {
 		if (DEBUG) {

@@ -33,8 +33,10 @@ import java.util.function.Predicate;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.jface.action.IAction;
 import org.junit.After;
 import org.junit.Test;
+import org.junit.rules.RunRules;
 import org.mandas.docker.client.DefaultDockerClient;
 import org.mandas.docker.client.DockerClient;
 import org.mandas.docker.client.DockerClient.ListContainersParam;
@@ -47,6 +49,8 @@ import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.RemoteBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeployToRemoteTargetAction;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.docker.runtarget.DockerApp;
 import org.springframework.ide.eclipse.boot.dash.docker.runtarget.DockerContainer;
@@ -57,12 +61,16 @@ import org.springframework.ide.eclipse.boot.dash.docker.runtarget.DockerTargetPa
 import org.springframework.ide.eclipse.boot.dash.docker.ui.SelectDockerDaemonDialog.Model;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.Taggable;
 import org.springframework.ide.eclipse.boot.dash.model.remote.GenericRemoteAppElement;
 import org.springframework.ide.eclipse.boot.dash.model.remote.GenericRemoteBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.remote.RefreshStateTracker;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.LocalRunTargetType;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget.ConnectMode;
+import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.views.AddRunTargetAction;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.DeleteElementsAction;
@@ -102,6 +110,29 @@ public class BootDashDockerTests {
 		});
 
 		verifyNoMoreInteractions(ui());
+	}
+
+	@Test
+	public void deployAndDebugOnTarget() throws Exception {
+		RemoteBootDashModel model = createDockerTarget();
+		Mockito.reset(ui());
+		IProject project = projects.createBootWebProject("webby", bootVersionAtLeast("2.3.0"));
+
+		BootProjectDashElement localElement = harness.waitForElement(2_000, project);
+		DeployToRemoteTargetAction<?,?> a = debugOnDockerAction();
+		harness.selection.setElements(localElement);
+		assertTrue(a.isEnabled());
+		a.run();
+
+		GenericRemoteAppElement dep = waitForDeployment(model, project);
+		GenericRemoteAppElement img = waitForChild(dep, d -> d instanceof DockerImage);
+		GenericRemoteAppElement con = waitForChild(img, d -> d instanceof DockerContainer);
+
+		ACondition.waitFor("all debugging", BUILD_IMAGE_TIMEOUT, () -> {
+			assertEquals(RunState.DEBUGGING, dep.getRunState());
+			assertEquals(RunState.DEBUGGING, img.getRunState());
+			assertEquals(RunState.DEBUGGING, con.getRunState());
+		});
 	}
 
 	@Test
@@ -150,7 +181,7 @@ public class BootDashDockerTests {
 		harness.reload();
 
 		{
-			GenericRemoteBootDashModel<DockerClient, DockerTargetParams> model = (GenericRemoteBootDashModel<DockerClient, DockerTargetParams>) harness
+			RemoteBootDashModel model = (RemoteBootDashModel) harness
 					.getRunTargetModel(DockerRunTargetType.class);
 			GenericRemoteAppElement dep = waitForDeployment(model, project);
 			GenericRemoteAppElement img = waitForChild(dep, d -> d instanceof DockerImage);
@@ -217,7 +248,7 @@ public class BootDashDockerTests {
 		});
 
 		harness.selection.setElements(dep);
-		getRestartAction().run();
+		restartAction().run();
 
 		ACondition.waitFor("Second container to appear", BUILD_IMAGE_TIMEOUT, () -> {
 			assertEquals(2, img.getChildren().getValues().size());
@@ -250,7 +281,7 @@ public class BootDashDockerTests {
 		harness.assertInstancesLabel("1", "", con2);
 
 		harness.selection.setElements(con);
-		getRestartAction().run();
+		restartAction().run();
 
 		ACondition.waitFor("Both containers running", BUILD_IMAGE_TIMEOUT, () -> {
 			assertTrue(con.getRunState() == RunState.RUNNING);
@@ -273,33 +304,6 @@ public class BootDashDockerTests {
 		harness.assertInstancesLabel("2", "2", img);
 		harness.assertInstancesLabel("1", "", con);
 		harness.assertInstancesLabel("1", "", con2);
-	}
-
-	private RunStateAction getRestartAction() {
-		for (RunStateAction a : actions().getRunStateActions()) {
-			if (a.getGoalState() == RunState.RUNNING) {
-				assertEquals("(Re)start", a.getText());
-				return a;
-			}
-		}
-		fail("Cannot find Restart action!");
-		return null;
-	}
-
-	private void setTags(Taggable e, String... tags) {
-		LinkedHashSet<String> tagSet = new LinkedHashSet<>();
-		for (String tag : tags) {
-			tagSet.add(tag);
-		}
-		e.setTags(tagSet);
-	}
-
-	private void assertTags(Taggable e, String... tags) {
-		LinkedHashSet<String> tagSet = new LinkedHashSet<>();
-		for (String tag : tags) {
-			tagSet.add(tag);
-		}
-		assertEquals(tagSet, e.getTags());
 	}
 
 	@Test
@@ -438,7 +442,7 @@ public class BootDashDockerTests {
 		return ((DockerApp)data).deployment().getSessionId();
 	}
 
-	private String getSessionId(GenericRemoteBootDashModel<DockerClient, DockerTargetParams> model) {
+	private String getSessionId(RemoteBootDashModel model) {
 		DockerRunTarget target = (DockerRunTarget) model.getRunTarget();
 		return target.getSessionId();
 	}
@@ -493,7 +497,7 @@ public class BootDashDockerTests {
 		return selected.get(0);
 	}
 
-	private GenericRemoteAppElement waitForDeployment(GenericRemoteBootDashModel<DockerClient, DockerTargetParams> model,
+	private GenericRemoteAppElement waitForDeployment(RemoteBootDashModel model,
 			IProject project) throws Exception {
 		ACondition.waitFor("project deployment node", 2_000, () -> {
 			getDeployment(model, project);
@@ -558,6 +562,7 @@ public class BootDashDockerTests {
 	);
 	{
 		context.injections.def(DockerRunTargetType.class, DockerRunTargetType::new);
+		context.injections.defInstance(RunTargetType.class, RunTargetTypes.LOCAL);
 	}
 	BootDashViewModelHarness harness = new BootDashViewModelHarness(context);
 	BootProjectTestHarness projects = new BootProjectTestHarness(ResourcesPlugin.getWorkspace());
@@ -588,4 +593,44 @@ public class BootDashDockerTests {
 	}
 
 
+	private DeployToRemoteTargetAction debugOnDockerAction() {
+		ImmutableList<IAction> as = actions().getDebugOnTargetActions();
+		for (IAction a : as) {
+			if (a instanceof DeployToRemoteTargetAction) {
+				DeployToRemoteTargetAction deployAction = (DeployToRemoteTargetAction) a;
+				RemoteRunTarget target = ((DeployToRemoteTargetAction) a).getTarget();
+				if (DockerRunTargetType.class == target.getType().getClass()) {
+					return deployAction;
+				}
+			}
+		}
+		throw new NoSuchElementException("Debug On Docker Target Action not found");
+	}
+
+	private RunStateAction restartAction() {
+		for (RunStateAction a : actions().getRunStateActions()) {
+			if (a.getGoalState() == RunState.RUNNING) {
+				assertEquals("(Re)start", a.getText());
+				return a;
+			}
+		}
+		fail("Cannot find Restart action!");
+		return null;
+	}
+
+	private void setTags(Taggable e, String... tags) {
+		LinkedHashSet<String> tagSet = new LinkedHashSet<>();
+		for (String tag : tags) {
+			tagSet.add(tag);
+		}
+		e.setTags(tagSet);
+	}
+
+	private void assertTags(Taggable e, String... tags) {
+		LinkedHashSet<String> tagSet = new LinkedHashSet<>();
+		for (String tag : tags) {
+			tagSet.add(tag);
+		}
+		assertEquals(tagSet, e.getTags());
+	}
 }

@@ -243,7 +243,7 @@ public class CloudFoundryBootDashModelIntegrationTest {
 		final String appName = appHarness.randomAppName();
 
 		harness.answerDeploymentPrompt(ui(), appName, appName);
-		model.performDeployment(ImmutableSet.of(project.getProject()), ui(), RunState.DEBUGGING);
+		model.performDeployment(ImmutableSet.of(project.getProject()), RunState.DEBUGGING);
 
 		new ACondition("wait for app '"+ appName +"'to be DEBUGGING", APP_DEPLOY_TIMEOUT) {
 			public boolean test() throws Exception {
@@ -325,7 +325,7 @@ public class CloudFoundryBootDashModelIntegrationTest {
 		env.put("FOO", "something");
 		harness.answerDeploymentPrompt(ui(), appName, appName, env);
 
-		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
+		model.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
 
 		new ACondition("wait for app '"+ appName +"'to be RUNNING", APP_DEPLOY_TIMEOUT) {
 			public boolean test() throws Exception {
@@ -363,7 +363,7 @@ public class CloudFoundryBootDashModelIntegrationTest {
 
 		harness.answerDeploymentPrompt(ui(), appName, appName, bindServices);
 
-		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
+		model.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
 
 		new ACondition("wait for app '"+ appName +"'to be RUNNING", APP_DEPLOY_TIMEOUT) {
 			public boolean test() throws Exception {
@@ -395,7 +395,7 @@ public class CloudFoundryBootDashModelIntegrationTest {
 				"  buildpack: staticfile_buildpack"
 		);
 		harness.answerDeploymentPrompt(ui(), manifestFile);
-		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
+		model.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
 
 		ACondition.waitFor("app to appear", APP_IS_VISIBLE_TIMEOUT, () -> {
 			assertNotNull(model.getApplication(appName));
@@ -428,7 +428,7 @@ public class CloudFoundryBootDashModelIntegrationTest {
 				"  buildpack: java_buildpack"
 		);
 		harness.answerDeploymentPrompt(ui(), manifestFile);
-		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
+		model.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
 		ACondition.waitFor("app to appear", APP_IS_VISIBLE_TIMEOUT, () -> {
 			assertNotNull(model.getApplication(appName));
 		});
@@ -466,7 +466,7 @@ public class CloudFoundryBootDashModelIntegrationTest {
 				"  buildpack: java_buildpack"
 		);
 		harness.answerDeploymentPrompt(ui(), manifestFile);
-		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
+		model.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
 		ACondition.waitFor("app to appear", APP_IS_VISIBLE_TIMEOUT, () -> {
 			assertNotNull(model.getApplication(appName));
 		});
@@ -501,7 +501,7 @@ public class CloudFoundryBootDashModelIntegrationTest {
 
 		);
 		harness.answerDeploymentPrompt(ui(), manifestFile);
-		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
+		model.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
 		ACondition.waitFor("app to appear", APP_IS_VISIBLE_TIMEOUT, () -> {
 			assertNotNull(model.getApplication(appName));
 		});
@@ -535,7 +535,7 @@ public class CloudFoundryBootDashModelIntegrationTest {
 
 		);
 		harness.answerDeploymentPrompt(ui(), manifestFile);
-		model.performDeployment(ImmutableSet.of(project), ui(), RunState.RUNNING);
+		model.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
 		ACondition.waitFor("app to appear", APP_IS_VISIBLE_TIMEOUT, () -> {
 			assertNotNull(model.getApplication(appName));
 		});

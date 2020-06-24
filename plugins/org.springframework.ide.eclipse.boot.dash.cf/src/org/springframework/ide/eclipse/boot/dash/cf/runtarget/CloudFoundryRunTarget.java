@@ -36,6 +36,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.osgi.framework.Version;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.api.App;
+import org.springframework.ide.eclipse.boot.dash.api.DebuggableTarget;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFBuildpack;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFCredentials;
@@ -66,7 +67,8 @@ import org.springsource.ide.eclipse.commons.ui.UiUtil;
 
 import com.google.common.collect.ImmutableSet;
 
-public class CloudFoundryRunTarget extends AbstractRunTarget<CloudFoundryTargetProperties> implements RunTargetWithProperties<CloudFoundryTargetProperties>, RemoteRunTarget<ClientRequests, CloudFoundryTargetProperties> {
+public class CloudFoundryRunTarget extends AbstractRunTarget<CloudFoundryTargetProperties>
+implements RunTargetWithProperties<CloudFoundryTargetProperties>, RemoteRunTarget<ClientRequests, CloudFoundryTargetProperties>, DebuggableTarget {
 
 	private CloudFoundryTargetProperties targetProperties;
 
@@ -449,5 +451,10 @@ public class CloudFoundryRunTarget extends AbstractRunTarget<CloudFoundryTargetP
 	@Override
 	public CloudFoundryRunTargetType getType() {
 		return (CloudFoundryRunTargetType) super.getType();
+	}
+
+	@Override
+	public boolean isDebuggingSupported() {
+		return true;
 	}
 }

@@ -13,9 +13,11 @@ package org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.swt.widgets.Display;
+import org.springframework.ide.eclipse.boot.dash.api.DebuggableTarget;
 import org.springframework.ide.eclipse.boot.dash.api.ProjectDeploymentTarget;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.RemoteBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget;
@@ -54,7 +56,6 @@ public class DeployToRemoteTargetAction<Client, Params> extends AbstractBootDash
 				});
 			}
 		};
-
 		target.getClientExp().addListener(connectionListener);
 		updateEnablement();
 	}
@@ -71,8 +72,19 @@ public class DeployToRemoteTargetAction<Client, Params> extends AbstractBootDash
 		setVisible(element != null && element instanceof BootProjectDashElement);
 
 		if (this.target != null && this.target instanceof RemoteRunTarget) {
-			setEnabled(((RemoteRunTarget<?,?>) this.target).isConnected());
+			setEnabled(((RemoteRunTarget<?,?>) this.target).isConnected() && isSupportedMode(element) && targetSupportsDebugging());
 		}
+	}
+
+	private boolean targetSupportsDebugging() {
+		if (target instanceof DebuggableTarget) {
+			return ((DebuggableTarget) target).isDebuggingSupported();
+		}
+		return false;
+	}
+
+	private boolean isSupportedMode(BootDashElement element) {
+		return element!=null && element.supportedGoalStates().contains(runOrDebug);
 	}
 
 	@Override
@@ -82,8 +94,9 @@ public class DeployToRemoteTargetAction<Client, Params> extends AbstractBootDash
 			if (element != null) {
 				final IProject project = element.getProject();
 				if (project != null) {
-					if (target instanceof ProjectDeploymentTarget) {
-						((ProjectDeploymentTarget) target).performDeployment(ImmutableSet.of(project), runOrDebug);
+					BootDashModel targetModel = model.getSectionByTargetId(target.getId());
+					if (targetModel instanceof ProjectDeploymentTarget) {
+						((ProjectDeploymentTarget) targetModel).performDeployment(ImmutableSet.of(project), runOrDebug);
 					}
 				}
 			}
@@ -101,6 +114,10 @@ public class DeployToRemoteTargetAction<Client, Params> extends AbstractBootDash
 	@Override
 	public String toString() {
 		return this.getClass().getSimpleName()+"("+runOrDebug+", "+target+")";
+	}
+
+	public RemoteRunTarget<Client, Params> getTarget() {
+		return target;
 	}
 
 }

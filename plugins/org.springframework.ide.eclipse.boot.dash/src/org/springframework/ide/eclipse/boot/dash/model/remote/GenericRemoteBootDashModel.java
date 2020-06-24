@@ -41,7 +41,7 @@ import org.springsource.ide.eclipse.commons.livexp.util.Log;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 
-public class GenericRemoteBootDashModel<Client, Params> extends RemoteBootDashModel implements ModifiableModel {
+public class GenericRemoteBootDashModel<Client, Params> extends RemoteBootDashModel {
 
 	private LiveSetVariable<String> existingAppIds = new LiveSetVariable<>();
 
@@ -176,20 +176,6 @@ public class GenericRemoteBootDashModel<Client, Params> extends RemoteBootDashMo
 		return false;
 	}
 
-	protected IProject getProject(Object obj) {
-		IProject project = null;
-		if (obj instanceof IProject) {
-			project = (IProject) obj;
-		} else if (obj instanceof IJavaProject) {
-			project = ((IJavaProject) obj).getProject();
-		} else if (obj instanceof IAdaptable) {
-			project = (IProject) ((IAdaptable) obj).getAdapter(IProject.class);
-		} else if (obj instanceof BootDashElement) {
-			project = ((BootDashElement) obj).getProject();
-		}
-		return project;
-	}
-
 	protected boolean isFromDifferentTarget(Object dropSource) {
 		if (dropSource instanceof BootDashElement) {
 			return ((BootDashElement) dropSource).getBootDashModel() != this;
@@ -199,22 +185,17 @@ public class GenericRemoteBootDashModel<Client, Params> extends RemoteBootDashMo
 		return true;
 	}
 
-
 	@Override
-	public void add(List<Object> sources) throws Exception {
-		ProjectDeploymentTarget target = (ProjectDeploymentTarget) getRunTarget();
-		Set<IProject> toDeploy = new HashSet<>();
-		for (Object dropped : sources) {
-			IProject project = getProject(dropped);
-			if (project!=null) {
-				toDeploy.add(project);
-			}
-		}
+	public void performDeployment(Set<IProject> toDeploy, RunState runOrDebug) throws Exception {
 		if (!toDeploy.isEmpty()) {
-			refreshTracker.run("Creating deployment", () -> {
-				target.performDeployment(toDeploy, RunState.RUNNING);
-			});
-			refresh(ui());
+			RemoteRunTarget<Client, Params> _target = getRunTarget();
+			if (_target instanceof ProjectDeploymentTarget) {
+				ProjectDeploymentTarget target = (ProjectDeploymentTarget) _target;
+				refreshTracker.run("Creating deployment", () -> {
+					target.performDeployment(toDeploy, runOrDebug);
+				});
+				refresh(ui());
+			}
 		}
 	}
 

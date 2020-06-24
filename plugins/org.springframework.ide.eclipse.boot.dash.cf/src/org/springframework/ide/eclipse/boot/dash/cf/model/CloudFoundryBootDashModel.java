@@ -10,14 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cf.model;
 
-import static org.springframework.ide.eclipse.boot.dash.model.AbstractLaunchConfigurationsDashElement.READY_STATES;
-
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,12 +39,10 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.text.edits.MalformedTreeException;
@@ -93,28 +87,20 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlFil
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlInput;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel.Result;
-import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
 import org.springframework.ide.eclipse.boot.dash.model.AsyncDeletable;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
-import org.springframework.ide.eclipse.boot.dash.model.ModifiableModel;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
-import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
-import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
-import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
-import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
-import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 import org.springsource.ide.eclipse.commons.livexp.util.OldValueDisposer;
@@ -122,12 +108,11 @@ import org.yaml.snakeyaml.Yaml;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSet.Builder;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-public class CloudFoundryBootDashModel extends RemoteBootDashModel implements ModifiableModel {
+public class CloudFoundryBootDashModel extends RemoteBootDashModel {
 
 	private DebugStrategyManager cfDebugStrategies;
 
@@ -352,34 +337,6 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 		return false;
 	}
 
-	@Override
-	public void add(List<Object> sources) throws Exception {
-		Builder<IProject> projects = ImmutableSet.builder();
-		if (sources != null) {
-			for (Object obj : sources) {
-				IProject project = getProject(obj);
-				if (project != null) {
-					projects.add(project);
-				}
-			}
-			performDeployment(projects.build(), ui(), RunState.RUNNING);
-		}
-	}
-
-	protected IProject getProject(Object obj) {
-		IProject project = null;
-		if (obj instanceof IProject) {
-			project = (IProject) obj;
-		} else if (obj instanceof IJavaProject) {
-			project = ((IJavaProject) obj).getProject();
-		} else if (obj instanceof IAdaptable) {
-			project = (IProject) ((IAdaptable) obj).getAdapter(IProject.class);
-		} else if (obj instanceof BootDashElement) {
-			project = ((BootDashElement) obj).getProject();
-		}
-		return project;
-	}
-
 	protected boolean isFromDifferentTarget(Object dropSource) {
 		if (dropSource instanceof BootDashElement) {
 			return ((BootDashElement) dropSource).getBootDashModel() != this;
@@ -390,14 +347,14 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel implements Mo
 		return true;
 	}
 
+	@Override
 	public void performDeployment(
 			final Set<IProject> projectsToDeploy,
-			final UserInteractions ui,
 			RunState runOrDebug
 	) throws Exception {
 		DebugSupport debugSuppport = getDebugSupport();
-		runAsynch(new ProjectsDeployer(CloudFoundryBootDashModel.this, ui, projectsToDeploy, runOrDebug, debugSuppport),
-				ui);
+		runAsynch(new ProjectsDeployer(CloudFoundryBootDashModel.this, ui(), projectsToDeploy, runOrDebug, debugSuppport),
+				ui());
 	}
 
 	public CloudAppDashElement addElement(CFApplicationDetail appDetail, IProject project) throws Exception {

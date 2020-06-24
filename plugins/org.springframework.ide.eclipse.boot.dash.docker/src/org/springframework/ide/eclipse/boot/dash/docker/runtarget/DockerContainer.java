@@ -20,6 +20,7 @@ import org.eclipse.swt.SWT;
 import org.springframework.ide.eclipse.boot.dash.api.ActualInstanceCount;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.AppContext;
+import org.springframework.ide.eclipse.boot.dash.api.DebuggableApp;
 import org.springframework.ide.eclipse.boot.dash.api.Deletable;
 import org.springframework.ide.eclipse.boot.dash.api.JmxConnectable;
 import org.springframework.ide.eclipse.boot.dash.api.PortConnectable;
@@ -38,8 +39,9 @@ import org.mandas.docker.client.DockerClient;
 import org.mandas.docker.client.exceptions.ContainerNotFoundException;
 import org.mandas.docker.client.messages.Container;
 
-public class DockerContainer implements App, RunStateProvider, JmxConnectable, Styleable, PortConnectable, Deletable, ActualInstanceCount {
+public class DockerContainer implements App, RunStateProvider, JmxConnectable, Styleable, PortConnectable, Deletable, ActualInstanceCount, DebuggableApp {
 
+	public  static final EnumSet<RunState> SUPPORTED_GOAL_STATES = EnumSet.of(RunState.RUNNING, RunState.DEBUGGING, RunState.INACTIVE);
 	private static final Duration WAIT_BEFORE_KILLING = Duration.ofSeconds(10);
 	private static final boolean DEBUG = true;
 	private final Container container;
@@ -61,7 +63,9 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 	public RunState fetchRunState() {
 		String state = container.state();
 		if ("running".equals(state)) {
-			return RunState.RUNNING;
+			return (container.labels().get(DockerApp.DEBUG_PORT)!=null) 
+					? RunState.DEBUGGING
+					: RunState.RUNNING;
 		} else if ("exited".equals(state)) {
 			return RunState.INACTIVE;
 		}
@@ -121,7 +125,7 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 	
 	@Override
 	public EnumSet<RunState> supportedGoalStates() {
-		return EnumSet.of(RunState.RUNNING, RunState.INACTIVE);
+		return SUPPORTED_GOAL_STATES;
 	}
 	
 	@Override
@@ -206,7 +210,6 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 							return null;
 						});
 				debug("Deleted");
-
 			});
 		}
 	}
@@ -214,5 +217,10 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 	@Override
 	public int getActualInstances() {
 		return fetchRunState().isActive() ? 1 : 0;
+	}
+
+	@Override
+	public int getDebugPort() {
+		return fetchRunState().isActive() ? Integer.valueOf(container.labels().get(DockerApp.DEBUG_PORT)) : -1;
 	}
 }
