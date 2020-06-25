@@ -421,26 +421,38 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 	public void stateChanged(BootDashElement e) {
 		this.livePorts.refresh();
 		this.actualInstanceCounts.refresh();
+		RemoteJavaLaunchUtil.synchronizeWith(this);
 	}
 
-	public ImmutableSet<Integer> getDebugPorts() {
+	/**
+	 * Summarise all the debug ports either defined by this node or it's children.
+	 */
+	public ImmutableSet<Integer> getDebugPortSummary() {
 		ImmutableSet.Builder<Integer> ports = ImmutableSet.builder();
 		collectDebugPorts(ports);
 		return ports.build();
 	}
 
 	private void collectDebugPorts(Builder<Integer> ports) {
-		App data = getAppData();
-		if (data instanceof DebuggableApp) {
-			int port = ((DebuggableApp) data).getDebugPort();
-			if (port>0) {
-				ports.add(port);
-			}
+		int port = getDebugPort();
+		if (port>0) {
+			ports.add(port);
 		}
 		for (BootDashElement c : children.getValues()) {
 			if (c instanceof GenericRemoteAppElement) {
 				((GenericRemoteAppElement)c).collectDebugPorts(ports);
 			}
 		}
+	}
+
+	/**
+	 * Summarise all the debug ports either defined by this node or it's children.
+	 */
+	public int getDebugPort() {
+		App data = getAppData();
+		if (data instanceof DebuggableApp) {
+			return ((DebuggableApp) data).getDebugPort();
+		}
+		return -1;
 	}
 }

@@ -15,6 +15,8 @@ import java.util.EnumSet;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.SWT;
 import org.mandas.docker.client.DockerClient;
@@ -27,6 +29,7 @@ import org.springframework.ide.eclipse.boot.dash.api.DebuggableApp;
 import org.springframework.ide.eclipse.boot.dash.api.Deletable;
 import org.springframework.ide.eclipse.boot.dash.api.JmxConnectable;
 import org.springframework.ide.eclipse.boot.dash.api.PortConnectable;
+import org.springframework.ide.eclipse.boot.dash.api.ProjectRelatable;
 import org.springframework.ide.eclipse.boot.dash.api.RunStateProvider;
 import org.springframework.ide.eclipse.boot.dash.api.Styleable;
 import org.springframework.ide.eclipse.boot.dash.docker.jmx.JmxSupport;
@@ -39,7 +42,7 @@ import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.common.collect.ImmutableSet;
 
-public class DockerContainer implements App, RunStateProvider, JmxConnectable, Styleable, PortConnectable, Deletable, ActualInstanceCount, DebuggableApp {
+public class DockerContainer implements App, RunStateProvider, JmxConnectable, Styleable, PortConnectable, Deletable, ActualInstanceCount, DebuggableApp, ProjectRelatable {
 
 	private static final Duration WAIT_BEFORE_KILLING = Duration.ofSeconds(10);
 	private static final boolean DEBUG = true;
@@ -100,7 +103,7 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 		if (container.names() != null && !container.names().isEmpty()) {
 			styledString = styledString.append(StringUtil.removePrefix(container.names().get(0), "/")).append(" ");
 		}
-		styledString = styledString.append(getShortHash(), stylers.italicColoured(SWT.COLOR_DARK_GRAY));
+		styledString = styledString.append(getShortHash(), stylers==null?null:stylers.italicColoured(SWT.COLOR_DARK_GRAY));
 		return styledString;
 	}
 
@@ -238,5 +241,18 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 			Log.log(e);
 		}
 		return -1;
+	}
+
+	@Override
+	public IProject getProject() {
+		try {
+			String projectName = container.labels().get(DockerApp.APP_NAME);
+			if (projectName!=null) {
+				return ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+			}
+		} catch (Exception e) {
+			Log.log(e);
+		}
+		return null;
 	}
 }

@@ -29,7 +29,7 @@ public class DebugPortPropertyControl extends AbstractBdePropertyControl {
 			String portStr = "";
 			if (element instanceof GenericRemoteAppElement) {
 				GenericRemoteAppElement app = (GenericRemoteAppElement) element;
-				ImmutableSet<Integer> ports = app.getDebugPorts();
+				ImmutableSet<Integer> ports = app.getDebugPortSummary();
 				portStr = StringUtil.collectionToCommaDelimitedString(ports);
 			}
 			ports.setText(portStr);
