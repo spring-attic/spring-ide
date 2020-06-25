@@ -17,6 +17,9 @@ import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.SWT;
+import org.mandas.docker.client.DockerClient;
+import org.mandas.docker.client.exceptions.ContainerNotFoundException;
+import org.mandas.docker.client.messages.Container;
 import org.springframework.ide.eclipse.boot.dash.api.ActualInstanceCount;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.AppContext;
@@ -35,10 +38,6 @@ import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.common.collect.ImmutableSet;
-import org.mandas.docker.client.DockerClient;
-import org.mandas.docker.client.exceptions.ContainerNotFoundException;
-import org.mandas.docker.client.messages.Container;
-import org.omg.PortableInterceptor.INACTIVE;
 
 public class DockerContainer implements App, RunStateProvider, JmxConnectable, Styleable, PortConnectable, Deletable, ActualInstanceCount, DebuggableApp {
 
