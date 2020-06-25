@@ -23,7 +23,8 @@ public class GenericRemoteAppGeneralPropertiesSection extends AbstractBdeGeneral
 				new AppPropertyControl(),
 				new UrlPropertyControl<>(BootDashElement.class, "URL:", (e) -> e.getUrl()),
 				new DefaultPathPropertyControl(),
-				new TagsPropertyControl()
+				new TagsPropertyControl(),
+				new DebugPortPropertyControl()
 		};
 	}
 

@@ -104,7 +104,7 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 
 	@Override
 	public EnumSet<RunState> supportedGoalStates() {
-		return DockerContainer.SUPPORTED_GOAL_STATES;
+		return EnumSet.of(RunState.INACTIVE, RunState.RUNNING, RunState.DEBUGGING);
 	}
 	
 	@Override

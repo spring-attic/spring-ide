@@ -23,6 +23,7 @@ import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModel;
 import org.springframework.ide.eclipse.boot.dash.api.ActualInstanceCount;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.AppContext;
+import org.springframework.ide.eclipse.boot.dash.api.DebuggableApp;
 import org.springframework.ide.eclipse.boot.dash.api.Deletable;
 import org.springframework.ide.eclipse.boot.dash.api.DesiredInstanceCount;
 import org.springframework.ide.eclipse.boot.dash.api.PortConnectable;
@@ -51,6 +52,7 @@ import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet.Builder;
 
 public class GenericRemoteAppElement extends WrappingBootDashElement<String> implements Deletable, AppContext, Styleable, ElementStateListener {
 
@@ -421,4 +423,24 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		this.actualInstanceCounts.refresh();
 	}
 
+	public ImmutableSet<Integer> getDebugPorts() {
+		ImmutableSet.Builder<Integer> ports = ImmutableSet.builder();
+		collectDebugPorts(ports);
+		return ports.build();
+	}
+
+	private void collectDebugPorts(Builder<Integer> ports) {
+		App data = getAppData();
+		if (data instanceof DebuggableApp) {
+			int port = ((DebuggableApp) data).getDebugPort();
+			if (port>0) {
+				ports.add(port);
+			}
+		}
+		for (BootDashElement c : children.getValues()) {
+			if (c instanceof GenericRemoteAppElement) {
+				((GenericRemoteAppElement)c).collectDebugPorts(ports);
+			}
+		}
+	}
 }

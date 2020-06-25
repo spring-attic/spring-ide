@@ -38,10 +38,10 @@ import com.google.common.collect.ImmutableSet;
 import org.mandas.docker.client.DockerClient;
 import org.mandas.docker.client.exceptions.ContainerNotFoundException;
 import org.mandas.docker.client.messages.Container;
+import org.omg.PortableInterceptor.INACTIVE;
 
 public class DockerContainer implements App, RunStateProvider, JmxConnectable, Styleable, PortConnectable, Deletable, ActualInstanceCount, DebuggableApp {
 
-	public  static final EnumSet<RunState> SUPPORTED_GOAL_STATES = EnumSet.of(RunState.RUNNING, RunState.DEBUGGING, RunState.INACTIVE);
 	private static final Duration WAIT_BEFORE_KILLING = Duration.ofSeconds(10);
 	private static final boolean DEBUG = true;
 	private final Container container;
@@ -125,7 +125,11 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 	
 	@Override
 	public EnumSet<RunState> supportedGoalStates() {
-		return SUPPORTED_GOAL_STATES;
+		if (container.labels().get(DockerApp.DEBUG_PORT)!=null) {
+			return EnumSet.of(RunState.INACTIVE, RunState.DEBUGGING);
+		} else {
+			return EnumSet.of(RunState.INACTIVE, RunState.RUNNING);
+		}
 	}
 	
 	@Override
@@ -221,6 +225,19 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 
 	@Override
 	public int getDebugPort() {
-		return fetchRunState().isActive() ? Integer.valueOf(container.labels().get(DockerApp.DEBUG_PORT)) : -1;
+		try {
+			if (fetchRunState().isActive()) {
+				String portStr = container.labels().get(DockerApp.DEBUG_PORT);
+				if (portStr!=null) {
+					int port = Integer.valueOf(portStr);
+					if (port>0) {
+						return port;
+					}
+				}
+			}
+		} catch (Exception e) {
+			Log.log(e);
+		}
+		return -1;
 	}
 }
