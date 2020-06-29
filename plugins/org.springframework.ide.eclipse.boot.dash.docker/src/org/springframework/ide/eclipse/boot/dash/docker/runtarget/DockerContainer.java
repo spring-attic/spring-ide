@@ -20,6 +20,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.SWT;
 import org.mandas.docker.client.DockerClient;
+import org.mandas.docker.client.DockerClient.RemoveContainerParam;
 import org.mandas.docker.client.exceptions.ContainerNotFoundException;
 import org.mandas.docker.client.messages.Container;
 import org.springframework.ide.eclipse.boot.dash.api.ActualInstanceCount;
@@ -203,7 +204,7 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 			RefreshStateTracker rt = this.refreshTracker.get();
 			rt.run("Deleting " + getShortHash(), () -> {
 				debug("Deleting");
-				client.removeContainer(container.id());
+				client.removeContainer(container.id(), RemoveContainerParam.forceKill());
 				debug("Waiting for Deleting");
 
 				RetryUtil.until(100, WAIT_BEFORE_KILLING.toMillis(),

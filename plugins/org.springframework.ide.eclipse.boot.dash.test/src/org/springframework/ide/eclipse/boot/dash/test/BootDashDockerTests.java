@@ -15,6 +15,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -30,6 +32,7 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -46,6 +49,7 @@ import org.mandas.docker.client.DockerClient;
 import org.mandas.docker.client.DockerClient.ListContainersParam;
 import org.mandas.docker.client.DockerClient.ListImagesParam;
 import org.mandas.docker.client.DockerClient.RemoveContainerParam;
+import org.mandas.docker.client.exceptions.DockerException;
 import org.mandas.docker.client.messages.Container;
 import org.mandas.docker.client.messages.ContainerInfo;
 import org.mandas.docker.client.messages.Image;
@@ -163,20 +167,50 @@ public class BootDashDockerTests {
 		});
 	}
 
-	private ILaunch assertActiveDebugLaunch(GenericRemoteAppElement el) throws CoreException {
-		DockerContainer container = (DockerContainer)el.getAppData();
-		String containerId = container.getName();
-		List<ILaunch> launches = new ArrayList<>();
-		for (ILaunch l : DebugPlugin.getDefault().getLaunchManager().getLaunches()) {
-			if (!l.isTerminated()) {
-				ILaunchConfiguration conf = l.getLaunchConfiguration();
-				if (conf!=null && containerId.equals(conf.getAttribute(RemoteJavaLaunchUtil.APP_NAME, ""))) {
-					launches.add(l);
-				}
-			}
-		}
-		assertEquals(1, launches.size());
-		return launches.get(0);
+	@Test
+	public void deleteRunningContainer() throws Exception {
+		GenericRemoteBootDashModel<DockerClient, DockerTargetParams> model = createDockerTarget();
+		Mockito.reset(ui());
+		IProject project = projects.createBootWebProject("webby", bootVersionAtLeast("2.3.0"));
+
+		dragAndDrop(project, model);
+		GenericRemoteAppElement dep = waitForDeployment(model, project);
+		GenericRemoteAppElement img = waitForChild(dep, d -> d instanceof DockerImage);
+		GenericRemoteAppElement con = waitForChild(img, d -> d instanceof DockerContainer);
+
+		ACondition.waitFor("all started", BUILD_IMAGE_TIMEOUT, () -> {
+			assertEquals(RunState.RUNNING, dep.getRunState());
+			assertEquals(RunState.RUNNING, img.getRunState());
+			assertEquals(RunState.RUNNING, con.getRunState());
+		});
+
+		verifyNoMoreInteractions(ui());
+
+		String containerId = con.getName();
+		assertEquals(1, listContainersWithId(containerId).size());
+
+		when(ui().confirmOperation(eq("Deleting Elements"), any())).thenReturn(true);
+		DeleteElementsAction<?> delete = actions().getDeleteAppsAction();
+		harness.selection.setElements(con);
+		assertTrue(delete.isEnabled());
+		delete.run();
+
+		ACondition.waitFor("container deleted", 5_000, () -> {
+			assertTrue(img.getChildren().getValue().isEmpty());
+			assertEquals(0, listContainersWithId(containerId).size());
+		});
+	}
+
+	private List<Container> listContainersWithId(String containerId)
+			throws DockerException, InterruptedException {
+		return
+				client().listContainers(
+						ListContainersParam.allContainers(),
+						ListContainersParam.withLabel(DockerApp.APP_NAME)
+				)
+				.stream()
+				.filter(c -> c.id().equals(containerId))
+				.collect(Collectors.toList());
 	}
 
 	@Test
@@ -559,6 +593,22 @@ public class BootDashDockerTests {
 	@After
 	public void cleanup() {
 		RefreshStateTracker.clearDebugObservers();
+	}
+
+	private ILaunch assertActiveDebugLaunch(GenericRemoteAppElement el) throws CoreException {
+		DockerContainer container = (DockerContainer)el.getAppData();
+		String containerId = container.getName();
+		List<ILaunch> launches = new ArrayList<>();
+		for (ILaunch l : DebugPlugin.getDefault().getLaunchManager().getLaunches()) {
+			if (!l.isTerminated()) {
+				ILaunchConfiguration conf = l.getLaunchConfiguration();
+				if (conf!=null && containerId.equals(conf.getAttribute(RemoteJavaLaunchUtil.APP_NAME, ""))) {
+					launches.add(l);
+				}
+			}
+		}
+		assertEquals(1, launches.size());
+		return launches.get(0);
 	}
 
 	private String getSessionId(GenericRemoteAppElement dep) {
