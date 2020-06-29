@@ -158,9 +158,9 @@ public class BootDashDockerTests {
 
 		assertEquals(ImmutableSet.of(conf), con.getLaunchConfigs());
 
-		model.refresh(ui()); //TODO: this should not be necessary. We should somehow create a launch listener
-						// which should trigger a refresh automatically when a relevant launches terminates.
 		ACondition.waitFor("all stopped", BUILD_IMAGE_TIMEOUT, () -> {
+			model.refresh(ui()); //TODO: this should not be necessary. We should somehow create a launch listener
+			// which should trigger a refresh automatically when a relevant launches terminates.
 			assertEquals(RunState.INACTIVE, dep.getRunState());
 			assertEquals(RunState.INACTIVE, img.getRunState());
 			assertEquals(RunState.INACTIVE, con.getRunState());
@@ -298,7 +298,7 @@ public class BootDashDockerTests {
 	public void dragAndDropGradleProject() throws Exception {
 		GenericRemoteBootDashModel<DockerClient, DockerTargetParams> model = createDockerTarget();
 		Mockito.reset(ui());
-		IProject project = projects.createBootWebProject("webby", bootVersionAtLeast("2.3.0"), withImportStrategy("GRADLE-Buildship 3.x"));
+		IProject project = projects.createBootWebProject("webby", bootVersionAtLeast("2.3.0"), withImportStrategy("GRADLE"));
 
 		dragAndDrop(project, model);
 		GenericRemoteAppElement dep = waitForDeployment(model, project);
