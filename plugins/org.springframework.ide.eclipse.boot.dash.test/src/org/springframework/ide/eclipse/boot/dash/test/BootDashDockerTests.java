@@ -159,8 +159,6 @@ public class BootDashDockerTests {
 		assertEquals(ImmutableSet.of(conf), con.getLaunchConfigs());
 
 		ACondition.waitFor("all stopped", BUILD_IMAGE_TIMEOUT, () -> {
-			model.refresh(ui()); //TODO: this should not be necessary. We should somehow create a launch listener
-			// which should trigger a refresh automatically when a relevant launches terminates.
 			assertEquals(RunState.INACTIVE, dep.getRunState());
 			assertEquals(RunState.INACTIVE, img.getRunState());
 			assertEquals(RunState.INACTIVE, con.getRunState());

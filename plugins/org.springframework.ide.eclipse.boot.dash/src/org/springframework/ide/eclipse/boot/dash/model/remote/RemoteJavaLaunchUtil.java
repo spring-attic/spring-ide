@@ -49,20 +49,34 @@ public class RemoteJavaLaunchUtil {
 	 */
 	public synchronized static void synchronizeWith(GenericRemoteAppElement app) {
 		if (isDebuggable(app)) {
-			ensureDebuggerAttached(app);
+			 ILaunch l = ensureDebuggerAttached(app);
+			 if (l!=null) {
+				 terminationListener().add(l, app);
+			 }
 		}
 	}
 
-	private static void ensureDebuggerAttached(GenericRemoteAppElement app) {
+	private static DebugLaunchTerminationListener terminationListener;
+
+	private synchronized static DebugLaunchTerminationListener terminationListener() {
+		if (terminationListener==null) {
+			terminationListener = new DebugLaunchTerminationListener();
+			DebugPlugin.getDefault().getLaunchManager().addLaunchListener(terminationListener);
+		}
+		return terminationListener;
+	}
+
+	private static ILaunch ensureDebuggerAttached(GenericRemoteAppElement app) {
 		try {
 			ILaunchConfiguration conf = getLaunchConfig(app);
 			if (conf==null) {
 				conf = createLaunchConfig(app);
 			}
-			ensureActiveLaunch(conf);
+			return ensureActiveLaunch(conf);
 		} catch (Exception e) {
 			Log.log(e);
 		}
+		return null;
 	}
 
 
@@ -84,17 +98,16 @@ public class RemoteJavaLaunchUtil {
 		return wc.doSave();
 	}
 
-
-	private static void ensureActiveLaunch(ILaunchConfiguration conf) throws CoreException {
+	private static ILaunch ensureActiveLaunch(ILaunchConfiguration conf) throws CoreException {
 		ILaunchManager lm = DebugPlugin.getDefault().getLaunchManager();
 		for (ILaunch l : lm.getLaunches()) {
 			if (conf.equals(l.getLaunchConfiguration())) {
 				if (!l.isTerminated()) {
-					return;
+					return null;
 				}
 			}
 		};
-		conf.launch(ILaunchManager.DEBUG_MODE, new NullProgressMonitor(), false, true);
+		return conf.launch(ILaunchManager.DEBUG_MODE, new NullProgressMonitor(), false, true);
 	}
 
 	private static ILaunchConfiguration getLaunchConfig(GenericRemoteAppElement app) {

@@ -112,7 +112,7 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		children.dependsOn(refreshTracker.refreshState);
 	}
 
-	private LiveExpression<RunState> baseRunState = new AsyncLiveExpression<RunState>(RunState.UNKNOWN) {
+	LiveExpression<RunState> baseRunState = new AsyncLiveExpression<RunState>(RunState.UNKNOWN) {
 		{
 			dependsOn(app);
 			dependsOn(children);
