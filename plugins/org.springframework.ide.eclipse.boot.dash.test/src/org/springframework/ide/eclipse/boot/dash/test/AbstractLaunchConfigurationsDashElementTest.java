@@ -200,7 +200,7 @@ public class AbstractLaunchConfigurationsDashElementTest extends Mocks {
 
 		element.restart(RunState.RUNNING, ui);
 
-		verify(element).stopSync();;
+		verify(element).stopSync();
 		verify(element).launch(ILaunchManager.RUN_MODE, conf);
 		verifyZeroInteractions(ui);
 	}
@@ -230,7 +230,7 @@ public class AbstractLaunchConfigurationsDashElementTest extends Mocks {
 
 		element.restartAndExpose(RunState.RUNNING, ngrokClient, eurekaInstance, ui);
 
-		verify(element).stopSync();;
+		verify(element).stopSync();
 		verify(element).launch(ILaunchManager.RUN_MODE, copyOfConf);
 		verifyZeroInteractions(ui);
 

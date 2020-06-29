@@ -26,29 +26,28 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaRuntime;
-import org.eclipse.ui.views.navigator.CollapseAllAction;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
 public class RemoteJavaLaunchUtil {
 
 	public static void cleanupOldLaunchConfigs(Collection<GenericRemoteAppElement> existinginElements) {
+		//TODO: implement this and find a good place and time to call it from.
 		Set<String> validIds = new HashSet<>();
 		for (GenericRemoteAppElement el : existinginElements) {
 
 		}
 	}
 
-	private static final String APP_NAME = "sts.boot.dash.element.name";;
+	public static final String APP_NAME = "sts.boot.dash.element.name";
 
 	/**
-	 * Check the stte of a remote boot dash element and whether it needs to have a debugger
-	 * attached. Depending on that either make sure there is a debugger attached or
-	 * cleanup existing debugger if not needed anymore.
+	 * Check the state of a remote boot dash element and whether it needs to have a debugger
+	 * attached. If yes, make sure there is a debugger attached.
 	 */
 	public synchronized static void synchronizeWith(GenericRemoteAppElement app) {
-		System.out.println("debugPort = " +app.getDebugPort());
 		if (isDebuggable(app)) {
 			ensureDebuggerAttached(app);
 		}
@@ -86,22 +85,17 @@ public class RemoteJavaLaunchUtil {
 	}
 
 
-	private static void ensureActiveLaunch(ILaunchConfiguration conf) {
-		try {
-			ILaunchManager lm = DebugPlugin.getDefault().getLaunchManager();
-			for (ILaunch l : lm.getLaunches()) {
-				if (conf.equals(l.getLaunchConfiguration())) {
-					if (!l.isTerminated()) {
-						return;
-					}
+	private static void ensureActiveLaunch(ILaunchConfiguration conf) throws CoreException {
+		ILaunchManager lm = DebugPlugin.getDefault().getLaunchManager();
+		for (ILaunch l : lm.getLaunches()) {
+			if (conf.equals(l.getLaunchConfiguration())) {
+				if (!l.isTerminated()) {
+					return;
 				}
-			};
-			conf.launch(ILaunchManager.DEBUG_MODE, new NullProgressMonitor(), false, true);
-		} catch (Exception e) {
-			Log.log(e);
-		}
+			}
+		};
+		conf.launch(ILaunchManager.DEBUG_MODE, new NullProgressMonitor(), false, true);
 	}
-
 
 	private static ILaunchConfiguration getLaunchConfig(GenericRemoteAppElement app) {
 		try {
@@ -146,5 +140,26 @@ public class RemoteJavaLaunchUtil {
 			Log.log(e);
 		}
 		return false;
+	}
+
+	public static ImmutableSet<ILaunchConfiguration> getLaunchConfigs(GenericRemoteAppElement element) {
+		try {
+			String appName = element.getName();
+			ILaunchManager lm = DebugPlugin.getDefault().getLaunchManager();
+			ILaunchConfigurationType type = lm.getLaunchConfigurationType(IJavaLaunchConfigurationConstants.ID_REMOTE_JAVA_APPLICATION);
+			ILaunchConfiguration[] confs = lm.getLaunchConfigurations(type);
+			if (confs!=null) {
+				ImmutableSet.Builder<ILaunchConfiguration> found = ImmutableSet.builder();
+				for (ILaunchConfiguration c : confs) {
+					if (appName.equals(c.getAttribute(APP_NAME, (String)null))) {
+						found.add(c);
+					}
+				}
+				return found.build();
+			}
+		} catch (Exception e) {
+			Log.log(e);
+		}
+		return ImmutableSet.of();
 	}
 }

@@ -445,6 +445,11 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		}
 	}
 
+	@Override
+	public ImmutableSet<ILaunchConfiguration> getLaunchConfigs() {
+		return RemoteJavaLaunchUtil.getLaunchConfigs(this);
+	}
+
 	/**
 	 * Summarise all the debug ports either defined by this node or it's children.
 	 */

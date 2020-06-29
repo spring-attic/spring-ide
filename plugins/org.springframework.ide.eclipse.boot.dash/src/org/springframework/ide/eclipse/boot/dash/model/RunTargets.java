@@ -20,5 +20,5 @@ public class RunTargets {
 
 	public static final EnumSet<RunState> LOCAL_RUN_GOAL_STATES = EnumSet.of(INACTIVE, RUNNING, DEBUGGING);
 
-	public static final RunTarget LOCAL = LocalRunTarget.INSTANCE;;
+	public static final RunTarget LOCAL = LocalRunTarget.INSTANCE;
 }

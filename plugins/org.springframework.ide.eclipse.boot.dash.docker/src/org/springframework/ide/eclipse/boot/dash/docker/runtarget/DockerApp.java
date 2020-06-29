@@ -378,7 +378,7 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 	public void setGoalState(RunState newGoalState) {
 		DockerDeployment deployment = deployment();
 		if (deployment.getRunState()!=newGoalState) {
-			target.deployments.createOrUpdate(deployment.withGoalState(newGoalState));
+			target.deployments.createOrUpdate(deployment.withGoalState(newGoalState, target.sessionId.getValue()));
 		}
 	}
 

@@ -45,6 +45,8 @@ public class DockerDeployment implements Nameable, DesiredInstanceCount {
 	public DockerDeployment(DockerDeployment copyFrom) {
 		this.name = copyFrom.name;
 		this.runState = copyFrom.runState;
+		this.buildId = copyFrom.buildId;
+		this.sessionId = copyFrom.sessionId;
 	}
 	
 	public String getName() {
@@ -60,9 +62,10 @@ public class DockerDeployment implements Nameable, DesiredInstanceCount {
 		this.runState = runState;
 	}
 
-	public DockerDeployment withGoalState(RunState newGoalState) {
+	public DockerDeployment withGoalState(RunState newGoalState, String sessionId) {
 		DockerDeployment d = new DockerDeployment(this);
 		d.setRunState(newGoalState);
+		d.setSessionId(sessionId);
 		return d;
 	}
 

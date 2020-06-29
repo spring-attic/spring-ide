@@ -66,7 +66,7 @@ public abstract class AbstractBdeGeneralPropertiesSection extends AbstractBdePro
 	public void refresh() {
 		super.refresh();
 		for (BootDashElementPropertyControl control : propertyControls) {
-			control.refreshControl();;
+			control.refreshControl();
 		}
 	}
 

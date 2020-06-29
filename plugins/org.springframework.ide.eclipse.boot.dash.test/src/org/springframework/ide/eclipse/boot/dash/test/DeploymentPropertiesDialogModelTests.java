@@ -618,7 +618,7 @@ public class DeploymentPropertiesDialogModelTests {
 	@Test public void testValidMultiAppFileSelectedForDeployedApp() throws Exception {
 		String appName = "my-test-app";
 		IProject project = projects.createProject("p1");
-		CFApplication deployedApp = createCfApp(appName, 512);;
+		CFApplication deployedApp = createCfApp(appName, 512);
 
 		IFile validFileMultiName = createFile(project, "manifest.yml",
 				"applications:\n" +
