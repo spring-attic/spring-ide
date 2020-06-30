@@ -53,11 +53,6 @@
 							</requirement>
 							<requirement>
 								<type>eclipse-plugin</type>
-								<id>org.springframework.ide.eclipse.buildship20</id>
-								<versionRange>0.0.0</versionRange>
-							</requirement>
-							<requirement>
-								<type>eclipse-plugin</type>
 								<id>org.springframework.ide.eclipse.buildship30</id>
 								<versionRange>0.0.0</versionRange>
 							</requirement>
