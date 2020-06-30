@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views.properties;
 
+import org.springframework.ide.eclipse.boot.dash.api.App;
+import org.springframework.ide.eclipse.boot.dash.api.JmxConnectable;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.remote.GenericRemoteAppElement;
 
 public class GenericRemoteAppGeneralPropertiesSection extends AbstractBdeGeneralPropertiesSection {
 
@@ -24,7 +27,9 @@ public class GenericRemoteAppGeneralPropertiesSection extends AbstractBdeGeneral
 				new UrlPropertyControl<>(BootDashElement.class, "URL:", (e) -> e.getUrl()),
 				new DefaultPathPropertyControl(),
 				new TagsPropertyControl(),
-				new DebugPortPropertyControl()
+				new DebugPortPropertyControl(),
+				new ReadOnlyStringPropertyControl<>(GenericRemoteAppElement.class, "Jmx URL:", (e) -> e.getJmxUrl(), false)
+					.visibleWhen((e) -> e!=null && e.getAppData() instanceof JmxConnectable)
 		};
 	}
 

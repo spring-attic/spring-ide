@@ -20,8 +20,11 @@ import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+
+import com.google.common.base.Predicate;
 
 /**
  * URL control for property section composite
@@ -31,16 +34,18 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 public class ReadOnlyStringPropertyControl<T extends BootDashElement> extends AbstractBdePropertyControl {
 
 	private static final String PLACEHOLDER_TEXT = "Getting value...";
-	private final String label;
+	private final String labelString;
 	private StyledText value;
 
 	private final Class<T> type;
 	private final Function<T, String> getter;
 	private final boolean asyncRefresh;
+	private Predicate<T> visibleWhen = x -> true;
+	private Label label;
 
 	public ReadOnlyStringPropertyControl(Class<T> type, String label, Function<T, String> getter, boolean asyncRefresh) {
 		this.type = type;
-		this.label = label;
+		this.labelString = label;
 		this.getter = getter;
 		this.asyncRefresh = asyncRefresh;
 	}
@@ -49,7 +54,8 @@ public class ReadOnlyStringPropertyControl<T extends BootDashElement> extends Ab
 	public void createControl(Composite composite, TabbedPropertySheetPage page) {
 		super.createControl(composite, page);
 
-		page.getWidgetFactory().createLabel(composite, label).setLayoutData(GridDataFactory.fillDefaults().create()); //$NON-NLS-1$
+		label = page.getWidgetFactory().createLabel(composite, labelString);
+		label.setLayoutData(GridDataFactory.fillDefaults().create()); //$NON-NLS-1$
 		value = new StyledText(composite, SWT.READ_ONLY);
 		value.setCaret(null);
 		value.setText(PLACEHOLDER_TEXT);
@@ -74,14 +80,32 @@ public class ReadOnlyStringPropertyControl<T extends BootDashElement> extends Ab
 	}
 
 	private void updateUI(String text) {
-		if (value != null && !value.isDisposed()) {
-			value.setText(text);
-			int width = value.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
-			GridData data = GridDataFactory.copyData(((GridData) value.getLayoutData()));
-			data.widthHint = width;
-			value.setLayoutData(data);
-			value.getParent().layout();
+		boolean show = shouldShow();
+		if (show) {
+			if (value != null && !value.isDisposed()) {
+				value.setText(text);
+				int width = value.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+				GridData data = GridDataFactory.copyData(((GridData) value.getLayoutData()));
+				data.widthHint = width;
+				value.setLayoutData(data);
+				value.getParent().layout();
+			}
+			show();
+		} else {
+			hide();
 		}
+	}
+
+	private boolean shouldShow() {
+		BootDashElement element = getBootDashElement();
+		if (element!=null && type.isAssignableFrom(element.getClass())) {
+			@SuppressWarnings("unchecked")
+			Boolean val = visibleWhen.apply((T)element);
+			if (val!=null) {
+				return val;
+			}
+		}
+		return false;
 	}
 
 	protected String fetchValue(BootDashElement element) {
@@ -93,6 +117,36 @@ public class ReadOnlyStringPropertyControl<T extends BootDashElement> extends Ab
 			}
 		}
 		return "";
+	}
+
+	public ReadOnlyStringPropertyControl<T> visibleWhen(Predicate<T> visibleWhen) {
+		this.visibleWhen = visibleWhen; //TODO: support this
+		return this;
+	}
+
+	// For future possible dynamic filtering of controls
+	private void hide() {
+		label.setLayoutData(GridDataFactory.swtDefaults().exclude(true).create()); //$NON-NLS-1$
+		label.setVisible(false);
+		value.setLayoutData(GridDataFactory.swtDefaults().exclude(true).create());
+		value.setVisible(false);
+		relayout();
+	}
+
+	private void relayout() {
+		Composite c = label.getParent();
+		while (c != null) {
+			c.layout(true, true);
+			c = c.getParent();
+		}
+	}
+
+	private void show() {
+		label.setLayoutData(GridDataFactory.fillDefaults().create()); //$NON-NLS-1$
+		label.setVisible(true);
+		value.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
+		value.setVisible(true);
+		relayout();
 	}
 
 }

@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.boot.dash.api.AppContext;
 import org.springframework.ide.eclipse.boot.dash.api.DebuggableApp;
 import org.springframework.ide.eclipse.boot.dash.api.Deletable;
 import org.springframework.ide.eclipse.boot.dash.api.DesiredInstanceCount;
+import org.springframework.ide.eclipse.boot.dash.api.JmxConnectable;
 import org.springframework.ide.eclipse.boot.dash.api.PortConnectable;
 import org.springframework.ide.eclipse.boot.dash.api.ProjectRelatable;
 import org.springframework.ide.eclipse.boot.dash.api.RunStateProvider;
@@ -54,7 +55,7 @@ import org.springsource.ide.eclipse.commons.livexp.util.Log;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 
-public class GenericRemoteAppElement extends WrappingBootDashElement<String> implements Deletable, AppContext, Styleable, ElementStateListener {
+public class GenericRemoteAppElement extends WrappingBootDashElement<String> implements Deletable, AppContext, Styleable, ElementStateListener, JmxConnectable {
 
 	private static final boolean DEBUG = false;
 
@@ -459,5 +460,14 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 			return ((DebuggableApp) data).getDebugPort();
 		}
 		return -1;
+	}
+
+	@Override
+	public String getJmxUrl() {
+		App data = getAppData();
+		if (data!=null && data instanceof JmxConnectable) {
+			return ((JmxConnectable)data).getJmxUrl();
+		}
+		return null;
 	}
 }
