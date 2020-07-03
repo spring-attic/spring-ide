@@ -173,6 +173,7 @@ public class CloudFoundryBootDashModelMockingTest {
 
 	@Before
 	public void setup() throws Exception {
+		System.out.println("java.version="+System.getProperty("java.version"));
 		StsTestUtil.deleteAllProjects();
 		this.clientFactory = new MockCloudFoundryClientFactory();
 		this.context = new TestBootDashModelContext(
