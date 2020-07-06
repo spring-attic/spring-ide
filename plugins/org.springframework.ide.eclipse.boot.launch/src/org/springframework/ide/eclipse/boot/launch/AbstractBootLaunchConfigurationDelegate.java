@@ -430,6 +430,13 @@ public abstract class AbstractBootLaunchConfigurationDelegate extends AdvancedJa
 	public static void enableMavenClasspathProviders(ILaunchConfigurationWorkingCopy wc) {
 		setAttribute(wc, IJavaLaunchConfigurationConstants.ATTR_SOURCE_PATH_PROVIDER, BOOT_MAVEN_SOURCE_PATH_PROVIDER);
 		setAttribute(wc, IJavaLaunchConfigurationConstants.ATTR_CLASSPATH_PROVIDER, BOOT_MAVEN_CLASS_PATH_PROVIDER);
+		try {
+			if (!wc.hasAttribute(IJavaLaunchConfigurationConstants.ATTR_EXCLUDE_TEST_CODE)) {
+				setAttribute(wc, IJavaLaunchConfigurationConstants.ATTR_EXCLUDE_TEST_CODE, true);
+			}
+		} catch (CoreException e) {
+			Log.log(e);
+		}
 	}
 
 	public static void enableGradleClasspathProviders(ILaunchConfigurationWorkingCopy wc) {
