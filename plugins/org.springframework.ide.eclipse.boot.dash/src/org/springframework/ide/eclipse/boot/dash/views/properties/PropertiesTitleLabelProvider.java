@@ -13,8 +13,13 @@ package org.springframework.ide.eclipse.boot.dash.views.properties;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.graphics.Image;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.labels.BootDashLabels;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
+import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 
 /**
  * Label provider for Boot Dash elements for the tabbed properties view
@@ -23,6 +28,8 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
  *
  */
 public class PropertiesTitleLabelProvider implements ILabelProvider {
+
+	BootDashLabels labels = new BootDashLabels(BootDashActivator.getDefault().getInjections(), new Stylers(null));
 
 	@Override
 	public void addListener(ILabelProviderListener listener) {
@@ -67,7 +74,12 @@ public class PropertiesTitleLabelProvider implements ILabelProvider {
 			} else {
 				Object o = ((IStructuredSelection)element).getFirstElement();
 				if (o instanceof BootDashElement) {
-					return ((BootDashElement) o).getName();
+					StyledString l = labels.getStyledText((BootDashElement)o, BootDashColumn.NAME);
+					if (l!=null) {
+						return l.getString();
+					} else {
+						return ((BootDashElement) o).getName();
+					}
 				}
 			}
 		}
