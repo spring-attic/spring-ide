@@ -55,6 +55,8 @@ import org.mandas.docker.client.messages.ContainerInfo;
 import org.mandas.docker.client.messages.Image;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.RemoteBootDashModel;
@@ -183,11 +185,12 @@ public class BootDashDockerTests {
 		});
 
 		verifyNoMoreInteractions(ui());
+		Mockito.reset(ui());
 
 		String containerId = con.getName();
 		assertEquals(1, listContainersWithId(containerId).size());
 
-		when(ui().confirmOperation(eq("Deleting Elements"), any())).thenReturn(true);
+//		when(ui().confirmOperation(eq("Deleting Elements"), any())).thenAnswer(answer);
 		DeleteElementsAction<?> delete = actions().getDeleteAppsAction();
 		harness.selection.setElements(con);
 		assertTrue(delete.isEnabled());
@@ -197,6 +200,7 @@ public class BootDashDockerTests {
 			assertTrue(img.getChildren().getValue().isEmpty());
 			assertEquals(0, listContainersWithId(containerId).size());
 		});
+		verifyNoMoreInteractions(ui());
 	}
 
 	private List<Container> listContainersWithId(String containerId)

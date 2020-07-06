@@ -61,7 +61,8 @@ public class DeleteElementsAction<T extends RunTargetType> extends AbstractBootD
 		for (final Entry<BootDashModel, Collection<BootDashElement>> workitem : sortingBins.asMap().entrySet()) {
 			BootDashModel model = workitem.getKey();
 			final DeletionCapabableModel modifiable = (DeletionCapabableModel)model; //cast is safe. Only DeleteCapabableModel are added to sortingBins
-			if (ui().confirmOperation("Deleting Elements", modifiable.getDeletionConfirmationMessage(workitem.getValue()))) {
+			String confirmationMsg = modifiable.getDeletionConfirmationMessage(workitem.getValue());
+			if (confirmationMsg==null || ui().confirmOperation("Deleting Elements", confirmationMsg)) {
 				Job job = new Job("Deleting Elements from " + model.getRunTarget().getName()) {
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {

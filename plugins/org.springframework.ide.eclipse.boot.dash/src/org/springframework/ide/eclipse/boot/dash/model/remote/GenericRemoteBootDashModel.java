@@ -145,16 +145,7 @@ public class GenericRemoteBootDashModel<Client, Params> extends RemoteBootDashMo
 
 	@Override
 	public String getDeletionConfirmationMessage(Collection<BootDashElement> value) {
-		StringBuilder things = new StringBuilder();
-		boolean first = true;
-		for (BootDashElement bde : value) {
-			if (!first) {
-				things.append(", ");
-			}
-			things.append(bde.getName());
-			first = false;
-		}
-		return "Delete "+things+" ?";
+		return null; // no confirmation asked.
 	}
 
 	@Override
