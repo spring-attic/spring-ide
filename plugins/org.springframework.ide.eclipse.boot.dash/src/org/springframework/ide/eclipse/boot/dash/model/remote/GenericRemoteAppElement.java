@@ -38,6 +38,8 @@ import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.WrappingBootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.actuator.ActuatorClient;
+import org.springframework.ide.eclipse.boot.dash.model.actuator.JMXActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.env.LiveEnvModel;
 import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
@@ -328,12 +330,6 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 	}
 
 	@Override
-	public LiveBeansModel getLiveBeans() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public LiveEnvModel getLiveEnv() {
 		// TODO Auto-generated method stub
 		return null;
@@ -470,4 +466,62 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		}
 		return null;
 	}
+
+
+	private LiveExpression<String> actuatorUrl;
+
+	public synchronized LiveExpression<String> getActuatorUrl() {
+		if (actuatorUrl==null) {
+			actuatorUrl = new LiveExpression<String>() {
+				{
+					dependsOn(app);
+					dependsOn(getRunStateExp());
+					GenericRemoteAppElement.this.addDisposableChild(this);
+//					onChange((e,v) -> {
+//						if (getRunState()==RunS;
+//						System.out.println("actuatorUrl = "+e.getValue());
+//					});
+				}
+
+				@Override
+				protected String compute() {
+					RunState rs = getRunState();
+					if (rs.isActive()) {
+						return getJmxUrl();
+					}
+					return null;
+				}
+			};
+
+		}
+		return actuatorUrl;
+	}
+	private LiveExpression<LiveBeansModel> liveBeans;
+
+
+	@Override
+	public LiveBeansModel getLiveBeans() {
+		synchronized (this) {
+			if (liveBeans == null) {
+				LiveExpression<String> actuatorUrl = getActuatorUrl();
+				liveBeans = new AsyncLiveExpression<LiveBeansModel>(null, "Fetch beans for '"+getName()+"'") {
+					@Override
+					protected LiveBeansModel compute() {
+						String target = actuatorUrl.getValue();
+						if (target != null) {
+							ActuatorClient client = JMXActuatorClient.forUrl(getTypeLookup(), () -> target);
+							return client.getBeans();
+						}
+						return null;
+					}
+
+				};
+				liveBeans.dependsOn(actuatorUrl);
+				addElementState(liveBeans);
+				addDisposableChild(liveBeans);
+			}
+		}
+		return liveBeans.getValue();
+	}
+
 }
