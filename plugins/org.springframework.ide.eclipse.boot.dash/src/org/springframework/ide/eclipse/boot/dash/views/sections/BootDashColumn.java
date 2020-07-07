@@ -18,6 +18,11 @@ public class BootDashColumn {
 		this.ID = ID;
 	}
 
+	@Override
+	public String toString() {
+		return ID;
+	}
+
 	public static final BootDashColumn RUN_STATE_ICN = new BootDashColumn("RUN_STATE_ICN");
 	public static final BootDashColumn INSTANCES = new BootDashColumn("INSTANCES");
 	public static final BootDashColumn PROJECT = new BootDashColumn("PROJECT");
