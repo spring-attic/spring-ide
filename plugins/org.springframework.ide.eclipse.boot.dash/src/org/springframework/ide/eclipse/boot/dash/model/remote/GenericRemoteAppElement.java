@@ -54,6 +54,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 
@@ -324,12 +325,6 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 	}
 
 	@Override
-	public List<RequestMapping> getLiveRequestMappings() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public ILaunchConfiguration getActiveConfig() {
 		// TODO Auto-generated method stub
 		return null;
@@ -491,7 +486,38 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		return actuatorUrl;
 	}
 
+	private LiveExpression<ImmutableList<RequestMapping>> liveRequestMappings;
 	private LiveExpression<LiveEnvModel> liveEnv;
+	private LiveExpression<LiveBeansModel> liveBeans;
+
+	@Override
+	public List<RequestMapping> getLiveRequestMappings() {
+		synchronized (this) {
+			if (liveRequestMappings==null) {
+				final LiveExpression<String> actuatorUrl = getActuatorUrl();
+				liveRequestMappings = new AsyncLiveExpression<ImmutableList<RequestMapping>>(null, "Fetch request mappings for '"+getName()+"'") {
+					@Override
+					protected ImmutableList<RequestMapping> compute() {
+						String target = actuatorUrl.getValue();
+						if (target!=null) {
+							ActuatorClient client = JMXActuatorClient.forUrl(getTypeLookup(), () -> target);
+							List<RequestMapping> list = client.getRequestMappings();
+							if (list!=null) {
+								return ImmutableList.copyOf(client.getRequestMappings());
+							}
+						}
+						return null;
+					}
+
+				};
+				liveRequestMappings.dependsOn(actuatorUrl);
+				addElementState(liveRequestMappings);
+				addDisposableChild(liveRequestMappings);
+			}
+		}
+		return liveRequestMappings.getValue();
+	}
+
 	@Override
 	public LiveEnvModel getLiveEnv() {
 		synchronized (this) {
@@ -517,7 +543,6 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		return liveEnv.getValue();
 	}
 
-	private LiveExpression<LiveBeansModel> liveBeans;
 	@Override
 	public LiveBeansModel getLiveBeans() {
 		synchronized (this) {

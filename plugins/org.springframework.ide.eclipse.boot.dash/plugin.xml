@@ -102,6 +102,9 @@
             <input
                   type="org.springframework.ide.eclipse.boot.dash.cf.model.CloudAppDashElement">
             </input>
+            <input
+                  type="org.springframework.ide.eclipse.boot.dash.model.remote.GenericRemoteAppElement">
+            </input>
          </propertySection>
          <propertySection
                class="org.springframework.ide.eclipse.boot.dash.views.properties.LocalGeneralPropertiesSection"
