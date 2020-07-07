@@ -15,7 +15,7 @@ import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashC
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.NAME;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.PROJECT;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.TAGS;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.*;
 
 import java.util.Collection;
 import java.util.Set;
@@ -137,6 +137,7 @@ implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentT
 		return new BootDashColumn[] {
 				RUN_STATE_ICN,
 				NAME,
+				LIVE_PORT,
 				PROJECT,
 				INSTANCES,
 				DEFAULT_PATH,
