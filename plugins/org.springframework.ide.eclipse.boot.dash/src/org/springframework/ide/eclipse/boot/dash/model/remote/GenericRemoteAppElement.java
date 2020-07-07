@@ -330,12 +330,6 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 	}
 
 	@Override
-	public LiveEnvModel getLiveEnv() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public ILaunchConfiguration getActiveConfig() {
 		// TODO Auto-generated method stub
 		return null;
@@ -496,9 +490,34 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		}
 		return actuatorUrl;
 	}
+
+	private LiveExpression<LiveEnvModel> liveEnv;
+	@Override
+	public LiveEnvModel getLiveEnv() {
+		synchronized (this) {
+			if (liveEnv == null) {
+				final LiveExpression<String> actuatorUrl = getActuatorUrl();
+				liveEnv = new AsyncLiveExpression<LiveEnvModel>(null, "Fetch env for '"+getName()+"'") {
+					@Override
+					protected LiveEnvModel compute() {
+						String target = actuatorUrl.getValue();
+						if (target != null) {
+							ActuatorClient client = JMXActuatorClient.forUrl(getTypeLookup(), () -> target);
+							return client.getEnv();
+						}
+						return null;
+					}
+
+				};
+				liveEnv.dependsOn(actuatorUrl);
+				addElementState(liveEnv);
+				addDisposableChild(liveEnv);
+			}
+		}
+		return liveEnv.getValue();
+	}
+
 	private LiveExpression<LiveBeansModel> liveBeans;
-
-
 	@Override
 	public LiveBeansModel getLiveBeans() {
 		synchronized (this) {
