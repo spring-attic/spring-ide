@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model.remote;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -73,6 +74,8 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 	private final RefreshStateTracker refreshTracker = new RefreshStateTracker(this);
 
 	final protected IPropertyStore backingStore;
+
+	final private List<LiveExpression<?>> summaries = new ArrayList<>();
 
 	DisposingFactory<String, GenericRemoteAppElement> childFactory = new DisposingFactory<String, GenericRemoteAppElement>(existingChildIds) {
 		@Override
@@ -192,35 +195,57 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		livePorts.dependsOn(getRunStateExp());
 	}
 
-	private LiveExpression<Integer> actualInstanceCounts = new AsyncLiveExpression<Integer>(0) {
-		{
-			dependsOn(children);
-			dependsOn(app);
-			dependsOn(getRunStateExp());
+	private LiveExpression<Integer> actualInstanceCounts = sumarizeFromChildren(new AppDataSummarizer<Integer>() {
+
+		public Integer zero() { return 0;}
+
+		@Override
+		public Integer getHere(GenericRemoteAppElement app) {
+			if (getRunState().isActive()) {
+				App appVal = app.getAppData();
+				debug("appVal: " + appVal);
+				if (appVal instanceof ActualInstanceCount) {
+					return ((ActualInstanceCount) appVal).getActualInstances();
+				}
+			}
+			return zero();
 		}
 
 		@Override
-		protected Integer compute() {
-			int count = 0;
+		public Integer getSummary(GenericRemoteAppElement element) {
+			return element.getActualInstances();
+		}
 
-			if (getRunState() == RunState.RUNNING || getRunState() == RunState.DEBUGGING) {
-				App appVal = app.getValue();
-				debug("appVal: " + appVal);
+		public Integer merge(Integer d1, Integer d2) {
+			return d1 + d2;
+		}
+	});
 
-				if (appVal instanceof ActualInstanceCount) {
-					count += ((ActualInstanceCount) appVal).getActualInstances();
-				}
-
+	private <T> LiveExpression<T> sumarizeFromChildren(AppDataSummarizer<T> sumarizer) {
+		AsyncLiveExpression<T> sumary = new AsyncLiveExpression<T>(sumarizer.zero()) {
+			@Override
+			protected T compute() {
+				T sum = sumarizer.getHere(GenericRemoteAppElement.this);
 				ImmutableSet<BootDashElement> children = GenericRemoteAppElement.this.children.getValue();
 				if (children != null && !children.isEmpty()) {
-					for (BootDashElement child : children) {
-						count += child.getActualInstances();
+					for (BootDashElement _child : children) {
+						if (_child instanceof GenericRemoteAppElement) {
+							GenericRemoteAppElement child = ((GenericRemoteAppElement) _child);
+							sum = sumarizer.merge(sum, sumarizer.getSummary(child));
+						}
 					}
 				}
+				return sum;
 			}
-			return count;
-		}
-	};
+		};
+		sumary.dependsOn(children);
+		sumary.dependsOn(app);
+		sumary.dependsOn(getRunStateExp());
+		addDisposableChild(sumary);
+		addElementNotifier(sumary);
+		summaries.add(sumary);
+		return sumary;
+	}
 
 	private void debug(String message) {
 		if (DEBUG) {
@@ -247,8 +272,6 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		addElementNotifier(getRunStateExp());
 		addDisposableChild(livePorts);
 		addElementNotifier(livePorts);
-		addDisposableChild(actualInstanceCounts);
-		addElementNotifier(actualInstanceCounts);
 
 		model.addElementStateListener(this);
 
@@ -406,7 +429,9 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 	@Override
 	public void stateChanged(BootDashElement e) {
 		this.livePorts.refresh();
-		this.actualInstanceCounts.refresh();
+		for (LiveExpression<?> sumary : summaries) {
+			sumary.refresh();
+		}
 		RemoteJavaLaunchUtil.synchronizeWith(this);
 	}
 
@@ -456,33 +481,29 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		return null;
 	}
 
+	private LiveExpression<String> actuatorUrl = sumarizeFromChildren(new AppDataSummarizer<String>() {
 
-	private LiveExpression<String> actuatorUrl;
-
-	public synchronized LiveExpression<String> getActuatorUrl() {
-		if (actuatorUrl==null) {
-			actuatorUrl = new LiveExpression<String>() {
-				{
-					dependsOn(app);
-					dependsOn(getRunStateExp());
-					GenericRemoteAppElement.this.addDisposableChild(this);
-//					onChange((e,v) -> {
-//						if (getRunState()==RunS;
-//						System.out.println("actuatorUrl = "+e.getValue());
-//					});
-				}
-
-				@Override
-				protected String compute() {
-					RunState rs = getRunState();
-					if (rs.isActive()) {
-						return getJmxUrl();
-					}
-					return null;
-				}
-			};
-
+		@Override
+		public String getHere(GenericRemoteAppElement app) {
+			RunState rs = app.getRunState();
+			if (rs.isActive()) {
+				return app.getJmxUrl();
+			}
+			return null;
 		}
+
+		@Override
+		public String getSummary(GenericRemoteAppElement element) {
+			return element.getActuatorUrl().getValue();
+		}
+
+	});
+	{
+		actuatorUrl.onChange((e, v) -> {
+			System.out.println(getName()+" actuatorUrl = "+getActuatorUrl().getValue());
+		});
+	}
+	public LiveExpression<String> getActuatorUrl() {
 		return actuatorUrl;
 	}
 
