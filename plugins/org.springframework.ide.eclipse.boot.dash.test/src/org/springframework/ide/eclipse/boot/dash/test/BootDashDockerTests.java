@@ -297,7 +297,7 @@ public class BootDashDockerTests {
 	}
 
 	@Test
-	public void liveBeansOnContainer() throws Exception {
+	public void liveBeans() throws Exception {
 		IProject project = projects.createBootProject("webby-actuator",
 				bootVersionAtLeast("2.3.0"),
 				withStarters("web", "actuator")
@@ -308,6 +308,9 @@ public class BootDashDockerTests {
 		GenericRemoteAppElement dep = waitForDeployment(model, project);
 		GenericRemoteAppElement img = waitForChild(dep, d -> d instanceof DockerImage);
 		GenericRemoteAppElement con = waitForChild(img, d -> d instanceof DockerContainer);
+		GenericRemoteAppElement[] nodes = {
+				con, img, dep
+		};
 
 		ACondition.waitFor("all started", BUILD_IMAGE_TIMEOUT, () -> {
 			assertEquals(RunState.RUNNING, dep.getRunState());
@@ -318,10 +321,12 @@ public class BootDashDockerTests {
 
 		String jmxUrl = con.getJmxUrl();
 		ACondition.waitFor("live beans model", 5_000, () -> {
-			assertEquals(jmxUrl, con.getActuatorUrl().getValue());
-			LiveBeansModel beans = con.getLiveBeans();
-			assertNotNull(beans);
-			assertFalse(beans.getBeans().isEmpty());
+			for (GenericRemoteAppElement node : nodes) {
+				assertEquals(jmxUrl, node.getActuatorUrl().getValue());
+				LiveBeansModel beans = node.getLiveBeans();
+				assertNotNull(beans);
+				assertFalse(beans.getBeans().isEmpty());
+			}
 		});
 
 		RunStateAction stop = stopAction();
@@ -332,13 +337,15 @@ public class BootDashDockerTests {
 			assertEquals(RunState.INACTIVE, con.getRunState());
 		});
 		ACondition.waitFor("live beans gone", 5_000, () -> {
-			assertNull(con.getActuatorUrl().getValue());
-			assertNull(con.getLiveBeans());
+			for (GenericRemoteAppElement node : nodes) {
+				assertNull(node.getActuatorUrl().getValue());
+				assertNull(node.getLiveBeans());
+			}
 		});
 	}
 
 	@Test
-	public void liveRequestMappingsOnContainer() throws Exception {
+	public void liveRequestMappings() throws Exception {
 		IProject project = projects.createBootProject("webby-actuator",
 				bootVersionAtLeast("2.3.0"),
 				withStarters("web", "actuator")
@@ -349,6 +356,9 @@ public class BootDashDockerTests {
 		GenericRemoteAppElement dep = waitForDeployment(model, project);
 		GenericRemoteAppElement img = waitForChild(dep, d -> d instanceof DockerImage);
 		GenericRemoteAppElement con = waitForChild(img, d -> d instanceof DockerContainer);
+		GenericRemoteAppElement[] nodes = {
+				con, img, dep
+		};
 
 		ACondition.waitFor("all started", BUILD_IMAGE_TIMEOUT, () -> {
 			assertEquals(RunState.RUNNING, dep.getRunState());
@@ -359,10 +369,12 @@ public class BootDashDockerTests {
 
 		String jmxUrl = con.getJmxUrl();
 		ACondition.waitFor("live requestmappings", 5_000, () -> {
-			assertEquals(jmxUrl, con.getActuatorUrl().getValue());
-			List<RequestMapping> rm = con.getLiveRequestMappings();
-			assertNotNull(rm);
-			assertFalse(rm.isEmpty());
+			for (GenericRemoteAppElement node : nodes) {
+				assertEquals(jmxUrl, node.getActuatorUrl().getValue());
+				List<RequestMapping> rm = node.getLiveRequestMappings();
+				assertNotNull(rm);
+				assertFalse(rm.isEmpty());
+			}
 		});
 
 		RunStateAction stop = stopAction();
@@ -373,13 +385,15 @@ public class BootDashDockerTests {
 			assertEquals(RunState.INACTIVE, con.getRunState());
 		});
 		ACondition.waitFor("live requestmappings gone", 5_000, () -> {
-			assertNull(con.getActuatorUrl().getValue());
-			assertNull(con.getLiveBeans());
+			for (GenericRemoteAppElement node : nodes) {
+				assertNull(node.getActuatorUrl().getValue());
+				assertNull(node.getLiveBeans());
+			}
 		});
 	}
 
 	@Test
-	public void liveEnvOnContainer() throws Exception {
+	public void liveEnv() throws Exception {
 		IProject project = projects.createBootProject("webby-actuator",
 				bootVersionAtLeast("2.3.0"),
 				withStarters("web", "actuator")
@@ -390,6 +404,9 @@ public class BootDashDockerTests {
 		GenericRemoteAppElement dep = waitForDeployment(model, project);
 		GenericRemoteAppElement img = waitForChild(dep, d -> d instanceof DockerImage);
 		GenericRemoteAppElement con = waitForChild(img, d -> d instanceof DockerContainer);
+		GenericRemoteAppElement[] nodes = {
+				con, img, dep
+		};
 
 		ACondition.waitFor("all started", BUILD_IMAGE_TIMEOUT, () -> {
 			assertEquals(RunState.RUNNING, dep.getRunState());
@@ -400,10 +417,12 @@ public class BootDashDockerTests {
 
 		String jmxUrl = con.getJmxUrl();
 		ACondition.waitFor("live env", 5_000, () -> {
-			assertEquals(jmxUrl, con.getActuatorUrl().getValue());
-			LiveEnvModel env = con.getLiveEnv();
-			assertNotNull(env);
-			assertFalse(env.getPropertySources().getPropertySources().isEmpty());
+			for (GenericRemoteAppElement node : nodes) {
+				assertEquals(jmxUrl, node.getActuatorUrl().getValue());
+				LiveEnvModel env = node.getLiveEnv();
+				assertNotNull(env);
+				assertFalse(env.getPropertySources().getPropertySources().isEmpty());
+			}
 		});
 
 		RunStateAction stop = stopAction();
@@ -414,8 +433,10 @@ public class BootDashDockerTests {
 			assertEquals(RunState.INACTIVE, con.getRunState());
 		});
 		ACondition.waitFor("live env gone", 5_000, () -> {
-			assertNull(con.getActuatorUrl().getValue());
-			assertNull(con.getLiveEnv());
+			for (GenericRemoteAppElement node : nodes) {
+				assertNull(node.getActuatorUrl().getValue());
+				assertNull(node.getLiveEnv());
+			}
 		});
 	}
 
