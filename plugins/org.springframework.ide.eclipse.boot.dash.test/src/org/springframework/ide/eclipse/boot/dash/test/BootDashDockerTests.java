@@ -13,16 +13,15 @@ package org.springframework.ide.eclipse.boot.dash.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.bootVersionAtLeast;
-import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withImportStrategy;
+import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.*;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -55,8 +54,7 @@ import org.mandas.docker.client.messages.ContainerInfo;
 import org.mandas.docker.client.messages.Image;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
+import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModel;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.RemoteBootDashModel;
@@ -74,6 +72,8 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.Taggable;
+import org.springframework.ide.eclipse.boot.dash.model.actuator.RequestMapping;
+import org.springframework.ide.eclipse.boot.dash.model.actuator.env.LiveEnvModel;
 import org.springframework.ide.eclipse.boot.dash.model.remote.GenericRemoteAppElement;
 import org.springframework.ide.eclipse.boot.dash.model.remote.GenericRemoteBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.remote.RefreshStateTracker;
@@ -297,6 +297,129 @@ public class BootDashDockerTests {
 	}
 
 	@Test
+	public void liveBeansOnContainer() throws Exception {
+		IProject project = projects.createBootProject("webby-actuator",
+				bootVersionAtLeast("2.3.0"),
+				withStarters("web", "actuator")
+		);
+		GenericRemoteBootDashModel<DockerClient, DockerTargetParams> model = createDockerTarget();
+		Mockito.reset(ui());
+		dragAndDrop(project, model);
+		GenericRemoteAppElement dep = waitForDeployment(model, project);
+		GenericRemoteAppElement img = waitForChild(dep, d -> d instanceof DockerImage);
+		GenericRemoteAppElement con = waitForChild(img, d -> d instanceof DockerContainer);
+
+		ACondition.waitFor("all started", BUILD_IMAGE_TIMEOUT, () -> {
+			assertEquals(RunState.RUNNING, dep.getRunState());
+			assertEquals(RunState.RUNNING, img.getRunState());
+			assertEquals(RunState.RUNNING, con.getRunState());
+		});
+		verifyNoMoreInteractions(ui());
+
+		String jmxUrl = con.getJmxUrl();
+		ACondition.waitFor("live beans model", 5_000, () -> {
+			assertEquals(jmxUrl, con.getActuatorUrl().getValue());
+			LiveBeansModel beans = con.getLiveBeans();
+			assertNotNull(beans);
+			assertFalse(beans.getBeans().isEmpty());
+		});
+
+		RunStateAction stop = stopAction();
+		harness.selection.setElements(dep);
+		stop.run();
+
+		ACondition.waitFor("Container stopped", 15_000, () -> { //Sometimes stopping container takes a long time. Not sure why.
+			assertEquals(RunState.INACTIVE, con.getRunState());
+		});
+		ACondition.waitFor("live beans gone", 5_000, () -> {
+			assertNull(con.getActuatorUrl().getValue());
+			assertNull(con.getLiveBeans());
+		});
+	}
+
+	@Test
+	public void liveRequestMappingsOnContainer() throws Exception {
+		IProject project = projects.createBootProject("webby-actuator",
+				bootVersionAtLeast("2.3.0"),
+				withStarters("web", "actuator")
+		);
+		GenericRemoteBootDashModel<DockerClient, DockerTargetParams> model = createDockerTarget();
+		Mockito.reset(ui());
+		dragAndDrop(project, model);
+		GenericRemoteAppElement dep = waitForDeployment(model, project);
+		GenericRemoteAppElement img = waitForChild(dep, d -> d instanceof DockerImage);
+		GenericRemoteAppElement con = waitForChild(img, d -> d instanceof DockerContainer);
+
+		ACondition.waitFor("all started", BUILD_IMAGE_TIMEOUT, () -> {
+			assertEquals(RunState.RUNNING, dep.getRunState());
+			assertEquals(RunState.RUNNING, img.getRunState());
+			assertEquals(RunState.RUNNING, con.getRunState());
+		});
+		verifyNoMoreInteractions(ui());
+
+		String jmxUrl = con.getJmxUrl();
+		ACondition.waitFor("live requestmappings", 5_000, () -> {
+			assertEquals(jmxUrl, con.getActuatorUrl().getValue());
+			List<RequestMapping> rm = con.getLiveRequestMappings();
+			assertNotNull(rm);
+			assertFalse(rm.isEmpty());
+		});
+
+		RunStateAction stop = stopAction();
+		harness.selection.setElements(dep);
+		stop.run();
+
+		ACondition.waitFor("Container stopped", 15_000, () -> { //Sometimes stopping container takes a long time. Not sure why.
+			assertEquals(RunState.INACTIVE, con.getRunState());
+		});
+		ACondition.waitFor("live requestmappings gone", 5_000, () -> {
+			assertNull(con.getActuatorUrl().getValue());
+			assertNull(con.getLiveBeans());
+		});
+	}
+
+	@Test
+	public void liveEnvOnContainer() throws Exception {
+		IProject project = projects.createBootProject("webby-actuator",
+				bootVersionAtLeast("2.3.0"),
+				withStarters("web", "actuator")
+		);
+		GenericRemoteBootDashModel<DockerClient, DockerTargetParams> model = createDockerTarget();
+		Mockito.reset(ui());
+		dragAndDrop(project, model);
+		GenericRemoteAppElement dep = waitForDeployment(model, project);
+		GenericRemoteAppElement img = waitForChild(dep, d -> d instanceof DockerImage);
+		GenericRemoteAppElement con = waitForChild(img, d -> d instanceof DockerContainer);
+
+		ACondition.waitFor("all started", BUILD_IMAGE_TIMEOUT, () -> {
+			assertEquals(RunState.RUNNING, dep.getRunState());
+			assertEquals(RunState.RUNNING, img.getRunState());
+			assertEquals(RunState.RUNNING, con.getRunState());
+		});
+		verifyNoMoreInteractions(ui());
+
+		String jmxUrl = con.getJmxUrl();
+		ACondition.waitFor("live env", 5_000, () -> {
+			assertEquals(jmxUrl, con.getActuatorUrl().getValue());
+			LiveEnvModel env = con.getLiveEnv();
+			assertNotNull(env);
+			assertFalse(env.getPropertySources().getPropertySources().isEmpty());
+		});
+
+		RunStateAction stop = stopAction();
+		harness.selection.setElements(dep);
+		stop.run();
+
+		ACondition.waitFor("Container stopped", 15_000, () -> { //Sometimes stopping container takes a long time. Not sure why.
+			assertEquals(RunState.INACTIVE, con.getRunState());
+		});
+		ACondition.waitFor("live env gone", 5_000, () -> {
+			assertNull(con.getActuatorUrl().getValue());
+			assertNull(con.getLiveEnv());
+		});
+	}
+
+	@Test
 	public void dragAndDropGradleProject() throws Exception {
 		GenericRemoteBootDashModel<DockerClient, DockerTargetParams> model = createDockerTarget();
 		Mockito.reset(ui());
@@ -316,7 +439,6 @@ public class BootDashDockerTests {
 		verifyNoMoreInteractions(ui());
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void tagsPersistence() throws Exception {
 	IProject project = projects.createBootWebProject("webby", bootVersionAtLeast("2.3.0"));
@@ -579,7 +701,7 @@ public class BootDashDockerTests {
 
 		doAnswer(invocation -> {
 			Model model = (Model) invocation.getArguments()[0];
-			//model.performOk(); //no clicking ok, so dialog that's like when dialog is 'canceled'.
+			//model.performOk(); //no clicking ok, so that's like when dialog is 'canceled'.
 			return null;
 		}).when(ui()).selectDockerDaemonDialog(Matchers.any());
 
