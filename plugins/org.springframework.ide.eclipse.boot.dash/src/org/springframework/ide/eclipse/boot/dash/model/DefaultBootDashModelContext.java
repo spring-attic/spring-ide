@@ -26,6 +26,7 @@ import org.springframework.ide.eclipse.boot.dash.console.CloudAppLogManager;
 import org.springframework.ide.eclipse.boot.dash.di.EclipseBeanLoader;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
+import org.springframework.ide.eclipse.boot.dash.model.remote.GenericRemoteAppElementDataContributor;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.remoteapps.RemoteBootAppsDataHolder;
 import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions;
@@ -62,6 +63,7 @@ public class DefaultBootDashModelContext extends BootDashModelContext {
 		injections.def(BootDashModelContext.class, DefaultBootDashModelContext::new);
 		injections.defInstance(RunTargetType.class, RunTargetTypes.LOCAL);
 		injections.def(CloudAppLogManager.class, CloudAppLogManager::new);
+		injections.def(RemoteBootAppsDataHolder.Contributor.class, GenericRemoteAppElementDataContributor::new);
 		new EclipseBeanLoader(injections).loadFromExtensionPoint(BootDashActivator.INJECTIONS_EXTENSION_ID);
 		return new DefaultBootDashModelContext(injections);
 	}
