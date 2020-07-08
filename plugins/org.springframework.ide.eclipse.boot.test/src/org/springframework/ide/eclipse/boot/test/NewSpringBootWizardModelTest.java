@@ -144,7 +144,7 @@ public class NewSpringBootWizardModelTest extends TestCase {
 
 			RadioGroup group = model.getRadioGroups().getGroup("type");
 			assertNotNull(group);
-			assertGroupValues(group, "MAVEN", "GRADLE-Buildship 2.x", "GRADLE-Buildship 3.x");
+			assertGroupValues(group, "MAVEN", "GRADLE");
 			assertEquals("MAVEN", group.getDefaultValue().getValue());
 
 			group.getSelection().selection.setValue(group.getRadio("MAVEN"));
@@ -172,7 +172,7 @@ public class NewSpringBootWizardModelTest extends TestCase {
 
 		RadioGroup group = model.getRadioGroups().getGroup("type");
 		assertNotNull(group);
-		assertGroupValues(group, "MAVEN", "GRADLE-Buildship 2.x", "GRADLE-Buildship 3.x");
+		assertGroupValues(group, "MAVEN", "GRADLE");
 		assertEquals("MAVEN", group.getDefaultValue().getValue());
 		assertEquals(mavenZipUrl, model.baseUrl.getValue());
 
@@ -754,11 +754,7 @@ public class NewSpringBootWizardModelTest extends TestCase {
 		String urlParam = getUrlParam(model.downloadUrl.getValue(), "type");
 		assertEquals("maven-project", urlParam);
 
-		selection.setValue(type.getRadio("GRADLE-Buildship 2.x"));
-		urlParam = getUrlParam(model.downloadUrl.getValue(), "type");
-		assertEquals("gradle-project", urlParam);
-
-		selection.setValue(type.getRadio("GRADLE-Buildship 3.x"));
+		selection.setValue(type.getRadio("GRADLE"));
 		urlParam = getUrlParam(model.downloadUrl.getValue(), "type");
 		assertEquals("gradle-project", urlParam);
 }

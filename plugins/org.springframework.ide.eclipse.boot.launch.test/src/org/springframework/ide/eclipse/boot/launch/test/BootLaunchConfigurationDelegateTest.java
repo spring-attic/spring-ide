@@ -344,7 +344,7 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 				BootPreferences.getInstance().setThinWrapper(thinWrapper);
 
 				doThinWrapperLaunchTest(thinWrapper, "MAVEN");
-				//Not working: doThinWrapperLaunchTest(thinWrapper, "GRADLE-Buildship 2.x");
+				//Not working: doThinWrapperLaunchTest(thinWrapper, "GRADLE");
 
 			} finally {
 				FileUtils.deleteQuietly(thinWrapper);
@@ -429,7 +429,7 @@ public class BootLaunchConfigurationDelegateTest extends BootLaunchTestCase {
 
 
 	public void testRuntimeClasspathNoTestStuffGradle() throws Exception {
-		IProject project = projects.createBootProject("gradle-test-project", withImportStrategy("GRADLE-Buildship 3.x"));
+		IProject project = projects.createBootProject("gradle-test-project", withImportStrategy("GRADLE"));
 		ILaunchConfigurationWorkingCopy wc = createBaseWorkingCopy(project.getName(), "com.example.demo.GradleTestProjectApplication");
 		String[] cp = getClasspath(new BootLaunchConfigurationDelegate(), wc);
 
