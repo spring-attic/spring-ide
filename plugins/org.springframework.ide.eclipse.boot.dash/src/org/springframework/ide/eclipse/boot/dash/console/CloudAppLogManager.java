@@ -118,6 +118,7 @@ public class CloudAppLogManager extends BootDashModelConsoleManager implements A
 			consoleManager.addConsoles(new IConsole[] { appConsole });
 
 			connect(appConsole, element);
+			showConsole(element);
 		}
 
 		return appConsole;
@@ -179,8 +180,16 @@ public class CloudAppLogManager extends BootDashModelConsoleManager implements A
 			@Override
 			public void write(String message, LogType type) {
 				try {
-					showConsole(app);
 					writeToConsole(app, message, type);
+				} catch (Exception e) {
+					Log.log(e);
+				}
+			}
+
+			@Override
+			public void show() {
+				try {
+					showConsole(app);
 				} catch (Exception e) {
 					Log.log(e);
 				}

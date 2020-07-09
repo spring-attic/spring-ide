@@ -190,6 +190,7 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 		RefreshStateTracker refreshTracker = this.refreshTracker.get();
 		refreshTracker.run("Deploying " + getName() + "...", () -> {
 			AppConsole console = target.injections().getBean(AppConsoleProvider.class).getConsole(this);
+			console.show();
 			if (!project.isAccessible()) {
 				throw new IllegalStateException("The project '"+project.getName()+"' is not accessible");
 			}
