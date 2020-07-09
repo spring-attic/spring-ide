@@ -54,6 +54,7 @@ import org.springframework.ide.eclipse.boot.dash.model.remote.RefreshStateTracke
 import org.springframework.ide.eclipse.boot.dash.util.LineBasedStreamGobler;
 import org.springframework.ide.eclipse.boot.launch.util.PortFinder;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
+import org.springsource.ide.eclipse.commons.core.util.OsUtils;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.StringUtils;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
@@ -286,15 +287,8 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 	private String build(AppConsole console) throws Exception {
 		AtomicReference<String> image = new AtomicReference<>();
 		File directory = new File(project.getLocation().toString());
-		String[] command;
-		if (Files.exists(directory.toPath().resolve("mvnw"))) {
-			command = new String[] {"./mvnw", "spring-boot:build-image", "-DskipTests"};
-		} else if (Files.exists(directory.toPath().resolve("gradlew"))) {
-			command = new String[] {"./gradlew", "bootBuildImage", "-x", "test" };
-		} else {
-			throw new IllegalStateException("Neither Gradle nor Maven wrapper was found!");
-		}
-		
+		String[] command = getBuildCommand(directory);
+
 		ProcessBuilder builder = new ProcessBuilder(command).directory(directory);
 		
 		Process process = builder.start();
@@ -325,6 +319,28 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 		
 		return imageTag;
 	}
+	
+	private String[] getBuildCommand(File directory) {
+		String[] command = null;
+		if (OsUtils.isWindows()) {
+			if (Files.exists(directory.toPath().resolve("mvnw.cmd"))) {
+				command = new String[] {"CMD", "/C", "mvnw.cmd", "spring-boot:build-image", "-DskipTests"};
+			} else if (Files.exists(directory.toPath().resolve("gradlew.bat"))) {
+				command = new String[] {"CMD", "/C", "gradlew.bat", "bootBuildImage", "-x", "test"};
+			} 
+		} else {
+			if (Files.exists(directory.toPath().resolve("mvnw"))) {
+				command = new String[] {"./mvnw", "spring-boot:build-image", "-DskipTests"};
+			} else if (Files.exists(directory.toPath().resolve("gradlew"))) {
+				command = new String[] {"./gradlew", "bootBuildImage", "-x", "test" };
+			}	
+		}
+		
+		if (command == null) {
+			throw new IllegalStateException("Neither Gradle nor Maven wrapper was found!");
+		}
+		return command;
+    }
 
 	synchronized private void addPersistedImage(String imageId) {
 		String key = imagesKey();

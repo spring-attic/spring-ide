@@ -14,6 +14,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.widgets.Shell;
+import org.springsource.ide.eclipse.commons.core.util.OsUtils;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.ui.CheckboxSection;
@@ -29,17 +30,18 @@ public class SelectDockerDaemonDialog extends DialogWithSections {
 	private Model model;
 
 	public static class Model implements OkButtonHandler {
-		private static final String DEFAULT_DOCKER_URL = "unix:///var/run/docker.sock";
+		private static final String DEFAULT_UNIX_DOCKER_URL = "unix:///var/run/docker.sock";
+		private static final String DEFAUL_WINDOWS_DOCKER_URL = "https://localhost:2375";
 		
 		public final LiveVariable<Boolean> useLocalDaemon = new LiveVariable<>(true);
 		public final LiveExpression<Boolean> daemonUrlEnabled = useLocalDaemon.apply(local -> !local);
-		public final LiveVariable<String> daemonUrl = new LiveVariable<>(DEFAULT_DOCKER_URL);
+		public final LiveVariable<String> daemonUrl = new LiveVariable<>(getDefaultDaemonUrl());
 		public final LiveVariable<Boolean> okPressed = new LiveVariable<>(false);
 		
 		{
 			daemonUrlEnabled.onChange((e,v) -> {
 				if (useLocalDaemon.getValue()) {
-					daemonUrl.setValue(DEFAULT_DOCKER_URL);
+					daemonUrl.setValue(getDefaultDaemonUrl());
 				}
 			});
 		}
@@ -47,6 +49,14 @@ public class SelectDockerDaemonDialog extends DialogWithSections {
 		@Override
 		public void performOk() throws Exception {
 			okPressed.setValue(true);
+		}
+
+		private String getDefaultDaemonUrl() {
+			if (OsUtils.isWindows()) {
+				return DEFAUL_WINDOWS_DOCKER_URL;
+			} else {
+				return DEFAULT_UNIX_DOCKER_URL;
+			}
 		}
 	}
 
