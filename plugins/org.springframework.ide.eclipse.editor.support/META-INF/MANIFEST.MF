@@ -7,7 +7,6 @@ Bundle-Version: 3.9.14.qualifier
 Bundle-Activator: org.springframework.ide.eclipse.editor.support.EditorSupportActivator
 Bundle-Localization: plugin
 Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime,
  org.eclipse.text,
  org.eclipse.jface.text,
  org.yaml.snakeyaml,
@@ -44,3 +43,9 @@ Export-Package: org.springframework.ide.eclipse.editor.support,
  org.springframework.ide.eclipse.editor.support.yaml.schema.constraints,
  org.springframework.ide.eclipse.editor.support.yaml.structure
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Automatic-Module-Name: org.springframework.ide.eclipse.editor.support
+Import-Package: org.eclipse.core.runtime,
+ org.eclipse.core.runtime.jobs,
+ org.eclipse.core.runtime.preferences,
+ org.osgi.service.prefs,
+ org.osgi.framework
