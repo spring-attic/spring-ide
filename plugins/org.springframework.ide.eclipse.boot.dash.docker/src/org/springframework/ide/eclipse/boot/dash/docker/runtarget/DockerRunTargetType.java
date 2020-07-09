@@ -90,7 +90,7 @@ public class DockerRunTargetType extends AbstractRemoteRunTargetType<DockerTarge
 
 	@Override
 	public ImageDescriptor getDisconnectedIcon() {
-		return BootDashActivator.getImageDescriptor("icons/cloud-inactive.png");
+		return imageDescriptorFromPlugin(PLUGIN_ID, "/icons/docker-inactive.png");
 	}
 
 
