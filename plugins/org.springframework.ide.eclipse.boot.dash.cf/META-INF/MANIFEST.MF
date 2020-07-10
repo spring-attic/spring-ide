@@ -6,7 +6,6 @@ Bundle-Vendor: Pivotal Inc
 Bundle-Name: Spring Boot Dash CF Support
 Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.ide,
- org.eclipse.core.runtime,
  org.springframework.ide.eclipse.boot.launch,
  org.springframework.ide.eclipse.boot,
  org.springframework.ide.eclipse.boot.dash,
@@ -66,3 +65,9 @@ Export-Package: org.springframework.ide.eclipse.boot.dash.cf,
  org.springframework.ide.eclipse.boot.dash.cf.ui
 Bundle-ClassPath: .,
  lib/spring-boot-loader-tools-1.2.3.RELEASE.jar
+Automatic-Module-Name: org.springframework.ide.eclipse.boot.dash.cf
+Import-Package: org.eclipse.core.runtime,
+ org.eclipse.core.runtime.jobs,
+ org.eclipse.core.runtime.preferences,
+ org.eclipse.osgi.util,
+ org.osgi.framework
