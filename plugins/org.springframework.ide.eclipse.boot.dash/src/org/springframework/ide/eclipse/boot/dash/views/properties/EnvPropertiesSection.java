@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Pivotal, Inc.
+ * Copyright (c) 2019, 2020 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.Failable;
+import org.springframework.ide.eclipse.boot.dash.model.MissingLiveInfoMessages;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.env.ActiveProfiles;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.env.LiveEnvModel;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.env.Property;
@@ -38,6 +40,7 @@ public class EnvPropertiesSection extends AbstractBdePropertiesSection {
 
 	private SearchableTreeControl searchableTree;
 	private TabbedPropertySheetPage page;
+	private Failable<LiveEnvModel> env;
 
 
 	@Override
@@ -58,8 +61,8 @@ public class EnvPropertiesSection extends AbstractBdePropertiesSection {
 			BootDashElement bde = getBootDashElement();
 			if (bde == null) {
 				return MissingLiveInfoMessages.noSelectionMessage("environment properties");
-			} else if (bde.getLiveEnv() == null) {
-				return MissingLiveInfoMessages.getMissingInfoMessage(bde.getName(), "env");
+			} else if (env != null && env.hasFailed()) {
+				return env.getErrorMessage();
 			} else {
 				// Must return null if there is content
 				return null;
@@ -75,10 +78,16 @@ public class EnvPropertiesSection extends AbstractBdePropertiesSection {
 
 	@Override
 	public void refresh() {
+		BootDashElement bde = getBootDashElement();
+		if (bde == null) {
+			this.env = null;
+		} else {
+			this.env = bde.getLiveEnv();
+		}
 		searchableTree.refresh();
 	}
 
-	private static class LiveEnvContentProvider implements ITreeContentProvider {
+	private class LiveEnvContentProvider implements ITreeContentProvider {
 
 		LiveEnvContentProvider() {
 		}
@@ -86,8 +95,7 @@ public class EnvPropertiesSection extends AbstractBdePropertiesSection {
 		@Override
 		public Object[] getElements(Object inputElement) {
 			if (inputElement instanceof BootDashElement) {
-				BootDashElement bde = (BootDashElement) inputElement;
-				LiveEnvModel liveEnv = bde.getLiveEnv();
+				LiveEnvModel liveEnv = env == null ? null : env.getValue();
 				if (liveEnv != null) {
 					List<Object> elements = new ArrayList<>();
 

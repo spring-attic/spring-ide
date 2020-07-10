@@ -65,6 +65,7 @@ import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 import org.springsource.ide.eclipse.commons.ui.launch.LaunchUtils;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
 /**
@@ -96,9 +97,9 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 
 	private PropertyStoreApi persistentProperties;
 
-	private PollingLiveExp<List<RequestMapping>> liveRequestMappings;
-	private PollingLiveExp<LiveBeansModel> liveBeans;
-	private PollingLiveExp<LiveEnvModel> liveEnv;
+	private PollingLiveExp<Failable<ImmutableList<RequestMapping>>> liveRequestMappings;
+	private PollingLiveExp<Failable<LiveBeansModel>> liveBeans;
+	private PollingLiveExp<Failable<LiveEnvModel>> liveEnv;
 
 	public AbstractLaunchConfigurationsDashElement(LocalBootDashModel bootDashModel, T delegate) {
 		super(bootDashModel, delegate);
@@ -531,11 +532,16 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 	}
 
 	@Override
-	public List<RequestMapping> getLiveRequestMappings() {
+	public Failable<ImmutableList<RequestMapping>> getLiveRequestMappings() {
 		synchronized (this) {
 			if (liveRequestMappings==null) {
 				ActuatorClient client = getActuatorClient();
-				liveRequestMappings = PollingLiveExp.create(client::getRequestMappings);
+				liveRequestMappings = PollingLiveExp.create(Failable.error(MissingLiveInfoMessages.NOT_YET_COMPUTED), () -> {
+					List<RequestMapping> requestMappings = client.getRequestMappings();
+					return requestMappings == null ?
+							Failable.error(getBootDashModel().getRunTarget().getType().getMissingLiveInfoMessages().getMissingInfoMessage(getName(), "mappings")) :
+							Failable.of(ImmutableList.copyOf(requestMappings));
+				});
 				addElementState(liveRequestMappings);
 				addDisposableChild(liveRequestMappings);
 				runState.addListener((e, runstate) -> {
@@ -550,11 +556,15 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 		}
 	}
 
-	public LiveBeansModel getLiveBeans() {
+	public Failable<LiveBeansModel> getLiveBeans() {
 		synchronized (this) {
 			if (liveBeans == null) {
 				ActuatorClient client = getActuatorClient();
-				liveBeans = PollingLiveExp.create(client::getBeans);
+				liveBeans = PollingLiveExp.create(Failable.error(MissingLiveInfoMessages.NOT_YET_COMPUTED), () -> {
+					LiveBeansModel beans = client.getBeans();
+					return beans == null ? Failable.error(getBootDashModel().getRunTarget().getType().getMissingLiveInfoMessages().getMissingInfoMessage(getName(), "beans")) :
+						Failable.of(beans);
+				});
 				addElementState(liveBeans);
 				addDisposableChild(liveBeans);
 				runState.addListener((e, runstate) -> {
@@ -571,11 +581,15 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 		}
 	}
 
-	public LiveEnvModel getLiveEnv() {
+	public Failable<LiveEnvModel> getLiveEnv() {
 		synchronized (this) {
 			if (liveEnv == null) {
 				ActuatorClient client = getActuatorClient();
-				liveEnv = PollingLiveExp.create(client::getEnv);
+				liveEnv = PollingLiveExp.create(Failable.error(MissingLiveInfoMessages.NOT_YET_COMPUTED), () -> {
+					LiveEnvModel env = client.getEnv();
+					return env == null ? Failable.error(getBootDashModel().getRunTarget().getType().getMissingLiveInfoMessages().getMissingInfoMessage(getName(), "env")) :
+						Failable.of(env);
+				});
 				addElementState(liveEnv);
 				addDisposableChild(liveEnv);
 				runState.addListener((e, runstate) -> {

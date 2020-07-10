@@ -54,6 +54,9 @@ public class DockerImage implements App, ChildBearing, Styleable {
 
 	@Override
 	public StyledString getStyledName(Stylers stylers) {
+		if (stylers == null) {
+			stylers = new Stylers(null);
+		}
 		List<String> repoTags = image.repoTags();
 		if (repoTags != null && !repoTags.isEmpty()) {
 			StyledString styledString = new StyledString(repoTags.get(0))

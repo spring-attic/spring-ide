@@ -21,7 +21,9 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.bootVersionAtLeast;
-import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.*;
+import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withImportStrategy;
+import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
+import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertContains;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -70,6 +72,7 @@ import org.springframework.ide.eclipse.boot.dash.docker.ui.SelectDockerDaemonDia
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.Failable;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.Taggable;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.RequestMapping;
@@ -322,8 +325,8 @@ public class BootDashDockerTests {
 		String jmxUrl = con.getJmxUrl();
 		ACondition.waitFor("live beans model", 5_000, () -> {
 			for (GenericRemoteAppElement node : nodes) {
-				assertEquals(jmxUrl, node.getActuatorUrl().getValue());
-				LiveBeansModel beans = node.getLiveBeans();
+				assertEquals(ImmutableSet.of(jmxUrl), node.getActuatorUrls().getValue());
+				LiveBeansModel beans = node.getLiveBeans().orElse(null);
 				assertNotNull(beans);
 				assertFalse(beans.getBeans().isEmpty());
 			}
@@ -338,8 +341,8 @@ public class BootDashDockerTests {
 		});
 		ACondition.waitFor("live beans gone", 5_000, () -> {
 			for (GenericRemoteAppElement node : nodes) {
-				assertNull(node.getActuatorUrl().getValue());
-				assertNull(node.getLiveBeans());
+				assertTrue(node.getActuatorUrls().getValue().isEmpty());
+				assertNull(node.getLiveBeans().orElse(null));
 			}
 		});
 	}
@@ -370,8 +373,8 @@ public class BootDashDockerTests {
 		String jmxUrl = con.getJmxUrl();
 		ACondition.waitFor("live requestmappings", 5_000, () -> {
 			for (GenericRemoteAppElement node : nodes) {
-				assertEquals(jmxUrl, node.getActuatorUrl().getValue());
-				List<RequestMapping> rm = node.getLiveRequestMappings();
+				assertEquals(ImmutableSet.of(jmxUrl), node.getActuatorUrls().getValue());
+				List<RequestMapping> rm = node.getLiveRequestMappings().orElse(null);
 				assertNotNull(rm);
 				assertFalse(rm.isEmpty());
 			}
@@ -386,8 +389,63 @@ public class BootDashDockerTests {
 		});
 		ACondition.waitFor("live requestmappings gone", 5_000, () -> {
 			for (GenericRemoteAppElement node : nodes) {
-				assertNull(node.getActuatorUrl().getValue());
-				assertNull(node.getLiveBeans());
+				assertTrue(node.getActuatorUrls().getValue().isEmpty());
+				assertNull(node.getLiveBeans().orElse(null));
+			}
+		});
+	}
+
+	@Test
+	public void liveDataNotAvailable() throws Exception {
+		IProject project = projects.createBootProject("webby-actuator",
+				bootVersionAtLeast("2.3.0"),
+				withStarters("web")
+		);
+		GenericRemoteBootDashModel<DockerClient, DockerTargetParams> model = createDockerTarget();
+		Mockito.reset(ui());
+		dragAndDrop(project, model);
+		GenericRemoteAppElement dep = waitForDeployment(model, project);
+		GenericRemoteAppElement img = waitForChild(dep, d -> d instanceof DockerImage);
+		GenericRemoteAppElement con = waitForChild(img, d -> d instanceof DockerContainer);
+		GenericRemoteAppElement[] nodes = {
+				con, img, dep
+		};
+
+		ACondition.waitFor("all started", BUILD_IMAGE_TIMEOUT, () -> {
+			assertEquals(RunState.RUNNING, dep.getRunState());
+			assertEquals(RunState.RUNNING, img.getRunState());
+			assertEquals(RunState.RUNNING, con.getRunState());
+		});
+		verifyNoMoreInteractions(ui());
+
+		ACondition.waitFor("live requestmappings", 5_000, () -> {
+			for (GenericRemoteAppElement node : nodes) {
+				Failable<ImmutableList<RequestMapping>> rm = node.getLiveRequestMappings();
+				Failable<LiveBeansModel> beans = node.getLiveBeans();
+				Failable<LiveEnvModel> env = node.getLiveEnv();
+
+				assertTrue(rm.hasFailed());
+				assertContains("Enable actuator endpoint 'mappings'", rm.getErrorMessage());
+
+				assertTrue(beans.hasFailed());
+				assertContains("Enable actuator endpoint 'beans'", beans.getErrorMessage());
+
+				assertTrue(env.hasFailed());
+				assertContains("Enable actuator endpoint 'env'", env.getErrorMessage());
+			}
+		});
+
+		RunStateAction stop = stopAction();
+		harness.selection.setElements(dep);
+		stop.run();
+
+		ACondition.waitFor("Container stopped", 15_000, () -> { //Sometimes stopping container takes a long time. Not sure why.
+			assertEquals(RunState.INACTIVE, con.getRunState());
+		});
+		ACondition.waitFor("live requestmappings gone", 5_000, () -> {
+			for (GenericRemoteAppElement node : nodes) {
+				assertTrue(node.getActuatorUrls().getValue().isEmpty());
+				assertNull(node.getLiveBeans().orElse(null));
 			}
 		});
 	}
@@ -418,8 +476,8 @@ public class BootDashDockerTests {
 		String jmxUrl = con.getJmxUrl();
 		ACondition.waitFor("live env", 5_000, () -> {
 			for (GenericRemoteAppElement node : nodes) {
-				assertEquals(jmxUrl, node.getActuatorUrl().getValue());
-				LiveEnvModel env = node.getLiveEnv();
+				assertEquals(ImmutableSet.of(jmxUrl), node.getActuatorUrls().getValue());
+				LiveEnvModel env = node.getLiveEnv().orElse(null);
 				assertNotNull(env);
 				assertFalse(env.getPropertySources().getPropertySources().isEmpty());
 			}
@@ -434,8 +492,8 @@ public class BootDashDockerTests {
 		});
 		ACondition.waitFor("live env gone", 5_000, () -> {
 			for (GenericRemoteAppElement node : nodes) {
-				assertNull(node.getActuatorUrl().getValue());
-				assertNull(node.getLiveEnv());
+				assertTrue(node.getActuatorUrls().getValue().isEmpty());
+				assertNull(node.getLiveEnv().orElse(null));
 			}
 		});
 	}

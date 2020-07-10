@@ -35,6 +35,8 @@ import org.springframework.ide.eclipse.boot.dash.api.Styleable;
 import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
+import org.springframework.ide.eclipse.boot.dash.model.Failable;
+import org.springframework.ide.eclipse.boot.dash.model.MissingLiveInfoMessages;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
@@ -423,7 +425,7 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		if (app instanceof Styleable) {
 			return ((Styleable) app).getStyledName(stylers);
 		}
-		return null;
+		return new StyledString(getName());
 	}
 
 	@Override
@@ -481,57 +483,79 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		return null;
 	}
 
-	private LiveExpression<String> actuatorUrl = sumarizeFromChildren(new AppDataSummarizer<String>() {
+	private LiveExpression<Set<String>> actuatorUrls = sumarizeFromChildren(new AppDataSummarizer<Set<String>>() {
 
 		@Override
-		public String getHere(GenericRemoteAppElement app) {
-			RunState rs = app.getRunState();
-			if (rs.isActive()) {
-				return app.getJmxUrl();
-			}
-			return null;
+		public Set<String> getHere(GenericRemoteAppElement app) {
+			String url = app.getActuatorUrlHere();
+			return url == null ? ImmutableSet.of() : ImmutableSet.of(url);
 		}
 
 		@Override
-		public String getSummary(GenericRemoteAppElement element) {
-			return element.getActuatorUrl().getValue();
+		public Set<String> merge(Set<String> d1, Set<String> d2) {
+			ImmutableSet.Builder<String> builder = ImmutableSet.builder();
+			if (d1 != null) {
+				builder.addAll(d1);
+			}
+			if (d2 != null) {
+				builder.addAll(d2);
+			}
+			return builder.build();
+		}
+
+		@Override
+		public Set<String> getSummary(GenericRemoteAppElement element) {
+			return element.getActuatorUrls().getValue();
 		}
 
 	});
 	{
-		actuatorUrl.onChange((e, v) -> {
-			System.out.println(getName()+" actuatorUrl = "+getActuatorUrl().getValue());
+		actuatorUrls.onChange((e, v) -> {
+			System.out.println(getName()+" actuatorUrl = "+getActuatorUrls().getValue());
 		});
 	}
-	public LiveExpression<String> getActuatorUrl() {
-		return actuatorUrl;
+	public LiveExpression<Set<String>> getActuatorUrls() {
+		return actuatorUrls;
 	}
 
-	private LiveExpression<ImmutableList<RequestMapping>> liveRequestMappings;
-	private LiveExpression<LiveEnvModel> liveEnv;
-	private LiveExpression<LiveBeansModel> liveBeans;
+	String getActuatorUrlHere() {
+		RunState rs = getRunState();
+		if (rs.isActive()) {
+			return getJmxUrl();
+		}
+		return null;
+	}
+
+	private LiveExpression<Failable<ImmutableList<RequestMapping>>> liveRequestMappings;
+	private LiveExpression<Failable<LiveEnvModel>> liveEnv;
+	private LiveExpression<Failable<LiveBeansModel>> liveBeans;
 
 	@Override
-	public List<RequestMapping> getLiveRequestMappings() {
+	public Failable<ImmutableList<RequestMapping>> getLiveRequestMappings() {
 		synchronized (this) {
 			if (liveRequestMappings==null) {
-				final LiveExpression<String> actuatorUrl = getActuatorUrl();
-				liveRequestMappings = new AsyncLiveExpression<ImmutableList<RequestMapping>>(null, "Fetch request mappings for '"+getName()+"'") {
+				final LiveExpression<Set<String>> actuatorUrls = getActuatorUrls();
+				liveRequestMappings = new AsyncLiveExpression<Failable<ImmutableList<RequestMapping>>>(Failable.error(MissingLiveInfoMessages.NOT_YET_COMPUTED), "Fetch request mappings for '"+getStyledName(null).getString()+"'") {
 					@Override
-					protected ImmutableList<RequestMapping> compute() {
-						String target = actuatorUrl.getValue();
-						if (target!=null) {
-							ActuatorClient client = JMXActuatorClient.forUrl(getTypeLookup(), () -> target);
-							List<RequestMapping> list = client.getRequestMappings();
-							if (list!=null) {
-								return ImmutableList.copyOf(client.getRequestMappings());
+					protected Failable<ImmutableList<RequestMapping>> compute() {
+						Set<String> targets = actuatorUrls.getValue();
+						if (targets!=null && !targets.isEmpty()) {
+							if (targets.size() == 1) {
+								String target = targets.iterator().next();
+								ActuatorClient client = JMXActuatorClient.forUrl(getTypeLookup(), () -> target);
+								List<RequestMapping> list = client.getRequestMappings();
+								if (list!=null) {
+									return Failable.of(ImmutableList.copyOf(client.getRequestMappings()));
+								}
+							} else {
+								return Failable.error("More than one child can provide live data. Please select one.");
 							}
 						}
-						return null;
+						return Failable.error(getBootDashModel().getRunTarget().getType().getMissingLiveInfoMessages().getMissingInfoMessage(getStyledName(null).getString(), "mappings"));
 					}
 
 				};
-				liveRequestMappings.dependsOn(actuatorUrl);
+				liveRequestMappings.dependsOn(actuatorUrls);
 				addElementState(liveRequestMappings);
 				addDisposableChild(liveRequestMappings);
 			}
@@ -540,23 +564,31 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 	}
 
 	@Override
-	public LiveEnvModel getLiveEnv() {
+	public Failable<LiveEnvModel> getLiveEnv() {
 		synchronized (this) {
 			if (liveEnv == null) {
-				final LiveExpression<String> actuatorUrl = getActuatorUrl();
-				liveEnv = new AsyncLiveExpression<LiveEnvModel>(null, "Fetch env for '"+getName()+"'") {
+				final LiveExpression<Set<String>> actuatorUrls = getActuatorUrls();
+				liveEnv = new AsyncLiveExpression<Failable<LiveEnvModel>>(Failable.error(MissingLiveInfoMessages.NOT_YET_COMPUTED), "Fetch env for '"+getStyledName(null).getString()+"'") {
 					@Override
-					protected LiveEnvModel compute() {
-						String target = actuatorUrl.getValue();
-						if (target != null) {
-							ActuatorClient client = JMXActuatorClient.forUrl(getTypeLookup(), () -> target);
-							return client.getEnv();
+					protected Failable<LiveEnvModel> compute() {
+						Set<String> targets = actuatorUrls.getValue();
+						if (targets!=null && !targets.isEmpty()) {
+							if (targets.size() == 1) {
+								String target = targets.iterator().next();
+								ActuatorClient client = JMXActuatorClient.forUrl(getTypeLookup(), () -> target);
+								LiveEnvModel env = client.getEnv();
+								if (env != null) {
+									return Failable.of(env);
+								}
+							} else {
+								return Failable.error("More than one child can provide live data. Please select one.");
+							}
 						}
-						return null;
+						return Failable.error(getBootDashModel().getRunTarget().getType().getMissingLiveInfoMessages().getMissingInfoMessage(getStyledName(null).getString(), "env"));
 					}
 
 				};
-				liveEnv.dependsOn(actuatorUrl);
+				liveEnv.dependsOn(actuatorUrls);
 				addElementState(liveEnv);
 				addDisposableChild(liveEnv);
 			}
@@ -565,23 +597,31 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 	}
 
 	@Override
-	public LiveBeansModel getLiveBeans() {
+	public Failable<LiveBeansModel> getLiveBeans() {
 		synchronized (this) {
 			if (liveBeans == null) {
-				LiveExpression<String> actuatorUrl = getActuatorUrl();
-				liveBeans = new AsyncLiveExpression<LiveBeansModel>(null, "Fetch beans for '"+getName()+"'") {
+				LiveExpression<Set<String>> actuatorUrls = getActuatorUrls();
+				liveBeans = new AsyncLiveExpression<Failable<LiveBeansModel>>(Failable.error(MissingLiveInfoMessages.NOT_YET_COMPUTED), "Fetch beans for '"+getStyledName(null).getString()+"'") {
 					@Override
-					protected LiveBeansModel compute() {
-						String target = actuatorUrl.getValue();
-						if (target != null) {
-							ActuatorClient client = JMXActuatorClient.forUrl(getTypeLookup(), () -> target);
-							return client.getBeans();
+					protected Failable<LiveBeansModel> compute() {
+						Set<String> targets = actuatorUrls.getValue();
+						if (targets!=null && !targets.isEmpty()) {
+							if (targets.size() == 1) {
+								String target = targets.iterator().next();
+								ActuatorClient client = JMXActuatorClient.forUrl(getTypeLookup(), () -> target);
+								LiveBeansModel beans = client.getBeans();
+								if (beans != null) {
+									return Failable.of(beans);
+								}
+							} else {
+								return Failable.error("More than one child can provide live data. Please select one.");
+							}
 						}
-						return null;
+						return Failable.error(getBootDashModel().getRunTarget().getType().getMissingLiveInfoMessages().getMissingInfoMessage(getStyledName(null).getString(), "beans"));
 					}
 
 				};
-				liveBeans.dependsOn(actuatorUrl);
+				liveBeans.dependsOn(actuatorUrls);
 				addElementState(liveBeans);
 				addDisposableChild(liveBeans);
 			}

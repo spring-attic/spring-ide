@@ -1,6 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2020 Pivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Pivotal, Inc. - initial API and implementation
+ *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model.remote;
-
-import com.google.common.base.Objects;
 
 public interface AppDataSummarizer<T> {
 
@@ -29,13 +37,7 @@ public interface AppDataSummarizer<T> {
 	 * Default implementation just keeps the first 'real' data
 	 * and ignores the rest.
 	 */
-	default T merge(T d1 , T d2) {
-		if (!Objects.equal(d1, zero())) {
-			return d1;
-		} else {
-			return d2;
-		}
-	}
+	T merge(T d1 , T d2);
 
 	/**
 	 * Defines the element that represents 'no data'. A typical value

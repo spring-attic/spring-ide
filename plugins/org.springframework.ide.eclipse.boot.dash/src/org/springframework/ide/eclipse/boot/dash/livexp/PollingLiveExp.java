@@ -40,6 +40,10 @@ public abstract class PollingLiveExp<T> extends LiveExpression<T> {
 
 	private Supplier<Boolean> continueRefreshing = STOP_REFRESHING;
 
+	public PollingLiveExp(T initialValue) {
+		super(initialValue);
+	}
+
 	/**
 	 * Override the default 'sleepBetweenRefreshes' value.
 	 */
@@ -125,14 +129,13 @@ public abstract class PollingLiveExp<T> extends LiveExpression<T> {
 	/**
 	 * Lambda-friendly way of creating a PollingLiveExp instance.
 	 */
-	public static <T> PollingLiveExp<T> create(Supplier<T> computer) {
-		return new PollingLiveExp<T>() {
+	public static <T> PollingLiveExp<T> create(T initialValue, Supplier<T> computer) {
+		return new PollingLiveExp<T>(initialValue) {
 			@Override
 			protected T compute() {
 				return computer.get();
 			}
 		};
 	}
-
 
 }

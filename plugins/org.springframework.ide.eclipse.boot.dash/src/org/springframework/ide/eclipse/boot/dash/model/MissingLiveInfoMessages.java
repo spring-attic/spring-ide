@@ -8,13 +8,17 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.views.properties;
+package org.springframework.ide.eclipse.boot.dash.model;
 
-public class MissingLiveInfoMessages {
+public interface MissingLiveInfoMessages {
 
-	public static final String EXTERNAL_DOCUMENT_LINK = "https://github.com/spring-projects/sts4/wiki/Live-Application-Information#application-requirements-for-spring-boot-projects";
+	static final String EXTERNAL_DOCUMENT_LINK = "https://github.com/spring-projects/sts4/wiki/Live-Application-Information#application-requirements-for-spring-boot-projects";
 
-	public static String getMissingInfoMessage(String appName, String actuatorEndpoint) {
+	static final MissingLiveInfoMessages DEFAULT = new MissingLiveInfoMessages() {};
+
+	static final String NOT_YET_COMPUTED = "Not yet computed...";
+
+	default String getMissingInfoMessage(String appName, String actuatorEndpoint) {
 		StringBuilder message = new StringBuilder();
 		message.append("'");
 		message.append(appName);
@@ -37,7 +41,7 @@ public class MissingLiveInfoMessages {
 		return message.toString();
 	}
 
-	public static String noSelectionMessage(String element) {
+	static String noSelectionMessage(String element) {
 		return "Select single element in Boot Dashboard to see live " + element;
 	}
 

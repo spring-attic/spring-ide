@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2019 Pivotal, Inc.
+ * Copyright (c) 2017, 2020 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,10 +23,13 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
 import org.springframework.ide.eclipse.beans.ui.live.model.AbstractLiveBeansModelElement;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeanType;
+import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModel;
 import org.springframework.ide.eclipse.beans.ui.live.tree.ContextGroupedBeansContentProvider;
 import org.springframework.ide.eclipse.beans.ui.live.tree.LiveBeansTreeLabelProvider;
 import org.springframework.ide.eclipse.beans.ui.live.utils.LiveBeanUtil;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.Failable;
+import org.springframework.ide.eclipse.boot.dash.model.MissingLiveInfoMessages;
 import org.springsource.ide.eclipse.commons.livexp.ui.util.TreeElementWrappingContentProvider;
 import org.springsource.ide.eclipse.commons.livexp.ui.util.TreeElementWrappingContentProvider.TreeNode;
 
@@ -40,6 +43,7 @@ public class BeansPropertiesSection extends AbstractBdePropertiesSection {
 
 	private TabbedPropertySheetPage page;
 	private SearchableTreeControl searchableTree;
+	private Failable<LiveBeansModel> beans;
 
 
 	@Override
@@ -68,6 +72,12 @@ public class BeansPropertiesSection extends AbstractBdePropertiesSection {
 
 	@Override
 	public void refresh() {
+		this.beans = null;
+		BootDashElement bde = getBootDashElement();
+		if (bde != null) {
+			this.beans = bde.getLiveBeans();
+		}
+
 		searchableTree.refresh();
 	}
 
@@ -76,15 +86,15 @@ public class BeansPropertiesSection extends AbstractBdePropertiesSection {
 			BootDashElement bde = getBootDashElement();
 			if (bde == null) {
 				return MissingLiveInfoMessages.noSelectionMessage("Beans");
-			} else if (bde.getLiveBeans() == null) {
-				return MissingLiveInfoMessages.getMissingInfoMessage(bde.getName(), "beans");
+			} else if (beans != null && beans.hasFailed()) {
+				return beans.getErrorMessage();
 			} else {
 				return null;
 			}
 		};
 	}
 
-	private static class BeansContentProvider implements ITreeContentProvider {
+	private class BeansContentProvider implements ITreeContentProvider {
 
 		private ITreeContentProvider delegateContentProvider;
 
@@ -95,8 +105,7 @@ public class BeansPropertiesSection extends AbstractBdePropertiesSection {
 		@Override
 		public Object[] getElements(Object inputElement) {
 			if (inputElement instanceof BootDashElement) {
-				BootDashElement bde = (BootDashElement) inputElement;
-				return delegateContentProvider.getElements(bde.getLiveBeans());
+				return delegateContentProvider.getElements(beans == null ? null : beans.getValue());
 			}
 			return new Object[0];
 		}

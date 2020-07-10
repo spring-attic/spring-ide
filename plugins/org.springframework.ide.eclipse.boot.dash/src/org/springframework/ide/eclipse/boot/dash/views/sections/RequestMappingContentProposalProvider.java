@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.boot.dash.views.sections;
 
 import java.util.LinkedHashSet;
-import java.util.List;
 
 import org.eclipse.jface.fieldassist.IContentProposal;
 import org.eclipse.jface.fieldassist.IContentProposalProvider;
@@ -19,6 +18,8 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.RequestMapping;
 import org.springframework.ide.eclipse.editor.support.util.FuzzyMatcher;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+
+import com.google.common.collect.ImmutableList;
 
 public class RequestMappingContentProposalProvider implements IContentProposalProvider {
 
@@ -34,9 +35,9 @@ public class RequestMappingContentProposalProvider implements IContentProposalPr
 	public IContentProposal[] getProposals(String contents, int position) {
 		BootDashElement bde = input.getValue();
 		if (bde!=null) {
-			List<RequestMapping> rms = bde.getLiveRequestMappings();
+			ImmutableList<RequestMapping> rms = bde.getLiveRequestMappings().orElse(null);
 			if (rms!=null && !rms.isEmpty()) {
-				LinkedHashSet<String> matches = new LinkedHashSet<String>(rms.size());
+				LinkedHashSet<String> matches = new LinkedHashSet<>(rms.size());
 				for (RequestMapping rm : rms) {
 					String path = rm.getPath();
 					if (FuzzyMatcher.matchScore(contents, path)!=0) {

@@ -1025,13 +1025,13 @@ public class BootDashModelTest {
 		final BootDashElement element = getElement(projectName);
 		try {
 			waitForState(element, RunState.INACTIVE);
-			assertNull(element.getLiveRequestMappings()); // unknown since can only be determined when app is running
+			assertNull(element.getLiveRequestMappings().orElse(null)); // unknown since can only be determined when app is running
 
 			element.restart(RunState.RUNNING, ui());
 			waitForState(element, RunState.RUNNING);
 			new ACondition("Wait for request mappings", MODEL_UPDATE_TIMEOUT) {
 				public boolean test() throws Exception {
-					List<RequestMapping> mappings = element.getLiveRequestMappings();
+					List<RequestMapping> mappings = element.getLiveRequestMappings().orElse(null);
 					assertNotNull(mappings); //Why is the test sometimes failing here?
 					assertTrue(!mappings.isEmpty()); //Even though this is an 'empty' app should have some mappings,
 					                                 // for example an 'error' page.
@@ -1039,7 +1039,7 @@ public class BootDashModelTest {
 				}
 			};
 
-			List<RequestMapping> mappings = element.getLiveRequestMappings();
+			List<RequestMapping> mappings = element.getLiveRequestMappings().orElse(null);
 			System.out.println(">>> Found RequestMappings");
 			for (RequestMapping m : mappings) {
 				System.out.println(m.getPath());
@@ -1122,18 +1122,18 @@ public class BootDashModelTest {
 		wc.doSave();
 		try {
 			waitForState(element, RunState.INACTIVE);
-			assertNull(element.getLiveRequestMappings()); // unknown since can only be determined when app is running
+			assertNull(element.getLiveRequestMappings().orElse(null)); // unknown since can only be determined when app is running
 
 			element.restart(runMode, ui());
 			waitForState(element, runMode);
 			ACondition.waitFor("Wait for request mappings", MODEL_UPDATE_TIMEOUT, () -> {
-				List<RequestMapping> mappings = element.getLiveRequestMappings();
+				List<RequestMapping> mappings = element.getLiveRequestMappings().orElse(null);
 				assertNotNull(mappings);
 				assertTrue(!mappings.isEmpty()); //Even though this is an 'empty' app should have some mappings,
 				                                 // for example an 'error' page.
 			});
 
-			List<RequestMapping> mappings = element.getLiveRequestMappings();
+			List<RequestMapping> mappings = element.getLiveRequestMappings().orElse(null);
 			System.out.println(">>> Found RequestMappings");
 			for (RequestMapping m : mappings) {
 				System.out.println(m.getPath());

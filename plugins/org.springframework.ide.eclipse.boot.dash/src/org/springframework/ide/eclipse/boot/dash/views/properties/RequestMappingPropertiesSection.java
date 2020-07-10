@@ -12,10 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.views.properties;
 
 import static org.springsource.ide.eclipse.commons.ui.UiUtil.openUrl;
 
-import java.util.List;
-
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -45,6 +42,8 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.views.properties.tabbed.ITabbedPropertyConstants;
 import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.Failable;
+import org.springframework.ide.eclipse.boot.dash.model.MissingLiveInfoMessages;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.util.Utils;
 import org.springframework.ide.eclipse.boot.dash.views.RequestMappingLabelProvider;
@@ -53,6 +52,8 @@ import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 import org.springsource.ide.eclipse.commons.ui.SpringUIUtils;
 import org.springsource.ide.eclipse.commons.ui.UiUtil;
 
+import com.google.common.collect.ImmutableList;
+
 /**
  * Tabbed properties view section for live request mappings
  *
@@ -60,6 +61,8 @@ import org.springsource.ide.eclipse.commons.ui.UiUtil;
  * @author Kris De Volder
  */
 public class RequestMappingPropertiesSection extends AbstractBdePropertiesSection {
+
+	private Failable<ImmutableList<RequestMapping>> requestMappings = Failable.of(ImmutableList.of());
 
 	private class DoubleClickListener extends MouseAdapter {
 		DoubleClickListener(TableViewer tv) {
@@ -180,8 +183,6 @@ public class RequestMappingPropertiesSection extends AbstractBdePropertiesSectio
 		tv.getTable().setHeaderVisible(true);
 		stylers = new Stylers(tv.getTable().getFont());
 
-		refreshControlsVisibility();
-
 		for (RequestMappingsColumn colType : RequestMappingsColumn.values()) {
 			TableViewerColumn col = new TableViewerColumn(tv, colType.getAlignment());
 			col.setLabelProvider(new RequestMappingLabelProvider(stylers, getBootDashElementLiveExpression(), colType));
@@ -201,26 +202,24 @@ public class RequestMappingPropertiesSection extends AbstractBdePropertiesSectio
 	}
 
 	public void refresh() {
-		refreshControlsVisibility();
+		this.requestMappings = Failable.of(ImmutableList.of());
 		BootDashElement bde = getBootDashElement();
-		if (bde == null) {
-			labelText.setText(MissingLiveInfoMessages.noSelectionMessage("Request Mappings"));
-		} else if (bde.getLiveRequestMappings() == null) {
-			labelText.setText(MissingLiveInfoMessages.getMissingInfoMessage(bde.getName(), "mappings"));
+		if (bde != null) {
+			layout.topControl = tv.getControl();
+			this.requestMappings = bde.getLiveRequestMappings();
+			if (requestMappings.hasFailed()) {
+				labelText.setText(requestMappings.getErrorMessage());
+				layout.topControl = missingInfoComp;
+			} else {
+				layout.topControl = tv.getControl();
+			}
 		} else {
-			labelText.setText("");
+			layout.topControl = missingInfoComp;
+			labelText.setText(MissingLiveInfoMessages.noSelectionMessage("Request Mappings"));
 		}
+
 		tv.refresh();
 		SectionStackLayout.reflow(page);
-	}
-
-	private void refreshControlsVisibility() {
-		BootDashElement bde = getBootDashElement();
-		if (bde == null || bde.getLiveRequestMappings() == null) {
-			layout.topControl = missingInfoComp;
-		} else {
-			layout.topControl = tv.getControl();
-		}
 	}
 
 	@Override
@@ -252,22 +251,7 @@ public class RequestMappingPropertiesSection extends AbstractBdePropertiesSectio
 
 		@Override
 		public Object[] getElements(Object inputElement) {
-			if (inputElement instanceof BootDashElement) {
-				BootDashElement el = (BootDashElement) inputElement;
-				List<RequestMapping> elements = el.getLiveRequestMappings();
-				if (elements!=null) {
-					return elements.toArray();
-				} else {
-					//null means we couldn't determine the request mappings.
-					return new Object[] {
-							"'"+el.getName()+"' must be running...",
-							"and the actuator 'mappings' ...",
-							"endpoint must be enabled ...",
-							"to obtain request mappings.",
-					};
-				}
-			}
-			return NO_ELEMENTS;
+			return requestMappings.hasFailed() ? new Object[0] : requestMappings.getValue().toArray();
 		}
 	}
 

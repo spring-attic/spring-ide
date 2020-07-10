@@ -10,16 +10,13 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cf.model;
 
-import java.net.URI;
 import java.util.List;
-import java.util.Optional;
-
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModel;
 import org.springframework.ide.eclipse.boot.dash.cf.runtarget.CloudFoundryRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.Failable;
+import org.springframework.ide.eclipse.boot.dash.model.MissingLiveInfoMessages;
 import org.springframework.ide.eclipse.boot.dash.model.WrappingBootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.ActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.JMXActuatorClient;
@@ -36,27 +33,27 @@ public abstract class CloudDashElement<T> extends WrappingBootDashElement<T> {
 		super(bootDashModel, delegate);
 	}
 
-	private LiveExpression<ImmutableList<RequestMapping>> liveRequestMappings;
-	private LiveExpression<LiveBeansModel> liveBeans;
-	private LiveExpression<LiveEnvModel> liveEnv;
+	private LiveExpression<Failable<ImmutableList<RequestMapping>>> liveRequestMappings;
+	private LiveExpression<Failable<LiveBeansModel>> liveBeans;
+	private LiveExpression<Failable<LiveEnvModel>> liveEnv;
 
 	@Override
-	public List<RequestMapping> getLiveRequestMappings() {
+	public Failable<ImmutableList<RequestMapping>> getLiveRequestMappings() {
 		synchronized (this) {
 			if (liveRequestMappings==null) {
 				final LiveExpression<String> actuatorUrl = getActuatorUrl();
-				liveRequestMappings = new AsyncLiveExpression<ImmutableList<RequestMapping>>(null, "Fetch request mappings for '"+getName()+"'") {
+				liveRequestMappings = new AsyncLiveExpression<Failable<ImmutableList<RequestMapping>>>(Failable.error(MissingLiveInfoMessages.NOT_YET_COMPUTED), "Fetch request mappings for '"+getName()+"'") {
 					@Override
-					protected ImmutableList<RequestMapping> compute() {
+					protected Failable<ImmutableList<RequestMapping>> compute() {
 						String target = actuatorUrl.getValue();
 						if (target!=null) {
 							ActuatorClient client = JMXActuatorClient.forUrl(getTypeLookup(), () -> target);
 							List<RequestMapping> list = client.getRequestMappings();
 							if (list!=null) {
-								return ImmutableList.copyOf(client.getRequestMappings());
+								return Failable.of(ImmutableList.copyOf(client.getRequestMappings()));
 							}
 						}
-						return null;
+						return Failable.error(getBootDashModel().getRunTarget().getType().getMissingLiveInfoMessages().getMissingInfoMessage(getName(), "mappings"));
 					}
 
 				};
@@ -69,19 +66,22 @@ public abstract class CloudDashElement<T> extends WrappingBootDashElement<T> {
 	}
 
 	@Override
-	public LiveBeansModel getLiveBeans() {
+	public Failable<LiveBeansModel> getLiveBeans() {
 		synchronized (this) {
 			if (liveBeans == null) {
 				final LiveExpression<String> actuatorUrl = getActuatorUrl();
-				liveBeans = new AsyncLiveExpression<LiveBeansModel>(null, "Fetch beans for '"+getName()+"'") {
+				liveBeans = new AsyncLiveExpression<Failable<LiveBeansModel>>(Failable.error(MissingLiveInfoMessages.NOT_YET_COMPUTED), "Fetch beans for '"+getName()+"'") {
 					@Override
-					protected LiveBeansModel compute() {
+					protected Failable<LiveBeansModel> compute() {
 						String target = actuatorUrl.getValue();
 						if (target != null) {
 							ActuatorClient client = JMXActuatorClient.forUrl(getTypeLookup(), () -> target);
-							return client.getBeans();
+							LiveBeansModel beans = client.getBeans();
+							if (beans != null) {
+								return Failable.of(beans);
+							}
 						}
-						return null;
+						return Failable.error(getBootDashModel().getRunTarget().getType().getMissingLiveInfoMessages().getMissingInfoMessage(getName(), "beans"));
 					}
 
 				};
@@ -94,19 +94,22 @@ public abstract class CloudDashElement<T> extends WrappingBootDashElement<T> {
 	}
 
 	@Override
-	public LiveEnvModel getLiveEnv() {
+	public Failable<LiveEnvModel> getLiveEnv() {
 		synchronized (this) {
 			if (liveEnv == null) {
 				final LiveExpression<String> actuatorUrl = getActuatorUrl();
-				liveEnv = new AsyncLiveExpression<LiveEnvModel>(null, "Fetch env for '"+getName()+"'") {
+				liveEnv = new AsyncLiveExpression<Failable<LiveEnvModel>>(Failable.error(MissingLiveInfoMessages.NOT_YET_COMPUTED), "Fetch env for '"+getName()+"'") {
 					@Override
-					protected LiveEnvModel compute() {
+					protected Failable<LiveEnvModel> compute() {
 						String target = actuatorUrl.getValue();
 						if (target != null) {
 							ActuatorClient client = JMXActuatorClient.forUrl(getTypeLookup(), () -> target);
-							return client.getEnv();
+							LiveEnvModel env = client.getEnv();
+							if (env != null) {
+								return Failable.of(env);
+							}
 						}
-						return null;
+						return Failable.error(getBootDashModel().getRunTarget().getType().getMissingLiveInfoMessages().getMissingInfoMessage(getName(), "env"));
 					}
 
 				};

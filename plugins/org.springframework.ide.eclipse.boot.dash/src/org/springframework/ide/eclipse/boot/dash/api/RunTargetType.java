@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.api;
 import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.springframework.ide.eclipse.boot.dash.model.MissingLiveInfoMessages;
 import org.springframework.ide.eclipse.boot.dash.model.Nameable;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.util.template.Templates;
@@ -91,4 +92,8 @@ public interface RunTargetType<Params> extends Nameable {
 	String serialize(Params serializedTargetParams);
 
 	ImageDescriptor getDisconnectedIcon();
+
+	default MissingLiveInfoMessages getMissingLiveInfoMessages() {
+		return MissingLiveInfoMessages.DEFAULT;
+	}
 }

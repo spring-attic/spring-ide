@@ -23,6 +23,7 @@ import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.docker.ui.DockerUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.docker.ui.SelectDockerDaemonDialog;
 import org.springframework.ide.eclipse.boot.dash.docker.ui.SelectDockerDaemonDialog.Model;
+import org.springframework.ide.eclipse.boot.dash.model.MissingLiveInfoMessages;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.AbstractRemoteRunTargetType;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
@@ -103,5 +104,34 @@ public class DockerRunTargetType extends AbstractRemoteRunTargetType<DockerTarge
 	public String serialize(DockerTargetParams p) {
 		return p==null ? null : p.getUri();
 	}
+
+	@Override
+	public MissingLiveInfoMessages getMissingLiveInfoMessages() {
+		return new MissingLiveInfoMessages() {
+			@Override
+			public String getMissingInfoMessage(String appName, String actuatorEndpoint) {
+				StringBuilder message = new StringBuilder();
+				message.append("'");
+				message.append(appName);
+				message.append("'");
+
+				message.append(" must be running with JMX and actuator endpoint enabled:");
+				message.append('\n');
+				message.append('\n');
+
+				message.append("1. Enable actuator.\n");
+				
+				message.append("2. Enable actuator endpoint ");
+				message.append("'");
+				message.append(actuatorEndpoint);
+				message.append("'");
+				message.append(" in the application.\n");
+
+				return message.toString();
+			}
+		};
+	}
+	
+	
 
 }

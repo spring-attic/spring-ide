@@ -66,7 +66,7 @@ public class GenericRemoteAppElementDataContributor implements Contributor, Elem
 	}
 
 	private void collectFrom(GenericRemoteAppElement child, ImmutableSet.Builder<RemoteAppData> allApps) {
-		String actuatorUrl = child.getActuatorUrl().getValue();
+		String actuatorUrl = child.getActuatorUrlHere();
 		if (actuatorUrl!=null) {
 			RemoteAppData data = new RemoteAppData(actuatorUrl, child.getLiveHost());
 			data.setUrlScheme("http");

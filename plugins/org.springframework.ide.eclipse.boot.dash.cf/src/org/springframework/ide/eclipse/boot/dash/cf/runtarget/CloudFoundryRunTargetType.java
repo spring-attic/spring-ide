@@ -29,6 +29,7 @@ import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultWizardModelUserInteractions;
+import org.springframework.ide.eclipse.boot.dash.model.MissingLiveInfoMessages;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.WizardModelUserInteractions;
@@ -166,5 +167,35 @@ public class CloudFoundryRunTargetType extends AbstractRemoteRunTargetType<Cloud
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public MissingLiveInfoMessages getMissingLiveInfoMessages() {
+		return new MissingLiveInfoMessages() {
+			@Override
+			public String getMissingInfoMessage(String appName, String actuatorEndpoint) {
+				StringBuilder message = new StringBuilder();
+				message.append("'");
+				message.append(appName);
+				message.append("'");
+
+				message.append(" must be running with JMX and actuator endpoint enabled:");
+				message.append('\n');
+				message.append('\n');
+
+				message.append("1. Enable actuator ");
+				message.append("'");
+				message.append(actuatorEndpoint);
+				message.append("'");
+				message.append(" endpoint in the application.");
+				message.append('\n');
+
+				message.append("2. Select 'Enable JMX SSH Tunnel' in the deployment dialog.");
+				message.append('\n');
+
+				return message.toString();
+			}
+		};
+	}
+
 
 }

@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.boot.dash.model;
 
 import java.util.EnumSet;
-import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -25,6 +24,7 @@ import org.springframework.ide.eclipse.boot.dash.model.actuator.env.LiveEnvModel
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
 public interface BootDashElement extends App, Taggable {
@@ -54,21 +54,21 @@ public interface BootDashElement extends App, Taggable {
 	 * request mappings can not be determined. (So 'null' means 'unknown', whereas
 	 * an empty list means 'no request mappings').
 	 */
-	List<RequestMapping> getLiveRequestMappings();
+	Failable<ImmutableList<RequestMapping>> getLiveRequestMappings();
 
 	/**
 	 * Get the beans from a running process. May return null if beans cannot be
 	 * determined. (Thus, <code>null</code> means unknown, whereas an empty list
 	 * means 'no beans')
 	 */
-	LiveBeansModel getLiveBeans();
+	Failable<LiveBeansModel> getLiveBeans();
 
 	/**
 	 * Get the env from a running process. May return null if env cannot be
 	 * determined. (Thus, <code>null</code> means unknown, whereas an empty list
 	 * means 'no env')
 	 */
-	LiveEnvModel getLiveEnv();
+	Failable<LiveEnvModel> getLiveEnv();
 
 	/**
 	 * Get the 'active' launch configuration. This may be null.
