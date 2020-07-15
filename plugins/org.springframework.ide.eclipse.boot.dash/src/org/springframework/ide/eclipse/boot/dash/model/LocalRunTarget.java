@@ -74,10 +74,6 @@ public class LocalRunTarget extends AbstractRunTarget<Void> {
 	}
 
 	@Override
-	public void dispose() {
-	}
-
-	@Override
 	public Void getParams() {
 		return null;
 	}

@@ -85,7 +85,7 @@ implements RunTargetWithProperties<CloudFoundryTargetProperties>, RemoteRunTarge
 				CloudFoundryTargetProperties.getName(targetProperties));
 		this.targetProperties = targetProperties;
 		this.clientFactory = clientFactory;
-		this.cachedClientDisposer = new OldValueDisposer<>();
+		this.cachedClientDisposer = new OldValueDisposer<>(this);
 		cachedClient().onChange((_e, v) -> {
 			try {
 				if (getClient() != null) {
@@ -173,7 +173,7 @@ implements RunTargetWithProperties<CloudFoundryTargetProperties>, RemoteRunTarge
 	@Override
 	public void dispose() {
 		disconnect();
-		cachedClientDisposer.dispose();
+		super.dispose();
 	}
 
 	protected void persistBuildpacks(List<CFBuildpack> buildpacks) throws Exception {

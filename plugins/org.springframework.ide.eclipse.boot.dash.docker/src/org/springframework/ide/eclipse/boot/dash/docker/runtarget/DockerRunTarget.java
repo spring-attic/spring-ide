@@ -37,22 +37,26 @@ import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunT
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.util.OldValueDisposer;
 
 import com.google.common.collect.ImmutableList;
 
 public class DockerRunTarget extends AbstractRunTarget<DockerTargetParams> 
 implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentTarget, DebuggableTarget {
 
-	LiveVariable<DockerClient> client = new LiveVariable<>();
-	LiveExpression<String> sessionId = client.apply(c -> c!=null ? UUID.randomUUID().toString() : null);
+	final LiveVariable<DockerClient> client;
+	LiveExpression<String> sessionId;
 	
 	private DockerTargetParams params;
 	
 	final DockerDeployments deployments;
 	private final LiveExpression<DockerDeployer> deployer;
 	
+	@SuppressWarnings("resource")
 	public DockerRunTarget(DockerRunTargetType type, DockerTargetParams params, DockerClient client) {
 		super(type, params.getUri());
+		this.client = new OldValueDisposer<DockerClient>(this).getVar();
+		this.sessionId = this.client.apply(c -> c!=null ? UUID.randomUUID().toString() : null);
 		this.deployments = this.client.addDisposableChild(new DockerDeployments(getPersistentProperties()));
 		this.params = params;
 		this.client.setValue(client);
@@ -89,11 +93,6 @@ implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentT
 	}
 
 	@Override
-	public void dispose() {
-		client.dispose();
-	}
-
-	@Override
 	public LiveExpression<DockerClient> getClientExp() {
 		return client;
 	}
@@ -109,7 +108,6 @@ implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentT
 		DockerClient c = client.getValue();
 		if (c!=null) {
 			client.setValue(null);
-			c.close();
 		}
 	}
 

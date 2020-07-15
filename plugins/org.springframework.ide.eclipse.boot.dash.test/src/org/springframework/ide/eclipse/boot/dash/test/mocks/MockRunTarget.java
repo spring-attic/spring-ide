@@ -81,10 +81,6 @@ public class MockRunTarget extends AbstractRunTarget<CloudFoundryTargetPropertie
 	}
 
 	@Override
-	public void dispose() {
-	}
-
-	@Override
 	public CloudFoundryTargetProperties getParams() {
 		return properties;
 	}

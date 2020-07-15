@@ -16,7 +16,6 @@ import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashC
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
-import org.springframework.ide.eclipse.boot.dash.model.remote.GenericRemoteBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget;
 import org.springframework.ide.eclipse.boot.dash.util.template.Template;
 import org.springframework.ide.eclipse.boot.dash.util.template.TemplateEnv;
@@ -26,7 +25,7 @@ import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
 
-public abstract class AbstractRunTarget<Params> implements RunTarget<Params>, TemplateEnv {
+public abstract class AbstractRunTarget<Params> extends AbstractDisposable implements RunTarget<Params>, TemplateEnv {
 
 	private static final String NAME_TEMPLATE = "NAME_TEMPLATE";
 
