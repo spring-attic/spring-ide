@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.springframework.ide.eclipse.boot.dash.cf.devtools;
+package org.springframework.ide.eclipse.boot.dash.devtools;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,11 +30,8 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IProcess;
-import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.cf.model.CloudAppDashElement;
-import org.springframework.ide.eclipse.boot.dash.cf.model.CloudFoundryBootDashModel;
-import org.springframework.ide.eclipse.boot.dash.model.AbstractBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
@@ -42,6 +39,7 @@ import org.springframework.ide.eclipse.boot.launch.devtools.BootDevtoolsClientLa
 import org.springframework.ide.eclipse.boot.util.ProcessListenerAdapter;
 import org.springframework.ide.eclipse.boot.util.ProcessTracker;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 /**
  * @author Kris De Volder
@@ -81,15 +79,15 @@ public class DevtoolsUtil {
 		return "https://"+host;
 	}
 
-	public static ILaunch launchDevtools(IProject project, String host, String debugSecret, CloudAppDashElement cde, String mode, IProgressMonitor monitor) throws CoreException {
+	public static ILaunch launchDevtools(IProject project, String host, String debugSecret, BootDashElement bde, String mode, IProgressMonitor monitor) throws CoreException {
 		if (host==null) {
 			throw ExceptionUtil.coreException("Can not launch devtools client: Host not specified");
 		}
-		ILaunchConfiguration conf = getOrCreateLaunchConfig(project, host, debugSecret, cde);
+		ILaunchConfiguration conf = getOrCreateLaunchConfig(project, host, debugSecret, bde);
 		return conf.launch(mode, monitor == null ? new NullProgressMonitor() : monitor);
 	}
 
-	private static ILaunchConfiguration getOrCreateLaunchConfig(IProject project, String host, String debugSecret, CloudAppDashElement cde) throws CoreException {
+	private static ILaunchConfiguration getOrCreateLaunchConfig(IProject project, String host, String debugSecret, BootDashElement bde) throws CoreException {
 		ILaunchConfiguration existing = findConfig(project, host);
 		ILaunchConfigurationWorkingCopy wc;
 		if (existing!=null) {
@@ -98,7 +96,7 @@ public class DevtoolsUtil {
 			wc = createConfiguration(project, host);
 		}
 		BootDevtoolsClientLaunchConfigurationDelegate.setRemoteSecret(wc, debugSecret);
-		setElement(wc, cde);
+		setElement(wc, bde);
 		return wc.doSave();
 	}
 
@@ -112,7 +110,7 @@ public class DevtoolsUtil {
 				}
 			}
 		} catch (CoreException e) {
-			BootActivator.log(e);
+			Log.log(e);
 		}
 		return null;
 	}
@@ -130,14 +128,14 @@ public class DevtoolsUtil {
 					}
 				}
 			} catch (Exception e) {
-				BootActivator.log(e);
+				Log.log(e);
 			}
 		}
 		return launches;
 	}
 
 
-	public static boolean isDevClientAttached(CloudAppDashElement cde, String launchMode) {
+	public static boolean isDevClientAttached(BootDashElement cde, String launchMode) {
 		IProject project = cde.getProject();
 		if (project!=null) { // else not associated with a local project... can't really attach debugger then
 			String host = cde.getLiveHost();
@@ -172,22 +170,22 @@ public class DevtoolsUtil {
 		return false;
 	}
 
-	public static void launchDevtools(CloudAppDashElement cde, String debugSecret, String mode, IProgressMonitor monitor) throws CoreException {
+	public static void launchDevtools(BootDashElement cde, String debugSecret, String mode, IProgressMonitor monitor) throws CoreException {
 		launchDevtools(cde.getProject(), cde.getLiveHost(), debugSecret, cde, mode, monitor);
 	}
 
-	public static void setElement(ILaunchConfigurationWorkingCopy l, CloudAppDashElement cde) {
+	public static void setElement(ILaunchConfigurationWorkingCopy l, BootDashElement bde) {
 		//Tag the launch so we can easily determine what CDE it belongs to later.
-		l.setAttribute(TARGET_ID, cde.getTarget().getId());
-		l.setAttribute(APP_NAME, cde.getName());
+		l.setAttribute(TARGET_ID, bde.getTarget().getId());
+		l.setAttribute(APP_NAME, bde.getName());
 	}
 
-	public static boolean isLaunchFor(ILaunch l, CloudAppDashElement cde) {
+	public static boolean isLaunchFor(ILaunch l, BootDashElement bde) {
 		String targetId = getAttribute(l, TARGET_ID);
 		String appName = getAttribute(l, APP_NAME);
 		if (targetId!=null && appName!=null) {
-			return targetId.equals(cde.getTarget().getId())
-					&& appName.equals(cde.getName());
+			return targetId.equals(bde.getTarget().getId())
+					&& appName.equals(bde.getName());
 		}
 		return false;
 	}
@@ -195,19 +193,17 @@ public class DevtoolsUtil {
 	/**
 	 * Retreive corresponding CDE for a given launch.
 	 */
-	public static CloudAppDashElement getElement(ILaunchConfiguration l, BootDashViewModel model) {
+	public static BootDashElement getElement(ILaunchConfiguration l, BootDashViewModel model) {
 		String targetId = getAttribute(l, TARGET_ID);
 		String appName = getAttribute(l, APP_NAME);
 		if (targetId!=null && appName!=null) {
 			BootDashModel section = model.getSectionByTargetId(targetId);
-			if (section instanceof CloudFoundryBootDashModel) {
-				return ((CloudFoundryBootDashModel) section).getApplication(appName);
-			}
+			return section.getApplication(appName);
 		}
 		return null;
 	}
 
-	public static CloudAppDashElement getElement(ILaunch l, BootDashViewModel viewModel) {
+	public static BootDashElement getElement(ILaunch l, BootDashViewModel viewModel) {
 		ILaunchConfiguration conf = l.getLaunchConfiguration();
 		if (conf!=null) {
 			return getElement(conf, viewModel);
@@ -223,7 +219,7 @@ public class DevtoolsUtil {
 				return c.getAttribute(name, (String)null);
 			}
 		} catch (Exception e) {
-			BootActivator.log(e);
+			Log.log(e);
 		}
 		return null;
 	}
@@ -232,7 +228,7 @@ public class DevtoolsUtil {
 		try {
 			return l.getAttribute(name, (String)null);
 		} catch (CoreException e) {
-			BootActivator.log(e);
+			Log.log(e);
 			return null;
 		}
 	}
@@ -257,7 +253,7 @@ public class DevtoolsUtil {
 				handleStateChange(process.getLaunch(), "processCreated");
 			}
 			private void handleStateChange(ILaunch l, Object info) {
-				CloudAppDashElement e = DevtoolsUtil.getElement(l, viewModel);
+				BootDashElement e = DevtoolsUtil.getElement(l, viewModel);
 				if (e!=null) {
 					BootDashModel model = e.getBootDashModel();
 					model.notifyElementChanged(e, info);
@@ -266,11 +262,7 @@ public class DevtoolsUtil {
 		});
 	}
 
-	public static DevtoolsDebugTargetDisconnector createDebugTargetDisconnector(AbstractBootDashModel model) {
-		return new DevtoolsDebugTargetDisconnector(model);
-	}
-
-	public static void disconnectDevtoolsClientsFor(CloudAppDashElement e) {
+	public static void disconnectDevtoolsClientsFor(BootDashElement e) {
 		ILaunchManager lm = getLaunchManager();
 		for (ILaunch l : lm.getLaunches()) {
 			if (!l.isTerminated() && isLaunchFor(l, e)) {
@@ -278,7 +270,7 @@ public class DevtoolsUtil {
 					try {
 						l.terminate();
 					} catch (DebugException de) {
-						BootActivator.log(de);
+						Log.log(de);
 					}
 				}
 			}

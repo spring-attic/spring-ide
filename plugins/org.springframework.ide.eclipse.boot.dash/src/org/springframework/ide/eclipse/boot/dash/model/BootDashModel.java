@@ -99,4 +99,13 @@ public interface BootDashModel {
 	ObservableSet<ButtonModel> getButtons();
 
 	void performDoubleClickAction(UserInteractions ui);
+
+	default BootDashElement getApplication(String appName) {
+		for (BootDashElement bde : getElements().getValues()) {
+			if (appName.equals(bde.getName())) {
+				return bde;
+			}
+		}
+		return null;
+	}
 }

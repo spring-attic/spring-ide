@@ -65,8 +65,6 @@ import org.springframework.ide.eclipse.boot.dash.cf.deployment.CloudApplicationD
 import org.springframework.ide.eclipse.boot.dash.cf.deployment.CloudData;
 import org.springframework.ide.eclipse.boot.dash.cf.deployment.UnsupportedPushProperties;
 import org.springframework.ide.eclipse.boot.dash.cf.deployment.YamlGraphDeploymentProperties;
-import org.springframework.ide.eclipse.boot.dash.cf.devtools.DevtoolsDebugTargetDisconnector;
-import org.springframework.ide.eclipse.boot.dash.cf.devtools.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.cf.dialogs.DeploymentPropertiesDialog;
 import org.springframework.ide.eclipse.boot.dash.cf.dialogs.DeploymentPropertiesDialogModel;
 import org.springframework.ide.eclipse.boot.dash.cf.dialogs.DeploymentPropertiesDialogModel.ManifestType;
@@ -149,10 +147,6 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel {
 	private final LiveSetVariable<CloudServiceInstanceDashElement> services = new LiveSetVariable<>(AsyncMode.SYNC);
 	private final CloudDashApplications applications = new CloudDashApplications(this);
 	private final ObservableSet<BootDashElement> allElements = LiveSets.union(applications.getApplications(), services);
-
-	private DevtoolsDebugTargetDisconnector debugTargetDisconnector;
-
-//	private LiveVariable<RefreshState> baseRefeshState = new LiveVariable<>();
 
 	private void checkApiVersion() {
 		this.refreshTracker.callAsync("Checking API version...", () -> {
@@ -254,7 +248,6 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel {
 		this.elementFactory = new CloudDashElementFactory(context, target.getPropertyStore(), this);
 
 		this.unsupportedPushProperties = new UnsupportedPushProperties();
-		this.debugTargetDisconnector = DevtoolsUtil.createDebugTargetDisconnector(this);
 		addDisposableChild(target.getClientExp().onChange((exp,v) -> {
 			this.refresh(ui());
 			ClientRequests client = exp.getValue();
@@ -292,10 +285,6 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel {
 
 	@Override
 	public void dispose() {
-		if (debugTargetDisconnector!=null) {
-			debugTargetDisconnector.dispose();
-			debugTargetDisconnector = null;
-		}
 		if (cfDebugStrategies!=null) {
 			cfDebugStrategies.dispose();
 		}
@@ -376,6 +365,7 @@ public class CloudFoundryBootDashModel extends RemoteBootDashModel {
 		return addedElement;
 	}
 
+	@Override
 	public CloudAppDashElement getApplication(String appName) {
 		Set<CloudAppDashElement> apps = getApplications().getValues();
 		for (CloudAppDashElement element : apps) {
