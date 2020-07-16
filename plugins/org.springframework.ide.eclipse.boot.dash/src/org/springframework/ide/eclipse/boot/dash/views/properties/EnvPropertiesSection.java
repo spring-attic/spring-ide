@@ -12,14 +12,13 @@ package org.springframework.ide.eclipse.boot.dash.views.properties;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.Failable;
 import org.springframework.ide.eclipse.boot.dash.model.MissingLiveInfoMessages;
@@ -36,55 +35,14 @@ import org.springsource.ide.eclipse.commons.livexp.ui.util.TreeElementWrappingCo
  *
  *
  */
-public class EnvPropertiesSection extends AbstractBdePropertiesSection {
+public class EnvPropertiesSection extends LiveDataPropertiesSection<LiveEnvModel> {
 
 	private SearchableTreeControl searchableTree;
-	private TabbedPropertySheetPage page;
-	private Failable<LiveEnvModel> env;
-
-
-	@Override
-	public void createControls(Composite parent, TabbedPropertySheetPage aTabbedPropertySheetPage) {
-		super.createControls(parent, aTabbedPropertySheetPage);
-		page = aTabbedPropertySheetPage;
-
-		LabelProvider labelProvider = new LiveEnvLabelProvider();
-		ITreeContentProvider treeContentProvider = new TreeElementWrappingContentProvider(new LiveEnvContentProvider());
-
-		searchableTree = new SearchableTreeControl(getWidgetFactory(), getMissingContentHandler());
-
-		searchableTree.createControls(parent, page, treeContentProvider, labelProvider);
-	}
-
-	private Supplier<String> getMissingContentHandler() {
-		return () ->  {
-			BootDashElement bde = getBootDashElement();
-			if (bde == null) {
-				return MissingLiveInfoMessages.noSelectionMessage("environment properties");
-			} else if (env != null && env.hasFailed()) {
-				return env.getErrorMessage();
-			} else {
-				// Must return null if there is content
-				return null;
-			}
-		};
-	}
 
 	@Override
 	public void setInput(IWorkbenchPart part, ISelection selection) {
 		super.setInput(part, selection);
 		searchableTree.getTreeViewer().setInput(getBootDashElement());
-	}
-
-	@Override
-	public void refresh() {
-		BootDashElement bde = getBootDashElement();
-		if (bde == null) {
-			this.env = null;
-		} else {
-			this.env = bde.getLiveEnv();
-		}
-		searchableTree.refresh();
 	}
 
 	private class LiveEnvContentProvider implements ITreeContentProvider {
@@ -95,7 +53,7 @@ public class EnvPropertiesSection extends AbstractBdePropertiesSection {
 		@Override
 		public Object[] getElements(Object inputElement) {
 			if (inputElement instanceof BootDashElement) {
-				LiveEnvModel liveEnv = env == null ? null : env.getValue();
+				LiveEnvModel liveEnv = data.hasFailed() ? null : data.getValue();
 				if (liveEnv != null) {
 					List<Object> elements = new ArrayList<>();
 
@@ -141,6 +99,33 @@ public class EnvPropertiesSection extends AbstractBdePropertiesSection {
 		public boolean hasChildren(Object element) {
 			Object[] children = getChildren(element);
 			return children != null && children.length > 0;
+		}
+	}
+
+	@Override
+	protected Control createSectionDataControls(Composite parent) {
+		LabelProvider labelProvider = new LiveEnvLabelProvider();
+		ITreeContentProvider treeContentProvider = new TreeElementWrappingContentProvider(new LiveEnvContentProvider());
+
+		searchableTree = new SearchableTreeControl(getWidgetFactory());
+
+		searchableTree.createControls(parent, treeContentProvider, labelProvider);
+
+		return searchableTree.getComposite();
+	}
+
+	@Override
+	protected void refreshDataControls() {
+		searchableTree.refresh();
+	}
+
+	@Override
+	protected Failable<LiveEnvModel> fetchData() {
+		BootDashElement bde = getBootDashElement();
+		if (bde == null) {
+			return Failable.error(MissingLiveInfoMessages.noSelectionMessage("environment properties"));
+		} else {
+			return bde.getLiveEnv();
 		}
 	}
 }

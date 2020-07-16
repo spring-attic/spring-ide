@@ -548,7 +548,7 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 									return Failable.of(ImmutableList.copyOf(client.getRequestMappings()));
 								}
 							} else {
-								return Failable.error("More than one child can provide live data. Please select one.");
+								return Failable.error(buffer -> buffer.p("More than one child can provide live data. Please select one."));
 							}
 						}
 						return Failable.error(getBootDashModel().getRunTarget().getType().getMissingLiveInfoMessages().getMissingInfoMessage(getStyledName(null).getString(), "mappings"));
@@ -581,7 +581,7 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 									return Failable.of(env);
 								}
 							} else {
-								return Failable.error("More than one child can provide live data. Please select one.");
+								return Failable.error(buffer -> buffer.p("More than one child can provide live data. Please select one."));
 							}
 						}
 						return Failable.error(getBootDashModel().getRunTarget().getType().getMissingLiveInfoMessages().getMissingInfoMessage(getStyledName(null).getString(), "env"));
@@ -614,7 +614,7 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 									return Failable.of(beans);
 								}
 							} else {
-								return Failable.error("More than one child can provide live data. Please select one.");
+								return Failable.error(buffer -> buffer.p("More than one child can provide live data. Please select one."));
 							}
 						}
 						return Failable.error(getBootDashModel().getRunTarget().getType().getMissingLiveInfoMessages().getMissingInfoMessage(getStyledName(null).getString(), "beans"));

@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views.properties;
 
-import java.util.function.Supplier;
-
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -19,8 +17,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
 import org.springframework.ide.eclipse.beans.ui.live.model.AbstractLiveBeansModelElement;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeanType;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModel;
@@ -39,26 +37,9 @@ import org.springsource.ide.eclipse.commons.livexp.ui.util.TreeElementWrappingCo
  * @author Alex Boyko
  *
  */
-public class BeansPropertiesSection extends AbstractBdePropertiesSection {
+public class BeansPropertiesSection extends LiveDataPropertiesSection<LiveBeansModel> {
 
-	private TabbedPropertySheetPage page;
 	private SearchableTreeControl searchableTree;
-	private Failable<LiveBeansModel> beans;
-
-
-	@Override
-	public void createControls(Composite parent, TabbedPropertySheetPage aTabbedPropertySheetPage) {
-		super.createControls(parent, aTabbedPropertySheetPage);
-		page = aTabbedPropertySheetPage;
-
-		ITreeContentProvider treeContent = new TreeElementWrappingContentProvider(new BeansContentProvider(ContextGroupedBeansContentProvider.INSTANCE));
-		LabelProvider labelProvider = LiveBeansTreeLabelProvider.INSTANCE;
-
-		searchableTree = new SearchableTreeControl(getWidgetFactory(), getNoContentMessage());
-		searchableTree.createControls(parent, page, treeContent, labelProvider);
-
-		searchableTree.getTreeViewer().addDoubleClickListener(new DoubleClickListener());
-	}
 
 	@Override
 	public void setInput(IWorkbenchPart part, ISelection selection) {
@@ -68,30 +49,6 @@ public class BeansPropertiesSection extends AbstractBdePropertiesSection {
 		// tree viewer rather then set the whole input that would remove the selection
 		// and collapse expanded nodes
 		searchableTree.getTreeViewer().setInput(getBootDashElement());
-	}
-
-	@Override
-	public void refresh() {
-		this.beans = null;
-		BootDashElement bde = getBootDashElement();
-		if (bde != null) {
-			this.beans = bde.getLiveBeans();
-		}
-
-		searchableTree.refresh();
-	}
-
-	private Supplier<String> getNoContentMessage() {
-		return () -> {
-			BootDashElement bde = getBootDashElement();
-			if (bde == null) {
-				return MissingLiveInfoMessages.noSelectionMessage("Beans");
-			} else if (beans != null && beans.hasFailed()) {
-				return beans.getErrorMessage();
-			} else {
-				return null;
-			}
-		};
 	}
 
 	private class BeansContentProvider implements ITreeContentProvider {
@@ -105,7 +62,7 @@ public class BeansPropertiesSection extends AbstractBdePropertiesSection {
 		@Override
 		public Object[] getElements(Object inputElement) {
 			if (inputElement instanceof BootDashElement) {
-				return delegateContentProvider.getElements(beans == null ? null : beans.getValue());
+				return delegateContentProvider.getElements(data == null ? null : data.getValue());
 			}
 			return new Object[0];
 		}
@@ -148,6 +105,36 @@ public class BeansPropertiesSection extends AbstractBdePropertiesSection {
 					}
 				}
 			}
+		}
+	}
+
+	@Override
+	protected Control createSectionDataControls(Composite parent) {
+		ITreeContentProvider treeContent = new TreeElementWrappingContentProvider(new BeansContentProvider(ContextGroupedBeansContentProvider.INSTANCE));
+		LabelProvider labelProvider = LiveBeansTreeLabelProvider.INSTANCE;
+
+		searchableTree = new SearchableTreeControl(getWidgetFactory());
+
+		searchableTree.createControls(parent, treeContent, labelProvider);
+
+		searchableTree.getTreeViewer().addDoubleClickListener(new DoubleClickListener());
+
+
+		return searchableTree.getComposite();
+	}
+
+	@Override
+	protected void refreshDataControls() {
+		searchableTree.refresh();
+	}
+
+	@Override
+	protected Failable<LiveBeansModel> fetchData() {
+		BootDashElement bde = getBootDashElement();
+		if (bde == null) {
+			return Failable.error(MissingLiveInfoMessages.noSelectionMessage("Beans"));
+		} else {
+			return bde.getLiveBeans();
 		}
 	}
 }

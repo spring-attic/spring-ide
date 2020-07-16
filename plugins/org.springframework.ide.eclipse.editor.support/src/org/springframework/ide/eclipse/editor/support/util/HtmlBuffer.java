@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014-2016 Pivotal, Inc.
+ * Copyright (c) 2014-2020 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,13 +22,14 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jface.internal.text.html.BrowserInformationControl;
+import org.eclipse.jface.internal.text.html.HTMLPrinter;
+import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.RGB;
 import org.osgi.framework.Bundle;
 import org.springframework.ide.eclipse.editor.support.EditorSupportActivator;
-
-import org.springsource.ide.eclipse.commons.ui.HTMLPrinter;
 
 /**
  * Helper class to make it a little easier to create simple html page (for display in
@@ -79,7 +80,12 @@ public class HtmlBuffer {
 	public String toString() {
 		if (!epilogAdded && buffer.length()>0) {
 			epilogAdded = true;
-			HTMLPrinter.insertPageProlog(buffer, 0, getCSSStyles());
+
+			ColorRegistry registry = JFaceResources.getColorRegistry();
+			RGB fgRGB = registry.getRGB("org.eclipse.jdt.ui.Javadoc.foregroundColor"); //$NON-NLS-1$
+			RGB bgRGB= registry.getRGB("org.eclipse.jdt.ui.Javadoc.backgroundColor"); //$NON-NLS-1$
+
+			HTMLPrinter.insertPageProlog(buffer, 0, fgRGB, bgRGB, getCSSStyles());
 			HTMLPrinter.addPageEpilog(buffer);
 		}
 		return buffer.toString();
@@ -149,6 +155,12 @@ public class HtmlBuffer {
 		raw("<b>");
 		text(string);
 		raw("</b>");
+	}
+
+	public void href(String url, String displayText) {
+		raw("<a href=\"" + url + "\">");
+		text(displayText);
+		raw("</a>");
 	}
 
 

@@ -425,13 +425,13 @@ public class BootDashDockerTests {
 				Failable<LiveEnvModel> env = node.getLiveEnv();
 
 				assertTrue(rm.hasFailed());
-				assertContains("Enable actuator endpoint 'mappings'", rm.getErrorMessage());
+				assertContains("Enable actuator endpoint <b>mappings</b>", rm.getErrorMessage().toHtml());
 
 				assertTrue(beans.hasFailed());
-				assertContains("Enable actuator endpoint 'beans'", beans.getErrorMessage());
+				assertContains("Enable actuator endpoint <b>beans</b>", beans.getErrorMessage().toHtml());
 
 				assertTrue(env.hasFailed());
-				assertContains("Enable actuator endpoint 'env'", env.getErrorMessage());
+				assertContains("Enable actuator endpoint <b>env</b>", env.getErrorMessage().toHtml());
 			}
 		});
 

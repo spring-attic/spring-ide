@@ -11,36 +11,25 @@
 package org.springframework.ide.eclipse.boot.dash.model;
 
 import org.eclipse.core.runtime.Assert;
+import org.springframework.ide.eclipse.editor.support.util.HtmlSnippet;
 
 public class Failable<T> {
 
 	final private T value;
-	final private Throwable error;
+	final private HtmlSnippet error;
 
 	public static <T> Failable<T> of(T value) {
 		return new Failable<>(value, null);
 	}
 
-	public static <T> Failable<T> error(Throwable t) {
-		return new Failable<>(null, t);
+	public static <T> Failable<T> error(HtmlSnippet snippet) {
+		return new Failable<>(null, snippet);
 	}
 
-	public static <T> Failable<T> error(String msg) {
-		return new Failable<>(null, new Exception(msg));
-	}
-
-	private Failable(T value, Throwable error) {
+	private Failable(T value, HtmlSnippet error) {
 		Assert.isTrue((value != null && error == null) || (value == null && error != null));
 		this.value = value;
 		this.error = error;
-	}
-
-	public T get() throws Throwable {
-		if (value != null) {
-			return value;
-		} else {
-			throw error;
-		}
 	}
 
 	@Override
@@ -88,8 +77,8 @@ public class Failable<T> {
 		return error != null;
 	}
 
-	public String getErrorMessage() {
-		return error.getMessage();
+	public HtmlSnippet getErrorMessage() {
+		return error;
 	}
 
 	public T getValue() {

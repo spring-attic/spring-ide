@@ -10,32 +10,19 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views.properties;
 
-import java.util.function.Supplier;
-
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StackLayout;
-import org.eclipse.swt.events.TreeEvent;
-import org.eclipse.swt.events.TreeListener;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.forms.events.HyperlinkAdapter;
-import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.eclipse.ui.forms.widgets.Hyperlink;
-import org.eclipse.ui.views.properties.tabbed.ITabbedPropertyConstants;
-import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
-import org.springframework.ide.eclipse.boot.dash.model.MissingLiveInfoMessages;
 import org.springsource.ide.eclipse.commons.livexp.core.FilterBoxModel;
 import org.springsource.ide.eclipse.commons.livexp.ui.util.SwtConnect;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 import org.springsource.ide.eclipse.commons.livexp.util.Filters;
-import org.springsource.ide.eclipse.commons.ui.UiUtil;
 
 /**
  * Tree viewer control with search box that searches for any text pattern in the
@@ -54,16 +41,10 @@ import org.springsource.ide.eclipse.commons.ui.UiUtil;
 public class SearchableTreeControl {
 
 	private TreeViewer treeViewer;
-	private TabbedPropertySheetPage page;
-	private StackLayout layout;
 	private Text searchBox;
 	private Composite treeViewerComposite;
-	private Composite missingInfoComp;
-	private Label missingContentsLabel;
-	private Hyperlink externalDocLink;
 
 	private final FormToolkit widgetFactory;
-	private final Supplier<String> missingContentSupplier;
 
 	/**
 	 *
@@ -72,40 +53,13 @@ public class SearchableTreeControl {
 	 *                               available. Supplier MUST return null if content
 	 *                               is available.
 	 */
-	public SearchableTreeControl(FormToolkit widgetFactory, Supplier<String> missingContentSupplier) {
+	public SearchableTreeControl(FormToolkit widgetFactory) {
 		this.widgetFactory = widgetFactory;
-		this.missingContentSupplier = missingContentSupplier;
 	}
 
-	public void createControls(Composite parent, TabbedPropertySheetPage aTabbedPropertySheetPage,
-			ITreeContentProvider treeContentProvider, LabelProvider labelProvider) {
-		page = aTabbedPropertySheetPage;
+	public void createControls(Composite parent, ITreeContentProvider treeContentProvider, LabelProvider labelProvider) {
 
-		Composite composite = widgetFactory.createComposite(parent, SWT.NONE);
-
-		composite.setLayout(layout = new SectionStackLayout());
-
-		layout.marginWidth = ITabbedPropertyConstants.HSPACE + 2;
-		layout.marginHeight = ITabbedPropertyConstants.VSPACE + 4;
-
-		missingInfoComp = widgetFactory.createComposite(composite, SWT.NONE);
-		missingInfoComp.setLayout(GridLayoutFactory.fillDefaults().margins(0, 0).spacing(1, 1).numColumns(1).create());
-
-		missingContentsLabel = widgetFactory.createLabel(missingInfoComp, "", SWT.WRAP);
-		externalDocLink = widgetFactory.createHyperlink(missingInfoComp, "", SWT.WRAP);
-
-		externalDocLink.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				if (!externalDocLink.getText().isEmpty()) {
-					UiUtil.openUrl(externalDocLink.getText());
-				}
-			}
-		});
-		externalDocLink.setText(MissingLiveInfoMessages.EXTERNAL_DOCUMENT_LINK);
-
-
-		treeViewerComposite = new Composite(composite, SWT.NONE);
+		treeViewerComposite = new Composite(parent, SWT.NONE);
 		treeViewerComposite
 				.setLayout(GridLayoutFactory.fillDefaults().margins(0, 0).spacing(1, 1).numColumns(1).create());
 
@@ -128,45 +82,20 @@ public class SearchableTreeControl {
 		treeViewer.setLabelProvider(labelProvider);
 		treeViewer.setAutoExpandLevel(2);
 
-		treeViewer.getTree().addTreeListener(new TreeListener() {
-			@Override
-			public void treeExpanded(TreeEvent e) {
-				SectionStackLayout.reflow(page);
-			}
-
-			@Override
-			public void treeCollapsed(TreeEvent e) {
-				SectionStackLayout.reflow(page);
-			}
-		});
-
 		SwtConnect.connectTextBasedFilter(treeViewer, searchBoxModel.getFilter(), labelProvider, treeContentProvider);
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(treeViewer.getTree());
 
-		refreshControlsVisibility();
+	}
 
+	public Composite getComposite() {
+		return treeViewerComposite;
 	}
 
 	public TreeViewer getTreeViewer() {
 		return treeViewer;
 	}
 
-	private void refreshControlsVisibility() {
-		if (missingContentSupplier.get() != null) {
-			layout.topControl = missingInfoComp;
-		} else {
-			layout.topControl = treeViewerComposite;
-		}
-	}
-
 	public void refresh() {
-		refreshControlsVisibility();
-		String message = missingContentSupplier.get();
-		if (message == null) {
-			message = "";
-		}
-		missingContentsLabel.setText(message);
-
 		// If tree is populated for the first time then auto expand to level 2 manually
 		// because new input is not set in this case
 		boolean firstTimeTreePopulated = treeViewer.getTree().getItems().length == 0;
@@ -175,6 +104,5 @@ public class SearchableTreeControl {
 		if (firstTimeTreePopulated) {
 			treeViewer.expandToLevel(2);
 		}
-		SectionStackLayout.reflow(page);
 	}
 }

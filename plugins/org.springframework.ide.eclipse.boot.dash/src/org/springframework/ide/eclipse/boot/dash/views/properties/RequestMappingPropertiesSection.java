@@ -17,7 +17,6 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -27,20 +26,14 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.forms.events.HyperlinkAdapter;
-import org.eclipse.ui.forms.events.HyperlinkEvent;
-import org.eclipse.ui.forms.widgets.Hyperlink;
-import org.eclipse.ui.views.properties.tabbed.ITabbedPropertyConstants;
-import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.Failable;
 import org.springframework.ide.eclipse.boot.dash.model.MissingLiveInfoMessages;
@@ -50,7 +43,6 @@ import org.springframework.ide.eclipse.boot.dash.views.RequestMappingLabelProvid
 import org.springframework.ide.eclipse.boot.dash.views.RequestMappingsColumn;
 import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 import org.springsource.ide.eclipse.commons.ui.SpringUIUtils;
-import org.springsource.ide.eclipse.commons.ui.UiUtil;
 
 import com.google.common.collect.ImmutableList;
 
@@ -60,9 +52,7 @@ import com.google.common.collect.ImmutableList;
  * @author Alex Boyko
  * @author Kris De Volder
  */
-public class RequestMappingPropertiesSection extends AbstractBdePropertiesSection {
-
-	private Failable<ImmutableList<RequestMapping>> requestMappings = Failable.of(ImmutableList.of());
+public class RequestMappingPropertiesSection extends LiveDataPropertiesSection<ImmutableList<RequestMapping>> {
 
 	private class DoubleClickListener extends MouseAdapter {
 		DoubleClickListener(TableViewer tv) {
@@ -106,15 +96,6 @@ public class RequestMappingPropertiesSection extends AbstractBdePropertiesSectio
 
 	}
 
-	private Label labelText;
-
-	private static final Object[] NO_ELEMENTS = new Object[0];
-	private TabbedPropertySheetPage page;
-	private Composite composite;
-	private Composite missingInfoComp;
-	private Hyperlink externalDocLink;
-
-	private StackLayout layout;
 	private TableViewer tv;
 	private RequestMappingLabelProvider labelProvider;
 	private Stylers stylers;
@@ -145,81 +126,9 @@ public class RequestMappingPropertiesSection extends AbstractBdePropertiesSectio
 		}
 	};
 
-	public void createControls(Composite parent, TabbedPropertySheetPage aTabbedPropertySheetPage) {
-		super.createControls(parent, aTabbedPropertySheetPage);
-		this.page = aTabbedPropertySheetPage;
-		composite = getWidgetFactory().createComposite(parent, SWT.NONE);
-
-		// Layout variant to have owner composite size to be equal the client area size of the next upper level ScrolledComposite
-		composite.setLayout(layout = new SectionStackLayout());
-
-		layout.marginWidth = ITabbedPropertyConstants.HSPACE + 2;
-		layout.marginHeight = ITabbedPropertyConstants.VSPACE + 4;
-
-		page.getControl().setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_RED));
-
-		missingInfoComp = getWidgetFactory().createComposite(composite, SWT.NONE);
-		missingInfoComp.setLayout(GridLayoutFactory.fillDefaults().margins(0, 0).spacing(1, 1).numColumns(1).create());
-
-		labelText = getWidgetFactory().createLabel(missingInfoComp, "", SWT.WRAP);
-		externalDocLink = getWidgetFactory().createHyperlink(missingInfoComp, "", SWT.WRAP);
-
-		externalDocLink.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				if (!externalDocLink.getText().isEmpty()) {
-					UiUtil.openUrl(externalDocLink.getText());
-				}
-			}
-		});
-		externalDocLink.setText(MissingLiveInfoMessages.EXTERNAL_DOCUMENT_LINK);
-
-		this.tv = new TableViewer(composite, SWT.BORDER|SWT.FULL_SELECTION/*|SWT.NO_SCROLL*/);
-
-		tv.setContentProvider(new ContentProvider());
-		tv.setComparator(sorter);
-//		tv.setLabelProvider(labelProvider = new RequestMappingLabelProvider(tv.getTable().getFont(), input));
-		tv.setInput(getBootDashElement());
-		tv.getTable().setHeaderVisible(true);
-		stylers = new Stylers(tv.getTable().getFont());
-
-		for (RequestMappingsColumn colType : RequestMappingsColumn.values()) {
-			TableViewerColumn col = new TableViewerColumn(tv, colType.getAlignment());
-			col.setLabelProvider(new RequestMappingLabelProvider(stylers, getBootDashElementLiveExpression(), colType));
-			TableColumn colWidget = col.getColumn();
-			colWidget.setText(colType.getLabel());
-			colWidget.setWidth(colType.getDefaultWidth());
-		}
-
-		createContextMenu(tv);
-
-		new DoubleClickListener(tv);
-	}
-
 	public void setInput(IWorkbenchPart part, ISelection selection) {
 		super.setInput(part, selection);
 		tv.setInput(getBootDashElement());
-	}
-
-	public void refresh() {
-		this.requestMappings = Failable.of(ImmutableList.of());
-		BootDashElement bde = getBootDashElement();
-		if (bde != null) {
-			layout.topControl = tv.getControl();
-			this.requestMappings = bde.getLiveRequestMappings();
-			if (requestMappings.hasFailed()) {
-				labelText.setText(requestMappings.getErrorMessage());
-				layout.topControl = missingInfoComp;
-			} else {
-				layout.topControl = tv.getControl();
-			}
-		} else {
-			layout.topControl = missingInfoComp;
-			labelText.setText(MissingLiveInfoMessages.noSelectionMessage("Request Mappings"));
-		}
-
-		tv.refresh();
-		SectionStackLayout.reflow(page);
 	}
 
 	@Override
@@ -251,7 +160,7 @@ public class RequestMappingPropertiesSection extends AbstractBdePropertiesSectio
 
 		@Override
 		public Object[] getElements(Object inputElement) {
-			return requestMappings.hasFailed() ? new Object[0] : requestMappings.getValue().toArray();
+			return data.hasFailed() ? new Object[0] : data.getValue().toArray();
 		}
 	}
 
@@ -295,6 +204,47 @@ public class RequestMappingPropertiesSection extends AbstractBdePropertiesSectio
 		//return tv.getStructuredSelection();
 		//So do this instead:
 		return (IStructuredSelection) tv.getSelection();
+	}
+
+	@Override
+	protected Control createSectionDataControls(Composite composite) {
+		this.tv = new TableViewer(composite, SWT.BORDER|SWT.FULL_SELECTION/*|SWT.NO_SCROLL*/);
+
+		tv.setContentProvider(new ContentProvider());
+		tv.setComparator(sorter);
+//		tv.setLabelProvider(labelProvider = new RequestMappingLabelProvider(tv.getTable().getFont(), input));
+		tv.setInput(getBootDashElement());
+		tv.getTable().setHeaderVisible(true);
+		stylers = new Stylers(tv.getTable().getFont());
+
+		for (RequestMappingsColumn colType : RequestMappingsColumn.values()) {
+			TableViewerColumn col = new TableViewerColumn(tv, colType.getAlignment());
+			col.setLabelProvider(new RequestMappingLabelProvider(stylers, getBootDashElementLiveExpression(), colType));
+			TableColumn colWidget = col.getColumn();
+			colWidget.setText(colType.getLabel());
+			colWidget.setWidth(colType.getDefaultWidth());
+		}
+
+		createContextMenu(tv);
+
+		new DoubleClickListener(tv);
+
+		return tv.getControl();
+	}
+
+	@Override
+	protected void refreshDataControls() {
+		tv.refresh();
+	}
+
+	@Override
+	protected Failable<ImmutableList<RequestMapping>> fetchData() {
+		BootDashElement bde = getBootDashElement();
+		if (bde != null) {
+			return bde.getLiveRequestMappings();
+		} else {
+			return Failable.error(MissingLiveInfoMessages.noSelectionMessage("Request Mapping"));
+		}
 	}
 
 }

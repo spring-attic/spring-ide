@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Pivotal, Inc.
+ * Copyright (c) 2016, 2020 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,10 +15,12 @@ package org.springframework.ide.eclipse.editor.support.util;
  *
  * @author Kris De Volder
  */
-public abstract class HtmlSnippet {
-	public abstract void render(HtmlBuffer html);
+@FunctionalInterface
+public interface HtmlSnippet {
 
-	public String toHtml() {
+	void render(HtmlBuffer html);
+
+	default public String toHtml() {
 		HtmlBuffer buf = new HtmlBuffer();
 		render(buf);
 		return buf.toString();

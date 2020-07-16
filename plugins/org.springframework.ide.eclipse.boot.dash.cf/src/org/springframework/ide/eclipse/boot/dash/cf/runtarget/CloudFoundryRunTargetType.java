@@ -34,15 +34,14 @@ import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.WizardModelUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.AbstractRemoteRunTargetType;
-import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget.ConnectMode;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.TargetProperties;
 import org.springframework.ide.eclipse.boot.dash.util.UiUtil;
 import org.springframework.ide.eclipse.boot.util.ProcessTracker;
+import org.springframework.ide.eclipse.editor.support.util.HtmlSnippet;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
-import com.google.common.util.concurrent.Futures;
 import com.google.gson.Gson;
 
 /**
@@ -172,27 +171,38 @@ public class CloudFoundryRunTargetType extends AbstractRemoteRunTargetType<Cloud
 	public MissingLiveInfoMessages getMissingLiveInfoMessages() {
 		return new MissingLiveInfoMessages() {
 			@Override
-			public String getMissingInfoMessage(String appName, String actuatorEndpoint) {
-				StringBuilder message = new StringBuilder();
-				message.append("'");
-				message.append(appName);
-				message.append("'");
+			public HtmlSnippet getMissingInfoMessage(String appName, String actuatorEndpoint) {
 
-				message.append(" must be running with JMX and actuator endpoint enabled:");
-				message.append('\n');
-				message.append('\n');
+				return buffer -> {
+					buffer.raw("<p>");
+					buffer.raw("<b>");
+					buffer.text(appName);
+					buffer.raw("</b>");
+					buffer.text(" must be running with JMX and actuator endpoint enabled:");
+					buffer.raw("</p>");
 
-				message.append("1. Enable actuator ");
-				message.append("'");
-				message.append(actuatorEndpoint);
-				message.append("'");
-				message.append(" endpoint in the application.");
-				message.append('\n');
+					buffer.raw("<ol>");
 
-				message.append("2. Select 'Enable JMX SSH Tunnel' in the deployment dialog.");
-				message.append('\n');
+					buffer.raw("<li>");
+					buffer.text("Enable actuator ");
+					buffer.raw("<b>");
+					buffer.text(actuatorEndpoint);
+					buffer.raw("</b>");
+					buffer.text(" endpoint in the application.");
+					buffer.raw("</li>");
 
-				return message.toString();
+					buffer.raw("<li>");
+					buffer.text("Select ");
+					buffer.raw("<b>");
+					buffer.text("Enable JMX SSH Tunnel");
+					buffer.raw("</b>");
+					buffer.text(" in the deployment dialog.");
+					buffer.raw("</li>");
+					buffer.raw("</ol>");
+
+					buffer.href(EXTERNAL_DOCUMENT_LINK, "See documentation");
+				};
+
 			}
 		};
 	}

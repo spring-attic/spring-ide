@@ -18,7 +18,6 @@ import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.mandas.docker.client.DefaultDockerClient;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.docker.ui.DockerUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.docker.ui.SelectDockerDaemonDialog;
@@ -26,6 +25,7 @@ import org.springframework.ide.eclipse.boot.dash.docker.ui.SelectDockerDaemonDia
 import org.springframework.ide.eclipse.boot.dash.model.MissingLiveInfoMessages;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.AbstractRemoteRunTargetType;
+import org.springframework.ide.eclipse.editor.support.util.HtmlSnippet;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.StringUtils;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
@@ -109,25 +109,34 @@ public class DockerRunTargetType extends AbstractRemoteRunTargetType<DockerTarge
 	public MissingLiveInfoMessages getMissingLiveInfoMessages() {
 		return new MissingLiveInfoMessages() {
 			@Override
-			public String getMissingInfoMessage(String appName, String actuatorEndpoint) {
-				StringBuilder message = new StringBuilder();
-				message.append("'");
-				message.append(appName);
-				message.append("'");
-
-				message.append(" must be running with JMX and actuator endpoint enabled:");
-				message.append('\n');
-				message.append('\n');
-
-				message.append("1. Enable actuator.\n");
+			public HtmlSnippet getMissingInfoMessage(String appName, String actuatorEndpoint) {
 				
-				message.append("2. Enable actuator endpoint ");
-				message.append("'");
-				message.append(actuatorEndpoint);
-				message.append("'");
-				message.append(" in the application.\n");
+				return buffer -> {
+					buffer.raw("<p>");
+					buffer.raw("<b>");
+					buffer.text(appName);
+					buffer.raw("</b>");
+					buffer.text(" must be running with JMX and actuator endpoint enabled:");
+					buffer.raw("</p>");
 
-				return message.toString();
+					buffer.raw("<ol>");
+
+					buffer.raw("<li>");
+					buffer.text("Enable actuator.");
+					buffer.raw("</li>");
+
+					buffer.raw("<li>");
+					buffer.text("Enable actuator endpoint ");
+					buffer.raw("<b>");
+					buffer.text(actuatorEndpoint);
+					buffer.raw("</b>");
+					buffer.text(" in the application.");
+					buffer.raw("</li>");
+					buffer.raw("</ol>");
+
+					buffer.href(EXTERNAL_DOCUMENT_LINK, "See documentation");
+				};
+				
 			}
 		};
 	}
