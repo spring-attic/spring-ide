@@ -133,4 +133,5 @@ public interface BootDashElement extends App, Taggable {
 	default ImageDescriptor getRunStateImageDecoration() { return null; }
 	default ImageDescriptor getCustomRunStateIcon() { return null; }
 	default Image getPropertiesTitleIconImage() { return null; }
+	default String getProtocol() { return "http"; }
 }

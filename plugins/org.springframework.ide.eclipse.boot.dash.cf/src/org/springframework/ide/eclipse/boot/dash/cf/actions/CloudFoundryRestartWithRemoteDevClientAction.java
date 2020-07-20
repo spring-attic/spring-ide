@@ -28,11 +28,11 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStat
  * @author Alex Boyko
  *
  */
-public class RestartWithRemoteDevClientAction extends AbstractCloudAppDashElementsAction {
+public class CloudFoundryRestartWithRemoteDevClientAction extends AbstractCloudAppDashElementsAction {
 
 	private ElementStateListener stateListener;
 
-	public RestartWithRemoteDevClientAction(Params params) {
+	public CloudFoundryRestartWithRemoteDevClientAction(Params params) {
 		super(params);
 		this.setText("(Re)start Remote DevTools Client");
 		this.setToolTipText("Restarts application with the Remote DevTools Client attched.");

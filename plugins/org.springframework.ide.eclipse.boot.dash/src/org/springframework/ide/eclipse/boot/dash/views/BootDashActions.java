@@ -103,6 +103,10 @@ public class BootDashActions {
 
 	private ToggleBootDashModelConnection connectAction;
 
+	private EnableRemoteDevtoolsAction enableRemoteDevtoolsAction;
+
+	private RestartDevtoolsClientAction restartDevtoolsClientAction;
+
 	public interface Factory {
 		Collection<AbstractBootDashAction> create(BootDashActions actions, BootDashViewModel model, MultiSelection<BootDashElement> selection, LiveExpression<BootDashModel> section, SimpleDIContext context, LiveProcessCommandsExecutor liveProcessCmds);
 	}
@@ -234,6 +238,9 @@ public class BootDashActions {
 
 		openFilterPreferencesAction = new OpenFilterPreferencesAction(context);
 		liveDataConnectionManagement = new LiveDataConnectionManagementActions(defaultActionParams());
+
+		enableRemoteDevtoolsAction = new EnableRemoteDevtoolsAction(defaultActionParams());
+		restartDevtoolsClientAction = new RestartDevtoolsClientAction(defaultActionParams());
 
 		ImmutableList.Builder<AbstractBootDashAction> injectedActions = ImmutableList.builder();
 		for (Factory f : context.getBeans(Factory.class)) {
@@ -411,6 +418,14 @@ public class BootDashActions {
 
 	public IAction getExposeDebugAppAction() {
 		return exposeDebugAppAction;
+	}
+
+	public EnableRemoteDevtoolsAction getEnableDevtoolsAction() {
+		return enableRemoteDevtoolsAction;
+	}
+
+	public RestartDevtoolsClientAction getRestartDevtoolsClientAction() {
+		return restartDevtoolsClientAction;
 	}
 
 	public void dispose() {

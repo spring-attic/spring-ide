@@ -12,6 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.docker.runtarget;
 
 import java.time.Duration;
 import java.util.EnumSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
@@ -28,22 +29,29 @@ import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.AppContext;
 import org.springframework.ide.eclipse.boot.dash.api.DebuggableApp;
 import org.springframework.ide.eclipse.boot.dash.api.Deletable;
+import org.springframework.ide.eclipse.boot.dash.api.DevtoolsConnectable;
 import org.springframework.ide.eclipse.boot.dash.api.JmxConnectable;
 import org.springframework.ide.eclipse.boot.dash.api.PortConnectable;
 import org.springframework.ide.eclipse.boot.dash.api.ProjectRelatable;
 import org.springframework.ide.eclipse.boot.dash.api.RunStateProvider;
 import org.springframework.ide.eclipse.boot.dash.api.Styleable;
+import org.springframework.ide.eclipse.boot.dash.devtools.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.docker.jmx.JmxSupport;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.remote.RefreshStateTracker;
 import org.springframework.ide.eclipse.boot.util.RetryUtil;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
+import org.springsource.ide.eclipse.commons.frameworks.core.util.StringUtils;
 import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
-public class DockerContainer implements App, RunStateProvider, JmxConnectable, Styleable, PortConnectable, Deletable, ActualInstanceCount, DebuggableApp, ProjectRelatable {
+public class DockerContainer implements App, RunStateProvider, JmxConnectable, Styleable, PortConnectable, 
+	Deletable, ActualInstanceCount, DebuggableApp, ProjectRelatable, DevtoolsConnectable
+{
 
 	private static final Duration WAIT_BEFORE_KILLING = Duration.ofSeconds(10);
 	private static final boolean DEBUG = true;
@@ -255,5 +263,25 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 			Log.log(e);
 		}
 		return null;
+	}
+
+	@Override
+	public String getDevtoolsSecret() {
+		Map<String, String> sysprops = getSystemProps(container);
+		return sysprops.getOrDefault(DevtoolsUtil.REMOTE_SECRET_PROP, null);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static Map<String,String> getSystemProps(Container c) {
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			String sysprops = c.labels().get(DockerApp.SYSTEM_PROPS);
+			if (StringUtils.hasText(sysprops)) {
+				return mapper.readValue(sysprops, Map.class);
+			}
+		} catch (Exception e) {
+			Log.log(e);
+		}
+		return ImmutableMap.of();
 	}
 }

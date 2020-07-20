@@ -67,7 +67,6 @@ public class SpringBootCore {
 	 *
 	 * @return a SpringBoot centric view on a eclipse project.
 	 */
-	@Deprecated
 	public static ISpringBootProject create(IProject project) throws CoreException {
 		return getDefault().project(project);
 	}

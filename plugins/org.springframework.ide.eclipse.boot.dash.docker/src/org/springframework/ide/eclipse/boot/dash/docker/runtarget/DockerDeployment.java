@@ -10,9 +10,14 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.docker.runtarget;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.ide.eclipse.boot.dash.api.DesiredInstanceCount;
 import org.springframework.ide.eclipse.boot.dash.model.Nameable;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
+
+import com.google.common.collect.ImmutableMap;
 
 /**
  * Data class containing info about a 'deployment' (i.e. what gets created when you
@@ -40,6 +45,8 @@ public class DockerDeployment implements Nameable, DesiredInstanceCount {
 	 */
 	private String sessionId;
 	
+	private HashMap<String, String> sysprops;
+	
 	public DockerDeployment() {}
 
 	public DockerDeployment(DockerDeployment copyFrom) {
@@ -47,6 +54,10 @@ public class DockerDeployment implements Nameable, DesiredInstanceCount {
 		this.runState = copyFrom.runState;
 		this.buildId = copyFrom.buildId;
 		this.sessionId = copyFrom.sessionId;
+		this.sysprops = copyFrom.sysprops;
+		if (sysprops!=null) {
+			sysprops = new HashMap<>(sysprops);
+		}
 	}
 	
 	public String getName() {
@@ -73,6 +84,13 @@ public class DockerDeployment implements Nameable, DesiredInstanceCount {
 		return buildId;
 	}
 
+	public Map<String,String> getSystemProperties() {
+		if (sysprops == null) {
+			return ImmutableMap.of();
+		}
+		return sysprops;
+	}
+	
 	/**
 	 * When you set a buildId you should *also* set the session id as well. These two id's are pair that
 	 * allways belong together. The only scenario were this method is called 'by itself' is by Yaml deserialization.
@@ -91,5 +109,16 @@ public class DockerDeployment implements Nameable, DesiredInstanceCount {
 
 	public int getDesiredInstances() {
 		return 1;
+	}
+
+	public void setSystemProperty(String name, String value) {
+		if (sysprops==null) {
+			sysprops = new HashMap<>();
+		}
+		if (value==null) {
+			sysprops.remove(name);
+		} else {
+			sysprops.put(name, value);
+		}
 	}
 }

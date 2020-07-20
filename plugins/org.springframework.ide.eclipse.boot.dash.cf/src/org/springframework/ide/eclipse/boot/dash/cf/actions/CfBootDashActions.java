@@ -44,7 +44,7 @@ public class CfBootDashActions {
 		ImmutableList.Builder<AbstractBootDashAction> builder = ImmutableList.builder();
 		builder.add(new RestartApplicationOnlyAction(defaultActionParams));
 		builder.add(new SelectManifestAction(defaultActionParams));
-		builder.add(new RestartWithRemoteDevClientAction(defaultActionParams));
+		builder.add(new CloudFoundryRestartWithRemoteDevClientAction(defaultActionParams));
 		builder.add(new EnableJmxSshTunnelAction(defaultActionParams));
 		builder.add(new ReconnectCloudConsoleAction(defaultActionParams));
 		if (section!=null) {

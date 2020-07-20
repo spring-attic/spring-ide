@@ -18,7 +18,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jface.viewers.StyledString;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModel;
 import org.springframework.ide.eclipse.boot.dash.api.ActualInstanceCount;
@@ -32,6 +34,8 @@ import org.springframework.ide.eclipse.boot.dash.api.PortConnectable;
 import org.springframework.ide.eclipse.boot.dash.api.ProjectRelatable;
 import org.springframework.ide.eclipse.boot.dash.api.RunStateProvider;
 import org.springframework.ide.eclipse.boot.dash.api.Styleable;
+import org.springframework.ide.eclipse.boot.dash.api.SystemPropertySupport;
+import org.springframework.ide.eclipse.boot.dash.devtools.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
@@ -45,6 +49,7 @@ import org.springframework.ide.eclipse.boot.dash.model.actuator.ActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.JMXActuatorClient;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.env.LiveEnvModel;
+import org.springframework.ide.eclipse.boot.dash.util.RunnableWithException;
 import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
@@ -54,9 +59,11 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
+import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
@@ -627,6 +634,44 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 			}
 		}
 		return liveBeans.getValue();
+	}
+
+	public void enableDevtools(boolean enable) {
+		if (enable) {
+			refreshTracker.runAsync("Enable Devtools Support for application '" + getStyledName(null).getString() + "'", () -> {
+				App app = getAppData();
+				if (app instanceof SystemPropertySupport) {
+					SystemPropertySupport sysprops = (SystemPropertySupport) app;
+					IProject project = getProject();
+					if (project!=null) {
+						sysprops.setSystemProperty(DevtoolsUtil.REMOTE_SECRET_PROP, DevtoolsUtil.getSecret(project));
+						app.setGoalState(RunState.RUNNING);
+					}
+				}
+			});
+		} else {
+			refreshTracker.runAsync("Disable Devtools Support for application '" + getStyledName(null).getString() + "'", () -> {
+				App app = getAppData();
+				if (app instanceof SystemPropertySupport) {
+					SystemPropertySupport sysprops = (SystemPropertySupport) app;
+					sysprops.setSystemProperty(DevtoolsUtil.REMOTE_SECRET_PROP, null);
+				}
+			});
+		}
+	}
+
+	public void restartRemoteDevtoolsClient() {
+		refreshTracker.runAsync("(Re)starting remote devtools client", () -> {
+			IProject project = getProject();
+			if (project!=null) {
+				DevtoolsUtil.disconnectDevtoolsClientsFor(this);
+				DevtoolsUtil.launchDevtools(this, DevtoolsUtil.getSecret(project), ILaunchManager.RUN_MODE, new NullProgressMonitor());
+			}
+		});
+	}
+
+	public UserInteractions ui() {
+		return getBootDashModel().ui();
 	}
 
 }

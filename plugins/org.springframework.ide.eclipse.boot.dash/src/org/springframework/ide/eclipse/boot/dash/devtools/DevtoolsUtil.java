@@ -34,6 +34,7 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
+import org.springframework.ide.eclipse.boot.dash.util.CollectionUtils;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.devtools.BootDevtoolsClientLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.util.ProcessListenerAdapter;
@@ -52,7 +53,8 @@ public class DevtoolsUtil {
 	private static final QualifiedName REMOTE_CLIENT_SECRET_PROPERTY = new QualifiedName(BootDashActivator.PLUGIN_ID, "spring.devtools.remote.secret");
 
 	private static final String JAVA_OPTS_ENV_VAR = "JAVA_OPTS";
-	private static final String REMOTE_SECRET_JVM_ARG = "-Dspring.devtools.remote.secret=";
+	public static final String REMOTE_SECRET_PROP = "spring.devtools.remote.secret";
+	private static final String REMOTE_SECRET_JVM_ARG = "-D"+REMOTE_SECRET_PROP+"=";
 //	private static final String REMOTE_DEBUG_JVM_ARGS = "-Dspring.devtools.restart.enabled=false -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n";
 
 	private static ILaunchManager getLaunchManager() {
@@ -63,45 +65,54 @@ public class DevtoolsUtil {
 		return getLaunchManager().getLaunchConfigurationType(BootDevtoolsClientLaunchConfigurationDelegate.TYPE_ID);
 	}
 
-	private static ILaunchConfigurationWorkingCopy createConfiguration(IProject project, String host) throws CoreException {
+	private static ILaunchConfigurationWorkingCopy createConfiguration(IProject project, BootDashElement bde) throws CoreException {
 		ILaunchConfigurationType configType = getConfigurationType();
 		String projectName = project.getName();
-		ILaunchConfigurationWorkingCopy wc = configType.newInstance(null, getLaunchManager().generateLaunchConfigurationName("cf-devtools-client["+projectName+"]"));
+		ILaunchConfigurationWorkingCopy wc = configType.newInstance(null, getLaunchManager().generateLaunchConfigurationName("remote-devtools-client["+projectName+"]"));
 
 		BootLaunchConfigurationDelegate.setProject(wc, project);
-		BootDevtoolsClientLaunchConfigurationDelegate.setRemoteUrl(wc, remoteUrl(host));
+		BootDevtoolsClientLaunchConfigurationDelegate.setRemoteUrl(wc, remoteUrl(bde));
 
 		wc.setMappedResources(new IResource[] {project});
 		return wc;
 	}
 
-	public static String remoteUrl(String host) {
-		return "https://"+host;
-	}
-
-	public static ILaunch launchDevtools(IProject project, String host, String debugSecret, BootDashElement bde, String mode, IProgressMonitor monitor) throws CoreException {
-		if (host==null) {
-			throw ExceptionUtil.coreException("Can not launch devtools client: Host not specified");
+	public static String remoteUrl(BootDashElement bde) {
+		String host = bde.getLiveHost();
+		Integer port = CollectionUtils.getSingle(bde.getLivePorts());
+		String proto = bde.getProtocol();
+		if (proto!=null && host!=null && port!=null && port>0) {
+			return proto +"://"+host+":"+port;
 		}
-		ILaunchConfiguration conf = getOrCreateLaunchConfig(project, host, debugSecret, bde);
-		return conf.launch(mode, monitor == null ? new NullProgressMonitor() : monitor);
+		return null;
 	}
 
-	private static ILaunchConfiguration getOrCreateLaunchConfig(IProject project, String host, String debugSecret, BootDashElement bde) throws CoreException {
-		ILaunchConfiguration existing = findConfig(project, host);
-		ILaunchConfigurationWorkingCopy wc;
-		if (existing!=null) {
-			wc = existing.getWorkingCopy();
-		} else {
-			wc = createConfiguration(project, host);
+	public static ILaunch launchDevtools(IProject project, String debugSecret, BootDashElement bde, String mode, IProgressMonitor monitor) throws CoreException {
+		ILaunchConfiguration conf = getOrCreateLaunchConfig(project, debugSecret, bde);
+		if (conf!=null) {
+			return conf.launch(mode, monitor == null ? new NullProgressMonitor() : monitor);
 		}
-		BootDevtoolsClientLaunchConfigurationDelegate.setRemoteSecret(wc, debugSecret);
-		setElement(wc, bde);
-		return wc.doSave();
+		throw ExceptionUtil.coreException("Can't launch, not remote url?");
 	}
 
-	private static ILaunchConfiguration findConfig(IProject project, String host) {
-		String remoteUrl = remoteUrl(host);
+	private static ILaunchConfiguration getOrCreateLaunchConfig(IProject project, String debugSecret, BootDashElement bde) throws CoreException {
+		String remoteUrl = DevtoolsUtil.remoteUrl(bde);
+		if (remoteUrl!=null) {
+			ILaunchConfiguration existing = findConfig(project, remoteUrl);
+			ILaunchConfigurationWorkingCopy wc;
+			if (existing!=null) {
+				wc = existing.getWorkingCopy();
+			} else {
+				wc = createConfiguration(project, bde);
+			}
+			BootDevtoolsClientLaunchConfigurationDelegate.setRemoteSecret(wc, debugSecret);
+			setElement(wc, bde);
+			return wc.doSave();
+		}
+		return null;
+	}
+
+	private static ILaunchConfiguration findConfig(IProject project, String remoteUrl) {
 		try {
 			for (ILaunchConfiguration c : getLaunchManager().getLaunchConfigurations(getConfigurationType())) {
 				if (project.equals(BootLaunchConfigurationDelegate.getProject(c))
@@ -115,8 +126,8 @@ public class DevtoolsUtil {
 		return null;
 	}
 
-	private static List<ILaunch> findLaunches(IProject project, String host) {
-		String remoteUrl = remoteUrl(host);
+	private static List<ILaunch> findLaunches(IProject project, BootDashElement bde) {
+		String remoteUrl = remoteUrl(bde);
 		List<ILaunch> launches = new ArrayList<>();
 		for (ILaunch l : getLaunchManager().getLaunches()) {
 			try {
@@ -135,12 +146,12 @@ public class DevtoolsUtil {
 	}
 
 
-	public static boolean isDevClientAttached(BootDashElement cde, String launchMode) {
-		IProject project = cde.getProject();
+	public static boolean isDevClientAttached(BootDashElement bde, String launchMode) {
+		IProject project = bde.getProject();
 		if (project!=null) { // else not associated with a local project... can't really attach debugger then
-			String host = cde.getLiveHost();
+			String host = bde.getLiveHost();
 			if (host!=null) { // else app not running, can't attach debugger then
-				return isLaunchMode(findLaunches(project, host), launchMode);
+				return isLaunchMode(findLaunches(project, bde), launchMode);
 			}
 		}
 		return false;
@@ -171,7 +182,7 @@ public class DevtoolsUtil {
 	}
 
 	public static void launchDevtools(BootDashElement cde, String debugSecret, String mode, IProgressMonitor monitor) throws CoreException {
-		launchDevtools(cde.getProject(), cde.getLiveHost(), debugSecret, cde, mode, monitor);
+		launchDevtools(cde.getProject(), debugSecret, cde, mode, monitor);
 	}
 
 	public static void setElement(ILaunchConfigurationWorkingCopy l, BootDashElement bde) {

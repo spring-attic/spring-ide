@@ -920,4 +920,10 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 		}
 		return null;
 	}
+
+	@Override
+	public String getProtocol() {
+		return "https";
+	}
+
 }

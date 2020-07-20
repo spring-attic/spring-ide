@@ -18,6 +18,8 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -27,6 +29,7 @@ import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.Assert;
 import org.mandas.docker.client.DockerClient;
 import org.mandas.docker.client.DockerClient.ListContainersParam;
 import org.mandas.docker.client.DockerClient.ListImagesParam;
@@ -45,7 +48,9 @@ import org.springframework.ide.eclipse.boot.dash.api.AppContext;
 import org.springframework.ide.eclipse.boot.dash.api.Deletable;
 import org.springframework.ide.eclipse.boot.dash.api.DesiredInstanceCount;
 import org.springframework.ide.eclipse.boot.dash.api.ProjectRelatable;
+import org.springframework.ide.eclipse.boot.dash.api.SystemPropertySupport;
 import org.springframework.ide.eclipse.boot.dash.console.LogType;
+import org.springframework.ide.eclipse.boot.dash.devtools.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.docker.jmx.JmxSupport;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -59,12 +64,13 @@ import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.StringUtils;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
-public class DockerApp extends AbstractDisposable implements App, ChildBearing, Deletable, ProjectRelatable, DesiredInstanceCount {
+public class DockerApp extends AbstractDisposable implements App, ChildBearing, Deletable, ProjectRelatable, DesiredInstanceCount, SystemPropertySupport {
 
 	private static final String DOCKER_IO_LIBRARY = "docker.io/library/";
 	private static final String[] NO_STRINGS = new String[0];
@@ -75,6 +81,7 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 	
 	public static final String APP_NAME = "sts.app.name";
 	public static final String BUILD_ID = "sts.app.build-id";
+	public static final String SYSTEM_PROPS = "sts.app.sysprops";
 	public static final String JMX_PORT = "sts.app.jmx.port";
 	public static final String DEBUG_PORT = "sts.app.debug.port";
 	public static final String APP_LOCAL_PORT = "sts.app.port.local";
@@ -156,11 +163,10 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 					if (desiredRunState==RunState.INACTIVE) {
 						stop(containers);
 					} else if (desiredRunState.isActive()) {
-						String desiredBuildId = deployment.getBuildId();
 						List<Container> toStop = new ArrayList<>(containers.size());
 						boolean desiredContainerFound = false;
 						for (Container c : containers) {
-							if (desiredBuildId.equals(c.labels().get(BUILD_ID))) {
+							if (isMatchingContainer(deployment, c)) {
 								if (new DockerContainer(getTarget(), c).fetchRunState()==desiredRunState) {
 									desiredContainerFound = true;
 								}
@@ -170,12 +176,23 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 						}
 						stop(toStop);
 						if (!desiredContainerFound) {
-							start(desiredBuildId, desiredRunState);
+							start(deployment);
 						}
 					}
 				}
 			});
 		});
+	}
+
+	/**
+	 * Checks whether a container's metadata matches all of the desired deployment props.
+	 * But without considering runstate.
+	 */
+	private boolean isMatchingContainer(DockerDeployment d, Container c) {
+		String desiredBuildId = d.getBuildId();
+		Map<String, String> desiredProps = d.getSystemProperties();
+		return desiredBuildId.equals(c.labels().get(BUILD_ID)) && 
+				desiredProps.equals(DockerContainer.getSystemProps(c));
 	}
 
 	private void stop(List<Container> containers) throws Exception {
@@ -187,7 +204,7 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 		});
 	}
 
-	public void start(String desiredBuildId, RunState desiredRunState) throws Exception {
+	public void start(DockerDeployment deployment) throws Exception {
 		RefreshStateTracker refreshTracker = this.refreshTracker.get();
 		refreshTracker.run("Deploying " + getName() + "...", () -> {
 			AppConsole console = target.injections().getBean(AppConsoleProvider.class).getConsole(this);
@@ -197,12 +214,12 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 			}
 			console.write("Deploying Docker app " + getName() +"...", LogType.STDOUT);
 			String image = build(console);
-			run(console, image, desiredBuildId, desiredRunState);
+			run(console, image, deployment);
 			console.write("DONE Deploying Docker app " + getName(), LogType.STDOUT);
 		});
 	}
 
-	private void run(AppConsole console, String image, String desiredBuildId, RunState desiredRunState) throws Exception {
+	private void run(AppConsole console, String image, DockerDeployment deployment) throws Exception {
 		if (client==null) {
 			console.write("Cannot start container... Docker client is disconnected!", LogType.STDERROR);
 		} else {
@@ -212,9 +229,13 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 			if (jmxUrl!=null) {
 				console.write("JMX URL = "+jmxUrl, LogType.STDOUT);
 			}
+			String desiredBuildId = deployment.getBuildId();
+			Map<String, String> systemProperties = deployment.getSystemProperties();
+			String sysprops = new ObjectMapper().writeValueAsString(systemProperties);
 			ImmutableMap.Builder<String,String> labels = ImmutableMap.<String,String>builder()
 					.put(APP_NAME, getName())
-					.put(BUILD_ID, desiredBuildId);
+					.put(BUILD_ID, desiredBuildId)
+					.put(SYSTEM_PROPS, sysprops);
 			
 			ImmutableSet.Builder<String> exposedPorts = ImmutableSet.builder();
 			ImmutableMap.Builder<String, List<PortBinding>> portBindings = ImmutableMap.builder();
@@ -244,6 +265,7 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 				javaOpts.append(" ");
 			}
 			
+			RunState desiredRunState = deployment.getRunState();
 			if (desiredRunState==RunState.DEBUGGING) {
 				String debugPort = ""+PortFinder.findFreePort();
 				labels.put(DockerApp.DEBUG_PORT, debugPort);
@@ -255,6 +277,17 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 				console.write("Debug Port = "+debugPort, LogType.STDOUT);
 			}
 			
+			if (!systemProperties.isEmpty()) {
+				for (Entry<String, String> prop : systemProperties.entrySet()) {
+					Assert.isTrue(!prop.getValue().contains(" ")); //TODO: Escaping stuff like spaces in the value
+					Assert.isTrue(!prop.getValue().contains("\t"));
+					Assert.isTrue(!prop.getValue().contains("\n"));
+					Assert.isTrue(!prop.getValue().contains("\r"));
+					javaOpts.append("-D"+prop.getKey()+"="+prop.getValue()); 
+					javaOpts.append(" ");
+				}
+			}
+						
 			String javaOptsStr = javaOpts.toString();
 			if (StringUtils.hasText(javaOptsStr)) {
 				cb.env("JAVA_OPTS="+javaOptsStr.trim());
@@ -321,25 +354,29 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 	}
 	
 	private String[] getBuildCommand(File directory) {
-		String[] command = null;
+		List<String> command = new ArrayList<>();
 		if (OsUtils.isWindows()) {
 			if (Files.exists(directory.toPath().resolve("mvnw.cmd"))) {
-				command = new String[] {"CMD", "/C", "mvnw.cmd", "spring-boot:build-image", "-DskipTests"};
+				command.addAll(ImmutableList.of("CMD", "/C", "mvnw.cmd", "spring-boot:build-image", "-DskipTests"));
+				//, "-Dspring-boot.repackage.excludeDevtools=false" };
 			} else if (Files.exists(directory.toPath().resolve("gradlew.bat"))) {
-				command = new String[] {"CMD", "/C", "gradlew.bat", "bootBuildImage", "-x", "test"};
+				command.addAll(ImmutableList.of("CMD", "/C", "gradlew.bat", "bootBuildImage", "-x", "test"));
 			} 
 		} else {
 			if (Files.exists(directory.toPath().resolve("mvnw"))) {
-				command = new String[] {"./mvnw", "spring-boot:build-image", "-DskipTests"};
+				command.addAll(ImmutableList.of("./mvnw", "spring-boot:build-image", "-DskipTests"));
 			} else if (Files.exists(directory.toPath().resolve("gradlew"))) {
-				command = new String[] {"./gradlew", "bootBuildImage", "-x", "test" };
+				command.addAll(ImmutableList.of("./gradlew", "bootBuildImage", "-x", "test" ));
 			}	
 		}
-		
-		if (command == null) {
+		if (command.isEmpty()) {
 			throw new IllegalStateException("Neither Gradle nor Maven wrapper was found!");
 		}
-		return command;
+		boolean wantsDevtools = deployment().getSystemProperties().getOrDefault(DevtoolsUtil.REMOTE_SECRET_PROP, null)!=null;
+		if (wantsDevtools) {
+			command.add("-Dspring-boot.repackage.excludeDevtools=false");
+		}
+		return command.toArray(new String[command.size()]);
     }
 
 	synchronized private void addPersistedImage(String imageId) {
@@ -392,6 +429,23 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 	}
 
 	@Override
+	public void setSystemProperty(String name, String value) {
+		DockerDeployment d = new DockerDeployment(deployment());
+		d.setSystemProperty(name, value);
+		d.setSessionId(target.sessionId.getValue());
+		target.deployments.createOrUpdate(d);
+	}
+	
+	@Override
+	public String getSystemProperty(String key) {
+		DockerDeployment d = deployment();
+		if (d!=null ) {
+			return d.getSystemProperties().getOrDefault(key, null);
+		}
+		return null;
+	}
+
+	@Override
 	public void setGoalState(RunState newGoalState) {
 		DockerDeployment deployment = deployment();
 		if (deployment.getRunState()!=newGoalState) {
@@ -412,4 +466,5 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 		}
 		return 0;
 	}
+
 }

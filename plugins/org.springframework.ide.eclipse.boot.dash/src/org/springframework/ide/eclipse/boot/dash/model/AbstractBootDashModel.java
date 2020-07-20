@@ -146,7 +146,7 @@ public abstract class AbstractBootDashModel extends AbstractDisposable implement
 		return getViewModel().getContext().injections;
 	}
 
-	protected final UserInteractions ui() {
+	public final UserInteractions ui() {
 		return injections().getBean(UserInteractions.class);
 	}
 
