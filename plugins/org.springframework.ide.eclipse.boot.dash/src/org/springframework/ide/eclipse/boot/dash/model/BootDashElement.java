@@ -99,7 +99,7 @@ public interface BootDashElement extends App, Taggable {
 
 	BootDashModel getBootDashModel();
 
-	void stopAsync(UserInteractions ui) throws Exception;
+	void stopAsync() throws Exception;
 	void restart(RunState runingOrDebugging, UserInteractions ui) throws Exception;
 	void openConfig(UserInteractions ui);
 	int getActualInstances();

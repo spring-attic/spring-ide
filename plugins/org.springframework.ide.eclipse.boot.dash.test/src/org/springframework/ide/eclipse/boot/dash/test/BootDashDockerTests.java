@@ -24,7 +24,9 @@ import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.b
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withImportStrategy;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertContains;
+import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.createFile;
 
+import java.net.URI;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -35,15 +37,19 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.IOUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationType;
+import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.action.IAction;
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mandas.docker.client.DefaultDockerClient;
 import org.mandas.docker.client.DockerClient;
@@ -61,6 +67,7 @@ import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.RemoteBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeployToRemoteTargetAction;
+import org.springframework.ide.eclipse.boot.dash.devtools.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.docker.runtarget.DockerApp;
 import org.springframework.ide.eclipse.boot.dash.docker.runtarget.DockerContainer;
@@ -84,10 +91,14 @@ import org.springframework.ide.eclipse.boot.dash.model.remote.RemoteJavaLaunchUt
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget.ConnectMode;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
+import org.springframework.ide.eclipse.boot.dash.util.CollectionUtils;
 import org.springframework.ide.eclipse.boot.dash.views.AddRunTargetAction;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.DeleteElementsAction;
+import org.springframework.ide.eclipse.boot.dash.views.EnableRemoteDevtoolsAction;
+import org.springframework.ide.eclipse.boot.dash.views.RestartDevtoolsClientAction;
 import org.springframework.ide.eclipse.boot.dash.views.RunStateAction;
+import org.springframework.ide.eclipse.boot.launch.devtools.BootDevtoolsClientLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
@@ -100,9 +111,144 @@ public class BootDashDockerTests {
 	private static final int BUILD_IMAGE_TIMEOUT = 30_000;
 	private static final String DEFAULT_DOCKER_URL = "unix:///var/run/docker.sock";
 
+	@Rule
+	public LaunchCleanups launches = new LaunchCleanups();
+
 	@Test
 	public void testCreateDockerTarget() throws Exception {
 		createDockerTarget();
+	}
+
+	@Test
+	public void devtoolsFullScenario() throws Exception {
+		GenericRemoteBootDashModel<DockerClient, DockerTargetParams> model = createDockerTarget();
+		Mockito.reset(ui());
+		IProject project = projects.createBootWebProject("webby", bootVersionAtLeast("2.3.0"),
+				withStarters("devtools")
+		);
+
+		dragAndDrop(project, model);
+		GenericRemoteAppElement dep = waitForDeployment(model, project);
+		GenericRemoteAppElement img = waitForChild(dep, d -> d instanceof DockerImage);
+		GenericRemoteAppElement con = waitForChild(img, d -> d instanceof DockerContainer);
+
+		ACondition.waitFor("all started", BUILD_IMAGE_TIMEOUT, () -> {
+			assertEquals(RunState.RUNNING, dep.getRunState());
+			assertEquals(RunState.RUNNING, img.getRunState());
+			assertEquals(RunState.RUNNING, con.getRunState());
+		});
+
+		EnableRemoteDevtoolsAction enableDevtools = actions().getEnableDevtoolsAction();
+
+		harness.selection.setElements(con);
+		assertFalse(enableDevtools.isVisible());
+		harness.selection.setElements(img);
+		assertFalse(enableDevtools.isVisible());
+
+		harness.selection.setElements(dep);
+		assertTrue(enableDevtools.isVisible());
+		assertTrue(enableDevtools.isEnabled());
+		assertEquals("Enable Remote DevTools Server", enableDevtools.getText());
+
+		assertNull(getDevtoolsSecret(dep));
+
+		enableDevtools.run();
+		enableDevtools.lastOperation.get();
+
+		String deploymentSecret = getDevtoolsSecret(dep);
+		assertNotNull(deploymentSecret);
+
+		ACondition.waitFor("old container stopped", 5_000, () -> {
+			assertEquals(RunState.INACTIVE, con.getRunState());
+		});
+
+		GenericRemoteAppElement img2 = waitForChild(dep, d -> d instanceof DockerImage && !d.getName().equals(img.getName()));
+		GenericRemoteAppElement con2 = waitForChild(img2, d -> d instanceof DockerContainer);
+		String containerSecret = getDevtoolsSecret(con2);
+		assertEquals(deploymentSecret, containerSecret);
+
+		ACondition.waitFor("second container running", 5_000, () -> {
+			assertEquals(RunState.RUNNING, con2.getRunState());
+		});
+
+		RestartDevtoolsClientAction restartClient = actions().getRestartDevtoolsClientAction();
+
+		harness.selection.setElements(dep);
+		assertFalse(restartClient.isVisible());
+		harness.selection.setElements(img2);
+		assertFalse(restartClient.isVisible());
+		harness.selection.setElements(con);
+		assertTrue(restartClient.isVisible());
+		assertFalse(restartClient.isEnabled());
+
+		harness.selection.setElements(con2);
+		assertTrue(restartClient.isVisible());
+		assertTrue(restartClient.isEnabled());
+
+		restartClient.run();
+		ACondition.waitFor("container running state", 5_000, () -> {
+			assertActiveDevtoolsClientLaunch(con2);
+		});
+		ILaunch launch = assertActiveDevtoolsClientLaunch(con2);
+		ILaunchConfiguration conf = launch.getLaunchConfiguration();
+		assertEquals(containerSecret, BootDevtoolsClientLaunchConfigurationDelegate.getRemoteSecret(conf));
+
+		createFile(project, "src/main/java/com/example/demo/HelloController.java", helloController("Good"));
+		ACondition.waitFor("Good controller", 15_000, () -> {
+			String url = con2.getUrl();
+			assertEquals("Good", IOUtils.toString(new URI(url), "UTF8"));
+		});
+
+		createFile(project, "src/main/java/com/example/demo/HelloController.java", helloController("Better"));
+		ACondition.waitFor("Better controller", 15_000, () -> {
+			String url = con2.getUrl();
+			assertEquals("Better", IOUtils.toString(new URI(url), "UTF8"));
+		});
+
+		con2.stopAsync();
+
+		ACondition.waitFor("container node deleted", 10_000, () -> {
+			assertEquals(RunState.INACTIVE, dep.getRunState());
+			assertEquals(RunState.INACTIVE, img2.getRunState());
+			BootDashElement child = CollectionUtils.getSingle(img2.getChildren().getValues());
+			assertEquals(RunState.INACTIVE, child.getRunState());
+// TODO:
+//			assertNoActiveDevtoolsClientLaunch(con2);
+//			assertNoLaunchConfigs(BootDevtoolsClientLaunchConfigurationDelegate.TYPE_ID);
+		});
+
+		launch.terminate();
+	}
+
+	private static String helloController(String message) {
+		return "package com.example.demo;\n" +
+				"\n" +
+				"import org.springframework.web.bind.annotation.GetMapping;\n" +
+				"import org.springframework.web.bind.annotation.RestController;\n" +
+				"\n" +
+				"@RestController\n" +
+				"public class HelloController {\n" +
+				"\n" +
+				"	@GetMapping(\"/\")\n" +
+				"	public String hello() {\n" +
+				"		return \""+message+"\";\n" +
+				"	}\n" +
+				"}";
+	}
+
+	private String getDevtoolsSecret(GenericRemoteAppElement el) {
+		App data = el.getAppData();
+		System.out.println("getDevtoolsSecret data ="+data);
+		if (data instanceof DockerApp) {
+			@SuppressWarnings("resource")
+			DockerApp app = (DockerApp)data;
+			return app.deployment().getSystemProperties().getOrDefault(DevtoolsUtil.REMOTE_SECRET_PROP, null);
+		} else if (data instanceof DockerContainer) {
+			DockerContainer con = (DockerContainer)data;
+			return con.getSystemProps().getOrDefault(DevtoolsUtil.REMOTE_SECRET_PROP, null);
+		} else {
+			return null;
+		}
 	}
 
 	@Test
@@ -796,6 +942,41 @@ public class BootDashDockerTests {
 	@After
 	public void cleanup() {
 		RefreshStateTracker.clearDebugObservers();
+	}
+
+	private void assertNoLaunchConfigs(String typeId) throws CoreException {
+		ILaunchManager lm = DebugPlugin.getDefault().getLaunchManager();
+		ILaunchConfigurationType type = lm.getLaunchConfigurationType(typeId);
+		ILaunchConfiguration[] confs = lm.getLaunchConfigurations(type);
+		assertTrue(confs == null || confs.length == 0);
+	}
+
+	private void assertNoActiveDevtoolsClientLaunch(GenericRemoteAppElement el) throws CoreException {
+		List<ILaunch> launches = getDevtoolsClientLaunches(el);
+		assertTrue(launches.isEmpty());
+	}
+
+	private ILaunch assertActiveDevtoolsClientLaunch(GenericRemoteAppElement el) throws CoreException {
+		List<ILaunch> launches = getDevtoolsClientLaunches(el);
+		assertEquals(1, launches.size());
+		return launches.get(0);
+	}
+
+	private List<ILaunch> getDevtoolsClientLaunches(GenericRemoteAppElement el) throws CoreException {
+		List<ILaunch> launches = new ArrayList<>();
+		for (ILaunch l : DebugPlugin.getDefault().getLaunchManager().getLaunches()) {
+			if (!l.isTerminated()) {
+				ILaunchConfiguration conf = l.getLaunchConfiguration();
+				if (conf.getType().getIdentifier().equals(BootDevtoolsClientLaunchConfigurationDelegate.TYPE_ID)) {
+					String url = DevtoolsUtil.remoteUrl(el);
+					assertTrue(url.startsWith("http"));
+					if (url.equals(conf.getAttribute(BootDevtoolsClientLaunchConfigurationDelegate.REMOTE_URL, ""))) {
+						launches.add(l);
+					}
+				}
+			}
+		}
+		return launches;
 	}
 
 	private ILaunch assertActiveDebugLaunch(GenericRemoteAppElement el) throws CoreException {

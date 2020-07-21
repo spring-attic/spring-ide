@@ -157,7 +157,7 @@ public abstract class AbstractLaunchConfigurationsDashElement<T> extends Wrappin
 	}
 
 	@Override
-	public void stopAsync(UserInteractions ui) {
+	public void stopAsync() {
 		try {
 			stop(false);
 		} catch (Exception e) {

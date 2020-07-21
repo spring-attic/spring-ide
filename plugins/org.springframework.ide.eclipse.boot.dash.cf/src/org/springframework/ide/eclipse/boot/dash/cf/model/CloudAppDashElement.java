@@ -227,12 +227,12 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 	}
 
 	@Override
-	public void stopAsync(UserInteractions ui) throws Exception {
+	public void stopAsync() throws Exception {
 		cancelOperations();
 		String appName = getName();
 		getBootDashModel().runAsynch("Stopping application " + appName, appName, (IProgressMonitor monitor) -> {
 			stop(createCancelationToken(), monitor);
-		}, ui);
+		}, ui());
 	}
 
 	public void stop(CancelationToken cancelationToken, IProgressMonitor monitor) throws Exception {

@@ -41,7 +41,7 @@ import org.springframework.ide.eclipse.boot.launch.util.WaitFor;
 import org.springframework.ide.eclipse.boot.util.ProcessListenerAdapter;
 import org.springframework.ide.eclipse.boot.util.ProcessTracker;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
-import org.springsource.ide.eclipse.commons.frameworks.core.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 @SuppressWarnings("restriction")
 public class BootDevtoolsClientLaunchConfigurationDelegate extends AbstractBootLaunchConfigurationDelegate {
@@ -143,7 +143,7 @@ public class BootDevtoolsClientLaunchConfigurationDelegate extends AbstractBootL
 		conf.setAttribute(REMOTE_SECRET, value);
 	}
 
-	public static String getRemoteSecret(ILaunchConfigurationWorkingCopy conf) {
+	public static String getRemoteSecret(ILaunchConfiguration conf) {
 		try {
 			return conf.getAttribute(REMOTE_SECRET, (String)null);
 		} catch (CoreException e) {

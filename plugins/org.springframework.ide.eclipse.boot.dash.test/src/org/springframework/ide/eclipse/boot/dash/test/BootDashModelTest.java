@@ -570,7 +570,7 @@ public class BootDashModelTest {
 		listener = mock(ElementStateListener.class);
 		model.addElementStateListener(listener);
 
-		element.stopAsync(ui());
+		element.stopAsync();
 		waitForState(element, RunState.INACTIVE);
 		waitForState(childElement, RunState.INACTIVE);
 
@@ -632,7 +632,7 @@ public class BootDashModelTest {
 			waitForState(app, runOrDebug);
 		} finally {
 			ACondition.waitFor("stop hammering", 20000, () -> {
-				app.stopAsync(ui());
+				app.stopAsync();
 				assertEquals(RunState.INACTIVE, app.getRunState());
 			});
 		}
@@ -678,7 +678,7 @@ public class BootDashModelTest {
 		listener = mock(ElementStateListener.class);
 		model.addElementStateListener(listener);
 
-		element.stopAsync(ui());
+		element.stopAsync();
 		waitForState(element, RunState.INACTIVE);
 
 		//4 changes:  INACTIVE -> STARTING, STARTING -> RUNNING, livePort(set), actualInstances++
@@ -775,7 +775,7 @@ public class BootDashModelTest {
 
 		} finally {
 			System.out.println("Cleanup: stop "+project);
-			project.stopAsync(ui());
+			project.stopAsync();
 			waitForState(project, RunState.INACTIVE);
 		}
 	}
@@ -829,7 +829,7 @@ public class BootDashModelTest {
 			model.removeElementStateListener(recordedChanges2);
 
 		} finally {
-			element.stopAsync(ui());
+			element.stopAsync();
 			waitForState(element, RunState.INACTIVE);
 		}
 	}
@@ -859,7 +859,7 @@ public class BootDashModelTest {
 
 			waitForState(element, toState);
 		} finally {
-			element.stopAsync(ui());
+			element.stopAsync();
 			waitForState(element, RunState.INACTIVE);
 		}
 	}
@@ -915,7 +915,7 @@ public class BootDashModelTest {
 				}
 			};
 
-			el1.stopAsync(ui());
+			el1.stopAsync();
 			new ACondition("check port summary", MODEL_UPDATE_TIMEOUT) {
 				public boolean test() throws Exception {
 					assertEquals(ImmutableSet.of(port2), project.getLivePorts());
@@ -993,7 +993,7 @@ public class BootDashModelTest {
 			};
 
 		} finally {
-			element.stopAsync(ui());
+			element.stopAsync();
 			waitForState(element, RunState.INACTIVE);
 		}
 	}
@@ -1078,7 +1078,7 @@ public class BootDashModelTest {
 			assertFalse(rm.isUserDefined());
 
 		} finally {
-			element.stopAsync(ui());
+			element.stopAsync();
 			waitForState(element, RunState.INACTIVE);
 		}
 	}
@@ -1156,7 +1156,7 @@ public class BootDashModelTest {
 			assertFalse(rm.isUserDefined());
 
 		} finally {
-			element.stopAsync(ui());
+			element.stopAsync();
 			waitForState(element, RunState.INACTIVE);
 		}
 	}

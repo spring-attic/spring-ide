@@ -271,6 +271,10 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 		return sysprops.getOrDefault(DevtoolsUtil.REMOTE_SECRET_PROP, null);
 	}
 
+	public Map<String,String> getSystemProps() {
+		return container!=null ? getSystemProps(container) : null;
+	}
+
 	@SuppressWarnings("unchecked")
 	public static Map<String,String> getSystemProps(Container c) {
 		try {

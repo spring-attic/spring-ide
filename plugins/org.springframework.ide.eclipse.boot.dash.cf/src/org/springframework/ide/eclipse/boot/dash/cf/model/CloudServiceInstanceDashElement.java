@@ -72,7 +72,7 @@ public class CloudServiceInstanceDashElement extends CloudDashElement<String> im
 	}
 
 	@Override
-	public void stopAsync(UserInteractions ui) throws Exception {
+	public void stopAsync() throws Exception {
 	}
 
 	@Override

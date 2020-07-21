@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.resources.IProject;
@@ -363,7 +364,7 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 	}
 
 	@Override
-	public void stopAsync(UserInteractions ui) throws Exception {
+	public void stopAsync() throws Exception {
 		App a = this.app.getValue();
 		a.setGoalState(RunState.INACTIVE);
 	}
@@ -636,9 +637,9 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		return liveBeans.getValue();
 	}
 
-	public void enableDevtools(boolean enable) {
+	public CompletableFuture<Void> enableDevtools(boolean enable) {
 		if (enable) {
-			refreshTracker.runAsync("Enable Devtools Support for application '" + getStyledName(null).getString() + "'", () -> {
+			return refreshTracker.runAsync("Enable Devtools Support for application '" + getStyledName(null).getString() + "'", () -> {
 				App app = getAppData();
 				if (app instanceof SystemPropertySupport) {
 					SystemPropertySupport sysprops = (SystemPropertySupport) app;
@@ -650,7 +651,7 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 				}
 			});
 		} else {
-			refreshTracker.runAsync("Disable Devtools Support for application '" + getStyledName(null).getString() + "'", () -> {
+			return refreshTracker.runAsync("Disable Devtools Support for application '" + getStyledName(null).getString() + "'", () -> {
 				App app = getAppData();
 				if (app instanceof SystemPropertySupport) {
 					SystemPropertySupport sysprops = (SystemPropertySupport) app;

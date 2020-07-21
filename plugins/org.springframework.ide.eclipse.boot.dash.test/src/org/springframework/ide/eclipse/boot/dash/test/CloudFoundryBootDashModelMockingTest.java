@@ -915,7 +915,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		assertFalse(app.getEnableJmxSshTunnel());
 
 		ACondition.waitFor("stop hammering", 20000, () -> {
-			app.stopAsync(ui());
+			app.stopAsync();
 			assertEquals(RunState.INACTIVE, app.getRunState());
 		});
 
@@ -950,7 +950,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		});
 
 		ACondition.waitFor("stop hammering", 20000, () -> {
-			app.stopAsync(ui());
+			app.stopAsync();
 			assertEquals(RunState.INACTIVE, app.getRunState());
 		});
 		ACondition.waitFor("tunnel closed", 2_000, () -> {
@@ -1009,7 +1009,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		});
 
 		ACondition.waitFor("stop hammering", 2_000, () -> {
-			app.stopAsync(ui());
+			app.stopAsync();
 			assertEquals(RunState.INACTIVE, app.getRunState());
 		});
 	}
@@ -1102,7 +1102,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		});
 
 		ACondition.waitFor("stop hammering", 2_000, () -> {
-			app.stopAsync(ui());
+			app.stopAsync();
 			assertEquals(RunState.INACTIVE, app.getRunState());
 		});
 	}
@@ -1156,7 +1156,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		});
 
 		ACondition.waitFor("stop hammering", 20000, () -> {
-			app.stopAsync(ui());
+			app.stopAsync();
 			assertEquals(RunState.INACTIVE, app.getRunState());
 		});
 	}
@@ -1842,7 +1842,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		waitForState(app, RunState.STARTING, 3000);
 
 		ACondition.waitFor("stop hammering", 20000, () -> {
-			app.stopAsync(ui());
+			app.stopAsync();
 			assertEquals(RunState.INACTIVE, app.getRunState());
 		});
 
@@ -1879,7 +1879,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		waitForState(app, RunState.STARTING, 30000);
 
 		System.out.println("Stopping app...");
-		app.stopAsync(ui());
+		app.stopAsync();
 
 		waitForState(app, RunState.INACTIVE, 20000);
 		System.out.println("Stopped!");
@@ -1903,7 +1903,7 @@ public class CloudFoundryBootDashModelMockingTest {
 		app.restartOnlyAsynch(ui(), app.createCancelationToken());
 		waitForState(app, RunState.STARTING, 3000);
 
-		app.stopAsync(ui());
+		app.stopAsync();
 		waitForState(app, RunState.INACTIVE, 20000);
 	}
 

@@ -1,6 +1,9 @@
 package org.springframework.ide.eclipse.boot.dash.views;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.FileLocator;
@@ -29,6 +32,11 @@ public class EnableRemoteDevtoolsAction extends AbstractBootDashElementsAction {
 
 	private ElementStateListener stateListener;
 	private boolean enable;
+
+	/**
+	 * For testing code to be able to observe / synchronize with the end of a executed action.
+	 */
+	public CompletableFuture<Void> lastOperation;
 
 	public EnableRemoteDevtoolsAction(Params params) {
 		super(params);
@@ -120,12 +128,14 @@ public class EnableRemoteDevtoolsAction extends AbstractBootDashElementsAction {
 
 	@Override
 	public void run() {
+		List<CompletableFuture<Void>> futures = new ArrayList<>();
 		for (BootDashElement _e : getSelectedElements()) {
 			if (_e instanceof GenericRemoteAppElement && _e.getProject() != null) {
 				GenericRemoteAppElement e = (GenericRemoteAppElement) _e;
-				e.enableDevtools(enable);
+				futures.add(e.enableDevtools(enable));
 			}
 		}
+		lastOperation = CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()]));
 	}
 
 	@Override
