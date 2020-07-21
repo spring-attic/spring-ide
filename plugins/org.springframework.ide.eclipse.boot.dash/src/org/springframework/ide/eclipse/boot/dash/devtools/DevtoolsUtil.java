@@ -181,8 +181,8 @@ public class DevtoolsUtil {
 		return false;
 	}
 
-	public static void launchDevtools(BootDashElement cde, String debugSecret, String mode, IProgressMonitor monitor) throws CoreException {
-		launchDevtools(cde.getProject(), debugSecret, cde, mode, monitor);
+	public static ILaunch launchDevtools(BootDashElement cde, String debugSecret, String mode, IProgressMonitor monitor) throws CoreException {
+		return launchDevtools(cde.getProject(), debugSecret, cde, mode, monitor);
 	}
 
 	public static void setElement(ILaunchConfigurationWorkingCopy l, BootDashElement bde) {

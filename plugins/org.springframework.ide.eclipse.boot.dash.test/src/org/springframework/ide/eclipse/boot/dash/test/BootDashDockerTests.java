@@ -186,38 +186,40 @@ public class BootDashDockerTests {
 		assertTrue(restartClient.isEnabled());
 
 		restartClient.run();
-		ACondition.waitFor("container running state", 5_000, () -> {
+		ACondition.waitFor("active devtools client", 10_000, () -> {
 			assertActiveDevtoolsClientLaunch(con2);
 		});
 		ILaunch launch = assertActiveDevtoolsClientLaunch(con2);
-		ILaunchConfiguration conf = launch.getLaunchConfiguration();
-		assertEquals(containerSecret, BootDevtoolsClientLaunchConfigurationDelegate.getRemoteSecret(conf));
+		try {
+			ILaunchConfiguration conf = launch.getLaunchConfiguration();
+			assertEquals(containerSecret, BootDevtoolsClientLaunchConfigurationDelegate.getRemoteSecret(conf));
 
-		createFile(project, "src/main/java/com/example/demo/HelloController.java", helloController("Good"));
-		ACondition.waitFor("Good controller", 15_000, () -> {
-			String url = con2.getUrl();
-			assertEquals("Good", IOUtils.toString(new URI(url), "UTF8"));
-		});
+			createFile(project, "src/main/java/com/example/demo/HelloController.java", helloController("Good"));
+			ACondition.waitFor("Good controller", 15_000, () -> {
+				String url = con2.getUrl();
+				assertEquals("Good", IOUtils.toString(new URI(url), "UTF8"));
+			});
 
-		createFile(project, "src/main/java/com/example/demo/HelloController.java", helloController("Better"));
-		ACondition.waitFor("Better controller", 15_000, () -> {
-			String url = con2.getUrl();
-			assertEquals("Better", IOUtils.toString(new URI(url), "UTF8"));
-		});
+			createFile(project, "src/main/java/com/example/demo/HelloController.java", helloController("Better"));
+			ACondition.waitFor("Better controller", 15_000, () -> {
+				String url = con2.getUrl();
+				assertEquals("Better", IOUtils.toString(new URI(url), "UTF8"));
+			});
 
-		con2.stopAsync();
+			con2.stopAsync();
 
-		ACondition.waitFor("container node deleted", 10_000, () -> {
-			assertEquals(RunState.INACTIVE, dep.getRunState());
-			assertEquals(RunState.INACTIVE, img2.getRunState());
-			BootDashElement child = CollectionUtils.getSingle(img2.getChildren().getValues());
-			assertEquals(RunState.INACTIVE, child.getRunState());
-// TODO:
-//			assertNoActiveDevtoolsClientLaunch(con2);
-//			assertNoLaunchConfigs(BootDevtoolsClientLaunchConfigurationDelegate.TYPE_ID);
-		});
-
-		launch.terminate();
+			ACondition.waitFor("container node deleted", 10_000, () -> {
+				assertEquals(RunState.INACTIVE, dep.getRunState());
+				assertEquals(RunState.INACTIVE, img2.getRunState());
+				BootDashElement child = CollectionUtils.getSingle(img2.getChildren().getValues());
+				assertEquals(RunState.INACTIVE, child.getRunState());
+	// TODO:
+				assertNoActiveDevtoolsClientLaunch(con2);
+	//			assertNoLaunchConfigs(BootDevtoolsClientLaunchConfigurationDelegate.TYPE_ID);
+			});
+		} finally {
+			launch.terminate();
+		}
 	}
 
 	private static String helloController(String message) {

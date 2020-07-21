@@ -20,6 +20,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.debug.core.DebugException;
+import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jface.viewers.StyledString;
@@ -56,11 +58,13 @@ import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
+import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
+import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
@@ -661,12 +665,57 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		}
 	}
 
+	private static class LaunchTerminator implements DisposeListener, ValueListener<RunState> {
+
+		private ILaunch launch;
+		private GenericRemoteAppElement owner;
+
+		public LaunchTerminator(ILaunch launch, GenericRemoteAppElement owner) {
+			this.launch = launch;
+			this.owner = owner;
+			owner.getRunStateExp().addListener(this);
+			owner.onDispose(d -> {
+				terminate();
+			});
+
+		}
+
+		@Override
+		public void gotValue(LiveExpression<RunState> exp, RunState value) {
+			if (exp.getValue()==RunState.INACTIVE) {
+				terminate();
+			}
+ 		}
+
+		@Override
+		public void disposed(Disposable disposed) {
+			terminate();
+		}
+
+		void terminate() {
+			ILaunch launch;
+			synchronized (this) {
+				launch = this.launch;
+				this.launch = null;
+			}
+			if (launch!=null) {
+				try {
+					launch.terminate();
+				} catch (DebugException e) {
+					Log.log(e);
+				}
+				owner.getRunStateExp().removeListener(this);
+			}
+		}
+	}
+
 	public void restartRemoteDevtoolsClient() {
 		refreshTracker.runAsync("(Re)starting remote devtools client", () -> {
 			IProject project = getProject();
 			if (project!=null) {
 				DevtoolsUtil.disconnectDevtoolsClientsFor(this);
-				DevtoolsUtil.launchDevtools(this, DevtoolsUtil.getSecret(project), ILaunchManager.RUN_MODE, new NullProgressMonitor());
+				ILaunch launch = DevtoolsUtil.launchDevtools(this, DevtoolsUtil.getSecret(project), ILaunchManager.RUN_MODE, new NullProgressMonitor());
+				new LaunchTerminator(launch, this);
 			}
 		});
 	}
