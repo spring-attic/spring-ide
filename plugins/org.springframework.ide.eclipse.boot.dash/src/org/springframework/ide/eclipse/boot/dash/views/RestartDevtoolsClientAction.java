@@ -1,6 +1,7 @@
 package org.springframework.ide.eclipse.boot.dash.views;
 
 import java.net.URL;
+import java.util.concurrent.TimeoutException;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.FileLocator;
@@ -95,6 +96,8 @@ public class RestartDevtoolsClientAction extends AbstractBootDashElementsAction 
 					}
 				}
 			}
+		} catch (TimeoutException e) {
+			//expected from fastHasDevTools
 		} catch (Exception e) {
 			Log.log(e);
 		}

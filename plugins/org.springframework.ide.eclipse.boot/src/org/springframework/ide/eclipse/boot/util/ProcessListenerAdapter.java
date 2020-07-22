@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.util;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IProcess;
 import org.springframework.ide.eclipse.boot.util.ProcessTracker.ProcessListener;
+import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 /**
  * Adapter for {@link ProcessListener} so that subclass only needs to implement
@@ -20,7 +21,7 @@ import org.springframework.ide.eclipse.boot.util.ProcessTracker.ProcessListener;
  *
  * @author Kris De Volder
  */
-public class ProcessListenerAdapter implements ProcessListener{
+public class ProcessListenerAdapter implements ProcessListener, Disposable {
 
 	@Override
 	public void debugTargetCreated(ProcessTracker tracker, IDebugTarget target) {
@@ -38,5 +39,8 @@ public class ProcessListenerAdapter implements ProcessListener{
 	public void processCreated(ProcessTracker tracker, IProcess process) {
 	}
 
+	@Override
+	public void dispose() {
+	}
 
 }

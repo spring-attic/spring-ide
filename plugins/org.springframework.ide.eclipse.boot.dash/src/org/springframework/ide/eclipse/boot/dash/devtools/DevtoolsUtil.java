@@ -42,6 +42,8 @@ import org.springframework.ide.eclipse.boot.util.ProcessTracker;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
+import com.google.common.collect.ImmutableList;
+
 /**
  * @author Kris De Volder
  */
@@ -129,21 +131,24 @@ public class DevtoolsUtil {
 
 	private static List<ILaunch> findLaunches(IProject project, BootDashElement bde) {
 		String remoteUrl = remoteUrl(bde);
-		List<ILaunch> launches = new ArrayList<>();
-		for (ILaunch l : getLaunchManager().getLaunches()) {
-			try {
-				ILaunchConfiguration c = l.getLaunchConfiguration();
-				if (c!=null) {
-					if (project.equals(BootLaunchConfigurationDelegate.getProject(c))
-						&& remoteUrl.equals(BootDevtoolsClientLaunchConfigurationDelegate.getRemoteUrl(c))) {
-						launches.add(l);
+		if (remoteUrl!=null) {
+			List<ILaunch> launches = new ArrayList<>();
+			for (ILaunch l : getLaunchManager().getLaunches()) {
+				try {
+					ILaunchConfiguration c = l.getLaunchConfiguration();
+					if (c!=null) {
+						if (project.equals(BootLaunchConfigurationDelegate.getProject(c))
+							&& remoteUrl.equals(BootDevtoolsClientLaunchConfigurationDelegate.getRemoteUrl(c))) {
+							launches.add(l);
+						}
 					}
+				} catch (Exception e) {
+					Log.log(e);
 				}
-			} catch (Exception e) {
-				Log.log(e);
 			}
+			return launches;
 		}
-		return launches;
+		return ImmutableList.of();
 	}
 
 
@@ -285,6 +290,19 @@ public class DevtoolsUtil {
 				if (e!=null) {
 					BootDashModel model = e.getBootDashModel();
 					model.notifyElementChanged(e, info);
+				}
+			}
+
+			@Override
+			public void dispose() {
+				try {
+					for (ILaunchConfiguration c : DebugPlugin.getDefault().getLaunchManager().getLaunchConfigurations()) {
+						if (BootDevtoolsClientLaunchConfigurationDelegate.isManaged(c)) {
+							c.delete();
+						}
+					}
+				} catch (Exception e) {
+					Log.log(e);
 				}
 			}
 		});

@@ -17,6 +17,7 @@ import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IProcess;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
@@ -115,12 +116,15 @@ public class ProcessTracker implements Disposable {
 	/**
 	 * Call to free up or deregister stuff if we don't need it any more. (e.g disconnect debug event listeners)
 	 */
+	@Override
 	public void dispose() {
 		if (debugListener!=null) {
 			DebugPlugin.getDefault().removeDebugEventListener(debugListener);
 			debugListener = null;
+			if (listener instanceof Disposable) {
+				((Disposable) listener).dispose();
+			}
 			listener = null;
 		}
 	}
-
 }

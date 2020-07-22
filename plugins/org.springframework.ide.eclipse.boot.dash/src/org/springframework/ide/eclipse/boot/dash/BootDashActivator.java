@@ -93,6 +93,9 @@ public class BootDashActivator extends AbstractUIPlugin {
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
 		super.stop(context);
+		if (model!=null) {
+			model.dispose();
+		}
 	}
 
 	/**
