@@ -1,5 +1,6 @@
 package org.springframework.ide.eclipse.boot.dash.model;
 
+import java.util.Collection;
 import java.util.Comparator;
 
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
@@ -101,9 +102,17 @@ public interface BootDashModel {
 	void performDoubleClickAction(UserInteractions ui);
 
 	default BootDashElement getApplication(String appName) {
-		for (BootDashElement bde : getElements().getValues()) {
+		return findNameIn(appName, getElements().getValues());
+	}
+
+	static BootDashElement findNameIn(String appName, Collection<BootDashElement> children) {
+		for (BootDashElement bde : children) {
 			if (appName.equals(bde.getName())) {
 				return bde;
+			}
+			BootDashElement found = findNameIn(appName, bde.getChildren().getValues());
+			if (found!=null) {
+				return found;
 			}
 		}
 		return null;

@@ -24,8 +24,10 @@ import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.StyledString;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModel;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.api.ActualInstanceCount;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.AppContext;
@@ -701,7 +703,9 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 			if (launch!=null) {
 				try {
 					launch.terminate();
-				} catch (DebugException e) {
+					ILaunchConfiguration conf = launch.getLaunchConfiguration();
+					conf.delete();
+				} catch (Exception e) {
 					Log.log(e);
 				}
 				owner.getRunStateExp().removeListener(this);
@@ -722,6 +726,16 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 
 	public UserInteractions ui() {
 		return getBootDashModel().ui();
+	}
+
+	@Override
+	public ImageDescriptor getRunStateImageDecoration() {
+		if (this.getTarget() != null && this.getRunState() == RunState.RUNNING) {
+			if (DevtoolsUtil.isDevClientAttached(this, ILaunchManager.RUN_MODE)) {
+				return BootDashActivator.getDefault().getImageRegistry().getDescriptor(BootDashActivator.DT_ICON_ID);
+			}
+		}
+		return null;
 	}
 
 }

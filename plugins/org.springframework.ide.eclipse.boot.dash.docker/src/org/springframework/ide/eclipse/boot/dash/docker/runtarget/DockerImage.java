@@ -2,9 +2,11 @@ package org.springframework.ide.eclipse.boot.dash.docker.runtarget;
 
 import java.util.List;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.SWT;
 import org.springframework.ide.eclipse.boot.dash.api.App;
+import org.springframework.ide.eclipse.boot.dash.api.ProjectRelatable;
 import org.springframework.ide.eclipse.boot.dash.api.Styleable;
 import org.springframework.ide.eclipse.boot.dash.model.remote.ChildBearing;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
@@ -17,7 +19,7 @@ import org.mandas.docker.client.DockerClient.ListContainersParam;
 import org.mandas.docker.client.messages.Container;
 import org.mandas.docker.client.messages.Image;
 
-public class DockerImage implements App, ChildBearing, Styleable {
+public class DockerImage implements App, ChildBearing, Styleable, ProjectRelatable {
 	
 	private final DockerApp app;
 	private final Image image;
@@ -81,4 +83,8 @@ public class DockerImage implements App, ChildBearing, Styleable {
 		return "DockerImage("+image.id()+")";
 	}
 
+	@Override
+	public IProject getProject() {
+		return app.getProject();
+	}
 }

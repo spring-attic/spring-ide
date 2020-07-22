@@ -185,9 +185,20 @@ public class BootDashDockerTests {
 		assertTrue(restartClient.isVisible());
 		assertTrue(restartClient.isEnabled());
 
+		assertNull(dep.getRunStateImageDecoration());
+		assertNull(img.getRunStateImageDecoration());
+		assertNull(con.getRunStateImageDecoration());
+		assertNull(img2.getRunStateImageDecoration());
+		assertNull(con2.getRunStateImageDecoration());
+
 		restartClient.run();
 		ACondition.waitFor("active devtools client", 10_000, () -> {
 			assertActiveDevtoolsClientLaunch(con2);
+			assertNotNull(dep.getRunStateImageDecoration());
+			assertNull(img.getRunStateImageDecoration());
+			assertNull(con.getRunStateImageDecoration());
+			assertNotNull(img2.getRunStateImageDecoration());
+			assertNotNull(con2.getRunStateImageDecoration());
 		});
 		ILaunch launch = assertActiveDevtoolsClientLaunch(con2);
 		try {
@@ -213,9 +224,8 @@ public class BootDashDockerTests {
 				assertEquals(RunState.INACTIVE, img2.getRunState());
 				BootDashElement child = CollectionUtils.getSingle(img2.getChildren().getValues());
 				assertEquals(RunState.INACTIVE, child.getRunState());
-	// TODO:
 				assertNoActiveDevtoolsClientLaunch(con2);
-	//			assertNoLaunchConfigs(BootDevtoolsClientLaunchConfigurationDelegate.TYPE_ID);
+				assertNoLaunchConfigs(BootDevtoolsClientLaunchConfigurationDelegate.TYPE_ID);
 			});
 		} finally {
 			launch.terminate();
