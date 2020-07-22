@@ -14,12 +14,15 @@ import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
+import org.springframework.ide.eclipse.boot.dash.devtools.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.util.TreeAwareFilter;
+import org.springframework.ide.eclipse.boot.util.ProcessTracker;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
@@ -79,6 +82,7 @@ public class BootDashViewModel extends AbstractDisposable {
 		});
 		filter = Filters.compose(treeAwarefilter, toggleFiltersModel.getFilter());
 		addDisposableChild(filter);
+		addDisposableChild(DevtoolsUtil.createProcessTracker(this));
 	}
 
 	public LiveSetVariable<RunTarget> getRunTargets() {

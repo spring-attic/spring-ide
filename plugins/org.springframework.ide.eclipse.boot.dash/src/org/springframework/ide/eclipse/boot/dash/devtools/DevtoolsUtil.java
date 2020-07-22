@@ -72,6 +72,7 @@ public class DevtoolsUtil {
 
 		BootLaunchConfigurationDelegate.setProject(wc, project);
 		BootDevtoolsClientLaunchConfigurationDelegate.setRemoteUrl(wc, remoteUrl(bde));
+		BootDevtoolsClientLaunchConfigurationDelegate.setManaged(wc, true);
 
 		wc.setMappedResources(new IResource[] {project});
 		return wc;
@@ -209,7 +210,9 @@ public class DevtoolsUtil {
 		String appName = getAttribute(l, APP_NAME);
 		if (targetId!=null && appName!=null) {
 			BootDashModel section = model.getSectionByTargetId(targetId);
-			return section.getApplication(appName);
+			if (section!=null) {
+				return section.getApplication(appName);
+			}
 		}
 		return null;
 	}
@@ -238,10 +241,12 @@ public class DevtoolsUtil {
 	private static String getAttribute(ILaunchConfiguration l, String name) {
 		try {
 			return l.getAttribute(name, (String)null);
+		} catch (DebugException e) {
+			//ignore Eclipse throws this sometimes (trying to read attribute from launch who's config was deleted.
 		} catch (CoreException e) {
 			Log.log(e);
-			return null;
 		}
+		return null;
 	}
 
 	public static ProcessTracker createProcessTracker(final BootDashViewModel viewModel) {
@@ -253,11 +258,23 @@ public class DevtoolsUtil {
 			@Override
 			public void debugTargetTerminated(ProcessTracker tracker, IDebugTarget target) {
 				handleStateChange(target.getLaunch(), "debugTargetTerminated");
+				deleteConf(target.getLaunch());
 			}
 
 			@Override
 			public void processTerminated(ProcessTracker tracker, IProcess process) {
 				handleStateChange(process.getLaunch(), "processTerminated");
+				deleteConf(process.getLaunch());
+			}
+			private void deleteConf(ILaunch launch) {
+				try {
+					ILaunchConfiguration conf = launch.getLaunchConfiguration();
+					if (conf!=null && BootDevtoolsClientLaunchConfigurationDelegate.isManaged(conf)) {
+						conf.delete();
+					}
+				} catch (Exception e) {
+					Log.log(e);
+				}
 			}
 			@Override
 			public void processCreated(ProcessTracker tracker, IProcess process) {

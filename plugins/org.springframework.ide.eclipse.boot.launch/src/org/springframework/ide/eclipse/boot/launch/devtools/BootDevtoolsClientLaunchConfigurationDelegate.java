@@ -42,6 +42,7 @@ import org.springframework.ide.eclipse.boot.util.ProcessListenerAdapter;
 import org.springframework.ide.eclipse.boot.util.ProcessTracker;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 @SuppressWarnings("restriction")
 public class BootDevtoolsClientLaunchConfigurationDelegate extends AbstractBootLaunchConfigurationDelegate {
@@ -54,6 +55,8 @@ public class BootDevtoolsClientLaunchConfigurationDelegate extends AbstractBootL
 	public static final String REMOTE_SECRET = "spring.devtools.remote.secret";
 	public static final String DEFAULT_REMOTE_SECRET = "";
 	public static final String DEBUG_PORT = "spring.devtools.remote.debug.local-port";
+
+	private static final String MANAGED = "spring.devtools.isManagedLaunch";
 
 	private final ThreadLocal<Integer> localDebugPort = new ThreadLocal<>();
 
@@ -266,6 +269,19 @@ public class BootDevtoolsClientLaunchConfigurationDelegate extends AbstractBootL
 		    		BootActivator.log(e);
 		    	}
 			}
+		}
+	}
+
+	public static void setManaged(ILaunchConfigurationWorkingCopy wc, boolean isManaged) {
+		wc.setAttribute(MANAGED, isManaged);
+	}
+
+	public static boolean isManaged(ILaunchConfiguration c) {
+		try {
+			return c.getAttribute(MANAGED, false);
+		} catch (CoreException e) {
+			Log.log(e);
+			return false;
 		}
 	}
 

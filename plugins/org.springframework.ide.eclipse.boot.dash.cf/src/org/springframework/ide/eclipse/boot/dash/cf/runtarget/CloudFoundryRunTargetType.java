@@ -52,9 +52,6 @@ public class CloudFoundryRunTargetType extends AbstractRemoteRunTargetType<Cloud
 	private static final ImageDescriptor SMALL_ICON = BootDashActivator.getImageDescriptor("icons/cloud_obj.png");
 
 	private WizardModelUserInteractions interactions;
-	private AtomicBoolean processTrackerInitialized = new AtomicBoolean(false);
-	private ProcessTracker devtoolsProcessTracker;
-
 
 	public CloudFoundryRunTargetType(SimpleDIContext injections) {
 		super(injections, "Cloud Foundry");
@@ -91,6 +88,8 @@ public class CloudFoundryRunTargetType extends AbstractRemoteRunTargetType<Cloud
 		}
 	}
 
+
+
 	private CloudFoundryClientFactory clientFactory() {
 		return injections.getBean(CloudFoundryClientFactory.class);
 	}
@@ -101,17 +100,7 @@ public class CloudFoundryRunTargetType extends AbstractRemoteRunTargetType<Cloud
 
 	@Override
 	public RunTarget createRunTarget(CloudFoundryTargetProperties props) {
-		ensureProcessTracker();
 		return new CloudFoundryRunTarget((CloudFoundryTargetProperties) props, this, clientFactory());
-	}
-
-	private void ensureProcessTracker() {
-		if (processTrackerInitialized.compareAndSet(false, true)) {
-			//Careful... doing this too eagerly causes circular bean resolve issues. So... do this asyncly
-			injections.whenCreated(BootDashViewModel.class, (model) -> {
-				devtoolsProcessTracker = DevtoolsUtil.createProcessTracker(model);
-			});
-		}
 	}
 
 	@Override
@@ -138,14 +127,6 @@ public class CloudFoundryRunTargetType extends AbstractRemoteRunTargetType<Cloud
 				"   '%a': API URL\n" +
 				"\n" +
 				"To escape a variable name simply repeat the '%' sign. E.g. '%%u'";
-	}
-
-	@Override
-	public void dispose() {
-		if (devtoolsProcessTracker != null) {
-			devtoolsProcessTracker.dispose();
-			devtoolsProcessTracker = null;
-		}
 	}
 
 	@Override
@@ -207,5 +188,7 @@ public class CloudFoundryRunTargetType extends AbstractRemoteRunTargetType<Cloud
 		};
 	}
 
-
+	@Override
+	public void dispose() {
+	}
 }

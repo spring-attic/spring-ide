@@ -652,7 +652,6 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 					IProject project = getProject();
 					if (project!=null) {
 						sysprops.setSystemProperty(DevtoolsUtil.REMOTE_SECRET_PROP, DevtoolsUtil.getSecret(project));
-						app.setGoalState(RunState.RUNNING);
 					}
 				}
 			});
@@ -703,8 +702,6 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 			if (launch!=null) {
 				try {
 					launch.terminate();
-					ILaunchConfiguration conf = launch.getLaunchConfiguration();
-					conf.delete();
 				} catch (Exception e) {
 					Log.log(e);
 				}
