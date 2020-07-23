@@ -136,7 +136,7 @@ implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentT
 				RUN_STATE_ICN,
 				NAME,
 				LIVE_PORT,
-				PROJECT,
+				DEVTOOLS,
 				INSTANCES,
 				DEFAULT_PATH,
 				TAGS

@@ -34,6 +34,7 @@ import org.springframework.ide.eclipse.boot.dash.api.AppContext;
 import org.springframework.ide.eclipse.boot.dash.api.DebuggableApp;
 import org.springframework.ide.eclipse.boot.dash.api.Deletable;
 import org.springframework.ide.eclipse.boot.dash.api.DesiredInstanceCount;
+import org.springframework.ide.eclipse.boot.dash.api.DevtoolsConnectable;
 import org.springframework.ide.eclipse.boot.dash.api.JmxConnectable;
 import org.springframework.ide.eclipse.boot.dash.api.PortConnectable;
 import org.springframework.ide.eclipse.boot.dash.api.ProjectRelatable;
@@ -735,4 +736,12 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		return null;
 	}
 
+	@Override
+	public boolean isDevtoolsGreenColor() {
+		App data = getAppData();
+		if (data instanceof DevtoolsConnectable) {
+			return ((DevtoolsConnectable) data).getDevtoolsSecret()!=null;
+		}
+		return false;
+	}
 }

@@ -1178,7 +1178,7 @@ public class BootDashModelTest {
 		final String projectName = "project-hahaha";
 		IProject project = createBootProject(projectName, withStarters("web", "actuator", "devtools"));
 		final BootDashElement element = getElement(projectName);
-		assertTrue(element.hasDevtools());
+		assertTrue(element.hasDevtoolsDependency());
 		harness.assertLabelContains("[devtools]", element);
 
 		//Also check that we do not add 'devtools' label to launch configs.
@@ -1193,7 +1193,7 @@ public class BootDashModelTest {
 		IMavenCoordinates devtools = removeDevtools(project);
 		new ACondition("Wait for devtools to disapear", MAVEN_BUILD_TIMEOUT) {
 			public boolean test() throws Exception {
-				assertFalse(element.hasDevtools());
+				assertFalse(element.hasDevtoolsDependency());
 				assertEquals(projectName, harness.getLabel(element));
 				return true;
 			}
@@ -1202,7 +1202,7 @@ public class BootDashModelTest {
 		springBootCore.project(project).addMavenDependency(devtools, true);
 		new ACondition("Wait for devtools to re-apear", MAVEN_BUILD_TIMEOUT) {
 			public boolean test() throws Exception {
-				assertFalse(element.hasDevtools());
+				assertFalse(element.hasDevtoolsDependency());
 				assertEquals(projectName, harness.getLabel(element));
 				return true;
 			}

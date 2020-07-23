@@ -48,6 +48,7 @@ import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.swt.graphics.Color;
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
@@ -76,6 +77,7 @@ import org.springframework.ide.eclipse.boot.dash.docker.runtarget.DockerRunTarge
 import org.springframework.ide.eclipse.boot.dash.docker.runtarget.DockerRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.docker.runtarget.DockerTargetParams;
 import org.springframework.ide.eclipse.boot.dash.docker.ui.SelectDockerDaemonDialog.Model;
+import org.springframework.ide.eclipse.boot.dash.labels.BootDashLabels;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
@@ -199,6 +201,16 @@ public class BootDashDockerTests {
 			assertNull(con.getRunStateImageDecoration());
 			assertNotNull(img2.getRunStateImageDecoration());
 			assertNotNull(con2.getRunStateImageDecoration());
+
+			// text labels and colors
+
+			Color grey = BootDashLabels.colorGrey();
+			Color green = BootDashLabels.colorGreen();
+			harness.assertLabelContains("devtools", grey, dep);
+			harness.assertLabelContains("devtools", grey, img);
+			harness.assertLabelContains("devtools", grey, img2);
+			harness.assertLabelContains("devtools", grey, con);
+			harness.assertLabelContains("devtools", green, con2);
 		});
 		ILaunch launch = assertActiveDevtoolsClientLaunch(con2);
 		try {
@@ -279,6 +291,10 @@ public class BootDashDockerTests {
 			assertEquals(RunState.RUNNING, img.getRunState());
 			assertEquals(RunState.RUNNING, con.getRunState());
 		});
+
+		assertFalse(harness.getLabel(dep).contains("devtools"));
+		assertFalse(harness.getLabel(img).contains("devtools"));
+		assertFalse(harness.getLabel(con).contains("devtools"));
 
 		verifyNoMoreInteractions(ui());
 	}

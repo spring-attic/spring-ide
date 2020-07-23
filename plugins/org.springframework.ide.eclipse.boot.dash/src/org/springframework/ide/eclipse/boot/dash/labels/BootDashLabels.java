@@ -90,6 +90,13 @@ public class BootDashLabels implements Disposable {
 	public static final String ALT_TEXT_DECORATION_COLOR_THEME = "org.springframework.ide.eclipse.boot.dash.AltTextDecorColor";
 	public static final String MUTED_TEXT_DECORATION_COLOR_THEME = "org.springframework.ide.eclipse.boot.dash.MutedTextDecorColor";
 
+	public static Color colorGreen() {
+		return PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry().get(TEXT_DECORATION_COLOR_THEME);
+	}
+
+	public static Color colorGrey() {
+		return PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry().get(MUTED_TEXT_DECORATION_COLOR_THEME);
+	}
 
 	private static final String UNKNOWN_LABEL = "???";
 
@@ -247,7 +254,7 @@ public class BootDashLabels implements Disposable {
 				if (element.getRefreshState().isLoading()) {
 					StyledString prefix = new StyledString();
 					if (element.getRefreshState().getMessage() != null) {
-						Color color = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry().get(MUTED_TEXT_DECORATION_COLOR_THEME);
+						Color color = colorGrey();
 						prefix = new StyledString(element.getRefreshState().getMessage() + " - ", stylers.italicColoured(color));
 					}
 					return prefix.append(new StyledString(element.getRunTarget().getDisplayName(), stylers.italic()));
@@ -273,7 +280,7 @@ public class BootDashLabels implements Disposable {
 		if (column==TAGS) {
 			return stylers.tagBrackets();
 		} else if (column==LIVE_PORT) {
-			Color portColor = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry().get(TEXT_DECORATION_COLOR_THEME);
+			Color portColor = colorGreen();
 			return stylers.color(portColor);
 		} else if (column==INSTANCES) {
 			Color instancesColor = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry().get(ALT_TEXT_DECORATION_COLOR_THEME);
@@ -318,7 +325,7 @@ public class BootDashLabels implements Disposable {
 					// yet on CF elements.
 					boolean devtools = BootPropertyTester.hasDevtools(element.getProject());
 					if (devtools) {
-						Color color = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry().get(TEXT_DECORATION_COLOR_THEME);
+						Color color = colorGreen();
 						StyledString devtoolsDecoration = new StyledString(" [devtools]", stylers.color(color));
 						styledLabel.append(devtoolsDecoration);
 					}
@@ -365,8 +372,10 @@ public class BootDashLabels implements Disposable {
 					}
 				}
 			} else if (column==DEVTOOLS) {
-				if (element.hasDevtools()) {
-					Color color = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry().get(TEXT_DECORATION_COLOR_THEME);
+				if (element.hasDevtoolsDependency()) {
+					Color grey = colorGrey();
+					Color green = colorGreen();
+					Color color = element.isDevtoolsGreenColor() ? green : grey;
 					styledLabel = new StyledString("devtools", stylers.color(color));
 				} else {
 					styledLabel = new StyledString();
@@ -395,7 +404,7 @@ public class BootDashLabels implements Disposable {
 					if (stylers == null) {
 						label = textLabel;
 					} else {
-						Color color = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry().get(TEXT_DECORATION_COLOR_THEME);
+						Color color = colorGreen();
 						styledLabel = new StyledString(textLabel, stylers.color(color));
 					}
 				}
@@ -404,7 +413,7 @@ public class BootDashLabels implements Disposable {
 				if (stylers == null) {
 					label = path == null ? "" : path;
 				} else {
-					Color color = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry().get(MUTED_TEXT_DECORATION_COLOR_THEME);
+					Color color = colorGrey();
 					styledLabel = new StyledString(path == null ? "" : path, stylers.color(color));
 				}
 			} else if (column==INSTANCES) {

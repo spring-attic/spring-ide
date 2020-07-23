@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.springframework.ide.eclipse.beans.ui.live.model.TypeLookup;
 import org.springframework.ide.eclipse.beans.ui.live.model.TypeLookupImpl;
+import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
@@ -25,6 +26,8 @@ import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.Cancelat
 import org.springframework.ide.eclipse.boot.dash.util.Utils;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
+import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager;
+import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager.ClasspathListener;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
@@ -162,9 +165,38 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 		}
 	}
 
+	private LiveExpression<Boolean> hasDevtools = null;
 	@Override
-	public boolean hasDevtools() {
-		return false;
+	public final boolean hasDevtoolsDependency() {
+		if (hasDevtools==null) {
+			hasDevtools = new LiveExpression<Boolean>(false) {
+				@Override
+				protected Boolean compute() {
+					boolean val = BootPropertyTester.hasDevtools(getProject());
+					return val;
+				}
+			};
+			hasDevtools.refresh();
+			ClasspathListenerManager classpathListener = new ClasspathListenerManager(new ClasspathListener() {
+				public void classpathChanged(IJavaProject jp) {
+					if (jp.getProject().equals(getProject())) {
+						hasDevtools.refresh();
+					}
+				}
+			});
+			this.dependsOn(hasDevtools);
+			this.addDisposableChild(classpathListener);
+		}
+		return hasDevtools.getValue();
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	protected void dependsOn(LiveExpression<?> liveProperty) {
+		liveProperty.addListener(new ValueListener() {
+			public void gotValue(LiveExpression exp, Object value) {
+				getBootDashModel().notifyElementChanged(WrappingBootDashElement.this, "livePropertyChanged("+exp+", "+value+")");
+			}
+		});
 	}
 
 	public BootDashModel getBootDashModel() {

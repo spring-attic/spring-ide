@@ -61,7 +61,6 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 	private LaunchConfDashElementFactory childFactory;
 	private ObservableSet<BootDashElement> children;
 	private ObservableSet<Integer> ports;
-	private LiveExpression<Boolean> hasDevtools = null;
 
 	public BootProjectDashElement(IProject project, LocalBootDashModel context, IScopedPropertyStore<IProject> projectProperties,
 			BootProjectDashElementFactory factory, LaunchConfDashElementFactory childFactory) {
@@ -75,29 +74,6 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 //		}
 	}
 
-	@Override
-	public boolean hasDevtools() {
-		if (hasDevtools==null) {
-			hasDevtools = new LiveExpression<Boolean>(false) {
-				@Override
-				protected Boolean compute() {
-					boolean val = BootPropertyTester.hasDevtools(getProject());
-					return val;
-				}
-			};
-			hasDevtools.refresh();
-			ClasspathListenerManager classpathListener = new ClasspathListenerManager(new ClasspathListener() {
-				public void classpathChanged(IJavaProject jp) {
-					if (jp.getProject().equals(getProject())) {
-						hasDevtools.refresh();
-					}
-				}
-			});
-			this.dependsOn(hasDevtools);
-			this.addDisposableChild(classpathListener);
-		}
-		return hasDevtools.getValue();
-	}
 
 	@Override
 	public IProject getProject() {
@@ -141,15 +117,6 @@ public class BootProjectDashElement extends AbstractLaunchConfigurationsDashElem
 			this.dependsOn(ports);
 		}
 		return ports;
-	}
-
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private void dependsOn(LiveExpression<?> liveProperty) {
-		liveProperty.addListener(new ValueListener() {
-			public void gotValue(LiveExpression exp, Object value) {
-				getBootDashModel().notifyElementChanged(BootProjectDashElement.this, "livePropertyChanged("+exp+", "+value+")");
-			}
-		});
 	}
 
 	/**

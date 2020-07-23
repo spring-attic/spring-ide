@@ -30,6 +30,9 @@ import java.util.regex.Pattern;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.JavaRuntime;
 import org.mandas.docker.client.DockerClient;
 import org.mandas.docker.client.DockerClient.ListContainersParam;
 import org.mandas.docker.client.DockerClient.ListImagesParam;
@@ -63,6 +66,8 @@ import org.springsource.ide.eclipse.commons.core.util.OsUtils;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.StringUtils;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
+
+import org.eclipse.jdt.core.JavaCore;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
@@ -323,6 +328,7 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 		String[] command = getBuildCommand(directory);
 
 		ProcessBuilder builder = new ProcessBuilder(command).directory(directory);
+		builder.environment().put("JAVA_HOME", getJavaHome());
 		
 		Process process = builder.start();
 		LineBasedStreamGobler outputGobler = new LineBasedStreamGobler(process.getInputStream(), (line) -> {
@@ -353,6 +359,11 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 		return imageTag;
 	}
 	
+	private String getJavaHome() throws CoreException {
+		IVMInstall jvm = JavaRuntime.getVMInstall(JavaCore.create(project));
+		return jvm.getInstallLocation().toString();
+	}
+
 	private String[] getBuildCommand(File directory) {
 		List<String> command = new ArrayList<>();
 		if (OsUtils.isWindows()) {

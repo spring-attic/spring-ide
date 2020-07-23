@@ -20,7 +20,9 @@ Require-Bundle: org.springframework.ide.eclipse.boot.dash,
  org.mandas.docker-client;bundle-version="3.2.1",
  com.fasterxml.jackson.core.jackson-core,
  com.fasterxml.jackson.core.jackson-databind,
- org.springframework.ide.eclipse.editor.support
+ org.springframework.ide.eclipse.editor.support,
+ org.eclipse.jdt.launching,
+ org.eclipse.jdt.core
 Import-Package: org.eclipse.core.runtime
 Export-Package: org.springframework.ide.eclipse.boot.dash.docker.runtarget,
  org.springframework.ide.eclipse.boot.dash.docker.ui

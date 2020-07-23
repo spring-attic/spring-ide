@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertContains;
 
@@ -25,6 +26,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.swt.custom.StyleRange;
+import org.eclipse.swt.graphics.Color;
 import org.junit.Assert;
 import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.labels.BootDashLabels;
@@ -36,6 +40,7 @@ import org.springframework.ide.eclipse.boot.dash.model.ButtonModel;
 import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.RunTargets;
+import org.springframework.ide.eclipse.boot.dash.model.remote.GenericRemoteAppElement;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.test.mocks.MockMultiSelection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
@@ -223,17 +228,39 @@ public class BootDashViewModelHarness {
 		assertContains(expectSnippet, getLabel(element));
 	}
 
-	public String getLabel(Object element) {
-		Stylers stylers = new Stylers(null);
-		BootDashLabels labels = new BootDashLabels(context.injections, stylers);
-		try {
-			return labels
-					.getStyledText(element, BootDashColumn.TREE_VIEWER_MAIN)
-					.getString();
-		} finally {
-			labels.dispose();
-			stylers.dispose();
+	public void assertLabelContains(String expectSnippet, Color expectedColor, GenericRemoteAppElement element) {
+		StyledString label = getStyledLabel(element);
+		int snippetStart = label.getString().indexOf(expectSnippet);
+		int snippetEnd = snippetStart+expectSnippet.length();
+		assertTrue("Not found '"+expectSnippet+"' in '"+label.getString()+"'", snippetStart>=0);
+		StyleRange[] styles = label.getStyleRanges();
+		for (StyleRange r : styles) {
+			int end = r.start + r.length;
+			boolean overlaps = r.start<=snippetStart && end >= snippetEnd;
+			if (overlaps) {
+				if (expectedColor.equals(r.foreground)) {
+					return; // found it!
+				}
+			}
 		}
+		fail("Snippet found but not the right color");
+	}
+
+
+	public StyledString getStyledLabel(Object element) {
+		Stylers stylers = new Stylers(null);
+		try (BootDashLabels labels = new BootDashLabels(context.injections, stylers)) {
+			try {
+				return labels
+						.getStyledText(element, BootDashColumn.TREE_VIEWER_MAIN);
+			} finally {
+				stylers.dispose();
+			}
+		}
+	}
+
+	public String getLabel(Object element) {
+		return getStyledLabel(element).getString();
 	}
 
 	public ButtonModel assertButton(BootDashModel model, String expectedLabel) {
@@ -294,6 +321,5 @@ public class BootDashViewModelHarness {
 	public BootProjectDashElement waitForElement(long timeout, IProject project) throws Exception {
 		return waitForCallable("Element for project "+project.getName(), timeout, () -> getElementFor(project));
 	}
-
 
 }
