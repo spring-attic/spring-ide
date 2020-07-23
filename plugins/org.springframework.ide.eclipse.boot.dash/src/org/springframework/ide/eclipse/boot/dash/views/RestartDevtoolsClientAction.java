@@ -88,8 +88,7 @@ public class RestartDevtoolsClientAction extends AbstractBootDashElementsAction 
 		try {
 			IProject project = bde.getProject();
 			if (bde instanceof GenericRemoteAppElement && project!=null && bde.getRunState().isActive()) {
-				ISpringBootProject bootProject = SpringBootCore.create(bde.getProject());
-				if (BootPropertyTester.fastHasDevTools(bootProject)) {
+				if (BootPropertyTester.fastHasDevTools(project)) {
 					App data = ((GenericRemoteAppElement)bde).getAppData();
 					if (data instanceof DevtoolsConnectable) {
 						return ((DevtoolsConnectable)data).getDevtoolsSecret()!=null;

@@ -103,8 +103,7 @@ public class EnableRemoteDevtoolsAction extends AbstractBootDashElementsAction {
 		try {
 			IProject project = bde.getProject();
 			if (visibleForElement(bde) && project!=null) {
-				ISpringBootProject bootProject = SpringBootCore.create(bde.getProject());
-				if (BootPropertyTester.fastHasDevTools(bootProject)) {
+				if (BootPropertyTester.fastHasDevTools(bde.getProject())) {
 					App data = ((GenericRemoteAppElement)bde).getAppData();
 					if (data instanceof SystemPropertySupport) {
 						String secret = ((SystemPropertySupport)data).getSystemProperty(DevtoolsUtil.REMOTE_SECRET_PROP);

@@ -153,6 +153,33 @@ public class BootPropertyTester extends PropertyTester {
 	 * resolving the dependencies). It would be undesirable to block on the UI thread to wait for this
 	 * process to complete.
 	 */
+	public static boolean fastHasDevTools(IProject bootProject) throws TimeoutException, InterruptedException, ExecutionException {
+		if (bootProject==null) return false;
+		CompletableFuture<Boolean> result = new CompletableFuture<>();
+		Job job = new Job("Check for devtools") {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					result.complete(hasDevtools(bootProject));
+				} catch (Throwable e) {
+					result.completeExceptionally(e);
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		job.setSystem(true);
+		job.schedule();
+		return result.get(100, TimeUnit.MILLISECONDS);
+	}
+
+	/**
+	 * Like hasDevTools, but suitable for calling on the UI thread. This operation may fail
+	 * with a {@link TimeoutException} if it can not be readily determined whether a project
+	 * has dev tools as a dependency (this may happen, for example because m2e is still in the process of
+	 * resolving the dependencies). It would be undesirable to block on the UI thread to wait for this
+	 * process to complete.
+	 */
+	@Deprecated // Does not work for gradle
 	public static boolean fastHasDevTools(ISpringBootProject bootProject) throws TimeoutException, InterruptedException, ExecutionException {
 		CompletableFuture<Boolean> result = new CompletableFuture<>();
 		Job job = new Job("Check for devtools") {
@@ -171,6 +198,7 @@ public class BootPropertyTester extends PropertyTester {
 		return result.get(100, TimeUnit.MILLISECONDS);
 	}
 
+	@Deprecated // Does not work for gradle (use method with IProject parameter instead)
 	public static boolean hasDevTools(ISpringBootProject bootProject) {
 		try {
 			List<IMavenCoordinates> deps = bootProject.getDependencies();
