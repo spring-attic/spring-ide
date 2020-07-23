@@ -449,7 +449,11 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		for (LiveExpression<?> sumary : summaries) {
 			sumary.refresh();
 		}
-		RemoteJavaLaunchUtil.synchronizeWith(this);
+		//We do the next thing asynchronously because stateChanged events can be fired on the ui
+		// thread and the 'synchronizeWith' can a) take a while and b) cause deadlock.
+		refreshTracker.runAsync("Synchronize remote java launch", () -> {
+			RemoteJavaLaunchUtil.synchronizeWith(this);
+		});
 	}
 
 	/**

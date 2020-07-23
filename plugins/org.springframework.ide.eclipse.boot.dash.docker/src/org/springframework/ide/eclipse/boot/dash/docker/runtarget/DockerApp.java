@@ -32,6 +32,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.IVMInstall2;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.mandas.docker.client.DockerClient;
 import org.mandas.docker.client.DockerClient.ListContainersParam;
@@ -94,8 +95,29 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 	private static final int STOP_WAIT_TIME_IN_SECONDS = 20;
 	public final CompletableFuture<RefreshStateTracker> refreshTracker = new CompletableFuture<>();
 
-	private static final String DEBUG_JVM_ARGS(String debugPort) {
-		return "-Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n,address="+debugPort;
+	private final String DEBUG_JVM_ARGS(String debugPort) {
+		if (isJava9OrLater()) {
+			return "-Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n,address=*:"+debugPort;
+		} else {
+			return "-Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n,address="+debugPort;
+		}
+	}
+
+	private boolean isJava9OrLater() {
+		try {
+			IVMInstall _jvm = JavaRuntime.getVMInstall(JavaCore.create(project));
+			if (_jvm instanceof IVMInstall2) {
+				IVMInstall2 jvm = (IVMInstall2) _jvm;
+				String version = jvm.getJavaVersion();
+				int dot = version.indexOf('.');
+				String major = version.substring(0, dot).trim();
+				return Integer.valueOf(major)>=9;
+			}
+			return false;
+		} catch (Exception e) {
+			Log.log(e);
+			return true;
+		}
 	}
 
 	public DockerApp(String name, DockerRunTarget target, DockerClient client) {
