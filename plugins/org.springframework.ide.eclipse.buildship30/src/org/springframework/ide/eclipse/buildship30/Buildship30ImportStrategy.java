@@ -11,8 +11,12 @@
 package org.springframework.ide.eclipse.buildship30;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.Charset;
 
+import org.apache.commons.io.IOUtils;
 import org.eclipse.buildship.core.BuildConfiguration;
 import org.eclipse.buildship.core.GradleBuild;
 import org.eclipse.buildship.core.GradleCore;
@@ -66,7 +70,16 @@ public class Buildship30ImportStrategy extends ImportStrategy {
 				try {
 					File loc = new File(conf.getLocation());
 					conf.getCodeSet().createAt(loc);
-
+					
+					// Replace project name in the settings.gradle file with the one from `conf.getProjectName()`
+					// i.e. replace rootProject.name = 'project' with rootProject.name = 'project-generated'
+					File settingsFile = new File(loc, "settings.gradle");
+					if (settingsFile.exists()) {
+						String content = IOUtils.toString(new FileInputStream(settingsFile), Charset.defaultCharset());
+						String newContent = content.replaceAll("(\\s*rootProject\\.name\\s*=\\s*').*('\\s*)", "$1" + conf.getProjectName() + "$2");
+						IOUtils.write(newContent.getBytes(), new FileOutputStream(settingsFile));
+					}
+					
 					GradleBuild build = GradleCore.getWorkspace().createBuild(BuildConfiguration.forRootProjectDirectory(loc).build());
 					SynchronizationResult buildResult = build.synchronize(SubMonitor.convert(mon, 9));
 					if (buildResult.getStatus().isOK()) {
@@ -104,5 +117,5 @@ public class Buildship30ImportStrategy extends ImportStrategy {
 			}
 		};
 	}
-
+	
 }
