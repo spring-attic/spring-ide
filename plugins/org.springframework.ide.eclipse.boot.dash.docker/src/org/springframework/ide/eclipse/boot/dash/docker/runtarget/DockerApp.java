@@ -31,6 +31,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMInstall2;
 import org.eclipse.jdt.launching.JavaRuntime;
@@ -45,6 +46,7 @@ import org.mandas.docker.client.messages.ContainerCreation;
 import org.mandas.docker.client.messages.HostConfig;
 import org.mandas.docker.client.messages.Image;
 import org.mandas.docker.client.messages.PortBinding;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.AppConsole;
 import org.springframework.ide.eclipse.boot.dash.api.AppConsoleProvider;
@@ -68,13 +70,13 @@ import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.StringUtils;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
-import org.eclipse.jdt.core.JavaCore;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+
+import org.apache.commons.io.FileUtils;
 
 public class DockerApp extends AbstractDisposable implements App, ChildBearing, Deletable, ProjectRelatable, DesiredInstanceCount, SystemPropertySupport {
 
@@ -94,6 +96,8 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 	
 	private static final int STOP_WAIT_TIME_IN_SECONDS = 20;
 	public final CompletableFuture<RefreshStateTracker> refreshTracker = new CompletableFuture<>();
+	
+	private static File initFile;
 
 	private final String DEBUG_JVM_ARGS(String debugPort) {
 		if (isJava9OrLater()) {
@@ -387,19 +391,22 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 	}
 
 	private String[] getBuildCommand(File directory) {
+		boolean isMaven = true;
 		List<String> command = new ArrayList<>();
 		if (OsUtils.isWindows()) {
 			if (Files.exists(directory.toPath().resolve("mvnw.cmd"))) {
 				command.addAll(ImmutableList.of("CMD", "/C", "mvnw.cmd", "spring-boot:build-image", "-DskipTests"));
 				//, "-Dspring-boot.repackage.excludeDevtools=false" };
 			} else if (Files.exists(directory.toPath().resolve("gradlew.bat"))) {
+				isMaven = false;
 				command.addAll(ImmutableList.of("CMD", "/C", "gradlew.bat", "bootBuildImage", "-x", "test"));
 			} 
 		} else {
 			if (Files.exists(directory.toPath().resolve("mvnw"))) {
 				command.addAll(ImmutableList.of("./mvnw", "spring-boot:build-image", "-DskipTests"));
 			} else if (Files.exists(directory.toPath().resolve("gradlew"))) {
-				command.addAll(ImmutableList.of("./gradlew", "bootBuildImage", "-x", "test" ));
+				isMaven = false;
+				command.addAll(ImmutableList.of("./gradlew", "--stacktrace", "bootBuildImage", "-x", "test" ));
 			}	
 		}
 		if (command.isEmpty()) {
@@ -407,10 +414,39 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 		}
 		boolean wantsDevtools = deployment().getSystemProperties().getOrDefault(DevtoolsUtil.REMOTE_SECRET_PROP, null)!=null;
 		if (wantsDevtools) {
-			command.add("-Dspring-boot.repackage.excludeDevtools=false");
+			if (isMaven) {
+				command.add("-Dspring-boot.repackage.excludeDevtools=false");
+			} else {
+				try {
+					command.addAll(gradle_initScript(
+							"allprojects {\n" + 
+							"    afterEvaluate {\n" + 
+							"        bootJar {\n" + 
+							"          classpath configurations.developmentOnly\n" + 
+							"        }\n" + 
+							"   }\n" + 
+							"}"
+					));
+				} catch (Exception e) {
+					Log.log(e);
+				}
+			}
 		}
 		return command.toArray(new String[command.size()]);
     }
+
+	private synchronized static List<String> gradle_initScript(String script) throws IOException {
+		System.out.println(script);
+		if (initFile==null) {
+			initFile = File.createTempFile("init-script", ".gradle");
+			FileUtils.writeStringToFile(initFile, script, "UTF8");
+			initFile.deleteOnExit();
+		}
+		return ImmutableList.of(
+				"-I",
+				initFile.getAbsolutePath()
+		);
+	}
 
 	synchronized private void addPersistedImage(String imageId) {
 		String key = imagesKey();

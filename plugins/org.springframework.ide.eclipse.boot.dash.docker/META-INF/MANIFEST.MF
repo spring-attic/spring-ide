@@ -22,7 +22,8 @@ Require-Bundle: org.springframework.ide.eclipse.boot.dash,
  com.fasterxml.jackson.core.jackson-databind,
  org.springframework.ide.eclipse.editor.support,
  org.eclipse.jdt.launching,
- org.eclipse.jdt.core
+ org.eclipse.jdt.core,
+ org.apache.commons.io
 Import-Package: org.eclipse.core.runtime
 Export-Package: org.springframework.ide.eclipse.boot.dash.docker.runtarget,
  org.springframework.ide.eclipse.boot.dash.docker.ui
