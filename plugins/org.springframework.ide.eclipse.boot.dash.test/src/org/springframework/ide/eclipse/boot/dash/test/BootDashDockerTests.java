@@ -140,105 +140,118 @@ public class BootDashDockerTests {
 			assertEquals(RunState.RUNNING, con.getRunState());
 		});
 
-		EnableRemoteDevtoolsAction enableDevtools = actions().getEnableDevtoolsAction();
+		EnableRemoteDevtoolsAction disableDevtools = actions().getEnableDevtoolsAction();
 
 		harness.selection.setElements(con);
-		assertFalse(enableDevtools.isVisible());
+		assertFalse(disableDevtools.isVisible());
 		harness.selection.setElements(img);
-		assertFalse(enableDevtools.isVisible());
+		assertFalse(disableDevtools.isVisible());
 
 		harness.selection.setElements(dep);
-		assertTrue(enableDevtools.isVisible());
-		assertTrue(enableDevtools.isEnabled());
-		assertEquals("Enable Remote DevTools Server", enableDevtools.getText());
+		assertTrue(disableDevtools.isVisible());
+		assertTrue(disableDevtools.isEnabled());
+		assertEquals("Disable Remote DevTools Server", disableDevtools.getText());
 
-		assertNull(getDevtoolsSecret(dep));
-
-		enableDevtools.run();
-		enableDevtools.lastOperation.get();
-
-		String deploymentSecret = getDevtoolsSecret(dep);
-		assertNotNull(deploymentSecret);
-
-		ACondition.waitFor("old container stopped", 5_000, () -> {
-			assertEquals(RunState.INACTIVE, con.getRunState());
-		});
-
-		GenericRemoteAppElement img2 = waitForChild(dep, d -> d instanceof DockerImage && !d.getName().equals(img.getName()));
-		GenericRemoteAppElement con2 = waitForChild(img2, d -> d instanceof DockerContainer);
-		String containerSecret = getDevtoolsSecret(con2);
-		assertEquals(deploymentSecret, containerSecret);
-
-		ACondition.waitFor("second container running", 5_000, () -> {
-			assertEquals(RunState.RUNNING, con2.getRunState());
-		});
+		assertNotNull(getDevtoolsSecret(dep));
 
 		RestartDevtoolsClientAction restartClient = actions().getRestartDevtoolsClientAction();
-
 		harness.selection.setElements(dep);
 		assertFalse(restartClient.isVisible());
-		harness.selection.setElements(img2);
+		harness.selection.setElements(img);
 		assertFalse(restartClient.isVisible());
 		harness.selection.setElements(con);
 		assertTrue(restartClient.isVisible());
-		assertFalse(restartClient.isEnabled());
-
-		harness.selection.setElements(con2);
-		assertTrue(restartClient.isVisible());
 		assertTrue(restartClient.isEnabled());
+
+		Color grey = BootDashLabels.colorGrey();
+		Color green = BootDashLabels.colorGreen();
 
 		assertNull(dep.getRunStateImageDecoration());
 		assertNull(img.getRunStateImageDecoration());
 		assertNull(con.getRunStateImageDecoration());
-		assertNull(img2.getRunStateImageDecoration());
-		assertNull(con2.getRunStateImageDecoration());
+		harness.assertLabelContains("devtools", grey, dep);
+		harness.assertLabelContains("devtools", grey, img);
+		harness.assertLabelContains("devtools", green, con);
 
 		restartClient.run();
 		ACondition.waitFor("active devtools client", 10_000, () -> {
-			assertActiveDevtoolsClientLaunch(con2);
+			assertActiveDevtoolsClientLaunch(con);
 			assertNotNull(dep.getRunStateImageDecoration());
-			assertNull(img.getRunStateImageDecoration());
-			assertNull(con.getRunStateImageDecoration());
-			assertNotNull(img2.getRunStateImageDecoration());
-			assertNotNull(con2.getRunStateImageDecoration());
+			assertNotNull(img.getRunStateImageDecoration());
+			assertNotNull(con.getRunStateImageDecoration());
 
-			// text labels and colors
-
-			Color grey = BootDashLabels.colorGrey();
-			Color green = BootDashLabels.colorGreen();
 			harness.assertLabelContains("devtools", grey, dep);
 			harness.assertLabelContains("devtools", grey, img);
-			harness.assertLabelContains("devtools", grey, img2);
-			harness.assertLabelContains("devtools", grey, con);
-			harness.assertLabelContains("devtools", green, con2);
+			harness.assertLabelContains("devtools", green, con);
 		});
-		ILaunch launch = assertActiveDevtoolsClientLaunch(con2);
+		ILaunch launch = assertActiveDevtoolsClientLaunch(con);
 		try {
 			ILaunchConfiguration conf = launch.getLaunchConfiguration();
+
+			String deploymentSecret = getDevtoolsSecret(dep);
+			String containerSecret = getDevtoolsSecret(con);
+			assertNotNull(deploymentSecret);
 			assertEquals(containerSecret, BootDevtoolsClientLaunchConfigurationDelegate.getRemoteSecret(conf));
 
 			createFile(project, "src/main/java/com/example/demo/HelloController.java", helloController("Good"));
 			ACondition.waitFor("Good controller", 15_000, () -> {
-				String url = con2.getUrl();
+				String url = con.getUrl();
 				assertEquals("Good", IOUtils.toString(new URI(url), "UTF8"));
 			});
 
 			createFile(project, "src/main/java/com/example/demo/HelloController.java", helloController("Better"));
 			ACondition.waitFor("Better controller", 15_000, () -> {
-				String url = con2.getUrl();
+				String url = con.getUrl();
 				assertEquals("Better", IOUtils.toString(new URI(url), "UTF8"));
 			});
 
-			con2.stopAsync();
+			harness.selection.setElements(con);
+			assertFalse(disableDevtools.isVisible());
+			harness.selection.setElements(img);
+			assertFalse(disableDevtools.isVisible());
+			harness.selection.setElements(dep);
+			assertTrue(disableDevtools.isVisible());
+			assertTrue(disableDevtools.isEnabled());
 
-			ACondition.waitFor("container node deleted", 10_000, () -> {
-				assertEquals(RunState.INACTIVE, dep.getRunState());
-				assertEquals(RunState.INACTIVE, img2.getRunState());
-				BootDashElement child = CollectionUtils.getSingle(img2.getChildren().getValues());
-				assertEquals(RunState.INACTIVE, child.getRunState());
-				assertNoActiveDevtoolsClientLaunch(con2);
-				assertNoLaunchConfigs(BootDevtoolsClientLaunchConfigurationDelegate.TYPE_ID);
+			disableDevtools.run();
+			disableDevtools.lastOperation.get();
+
+			assertNull(getDevtoolsSecret(dep));
+
+			ACondition.waitFor("old container stopped", 5_000, () -> {
+				assertEquals(RunState.INACTIVE, con.getRunState());
 			});
+
+			GenericRemoteAppElement img2 = waitForChild(dep, d -> d instanceof DockerImage && !d.getName().equals(img.getName()));
+			GenericRemoteAppElement con2 = waitForChild(img2, d -> d instanceof DockerContainer);
+			containerSecret = getDevtoolsSecret(con2);
+			assertNull(containerSecret);
+
+			ACondition.waitFor("second container running", 5_000, () -> {
+				assertEquals(RunState.RUNNING, con2.getRunState());
+				assertEquals(RunState.INACTIVE, con.getRunState());
+			});
+
+			harness.selection.setElements(con2);
+			assertTrue(restartClient.isVisible());
+			assertFalse(restartClient.isEnabled());
+
+			ACondition.waitFor("active devtools client", 10_000, () -> {
+				assertTrue(launch.isTerminated());
+				assertNull(dep.getRunStateImageDecoration());
+				assertNull(img.getRunStateImageDecoration());
+				assertNull(con.getRunStateImageDecoration());
+				assertNull(img2.getRunStateImageDecoration());
+				assertNull(con2.getRunStateImageDecoration());
+
+				// text labels and colors
+				harness.assertLabelContains("devtools", grey, dep);
+				harness.assertLabelContains("devtools", grey, img);
+				harness.assertLabelContains("devtools", grey, img2);
+				harness.assertLabelContains("devtools", green, con);
+				harness.assertLabelContains("devtools", grey, con2);
+			});
+
 		} finally {
 			launch.terminate();
 		}

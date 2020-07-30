@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2020 Pivotal, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Pivotal, Inc. - initial API and implementation
+ *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model.remote;
 
 import java.util.HashMap;
@@ -6,7 +16,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
 
 import org.eclipse.core.runtime.Assert;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
@@ -15,6 +24,7 @@ import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.OnDispose;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 public class RefreshStateTracker {
 
@@ -74,6 +84,7 @@ public class RefreshStateTracker {
 			if (ExceptionUtil.isWarning(e)) {
 				warn(busyMessage, ExceptionUtil.getMessage(e));
 			} else {
+				Log.log(e);
 				error(busyMessage, ExceptionUtil.getMessage(e));
 			}
 			throw ExceptionUtil.exception(e);

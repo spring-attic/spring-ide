@@ -11,11 +11,12 @@
 package org.springframework.ide.eclipse.boot.dash.docker.runtarget;
 
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.DEFAULT_PATH;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.DEVTOOLS;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.INSTANCES;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.LIVE_PORT;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.NAME;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.PROJECT;
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.*;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.TAGS;
 
 import java.util.Collection;
 import java.util.Set;
@@ -24,10 +25,12 @@ import java.util.UUID;
 import org.eclipse.core.resources.IProject;
 import org.mandas.docker.client.DefaultDockerClient;
 import org.mandas.docker.client.DockerClient;
+import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.DebuggableTarget;
 import org.springframework.ide.eclipse.boot.dash.api.ProjectDeploymentTarget;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.RemoteBootDashModel;
+import org.springframework.ide.eclipse.boot.dash.devtools.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
@@ -126,6 +129,9 @@ implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentT
 			d.setRunState(runOrDebug);
 			d.setSessionId(sessionId.getValue());
 			d.setBuildId(UUID.randomUUID().toString());
+			if (BootPropertyTester.hasDevtools(p)) {
+				d.setSystemProperty(DevtoolsUtil.REMOTE_SECRET_PROP, DevtoolsUtil.getSecret(p));
+			}
 			deployments.createOrUpdate(d);
 		}
 	}
