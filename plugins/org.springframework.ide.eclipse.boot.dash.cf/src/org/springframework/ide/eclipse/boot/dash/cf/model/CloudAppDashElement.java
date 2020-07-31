@@ -481,7 +481,7 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 
 	@Override
 	public int getLivePort() {
-		return 80;
+		return 443;
 	}
 
 	@Override
