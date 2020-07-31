@@ -1,23 +1,31 @@
 package org.springframework.ide.eclipse.boot.dash.docker.runtarget;
 
+import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.SWT;
+import org.mandas.docker.client.DockerClient;
+import org.mandas.docker.client.DockerClient.ListContainersParam;
+import org.mandas.docker.client.messages.Container;
+import org.mandas.docker.client.messages.Image;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.ProjectRelatable;
 import org.springframework.ide.eclipse.boot.dash.api.Styleable;
 import org.springframework.ide.eclipse.boot.dash.model.remote.ChildBearing;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
+import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
 import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
-import org.mandas.docker.client.DockerClient;
-import org.mandas.docker.client.DockerClient.ListContainersParam;
-import org.mandas.docker.client.messages.Container;
-import org.mandas.docker.client.messages.Image;
 
 public class DockerImage implements App, ChildBearing, Styleable, ProjectRelatable {
 	
@@ -38,13 +46,17 @@ public class DockerImage implements App, ChildBearing, Styleable, ProjectRelatab
 	public DockerRunTarget getTarget() {
 		return this.app.getTarget();
 	}
-	
+
+
 	@Override
 	public List<App> fetchChildren() throws Exception {
 		Builder<App> builder = ImmutableList.builder();
 		DockerClient client = app.getClient();
 		if (client!=null) {
-			for (Container container : client.listContainers(ListContainersParam.allContainers(), ListContainersParam.withLabel(DockerApp.APP_NAME, app.getName()))) {
+			List<Container> containers = JobUtil.interruptAfter(Duration.ofSeconds(15), 
+					() -> client.listContainers(ListContainersParam.allContainers(), ListContainersParam.withLabel(DockerApp.APP_NAME, app.getName()))
+			);
+			for (Container container : containers) {
 				if (container.imageId().equals(image.id())) {
 					builder.add(new DockerContainer(getTarget(), container));
 				}
@@ -52,7 +64,6 @@ public class DockerImage implements App, ChildBearing, Styleable, ProjectRelatab
 		}
 		return builder.build();
 	}
-	
 
 	@Override
 	public StyledString getStyledName(Stylers stylers) {

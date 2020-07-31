@@ -13,6 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.docker.runtarget;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -171,8 +172,9 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 	public List<App> fetchChildren() throws Exception {
 		Builder<App> builder = ImmutableList.builder();
 		if (client!=null) {
-			List<Image> images = client.listImages(ListImagesParam.allImages());
-			
+			List<Image> images = JobUtil.interruptAfter(Duration.ofSeconds(15), 
+					() -> client.listImages(ListImagesParam.allImages())
+			);
 			synchronized (this) {
 				Set<String> persistedImages = new HashSet<>(Arrays.asList(getPersistedImages()));
 				Set<String> existingImages = new HashSet<>();
