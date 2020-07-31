@@ -165,9 +165,11 @@ public class BootDashDockerTests {
 		Color grey = BootDashLabels.colorGrey();
 		Color green = BootDashLabels.colorGreen();
 
-		assertNotNull(dep.getRunStateImageDecoration());
-		assertNotNull(img.getRunStateImageDecoration());
-		assertNotNull(con.getRunStateImageDecoration());
+		ACondition.waitFor("devtools client started / icons", 5_000, () -> {
+			assertNotNull(dep.getRunStateImageDecoration());
+			assertNotNull(img.getRunStateImageDecoration());
+			assertNotNull(con.getRunStateImageDecoration());
+		});
 		harness.assertLabelContains("devtools", grey, dep);
 		harness.assertLabelContains("devtools", grey, img);
 		harness.assertLabelContains("devtools", green, con);
@@ -265,6 +267,9 @@ public class BootDashDockerTests {
 
 		} finally {
 			launch.terminate();
+			ACondition.waitFor("launch terminated", 2_000, () -> {
+				assertTrue(launch.isTerminated());
+			});
 		}
 	}
 
