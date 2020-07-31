@@ -31,7 +31,10 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.launching.JREContainerInitializer;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMInstall2;
 import org.eclipse.jdt.launching.JavaRuntime;
@@ -46,6 +49,7 @@ import org.mandas.docker.client.messages.ContainerCreation;
 import org.mandas.docker.client.messages.HostConfig;
 import org.mandas.docker.client.messages.Image;
 import org.mandas.docker.client.messages.PortBinding;
+import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.AppConsole;
@@ -76,10 +80,13 @@ import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
+import static org.eclipse.jdt.internal.launching.JREContainerInitializer.getExecutionEnvironmentId;
+
 import org.apache.commons.io.FileUtils;
 
 public class DockerApp extends AbstractDisposable implements App, ChildBearing, Deletable, ProjectRelatable, DesiredInstanceCount, SystemPropertySupport {
 
+	private static final String JAVA_SE = "JavaSE-";
 	private static final String DOCKER_IO_LIBRARY = "docker.io/library/";
 	private static final String[] NO_STRINGS = new String[0];
 	private DockerClient client;
@@ -109,19 +116,28 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 
 	private boolean isJava9OrLater() {
 		try {
-			IVMInstall _jvm = JavaRuntime.getVMInstall(JavaCore.create(project));
-			if (_jvm instanceof IVMInstall2) {
-				IVMInstall2 jvm = (IVMInstall2) _jvm;
-				String version = jvm.getJavaVersion();
-				int dot = version.indexOf('.');
-				String major = version.substring(0, dot).trim();
-				return Integer.valueOf(major)>=9;
+			IJavaProject jp = JavaCore.create(project);
+			IClasspathEntry[] cp = jp.getRawClasspath();
+			for (IClasspathEntry cpe : cp) {
+				System.out.println(cpe);
+				if (cpe.getPath().segment(0).equals("org.eclipse.jdt.launching.JRE_CONTAINER")) {
+					String eeId = JREContainerInitializer.getExecutionEnvironmentId(cpe.getPath());
+					if (eeId.startsWith(JAVA_SE)) {
+						String version = eeId.substring(JAVA_SE.length());
+						if (version.contains(".")) {
+							return false;
+						} else {
+							return true;
+						}
+					} else {
+						return false;
+					}
+				}
 			}
-			return false;
 		} catch (Exception e) {
 			Log.log(e);
-			return true;
 		}
+		return true;
 	}
 
 	public DockerApp(String name, DockerRunTarget target, DockerClient client) {
