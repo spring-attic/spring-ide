@@ -44,8 +44,11 @@ import org.springframework.ide.eclipse.boot.dash.model.AbstractLaunchConfigurati
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.ButtonModel;
+import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
+import org.springframework.ide.eclipse.boot.dash.model.remote.GenericRemoteAppElement;
+import org.springframework.ide.eclipse.boot.dash.model.remote.RefreshStateTracker;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKClient;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKLaunchTracker;
 import org.springframework.ide.eclipse.boot.dash.views.ImageDecorator;
@@ -226,6 +229,12 @@ public class BootDashLabels implements Disposable {
 
 	public Image[] getImageAnimation(BootDashElement element, BootDashColumn column) {
 		if (column == BootDashColumn.RUN_STATE_ICN || column == BootDashColumn.TREE_VIEWER_MAIN) {
+			RefreshState rs = element.getRefreshState();
+			if (rs!=null) {
+				if (rs.isLoading()) {
+					return getRunStateAnimation(RunState.STARTING);
+				}
+			}
 			ImageDescriptor img = element.getCustomRunStateIcon();
 			Image[] anim;
 			if (img!=null) {

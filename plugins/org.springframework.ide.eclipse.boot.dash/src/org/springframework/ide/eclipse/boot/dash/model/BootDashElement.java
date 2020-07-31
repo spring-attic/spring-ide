@@ -135,4 +135,5 @@ public interface BootDashElement extends App, Taggable {
 	default Image getPropertiesTitleIconImage() { return null; }
 	default String getProtocol() { return "http"; }
 	default boolean isDevtoolsGreenColor() { return hasDevtoolsDependency(); }
+	default RefreshState getRefreshState() { return null; }
 }

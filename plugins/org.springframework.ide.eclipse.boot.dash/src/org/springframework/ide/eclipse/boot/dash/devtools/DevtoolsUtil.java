@@ -30,11 +30,14 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IProcess;
+import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
+import org.springframework.ide.eclipse.boot.dash.model.remote.GenericRemoteAppElement;
 import org.springframework.ide.eclipse.boot.dash.util.CollectionUtils;
+import org.springframework.ide.eclipse.boot.dash.views.RestartDevtoolsClientAction;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.devtools.BootDevtoolsClientLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.util.ProcessListenerAdapter;
@@ -95,7 +98,7 @@ public class DevtoolsUtil {
 		if (conf!=null) {
 			return conf.launch(mode, monitor == null ? new NullProgressMonitor() : monitor);
 		}
-		throw ExceptionUtil.coreException("Can't launch, not remote url?");
+		throw ExceptionUtil.coreException("Can't launch, no remote url?");
 	}
 
 	private static ILaunchConfiguration getOrCreateLaunchConfig(IProject project, String debugSecret, BootDashElement bde) throws CoreException {
@@ -366,6 +369,18 @@ public class DevtoolsUtil {
 			opts = opts.replaceAll(REMOTE_SECRET_JVM_ARG +"\\w+\\s*", "");
 		}
 		return opts;
+	}
+
+	public static void launchClientIfNeeded(GenericRemoteAppElement app) {
+		if (wantsDevtools(app)) {
+			if (!isDevClientAttached(app, ILaunchManager.RUN_MODE)) {
+				app.restartRemoteDevtoolsClient();
+			}
+		}
+	}
+
+	private static boolean wantsDevtools(GenericRemoteAppElement app) {
+		return app.getRunState().isActive() && app.hasDevtoolsDependency() && app.isDevtoolsGreenColor();
 	}
 
 }

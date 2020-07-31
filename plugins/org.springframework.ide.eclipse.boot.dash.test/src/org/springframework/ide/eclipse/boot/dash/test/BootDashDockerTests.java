@@ -113,8 +113,7 @@ public class BootDashDockerTests {
 	private static final int BUILD_IMAGE_TIMEOUT = 30_000;
 	private static final String DEFAULT_DOCKER_URL = "unix:///var/run/docker.sock";
 
-	@Rule
-	public LaunchCleanups launches = new LaunchCleanups();
+	@Rule public LaunchCleanups launches = new LaunchCleanups();
 
 	@Test
 	public void testCreateDockerTarget() throws Exception {
@@ -166,12 +165,24 @@ public class BootDashDockerTests {
 		Color grey = BootDashLabels.colorGrey();
 		Color green = BootDashLabels.colorGreen();
 
-		assertNull(dep.getRunStateImageDecoration());
-		assertNull(img.getRunStateImageDecoration());
-		assertNull(con.getRunStateImageDecoration());
+		assertNotNull(dep.getRunStateImageDecoration());
+		assertNotNull(img.getRunStateImageDecoration());
+		assertNotNull(con.getRunStateImageDecoration());
 		harness.assertLabelContains("devtools", grey, dep);
 		harness.assertLabelContains("devtools", grey, img);
 		harness.assertLabelContains("devtools", green, con);
+
+		{
+			ILaunch firstLaunch = assertActiveDevtoolsClientLaunch(con);
+			assertTrue(firstLaunch.canTerminate());
+			firstLaunch.terminate();
+			ACondition.waitFor("client termination reflected in icons", 5_000, () -> {
+				assertTrue(firstLaunch.isTerminated());
+				assertNull(dep.getRunStateImageDecoration());
+				assertNull(img.getRunStateImageDecoration());
+				assertNull(con.getRunStateImageDecoration());
+			});
+		}
 
 		restartClient.run();
 		ACondition.waitFor("active devtools client", 10_000, () -> {
@@ -341,8 +352,9 @@ public class BootDashDockerTests {
 		assertEquals(IJavaLaunchConfigurationConstants.ID_REMOTE_JAVA_APPLICATION, conf.getType().getIdentifier());
 
 		assertEquals(con.getStyledName(null).toString(), conf.getName());
-
-		assertTrue(launch.canTerminate());
+		ACondition.waitFor("launch can terminate", 2_000, () -> {
+			assertTrue(launch.canTerminate());
+		});
 		launch.terminate();
 		ACondition.waitFor("launch termination", 5_000, () -> {
 			assertTrue(launch.isTerminated());

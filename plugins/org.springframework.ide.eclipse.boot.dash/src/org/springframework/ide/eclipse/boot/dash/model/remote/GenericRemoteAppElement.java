@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.jdt.internal.launching.JavaRemoteApplicationLaunchConfigurationDelegate;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.StyledString;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModel;
@@ -137,15 +138,10 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		{
 			dependsOn(app);
 			dependsOn(children);
-			dependsOn(refreshTracker.refreshState);
 		}
 
 		@Override
 		protected RunState compute() {
-			RefreshState r = refreshTracker.refreshState.getValue();
-			if (r.isLoading()) {
-				return RunState.STARTING;
-			}
 			App data = app.getValue();
 			Assert.isLegal(!(data instanceof RunStateProvider && data instanceof ChildBearing));
 			if (data instanceof RunStateProvider) {
@@ -209,6 +205,38 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		livePorts.dependsOn(getRunStateExp());
 	}
 
+	private LiveExpression<Integer> debugPort = new AsyncLiveExpression<Integer>(0) {
+
+		//it is important that events for this exp are fired asynchronously to avoid starving ui thread
+		// causing deadlock. (I.e. the important thing is to have the event listeners not be doing things
+		// in the ui thread. It might be okay to do the refresh of the exp itself synchronously.
+		{
+			dependsOn(app);
+		}
+		protected Integer compute() {
+			App data = app.getValue();
+			if (data instanceof DebuggableApp) {
+				return ((DebuggableApp) data).getDebugPort();
+			}
+			return 0;
+		};
+	};
+
+	private LiveExpression<String> remoteDevtoolsUrl = new AsyncLiveExpression<String>(null) {
+
+		//it is important that events for this exp are fired asynchronously to avoid starving ui thread
+		// causing deadlock. (I.e. the important thing is to have the event listeners not be doing things
+		// in the ui thread. It might be okay to do the refresh of the exp itself synchronously.
+
+		{
+			dependsOn(livePorts);
+		}
+
+		protected String compute() {
+			return DevtoolsUtil.remoteUrl(GenericRemoteAppElement.this);
+		}
+	};
+
 	private LiveExpression<Integer> actualInstanceCounts = sumarizeFromChildren(new AppDataSummarizer<Integer>() {
 
 		public Integer zero() { return 0;}
@@ -261,6 +289,11 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		return sumary;
 	}
 
+	@Override
+	public RefreshState getRefreshState() {
+		return refreshTracker.refreshState.getValue();
+	}
+
 	private void debug(String message) {
 		if (DEBUG) {
 			System.out.println(this + ": " + message);
@@ -284,10 +317,26 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		addDisposableChild(baseRunState);
 		addDisposableChild(jmxRunStateTracker);
 		addElementNotifier(getRunStateExp());
+		addElementNotifier(refreshTracker.refreshState);
 		addDisposableChild(livePorts);
 		addElementNotifier(livePorts);
 
 		model.addElementStateListener(this);
+
+		debugPort.onChange(this, (e, v) -> {
+			RemoteJavaLaunchUtil.synchronizeWith(this);
+		});
+
+		remoteDevtoolsUrl.onChange(this, (e, v) -> {
+			DevtoolsUtil.launchClientIfNeeded(this);
+		});
+
+		refreshTracker.refreshState.addListener((e, v) -> {
+			RefreshState s = e.getValue();
+			if (s!=null && !s.isLoading()) {
+				app.refresh();
+			}
+		});
 
 		onDispose(d -> {
 			System.out.println("Dispose GenericRemoteAppElement instances = " +instances.decrementAndGet());
@@ -448,9 +497,13 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		}
 		//We do the next thing asynchronously because stateChanged events can be fired on the ui
 		// thread and the 'synchronizeWith' can a) take a while and b) cause deadlock.
-		refreshTracker.runAsync("Synchronize remote java launch", () -> {
-			RemoteJavaLaunchUtil.synchronizeWith(this);
-		});
+//		refreshTracker.runAsync("Synchronize remote java launch", () -> {
+//			System.out.println("refresh java debug launch");
+//			RemoteJavaLaunchUtil.synchronizeWith(this);
+//		});
+//		refreshTracker.runAsync("Synchronize devtools client launch", () -> {
+//			DevtoolsUtil.launchClientIfNeeded(this);
+//		});
 	}
 
 	/**
@@ -479,15 +532,8 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		return RemoteJavaLaunchUtil.getLaunchConfigs(this);
 	}
 
-	/**
-	 * Summarise all the debug ports either defined by this node or it's children.
-	 */
 	public int getDebugPort() {
-		App data = getAppData();
-		if (data instanceof DebuggableApp) {
-			return ((DebuggableApp) data).getDebugPort();
-		}
-		return -1;
+		return debugPort.getValue();
 	}
 
 	@Override
@@ -545,6 +591,8 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 	private LiveExpression<Failable<ImmutableList<RequestMapping>>> liveRequestMappings;
 	private LiveExpression<Failable<LiveEnvModel>> liveEnv;
 	private LiveExpression<Failable<LiveBeansModel>> liveBeans;
+
+	static private int count = 0;
 
 	@Override
 	public Failable<ImmutableList<RequestMapping>> getLiveRequestMappings() {
@@ -714,6 +762,7 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 
 	public void restartRemoteDevtoolsClient() {
 		refreshTracker.runAsync("(Re)starting remote devtools client", () -> {
+			System.out.println("starting devtools client " + (++count));
 			IProject project = getProject();
 			if (project!=null) {
 				DevtoolsUtil.disconnectDevtoolsClientsFor(this);
