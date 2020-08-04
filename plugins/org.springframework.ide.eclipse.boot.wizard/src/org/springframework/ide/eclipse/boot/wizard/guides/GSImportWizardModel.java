@@ -75,12 +75,24 @@ public class GSImportWizardModel {
 	 */
 	private final LiveVariable<GSContent> guide = new LiveVariable<GSContent>();
 
+	public final LiveExpression<ValidationResult> downloadStatus = new Validator() {
+		@Override
+		protected ValidationResult compute() {
+			GSContent g = guide.getValue();
+			if (g == null) {
+				return ValidationResult.OK;
+			} else {
+				return ValidationResult.from(g.getZip().getDownloadStatus());
+			}
+		}
+	};
 
 	private final LiveExpression<ValidationResult> guideValidator = new Validator() {
 		{
 			dependsOn(guide);
 			dependsOn(prefetchContentProviderPropsTracker);
 			dependsOn(prefetchContentTracker);
+			dependsOn(downloadStatus);
 		}
 
 		@Override
@@ -95,8 +107,11 @@ public class GSImportWizardModel {
 				}
 			}
 
+			ValidationResult downloadValidation = downloadStatus.getValue();
 			if (guide.getValue() == null) {
 				return ValidationResult.error("No GS content selected");
+			} else if (downloadValidation != null && !downloadValidation.isOk()){
+				return downloadValidation;
 			} else {
 				return ValidationResult.OK;
 			}
@@ -307,19 +322,6 @@ public class GSImportWizardModel {
 			}
 			return null;
 		};
-	};
-
-
-	public final LiveExpression<ValidationResult> downloadStatus = new Validator() {
-		@Override
-		protected ValidationResult compute() {
-			GSContent g = guide.getValue();
-			if (g == null) {
-				return ValidationResult.OK;
-			} else {
-				return ValidationResult.from(g.getZip().getDownloadStatus());
-			}
-		}
 	};
 
 	/**
