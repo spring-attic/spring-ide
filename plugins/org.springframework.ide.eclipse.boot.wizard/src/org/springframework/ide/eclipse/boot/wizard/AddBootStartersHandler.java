@@ -1,29 +1,27 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2020 GoPivotal, Inc.
+ * Copyright (c) 2020 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     GoPivotal, Inc. - initial API and implementation
+ *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.springframework.ide.eclipse.boot.wizard.starters.AddStartersSwitchHandler;
 import org.springframework.ide.eclipse.boot.wizard.starters.AddStartersWizard;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
-public class EditBootStartersHandler extends AbstractHandler {
+public class AddBootStartersHandler extends AbstractHandler {
 
 	/**
 	 * the command has been executed, so extract extract the needed information
@@ -35,16 +33,7 @@ public class EditBootStartersHandler extends AbstractHandler {
 		try {
 			IStructuredSelection selection = HandlerUtil.getCurrentStructuredSelection(event);
 			if (selection!=null) {
-				// PT 169994346 - "Secret" way to open alternate Add Starters wizard.
-				if (AddStartersSwitchHandler.isAddStartersEnabled()) {
-					AddStartersWizard.openFor(activeShell, selection);
-					return null;
-				}
-
-				IProject project = StartersWizardUtil.getProject(selection);
-				if (project != null) {
-					EditStartersDialog.openFor(project, activeShell);
-				}
+				AddStartersWizard.openFor(activeShell, selection);
 			}
 		} catch (Throwable e) {
 			Log.log(e);
