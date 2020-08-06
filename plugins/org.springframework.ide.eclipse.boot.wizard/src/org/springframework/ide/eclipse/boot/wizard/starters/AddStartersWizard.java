@@ -45,7 +45,7 @@ public class AddStartersWizard extends Wizard implements IWorkbenchWizard {
 		try {
 			if (project != null) {
 				IPreferenceStore preferenceStore = BootActivator.getDefault().getPreferenceStore();
-				URLConnectionFactory urlConnectionFactory = BootActivator.getUrlConnectionFactory();
+				URLConnectionFactory urlConnectionFactory = BootActivator.getUrlConnectionFactory(conn -> conn.addRequestProperty("X-STS-ACTION", "diff"));
 				AddStartersPreferences preferences = new AddStartersPreferences(preferenceStore);
 				AddStartersInitializrService initializrService = new AddStartersInitializrService(urlConnectionFactory);
 				wizardModel = new AddStartersWizardModel(project, preferences, initializrService);
