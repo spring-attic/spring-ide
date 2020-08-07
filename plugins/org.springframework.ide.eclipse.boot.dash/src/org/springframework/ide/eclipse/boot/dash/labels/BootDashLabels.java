@@ -47,12 +47,11 @@ import org.springframework.ide.eclipse.boot.dash.model.ButtonModel;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
-import org.springframework.ide.eclipse.boot.dash.model.remote.GenericRemoteAppElement;
-import org.springframework.ide.eclipse.boot.dash.model.remote.RefreshStateTracker;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKClient;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKLaunchTracker;
 import org.springframework.ide.eclipse.boot.dash.views.ImageDecorator;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
+import org.springsource.ide.eclipse.commons.frameworks.core.util.StringUtils;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
@@ -92,6 +91,8 @@ public class BootDashLabels implements Disposable {
 	public static final String TEXT_DECORATION_COLOR_THEME = "org.springframework.ide.eclipse.boot.dash.TextDecorColor";
 	public static final String ALT_TEXT_DECORATION_COLOR_THEME = "org.springframework.ide.eclipse.boot.dash.AltTextDecorColor";
 	public static final String MUTED_TEXT_DECORATION_COLOR_THEME = "org.springframework.ide.eclipse.boot.dash.MutedTextDecorColor";
+
+	public static final char ELLIPSIS = '\u2026';
 
 	public static Color colorGreen() {
 		return PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry().get(TEXT_DECORATION_COLOR_THEME);
@@ -378,6 +379,16 @@ public class BootDashLabels implements Disposable {
 					}
 					else {
 						styledLabel.append(UNKNOWN_LABEL);
+					}
+				}
+
+				if (element.getRefreshState().isLoading()) {
+					String message = element.getRefreshState().getMessage();
+					Color muted = colorGrey();
+					if (StringUtils.hasText(message)) {
+						styledLabel = new StyledString(styledLabel.getString() + " - " + message, stylers.italicColoured(muted));
+					} else {
+						styledLabel = new StyledString(styledLabel.getString() + ELLIPSIS, stylers.italicColoured(muted));
 					}
 				}
 			} else if (column==DEVTOOLS) {
