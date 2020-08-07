@@ -207,12 +207,15 @@ public class BootDashLabels implements Disposable {
 	}
 
 	private ImageDescriptor getDecoration(BootDashElement element) {
-		if (element.getRefreshState().isError()) {
-			return BootDashActivator.getImageDescriptor("icons/error_ovr.gif");
-		} else if (element.getRefreshState().isWarning()) {
-			return BootDashActivator.getImageDescriptor("icons/warning_ovr.png");
-		} else if (element.getRefreshState().isLoading()) {
-			return BootDashActivator.getImageDescriptor("icons/waiting_ovr.gif");
+		RefreshState refreshState = element.getRefreshState();
+		if (refreshState != null) {
+			if (refreshState.isError()) {
+				return BootDashActivator.getImageDescriptor("icons/error_ovr.gif");
+			} else if (refreshState.isWarning()) {
+				return BootDashActivator.getImageDescriptor("icons/warning_ovr.png");
+			} else if (refreshState.isLoading()) {
+				return BootDashActivator.getImageDescriptor("icons/waiting_ovr.gif");
+			}
 		}
 		return element.getRunStateImageDecoration();
 	}
@@ -383,12 +386,12 @@ public class BootDashLabels implements Disposable {
 					}
 				}
 
-				if (element.getRefreshState().isLoading()) {
+				if (element.getRefreshState() != null && element.getRefreshState().isLoading()) {
 					styledLabel = new StyledString(styledLabel.getString(), stylers.italicColoured(colorGrey()));
 				}
 
 			} else if (column==PROGRESS) {
-				if (element.getRefreshState().isLoading()) {
+				if (element.getRefreshState() != null && element.getRefreshState().isLoading()) {
 					String message = element.getRefreshState().getMessage();
 					Color muted = colorGrey();
 					if (StringUtils.hasText(message)) {
