@@ -22,12 +22,6 @@
 		</feature>
 
 		<feature
-			url="features/org.springframework.ide.eclipse.boot.dash.docker.feature_3.9.14.qualifier.jar"
-			id="org.springframework.ide.eclipse.boot.dash.docker.feature" version="3.9.14.qualifier">
-			<category name="Extensions / Spring IDE" />
-		</feature>
-
-		<feature
 			url="features/org.springframework.ide.eclipse.xml.namespaces.feature_3.9.14.qualifier.jar"
 			id="org.springframework.ide.eclipse.xml.namespaces.feature" version="3.9.14.qualifier">
 			<category name="Extensions / Spring IDE" />
