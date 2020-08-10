@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2019 Pivotal, Inc.
+ * Copyright (c) 2015, 2020 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,8 +35,11 @@ public class ApplicationLogConsole extends MessageConsole implements IPropertyCh
 
 	private Disposable logStreamingToken;
 
-	public ApplicationLogConsole(String name, String type) {
+	private ApplicationLogConsole parent;
+
+	public ApplicationLogConsole(String name, String type, ApplicationLogConsole parent) {
 		super(name, type, BootDashActivator.getImageDescriptor("icons/cloud_obj.png"), true);
+		this.parent = parent;
 	}
 
 	public synchronized void setLogStreamingToken(Disposable logStreamingToken) {
@@ -64,7 +67,7 @@ public class ApplicationLogConsole extends MessageConsole implements IPropertyCh
 	 * @param type
 	 * @return true if successfully wrote to stream. False otherwise
 	 */
-	public synchronized boolean writeApplicationLog(String message, LogType type) {
+	public synchronized void writeApplicationLog(String message, LogType type) {
 		if (message != null) {
 			IOConsoleOutputStream stream = getStream(type);
 
@@ -72,13 +75,15 @@ public class ApplicationLogConsole extends MessageConsole implements IPropertyCh
 				if (stream != null && !stream.isClosed()) {
 					message = format(message);
 					stream.write(message);
-					return true;
 				}
 			} catch (IOException e) {
 				Log.log(e);
 			}
+
+			if (parent != null) {
+				parent.writeApplicationLog(message, type);
+			}
 		}
-		return false;
 	}
 
 	protected static String format(String message) {

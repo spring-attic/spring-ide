@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2019 Pivotal, Inc.
+ * Copyright (c) 2015, 2020 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.console;
 
+import java.util.Set;
+
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
@@ -18,6 +20,10 @@ import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.AppConsole;
 import org.springframework.ide.eclipse.boot.dash.api.AppConsoleProvider;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
+import org.springframework.ide.eclipse.boot.dash.model.remote.GenericRemoteAppElement;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
@@ -29,8 +35,10 @@ public class CloudAppLogManager extends BootDashModelConsoleManager implements A
 	static final String APP_CONSOLE_ID = "consoleId";
 
 	private IConsoleManager consoleManager;
+	private SimpleDIContext injections;
 
 	public CloudAppLogManager(SimpleDIContext injections) {
+		this.injections = injections;
 		consoleManager = ConsolePlugin.getDefault().getConsoleManager();
 	}
 
@@ -112,7 +120,9 @@ public class CloudAppLogManager extends BootDashModelConsoleManager implements A
 		ApplicationLogConsole appConsole = getExisitingConsole(element);
 
 		if (appConsole == null) {
-			appConsole = new ApplicationLogConsole(getConsoleDisplayName(element), CONSOLE_TYPE);
+
+			App parentApp = getParentForApp(element);
+			appConsole = new ApplicationLogConsole(getConsoleDisplayName(element), CONSOLE_TYPE, parentApp == null ? null : getOrCreateConsole(parentApp));
 			appConsole.setAttribute(APP_CONSOLE_ID, getConsoleId(element));
 
 			consoleManager.addConsoles(new IConsole[] { appConsole });
@@ -196,4 +206,39 @@ public class CloudAppLogManager extends BootDashModelConsoleManager implements A
 			}
 		};
 	}
+
+	private App getParentForApp(App app) {
+		if (app instanceof BootDashElement) {
+			Object parent = ((BootDashElement) app).getParent();
+			return parent instanceof BootDashElement ? (BootDashElement) parent : null;
+		}
+		BootDashViewModel bootDashViewModel = injections.getBean(BootDashViewModel.class);
+		for (BootDashModel model : bootDashViewModel.getSectionModels().getValue()) {
+			if (app.getTarget() == model.getRunTarget()) {
+				return getParent(model.getElements().getValue(), app);
+			}
+		}
+		return null;
+	}
+
+	private App getParent(Set<BootDashElement> elements, App app) {
+		for (BootDashElement e : elements) {
+			if (e instanceof GenericRemoteAppElement) {
+				App appData = ((GenericRemoteAppElement) e).getAppData();
+				if (app.getName().equals(appData.getName())) {
+					Object parent = e.getParent();
+					if (parent instanceof GenericRemoteAppElement) {
+						return (GenericRemoteAppElement) parent;
+					}
+				} else {
+					App parent = getParent(e.getChildren().getValue(), app);
+					if (parent != null) {
+						return parent;
+					}
+				}
+			}
+		}
+		return null;
+	}
+
 }
