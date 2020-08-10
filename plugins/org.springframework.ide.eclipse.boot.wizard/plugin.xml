@@ -154,7 +154,7 @@
                commandId="org.springframework.ide.eclipse.boot.commands.editStartersCommand"
                icon="platform:/plugin/org.springframework.ide.eclipse.boot/resources/icons/boot-18x16.png"
                id="org.springframework.ide.eclipse.boot.menus.editStarters"
-               label="Edit Starters"
+               label="Add Starters"
                mnemonic="S"
                style="push">
             <visibleWhen
