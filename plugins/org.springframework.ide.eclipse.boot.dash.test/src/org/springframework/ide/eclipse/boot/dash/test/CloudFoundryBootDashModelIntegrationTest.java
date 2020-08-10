@@ -70,6 +70,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.test.util.SslValidationDisabler;
 import org.springframework.ide.eclipse.boot.test.AutobuildingEnablement;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.boot.test.util.TestBracketter;
@@ -107,6 +108,7 @@ public class CloudFoundryBootDashModelIntegrationTest {
 
 	@Before
 	public void setup() throws Exception {
+		SslValidationDisabler.disableSslValidation();
 		StsTestUtil.deleteAllProjects();
 		this.context = new TestBootDashModelContext(
 				ResourcesPlugin.getWorkspace(),

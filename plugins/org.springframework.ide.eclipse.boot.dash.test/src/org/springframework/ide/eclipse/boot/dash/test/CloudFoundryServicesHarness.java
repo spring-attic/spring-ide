@@ -57,6 +57,8 @@ public class CloudFoundryServicesHarness implements Disposable {
 			//TAN RGB
 			//return new String[] {"app-autoscaler", "bronze"}; //Warning not good enough for some tests!
 			return new String[] {"p-rabbitmq", "standard"};
+		} else if (api.contains("wdc-06-pcf2-system.oc.vmware.com")) {
+			return new String[] {"p-rabbitmq", "standard"};
 		}
 		return null;
 	}
