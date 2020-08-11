@@ -12,7 +12,11 @@ package org.springframework.ide.eclipse.boot.dash.docker.runtarget;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -302,12 +306,17 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 	}
 
 	@Override
-	public LogConnection connectLog(AppConsole logConsole) {
+	public LogConnection connectLog(AppConsole logConsole, boolean includeHistory) {
 		DockerClient client = target.getClient();
 		if (client != null) {
 			AppConsole console = target.injections().getBean(AppConsoleProvider.class).getConsole(this);
 			try {
-				LogStream appOutput = target.getClient().logs(container.id(), LogsParam.stdout(), LogsParam.follow());
+				List<LogsParam> logParams = new ArrayList<>();
+				logParams.addAll(Arrays.asList(LogsParam.stdout(), LogsParam.follow()));
+				if (!includeHistory) {
+					logParams.add(LogsParam.since((int)Instant.now().getEpochSecond()));
+				}
+				LogStream appOutput = target.getClient().logs(container.id(), logParams.toArray(new LogsParam[logParams.size()]));
 				return new LogConnection() {
 					
 					private boolean isClosed = false;

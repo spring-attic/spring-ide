@@ -383,6 +383,7 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		addDisposableChild(() -> consoleManager.removeConsoleListener(consoleListener));
 	}
 
+	private boolean firstConsoleConnection = true;
 	private void connectConsoleIfNeeded() {
 		App app = this.app.getValue();
 		CloudAppLogManager appLogManager = injections().getBean(CloudAppLogManager.class);
@@ -391,7 +392,8 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 				&& app instanceof LogProducer
 				&& appLogManager.hasConsole(app)) {
 			AppConsole console = appLogManager.getConsole(app);
-			this.logConnection.setValue(((LogProducer)app).connectLog(console));
+			this.logConnection.setValue(((LogProducer)app).connectLog(console, firstConsoleConnection));
+			firstConsoleConnection = false;
 		}
 	}
 

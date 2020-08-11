@@ -86,7 +86,7 @@ public class CloudAppLogManager extends BootDashModelConsoleManager implements A
 	 * @param appName
 	 * @return existing console, or null if it does not exist.
 	 */
-	protected synchronized ApplicationLogConsole getExisitingConsole(App element) {
+	public synchronized ApplicationLogConsole getExisitingConsole(App element) {
 		IConsole[] consoles = ConsolePlugin.getDefault().getConsoleManager().getConsoles();
 		if (consoles != null) {
 			for (IConsole console : consoles) {

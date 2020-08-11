@@ -12,6 +12,6 @@ package org.springframework.ide.eclipse.boot.dash.api;
 
 public interface LogProducer {
 
-	LogConnection connectLog(AppConsole logConsole);
+	LogConnection connectLog(AppConsole logConsole, boolean includeHistory);
 
 }

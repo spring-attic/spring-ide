@@ -45,7 +45,8 @@ Require-Bundle: org.junit,
  org.springframework.tooling.ls.eclipse.commons,
  org.springframework.ide.eclipse.boot.dash.docker;bundle-version="3.9.13",
  org.mandas.docker-client,
- org.springframework.ide.eclipse.buildship30
+ org.springframework.ide.eclipse.buildship30,
+ org.eclipse.ui.console
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Import-Package: javax.ws.rs.client,

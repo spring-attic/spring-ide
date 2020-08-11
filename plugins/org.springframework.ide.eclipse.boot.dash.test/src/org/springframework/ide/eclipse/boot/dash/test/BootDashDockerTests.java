@@ -24,6 +24,7 @@ import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.b
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withImportStrategy;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertContains;
+import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assertNotContains;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.createFile;
 
 import java.net.URI;
@@ -68,6 +69,8 @@ import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.RemoteBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeployToRemoteTargetAction;
+import org.springframework.ide.eclipse.boot.dash.console.ApplicationLogConsole;
+import org.springframework.ide.eclipse.boot.dash.console.CloudAppLogManager;
 import org.springframework.ide.eclipse.boot.dash.devtools.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.docker.runtarget.DockerApp;
@@ -93,7 +96,6 @@ import org.springframework.ide.eclipse.boot.dash.model.remote.RemoteJavaLaunchUt
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget.ConnectMode;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
-import org.springframework.ide.eclipse.boot.dash.util.CollectionUtils;
 import org.springframework.ide.eclipse.boot.dash.views.AddRunTargetAction;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.DeleteElementsAction;
@@ -321,11 +323,108 @@ public class BootDashDockerTests {
 			assertEquals(RunState.RUNNING, con.getRunState());
 		});
 
+		assertConsoleContains(dep, "Successfully built image 'docker.io/library/webby");
+		assertConsoleContains(dep, "Starting WebbyApplication");
+		assertConsoleNotContains(img, "Successfully built image 'docker.io/library/webby");
+		assertConsoleContains(img, "Starting WebbyApplication");
+		assertConsoleNotContains(con, "Successfully built image 'docker.io/library/webby");
+		assertConsoleContains(con, "Starting WebbyApplication");
+
 		assertFalse(harness.getLabel(dep).contains("devtools"));
 		assertFalse(harness.getLabel(img).contains("devtools"));
 		assertFalse(harness.getLabel(con).contains("devtools"));
 
 		verifyNoMoreInteractions(ui());
+	}
+
+	@Test
+	public void consoleStopAndStartContainer() throws Exception {
+		GenericRemoteBootDashModel<DockerClient, DockerTargetParams> model = createDockerTarget();
+		Mockito.reset(ui());
+		IProject project = projects.createBootWebProject("webby", bootVersionAtLeast("2.3.0"));
+
+		dragAndDrop(project, model);
+		GenericRemoteAppElement dep = waitForDeployment(model, project);
+		GenericRemoteAppElement img = waitForChild(dep, d -> d instanceof DockerImage);
+		GenericRemoteAppElement con = waitForChild(img, d -> d instanceof DockerContainer);
+
+		ACondition.waitFor("all started", BUILD_IMAGE_TIMEOUT, () -> {
+			assertEquals(RunState.RUNNING, dep.getRunState());
+			assertEquals(RunState.RUNNING, img.getRunState());
+			assertEquals(RunState.RUNNING, con.getRunState());
+		});
+
+		assertConsoleContains(dep, "Successfully built image 'docker.io/library/webby");
+		assertConsoleContains(dep, "Starting WebbyApplication");
+		assertConsoleNotContains(img, "Successfully built image 'docker.io/library/webby");
+		assertConsoleContains(img, "Starting WebbyApplication");
+		assertConsoleNotContains(con, "Successfully built image 'docker.io/library/webby");
+		assertConsoleContains(con, "Starting WebbyApplication");
+
+		clearConsole(con);
+		clearConsole(img);
+		clearConsole(dep);
+
+		RunStateAction stopAction = stopAction();
+		harness.selection.setElements(con);
+		stopAction.run();
+
+		ACondition.waitFor("all stopped", 5_000, () -> {
+			assertEquals(RunState.INACTIVE, dep.getRunState());
+			assertEquals(RunState.INACTIVE, img.getRunState());
+			assertEquals(RunState.INACTIVE, con.getRunState());
+		});
+
+		assertConsoleContains(con, "[extShutdownHook]");
+		assertConsoleNotContains(con, "Starting WebbyApplication");
+		assertConsoleContains(img, "[extShutdownHook]");
+		assertConsoleNotContains(img, "Starting WebbyApplication");
+		assertConsoleContains(dep, "[extShutdownHook]");
+		assertConsoleNotContains(dep, "Starting WebbyApplication");
+
+		RunStateAction startAction = restartAction();
+		harness.selection.setElements(con);
+		startAction.run();
+
+		ACondition.waitFor("all started", 15_000, () -> {
+			assertEquals(RunState.RUNNING, dep.getRunState());
+			assertEquals(RunState.RUNNING, img.getRunState());
+			assertEquals(RunState.RUNNING, con.getRunState());
+		});
+
+		assertConsoleNotContains(dep, "Successfully built image 'docker.io/library/webby");
+		assertConsoleContains(dep, "Starting WebbyApplication");
+		assertConsoleNotContains(img, "Successfully built image 'docker.io/library/webby");
+		assertConsoleContains(img, "Starting WebbyApplication");
+		assertConsoleNotContains(con, "Successfully built image 'docker.io/library/webby");
+		assertConsoleContains(con, "Starting WebbyApplication");
+
+	}
+
+	private void clearConsole(GenericRemoteAppElement element) throws Exception {
+		CloudAppLogManager logManager = context.injections.getBean(CloudAppLogManager.class);
+		ApplicationLogConsole console = logManager.getExisitingConsole(element);
+		assertNotNull("No console for " + element.getStyledName(null).getString(), console);
+		console.clearConsole();
+		ACondition.waitFor("clear console", 5_000, () -> {
+			assertEquals("", console.getDocument().get().trim());
+		});
+	}
+
+	private void assertConsoleContains(GenericRemoteAppElement element, String expectSnippet) {
+		CloudAppLogManager logManager = context.injections.getBean(CloudAppLogManager.class);
+		ApplicationLogConsole console = logManager.getExisitingConsole(element);
+		assertNotNull("No console for " + element.getStyledName(null).getString(), console);
+		String text = console.getDocument().get();
+		assertContains(expectSnippet, text);
+	}
+
+	private void assertConsoleNotContains(GenericRemoteAppElement element, String expectSnippet) {
+		CloudAppLogManager logManager = context.injections.getBean(CloudAppLogManager.class);
+		ApplicationLogConsole console = logManager.getExisitingConsole(element);
+		assertNotNull("No console for " + element.getStyledName(null).getString(), console);
+		String text = console.getDocument().get();
+		assertNotContains(expectSnippet, text);
 	}
 
 	@Test
