@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Pivotal, Inc.
+ * Copyright (c) 2017, 2020 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard;
 
-import static org.springframework.ide.eclipse.boot.wizard.BootWizardImages.*;
+import static org.springframework.ide.eclipse.boot.wizard.BootWizardImages.BOOT_SMALL_ICON;
+import static org.springframework.ide.eclipse.boot.wizard.BootWizardImages.getImage;
 
 import java.util.List;
 
@@ -27,6 +28,7 @@ import org.eclipse.wst.sse.ui.contentassist.CompletionProposalInvocationContext;
 import org.eclipse.wst.sse.ui.contentassist.ICompletionProposalComputer;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.util.Log;
+import org.springframework.ide.eclipse.boot.wizard.starters.AddStartersWizard;
 import org.springframework.ide.eclipse.editor.support.util.DocumentUtil;
 
 import com.google.common.collect.ImmutableList;
@@ -57,7 +59,7 @@ public class BootPomCompletionProposalComputer implements ICompletionProposalCom
 			@Override
 			public void apply(IDocument document) {
 				try {
-					EditStartersDialog.openFor(project, PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
+					AddStartersWizard.openFor(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), project);
 				} catch (CoreException e) {
 					Log.log(e);
 				}
@@ -70,12 +72,12 @@ public class BootPomCompletionProposalComputer implements ICompletionProposalCom
 
 			@Override
 			public String getAdditionalProposalInfo() {
-				return "Open 'Edit Spring Starters' Dialog";
+				return "Open 'Add Spring Starters' Dialog";
 			}
 
 			@Override
 			public String getDisplayString() {
-				return "Edit Starters...";
+				return "Add Starters...";
 			}
 
 			@Override

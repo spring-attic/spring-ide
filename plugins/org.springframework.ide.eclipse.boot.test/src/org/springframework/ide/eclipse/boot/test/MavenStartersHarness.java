@@ -29,7 +29,6 @@ import static org.springframework.ide.eclipse.boot.util.PomUtils.getScope;
 import static org.springframework.ide.eclipse.boot.util.PomUtils.getTextChild;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,9 +54,6 @@ import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.MavenId;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarter;
 import org.springframework.ide.eclipse.boot.core.SpringBootStarters;
-import org.springframework.ide.eclipse.boot.core.initializr.InitializrDependencySpec;
-import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
-import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.boot.wizard.PopularityTracker;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
@@ -65,14 +61,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 @SuppressWarnings("restriction")
-public class InitializrWizardModelHarness {
-
-	private MockInitializrService initializr = new MockInitializrService();
-
-
-	public MockInitializrService getInitializrService() {
-		return this.initializr;
-	}
+public class MavenStartersHarness {
 
 
 	public void assertStarters(List<SpringBootStarter> starters, String... expectedIds) {
@@ -205,103 +194,36 @@ public class InitializrWizardModelHarness {
 		return builder.toString();
 	}
 
+	public String generateFakePom(SpringBootStarters knownStarters, List<String> starters) throws Exception {
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		Document pom = dbf.newDocumentBuilder().newDocument();
+		Element rootElement = pom.createElement("project");
+		pom.appendChild(rootElement);
 
-	public static class MockInitializrService implements InitializrService {
+		Element depsEl = pom.createElement(DEPENDENCIES);
+		rootElement.appendChild(depsEl);
 
-		private SpringBootStarters starters;
-		private boolean unavailable = false;
-		private boolean generateFakePom = false;
+		for (String starterId : starters) {
+			SpringBootStarter starter = knownStarters.getStarter(starterId);
+			Element dep = pom.createElement(DEPENDENCY);
+			depsEl.appendChild(dep);
 
-		/**
-		 * Causes the mock to parse input from given input streams instead of calling out to
-		 * the real web service.
-		 */
-		public void setInputs(InputStream main, InputStream dependencies) throws Exception {
-			starters = new SpringBootStarters(
-					InitializrServiceSpec.parseFrom(main),
-					InitializrDependencySpec.parseFrom(dependencies)
-			);
-		}
-
-		public void enableFakePomGenerator() {
-			generateFakePom = true;
-		}
-
-		/**
-		 * Causes the mock to parse input from some resources located relative to the test
-		 * class.
-		 */
-		public void setInputs(String name) throws Exception {
-			setInputs(getResource(name, "main"), getResource(name, "dependencies"));
-		}
-
-		private InputStream getResource(String name, String endPoint) {
-			return getClass().getResourceAsStream("edit-starters-test-inputs/"+name+"-"+endPoint+".json");
-		}
-
-		@Override
-		public SpringBootStarters getStarters(String bootVersion) throws Exception {
-			if (unavailable) {
-				throw new IOException("Initializr Service Unavailable");
-			} else if (starters!=null) {
-				return starters;
-			} else {
-				return InitializrService.DEFAULT.getStarters(bootVersion);
+			{
+				Element gid = pom.createElement(GROUP_ID);
+				gid.appendChild(pom.createTextNode(starter.getGroupId()));
+				dep.appendChild(gid);
+			}
+			{
+				Element aid = pom.createElement(ARTIFACT_ID);
+				aid.appendChild(pom.createTextNode(starter.getArtifactId()));
+				dep.appendChild(aid);
 			}
 		}
 
-		/**
-		 * Make the mock behave as if the 'dependencies' endpoint is not available (either the service is down,
-		 * there is no internet connection, or this is an old service that doesn't implement the endpoint yet).
-		 */
-		public void makeUnavailable() {
-			this.unavailable = true;
-		}
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public String getPom(Map<String, ?> parameters) throws Exception {
-			if (unavailable) {
-				throw new IOException("Initializr Service Unavailable");
-			} else if (generateFakePom) {
-				return generateFakePom((String) parameters.get("bootVersion"), (List<String>) parameters.get("dependencies"));
-			} else {
-				return InitializrService.DEFAULT.getPom(parameters);
-			}
-		}
-
-		private String generateFakePom(String bootVersion, List<String> starters) throws Exception {
-			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			Document pom = dbf.newDocumentBuilder().newDocument();
-			Element rootElement = pom.createElement("project");
-			pom.appendChild(rootElement);
-
-			Element depsEl = pom.createElement(DEPENDENCIES);
-			rootElement.appendChild(depsEl);
-
-			SpringBootStarters knownStarters = getStarters(bootVersion);
-			for (String starterId : starters) {
-				SpringBootStarter starter = knownStarters.getStarter(starterId);
-				Element dep = pom.createElement(DEPENDENCY);
-				depsEl.appendChild(dep);
-
-				{
-					Element gid = pom.createElement(GROUP_ID);
-					gid.appendChild(pom.createTextNode(starter.getGroupId()));
-					dep.appendChild(gid);
-				}
-				{
-					Element aid = pom.createElement(ARTIFACT_ID);
-					aid.appendChild(pom.createTextNode(starter.getArtifactId()));
-					dep.appendChild(aid);
-				}
-			}
-
-			Transformer tf = TransformerFactory.newInstance().newTransformer();
-			StringWriter stringWriter = new StringWriter();
-			tf.transform(new DOMSource(pom), new StreamResult(stringWriter));
-			return stringWriter.toString();
-		}
+		Transformer tf = TransformerFactory.newInstance().newTransformer();
+		StringWriter stringWriter = new StringWriter();
+		tf.transform(new DOMSource(pom), new StreamResult(stringWriter));
+		return stringWriter.toString();
 	}
 
 }

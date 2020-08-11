@@ -10,17 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.labels;
 
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.DEFAULT_PATH;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.DEVTOOLS;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.EXPOSED_URL;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.HOST;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.INSTANCES;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.LIVE_PORT;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.NAME;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.PROJECT;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.RUN_STATE_ICN;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.TAGS;
-import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.TREE_VIEWER_MAIN;
+import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,12 +37,11 @@ import org.springframework.ide.eclipse.boot.dash.model.ButtonModel;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.TagUtils;
-import org.springframework.ide.eclipse.boot.dash.model.remote.GenericRemoteAppElement;
-import org.springframework.ide.eclipse.boot.dash.model.remote.RefreshStateTracker;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKClient;
 import org.springframework.ide.eclipse.boot.dash.ngrok.NGROKLaunchTracker;
 import org.springframework.ide.eclipse.boot.dash.views.ImageDecorator;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
+import org.springsource.ide.eclipse.commons.frameworks.core.util.StringUtils;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
@@ -92,6 +81,8 @@ public class BootDashLabels implements Disposable {
 	public static final String TEXT_DECORATION_COLOR_THEME = "org.springframework.ide.eclipse.boot.dash.TextDecorColor";
 	public static final String ALT_TEXT_DECORATION_COLOR_THEME = "org.springframework.ide.eclipse.boot.dash.AltTextDecorColor";
 	public static final String MUTED_TEXT_DECORATION_COLOR_THEME = "org.springframework.ide.eclipse.boot.dash.MutedTextDecorColor";
+
+	public static final char ELLIPSIS = '\u2026';
 
 	public static Color colorGreen() {
 		return PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry().get(TEXT_DECORATION_COLOR_THEME);
@@ -215,6 +206,20 @@ public class BootDashLabels implements Disposable {
 		return null;
 	}
 
+	private ImageDescriptor getDecoration(BootDashElement element) {
+		RefreshState refreshState = element.getRefreshState();
+		if (refreshState != null) {
+			if (refreshState.isError()) {
+				return BootDashActivator.getImageDescriptor("icons/error_ovr.gif");
+			} else if (refreshState.isWarning()) {
+				return BootDashActivator.getImageDescriptor("icons/warning_ovr.png");
+			} else if (refreshState.isLoading()) {
+				return BootDashActivator.getImageDescriptor("icons/waiting_ovr.gif");
+			}
+		}
+		return element.getRunStateImageDecoration();
+	}
+
 	private Image[] toAnimation(ImageDescriptor icon, ImageDescriptor decoration) {
 		Image img = imageDecorator.get(icon, decoration);
 		return toAnimation(img);
@@ -242,8 +247,8 @@ public class BootDashLabels implements Disposable {
 			} else {
 				anim = getRunStateAnimation(element.getRunState());
 			}
-			ImageDescriptor decor = element.getRunStateImageDecoration();
-			return imageDecorator.decorateImages(anim, decor);
+			ImageDescriptor decoration = getDecoration(element);
+			return imageDecorator.decorateImages(anim, decoration);
 		} else if (column==PROJECT) {
 			try {
 				if (element != null) {
@@ -355,7 +360,7 @@ public class BootDashLabels implements Disposable {
 								// Nothing in the label so far, don't added brackets to first piece
 								styledLabel = styledLabel.append(append);
 							} else {
-								if (col == BootDashColumn.DEFAULT_PATH) {
+								if (col == BootDashColumn.DEFAULT_PATH || col == BootDashColumn.PROGRESS) {
 									styledLabel = styledLabel.append(" ").append(append);
 								}
 								else {
@@ -378,6 +383,21 @@ public class BootDashLabels implements Disposable {
 					}
 					else {
 						styledLabel.append(UNKNOWN_LABEL);
+					}
+				}
+
+				if (element.getRefreshState() != null && element.getRefreshState().isLoading()) {
+					styledLabel = new StyledString(styledLabel.getString(), stylers.italicColoured(colorGrey()));
+				}
+
+			} else if (column==PROGRESS) {
+				if (element.getRefreshState() != null && element.getRefreshState().isLoading()) {
+					String message = element.getRefreshState().getMessage();
+					Color muted = colorGrey();
+					if (StringUtils.hasText(message)) {
+						styledLabel = new StyledString("- " + message, stylers.italicColoured(muted));
+					} else {
+						styledLabel = new StyledString("" + ELLIPSIS, stylers.italicColoured(muted));
 					}
 				}
 			} else if (column==DEVTOOLS) {

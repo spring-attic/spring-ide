@@ -16,38 +16,18 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.bootVersion;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.ConnectException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.function.Supplier;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
-import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
-import org.springframework.ide.eclipse.boot.core.SpringBootStarters;
-import org.springframework.ide.eclipse.boot.core.initializr.InitializrProjectDownloader;
-import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
-import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Option;
-import org.springframework.ide.eclipse.boot.core.initializr.InitializrUrl;
-import org.springframework.ide.eclipse.boot.test.InitializrWizardModelHarness.MockInitializrService;
 import org.springframework.ide.eclipse.boot.test.util.TestBracketter;
-import org.springframework.ide.eclipse.boot.test.util.TestResourcesUtil;
 import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection.CheckBoxModel;
 import org.springframework.ide.eclipse.boot.wizard.HierarchicalMultiSelectionFieldModel;
 import org.springframework.ide.eclipse.boot.wizard.starters.AddStartersCompareModel;
@@ -57,27 +37,11 @@ import org.springframework.ide.eclipse.boot.wizard.starters.AddStartersInitializ
 import org.springframework.ide.eclipse.boot.wizard.starters.AddStartersPreferences;
 import org.springframework.ide.eclipse.boot.wizard.starters.AddStartersWizardModel;
 import org.springframework.ide.eclipse.boot.wizard.starters.InitializrModel;
-import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.URLConnectionFactory;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
-import org.springsource.ide.eclipse.commons.livexp.util.Log;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
-import com.google.common.collect.ImmutableSet;
-
 @SuppressWarnings("restriction")
-public class AddStartersModelTest {
-
-	private BootProjectTestHarness harness = new BootProjectTestHarness(ResourcesPlugin.getWorkspace());
-	private IPreferenceStore prefs = new MockPrefsStore();
-
-
-	private static final String MOCK_VALID_INITIALIZR_URL = "https://add.starters.start.spring.io";
-	private static final String[] SUPPORTED_BOOT_VERSIONS = new String[] {"2.3.1.RELEASE","2.2.7.RELEASE", "2.1.14.RELEASE"};
-	private static final String CURRENT_BOOT_VERSION = "2.3.1.RELEASE";
-	// A starter zip file containing "selected" web and actuator dependencies
-	private static final String STARTER_ZIP_WEB_ACTUATOR = "/initializr/boot-web-actuator/starter.zip";
+public class AddStartersModelTest extends AddStartersTestHarness {
 
 	private static boolean wasAutobuilding;
 
@@ -112,8 +76,14 @@ public class AddStartersModelTest {
 		String validInitializrUrl = MOCK_VALID_INITIALIZR_URL;
 		String[] supportedBootVersions = SUPPORTED_BOOT_VERSIONS;
 		String[] dependenciesToSelect = new String[] {"web", "actuator"};
-		AddStartersWizardModel wizard = createAndLoadWizard(project, starterZipFile, validInitializrUrl,
-				supportedBootVersions, dependenciesToSelect);
+
+		MockInitializrService wrappedService = new MockInitializrService(supportedBootVersions, mavenStartersHarness,
+				INITIALIZR_INFO_INPUT);
+		AddStartersInitializrService initializrService = new MockAddStartersInitializrService(starterZipFile,
+				validInitializrUrl, supportedBootVersions, dependenciesToSelect, wrappedService);
+		AddStartersPreferences preferences = createPreferences(validInitializrUrl, prefs);
+		AddStartersWizardModel wizard = createAndLoadWizard(project, preferences, initializrService,
+				dependenciesToSelect);
 
 		// Verify the fields and model are set in the wizard after loading
 		assertEquals(validInitializrUrl, wizard.getServiceUrl().getValue());
@@ -151,8 +121,14 @@ public class AddStartersModelTest {
 		String validInitializrUrl = MOCK_VALID_INITIALIZR_URL;
 		String[] supportedBootVersions = SUPPORTED_BOOT_VERSIONS;
 		String[] dependenciesToSelect = new String[] {"web", "actuator"};
-		AddStartersWizardModel wizard = createAndLoadWizard(project, starterZipFile, validInitializrUrl,
-				supportedBootVersions, dependenciesToSelect);
+
+		MockInitializrService wrappedService = new MockInitializrService(supportedBootVersions, mavenStartersHarness,
+				INITIALIZR_INFO_INPUT);
+		AddStartersInitializrService initializrService = new MockAddStartersInitializrService(starterZipFile,
+				validInitializrUrl, supportedBootVersions, dependenciesToSelect, wrappedService);
+		AddStartersPreferences preferences = createPreferences(validInitializrUrl, prefs);
+		AddStartersWizardModel wizard = createAndLoadWizard(project, preferences, initializrService,
+				dependenciesToSelect);
 
 		// Verify the fields and model are set in the wizard after loading
 		assertEquals(validInitializrUrl, wizard.getServiceUrl().getValue());
@@ -186,8 +162,14 @@ public class AddStartersModelTest {
 		String validInitializrUrl = MOCK_VALID_INITIALIZR_URL;
 		String[] supportedBootVersions = SUPPORTED_BOOT_VERSIONS;
 		String[] dependenciesToSelect = new String[] {"web", "actuator"};
-		AddStartersWizardModel wizard = createAndLoadWizard(project, starterZipFile, validInitializrUrl,
-				supportedBootVersions, dependenciesToSelect);
+
+		MockInitializrService wrappedService = new MockInitializrService(supportedBootVersions, mavenStartersHarness,
+				INITIALIZR_INFO_INPUT);
+		AddStartersInitializrService initializrService = new MockAddStartersInitializrService(starterZipFile,
+				validInitializrUrl, supportedBootVersions, dependenciesToSelect, wrappedService);
+		AddStartersPreferences preferences = createPreferences(validInitializrUrl, prefs);
+		AddStartersWizardModel wizard = createAndLoadWizard(project, preferences, initializrService,
+				dependenciesToSelect);
 
 		// Verify the fields and model are set in the wizard after loading
 		assertEquals(validInitializrUrl, wizard.getServiceUrl().getValue());
@@ -222,8 +204,14 @@ public class AddStartersModelTest {
 		String validInitializrUrl = MOCK_VALID_INITIALIZR_URL;
 		String[] supportedBootVersions = SUPPORTED_BOOT_VERSIONS;
 		String[] dependenciesToSelect = new String[] {"web", "actuator"};
-		AddStartersWizardModel wizard = createAndLoadWizard(project, starterZipFile, validInitializrUrl,
-				supportedBootVersions, dependenciesToSelect);
+
+		MockInitializrService wrappedService = new MockInitializrService(supportedBootVersions, mavenStartersHarness,
+				INITIALIZR_INFO_INPUT);
+		AddStartersInitializrService initializrService = new MockAddStartersInitializrService(starterZipFile,
+				validInitializrUrl, supportedBootVersions, dependenciesToSelect, wrappedService);
+		AddStartersPreferences preferences = createPreferences(validInitializrUrl, prefs);
+		AddStartersWizardModel wizard = createAndLoadWizard(project, preferences, initializrService,
+				dependenciesToSelect);
 
 		// Verify the fields and model are set in the wizard after loading
 		assertEquals(validInitializrUrl, wizard.getServiceUrl().getValue());
@@ -266,8 +254,14 @@ public class AddStartersModelTest {
 
 		// No dependencies to select, as in this test, there should be no initializr information because boot version is not supported
 		String[] dependenciesToSelect = null;
-		AddStartersWizardModel wizard = createAndLoadWizard(project, starterZipFile, validInitializrUrl,
-				supportedBootVersions, dependenciesToSelect);
+
+		MockInitializrService wrappedService = new MockInitializrService(supportedBootVersions, mavenStartersHarness,
+				INITIALIZR_INFO_INPUT);
+		AddStartersInitializrService initializrService = new MockAddStartersInitializrService(starterZipFile,
+				validInitializrUrl, supportedBootVersions, dependenciesToSelect, wrappedService);
+		AddStartersPreferences preferences = createPreferences(validInitializrUrl, prefs);
+		AddStartersWizardModel wizard = createAndLoadWizard(project, preferences, initializrService,
+				dependenciesToSelect);
 
 		AddStartersError result = (AddStartersError)wizard.getValidator().getValue();
 		assertTrue(result.status == IStatus.ERROR);
@@ -288,8 +282,14 @@ public class AddStartersModelTest {
 		String validInitializrUrl = MOCK_VALID_INITIALIZR_URL;
 		String[] supportedBootVersions = SUPPORTED_BOOT_VERSIONS;
 		String[] dependenciesToSelect = new String[] {"web", "actuator"};
-		AddStartersWizardModel wizard = createAndLoadWizard(project, starterZipFile, validInitializrUrl,
-				supportedBootVersions, dependenciesToSelect);
+
+		MockInitializrService wrappedService = new MockInitializrService(supportedBootVersions, mavenStartersHarness,
+				INITIALIZR_INFO_INPUT);
+		AddStartersInitializrService initializrService = new MockAddStartersInitializrService(starterZipFile,
+				validInitializrUrl, supportedBootVersions, dependenciesToSelect, wrappedService);
+		AddStartersPreferences preferences = createPreferences(validInitializrUrl, prefs);
+		AddStartersWizardModel wizard = createAndLoadWizard(project, preferences, initializrService,
+				dependenciesToSelect);
 
 		assertInitializrAndCompareModelsNotNull(wizard);
 
@@ -307,279 +307,6 @@ public class AddStartersModelTest {
 	}
 
 
-	/*
-	 *
-	 * Helper methods and mock classes
-	 *
-	 */
 
-	public static class MockAddStartersInitializrService extends AddStartersInitializrService {
-
-
-		// Empty URL factory. Shouldn't do anything as an actual URL connection is not
-		// needed for testing
-		private static final URLConnectionFactory EMPTY_URL_FACTORY = new URLConnectionFactory() {
-
-			@Override
-			public URLConnection createConnection(URL url) throws IOException {
-				return null;
-			}
-
-		};
-
-		private final String starterZipPath;
-
-		private final Set<String> supportedBootVersions;
-
-		private final String validInitializrUrl;
-
-		private final String initializrInfoInput;
-
-		private final String[] expectedSelectedDependencies;
-
-		/**
-		 *
-		 * Provides the Add Starters wizard with mock versions of any intializr
-		 * component or information that would otherwise be downloaded from a real
-		 * initializr service, like initializr info containing dependencies to show in
-		 * the wizard, as well as a downloaded project from `/starter.zip` endpoint.
-		 *
-		 * @param starterZipPath               path to an starter zip file representing
-		 *                                     a project that would otherwise be
-		 *                                     downloaded from an actual initializr
-		 *                                     `/starter.zip` endpoint
-		 * @param validInitializrUrl           an initializr service URL that is
-		 *                                     considered "valid" for the wizard (does
-		 *                                     not have to be a real-life initializr URL
-		 *                                     as no connection will be attempted), and
-		 *                                     read by the wizard when it initially is
-		 *                                     created. Mocks having a valid URL like
-		 *                                     "https://start.spring.io " in an actual
-		 *                                     boot initializr preference that is
-		 *                                     initially read by the real wizard when it
-		 *                                     opens.
-		 * @param supportedBootVersions        list of supported boot versions
-		 *                                     associated with the "valid" initializr
-		 *                                     URL. This is used by the wizard to check
-		 *                                     against the boot version of the local
-		 *                                     project. Used for testing error
-		 *                                     conditions (e.g. unsupported boot version
-		 *                                     errors that a wizard may throw)
-		 * @param initializrInfoInput          a JSON test file that contains initializr
-		 *                                     info, like all available dependencies,
-		 *                                     that would otherwise be downloaded from a
-		 *                                     real initializr service.
-		 * @param expectedSelectedDependencies List of selected dependencies that are
-		 *                                     expected when a request is made to download a project within the wizard mechanics
-		 */
-		public MockAddStartersInitializrService(String starterZipPath,
-				String validInitializrUrl,
-				String[] supportedBootVersions,
-				String[] expectedSelectedDependencies,
-				String initializrInfoInput) {
-			super(EMPTY_URL_FACTORY);
-			this.starterZipPath = starterZipPath;
-			this.validInitializrUrl = validInitializrUrl;
-			this.supportedBootVersions = ImmutableSet.copyOf(supportedBootVersions);
-			this.initializrInfoInput = initializrInfoInput;
-			this.expectedSelectedDependencies = expectedSelectedDependencies != null ? expectedSelectedDependencies : new String[0];
-		}
-
-		@Override
-		public InitializrService getService(Supplier<String> url) {
-			MockInitializrService mockWrappedService = new MockInitializrService() {
-				@Override
-				public SpringBootStarters getStarters(String bootVersion) throws Exception {
-					// Mock unsupported boot version. This is an actual error thrown in the real wizard
-					if (!supportedBootVersions.contains(bootVersion)) {
-						throw new FileNotFoundException();
-					} else {
-						return super.getStarters(bootVersion);
-					}
-				}
-			};
-
-			// This sets initializr info from a JSON file that captures data that would
-			// otherwise be downloaded from initializr.
-			try {
-				mockWrappedService.setInputs(initializrInfoInput);
-			} catch (Exception e) {
-				// print the error so its visible during tests
-				e.printStackTrace();
-				return null;
-			}
-			return mockWrappedService;
-		}
-
-		@Override
-		public InitializrProjectDownloader getProjectDownloader(InitializrUrl url) {
-			return new MockProjectDownloader(urlConnectionFactory, url, starterZipPath, expectedSelectedDependencies);
-		}
-
-		@Override
-		public Option[] getSupportedBootReleaseVersions(String url) throws Exception {
-
-			Builder<Object> options = ImmutableList.builder();
-			for (String v : supportedBootVersions) {
-				Option option = new Option();
-				option.setId(v);
-				options.add(option);
-			}
-
-			return options.build().toArray(new Option[0]);
-		}
-
-		@Override
-		public void checkBasicConnection(URL url) throws Exception {
-			// Tests an actual error thrown by initializr service: a valid URL (e.g. https://www.google.com) that is
-			// not an initializr URL
-			if (!validInitializrUrl.equals(url.toString())) {
-				throw new ConnectException();
-			}
-		}
-
-	}
-
-	public class MockAddStartersPreferences extends AddStartersPreferences {
-
-		private final List<String> storedUrls = new ArrayList<>();
-
-
-		public MockAddStartersPreferences(String validUrl) {
-			super(prefs);
-			storedUrls.add(validUrl);
-		}
-
-		@Override
-		public String getInitializrUrl() {
-			return storedUrls.get(0);
-		}
-
-		@Override
-		public String[] getInitializrUrls() {
-			return storedUrls.toArray(new String[] {});
-		}
-
-		@Override
-		public void addInitializrUrl(String url) {
-			storedUrls.add(url);
-		}
-
-	}
-
-	public static class MockProjectDownloader extends InitializrProjectDownloader {
-
-		private final String starterZipPath;
-		private final String[] expectedSelectedDependencies;
-
-		public MockProjectDownloader(URLConnectionFactory urlConnectionFactory, InitializrUrl url,
-				String starterZipPath, String[] expectedSelectedDependencies) {
-			super(urlConnectionFactory, url);
-			this.starterZipPath = starterZipPath;
-			this.expectedSelectedDependencies = expectedSelectedDependencies;
-		}
-
-		@Override
-		public File getProject(List<Dependency> dependencies, ISpringBootProject bootProject) throws Exception {
-			// selected dependencies from the wizard don't actually get used in the mock project downloader
-			// as we dont actually  need to download the zip file from initializr using a constructed URL that
-			// contains the dependencies.
-			// However, we can at least test that the dependencies that were selected in the wizard match the expected ones
-			assertSelectedDependencies(dependencies);
-
-			return TestResourcesUtil.getTestFile(starterZipPath);
-		}
-
-		private void assertSelectedDependencies(List<Dependency> dependencies) {
-			assertEquals(expectedSelectedDependencies.length, dependencies.size());
-			for (Dependency actual : dependencies) {
-				assertNotNull(getExpectedDependency(actual, expectedSelectedDependencies));
-			}
-		}
-	}
-
-	private void loadInitializrModel(AddStartersWizardModel wizard) throws Exception {
-		wizard.addModelLoader(() -> wizard.createInitializrModel(new NullProgressMonitor()));
-		// Wait for it to finish
-		waitForWizardJob();
-	}
-
-	private void waitForWizardJob() throws InterruptedException {
-		Job.getJobManager().join(AddStartersWizardModel.JOB_FAMILY, null);
-	}
-
-	private void assertInitializrAndCompareModelsNull(AddStartersWizardModel wizard) {
-		InitializrModel initializrModel = wizard.getInitializrModel().getValue();
-		assertNull(initializrModel);
-		AddStartersCompareModel compareModel = wizard.getCompareModel().getValue();
-		assertNull(compareModel);
-	}
-
-	private void assertInitializrAndCompareModelsNotNull(AddStartersWizardModel wizard) {
-		InitializrModel initializrModel = wizard.getInitializrModel().getValue();
-		assertNotNull(initializrModel);
-		AddStartersCompareModel compareModel = wizard.getCompareModel().getValue();
-		assertNotNull(compareModel);
-	}
-
-	private static String getExpectedDependency(Dependency dep, String... expectedDependencies) {
-		for (String expected : expectedDependencies) {
-			if (expected.equals(dep.getId())) {
-				return expected;
-			}
-		}
-		return null;
-	}
-
-	private void selectDependenciesInWizard(AddStartersWizardModel wizard, String...dependencies) {
-		InitializrModel initializrModel = wizard.getInitializrModel().getValue();
-		for (String dep : dependencies) {
-			initializrModel.addDependency(dep);
-		}
-	}
-
-	/**
-	 *
-	 * @param project local project to compare to
-	 * @param starterZipFile path to a starter.zip file representing a downloaded project to compare to the local one
-	 * @param validInitializrUrl an initializr URL to set in preferences that the wizard will consider to be a valid service  URL (no connections will be made though)
-	 * @param supportedBootVersions
-	 * @param dependenciesToSelect dependencies to select in the wizard once it is created. Pass null if no dedencies to select.
-	 * @return
-	 * @throws Exception
-	 */
-	private AddStartersWizardModel createAndLoadWizard(
-			IProject project,
-			String starterZipFile,
-			String validInitializrUrl,
-			String[] supportedBootVersions,
-			String[] dependenciesToSelect) throws Exception {
-		String initializrInfoInput = "sample";
-		AddStartersInitializrService initializrService = new MockAddStartersInitializrService(
-				starterZipFile,
-				validInitializrUrl,
-				supportedBootVersions,
-				dependenciesToSelect,
-				initializrInfoInput);
-		AddStartersPreferences preferences = new MockAddStartersPreferences(validInitializrUrl);
-		AddStartersWizardModel wizard = new AddStartersWizardModel(project, preferences, initializrService);
-
-		// Wizard model is not available until it is loaded
-		assertInitializrAndCompareModelsNull(wizard);
-
-		loadInitializrModel(wizard);
-
-		// Select the dependencies in the "Dependencies" section of the wizard
-		if (dependenciesToSelect != null) {
-			selectDependenciesInWizard(wizard, dependenciesToSelect);
-		}
-
-		return wizard;
-	}
-
-	private void performOk(AddStartersWizardModel wizard) throws Exception {
-		wizard.performOk();
-		waitForWizardJob();
-	}
 
 }

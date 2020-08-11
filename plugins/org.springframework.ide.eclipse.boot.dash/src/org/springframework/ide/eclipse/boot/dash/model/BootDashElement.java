@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2019 Pivotal, Inc.
+ * Copyright (c) 2015, 2020 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -135,5 +135,5 @@ public interface BootDashElement extends App, Taggable {
 	default Image getPropertiesTitleIconImage() { return null; }
 	default String getProtocol() { return "http"; }
 	default boolean isDevtoolsGreenColor() { return hasDevtoolsDependency(); }
-	default RefreshState getRefreshState() { return null; }
+	default RefreshState getRefreshState() { return RefreshState.READY; }
 }

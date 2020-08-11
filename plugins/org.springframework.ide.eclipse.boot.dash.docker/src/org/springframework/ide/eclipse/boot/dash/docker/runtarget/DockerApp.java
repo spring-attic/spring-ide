@@ -28,6 +28,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
@@ -37,7 +38,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.launching.JREContainerInitializer;
 import org.eclipse.jdt.launching.IVMInstall;
-import org.eclipse.jdt.launching.IVMInstall2;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.mandas.docker.client.DockerClient;
 import org.mandas.docker.client.DockerClient.ListContainersParam;
@@ -50,8 +50,6 @@ import org.mandas.docker.client.messages.ContainerCreation;
 import org.mandas.docker.client.messages.HostConfig;
 import org.mandas.docker.client.messages.Image;
 import org.mandas.docker.client.messages.PortBinding;
-import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
-import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.AppConsole;
 import org.springframework.ide.eclipse.boot.dash.api.AppConsoleProvider;
@@ -63,6 +61,7 @@ import org.springframework.ide.eclipse.boot.dash.api.SystemPropertySupport;
 import org.springframework.ide.eclipse.boot.dash.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.devtools.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.docker.jmx.JmxSupport;
+import org.springframework.ide.eclipse.boot.dash.labels.BootDashLabels;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.remote.ChildBearing;
@@ -81,10 +80,7 @@ import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
-import static org.eclipse.jdt.internal.launching.JREContainerInitializer.getExecutionEnvironmentId;
-
-import org.apache.commons.io.FileUtils;
-
+@SuppressWarnings("restriction")
 public class DockerApp extends AbstractDisposable implements App, ChildBearing, Deletable, ProjectRelatable, DesiredInstanceCount, SystemPropertySupport {
 
 	private static final String JAVA_SE = "JavaSE-";
@@ -255,14 +251,19 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 
 	public void start(DockerDeployment deployment) throws Exception {
 		RefreshStateTracker refreshTracker = this.refreshTracker.get();
-		refreshTracker.run("Deploying " + getName() + "...", () -> {
-			AppConsole console = target.injections().getBean(AppConsoleProvider.class).getConsole(this);
-			console.show();
+		
+		AppConsole console = target.injections().getBean(AppConsoleProvider.class).getConsole(this);
+		console.show();
+		
+		String image = refreshTracker.call("Building image" + BootDashLabels.ELLIPSIS, () -> {
 			if (!project.isAccessible()) {
 				throw new IllegalStateException("The project '"+project.getName()+"' is not accessible");
 			}
-			console.write("Deploying Docker app " + getName() +"...", LogType.STDOUT);
-			String image = build(console);
+			console.write("Deploying Docker app " + getName() +  + BootDashLabels.ELLIPSIS, LogType.STDOUT);
+			return build(console);
+		});
+		
+		refreshTracker.run("Starting container '" + image + "'" +  + BootDashLabels.ELLIPSIS, () -> {
 			run(console, image, deployment);
 			console.write("DONE Deploying Docker app " + getName(), LogType.STDOUT);
 		});

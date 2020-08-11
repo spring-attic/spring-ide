@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Pivotal, Inc.
+ * Copyright (c) 2015, 2020 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,7 @@ import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.graphics.Image;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.labels.BootDashLabels;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.RefreshState;
 import org.springframework.ide.eclipse.boot.dash.util.ColumnViewerAnimator;
@@ -71,6 +72,12 @@ public class BootDashCellLabelProvider extends StyledCellLabelProvider {
 	public String getToolTipText(Object element) {
 		if (element instanceof BootDashModel) {
 			RefreshState state = ((BootDashModel) element).getRefreshState();
+			if (state!=null) {
+				return state.getMessage();
+			}
+		}
+		if (element instanceof BootDashElement) {
+			RefreshState state = ((BootDashElement) element).getRefreshState();
 			if (state!=null) {
 				return state.getMessage();
 			}

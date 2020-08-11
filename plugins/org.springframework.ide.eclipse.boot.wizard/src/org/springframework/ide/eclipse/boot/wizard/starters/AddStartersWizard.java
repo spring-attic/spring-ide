@@ -37,11 +37,15 @@ public class AddStartersWizard extends Wizard implements IWorkbenchWizard {
 
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
+		IProject project = StartersWizardUtil.getProject(selection);
+		init(workbench, project);
+	}
+
+	public void init(IWorkbench workbench, IProject project) {
 		try {
-			IProject project = StartersWizardUtil.getProject(selection);
 			if (project != null) {
 				IPreferenceStore preferenceStore = BootActivator.getDefault().getPreferenceStore();
-				URLConnectionFactory urlConnectionFactory = BootActivator.getUrlConnectionFactory();
+				URLConnectionFactory urlConnectionFactory = BootActivator.getUrlConnectionFactory(conn -> conn.addRequestProperty("X-STS-ACTION", "diff"));
 				AddStartersPreferences preferences = new AddStartersPreferences(preferenceStore);
 				AddStartersInitializrService initializrService = new AddStartersInitializrService(urlConnectionFactory);
 				wizardModel = new AddStartersWizardModel(project, preferences, initializrService);
@@ -84,11 +88,15 @@ public class AddStartersWizard extends Wizard implements IWorkbenchWizard {
 
 	public static void openFor(Shell shell, IStructuredSelection selection) throws CoreException {
 		IProject project = StartersWizardUtil.getProject(selection);
+		openFor(shell, project);
+	}
+
+	public static void openFor(Shell shell, IProject project) throws CoreException {
 		if (project != null) {
 			int promptResult = StartersWizardUtil.promptIfPomFileDirty(project, shell);
 			if (promptResult == MessageDialog.OK) {
 				AddStartersWizard addStartersWizard = new AddStartersWizard();
-				addStartersWizard.init(PlatformUI.getWorkbench(), selection);
+				addStartersWizard.init(PlatformUI.getWorkbench(), project);
 				new WizardDialog(shell, addStartersWizard) {
 
 					@Override

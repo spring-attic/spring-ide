@@ -21,11 +21,15 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.SWT;
 import org.mandas.docker.client.DockerClient;
+import org.mandas.docker.client.LogStream;
+import org.mandas.docker.client.DockerClient.LogsParam;
 import org.mandas.docker.client.DockerClient.RemoveContainerParam;
 import org.mandas.docker.client.exceptions.ContainerNotFoundException;
 import org.mandas.docker.client.messages.Container;
 import org.springframework.ide.eclipse.boot.dash.api.ActualInstanceCount;
 import org.springframework.ide.eclipse.boot.dash.api.App;
+import org.springframework.ide.eclipse.boot.dash.api.AppConsole;
+import org.springframework.ide.eclipse.boot.dash.api.AppConsoleProvider;
 import org.springframework.ide.eclipse.boot.dash.api.AppContext;
 import org.springframework.ide.eclipse.boot.dash.api.DebuggableApp;
 import org.springframework.ide.eclipse.boot.dash.api.Deletable;
@@ -35,12 +39,14 @@ import org.springframework.ide.eclipse.boot.dash.api.PortConnectable;
 import org.springframework.ide.eclipse.boot.dash.api.ProjectRelatable;
 import org.springframework.ide.eclipse.boot.dash.api.RunStateProvider;
 import org.springframework.ide.eclipse.boot.dash.api.Styleable;
+import org.springframework.ide.eclipse.boot.dash.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.devtools.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.docker.jmx.JmxSupport;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.remote.RefreshStateTracker;
 import org.springframework.ide.eclipse.boot.util.RetryUtil;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
+import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.StringUtils;
 import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
@@ -188,9 +194,18 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 		DockerClient client = dockerTarget.getClient();
 		if (client != null) {
 			try {
+				AppConsole console = target.injections().getBean(AppConsoleProvider.class).getConsole(this);
+				console.show();
+				
 				RefreshStateTracker rt = this.refreshTracker.get();
 				rt.run("Starting " + getShortHash(), () -> {
 					client.restartContainer(container.id());
+					
+					LogStream logOutput = client.logs(container.id(), LogsParam.stdout(), LogsParam.follow());
+					JobUtil.runQuietlyInJob("Tracking output for docker container "+container.id(), mon -> {
+						logOutput.attach(console.getOutputStream(LogType.APP_OUT), console.getOutputStream(LogType.APP_OUT));
+					});
+
 					RetryUtil.until(100, 1000, runstate -> runstate.equals(RunState.RUNNING), this::fetchRunState);
 				});
 			} catch (Exception e) {
