@@ -81,16 +81,6 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 		setControl(contentsContainer);
 	}
 
-	private void connectModelToUi(AddStartersCompareModel compareModel) {
-		compareModel.getCompareResult().addListener(compareResultListener);
-		compareModel.getDownloadTracker().addListener(downloadStateListener);
-	}
-
-	private void disconnectFromUi(AddStartersCompareModel compareModel) {
-		compareModel.getCompareResult().removeListener(compareResultListener);
-		compareModel.getDownloadTracker().removeListener(downloadStateListener);
-	}
-
 	private void setupCompareViewer() {
 		try {
 			AddStartersCompareModel compareModel = wizardModel.getCompareModel().getValue();
@@ -187,7 +177,8 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 
 	@Override
 	public boolean isPageComplete() {
-		return getWizard().getContainer().getCurrentPage() == this;
+		boolean isComplete = getWizard().getContainer().getCurrentPage() == this;
+		return isComplete;
 	}
 
 	@Override
@@ -198,8 +189,7 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 		AddStartersCompareModel compareModel = wizardModel.getCompareModel().getValue();
 
 		if (visible) {
-			compareModel.initTrackers();
-			connectModelToUi(compareModel);
+			compareModel.connect(compareResultListener, downloadStateListener);
 			try {
 				getWizard().getContainer().run(true, false, monitor -> compareModel.createComparison(monitor));
 			} catch (InvocationTargetException | InterruptedException e) {
@@ -207,8 +197,7 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 				Log.log(e);
 			}
 		} else {
-			disconnectFromUi(compareModel);
-			compareModel.disposeTrackers();
+			compareModel.disconnect(compareResultListener, downloadStateListener);
 			if (compareViewer != null) {
 				compareViewer.dispose();
 			}
