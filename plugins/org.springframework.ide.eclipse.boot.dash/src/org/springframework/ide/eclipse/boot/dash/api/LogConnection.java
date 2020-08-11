@@ -10,12 +10,10 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.api;
 
-import org.springframework.ide.eclipse.boot.dash.model.remote.RefreshStateTracker;
+import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
-public interface AppContext {
+public interface LogConnection extends Disposable {
 
-	RefreshStateTracker getRefreshTracker();
-
-	void showConsole(String appName);
+	boolean isClosed();
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Pivotal, Inc.
+ * Copyright (c) 2019, 2020 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -93,7 +93,8 @@ public class LinkWithConsoleAction extends AbstractBootDashElementsAction {
 					// The difference between this and open console is that we do NOT want to show
 					// a pop-up dialogue when the error is related to the console not existing. We don't
 					// consider this an error condition if the console is not available
-					if (consoleManager != null  && consoleManager.hasConsole(element)) {
+
+					if (consoleManager != null && consoleManager.safeGetOrCreateConsole(element) != null) {
 						consoleManager.showConsole(element);
 					}
 

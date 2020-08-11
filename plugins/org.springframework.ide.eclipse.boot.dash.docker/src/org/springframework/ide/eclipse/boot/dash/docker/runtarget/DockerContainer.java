@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.docker.runtarget;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.EnumSet;
 import java.util.Map;
@@ -21,9 +22,9 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.SWT;
 import org.mandas.docker.client.DockerClient;
-import org.mandas.docker.client.LogStream;
 import org.mandas.docker.client.DockerClient.LogsParam;
 import org.mandas.docker.client.DockerClient.RemoveContainerParam;
+import org.mandas.docker.client.LogStream;
 import org.mandas.docker.client.exceptions.ContainerNotFoundException;
 import org.mandas.docker.client.messages.Container;
 import org.springframework.ide.eclipse.boot.dash.api.ActualInstanceCount;
@@ -35,6 +36,8 @@ import org.springframework.ide.eclipse.boot.dash.api.DebuggableApp;
 import org.springframework.ide.eclipse.boot.dash.api.Deletable;
 import org.springframework.ide.eclipse.boot.dash.api.DevtoolsConnectable;
 import org.springframework.ide.eclipse.boot.dash.api.JmxConnectable;
+import org.springframework.ide.eclipse.boot.dash.api.LogConnection;
+import org.springframework.ide.eclipse.boot.dash.api.LogProducer;
 import org.springframework.ide.eclipse.boot.dash.api.PortConnectable;
 import org.springframework.ide.eclipse.boot.dash.api.ProjectRelatable;
 import org.springframework.ide.eclipse.boot.dash.api.RunStateProvider;
@@ -56,7 +59,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 public class DockerContainer implements App, RunStateProvider, JmxConnectable, Styleable, PortConnectable, 
-	Deletable, ActualInstanceCount, DebuggableApp, ProjectRelatable, DevtoolsConnectable
+	Deletable, ActualInstanceCount, DebuggableApp, ProjectRelatable, DevtoolsConnectable, LogProducer
 {
 
 	private static final Duration WAIT_BEFORE_KILLING = Duration.ofSeconds(10);
@@ -199,13 +202,7 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 				
 				RefreshStateTracker rt = this.refreshTracker.get();
 				rt.run("Starting " + getShortHash(), () -> {
-					client.restartContainer(container.id());
-					
-					LogStream logOutput = client.logs(container.id(), LogsParam.stdout(), LogsParam.follow());
-					JobUtil.runQuietlyInJob("Tracking output for docker container "+container.id(), mon -> {
-						logOutput.attach(console.getOutputStream(LogType.APP_OUT), console.getOutputStream(LogType.APP_OUT));
-					});
-
+					client.restartContainer(container.id());					
 					RetryUtil.until(100, 1000, runstate -> runstate.equals(RunState.RUNNING), this::fetchRunState);
 				});
 			} catch (Exception e) {
@@ -302,5 +299,48 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 			Log.log(e);
 		}
 		return ImmutableMap.of();
+	}
+
+	@Override
+	public LogConnection connectLog(AppConsole logConsole) {
+		DockerClient client = target.getClient();
+		if (client != null) {
+			AppConsole console = target.injections().getBean(AppConsoleProvider.class).getConsole(this);
+			try {
+				LogStream appOutput = target.getClient().logs(container.id(), LogsParam.stdout(), LogsParam.follow());
+				return new LogConnection() {
+					
+					private boolean isClosed = false;
+					
+					{
+						JobUtil.runQuietlyInJob("Tracking output for docker container "+container.id(), mon -> {
+							try {
+								appOutput.attach(console.getOutputStream(LogType.APP_OUT), console.getOutputStream(LogType.APP_OUT));
+							} finally {
+								isClosed = true;
+							}
+						});
+
+					}
+					
+					@Override
+					public void dispose() {
+						try {
+							appOutput.close();
+						} catch (IOException e) {
+							Log.log(e);
+						}
+					}
+					
+					@Override
+					public boolean isClosed() {
+						return isClosed;
+					}
+				};
+			} catch (Exception e) {
+				Log.log(e);
+			}			
+		}
+		return null;
 	}
 }

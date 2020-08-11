@@ -37,9 +37,8 @@ public class ApplicationLogConsole extends MessageConsole implements IPropertyCh
 
 	private ApplicationLogConsole parent;
 
-	public ApplicationLogConsole(String name, String type, ApplicationLogConsole parent) {
+	public ApplicationLogConsole(String name, String type) {
 		super(name, type, BootDashActivator.getImageDescriptor("icons/cloud_obj.png"), true);
-		this.parent = parent;
 	}
 
 	public synchronized void setLogStreamingToken(Disposable logStreamingToken) {
@@ -201,6 +200,10 @@ public class ApplicationLogConsole extends MessageConsole implements IPropertyCh
 		if (property.equals(IDebugUIConstants.PREF_CONSOLE_FONT)) {
 			setFont(JFaceResources.getFont(IDebugUIConstants.PREF_CONSOLE_FONT));
 		}
+	}
+
+	public void setParent(ApplicationLogConsole parent) {
+		this.parent = parent;
 	}
 
 }

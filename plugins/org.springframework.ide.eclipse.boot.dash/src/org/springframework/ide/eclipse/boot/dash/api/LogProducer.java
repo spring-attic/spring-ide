@@ -10,12 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.api;
 
-import org.springframework.ide.eclipse.boot.dash.model.remote.RefreshStateTracker;
+public interface LogProducer {
 
-public interface AppContext {
-
-	RefreshStateTracker getRefreshTracker();
-
-	void showConsole(String appName);
+	LogConnection connectLog(AppConsole logConsole);
 
 }

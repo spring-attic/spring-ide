@@ -23,25 +23,32 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.jdt.internal.launching.JavaRemoteApplicationLaunchConfigurationDelegate;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.ui.console.IConsole;
+import org.eclipse.ui.console.IConsoleListener;
+import org.eclipse.ui.console.IConsoleManager;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModel;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.api.ActualInstanceCount;
 import org.springframework.ide.eclipse.boot.dash.api.App;
+import org.springframework.ide.eclipse.boot.dash.api.AppConsole;
 import org.springframework.ide.eclipse.boot.dash.api.AppContext;
 import org.springframework.ide.eclipse.boot.dash.api.DebuggableApp;
 import org.springframework.ide.eclipse.boot.dash.api.Deletable;
 import org.springframework.ide.eclipse.boot.dash.api.DesiredInstanceCount;
 import org.springframework.ide.eclipse.boot.dash.api.DevtoolsConnectable;
 import org.springframework.ide.eclipse.boot.dash.api.JmxConnectable;
+import org.springframework.ide.eclipse.boot.dash.api.LogConnection;
+import org.springframework.ide.eclipse.boot.dash.api.LogProducer;
 import org.springframework.ide.eclipse.boot.dash.api.PortConnectable;
 import org.springframework.ide.eclipse.boot.dash.api.ProjectRelatable;
 import org.springframework.ide.eclipse.boot.dash.api.RunStateProvider;
 import org.springframework.ide.eclipse.boot.dash.api.Styleable;
 import org.springframework.ide.eclipse.boot.dash.api.SystemPropertySupport;
+import org.springframework.ide.eclipse.boot.dash.console.CloudAppLogManager;
 import org.springframework.ide.eclipse.boot.dash.devtools.DevtoolsUtil;
+import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
@@ -69,6 +76,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
+import org.springsource.ide.eclipse.commons.livexp.util.OldValueDisposer;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -95,7 +103,15 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 	DisposingFactory<String, GenericRemoteAppElement> childFactory = new DisposingFactory<String, GenericRemoteAppElement>(existingChildIds) {
 		@Override
 		protected GenericRemoteAppElement create(String appId) {
-			return new GenericRemoteAppElement(getBootDashModel(), GenericRemoteAppElement.this, appId, backingStore);
+			GenericRemoteAppElement parent = GenericRemoteAppElement.this;
+			GenericRemoteAppElement element = new GenericRemoteAppElement(getBootDashModel(), parent, appId, backingStore);
+
+			// Repair the console if it is present. Attach console of the child to parent consoles
+			CloudAppLogManager logManager = injections().getBean(CloudAppLogManager.class);
+
+			logManager.setParentFor(element, parent);
+
+			return element;
 		}
 	};
 
@@ -263,6 +279,8 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		}
 	});
 
+	private OldValueDisposer<LogConnection> logConnection = new OldValueDisposer<>(this);
+
 	private <T> LiveExpression<T> sumarizeFromChildren(AppDataSummarizer<T> sumarizer) {
 		AsyncLiveExpression<T> sumary = new AsyncLiveExpression<T>(sumarizer.zero()) {
 			@Override
@@ -342,6 +360,39 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 			System.out.println("Dispose GenericRemoteAppElement instances = " +instances.decrementAndGet());
 			model.removeElementStateListener(this);
 		});
+
+		getRunStateExp().onChange(this, (e, v) -> connectConsoleIfNeeded());
+
+		IConsoleListener consoleListener = new IConsoleListener() {
+
+			@Override
+			public void consolesAdded(IConsole[] consoles) {
+				connectConsoleIfNeeded();
+			}
+
+			@Override
+			public void consolesRemoved(IConsole[] consoles) {
+			}
+
+		};
+
+		IConsoleManager consoleManager = injections().getBean(CloudAppLogManager.class).getConsoleManager();
+
+		consoleManager.addConsoleListener(consoleListener);
+
+		addDisposableChild(() -> consoleManager.removeConsoleListener(consoleListener));
+	}
+
+	private void connectConsoleIfNeeded() {
+		App app = this.app.getValue();
+		CloudAppLogManager appLogManager = injections().getBean(CloudAppLogManager.class);
+		LogConnection logConnection = this.logConnection.getVar().getValue();
+		if ((logConnection == null || logConnection.isClosed())
+				&& app instanceof LogProducer
+				&& appLogManager.hasConsole(app)) {
+			AppConsole console = appLogManager.getConsole(app);
+			this.logConnection.setValue(((LogProducer)app).connectLog(console));
+		}
 	}
 
 	@Override
@@ -660,6 +711,10 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		return liveEnv.getValue();
 	}
 
+	protected final SimpleDIContext injections() {
+		return getBootDashModel().getViewModel().getContext().injections;
+	}
+
 	@Override
 	public Failable<LiveBeansModel> getLiveBeans() {
 		synchronized (this) {
@@ -793,5 +848,15 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 			return ((DevtoolsConnectable) data).getDevtoolsSecret()!=null;
 		}
 		return false;
+	}
+
+	@Override
+	public void showConsole(String appName) {
+		CloudAppLogManager appLogManager = injections().getBean(CloudAppLogManager.class);
+		try {
+			appLogManager.showConsole(getTarget(), appName);
+		} catch (Exception e) {
+			Log.log(e);
+		}
 	}
 }

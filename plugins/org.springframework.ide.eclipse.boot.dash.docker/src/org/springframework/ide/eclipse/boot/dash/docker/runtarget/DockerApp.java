@@ -42,8 +42,6 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.mandas.docker.client.DockerClient;
 import org.mandas.docker.client.DockerClient.ListContainersParam;
 import org.mandas.docker.client.DockerClient.ListImagesParam;
-import org.mandas.docker.client.DockerClient.LogsParam;
-import org.mandas.docker.client.LogStream;
 import org.mandas.docker.client.messages.Container;
 import org.mandas.docker.client.messages.ContainerConfig;
 import org.mandas.docker.client.messages.ContainerCreation;
@@ -101,6 +99,8 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 	private static final int STOP_WAIT_TIME_IN_SECONDS = 20;
 	public final CompletableFuture<RefreshStateTracker> refreshTracker = new CompletableFuture<>();
 	
+	private AppContext appContext;
+	
 	private static File initFile;
 
 	private final String DEBUG_JVM_ARGS(String debugPort) {
@@ -142,8 +142,6 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 		this.name = name;
 		this.client = client;
 		this.project = ResourcesPlugin.getWorkspace().getRoot().getProject(deployment().getName());
-		AppConsole console = target.injections().getBean(AppConsoleProvider.class).getConsole(this);
-		console.write("Creating app node " + getName(), LogType.STDOUT);
 	}
 	
 	public DockerClient getClient() {
@@ -248,7 +246,7 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 			}
 		});
 	}
-
+	
 	public void start(DockerDeployment deployment) throws Exception {
 		RefreshStateTracker refreshTracker = this.refreshTracker.get();
 		
@@ -355,12 +353,11 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 			console.write("Container created: "+c.id(), LogType.STDOUT);
 			console.write("Starting container: "+c.id(), LogType.STDOUT);
 			console.write("Ports: "+appLocalPort+"->"+appContainerPort, LogType.STDOUT);
+			
+			appContext.showConsole(c.id());
+			
 			client.startContainer(c.id());
 			
-			LogStream appOutput = client.logs(c.id(), LogsParam.stdout(), LogsParam.follow());
-			JobUtil.runQuietlyInJob("Tracking output for docker container "+c.id(), mon -> {
-				appOutput.attach(console.getOutputStream(LogType.APP_OUT), console.getOutputStream(LogType.APP_OUT));
-			});
 		}
 	}
 
@@ -504,6 +501,7 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 
 	@Override
 	public void setContext(AppContext context) {
+		this.appContext = context;
 		this.refreshTracker.complete(context.getRefreshTracker());
 	}
 
