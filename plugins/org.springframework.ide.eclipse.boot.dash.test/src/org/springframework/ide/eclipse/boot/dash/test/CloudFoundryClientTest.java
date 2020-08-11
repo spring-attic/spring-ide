@@ -52,6 +52,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Rule;
 import org.junit.Test;
@@ -79,6 +80,7 @@ import org.springframework.ide.eclipse.boot.dash.cf.client.v2.DefaultCloudFoundr
 import org.springframework.ide.eclipse.boot.dash.cf.client.v2.ReactorUtils;
 import org.springframework.ide.eclipse.boot.dash.console.IApplicationLogConsole;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.test.util.SslValidationDisabler;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springframework.ide.eclipse.boot.test.util.TestBracketter;
@@ -100,6 +102,8 @@ import reactor.core.publisher.Flux;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class CloudFoundryClientTest {
 
+	private static final String WDC_06_PCF2 = "wdc-06-pcf2-system.oc.vmware.com";
+
 	public String CFAPPS_IO() {
 		return get_CFAPPS_IO(clientParams);
 	}
@@ -116,6 +120,9 @@ public class CloudFoundryClientTest {
 		} else if (api.contains("api.tan.")) {
 			//TAN
 			return "tan.springapps.io";
+		} else if (api.contains(WDC_06_PCF2)) {
+			//vmware pws spring/sts-test space
+			return "wdc-06-pcf2-apps.oc.vmware.com";
 		}
 		throw new AssertionFailedError("unknown test environment, not sure what to expect here");
 	}
@@ -138,6 +145,11 @@ public class CloudFoundryClientTest {
 			//TAN
 			return new CFCloudDomain[] {
 					new CFCloudDomainData("tan.springapps.io")
+			};
+		} else if (api.contains(WDC_06_PCF2)) {
+			//vmware pws spring/sts-test space
+			return new CFCloudDomain[] {
+					new CFCloudDomainData("wdc-06-pcf2-apps.oc.vmware.com")
 			};
 		}
 		throw new AssertionFailedError("unknown test environment, not sure what to expect here");
@@ -167,6 +179,12 @@ public class CloudFoundryClientTest {
 				"java_buildpack_offline",
 				"ruby_buildpack"
 			};
+		} else if (api.contains(WDC_06_PCF2)) {
+			return new String[] {
+					"staticfile_buildpack",
+					"java_buildpack_offline",
+					"ruby_buildpack"
+			};
 		}
 		throw new AssertionFailedError("unknown test environment, not sure what to expect here");
 	}
@@ -180,6 +198,8 @@ public class CloudFoundryClientTest {
 		} else if (api.contains("api.tan.")) {
 			//TAN
 			return "ssh.tan.springapps.io";
+		} else if (api.contains(WDC_06_PCF2)) {
+			return "ssh."+WDC_06_PCF2;
 		}
 		throw new AssertionFailedError("unknown test environment, not sure what to expect here");
 	}
@@ -199,7 +219,8 @@ public class CloudFoundryClientTest {
 	public CloudFoundryApplicationHarness appHarness = new CloudFoundryApplicationHarness(client);
 
 	@Before
-	public void setup() {
+	public void setup() throws Exception {
+		SslValidationDisabler.disableSslValidation();
 		ReactorUtils.DUMP_STACK_ON_TIMEOUT = true;
 	}
 

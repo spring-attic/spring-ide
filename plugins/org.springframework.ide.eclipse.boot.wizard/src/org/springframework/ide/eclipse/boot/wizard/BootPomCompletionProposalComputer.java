@@ -72,12 +72,12 @@ public class BootPomCompletionProposalComputer implements ICompletionProposalCom
 
 			@Override
 			public String getAdditionalProposalInfo() {
-				return "Open 'Edit Spring Starters' Dialog";
+				return "Open 'Add Spring Starters' Dialog";
 			}
 
 			@Override
 			public String getDisplayString() {
-				return "Edit Starters...";
+				return "Add Starters...";
 			}
 
 			@Override

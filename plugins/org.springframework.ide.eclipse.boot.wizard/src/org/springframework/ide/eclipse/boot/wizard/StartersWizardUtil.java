@@ -73,7 +73,7 @@ public class StartersWizardUtil {
 			throws CoreException {
 		MessageDialogWithToggle dlg = new MessageDialogWithToggle(shell, "Pom file needs saving!", null,
 				"The pom file for project '" + selectedProject.getName()
-						+ "' has unsaved edits. The 'Edit Starters' dialog makes changes to "
+						+ "' has unsaved edits. The 'Add Starters' dialog makes changes to "
 						+ "the pom file on disk. Do you want to save it now?",
 				MessageDialog.WARNING, new String[] { "Cancel", "Save Pom" }, 1,
 				"Don't ask again and save automatically in the future", false);

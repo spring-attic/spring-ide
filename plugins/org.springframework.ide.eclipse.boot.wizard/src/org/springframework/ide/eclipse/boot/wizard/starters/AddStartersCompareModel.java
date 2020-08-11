@@ -21,6 +21,7 @@ import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpe
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrUrl;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
@@ -44,22 +45,22 @@ public class AddStartersCompareModel implements Disposable {
 		this.initializrModel = initializrModel;
 	}
 
-	public void initTrackers() {
-		compareInputModel = new LiveVariable<>(null);
-		downloadTracker = new LiveVariable<>(AddStartersTrackerState.NOT_STARTED);
-	}
-
-	public void disposeTrackers() {
-		this.compareInputModel.dispose();
-		this.downloadTracker.dispose();
-	}
-
 	public LiveExpression<AddStartersCompareResult> getCompareResult() {
 		return compareInputModel;
 	}
 
-	public LiveExpression<AddStartersTrackerState> getDownloadTracker() {
-		return downloadTracker;
+	public void connect(ValueListener<AddStartersCompareResult> compareResultListener,
+			ValueListener<AddStartersTrackerState> downloadStateListener) {
+		initTrackers();
+		getCompareResult().addListener(compareResultListener);
+		downloadTracker.addListener(downloadStateListener);
+	}
+
+	public void disconnect(ValueListener<AddStartersCompareResult> compareResultListener,
+			ValueListener<AddStartersTrackerState> downloadStateListener) {
+		getCompareResult().removeListener(compareResultListener);
+		downloadTracker.removeListener(downloadStateListener);
+		disposeTrackers();
 	}
 
 	@Override
@@ -88,7 +89,7 @@ public class AddStartersCompareModel implements Disposable {
 		}
 	}
 
-	String diffFileToOpenInitially() {
+	public String diffFileToOpenInitially() {
 		if (bootProject != null) {
 			switch (bootProject.buildType()) {
 			case InitializrUrl.MAVEN_PROJECT:
@@ -107,6 +108,16 @@ public class AddStartersCompareModel implements Disposable {
 
 		AddStartersCompareResult inputModel = new AddStartersCompareResult(localProject, projectFromInitializr);
 		this.compareInputModel.setValue(inputModel);
+	}
+
+	private void initTrackers() {
+		compareInputModel = new LiveVariable<>(null);
+		downloadTracker = new LiveVariable<>(AddStartersTrackerState.NOT_STARTED);
+	}
+
+	private void disposeTrackers() {
+		this.compareInputModel.dispose();
+		this.downloadTracker.dispose();
 	}
 
 	static class AddStartersTrackerState {
