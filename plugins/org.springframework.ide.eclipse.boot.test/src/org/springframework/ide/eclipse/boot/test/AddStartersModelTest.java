@@ -40,7 +40,6 @@ import org.springframework.ide.eclipse.boot.wizard.starters.InitializrModel;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 
-@SuppressWarnings("restriction")
 public class AddStartersModelTest extends AddStartersTestHarness {
 
 	private static boolean wasAutobuilding;
