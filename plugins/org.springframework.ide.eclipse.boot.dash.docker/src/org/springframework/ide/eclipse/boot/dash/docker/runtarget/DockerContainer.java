@@ -23,6 +23,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.SWT;
 import org.mandas.docker.client.DockerClient;
@@ -44,6 +45,7 @@ import org.springframework.ide.eclipse.boot.dash.api.LogConnection;
 import org.springframework.ide.eclipse.boot.dash.api.LogProducer;
 import org.springframework.ide.eclipse.boot.dash.api.PortConnectable;
 import org.springframework.ide.eclipse.boot.dash.api.ProjectRelatable;
+import org.springframework.ide.eclipse.boot.dash.api.RunStateIconProvider;
 import org.springframework.ide.eclipse.boot.dash.api.RunStateProvider;
 import org.springframework.ide.eclipse.boot.dash.api.Styleable;
 import org.springframework.ide.eclipse.boot.dash.console.LogType;
@@ -62,8 +64,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
+import static org.eclipse.ui.plugin.AbstractUIPlugin.imageDescriptorFromPlugin;
+import static org.springframework.ide.eclipse.boot.dash.docker.runtarget.DockerRunTargetType.PLUGIN_ID;
+
 public class DockerContainer implements App, RunStateProvider, JmxConnectable, Styleable, PortConnectable, 
-	Deletable, ActualInstanceCount, DebuggableApp, ProjectRelatable, DevtoolsConnectable, LogProducer
+	Deletable, ActualInstanceCount, DebuggableApp, ProjectRelatable, DevtoolsConnectable, LogProducer, RunStateIconProvider
 {
 
 	private static final Duration WAIT_BEFORE_KILLING = Duration.ofSeconds(10);
@@ -71,7 +76,8 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 	private final Container container;
 	private final DockerRunTarget target;
 	public final CompletableFuture<RefreshStateTracker> refreshTracker = new CompletableFuture<>();
-
+	
+	private static Map<RunState, ImageDescriptor> RUNSTATE_ICONS = null;
 
 	public DockerContainer(DockerRunTarget target, Container container) {
 		this.target = target;
@@ -349,6 +355,25 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 			} catch (Exception e) {
 				Log.log(e);
 			}			
+		}
+		return null;
+	}
+
+	@Override
+	public ImageDescriptor getRunStateIcon(RunState runState) {
+		try {
+			if (RUNSTATE_ICONS==null) {
+				RUNSTATE_ICONS = ImmutableMap.of(
+						RunState.RUNNING, imageDescriptorFromPlugin(PLUGIN_ID, "/icons/container_started.png"),
+						RunState.INACTIVE, imageDescriptorFromPlugin(PLUGIN_ID, "/icons/container_stopped.png"),
+						runState.DEBUGGING, imageDescriptorFromPlugin(PLUGIN_ID, "/icons/container_debugging.png")
+				);
+			}
+		} catch (Exception e) {
+			Log.log(e);
+		}
+		if (RUNSTATE_ICONS!=null) {
+			return RUNSTATE_ICONS.get(runState);
 		}
 		return null;
 	}

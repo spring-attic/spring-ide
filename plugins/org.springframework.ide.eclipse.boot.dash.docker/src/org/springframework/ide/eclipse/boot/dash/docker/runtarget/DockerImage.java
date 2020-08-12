@@ -1,7 +1,11 @@
 package org.springframework.ide.eclipse.boot.dash.docker.runtarget;
 
+import static org.eclipse.ui.plugin.AbstractUIPlugin.imageDescriptorFromPlugin;
+import static org.springframework.ide.eclipse.boot.dash.docker.runtarget.DockerRunTargetType.PLUGIN_ID;
+
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 import org.eclipse.core.resources.IProject;
@@ -9,6 +13,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.SWT;
 import org.mandas.docker.client.DockerClient;
@@ -17,7 +22,9 @@ import org.mandas.docker.client.messages.Container;
 import org.mandas.docker.client.messages.Image;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.ProjectRelatable;
+import org.springframework.ide.eclipse.boot.dash.api.RunStateIconProvider;
 import org.springframework.ide.eclipse.boot.dash.api.Styleable;
+import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.remote.ChildBearing;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
@@ -25,12 +32,15 @@ import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableList.Builder;
 
-public class DockerImage implements App, ChildBearing, Styleable, ProjectRelatable {
+public class DockerImage implements App, ChildBearing, Styleable, ProjectRelatable, RunStateIconProvider {
 	
 	private final DockerApp app;
 	private final Image image;
+
+	private static Map<RunState, ImageDescriptor> RUNSTATE_ICONS = null;
 
 	public DockerImage(DockerApp app, Image image) {
 		this.app = app;
@@ -97,5 +107,24 @@ public class DockerImage implements App, ChildBearing, Styleable, ProjectRelatab
 	@Override
 	public IProject getProject() {
 		return app.getProject();
+	}
+
+	@Override
+	public ImageDescriptor getRunStateIcon(RunState runState) {
+		try {
+			if (RUNSTATE_ICONS==null) {
+				RUNSTATE_ICONS = ImmutableMap.of(
+						RunState.RUNNING, imageDescriptorFromPlugin(PLUGIN_ID, "/icons/image_started.png"),
+						RunState.INACTIVE, imageDescriptorFromPlugin(PLUGIN_ID, "/icons/image_stopped.png"),
+						RunState.DEBUGGING, imageDescriptorFromPlugin(PLUGIN_ID, "/icons/image_debugging.png")
+				);
+			}
+		} catch (Exception e) {
+			Log.log(e);
+		}
+		if (RUNSTATE_ICONS!=null) {
+			return RUNSTATE_ICONS.get(runState);
+		}
+		return null;
 	}
 }

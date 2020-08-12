@@ -43,6 +43,7 @@ import org.springframework.ide.eclipse.boot.dash.api.LogConnection;
 import org.springframework.ide.eclipse.boot.dash.api.LogProducer;
 import org.springframework.ide.eclipse.boot.dash.api.PortConnectable;
 import org.springframework.ide.eclipse.boot.dash.api.ProjectRelatable;
+import org.springframework.ide.eclipse.boot.dash.api.RunStateIconProvider;
 import org.springframework.ide.eclipse.boot.dash.api.RunStateProvider;
 import org.springframework.ide.eclipse.boot.dash.api.Styleable;
 import org.springframework.ide.eclipse.boot.dash.api.SystemPropertySupport;
@@ -114,6 +115,18 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 			return element;
 		}
 	};
+
+	@Override
+	public ImageDescriptor getCustomRunStateIcon() {
+		App data = app.getValue();
+		if (data instanceof RunStateIconProvider) {
+			ImageDescriptor icon = ((RunStateIconProvider) data).getRunStateIcon(getRunState());
+			if (icon!=null) {
+				return icon;
+			}
+		}
+		return super.getCustomRunStateIcon();
+	}
 
 	private ObservableSet<BootDashElement> children = ObservableSet.<BootDashElement>builder().refresh(AsyncMode.ASYNC).compute(() -> {
 

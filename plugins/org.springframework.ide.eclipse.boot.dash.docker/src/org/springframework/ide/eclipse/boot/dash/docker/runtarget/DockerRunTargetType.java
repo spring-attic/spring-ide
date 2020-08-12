@@ -32,7 +32,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 
 public class DockerRunTargetType extends AbstractRemoteRunTargetType<DockerTargetParams> {
 	
-	private static final String PLUGIN_ID = "org.springframework.ide.eclipse.boot.dash.docker";
+	public static final String PLUGIN_ID = "org.springframework.ide.eclipse.boot.dash.docker";
 
 	public DockerRunTargetType(SimpleDIContext injections) {
 		super(injections, "Docker");
