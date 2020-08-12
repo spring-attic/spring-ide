@@ -470,7 +470,7 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 	}
 
 	@Override
-	public void stopAsync() throws Exception {
+	public void stop() throws Exception {
 		App a = this.app.getValue();
 		a.setGoalState(RunState.INACTIVE);
 	}

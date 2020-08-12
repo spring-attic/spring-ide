@@ -36,7 +36,6 @@ import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.assert
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.createFile;
 import static org.springsource.ide.eclipse.commons.tests.util.StsTestCase.setContents;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
@@ -84,7 +83,6 @@ import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
 import org.springframework.ide.eclipse.boot.core.cli.install.CloudCliInstall;
 import org.springframework.ide.eclipse.boot.core.cli.install.IBootInstall;
 import org.springframework.ide.eclipse.boot.dash.cf.model.CloudServiceInstanceDashElement;
-import org.springframework.ide.eclipse.boot.dash.labels.BootDashLabels;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElementsFilterBoxModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
@@ -100,7 +98,6 @@ import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.model.actuator.RequestMapping;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.util.CollectionUtils;
-import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.util.PortFinder;
 import org.springframework.ide.eclipse.boot.test.AutobuildingEnablement;
@@ -110,7 +107,6 @@ import org.springframework.ide.eclipse.boot.test.util.TestBracketter;
 import org.springframework.ide.eclipse.boot.util.version.Version;
 import org.springsource.ide.eclipse.commons.core.ZipFileUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.maintype.MainTypeFinder;
-import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
@@ -570,7 +566,7 @@ public class BootDashModelTest {
 		listener = mock(ElementStateListener.class);
 		model.addElementStateListener(listener);
 
-		element.stopAsync();
+		element.stop();
 		waitForState(element, RunState.INACTIVE);
 		waitForState(childElement, RunState.INACTIVE);
 
@@ -632,7 +628,7 @@ public class BootDashModelTest {
 			waitForState(app, runOrDebug);
 		} finally {
 			ACondition.waitFor("stop hammering", 20000, () -> {
-				app.stopAsync();
+				app.stop(false);
 				assertEquals(RunState.INACTIVE, app.getRunState());
 			});
 		}
@@ -678,7 +674,7 @@ public class BootDashModelTest {
 		listener = mock(ElementStateListener.class);
 		model.addElementStateListener(listener);
 
-		element.stopAsync();
+		element.stop();
 		waitForState(element, RunState.INACTIVE);
 
 		//4 changes:  INACTIVE -> STARTING, STARTING -> RUNNING, livePort(set), actualInstances++
@@ -731,7 +727,7 @@ public class BootDashModelTest {
 				withStarters("devtools")
 		);
 
-		final BootDashElement project = getElement(projectName);
+		final BootProjectDashElement project = getElement(projectName);
 		try {
 			waitForState(project, RunState.INACTIVE);
 			System.out.println("Starting "+project);
@@ -775,7 +771,7 @@ public class BootDashModelTest {
 
 		} finally {
 			System.out.println("Cleanup: stop "+project);
-			project.stopAsync();
+			project.stop();
 			waitForState(project, RunState.INACTIVE);
 		}
 	}
@@ -798,7 +794,7 @@ public class BootDashModelTest {
 		createBootProject(projectName,
 				bootVersionAtLeast("1.3.0") //1.3.0 required for lifecycle support
 		);
-		BootDashElement element = getElement(projectName);
+		BootProjectDashElement element = getElement(projectName);
 		try {
 			waitForState(element, RunState.INACTIVE);
 
@@ -829,13 +825,13 @@ public class BootDashModelTest {
 			model.removeElementStateListener(recordedChanges2);
 
 		} finally {
-			element.stopAsync();
+			element.stop();
 			waitForState(element, RunState.INACTIVE);
 		}
 	}
 
 	private void doRestartTest(String projectName, RunState fromState, RunState toState) throws Exception {
-		BootDashElement element = getElement(projectName);
+		BootProjectDashElement element = getElement(projectName);
 		try {
 			element.restart(fromState, ui());
 			waitForState(element, fromState);
@@ -859,7 +855,7 @@ public class BootDashModelTest {
 
 			waitForState(element, toState);
 		} finally {
-			element.stopAsync();
+			element.stop();
 			waitForState(element, RunState.INACTIVE);
 		}
 	}
@@ -915,7 +911,7 @@ public class BootDashModelTest {
 				}
 			};
 
-			el1.stopAsync();
+			el1.stop();
 			new ACondition("check port summary", MODEL_UPDATE_TIMEOUT) {
 				public boolean test() throws Exception {
 					assertEquals(ImmutableSet.of(port2), project.getLivePorts());
@@ -993,7 +989,7 @@ public class BootDashModelTest {
 			};
 
 		} finally {
-			element.stopAsync();
+			element.stop();
 			waitForState(element, RunState.INACTIVE);
 		}
 	}
@@ -1078,7 +1074,7 @@ public class BootDashModelTest {
 			assertFalse(rm.isUserDefined());
 
 		} finally {
-			element.stopAsync();
+			element.stop();
 			waitForState(element, RunState.INACTIVE);
 		}
 	}
@@ -1156,7 +1152,7 @@ public class BootDashModelTest {
 			assertFalse(rm.isUserDefined());
 
 		} finally {
-			element.stopAsync();
+			element.stop();
 			waitForState(element, RunState.INACTIVE);
 		}
 	}

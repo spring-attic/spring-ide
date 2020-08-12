@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2018 Pivotal, Inc.
+ * Copyright (c) 2015, 2020 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cf.model;
 
-import java.net.URI;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +21,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
@@ -31,7 +31,6 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
-import org.springframework.ide.eclipse.boot.core.initializr.IdAble;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.api.Deletable;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFApplication;
@@ -226,13 +225,18 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 		return (CloudFoundryBootDashModel) super.getBootDashModel();
 	}
 
-	@Override
 	public void stopAsync() throws Exception {
 		cancelOperations();
 		String appName = getName();
 		getBootDashModel().runAsynch("Stopping application " + appName, appName, (IProgressMonitor monitor) -> {
 			stop(createCancelationToken(), monitor);
 		}, ui());
+	}
+
+	@Override
+	public void stop() throws Exception {
+		cancelOperations();
+		stop(createCancelationToken(), new NullProgressMonitor());
 	}
 
 	public void stop(CancelationToken cancelationToken, IProgressMonitor monitor) throws Exception {

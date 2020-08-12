@@ -17,6 +17,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.Assert;
@@ -49,7 +54,6 @@ import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashAction.Lo
 import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashElementsAction.Params;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
-import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -161,15 +165,31 @@ public class BootDashActions {
 						protected IStatus run(IProgressMonitor monitor) {
 							monitor.beginTask("Stopping " + selecteds.size() + " Elements", selecteds.size());
 							try {
+
+								List<CompletableFuture<Void>> futures = new ArrayList<>(selecteds.size());
 								for (BootDashElement el : selecteds) {
-									monitor.subTask("Stopping: " + el.getName());
-									try {
-										el.stopAsync();
-									} catch (Exception e) {
-										return BootActivator.createErrorStatus(e);
-									}
-									monitor.worked(1);
+									futures.add(CompletableFuture.runAsync(() -> {
+										try {
+											el.stop();
+											monitor.worked(1);
+										} catch (Exception e) {
+											monitor.worked(1);
+											throw new CompletionException(e);
+										}
+									}));
 								}
+
+								try {
+									CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()])).get(60, TimeUnit.SECONDS);
+								} catch (InterruptedException e) {
+									BootActivator.createErrorStatus(e);
+								} catch (ExecutionException e) {
+									BootActivator.createErrorStatus(e);
+								} catch (TimeoutException e) {
+									BootActivator.createErrorStatus(e);
+								}
+
+
 								return Status.OK_STATUS;
 							} finally {
 								monitor.done();
