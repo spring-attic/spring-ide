@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.console;
 
-import java.util.Set;
+import java.io.IOException;
 
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
@@ -20,11 +20,7 @@ import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.AppConsole;
 import org.springframework.ide.eclipse.boot.dash.api.AppConsoleProvider;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
-import org.springframework.ide.eclipse.boot.dash.model.remote.GenericRemoteAppElement;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
@@ -36,10 +32,8 @@ public class CloudAppLogManager extends BootDashModelConsoleManager implements A
 	static final String APP_CONSOLE_ID = "consoleId";
 
 	private IConsoleManager consoleManager;
-	private SimpleDIContext injections;
 
 	public CloudAppLogManager(SimpleDIContext injections) {
-		this.injections = injections;
 		consoleManager = ConsolePlugin.getDefault().getConsoleManager();
 	}
 
@@ -52,6 +46,8 @@ public class CloudAppLogManager extends BootDashModelConsoleManager implements A
 			// To avoid console "jumping", only show console
 			// if none are visible
 			showIfNoOtherConsoles(console);
+		} else {
+			throw new IOException("Console is not available");
 		}
 	}
 
@@ -130,8 +126,6 @@ public class CloudAppLogManager extends BootDashModelConsoleManager implements A
 			appConsole.setAttribute(APP_CONSOLE_ID, getConsoleId(element));
 			consoleManager.addConsoles(new IConsole[] { appConsole });
 
-			setParentFor(element, getParentForApp(element));
-
 			connect(appConsole, element);
 			showConsole(element);
 		}
@@ -199,13 +193,8 @@ public class CloudAppLogManager extends BootDashModelConsoleManager implements A
 			}
 
 			@Override
-			public void write(String message, LogType type) {
-				try {
-					getOrCreateConsole(app);
-					writeToConsole(app, message, type);
-				} catch (Exception e) {
-					Log.log(e);
-				}
+			public void write(String message, LogType type) throws Exception {
+				writeToConsole(app, message, type);
 			}
 
 			@Override
@@ -217,40 +206,6 @@ public class CloudAppLogManager extends BootDashModelConsoleManager implements A
 				}
 			}
 		};
-	}
-
-	private App getParentForApp(App app) {
-		if (app instanceof BootDashElement) {
-			Object parent = ((BootDashElement) app).getParent();
-			return parent instanceof BootDashElement ? (BootDashElement) parent : null;
-		}
-		BootDashViewModel bootDashViewModel = injections.getBean(BootDashViewModel.class);
-		for (BootDashModel model : bootDashViewModel.getSectionModels().getValue()) {
-			if (app.getTarget() == model.getRunTarget()) {
-				return getParent(model.getElements().getValue(), app);
-			}
-		}
-		return null;
-	}
-
-	private App getParent(Set<BootDashElement> elements, App app) {
-		for (BootDashElement e : elements) {
-			if (e instanceof GenericRemoteAppElement) {
-				App appData = ((GenericRemoteAppElement) e).getAppData();
-				if (app.getName().equals(appData.getName())) {
-					Object parent = e.getParent();
-					if (parent instanceof GenericRemoteAppElement) {
-						return (GenericRemoteAppElement) parent;
-					}
-				} else {
-					App parent = getParent(e.getChildren().getValue(), app);
-					if (parent != null) {
-						return parent;
-					}
-				}
-			}
-		}
-		return null;
 	}
 
 	public void showConsole(RunTarget<?> target, String appName) throws Exception {
@@ -267,13 +222,6 @@ public class CloudAppLogManager extends BootDashModelConsoleManager implements A
 			}
 
 		});
-	}
-
-	public void setParentFor(App element, App parent) {
-		ApplicationLogConsole console = getExisitingConsole(element);
-		if (console != null) {
-			console.setParent(safeGetOrCreateConsole(parent));
-		}
 	}
 
 }

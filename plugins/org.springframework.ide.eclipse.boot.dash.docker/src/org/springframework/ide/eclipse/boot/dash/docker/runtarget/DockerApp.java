@@ -379,9 +379,19 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 			if (matcher.find()) {
 				image.set(matcher.group(1));
 			}
-			console.write(line, LogType.APP_OUT);
+			try {
+				console.write(line, LogType.APP_OUT);
+			} catch (Exception e) {
+				Log.log(e);
+			}
 		});
-		new LineBasedStreamGobler(process.getErrorStream(), (line) -> console.write(line, LogType.APP_ERROR));
+		new LineBasedStreamGobler(process.getErrorStream(), (line) -> {
+			try {
+				console.write(line, LogType.APP_ERROR);
+			} catch (Exception e) {
+				Log.log(e);
+			}
+		});
 		int exitCode = process.waitFor();
 		if (exitCode!=0) {
 			throw new IOException("Command execution failed!");

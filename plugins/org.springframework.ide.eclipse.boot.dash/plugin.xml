@@ -302,5 +302,17 @@
       </themeid>
    </stylesheet>
 </extension>
+<extension
+      point="org.eclipse.ui.console.consolePageParticipants">
+   <consolePageParticipant
+         class="org.springframework.ide.eclipse.boot.dash.console.ConsolePageParticipant"
+         id="org.springframework.ide.eclipse.boot.dash.consolePageParticipant">
+      <enablement>
+         <instanceof
+               value="org.springframework.ide.eclipse.boot.dash.console.ApplicationLogConsole">
+         </instanceof>
+      </enablement>
+   </consolePageParticipant>
+</extension>
 
 </plugin>

@@ -242,7 +242,7 @@ public class BootDashDockerTests {
 			containerSecret = getDevtoolsSecret(con2);
 			assertNull(containerSecret);
 
-			ACondition.waitFor("second container running", 5_000, () -> {
+			ACondition.waitFor("second container running", 10_000, () -> {
 				assertEquals(RunState.RUNNING, con2.getRunState());
 				assertEquals(RunState.INACTIVE, con.getRunState());
 			});
@@ -324,9 +324,8 @@ public class BootDashDockerTests {
 		});
 
 		assertConsoleContains(dep, "Successfully built image 'docker.io/library/webby");
-		assertConsoleContains(dep, "Starting WebbyApplication");
-		assertConsoleNotContains(img, "Successfully built image 'docker.io/library/webby");
-		assertConsoleContains(img, "Starting WebbyApplication");
+		assertConsoleNotContains(dep, "Starting WebbyApplication");
+		assertNoConsole(img);
 		assertConsoleNotContains(con, "Successfully built image 'docker.io/library/webby");
 		assertConsoleContains(con, "Starting WebbyApplication");
 
@@ -355,14 +354,12 @@ public class BootDashDockerTests {
 		});
 
 		assertConsoleContains(dep, "Successfully built image 'docker.io/library/webby");
-		assertConsoleContains(dep, "Starting WebbyApplication");
-		assertConsoleNotContains(img, "Successfully built image 'docker.io/library/webby");
-		assertConsoleContains(img, "Starting WebbyApplication");
+		assertConsoleNotContains(dep, "Starting WebbyApplication");
+		assertNoConsole(img);
 		assertConsoleNotContains(con, "Successfully built image 'docker.io/library/webby");
 		assertConsoleContains(con, "Starting WebbyApplication");
 
 		clearConsole(con);
-		clearConsole(img);
 		clearConsole(dep);
 
 		RunStateAction stopAction = stopAction();
@@ -377,9 +374,8 @@ public class BootDashDockerTests {
 
 		assertConsoleContains(con, "[extShutdownHook]");
 		assertConsoleNotContains(con, "Starting WebbyApplication");
-		assertConsoleContains(img, "[extShutdownHook]");
-		assertConsoleNotContains(img, "Starting WebbyApplication");
-		assertConsoleContains(dep, "[extShutdownHook]");
+		assertNoConsole(img);
+		assertConsoleNotContains(dep, "[extShutdownHook]");
 		assertConsoleNotContains(dep, "Starting WebbyApplication");
 
 		RunStateAction startAction = restartAction();
@@ -393,9 +389,8 @@ public class BootDashDockerTests {
 		});
 
 		assertConsoleNotContains(dep, "Successfully built image 'docker.io/library/webby");
-		assertConsoleContains(dep, "Starting WebbyApplication");
-		assertConsoleNotContains(img, "Successfully built image 'docker.io/library/webby");
-		assertConsoleContains(img, "Starting WebbyApplication");
+		assertConsoleNotContains(dep, "Starting WebbyApplication");
+		assertNoConsole(img);
 		assertConsoleNotContains(con, "Successfully built image 'docker.io/library/webby");
 		assertConsoleContains(con, "Starting WebbyApplication");
 
@@ -425,6 +420,12 @@ public class BootDashDockerTests {
 		assertNotNull("No console for " + element.getStyledName(null).getString(), console);
 		String text = console.getDocument().get();
 		assertNotContains(expectSnippet, text);
+	}
+
+	private void assertNoConsole(GenericRemoteAppElement element) {
+		CloudAppLogManager logManager = context.injections.getBean(CloudAppLogManager.class);
+		ApplicationLogConsole console = logManager.getExisitingConsole(element);
+		assertNull("Console for " + element.getStyledName(null).getString() + " exists!", console);
 	}
 
 	@Test

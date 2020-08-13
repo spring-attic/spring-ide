@@ -18,7 +18,6 @@ import org.eclipse.ui.console.IConsole;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
-import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 /**
  * Console manager for elements in a {@link BootDashModel}.
@@ -45,14 +44,10 @@ public abstract class BootDashModelConsoleManager {
 	 * @param element
 	 * @param message
 	 */
-	public void writeToConsole(App element, String message, LogType type){
+	public void writeToConsole(App element, String message, LogType type) throws Exception {
 		if (message != null) {
 			String bootMessage = asBootDashLog(message);
-			try {
-				doWriteToConsole(element, bootMessage, type);
-			} catch (Exception e) {
-				Log.log(e);
-			}
+			doWriteToConsole(element, bootMessage, type);
 		}
 	}
 

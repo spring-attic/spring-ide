@@ -106,12 +106,6 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		protected GenericRemoteAppElement create(String appId) {
 			GenericRemoteAppElement parent = GenericRemoteAppElement.this;
 			GenericRemoteAppElement element = new GenericRemoteAppElement(getBootDashModel(), parent, appId, backingStore);
-
-			// Repair the console if it is present. Attach console of the child to parent consoles
-			CloudAppLogManager logManager = injections().getBean(CloudAppLogManager.class);
-
-			logManager.setParentFor(element, parent);
-
 			return element;
 		}
 	};
@@ -374,17 +368,18 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 			model.removeElementStateListener(this);
 		});
 
-		getRunStateExp().onChange(this, (e, v) -> connectConsoleIfNeeded());
+		getRunStateExp().onChange(this, (e, v) -> connectOrDisconnectConsoleIfNeeded());
 
 		IConsoleListener consoleListener = new IConsoleListener() {
 
 			@Override
 			public void consolesAdded(IConsole[] consoles) {
-				connectConsoleIfNeeded();
+				connectOrDisconnectConsoleIfNeeded();
 			}
 
 			@Override
 			public void consolesRemoved(IConsole[] consoles) {
+				connectOrDisconnectConsoleIfNeeded();
 			}
 
 		};
@@ -397,17 +392,23 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 	}
 
 	private boolean firstConsoleConnection = true;
-	private void connectConsoleIfNeeded() {
+	private void connectOrDisconnectConsoleIfNeeded() {
 		App app = this.app.getValue();
 		CloudAppLogManager appLogManager = injections().getBean(CloudAppLogManager.class);
 		LogConnection logConnection = this.logConnection.getVar().getValue();
-		if ((logConnection == null || logConnection.isClosed())
-				&& app instanceof LogProducer
-				&& appLogManager.hasConsole(app)) {
-			AppConsole console = appLogManager.getConsole(app);
-			this.logConnection.setValue(((LogProducer)app).connectLog(console, firstConsoleConnection));
-			firstConsoleConnection = false;
+		boolean hasConnection = logConnection != null && !logConnection.isClosed();
+		boolean connectConsole = app instanceof LogProducer && appLogManager.hasConsole(app);
+
+		if (hasConnection != connectConsole) {
+			if (connectConsole) {
+				AppConsole console = appLogManager.getConsole(app);
+				this.logConnection.setValue(((LogProducer)app).connectLog(console, firstConsoleConnection));
+				firstConsoleConnection = false;
+			} else {
+				this.logConnection.setValue(null);
+			}
 		}
+
 	}
 
 	@Override
