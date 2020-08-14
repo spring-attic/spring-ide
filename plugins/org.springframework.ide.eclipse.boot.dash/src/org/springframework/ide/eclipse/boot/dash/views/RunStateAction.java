@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2017 Pivotal Software, Inc.
+ * Copyright (c) 2015, 2020 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,11 +14,14 @@ import java.util.Collection;
 
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.MultiRule;
 import org.eclipse.swt.widgets.Display;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
+
+import com.google.common.base.Objects;
 
 /**
  * An action who's intended effect is to transition a BootDashElement to a
@@ -37,12 +40,57 @@ public abstract class RunStateAction extends AbstractBootDashElementsAction {
 	}
 
 
+	protected static class BdeSchedulingRule implements ISchedulingRule {
+
+		private BootDashElement element;
+
+		public BdeSchedulingRule(BootDashElement element) {
+			this.element = element;
+		}
+
+		@Override
+		public boolean contains(ISchedulingRule rule) {
+			if (rule instanceof BdeSchedulingRule) {
+				BootDashElement other = ((BdeSchedulingRule) rule).element;
+				return Objects.equal(element, other);
+			}
+			return false;
+		}
+
+		@Override
+		public boolean isConflicting(ISchedulingRule rule) {
+			if (rule instanceof BdeSchedulingRule) {
+				BootDashElement other = ((BdeSchedulingRule) rule).element;
+				if (element != null && other != null) {
+					return isAncestor(other, element) || isAncestor(other, element);
+				}
+			}
+			return false;
+		}
+
+		private boolean isAncestor(BootDashElement ancestor, BootDashElement e) {
+			while (e != null) {
+				if (e.equals(ancestor)) {
+					return true;
+				} else {
+					Object parent = e.getParent();
+					e = parent instanceof BootDashElement ? (BootDashElement) parent : null;
+				}
+			}
+			return false;
+		}
+
+	}
+
 	private static final ISchedulingRule SCEDULING_RULE = JobUtil.lightRule("RunStateAction.RULE");
 	protected final RunState goalState;
 	private ElementStateListener stateListener = null;
 
 	protected void configureJob(Job job) {
-		job.setRule(SCEDULING_RULE);
+		ISchedulingRule rule = getSelectedElements().isEmpty() ? SCEDULING_RULE
+				: MultiRule.combine(
+						getSelectedElements().stream().map(BdeSchedulingRule::new).toArray(ISchedulingRule[]::new));
+		job.setRule(rule);
 	}
 
 	public RunStateAction(Params params, RunState goalState) {
