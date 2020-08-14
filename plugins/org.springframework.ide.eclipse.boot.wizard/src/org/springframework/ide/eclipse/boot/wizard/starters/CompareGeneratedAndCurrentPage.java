@@ -67,10 +67,9 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 		// or the model may not yet be available.
 
 		if (visible) {
-			connectModelToUi();
-			generateComparison();
+			connectToCompareModel();
 		} else {
-			disconnectModelFromUi();
+			disconnectFromCompareModel();
 		}
 		super.setVisible(visible);
 	}
@@ -83,10 +82,9 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 			AddStartersCompareModel compareModel = wizardModel.getCompareModel().getValue();
 			compareModel.generateComparison(monitor);
 
-			AddStartersCompareResult comparison = compareModel.getComparison().getValue();
 			ResourceCompareInput input = compareModel.getCompareEditorInput().getValue();
 
-			if (input != null && comparison != null) {
+			if (input != null) {
 				runInUi(() -> {
 
 					// PT 174276041 - Only enable Finish button if there are changes to save
@@ -122,7 +120,7 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 		});
 	}
 
-	private void disconnectModelFromUi() {
+	private void disconnectFromCompareModel() {
 		AddStartersCompareModel model = wizardModel.getCompareModel().getValue();
 		model.disposeTrackers();
 		if (compareViewer != null) {
@@ -130,7 +128,7 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 		}
 	}
 
-	private void connectModelToUi() {
+	private void connectToCompareModel() {
 		AddStartersCompareModel model = wizardModel.getCompareModel().getValue();
 
 		// Listener that wires into the wizard's messages
@@ -148,6 +146,8 @@ public class CompareGeneratedAndCurrentPage extends WizardPage {
 		};
 		model.initTrackers();
 		model.getStateTracker().onChange(downloadStateListener);
+
+		generateComparison();
 	}
 
 	private void runInWizardContainer(IRunnableWithProgress runnable) {
