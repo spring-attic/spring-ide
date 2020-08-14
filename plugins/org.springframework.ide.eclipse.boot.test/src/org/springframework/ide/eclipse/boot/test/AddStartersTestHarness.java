@@ -43,8 +43,8 @@ public class AddStartersTestHarness {
 
 
 	protected static final String MOCK_VALID_INITIALIZR_URL = "https://add.starters.start.spring.io";
-	protected static final String[] SUPPORTED_BOOT_VERSIONS = new String[] {"2.3.2.RELEASE","2.2.7.RELEASE", "2.1.14.RELEASE"};
-	protected static final String CURRENT_BOOT_VERSION = "2.3.2.RELEASE";
+	protected static final String[] SUPPORTED_BOOT_VERSIONS = new String[] {"2.3.3.RELEASE","2.2.7.RELEASE", "2.1.14.RELEASE"};
+	protected static final String CURRENT_BOOT_VERSION = "2.3.3.RELEASE";
 	// A starter zip file containing "selected" web and actuator dependencies
 	protected static final String STARTER_ZIP_WEB_ACTUATOR = "/initializr/boot-web-actuator/starter.zip";
 	protected static final String INITIALIZR_INFO_INPUT = "sample";

@@ -27,6 +27,7 @@ import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.initializr.HttpRedirectionException;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrUrl;
+import org.springframework.ide.eclipse.boot.wizard.starters.eclipse.ResourceCompareInput;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Option;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.FieldModel;
@@ -70,7 +71,6 @@ public class AddStartersWizardModel implements OkButtonHandler, Disposable {
 	private final AddStartersInitializrService initializrService;
 
 
-	private Runnable okRunnable;
 	private Job asyncModelLoadJob;
 
 
@@ -169,7 +169,6 @@ public class AddStartersWizardModel implements OkButtonHandler, Disposable {
 		return this.initializrValidator;
 	}
 
-
 	@Override
 	public void performOk() {
 		InitializrModel model = initializrModel.getValue();
@@ -181,13 +180,14 @@ public class AddStartersWizardModel implements OkButtonHandler, Disposable {
 			preferences.addInitializrUrl(urlField.getValue());
 		}
 
-		if (this.okRunnable != null) {
-			this.okRunnable.run();
+		AddStartersCompareModel comparison = compareModel.getValue();
+		if (comparison != null) {
+			ResourceCompareInput editorInput = comparison.getCompareEditorInput().getValue();
+			if (editorInput != null && editorInput.isSaveNeeded()) {
+				// This will save changes in the editor.
+				editorInput.okPressed();
+			}
 		}
-	}
-
-	public void onOkPressed(Runnable okRunnable) {
-		this.okRunnable = okRunnable;
 	}
 
 	private void handleLoadingError(InitializrModel model, String url, Throwable e) {

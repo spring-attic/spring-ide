@@ -344,6 +344,11 @@ public class ResourceCompareInput extends CompareEditorInput {
 					MyDiffNode parent = (MyDiffNode) getParent();
 					parent.setState(calculateContainerState(parent));
 				}
+
+				// PT 174276041 - Only enable Finish button if there are changes to save
+				// This sets dirty if any of the diff nodes changes state that indicates dirty
+				ResourceCompareInput.this.setDirty(isTreeDirty());
+
 				if (fDiffViewer != null) {
 					if (Display.getCurrent() == null) {
 						if (!fDiffViewer.getControl().isDisposed()) {
@@ -354,6 +359,14 @@ public class ResourceCompareInput extends CompareEditorInput {
 					}
 				}
 			}
+		}
+
+		private boolean isTreeDirty() {
+			if (fDiffViewer != null) {
+				MyDiffNode inp = (MyDiffNode)fDiffViewer.getInput();
+				return inp.getState() != DiffNodeState.NONE;
+			}
+			return false;
 		}
 
 		public void reset() {

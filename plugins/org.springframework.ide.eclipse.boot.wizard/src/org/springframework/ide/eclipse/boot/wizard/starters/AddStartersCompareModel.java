@@ -10,8 +10,15 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard.starters;
 
+import static org.springframework.ide.eclipse.boot.wizard.starters.PathSelectors.path;
+import static org.springframework.ide.eclipse.boot.wizard.starters.PathSelectors.pattern;
+import static org.springframework.ide.eclipse.boot.wizard.starters.PathSelectors.rootFiles;
+import static org.springframework.ide.eclipse.boot.wizard.starters.eclipse.ResourceCompareInput.fromFile;
+import static org.springframework.ide.eclipse.boot.wizard.starters.eclipse.ResourceCompareInput.fromWorkspaceResource;
+
 import java.io.File;
 import java.util.List;
+import java.util.function.Predicate;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -19,22 +26,29 @@ import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrProjectDownloader;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrUrl;
+import org.springframework.ide.eclipse.boot.wizard.BootWizardActivator;
+import org.springframework.ide.eclipse.boot.wizard.preferences.PreferenceConstants;
+import org.springframework.ide.eclipse.boot.wizard.starters.eclipse.ResourceCompareInput;
+import org.springframework.ide.eclipse.maven.pom.PomPlugin;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
-import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 /**
- * Model that generates two sides to compare: a local project and a project
- * downloaded from Spring Initializr. The model  will download the project from initializr as well.
+ * Model that contains a comparison between local and intializr projects, as well as
+ * the Eclipse editor input equivalent for integration with Eclipse compare/merge editor.
  *
  */
 public class AddStartersCompareModel implements Disposable {
 
 	private final ISpringBootProject bootProject;
 	private final InitializrProjectDownloader projectDownloader;
-	private LiveVariable<AddStartersCompareResult> compareInputModel = new LiveVariable<>(null);
+
+	private LiveVariable<AddStartersCompareResult> comparison = new LiveVariable<>(null);
+
+	private LiveVariable<ResourceCompareInput> editorInput = new LiveVariable<>(null);
+
 	private LiveVariable<AddStartersTrackerState> downloadTracker = new LiveVariable<>(
 			AddStartersTrackerState.NOT_STARTED);
 	private final InitializrModel initializrModel;
@@ -45,22 +59,23 @@ public class AddStartersCompareModel implements Disposable {
 		this.initializrModel = initializrModel;
 	}
 
-	public LiveExpression<AddStartersCompareResult> getCompareResult() {
-		return compareInputModel;
+	/**
+	 * Comparison that contains a left and right side (local project and project downloaded from
+	 * initializr)
+	 */
+	public LiveExpression<AddStartersCompareResult> getComparison() {
+		return comparison;
 	}
 
-	public void connect(ValueListener<AddStartersCompareResult> compareResultListener,
-			ValueListener<AddStartersTrackerState> downloadStateListener) {
-		initTrackers();
-		getCompareResult().addListener(compareResultListener);
-		downloadTracker.addListener(downloadStateListener);
+	/**
+	 * Eclipse compare editor input used to integrate with the Eclipse compare framework
+	 */
+	public LiveVariable<ResourceCompareInput> getCompareEditorInput() {
+		return editorInput;
 	}
 
-	public void disconnect(ValueListener<AddStartersCompareResult> compareResultListener,
-			ValueListener<AddStartersTrackerState> downloadStateListener) {
-		getCompareResult().removeListener(compareResultListener);
-		downloadTracker.removeListener(downloadStateListener);
-		disposeTrackers();
+	public LiveVariable<AddStartersTrackerState> getStateTracker() {
+		return downloadTracker;
 	}
 
 	@Override
@@ -69,54 +84,43 @@ public class AddStartersCompareModel implements Disposable {
 		this.projectDownloader.dispose();
 	}
 
-	/**
-	 * Creates a comparison between a local project and a project downloaded from initializr
-	 * @param monitor
-	 */
-	public void createComparison(IProgressMonitor monitor) {
+	public void generateComparison(IProgressMonitor monitor) {
+
 		try {
-			monitor.beginTask("Downloading 'starter.zip' from Initializr Service", IProgressMonitor.UNKNOWN);
-			downloadTracker.setValue(AddStartersTrackerState.IS_DOWNLOADING);
-			List<Dependency> dependencies = initializrModel.dependencies.getCurrentSelection();
-			File generatedProject = projectDownloader.getProject(dependencies, bootProject);
-			generateCompareResult(generatedProject, dependencies);
-			downloadTracker.setValue(AddStartersTrackerState.DOWNLOADING_COMPLETED);
-		} catch (Exception e) {
-			downloadTracker.setValue(AddStartersTrackerState.error(e));
-			Log.log(e);
+			AddStartersCompareResult result = null;
+			try {
+				monitor.beginTask("Downloading 'starter.zip' from Initializr Service", IProgressMonitor.UNKNOWN);
+				downloadTracker.setValue(AddStartersTrackerState.IS_DOWNLOADING);
+				List<Dependency> dependencies = initializrModel.dependencies.getCurrentSelection();
+				File generatedProject = projectDownloader.getProject(dependencies, bootProject);
+				IProject project = bootProject.getProject();
+				boolean editable = true;
+				LocalProject localProject = new LocalProject(project, editable);
+
+				result = new AddStartersCompareResult(localProject, generatedProject);
+				comparison.setValue(result);
+				downloadTracker.setValue(AddStartersTrackerState.DOWNLOADING_COMPLETED);
+				generateEditorInput(result, monitor);
+
+			} catch (Exception e) {
+				downloadTracker.setValue(AddStartersTrackerState.error(e));
+				Log.log(e);
+			}
+
 		} finally {
 			monitor.done();
 		}
 	}
 
-	public String diffFileToOpenInitially() {
-		if (bootProject != null) {
-			switch (bootProject.buildType()) {
-			case InitializrUrl.MAVEN_PROJECT:
-				return "pom.xml";
-			case InitializrUrl.GRADLE_PROJECT:
-				return "build.gradle";
-			}
-		}
-		return null;
-	}
-
-	protected void generateCompareResult(File projectFromInitializr, List<Dependency> dependencies) throws Exception {
-		IProject project = bootProject.getProject();
-		boolean editable = true;
-		LocalProject localProject = new LocalProject(project, editable);
-
-		AddStartersCompareResult inputModel = new AddStartersCompareResult(localProject, projectFromInitializr);
-		this.compareInputModel.setValue(inputModel);
-	}
-
-	private void initTrackers() {
-		compareInputModel = new LiveVariable<>(null);
+	public void initTrackers() {
+		comparison = new LiveVariable<>(null);
+		editorInput = new LiveVariable<>(null);
 		downloadTracker = new LiveVariable<>(AddStartersTrackerState.NOT_STARTED);
 	}
 
-	private void disposeTrackers() {
-		this.compareInputModel.dispose();
+	public void disposeTrackers() {
+		this.comparison.dispose();
+		this.editorInput.dispose();
 		this.downloadTracker.dispose();
 	}
 
@@ -159,4 +163,68 @@ public class AddStartersCompareModel implements Disposable {
 		}
 	}
 
+	private void generateEditorInput(AddStartersCompareResult comparison, IProgressMonitor monitor)  {
+		Predicate<String> filter = s -> true;
+		for (String glob : excludeGlobPatterns()) {
+			filter = filter.and(pattern(glob).negate());
+		}
+
+		filter = filter.and(rootFiles()
+				.or(path("HELP.md"))
+				.or(path("src/main/resources/application.properties"))
+				.or(path("src/main/resources/application.yml"))
+				.or(path("src/main/resources/static/"))
+				.or(path("src/main/resources/templates/"))
+				.or(pattern("src/main/resources/static/*"))
+				.or(pattern("src/main/resources/templates/*")));
+
+		ResourceCompareInput compareEditorInput = new ResourceCompareInput(comparison.getConfiguration(), filter);
+		setResources(compareEditorInput, comparison);
+		compareEditorInput.setTitle(
+				"Compare local project on the left with generated project from Spring Initializr on the right");
+		compareEditorInput.getCompareConfiguration().setProperty(PomPlugin.POM_STRUCTURE_ADDITIONS_COMPARE_SETTING, true);
+		compareEditorInput.getCompareConfiguration().setProperty(ResourceCompareInput.OPEN_DIFF_NODE_COMPARE_SETTING, diffFileToOpenInitially());
+
+		try {
+			monitor.beginTask(
+					"Calculating differences between project '"
+							+ comparison.getLocalResource().getProject().getName() + "' and 'starter.zip'",
+					IProgressMonitor.UNKNOWN);
+
+			compareEditorInput.run(monitor);
+			editorInput.setValue(compareEditorInput);
+		} catch (Exception e) {
+			downloadTracker.setValue(AddStartersTrackerState.error(e));
+			Log.log(e);
+		}
+	}
+
+	private String diffFileToOpenInitially() {
+		if (bootProject != null) {
+			switch (bootProject.buildType()) {
+			case InitializrUrl.MAVEN_PROJECT:
+				return "pom.xml";
+			case InitializrUrl.GRADLE_PROJECT:
+				return "build.gradle";
+			}
+		}
+		return null;
+	}
+
+	private String[] excludeGlobPatterns() {
+		String globStr = BootWizardActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.ADD_STARTERS_EXCLUDE_RESOURCES_FROM_COMPARE).trim();
+		return globStr.split("\\s*,\\s*");
+	}
+
+	/**
+	 * Sets the "left" and "right" resources to compare in the compare editor input
+	 *
+	 * @param input
+	 * @param inputFromModel
+	 * @throws Exception
+	 */
+	private void setResources(ResourceCompareInput input, AddStartersCompareResult inputFromModel)  {
+		IProject leftProject = inputFromModel.getLocalResource().getProject();
+		input.setSelection(fromFile(inputFromModel.getDownloadedProject()), fromWorkspaceResource(leftProject));
+	}
 }

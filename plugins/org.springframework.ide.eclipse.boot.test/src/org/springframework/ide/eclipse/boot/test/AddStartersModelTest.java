@@ -107,7 +107,7 @@ public class AddStartersModelTest extends AddStartersTestHarness {
 
 		// There should be no comparison, as we haven't downloaded the project to compare to in this test
 		AddStartersCompareModel compareModel = wizard.getCompareModel().getValue();
-		assertNull(compareModel.getCompareResult().getValue());
+		assertNull(compareModel.getComparison().getValue());
 	}
 
 
@@ -293,11 +293,11 @@ public class AddStartersModelTest extends AddStartersTestHarness {
 		assertInitializrAndCompareModelsNotNull(wizard);
 
 		AddStartersCompareModel compareModel = wizard.getCompareModel().getValue();
-		AddStartersCompareResult comparison = compareModel.getCompareResult().getValue();
+		AddStartersCompareResult comparison = compareModel.getComparison().getValue();
 		assertNull(comparison);
 
-		compareModel.createComparison(new NullProgressMonitor());
-		comparison = compareModel.getCompareResult().getValue();
+		compareModel.generateComparison(new NullProgressMonitor());
+		comparison = compareModel.getComparison().getValue();
 		assertNotNull(comparison);
 		// Verify that the comparison contains the "mocked" downloaded zip file as a comparison source
 		assertTrue(comparison.getDownloadedProject().getPath().contains(starterZipFile));
