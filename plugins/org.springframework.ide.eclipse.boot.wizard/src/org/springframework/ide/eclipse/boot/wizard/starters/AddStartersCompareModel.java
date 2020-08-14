@@ -85,28 +85,23 @@ public class AddStartersCompareModel implements Disposable {
 	}
 
 	public void generateComparison(IProgressMonitor monitor) {
-
 		try {
-			AddStartersCompareResult result = null;
-			try {
-				monitor.beginTask("Downloading 'starter.zip' from Initializr Service", IProgressMonitor.UNKNOWN);
-				downloadTracker.setValue(AddStartersTrackerState.IS_DOWNLOADING);
-				List<Dependency> dependencies = initializrModel.dependencies.getCurrentSelection();
-				File generatedProject = projectDownloader.getProject(dependencies, bootProject);
-				IProject project = bootProject.getProject();
-				boolean editable = true;
-				LocalProject localProject = new LocalProject(project, editable);
+			monitor.beginTask("Downloading 'starter.zip' from Initializr Service", IProgressMonitor.UNKNOWN);
+			downloadTracker.setValue(AddStartersTrackerState.IS_DOWNLOADING);
+			List<Dependency> dependencies = initializrModel.dependencies.getCurrentSelection();
+			File generatedProject = projectDownloader.getProject(dependencies, bootProject);
+			IProject project = bootProject.getProject();
+			boolean editable = true;
+			LocalProject localProject = new LocalProject(project, editable);
 
-				result = new AddStartersCompareResult(localProject, generatedProject);
-				comparison.setValue(result);
-				downloadTracker.setValue(AddStartersTrackerState.DOWNLOADING_COMPLETED);
-				generateEditorInput(result, monitor);
+			AddStartersCompareResult result = new AddStartersCompareResult(localProject, generatedProject);
+			comparison.setValue(result);
+			downloadTracker.setValue(AddStartersTrackerState.DOWNLOADING_COMPLETED);
+			generateEditorInput(result, monitor);
 
-			} catch (Exception e) {
-				downloadTracker.setValue(AddStartersTrackerState.error(e));
-				Log.log(e);
-			}
-
+		} catch (Exception e) {
+			downloadTracker.setValue(AddStartersTrackerState.error(e));
+			Log.log(e);
 		} finally {
 			monitor.done();
 		}
