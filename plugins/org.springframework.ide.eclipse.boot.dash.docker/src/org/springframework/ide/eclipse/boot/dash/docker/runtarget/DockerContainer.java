@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.docker.runtarget;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -326,11 +327,13 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 				return new LogConnection() {
 					
 					private boolean isClosed = false;
+					private OutputStream consoleOut = console.getOutputStream(LogType.APP_OUT);
+					private OutputStream consoleErr = console.getOutputStream(LogType.APP_OUT);
 					
 					{
 						JobUtil.runQuietlyInJob("Tracking output for docker container "+container.id(), mon -> {
 							try {
-								appOutput.attach(console.getOutputStream(LogType.APP_OUT), console.getOutputStream(LogType.APP_OUT));
+								appOutput.attach(consoleOut, consoleErr);
 							} finally {
 								isClosed = true;
 							}
@@ -341,7 +344,15 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 					@Override
 					public void dispose() {
 						try {
-							appOutput.close();
+							appOutput.close(); 
+								//Warning... appOutput.close seems to have no effect. This seems like the right way to disconnect from
+								// docker log stream... but it doesn't work.
+								//So we also close the consoleOut as a 'backup plan'. When later on more messages are streamed then the
+								// closed console output stream will throw an IOExcption. Since this is called as a 'callback' from
+								// appOutput.attach. that interrupts the job running appOutput.attach(consoleOut, consoleErr); and allows
+								// it to terminate as it should, when connection is closed.
+							consoleOut.close();
+							consoleErr.close();
 						} catch (IOException e) {
 							Log.log(e);
 						}

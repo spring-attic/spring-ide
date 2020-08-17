@@ -46,8 +46,6 @@ public class CloudAppLogManager extends BootDashModelConsoleManager implements A
 			// To avoid console "jumping", only show console
 			// if none are visible
 			showIfNoOtherConsoles(console);
-		} else {
-			throw new IOException("Console is not available");
 		}
 	}
 

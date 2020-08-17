@@ -23,9 +23,13 @@ public interface AppConsole {
 	default OutputStream getOutputStream(LogType type) {
 		return new OutputStream() {
 			StringBuffer line = new StringBuffer();
+			private boolean closed = false;
 
 			@Override
 			public void write(int b) throws IOException {
+				if (closed) {
+					throw new IOException("AppConsole closed");
+				}
 				if (b=='\n') {
 					try {
 						AppConsole.this.write(line.toString(), type);
@@ -43,6 +47,7 @@ public interface AppConsole {
 
 			@Override
 			public void close() throws IOException {
+				this.closed = true;
 				super.close();
 			}
 		};
