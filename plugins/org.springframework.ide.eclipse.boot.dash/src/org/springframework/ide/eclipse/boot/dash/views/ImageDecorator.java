@@ -88,7 +88,7 @@ public class ImageDecorator implements Disposable {
 			if (existing==null) {
 				debug("Decorating: "+baseImg + " with "+decoration);
 				DecorationOverlayIcon overlayer = new DecorationOverlayIcon(baseImg,
-						decoration, IDecoration.BOTTOM_RIGHT);
+						decoration, IDecoration.TOP_RIGHT);
 				decoratedImages.put(key, existing = overlayer.createImage());
 			}
 			return existing;
