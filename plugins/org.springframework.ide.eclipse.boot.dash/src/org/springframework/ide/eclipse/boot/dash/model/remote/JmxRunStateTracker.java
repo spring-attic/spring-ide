@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.model.remote;
 
+import java.io.IOException;
+import java.net.SocketException;
+import java.rmi.RemoteException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeoutException;
 
@@ -24,6 +27,7 @@ import org.springframework.ide.eclipse.boot.launch.util.SpringApplicationLifeCyc
 import org.springframework.ide.eclipse.boot.launch.util.SpringApplicationLifecycleClient;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 public class JmxRunStateTracker extends AbstractDisposable {
@@ -77,7 +81,12 @@ public class JmxRunStateTracker extends AbstractDisposable {
 					refreshMaybe(error);
 					return RunState.STARTING;
 				} catch (Exception e1) {
-					Log.log(e1);
+					Throwable cause = ExceptionUtil.getDeepestCause(e1);
+					if (cause instanceof IOException) {
+						//expected when container goes away, connections dropping / breaking etc.
+					} else {
+						Log.log(e1);
+					}
 					return RunState.UNKNOWN;
 				}
 			} else {
