@@ -83,6 +83,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 
+import java.util.concurrent.TimeoutException;
+
 public class GenericRemoteAppElement extends WrappingBootDashElement<String> implements Deletable, AppContext, Styleable, ElementStateListener, JmxConnectable {
 
 	private static final boolean DEBUG = false;
@@ -146,6 +148,8 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 					}
 				}
 				return builder.build();
+			} catch (TimeoutException e) {
+				//ignore, expected error
 			} catch (Exception e) {
 				Log.log(e);
 			}
