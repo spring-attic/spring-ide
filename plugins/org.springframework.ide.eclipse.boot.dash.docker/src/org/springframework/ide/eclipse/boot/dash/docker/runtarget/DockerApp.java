@@ -195,7 +195,6 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 	}
 	
 	public CompletableFuture<Void> synchronizeWithDeployment() {
-		System.out.println(refreshTracker.isDone());
 		return this.refreshTracker.thenComposeAsync(refreshTracker -> {
 			DockerDeployment deployment = deployment();
 			return refreshTracker.runAsync("Synchronizing deployment "+deployment.getName(), () -> {
@@ -354,7 +353,8 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 			console.write("Starting container: "+c.id(), LogType.STDOUT);
 			console.write("Ports: "+appLocalPort+"->"+appContainerPort, LogType.STDOUT);
 			
-			appContext.showConsole(c.id());
+			//Disabled show of console here. See: https://www.pivotaltracker.com/story/show/174316849
+			//appContext.showConsole(c.id());
 			
 			client.startContainer(c.id());
 			
