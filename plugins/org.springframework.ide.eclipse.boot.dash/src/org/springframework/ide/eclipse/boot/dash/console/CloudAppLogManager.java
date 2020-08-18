@@ -137,10 +137,10 @@ public class CloudAppLogManager extends BootDashModelConsoleManager implements A
 		if (logConsole == null) {
 			return;
 		}
-		if (element instanceof LogSource) {
+		if (element instanceof LegacyLogSource) {
 			Disposable existingToken = logConsole.getLogStreamingToken();
 			if (existingToken==null) {
-				LogSource source = (LogSource) element;
+				LegacyLogSource source = (LegacyLogSource) element;
 				logConsole.setLogStreamingToken(source.connectLog(logConsole));
 			}
 		}

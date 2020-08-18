@@ -43,7 +43,7 @@ import org.springframework.ide.eclipse.boot.dash.api.Deletable;
 import org.springframework.ide.eclipse.boot.dash.api.DevtoolsConnectable;
 import org.springframework.ide.eclipse.boot.dash.api.JmxConnectable;
 import org.springframework.ide.eclipse.boot.dash.api.LogConnection;
-import org.springframework.ide.eclipse.boot.dash.api.LogProducer;
+import org.springframework.ide.eclipse.boot.dash.api.LogSource;
 import org.springframework.ide.eclipse.boot.dash.api.PortConnectable;
 import org.springframework.ide.eclipse.boot.dash.api.ProjectRelatable;
 import org.springframework.ide.eclipse.boot.dash.api.RunStateIconProvider;
@@ -69,7 +69,7 @@ import static org.eclipse.ui.plugin.AbstractUIPlugin.imageDescriptorFromPlugin;
 import static org.springframework.ide.eclipse.boot.dash.docker.runtarget.DockerRunTargetType.PLUGIN_ID;
 
 public class DockerContainer implements App, RunStateProvider, JmxConnectable, Styleable, PortConnectable, 
-	Deletable, ActualInstanceCount, DebuggableApp, ProjectRelatable, DevtoolsConnectable, LogProducer, RunStateIconProvider
+	Deletable, ActualInstanceCount, DebuggableApp, ProjectRelatable, DevtoolsConnectable, LogSource, RunStateIconProvider
 {
 
 	public static final Duration WAIT_BEFORE_KILLING = Duration.ofSeconds(10);

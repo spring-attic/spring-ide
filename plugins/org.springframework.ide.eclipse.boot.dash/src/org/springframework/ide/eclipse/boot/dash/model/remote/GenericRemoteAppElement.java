@@ -40,7 +40,7 @@ import org.springframework.ide.eclipse.boot.dash.api.DesiredInstanceCount;
 import org.springframework.ide.eclipse.boot.dash.api.DevtoolsConnectable;
 import org.springframework.ide.eclipse.boot.dash.api.JmxConnectable;
 import org.springframework.ide.eclipse.boot.dash.api.LogConnection;
-import org.springframework.ide.eclipse.boot.dash.api.LogProducer;
+import org.springframework.ide.eclipse.boot.dash.api.LogSource;
 import org.springframework.ide.eclipse.boot.dash.api.PortConnectable;
 import org.springframework.ide.eclipse.boot.dash.api.ProjectRelatable;
 import org.springframework.ide.eclipse.boot.dash.api.RunStateIconProvider;
@@ -401,12 +401,12 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		CloudAppLogManager appLogManager = injections().getBean(CloudAppLogManager.class);
 		LogConnection logConnection = this.logConnection.getVar().getValue();
 		boolean hasConnection = logConnection != null && !logConnection.isClosed();
-		boolean connectConsole = app instanceof LogProducer && appLogManager.hasConsole(app);
+		boolean connectConsole = app instanceof LogSource && appLogManager.hasConsole(app);
 
 		if (hasConnection != connectConsole) {
 			if (connectConsole) {
 				AppConsole console = appLogManager.getConsole(app);
-				this.logConnection.setValue(((LogProducer)app).connectLog(console, firstConsoleConnection));
+				this.logConnection.setValue(((LogSource)app).connectLog(console, firstConsoleConnection));
 				firstConsoleConnection = false;
 			} else {
 				this.logConnection.setValue(null);
@@ -868,15 +868,5 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 			return ((DevtoolsConnectable) data).getDevtoolsSecret()!=null;
 		}
 		return false;
-	}
-
-	@Override
-	public void showConsole(String appName) {
-		CloudAppLogManager appLogManager = injections().getBean(CloudAppLogManager.class);
-		try {
-			appLogManager.showConsole(getTarget(), appName);
-		} catch (Exception e) {
-			Log.log(e);
-		}
 	}
 }

@@ -2,6 +2,6 @@ package org.springframework.ide.eclipse.boot.dash.console;
 
 import reactor.core.Disposable;
 
-public interface LogSource {
+public interface LegacyLogSource {
 	Disposable connectLog(ApplicationLogConsole logConsole);
 }
