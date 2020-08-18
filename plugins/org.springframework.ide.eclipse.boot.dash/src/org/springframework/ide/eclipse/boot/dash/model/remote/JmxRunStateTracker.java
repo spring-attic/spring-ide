@@ -11,8 +11,6 @@
 package org.springframework.ide.eclipse.boot.dash.model.remote;
 
 import java.io.IOException;
-import java.net.SocketException;
-import java.rmi.RemoteException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeoutException;
 

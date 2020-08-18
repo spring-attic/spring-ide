@@ -1002,7 +1002,8 @@ public class BootDashDockerTests {
 
 		//if (ui().confirmOperation("Deleting Elements", modifiable.getDeletionConfirmationMessage(workitem.getValue()))) {
 
-		when(ui().confirmOperation("Deleting Elements", "Delete webby ?")).thenReturn(true);
+// confirm popup was disabled.
+//		when(ui().confirmOperation("Deleting Elements", "Delete webby ?")).thenReturn(true);
 		deleteAction.run();
 
 		ACondition.waitFor("Everything is deleted", 5_000, () -> {
@@ -1019,6 +1020,49 @@ public class BootDashDockerTests {
 //			client().listImages(ListImagesParam.allImages()).stream().
 		});
 	}
+
+	@Test
+	public void deleteRunningImage() throws Exception {
+		GenericRemoteBootDashModel<DockerClient, DockerTargetParams> model = createDockerTarget();
+		Mockito.reset(ui());
+		IProject project = projects.createBootWebProject("webby", bootVersionAtLeast("2.3.0"));
+
+		dragAndDrop(project, model);
+		GenericRemoteAppElement dep = waitForDeployment(model, project);
+		GenericRemoteAppElement img = waitForChild(dep, d -> d instanceof DockerImage);
+		GenericRemoteAppElement con = waitForChild(img, d -> d instanceof DockerContainer);
+
+		String imgId = img.getName();
+
+		ACondition.waitFor("all started", BUILD_IMAGE_TIMEOUT, () -> {
+			assertEquals(RunState.RUNNING, dep.getRunState());
+			assertEquals(RunState.RUNNING, img.getRunState());
+			assertEquals(RunState.RUNNING, con.getRunState());
+		});
+
+		DeleteElementsAction<?> delete = actions().getDeleteAppsAction();
+		harness.selection.setElements(img);
+		assertTrue(delete.isEnabled());
+		assertTrue(delete.isVisible());
+
+		delete.run();
+
+		ACondition.waitFor("Image and container deletion", 10_000, () -> {
+			assertEquals(RunState.INACTIVE, dep.getRunState());
+			assertTrue(dep.getChildren().getValues().isEmpty());
+			assertTrue(img.isDisposed());
+			assertTrue(con.isDisposed());
+
+			assertNoImage(imgId);
+			assertTrue(
+					client().listContainers(
+						ListContainersParam.allContainers(), ListContainersParam.withLabel(DockerApp.APP_NAME)
+					)
+					.isEmpty()
+			);
+		});
+	}
+
 
 	@Test
 	public void noAutoStartForMismatchingSession() throws Exception {
