@@ -82,7 +82,7 @@ public class JmxRunStateTracker extends AbstractDisposable {
 					return RunState.STARTING;
 				} catch (Exception e1) {
 					Throwable cause = ExceptionUtil.getDeepestCause(e1);
-					if (cause instanceof IOException) {
+					if (cause instanceof IOException || cause instanceof TimeoutException) {
 						//expected when container goes away, connections dropping / breaking etc.
 					} else {
 						Log.log(e1);

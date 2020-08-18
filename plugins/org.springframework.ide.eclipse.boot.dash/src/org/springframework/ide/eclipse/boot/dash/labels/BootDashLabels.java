@@ -401,7 +401,7 @@ public class BootDashLabels implements Disposable {
 					}
 				} else if (RunState.STARTING.equals(element.getRunState())) {
 					Color muted = colorGrey();
-					styledLabel = new StyledString("- " + "App is starting up", stylers.italicColoured(muted));
+					styledLabel = new StyledString("- " + "Fetching runstate from JMX", stylers.italicColoured(muted));
 				}
 			} else if (column==DEVTOOLS) {
 				if (element.hasDevtoolsDependency()) {
