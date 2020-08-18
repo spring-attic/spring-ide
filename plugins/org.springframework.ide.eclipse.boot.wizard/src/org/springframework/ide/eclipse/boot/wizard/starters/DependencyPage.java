@@ -241,7 +241,7 @@ public class DependencyPage extends WizardPageWithSections {
 			protected String getSearchHint() {
 				return "Type to search dependencies";
 			}
-		};
+		}.grabFocus(true);
 //		PlatformUI.getWorkbench().getDisplay().asyncExec(() -> getControl().addListener(SWT.Show, event -> searchBoxSection.focusControl()));
 		return searchBoxSection;
 	}
