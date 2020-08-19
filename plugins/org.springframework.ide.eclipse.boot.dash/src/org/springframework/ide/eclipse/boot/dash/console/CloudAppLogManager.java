@@ -16,6 +16,7 @@ import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.MessageConsole;
+import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.AppConsole;
 import org.springframework.ide.eclipse.boot.dash.api.AppConsoleProvider;
@@ -119,8 +120,7 @@ public class CloudAppLogManager extends BootDashModelConsoleManager implements A
 		ApplicationLogConsole appConsole = getExisitingConsole(element);
 
 		if (appConsole == null) {
-
-			appConsole = new ApplicationLogConsole(getConsoleDisplayName(element), CONSOLE_TYPE);
+			appConsole = new ApplicationLogConsole(getConsoleDisplayName(element), CONSOLE_TYPE, element.getTarget().getIcon());
 			appConsole.setAttribute(APP_CONSOLE_ID, getConsoleId(element));
 			consoleManager.addConsoles(new IConsole[] { appConsole });
 

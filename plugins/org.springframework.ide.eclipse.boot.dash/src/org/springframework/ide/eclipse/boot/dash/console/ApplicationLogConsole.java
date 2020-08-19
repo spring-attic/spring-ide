@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -35,8 +36,8 @@ public class ApplicationLogConsole extends MessageConsole implements IPropertyCh
 
 	private Disposable logStreamingToken;
 
-	public ApplicationLogConsole(String name, String type) {
-		super(name, type, BootDashActivator.getImageDescriptor("icons/cloud_obj.png"), true);
+	public ApplicationLogConsole(String name, String type, ImageDescriptor icon) {
+		super(name, type, icon, true);
 	}
 
 	public synchronized void setLogStreamingToken(Disposable logStreamingToken) {
