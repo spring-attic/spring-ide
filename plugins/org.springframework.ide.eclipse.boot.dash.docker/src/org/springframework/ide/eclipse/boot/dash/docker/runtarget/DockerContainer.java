@@ -321,7 +321,7 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 			AppConsole console = target.injections().getBean(AppConsoleProvider.class).getConsole(this);
 			try {
 				List<LogsParam> logParams = new ArrayList<>();
-				logParams.addAll(Arrays.asList(LogsParam.stdout(), LogsParam.follow()));
+				logParams.addAll(Arrays.asList(LogsParam.stderr(), LogsParam.stdout(), LogsParam.follow()));
 				if (!includeHistory) {
 					logParams.add(LogsParam.since((int)Instant.now().getEpochSecond()));
 				}
