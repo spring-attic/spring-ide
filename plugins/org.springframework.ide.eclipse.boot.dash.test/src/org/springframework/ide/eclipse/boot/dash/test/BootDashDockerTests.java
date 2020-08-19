@@ -323,11 +323,17 @@ public class BootDashDockerTests {
 			assertEquals(RunState.RUNNING, con.getRunState());
 		});
 
+		assertConsoleName(dep, "webby - image build output @ unix:///var/run/docker.sock", false);
 		assertConsoleContains(dep, "Successfully built image 'docker.io/library/webby");
 		assertConsoleNotContains(dep, "Starting WebbyApplication");
+
 		assertNoConsole(img);
-		assertConsoleNotContains(con, "Successfully built image 'docker.io/library/webby");
-		assertConsoleContains(con, "Starting WebbyApplication");
+
+		assertConsoleName(con, "webby - in container "+con.getStyledName(null).getString()+ " @ unix:///var/run/docker.sock", true);
+		ACondition.waitFor("expected output in container", 5_000, () -> {
+			assertConsoleContains(con, "Starting WebbyApplication");
+			assertConsoleNotContains(con, "Successfully built image 'docker.io/library/webby");
+		});
 
 		assertFalse(harness.getLabel(dep).contains("devtools"));
 		assertFalse(harness.getLabel(img).contains("devtools"));
@@ -353,11 +359,14 @@ public class BootDashDockerTests {
 			assertEquals(RunState.RUNNING, con.getRunState());
 		});
 
-		assertConsoleContains(dep, "Successfully built image 'docker.io/library/webby");
-		assertConsoleNotContains(dep, "Starting WebbyApplication");
-		assertNoConsole(img);
-		assertConsoleNotContains(con, "Successfully built image 'docker.io/library/webby");
-		assertConsoleContains(con, "Starting WebbyApplication");
+		ACondition.waitFor("consoel output from starting app", 5_000, () -> {
+			assertConsoleContains(dep, "Successfully built image 'docker.io/library/webby");
+			assertConsoleNotContains(dep, "Starting WebbyApplication");
+			assertNoConsole(img);
+			assertConsoleName(con, "webby - in container "+con.getStyledName(null).getString()+ " @ unix:///var/run/docker.sock", true);
+			assertConsoleContains(con, "Starting WebbyApplication");
+			assertConsoleNotContains(con, "Successfully built image 'docker.io/library/webby");
+		});
 
 		clearConsole(con);
 		clearConsole(dep);
@@ -388,12 +397,14 @@ public class BootDashDockerTests {
 			assertEquals(RunState.RUNNING, con.getRunState());
 		});
 
-		assertConsoleNotContains(dep, "Successfully built image 'docker.io/library/webby");
-		assertConsoleNotContains(dep, "Starting WebbyApplication");
-		assertNoConsole(img);
-		assertConsoleNotContains(con, "Successfully built image 'docker.io/library/webby");
-		assertConsoleContains(con, "Starting WebbyApplication");
-
+		ACondition.waitFor("output from restarting app", 5_000, () -> {
+			assertConsoleNotContains(dep, "Successfully built image 'docker.io/library/webby");
+			assertConsoleNotContains(dep, "Starting WebbyApplication");
+			assertNoConsole(img);
+			assertConsoleName(con, "webby - in container "+con.getStyledName(null).getString()+ " @ unix:///var/run/docker.sock", true);
+			assertConsoleNotContains(con, "Successfully built image 'docker.io/library/webby");
+			assertConsoleContains(con, "Starting WebbyApplication");
+		});
 	}
 
 	private void clearConsole(GenericRemoteAppElement element) throws Exception {
@@ -404,6 +415,16 @@ public class BootDashDockerTests {
 		ACondition.waitFor("clear console", 5_000, () -> {
 			assertEquals("", console.getDocument().get().trim());
 		});
+	}
+
+
+	private void assertConsoleName(GenericRemoteAppElement element, String expectedName, boolean create) throws Exception {
+		CloudAppLogManager logManager = context.injections.getBean(CloudAppLogManager.class);
+		ApplicationLogConsole console = create
+				? logManager.getOrCreateConsole(element)
+				: logManager.getExisitingConsole(element);
+		assertNotNull("No console for " + element.getStyledName(null).getString(), console);
+		assertEquals(expectedName, console.getName());
 	}
 
 	private void assertConsoleContains(GenericRemoteAppElement element, String expectSnippet) {

@@ -94,7 +94,7 @@ public class DockerImage implements App, ChildBearing, Styleable, ProjectRelatab
 			);
 			for (Container container : containers) {
 				if (container.imageId().equals(image.id())) {
-					builder.add(new DockerContainer(getTarget(), container));
+					builder.add(new DockerContainer(getTarget(), app, container));
 				}
 			}
 		}

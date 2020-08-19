@@ -209,7 +209,7 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 						boolean desiredContainerFound = false;
 						for (Container c : containers) {
 							if (isMatchingContainer(deployment, c)) {
-								if (new DockerContainer(getTarget(), c).fetchRunState()==desiredRunState) {
+								if (new DockerContainer(getTarget(), this, c).fetchRunState()==desiredRunState) {
 									desiredContainerFound = true;
 								}
 							} else {
@@ -561,6 +561,12 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 			return deployment.getDesiredInstances();
 		}
 		return 0;
+	}
+
+	
+	@Override
+	public String getConsoleDisplayName() {
+		return getName() + " - image build output @ "+getTarget().getName();
 	}
 
 }

@@ -869,4 +869,11 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		}
 		return false;
 	}
+
+	@Override
+	public String getConsoleDisplayName() {
+		App data = app.getValue();
+		return data!=null ? data.getConsoleDisplayName() : null;
+	}
+
 }

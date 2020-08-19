@@ -79,9 +79,11 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 	public final CompletableFuture<RefreshStateTracker> refreshTracker = new CompletableFuture<>();
 	
 	private static Map<RunState, ImageDescriptor> RUNSTATE_ICONS = null;
+	private DockerApp app;
 
-	public DockerContainer(DockerRunTarget target, Container container) {
+	public DockerContainer(DockerRunTarget target, DockerApp app, Container container) {
 		this.target = target;
+		this.app = app;
 		this.container = container;
 	}
 
@@ -388,4 +390,10 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 		}
 		return null;
 	}
+	
+	@Override
+	public String getConsoleDisplayName() {
+		return app.getName() + " - in container "+getStyledName(null).getString()+" @ "+getTarget().getName();
+	}
+
 }

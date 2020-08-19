@@ -10,6 +10,12 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.api;
 
+/**
+ * Boot Dash has a console ui that provides a console
+ * for each {@link App}. The {@link AppConsoleProvider} allows extension authors
+ * to obtain a reference to the console for their {@link App}s and use it to write
+ * messages into the console.
+ */
 public interface AppConsoleProvider {
 	 AppConsole getConsole(App app);
 }

@@ -115,7 +115,7 @@ public class CloudAppLogManager extends BootDashModelConsoleManager implements A
 	 * @throws Exception
 	 *             if console was not created or found
 	 */
-	protected synchronized ApplicationLogConsole getOrCreateConsole(App element) throws Exception {
+	public synchronized ApplicationLogConsole getOrCreateConsole(App element) throws Exception {
 		ApplicationLogConsole appConsole = getExisitingConsole(element);
 
 		if (appConsole == null) {
@@ -151,7 +151,8 @@ public class CloudAppLogManager extends BootDashModelConsoleManager implements A
 	}
 
 	public static String getConsoleDisplayName(App element) {
-		return element.getName() +" @ "+ element.getTarget().getDisplayName();
+		String displayName = element.getConsoleDisplayName();
+		return displayName!=null ? displayName :element.getName() +" @ "+ element.getTarget().getDisplayName();
 	}
 
 	@Override
