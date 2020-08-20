@@ -194,3 +194,4 @@ Export-Package: org.cloudfoundry,
  org.cloudfoundry.util,
  org.cloudfoundry.util.tuple
 Automatic-Module-Name: org.springsource.ide.eclipse.commons.cloudfoundry.client.v2
+Import-Package: javax.xml.bind
