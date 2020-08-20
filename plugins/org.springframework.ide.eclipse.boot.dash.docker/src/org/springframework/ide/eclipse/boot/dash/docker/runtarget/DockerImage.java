@@ -14,14 +14,16 @@ import static org.eclipse.ui.plugin.AbstractUIPlugin.imageDescriptorFromPlugin;
 import static org.springframework.ide.eclipse.boot.dash.docker.runtarget.DockerRunTargetType.PLUGIN_ID;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.StyledString;
-import org.eclipse.swt.SWT;
 import org.mandas.docker.client.DockerClient;
 import org.mandas.docker.client.DockerClient.ListContainersParam;
 import org.mandas.docker.client.DockerClient.RemoveContainerParam;
@@ -54,7 +56,6 @@ public class DockerImage implements App, ChildBearing, Styleable, ProjectRelatab
 	private final DockerApp app;
 	private final Image image;
 	public final CompletableFuture<RefreshStateTracker> refreshTracker = new CompletableFuture<>();
-
 
 	private static Map<RunState, ImageDescriptor> RUNSTATE_ICONS = null;
 
@@ -95,22 +96,74 @@ public class DockerImage implements App, ChildBearing, Styleable, ProjectRelatab
 		return builder.build();
 	}
 
+	/**
+	 * @param dockerImage
+	 *            the {@link IDockerImage} to process
+	 * @return the {@link StyledString} to be displayed.
+	 */
+//	public static StyledString getStyledText(final IDockerImage dockerImage) {
+//		final StyledString result = new StyledString(dockerImage.repo());
+//		if (!dockerImage.tags().isEmpty()) {
+//			final List<String> tags = new ArrayList<>(dockerImage.tags());
+//			Collections.sort(tags);
+//			result.append(":");
+//			result.append(tags.stream().collect(Collectors.joining(", ")), //$NON-NLS-1$
+//					StyledString.COUNTER_STYLER);
+//		}
+//		// TODO: remove the cast to 'DockerImage' once the 'shortId()'
+//		// method is in the public API
+//		result.append(" (", StyledString.QUALIFIER_STYLER) //$NON-NLS-1$
+//				.append(((DockerImage) dockerImage).shortId(),
+//						StyledString.QUALIFIER_STYLER)
+//				.append(')', StyledString.QUALIFIER_STYLER); // $NON-NLS-1$
+//		return result;
+//	}
+
 	@Override
 	public StyledString getStyledName(Stylers stylers) {
-		if (stylers == null) {
-			stylers = new Stylers(null);
-		}
 		List<String> repoTags = image.repoTags();
-		if (repoTags != null && !repoTags.isEmpty()) {
-			StyledString styledString = new StyledString(repoTags.get(0))
-					.append(" ")
-					.append(getShortHash(), stylers.italicColoured(SWT.COLOR_DARK_GRAY));
-			return styledString;
-		} else {
-			return null;
+		String repo = extractRepo(repoTags);
+		List<String> tags = extractTags(repoTags);
+		final StyledString result = new StyledString(repo);
+		if (!tags.isEmpty()) {
+			result.append(":");
+			result.append(tags.stream().collect(Collectors.joining(", ")),
+					StyledString.COUNTER_STYLER);
 		}
+		result
+			.append(" (", StyledString.QUALIFIER_STYLER)
+			.append(getShortHash(), StyledString.QUALIFIER_STYLER)
+			.append(')', StyledString.QUALIFIER_STYLER); 
+		return result;
 	}
 	
+	private List<String> extractTags(List<String> repoTags) {
+		if (repoTags!=null && !repoTags.isEmpty()) {
+			ArrayList<String> tags = new ArrayList<>();
+			for (String repoTag : repoTags) {
+				int colon = repoTag.indexOf(':');
+				if (colon>=0) {
+					String tag = repoTag.substring(colon+1);
+					tags.add(tag);
+				}
+			}
+			Collections.sort(tags);
+			return tags;
+		}
+		return ImmutableList.of();
+	}
+
+	private String extractRepo(List<String> repoTags) {
+		if (repoTags!=null && !repoTags.isEmpty()) {
+			String repoTag = repoTags.get(0);
+			int colon = repoTag.indexOf(':');
+			if (colon>=0) {
+				return repoTag.substring(0, colon);
+			}
+		}
+		return null;
+	}
+
 	private String getShortHash() {
 		String id = StringUtil.removePrefix(image.id(), "sha256:");
 		if (id.length() > 12) {
