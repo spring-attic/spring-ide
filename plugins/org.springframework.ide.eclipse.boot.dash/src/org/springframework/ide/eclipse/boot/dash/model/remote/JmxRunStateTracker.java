@@ -60,7 +60,7 @@ public class JmxRunStateTracker extends AbstractDisposable {
 			debug("Computing augmented runstate...");
 			RunState baseRunState = _baseRunState.getValue();
 			debug("baseRunState = "+baseRunState);
-			if (baseRunState==RunState.RUNNING) {
+			if (baseRunState.isActive()) {
 				Exception error = null;
 				try {
 					SpringApplicationLifecycleClient client = clientMgr.getLifeCycleClient();
