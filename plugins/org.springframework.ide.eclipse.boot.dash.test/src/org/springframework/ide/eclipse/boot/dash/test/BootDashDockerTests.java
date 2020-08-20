@@ -325,7 +325,7 @@ public class BootDashDockerTests {
 
 		assertConsoleName(dep, "webby - image build output @ unix:///var/run/docker.sock", false);
 		assertConsoleContains(dep, "Successfully built image 'docker.io/library/webby");
-		assertConsoleNotContains(dep, "Starting WebbyApplication");
+		assertConsoleContains(dep, "Starting WebbyApplication");
 
 		assertNoConsole(img);
 
@@ -361,7 +361,7 @@ public class BootDashDockerTests {
 
 		ACondition.waitFor("consoel output from starting app", 5_000, () -> {
 			assertConsoleContains(dep, "Successfully built image 'docker.io/library/webby");
-			assertConsoleNotContains(dep, "Starting WebbyApplication");
+			assertConsoleContains(dep, "Starting WebbyApplication");
 			assertNoConsole(img);
 			assertConsoleName(con, "webby - in container "+con.getStyledName(null).getString()+ " @ unix:///var/run/docker.sock", true);
 			assertConsoleContains(con, "Starting WebbyApplication");

@@ -322,57 +322,61 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 	public LogConnection connectLog(AppConsole logConsole, boolean includeHistory) {
 		DockerClient client = target.getClient();
 		if (client != null) {
-			AppConsole console = target.injections().getBean(AppConsoleProvider.class).getConsole(this);
-			try {
-				List<LogsParam> logParams = new ArrayList<>();
-				logParams.addAll(Arrays.asList(LogsParam.stderr(), LogsParam.stdout(), LogsParam.follow()));
-				if (!includeHistory) {
-					logParams.add(LogsParam.since((int)Instant.now().getEpochSecond()));
-				}
-				LogStream appOutput = target.getClient().logs(container.id(), logParams.toArray(new LogsParam[logParams.size()]));
-				return new LogConnection() {
-					
-					private boolean isClosed = false;
-					private OutputStream consoleOut = console.getOutputStream(LogType.APP_OUT);
-					private OutputStream consoleErr = console.getOutputStream(LogType.APP_OUT);
-					
-					{
-						JobUtil.runQuietlyInJob("Tracking output for docker container "+container.id(), mon -> {
-							try {
-								appOutput.attach(consoleOut, consoleErr);
-							} finally {
-								isClosed = true;
-							}
-						});
-
-					}
-					
-					@Override
-					public void dispose() {
-						try {
-							appOutput.close(); 
-								//Warning... appOutput.close seems to have no effect. This seems like the right way to disconnect from
-								// docker log stream... but it doesn't work.
-								//So we also close the consoleOut as a 'backup plan'. When later on more messages are streamed then the
-								// closed console output stream will throw an IOExcption. Since this is called as a 'callback' from
-								// appOutput.attach. that interrupts the job running appOutput.attach(consoleOut, consoleErr); and allows
-								// it to terminate as it should, when connection is closed.
-							consoleOut.close();
-							consoleErr.close();
-						} catch (IOException e) {
-							Log.log(e);
-						}
-					}
-					
-					@Override
-					public boolean isClosed() {
-						return isClosed;
-					}
-				};
-			} catch (Exception e) {
-				Log.log(e);
-			}			
+			return connectLog(client, container.id(), logConsole, includeHistory);
 		}
+		return null;
+	}
+	
+	public static LogConnection connectLog(DockerClient client, String containerId, AppConsole console, boolean includeHistory) {
+		try {
+			List<LogsParam> logParams = new ArrayList<>();
+			logParams.addAll(Arrays.asList(LogsParam.stderr(), LogsParam.stdout(), LogsParam.follow()));
+			if (!includeHistory) {
+				logParams.add(LogsParam.since((int)Instant.now().getEpochSecond()));
+			}
+			LogStream appOutput = client.logs(containerId, logParams.toArray(new LogsParam[logParams.size()]));
+			return new LogConnection() {
+				
+				private boolean isClosed = false;
+				private OutputStream consoleOut = console.getOutputStream(LogType.APP_OUT);
+				private OutputStream consoleErr = console.getOutputStream(LogType.APP_OUT);
+				
+				{
+					JobUtil.runQuietlyInJob("Tracking output for docker container "+containerId, mon -> {
+						try {
+							appOutput.attach(consoleOut, consoleErr);
+						} finally {
+							isClosed = true;
+						}
+					});
+
+				}
+				
+				@Override
+				public void dispose() {
+					try {
+						appOutput.close(); 
+							//Warning... appOutput.close seems to have no effect. This seems like the right way to disconnect from
+							// docker log stream... but it doesn't work.
+							//So we also close the consoleOut as a 'backup plan'. When later on more messages are streamed then the
+							// closed console output stream will throw an IOExcption. Since this is called as a 'callback' from
+							// appOutput.attach. that interrupts the job running appOutput.attach(consoleOut, consoleErr); and allows
+							// it to terminate as it should, when connection is closed.
+						consoleOut.close();
+						consoleErr.close();
+					} catch (IOException e) {
+						Log.log(e);
+					}
+				}
+				
+				@Override
+				public boolean isClosed() {
+					return isClosed;
+				}
+			};
+		} catch (Exception e) {
+			Log.log(e);
+		}			
 		return null;
 	}
 

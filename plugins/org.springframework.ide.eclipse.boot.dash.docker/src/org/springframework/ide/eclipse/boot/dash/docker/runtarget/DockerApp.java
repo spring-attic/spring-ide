@@ -54,6 +54,7 @@ import org.springframework.ide.eclipse.boot.dash.api.AppConsoleProvider;
 import org.springframework.ide.eclipse.boot.dash.api.AppContext;
 import org.springframework.ide.eclipse.boot.dash.api.Deletable;
 import org.springframework.ide.eclipse.boot.dash.api.DesiredInstanceCount;
+import org.springframework.ide.eclipse.boot.dash.api.LogConnection;
 import org.springframework.ide.eclipse.boot.dash.api.ProjectRelatable;
 import org.springframework.ide.eclipse.boot.dash.api.SystemPropertySupport;
 import org.springframework.ide.eclipse.boot.dash.console.LogType;
@@ -71,6 +72,7 @@ import org.springsource.ide.eclipse.commons.core.util.OsUtils;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.StringUtils;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
+import org.springsource.ide.eclipse.commons.livexp.util.OldValueDisposer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
@@ -99,7 +101,7 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 	private static final int STOP_WAIT_TIME_IN_SECONDS = 20;
 	public final CompletableFuture<RefreshStateTracker> refreshTracker = new CompletableFuture<>();
 	
-	private AppContext appContext;
+	private OldValueDisposer<LogConnection> containerLogConnection = new OldValueDisposer<>(this);
 	
 	private static File initFile;
 
@@ -357,7 +359,7 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 			//appContext.showConsole(c.id());
 			
 			client.startContainer(c.id());
-			
+			containerLogConnection.setValue(DockerContainer.connectLog(client, c.id(), console, true));
 		}
 	}
 
@@ -511,7 +513,6 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 
 	@Override
 	public void setContext(AppContext context) {
-		this.appContext = context;
 		this.refreshTracker.complete(context.getRefreshTracker());
 	}
 
