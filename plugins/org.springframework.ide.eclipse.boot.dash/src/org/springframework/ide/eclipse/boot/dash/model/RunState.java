@@ -16,6 +16,7 @@ public enum RunState {
 	// depends on it.
 	UNKNOWN,
 	INACTIVE,
+	PAUSED,
 	STARTING,
 	RUNNING,
 	DEBUGGING,
@@ -36,13 +37,10 @@ public enum RunState {
 	}
 
 	public String getImageUrl() {
-		String iconSuffix = "gif";
+		String iconSuffix = "png";
 		String state = toString().toLowerCase();
-		if (state.contains("inactive") ||
-			state.contains("starting") ||
-			state.contains("debugging") ||
-			state.contains("running")) {
-			iconSuffix = "png";
+		if (state.contains("unknown") || state.contains("crashed") || state.contains("flapping")) {
+			iconSuffix = "gif";
 		}
 		return "icons/rs_"+toString().toLowerCase()+"."+iconSuffix;
 	}

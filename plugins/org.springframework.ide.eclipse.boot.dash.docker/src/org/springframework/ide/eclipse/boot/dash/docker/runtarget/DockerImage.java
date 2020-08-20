@@ -19,16 +19,12 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.SWT;
 import org.mandas.docker.client.DockerClient;
 import org.mandas.docker.client.DockerClient.ListContainersParam;
-import org.mandas.docker.client.DockerClient.ListImagesParam;
 import org.mandas.docker.client.DockerClient.RemoveContainerParam;
-import org.mandas.docker.client.exceptions.ContainerNotFoundException;
 import org.mandas.docker.client.exceptions.ImageNotFoundException;
 import org.mandas.docker.client.messages.Container;
 import org.mandas.docker.client.messages.Image;
@@ -50,8 +46,6 @@ import org.springsource.ide.eclipse.commons.livexp.util.Log;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
-
-import static org.eclipse.core.runtime.Assert.*;
 
 public class DockerImage implements App, ChildBearing, Styleable, ProjectRelatable, 
 	RunStateIconProvider, Deletable
@@ -142,7 +136,8 @@ public class DockerImage implements App, ChildBearing, Styleable, ProjectRelatab
 				RUNSTATE_ICONS = ImmutableMap.of(
 						RunState.RUNNING, imageDescriptorFromPlugin(PLUGIN_ID, "/icons/image_started.png"),
 						RunState.INACTIVE, imageDescriptorFromPlugin(PLUGIN_ID, "/icons/image_stopped.png"),
-						RunState.DEBUGGING, imageDescriptorFromPlugin(PLUGIN_ID, "/icons/image_debugging.png")
+						RunState.DEBUGGING, imageDescriptorFromPlugin(PLUGIN_ID, "/icons/image_debugging.png"),
+						RunState.PAUSED, imageDescriptorFromPlugin(PLUGIN_ID, "/icons/image_paused.png")
 				);
 			}
 		} catch (Exception e) {

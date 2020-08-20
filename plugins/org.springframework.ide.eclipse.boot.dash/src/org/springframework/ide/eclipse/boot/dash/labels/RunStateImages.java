@@ -58,7 +58,12 @@ public class RunStateImages {
 		}
 		else {
 			ImageDescriptor imageDescriptor = BootDashActivator.getImageDescriptor(urlString);
-			Image image = imageDescriptor.createImage();
+			Image image;
+			if (imageDescriptor!=null) {
+				image = imageDescriptor.createImage();
+			} else {
+				image = BootDashActivator.getImageDescriptor("/icons/rs_unknown.gif").createImage();
+			}
 			return new Image[] {image};
 		}
 

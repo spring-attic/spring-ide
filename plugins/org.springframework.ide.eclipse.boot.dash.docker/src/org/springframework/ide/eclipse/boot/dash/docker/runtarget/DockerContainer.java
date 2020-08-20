@@ -101,6 +101,8 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 					: RunState.RUNNING;
 		} else if ("exited".equals(state)) {
 			return RunState.INACTIVE;
+		} else if ("paused".equals(state)) {
+			return RunState.PAUSED;
 		}
 		return RunState.UNKNOWN;
 	}
@@ -379,7 +381,8 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 				RUNSTATE_ICONS = ImmutableMap.of(
 						RunState.RUNNING, imageDescriptorFromPlugin(PLUGIN_ID, "/icons/container_started.png"),
 						RunState.INACTIVE, imageDescriptorFromPlugin(PLUGIN_ID, "/icons/container_stopped.png"),
-						runState.DEBUGGING, imageDescriptorFromPlugin(PLUGIN_ID, "/icons/container_debugging.png")
+						RunState.DEBUGGING, imageDescriptorFromPlugin(PLUGIN_ID, "/icons/container_debugging.png"),
+						RunState.PAUSED, imageDescriptorFromPlugin(PLUGIN_ID, "/icons/container_paused.png")
 				);
 			}
 		} catch (Exception e) {
