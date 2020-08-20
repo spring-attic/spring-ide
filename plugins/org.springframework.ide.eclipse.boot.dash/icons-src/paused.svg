@@ -15,9 +15,9 @@
    version="1.1"
    inkscape:version="0.92.3 (2405546, 2018-03-11)"
    sodipodi:docname="paused.svg"
-   inkscape:export-filename="/home/kdvolder/commandline-dev/spring-ide/plugins/org.springframework.ide.eclipse.boot.dash/icons/rs_paused.png"
-   inkscape:export-xdpi="96"
-   inkscape:export-ydpi="96">
+   inkscape:export-filename="/home/kdvolder/commandline-dev/spring-ide/plugins/org.springframework.ide.eclipse.boot.dash.docker/icons-src/rs_paused@9x9.png"
+   inkscape:export-xdpi="54"
+   inkscape:export-ydpi="54">
   <defs
      id="defs2987" />
   <sodipodi:namedview
