@@ -11,7 +11,6 @@
 package org.springframework.ide.eclipse.boot.dash.liveprocess;
 
 import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveDataConnectionManagementActions.ExecuteCommandAction;
-import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 
 /**
  * A BDE that has a correspondence to a process that can provide live data
@@ -24,6 +23,6 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
  *
  * @author Kris De Volder
  */
-public interface LiveDataCapableElement extends BootDashElement {
+public interface LiveDataCapableElement {
 	boolean matchesLiveProcessCommand(ExecuteCommandAction action);
 }

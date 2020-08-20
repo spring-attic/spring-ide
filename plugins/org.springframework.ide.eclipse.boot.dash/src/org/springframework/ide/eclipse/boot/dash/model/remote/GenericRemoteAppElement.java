@@ -50,6 +50,8 @@ import org.springframework.ide.eclipse.boot.dash.api.SystemPropertySupport;
 import org.springframework.ide.eclipse.boot.dash.console.CloudAppLogManager;
 import org.springframework.ide.eclipse.boot.dash.devtools.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
+import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveDataCapableElement;
+import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveDataConnectionManagementActions.ExecuteCommandAction;
 import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
@@ -85,7 +87,7 @@ import com.google.common.collect.ImmutableSet.Builder;
 
 import java.util.concurrent.TimeoutException;
 
-public class GenericRemoteAppElement extends WrappingBootDashElement<String> implements Deletable, AppContext, Styleable, ElementStateListener, JmxConnectable {
+public class GenericRemoteAppElement extends WrappingBootDashElement<String> implements Deletable, AppContext, Styleable, ElementStateListener, JmxConnectable, LiveDataCapableElement {
 
 	private static final boolean DEBUG = false;
 
@@ -874,6 +876,15 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 	public String getConsoleDisplayName() {
 		App data = app.getValue();
 		return data!=null ? data.getConsoleDisplayName() : null;
+	}
+
+	@Override
+	public boolean matchesLiveProcessCommand(ExecuteCommandAction action) {
+		App data = getAppData();
+		if (data instanceof LiveDataCapableElement) {
+			return ((LiveDataCapableElement) data).matchesLiveProcessCommand(action);
+		}
+		return false;
 	}
 
 }
