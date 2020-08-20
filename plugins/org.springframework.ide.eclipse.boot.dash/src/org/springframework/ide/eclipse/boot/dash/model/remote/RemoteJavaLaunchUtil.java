@@ -26,6 +26,7 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaRuntime;
+import org.springframework.ide.eclipse.boot.util.RetryUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.common.collect.ImmutableMap;
@@ -98,7 +99,7 @@ public class RemoteJavaLaunchUtil {
 		return wc.doSave();
 	}
 
-	private static ILaunch ensureActiveLaunch(ILaunchConfiguration conf) throws CoreException {
+	private static ILaunch ensureActiveLaunch(ILaunchConfiguration conf) throws Exception {
 		ILaunchManager lm = DebugPlugin.getDefault().getLaunchManager();
 		for (ILaunch l : lm.getLaunches()) {
 			if (conf.equals(l.getLaunchConfiguration())) {
@@ -107,7 +108,7 @@ public class RemoteJavaLaunchUtil {
 				}
 			}
 		};
-		return conf.launch(ILaunchManager.DEBUG_MODE, new NullProgressMonitor(), false, true);
+		return RetryUtil.retry(50, 500, () -> conf.launch(ILaunchManager.DEBUG_MODE, new NullProgressMonitor(), false, true));
 	}
 
 	private static ILaunchConfiguration getLaunchConfig(GenericRemoteAppElement app) {
