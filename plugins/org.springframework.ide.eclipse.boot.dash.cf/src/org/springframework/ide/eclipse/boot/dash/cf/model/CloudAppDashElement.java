@@ -62,6 +62,7 @@ import org.springframework.ide.eclipse.boot.dash.devtools.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveDataCapableElement;
 import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveDataConnectionManagementActions.ExecuteCommandAction;
+import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
@@ -90,7 +91,7 @@ import reactor.core.Disposable;
  * <p/>
  * Cloud application state should always be resolved from external sources
  */
-public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> implements Deletable, LogSink, LiveDataCapableElement, LegacyLogSource {
+public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> implements BootDashElement, Deletable, LogSink, LiveDataCapableElement, LegacyLogSource {
 
 	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
 

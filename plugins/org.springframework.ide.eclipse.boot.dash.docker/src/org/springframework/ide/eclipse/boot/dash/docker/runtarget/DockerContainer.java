@@ -52,6 +52,8 @@ import org.springframework.ide.eclipse.boot.dash.api.Styleable;
 import org.springframework.ide.eclipse.boot.dash.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.devtools.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.docker.jmx.JmxSupport;
+import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveDataCapableElement;
+import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveDataConnectionManagementActions.ExecuteCommandAction;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.remote.RefreshStateTracker;
 import org.springframework.ide.eclipse.boot.util.RetryUtil;
@@ -69,7 +71,7 @@ import static org.eclipse.ui.plugin.AbstractUIPlugin.imageDescriptorFromPlugin;
 import static org.springframework.ide.eclipse.boot.dash.docker.runtarget.DockerRunTargetType.PLUGIN_ID;
 
 public class DockerContainer implements App, RunStateProvider, JmxConnectable, Styleable, PortConnectable, 
-	Deletable, ActualInstanceCount, DebuggableApp, ProjectRelatable, DevtoolsConnectable, LogSource, RunStateIconProvider
+	Deletable, ActualInstanceCount, DebuggableApp, ProjectRelatable, DevtoolsConnectable, LogSource, RunStateIconProvider, LiveDataCapableElement
 {
 
 	public static final Duration WAIT_BEFORE_KILLING = Duration.ofSeconds(10);
@@ -397,6 +399,11 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 	@Override
 	public String getConsoleDisplayName() {
 		return app.getName() + " - in container "+getStyledName(null).getString()+" @ "+getTarget().getName();
+	}
+
+	@Override
+	public boolean matchesLiveProcessCommand(ExecuteCommandAction action) {
+		return this.getProject().getName().equals(action.getProjectName());
 	}
 
 }
