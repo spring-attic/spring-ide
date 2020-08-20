@@ -384,7 +384,7 @@ public class BootDashDockerTests {
 		assertConsoleContains(con, "[extShutdownHook]");
 		assertConsoleNotContains(con, "Starting WebbyApplication");
 		assertNoConsole(img);
-		assertConsoleNotContains(dep, "[extShutdownHook]");
+		assertConsoleContains(dep, "[extShutdownHook]");
 		assertConsoleNotContains(dep, "Starting WebbyApplication");
 
 		RunStateAction startAction = restartAction();
@@ -403,7 +403,7 @@ public class BootDashDockerTests {
 			assertNoConsole(img);
 			assertConsoleName(con, "webby - in container "+con.getStyledName(null).getString()+ " @ unix:///var/run/docker.sock", true);
 			assertConsoleNotContains(con, "Successfully built image 'docker.io/library/webby");
-			assertConsoleContains(con, "Starting WebbyApplication");
+			assertConsoleContains(con, "Starting service [Tomcat]");
 		});
 	}
 
