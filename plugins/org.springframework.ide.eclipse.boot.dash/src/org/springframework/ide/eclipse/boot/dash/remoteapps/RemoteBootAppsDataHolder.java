@@ -19,18 +19,20 @@ import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 
 /**
  * A RemoteAppsDataHolder provides the means to connect providers of RemoteAppData
- * with consumers of RemoteAppData. At present there is one consumer and two producers.
+ * with consumers of RemoteAppData. At present there is one consumer and three producers.
  * <p>
  * The single consumer is the Spring Boot Language Server eclipse plugin. It uses remote app data
  * to scrape live (hover, bean etc.) information from remote boot processes.
  * <p>
- * The two producers of the information are:
+ * The three producers of the information are:
  * <p>
  * a) the "Remote Boot Apps" preferences page (which is defined in the language server
  * plugin and allows for users to manually enter information.
  * <p>
  * b) the BootDashBoard cloudfoundry plugin, which contributes information automatically
  * when boot apps are deployed to cf from boot dash with JMX tunnelling enabled.
+ * c) BootDashBoard itself via GenericRemoteAppElement framework. This provides remote app
+ *    data automatically, for elements that support JMX connections.
  * <p>
  * Note: it would be more logical if this class was defined inside boot.ls plugin, (since it
  * is the (only) consumer of the data). But because of how
