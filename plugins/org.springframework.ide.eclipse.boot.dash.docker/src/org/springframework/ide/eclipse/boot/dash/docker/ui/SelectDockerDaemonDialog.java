@@ -17,6 +17,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.springsource.ide.eclipse.commons.core.util.OsUtils;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.core.StringFieldModel;
+import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;
 import org.springsource.ide.eclipse.commons.livexp.ui.CheckboxSection;
 import org.springsource.ide.eclipse.commons.livexp.ui.DialogWithSections;
 import org.springsource.ide.eclipse.commons.livexp.ui.OkButtonHandler;
@@ -31,14 +33,28 @@ public class SelectDockerDaemonDialog extends DialogWithSections {
 
 	public static class Model implements OkButtonHandler {
 		private static final String DEFAULT_UNIX_DOCKER_URL = "unix:///var/run/docker.sock";
-		private static final String DEFAUL_WINDOWS_DOCKER_URL = "http://localhost:2375";
+		private static final String DEFAULT_WINDOWS_DOCKER_URL = "http://localhost:2375";
 		
 		public final LiveVariable<Boolean> useLocalDaemon = new LiveVariable<>(true);
 		public final LiveExpression<Boolean> daemonUrlEnabled = useLocalDaemon.apply(local -> !local);
-		public final LiveVariable<String> daemonUrl = new LiveVariable<>(getDefaultDaemonUrl());
+		public final LiveExpression<ValidationResult> urlValidator = new LiveExpression<ValidationResult>(ValidationResult.OK) {
+
+			@Override
+			protected ValidationResult compute() {
+				if (daemonUrl != null && isWindowsDefaultUrl(daemonUrl.getValue())) {
+					return ValidationResult.warning("May require exposing local Docker daemon in the Docker settings");
+				}
+				return ValidationResult.OK;
+			}
+		};
+		
+		public final StringFieldModel daemonUrl = new StringFieldModel("Url", getDefaultDaemonUrl());
 		public final LiveVariable<Boolean> okPressed = new LiveVariable<>(false);
 		
 		{
+			daemonUrl.validator(urlValidator);
+			urlValidator.dependsOn(daemonUrl.getVariable());
+			
 			daemonUrlEnabled.onChange((e,v) -> {
 				if (useLocalDaemon.getValue()) {
 					daemonUrl.setValue(getDefaultDaemonUrl());
@@ -53,10 +69,14 @@ public class SelectDockerDaemonDialog extends DialogWithSections {
 
 		private String getDefaultDaemonUrl() {
 			if (OsUtils.isWindows()) {
-				return DEFAUL_WINDOWS_DOCKER_URL;
+				return DEFAULT_WINDOWS_DOCKER_URL;
 			} else {
 				return DEFAULT_UNIX_DOCKER_URL;
 			}
+		}
+		
+		private boolean isWindowsDefaultUrl(String url) {
+			return OsUtils.isWindows() && DEFAULT_WINDOWS_DOCKER_URL.equals(url);
 		}
 	}
 
@@ -67,10 +87,9 @@ public class SelectDockerDaemonDialog extends DialogWithSections {
 	
 	@SuppressWarnings("resource") @Override
 	protected List<WizardPageSection> createSections() throws CoreException {
-		StringFieldSection sf = new StringFieldSection(this, "Url", model.daemonUrl);
 		return ImmutableList.of(
 				new CheckboxSection(this, model.useLocalDaemon, "Use Local Daemon"), 
-				new StringFieldSection(this, "Url", model.daemonUrl).setEnabler(model.daemonUrlEnabled)
+				new StringFieldSection(this, model.daemonUrl).setEnabler(model.daemonUrlEnabled)
 		);
 	}
 }
