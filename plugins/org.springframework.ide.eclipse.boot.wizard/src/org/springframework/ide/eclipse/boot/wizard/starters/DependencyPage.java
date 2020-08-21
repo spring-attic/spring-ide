@@ -6,7 +6,7 @@
  * https://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    GoPivotal, Inc. - initial API and implementation
+ *    Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard.starters;
 
@@ -15,13 +15,16 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.progress.UIJob;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.boot.livexp.ui.DynamicSection;
 import org.springframework.ide.eclipse.boot.wizard.CheckBoxesSection;
@@ -241,9 +244,34 @@ public class DependencyPage extends WizardPageWithSections {
 			protected String getSearchHint() {
 				return "Type to search dependencies";
 			}
+
+			@Override
+			public void focusControl() {
+				Control searchControl = getControl();
+				if (searchControl != null && !searchControl.isDisposed()) {
+					searchControl.setFocus();
+				}
+			}
 		}.grabFocus(true);
-//		PlatformUI.getWorkbench().getDisplay().asyncExec(() -> getControl().addListener(SWT.Show, event -> searchBoxSection.focusControl()));
+
+
+		// PT 174313406 - Async focus on search box. Dynamic creation seems to interfere with grabbing focus on the search box upon control creation
+		// therefore set it asynchronously
+		asyncSetFocus(searchBoxSection);
 		return searchBoxSection;
+	}
+
+	private void asyncSetFocus(SearchBoxSection searchBoxSection) {
+		UIJob showJob = new UIJob("Focus search box") {
+
+			@Override
+			public IStatus runInUIThread(IProgressMonitor monitor) {
+				searchBoxSection.focusControl();
+				return Status.OK_STATUS;
+			}
+		};
+		showJob.setSystem(true);
+		showJob.schedule(1000);
 	}
 
 	@SuppressWarnings("resource")
