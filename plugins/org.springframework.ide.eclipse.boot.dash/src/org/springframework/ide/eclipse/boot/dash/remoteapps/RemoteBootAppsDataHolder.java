@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Pivotal Software, Inc.
+ * Copyright (c) 2017, 2020 Pivotal Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,6 +62,7 @@ public class RemoteBootAppsDataHolder {
 			//Reason. All other 'sources' of remote apps are 'manual' and we want them to default to
 			//'keepChecking' even if the user doesn't set this to true manually.
 		private String processId = null;
+		private String processName = null;
 
 		public RemoteAppData() {
 		}
@@ -120,6 +121,14 @@ public class RemoteBootAppsDataHolder {
 			this.processId = processId;
 		}
 
+		public String getProcessName() {
+			return processName;
+		}
+
+		public void setProcessName(String processName) {
+			this.processName = processName;
+		}
+
 		@Override
 		public int hashCode() {
 			final int prime = 31;
@@ -130,8 +139,11 @@ public class RemoteBootAppsDataHolder {
 			result = prime * result + ((port == null) ? 0 : port.hashCode());
 			result = prime * result + ((processId == null) ? 0 : processId.hashCode());
 			result = prime * result + ((urlScheme == null) ? 0 : urlScheme.hashCode());
+			result = prime * result + ((processId == null) ? 0 : processId.hashCode());
+			result = prime * result + ((processName == null) ? 0 : processName.hashCode());
 			return result;
 		}
+
 		@Override
 		public boolean equals(Object obj) {
 			if (this == obj)
@@ -163,6 +175,11 @@ public class RemoteBootAppsDataHolder {
 					return false;
 			} else if (!processId.equals(other.processId))
 				return false;
+			if (processName == null) {
+				if (other.processName != null)
+					return false;
+			} else if (!processName.equals(other.processName))
+				return false;
 			if (urlScheme == null) {
 				if (other.urlScheme != null)
 					return false;
@@ -170,10 +187,11 @@ public class RemoteBootAppsDataHolder {
 				return false;
 			return true;
 		}
+
 		@Override
 		public String toString() {
 			return "RemoteAppData [jmxurl=" + jmxurl + ", host=" + host + ", urlScheme=" + urlScheme + ", port=" + port
-					+ ", keepChecking=" + keepChecking + ", processId=" + processId + "]";
+					+ ", keepChecking=" + keepChecking + ", processId=" + processId + ", processName=" + processName + "]";
 		}
 
 	}

@@ -73,6 +73,7 @@ public class GenericRemoteAppElementDataContributor implements Contributor, Elem
 			data.setPort(""+child.getLivePort());
 			data.setKeepChecking(false);
 			data.setProcessId(child.getAppData().getName());
+			data.setProcessName(child.getConsoleDisplayName());
 			allApps.add(data);
 		}
 		collectFrom(child.getChildren(), allApps);
