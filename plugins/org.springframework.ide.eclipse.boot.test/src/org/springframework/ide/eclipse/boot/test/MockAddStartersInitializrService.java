@@ -111,15 +111,13 @@ public class MockAddStartersInitializrService extends AddStartersInitializrServi
 	}
 
 	@Override
-	public Option[] getSupportedBootReleaseVersions(String url) throws Exception {
-
+	protected Option[] resolveAllBootVersions(String url) throws Exception {
 		Builder<Object> options = ImmutableList.builder();
 		for (String v : supportedBootVersions) {
 			Option option = new Option();
 			option.setId(v);
 			options.add(option);
 		}
-
 		return options.build().toArray(new Option[0]);
 	}
 

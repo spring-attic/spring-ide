@@ -14,7 +14,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.bootVersion;
+import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.latestBootReleaseVersion;
 
 import java.util.List;
 
@@ -68,12 +68,12 @@ public class AddStartersModelTest extends AddStartersTestHarness {
 	 */
 	@Test
 	public void selectDependenciesInWizard() throws Exception {
-		String projectBootVersion = CURRENT_BOOT_VERSION;
-		IProject project = harness.createBootProject("selectDependenciesInWizard", bootVersion(projectBootVersion));
+		IProject project = harness.createBootProject("selectDependenciesInWizard", latestBootReleaseVersion());
 
 		String starterZipFile = STARTER_ZIP_WEB_ACTUATOR;
 		String validInitializrUrl = MOCK_VALID_INITIALIZR_URL;
-		String[] supportedBootVersions = SUPPORTED_BOOT_VERSIONS;
+		String[] supportedBootVersions = harness.supportedBootVersions;
+		String latestBootVersion = harness.latestReleaseVersion;
 		String[] dependenciesToSelect = new String[] {"web", "actuator"};
 
 		MockInitializrService wrappedService = new MockInitializrService(supportedBootVersions, mavenStartersHarness,
@@ -86,7 +86,7 @@ public class AddStartersModelTest extends AddStartersTestHarness {
 
 		// Verify the fields and model are set in the wizard after loading
 		assertEquals(validInitializrUrl, wizard.getServiceUrl().getValue());
-		assertEquals(projectBootVersion, wizard.getBootVersion().getValue());
+		assertEquals(latestBootVersion, wizard.getBootVersion().getValue());
 		assertEquals(ValidationResult.OK, wizard.getValidator().getValue());
 		assertInitializrAndCompareModelsNotNull(wizard);
 
@@ -113,12 +113,12 @@ public class AddStartersModelTest extends AddStartersTestHarness {
 
 	@Test
 	public void changeBetweenInvalidAndValidUrl() throws Exception {
-		String projectBootVersion = CURRENT_BOOT_VERSION;
-		IProject project = harness.createBootProject("changeBetweenInvalidAndValidUrl", bootVersion(projectBootVersion));
+		IProject project = harness.createBootProject("changeBetweenInvalidAndValidUrl", latestBootReleaseVersion());
+		String[] supportedBootVersions = harness.supportedBootVersions;
+		String latestBootVersion = harness.latestReleaseVersion;
 
 		String starterZipFile = STARTER_ZIP_WEB_ACTUATOR;
 		String validInitializrUrl = MOCK_VALID_INITIALIZR_URL;
-		String[] supportedBootVersions = SUPPORTED_BOOT_VERSIONS;
 		String[] dependenciesToSelect = new String[] {"web", "actuator"};
 
 		MockInitializrService wrappedService = new MockInitializrService(supportedBootVersions, mavenStartersHarness,
@@ -131,7 +131,7 @@ public class AddStartersModelTest extends AddStartersTestHarness {
 
 		// Verify the fields and model are set in the wizard after loading
 		assertEquals(validInitializrUrl, wizard.getServiceUrl().getValue());
-		assertEquals(projectBootVersion, wizard.getBootVersion().getValue());
+		assertEquals(latestBootVersion, wizard.getBootVersion().getValue());
 		assertEquals(ValidationResult.OK, wizard.getValidator().getValue());
 		assertInitializrAndCompareModelsNotNull(wizard);
 
@@ -154,12 +154,12 @@ public class AddStartersModelTest extends AddStartersTestHarness {
 
 	@Test
 	public void malformedUrlError() throws Exception {
-		String projectBootVersion = CURRENT_BOOT_VERSION;
-		IProject project = harness.createBootProject("malformedUrlError", bootVersion(projectBootVersion));
+		IProject project = harness.createBootProject("malformedUrlError", latestBootReleaseVersion());
+		String[] supportedBootVersions = harness.supportedBootVersions;
+		String latestBootVersion = harness.latestReleaseVersion;
 
 		String starterZipFile = STARTER_ZIP_WEB_ACTUATOR;
 		String validInitializrUrl = MOCK_VALID_INITIALIZR_URL;
-		String[] supportedBootVersions = SUPPORTED_BOOT_VERSIONS;
 		String[] dependenciesToSelect = new String[] {"web", "actuator"};
 
 		MockInitializrService wrappedService = new MockInitializrService(supportedBootVersions, mavenStartersHarness,
@@ -172,7 +172,7 @@ public class AddStartersModelTest extends AddStartersTestHarness {
 
 		// Verify the fields and model are set in the wizard after loading
 		assertEquals(validInitializrUrl, wizard.getServiceUrl().getValue());
-		assertEquals(projectBootVersion, wizard.getBootVersion().getValue());
+		assertEquals(latestBootVersion, wizard.getBootVersion().getValue());
 		assertEquals(ValidationResult.OK, wizard.getValidator().getValue());
 		assertInitializrAndCompareModelsNotNull(wizard);
 
@@ -196,12 +196,12 @@ public class AddStartersModelTest extends AddStartersTestHarness {
 
 	@Test
 	public void missingUrlError() throws Exception {
-		String projectBootVersion = CURRENT_BOOT_VERSION;
-		IProject project = harness.createBootProject("missingUrlError", bootVersion(projectBootVersion));
+		IProject project = harness.createBootProject("missingUrlError", latestBootReleaseVersion());
+		String[] supportedBootVersions = harness.supportedBootVersions;
+		String latestBootVersion = harness.latestReleaseVersion;
 
 		String starterZipFile = STARTER_ZIP_WEB_ACTUATOR;
 		String validInitializrUrl = MOCK_VALID_INITIALIZR_URL;
-		String[] supportedBootVersions = SUPPORTED_BOOT_VERSIONS;
 		String[] dependenciesToSelect = new String[] {"web", "actuator"};
 
 		MockInitializrService wrappedService = new MockInitializrService(supportedBootVersions, mavenStartersHarness,
@@ -214,7 +214,7 @@ public class AddStartersModelTest extends AddStartersTestHarness {
 
 		// Verify the fields and model are set in the wizard after loading
 		assertEquals(validInitializrUrl, wizard.getServiceUrl().getValue());
-		assertEquals(projectBootVersion, wizard.getBootVersion().getValue());
+		assertEquals(latestBootVersion, wizard.getBootVersion().getValue());
 		assertEquals(ValidationResult.OK, wizard.getValidator().getValue());
 		assertInitializrAndCompareModelsNotNull(wizard);
 
@@ -243,13 +243,13 @@ public class AddStartersModelTest extends AddStartersTestHarness {
 		// doesn't allow creating a project with old unsupported boot version
 		// However we will change the list of supported boot versions to exclude this boot version
 		// to simulate a case where there is a unsupported boot version in the add starters wizard
-		IProject project = harness.createBootProject("unsupportedBootVersionError", bootVersion(CURRENT_BOOT_VERSION));
+		IProject project = harness.createBootProject("unsupportedBootVersionError", latestBootReleaseVersion());
 
 		String starterZipFile = STARTER_ZIP_WEB_ACTUATOR;
 		String validInitializrUrl = MOCK_VALID_INITIALIZR_URL;
 
 		// List supported versions that do not include the version used to create the project
-		String[] supportedBootVersions = new String[] { "4.4.0.RELEASE", "1.1.0.RELEASE", "1.5.3.RELEASE"};
+		String[] supportedBootVersions = new String[] { "1.0.0.RELEASE", "1.1.0.RELEASE", "1.5.3.RELEASE"};
 
 		// No dependencies to select, as in this test, there should be no initializr information because boot version is not supported
 		String[] dependenciesToSelect = null;
@@ -267,19 +267,18 @@ public class AddStartersModelTest extends AddStartersTestHarness {
 		assertTrue(result.details.contains("FileNotFoundException"));
 
 		// Also verify that the error message details lists all the supported boot versions that a user should update to
-		assertTrue(result.details.contains("4.4.0.RELEASE"));
+		assertTrue(result.details.contains("1.0.0.RELEASE"));
 		assertTrue(result.details.contains("1.1.0.RELEASE"));
 		assertTrue(result.details.contains("1.5.3.RELEASE"));
 	}
 
 	@Test
 	public void basicComparison() throws Exception {
-		String projectBootVersion = CURRENT_BOOT_VERSION;
-		IProject project = harness.createBootProject("basicComparison", bootVersion(projectBootVersion));
+		IProject project = harness.createBootProject("basicComparison", latestBootReleaseVersion());
+		String[] supportedBootVersions = harness.supportedBootVersions;
 
 		String starterZipFile = STARTER_ZIP_WEB_ACTUATOR;
 		String validInitializrUrl = MOCK_VALID_INITIALIZR_URL;
-		String[] supportedBootVersions = SUPPORTED_BOOT_VERSIONS;
 		String[] dependenciesToSelect = new String[] {"web", "actuator"};
 
 		MockInitializrService wrappedService = new MockInitializrService(supportedBootVersions, mavenStartersHarness,
@@ -304,8 +303,4 @@ public class AddStartersModelTest extends AddStartersTestHarness {
 		// Verify that the comparison contains the local project as a comparison source
 		assertTrue(comparison.getLocalResource().getProject().equals(project));
 	}
-
-
-
-
 }

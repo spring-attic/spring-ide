@@ -45,19 +45,32 @@ public class AddStartersInitializrService {
 	}
 
 	public Option[] getSupportedBootReleaseVersions(String url) throws Exception {
-		Option[] options = getServiceSpec(new URL(url)).getSingleSelectOptions("bootVersion");
+		Option[] options = resolveAllBootVersions(url);
+		return getReleaseVersions(options);
+	}
+
+	protected Option[] resolveAllBootVersions(String url) throws Exception {
+		return getServiceSpec(new URL(url)).getSingleSelectOptions("bootVersion");
+	}
+
+	protected Option[] getReleaseVersions(Option[] options) {
 		List<Option> releasesOnly = new ArrayList<>();
 		int count = 0;
 		if (options != null) {
 			for (Option option : options) {
 				// PT 172040311 - Do not include snapshot versions
-				if (!option.getId().contains("SNAPSHOT")) {
+				if (isRelease(option.getId())) {
 					releasesOnly.add(option);
 					count++;
 				}
 			}
 		}
 		return releasesOnly.toArray(new Option[count]);
+
+	}
+
+	public static boolean isRelease(String version) {
+		return version != null && !version.contains("SNAPSHOT");
 	}
 
 	public void checkBasicConnection(URL url) throws Exception {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2017 Pivotal, Inc.
+ * Copyright (c) 2015, 2020 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,8 +17,10 @@ import static org.springsource.ide.eclipse.commons.livexp.ui.ProjectLocationSect
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -48,6 +50,7 @@ import org.springframework.ide.eclipse.boot.wizard.content.CodeSet;
 import org.springframework.ide.eclipse.boot.wizard.importing.ImportConfiguration;
 import org.springframework.ide.eclipse.boot.wizard.importing.ImportStrategies;
 import org.springframework.ide.eclipse.boot.wizard.importing.ImportStrategy;
+import org.springframework.ide.eclipse.boot.wizard.starters.AddStartersInitializrService;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
@@ -60,6 +63,9 @@ import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
 public class BootProjectTestHarness {
 
 	private static final boolean DEBUG = true;
+
+	public String[] supportedBootVersions = null;
+	public String latestReleaseVersion = null;
 
 	private static void debug(String string) {
 		if (DEBUG) {
@@ -165,6 +171,24 @@ public class BootProjectTestHarness {
 		};
 	}
 
+	public static WizardConfigurer latestBootReleaseVersion() throws Exception {
+		return new WizardConfigurer() {
+			@Override
+			public void apply(NewSpringBootWizardModel wizard) {
+				RadioGroup bootVersionRadio = wizard.getBootVersion();
+				RadioInfo[] radios = bootVersionRadio.getRadios();
+				for (RadioInfo option : radios) {
+					if (AddStartersInitializrService.isRelease(option.getValue())) {
+						bootVersionRadio.setValue(option);
+						return;
+					}
+				}
+
+				fail("No boot versions found in the wizard. Unable to set the latest release version");
+			}
+		};
+	}
+
 	/**
 	 * @return A wizard configurer that ensures the selected 'boot version' is at least
 	 * a given version of boot.
@@ -262,6 +286,19 @@ public class BootProjectTestHarness {
 							for (WizardConfigurer extraConf : extraConfs) {
 								extraConf.apply(wizard);
 							}
+
+							RadioInfo[] radios =  wizard.getBootVersion().getRadios();
+							List<String> supportedBootVersions = new ArrayList<>();
+							String latestRelease = null;
+							for (RadioInfo info : radios) {
+								supportedBootVersions.add(info.getValue());
+								if (latestRelease == null && AddStartersInitializrService.isRelease(info.getValue())) {
+									latestRelease = info.getValue();
+								}
+							}
+							BootProjectTestHarness.this.latestReleaseVersion = latestRelease;
+							BootProjectTestHarness.this.supportedBootVersions = supportedBootVersions.toArray(new String[0]);
+
 							wizard.performFinish(new NullProgressMonitor()/*new SysOutProgressMonitor()*/);
 							return Status.OK_STATUS;
 						} catch (Throwable e) {
