@@ -72,21 +72,23 @@ public class AddStartersModelTest extends AddStartersTestHarness {
 
 		String starterZipFile = STARTER_ZIP_WEB_ACTUATOR;
 		String validInitializrUrl = MOCK_VALID_INITIALIZR_URL;
-		String[] supportedBootVersions = harness.supportedBootVersions;
-		String latestBootVersion = harness.latestReleaseVersion;
+		String[] supportedBootVersions = harness.getInitializrSupportedBootVersions();
 		String[] dependenciesToSelect = new String[] {"web", "actuator"};
 
 		MockInitializrService wrappedService = new MockInitializrService(supportedBootVersions, mavenStartersHarness,
 				INITIALIZR_INFO_INPUT);
 		AddStartersInitializrService initializrService = new MockAddStartersInitializrService(starterZipFile,
 				validInitializrUrl, supportedBootVersions, dependenciesToSelect, wrappedService);
+
+		String projectBootVersion = getProjectBootVersion(initializrService, validInitializrUrl, project);
+
 		AddStartersPreferences preferences = createPreferences(validInitializrUrl, prefs);
 		AddStartersWizardModel wizard = createAndLoadWizard(project, preferences, initializrService,
 				dependenciesToSelect);
 
 		// Verify the fields and model are set in the wizard after loading
 		assertEquals(validInitializrUrl, wizard.getServiceUrl().getValue());
-		assertEquals(latestBootVersion, wizard.getBootVersion().getValue());
+		assertEquals(projectBootVersion, wizard.getBootVersion().getValue());
 		assertEquals(ValidationResult.OK, wizard.getValidator().getValue());
 		assertInitializrAndCompareModelsNotNull(wizard);
 
@@ -114,8 +116,7 @@ public class AddStartersModelTest extends AddStartersTestHarness {
 	@Test
 	public void changeBetweenInvalidAndValidUrl() throws Exception {
 		IProject project = harness.createBootProject("changeBetweenInvalidAndValidUrl", latestBootReleaseVersion());
-		String[] supportedBootVersions = harness.supportedBootVersions;
-		String latestBootVersion = harness.latestReleaseVersion;
+		String[] supportedBootVersions = harness.getInitializrSupportedBootVersions();
 
 		String starterZipFile = STARTER_ZIP_WEB_ACTUATOR;
 		String validInitializrUrl = MOCK_VALID_INITIALIZR_URL;
@@ -125,13 +126,16 @@ public class AddStartersModelTest extends AddStartersTestHarness {
 				INITIALIZR_INFO_INPUT);
 		AddStartersInitializrService initializrService = new MockAddStartersInitializrService(starterZipFile,
 				validInitializrUrl, supportedBootVersions, dependenciesToSelect, wrappedService);
+
+		String projectBootVersion = getProjectBootVersion(initializrService, validInitializrUrl, project);
+
 		AddStartersPreferences preferences = createPreferences(validInitializrUrl, prefs);
 		AddStartersWizardModel wizard = createAndLoadWizard(project, preferences, initializrService,
 				dependenciesToSelect);
 
 		// Verify the fields and model are set in the wizard after loading
 		assertEquals(validInitializrUrl, wizard.getServiceUrl().getValue());
-		assertEquals(latestBootVersion, wizard.getBootVersion().getValue());
+		assertEquals(projectBootVersion, wizard.getBootVersion().getValue());
 		assertEquals(ValidationResult.OK, wizard.getValidator().getValue());
 		assertInitializrAndCompareModelsNotNull(wizard);
 
@@ -155,8 +159,7 @@ public class AddStartersModelTest extends AddStartersTestHarness {
 	@Test
 	public void malformedUrlError() throws Exception {
 		IProject project = harness.createBootProject("malformedUrlError", latestBootReleaseVersion());
-		String[] supportedBootVersions = harness.supportedBootVersions;
-		String latestBootVersion = harness.latestReleaseVersion;
+		String[] supportedBootVersions = harness.getInitializrSupportedBootVersions();
 
 		String starterZipFile = STARTER_ZIP_WEB_ACTUATOR;
 		String validInitializrUrl = MOCK_VALID_INITIALIZR_URL;
@@ -166,13 +169,16 @@ public class AddStartersModelTest extends AddStartersTestHarness {
 				INITIALIZR_INFO_INPUT);
 		AddStartersInitializrService initializrService = new MockAddStartersInitializrService(starterZipFile,
 				validInitializrUrl, supportedBootVersions, dependenciesToSelect, wrappedService);
+
+		String projectBootVersion = getProjectBootVersion(initializrService, validInitializrUrl, project);
+
 		AddStartersPreferences preferences = createPreferences(validInitializrUrl, prefs);
 		AddStartersWizardModel wizard = createAndLoadWizard(project, preferences, initializrService,
 				dependenciesToSelect);
 
 		// Verify the fields and model are set in the wizard after loading
 		assertEquals(validInitializrUrl, wizard.getServiceUrl().getValue());
-		assertEquals(latestBootVersion, wizard.getBootVersion().getValue());
+		assertEquals(projectBootVersion, wizard.getBootVersion().getValue());
 		assertEquals(ValidationResult.OK, wizard.getValidator().getValue());
 		assertInitializrAndCompareModelsNotNull(wizard);
 
@@ -197,8 +203,7 @@ public class AddStartersModelTest extends AddStartersTestHarness {
 	@Test
 	public void missingUrlError() throws Exception {
 		IProject project = harness.createBootProject("missingUrlError", latestBootReleaseVersion());
-		String[] supportedBootVersions = harness.supportedBootVersions;
-		String latestBootVersion = harness.latestReleaseVersion;
+		String[] supportedBootVersions = harness.getInitializrSupportedBootVersions();
 
 		String starterZipFile = STARTER_ZIP_WEB_ACTUATOR;
 		String validInitializrUrl = MOCK_VALID_INITIALIZR_URL;
@@ -208,13 +213,16 @@ public class AddStartersModelTest extends AddStartersTestHarness {
 				INITIALIZR_INFO_INPUT);
 		AddStartersInitializrService initializrService = new MockAddStartersInitializrService(starterZipFile,
 				validInitializrUrl, supportedBootVersions, dependenciesToSelect, wrappedService);
+
+		String projectBootVersion = getProjectBootVersion(initializrService, validInitializrUrl, project);
+
 		AddStartersPreferences preferences = createPreferences(validInitializrUrl, prefs);
 		AddStartersWizardModel wizard = createAndLoadWizard(project, preferences, initializrService,
 				dependenciesToSelect);
 
 		// Verify the fields and model are set in the wizard after loading
 		assertEquals(validInitializrUrl, wizard.getServiceUrl().getValue());
-		assertEquals(latestBootVersion, wizard.getBootVersion().getValue());
+		assertEquals(projectBootVersion, wizard.getBootVersion().getValue());
 		assertEquals(ValidationResult.OK, wizard.getValidator().getValue());
 		assertInitializrAndCompareModelsNotNull(wizard);
 
@@ -234,7 +242,6 @@ public class AddStartersModelTest extends AddStartersTestHarness {
 		assertEquals(ValidationResult.OK, wizard.getValidator().getValue());
 		assertInitializrAndCompareModelsNotNull(wizard);
 	}
-
 
 	@Test
 	public void unsupportedBootVersionError() throws Exception {
@@ -275,7 +282,7 @@ public class AddStartersModelTest extends AddStartersTestHarness {
 	@Test
 	public void basicComparison() throws Exception {
 		IProject project = harness.createBootProject("basicComparison", latestBootReleaseVersion());
-		String[] supportedBootVersions = harness.supportedBootVersions;
+		String[] supportedBootVersions = harness.getInitializrSupportedBootVersions();
 
 		String starterZipFile = STARTER_ZIP_WEB_ACTUATOR;
 		String validInitializrUrl = MOCK_VALID_INITIALIZR_URL;

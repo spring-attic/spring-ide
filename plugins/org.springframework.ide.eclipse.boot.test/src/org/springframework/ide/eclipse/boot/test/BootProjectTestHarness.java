@@ -64,8 +64,8 @@ public class BootProjectTestHarness {
 
 	private static final boolean DEBUG = true;
 
-	public String[] supportedBootVersions = null;
-	public String latestReleaseVersion = null;
+	private String[] supportedBootVersions = null;
+	private String latestReleaseVersion = null;
 
 	private static void debug(String string) {
 		if (DEBUG) {
@@ -426,5 +426,19 @@ public class BootProjectTestHarness {
 		description.setName(newName);
 		project.move(description, true, new NullProgressMonitor());
 		return workspace.getRoot().getProject(newName);
+	}
+
+	public String[] getInitializrSupportedBootVersions() {
+		if (supportedBootVersions == null) {
+			fail("Must first create a project before initializr supported versions are resolved.");
+		}
+		return supportedBootVersions;
+	}
+
+	public String getLatestBootReleaseVersion() {
+		if (latestReleaseVersion == null) {
+			fail("Must first create a project before latest boot version from initializr is resolved.");
+		}
+		return latestReleaseVersion;
 	}
 }

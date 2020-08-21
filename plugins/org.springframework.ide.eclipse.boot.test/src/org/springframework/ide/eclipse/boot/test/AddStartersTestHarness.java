@@ -24,7 +24,9 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
+import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrProjectDownloader;
+import org.springframework.ide.eclipse.boot.core.initializr.InitializrService;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrServiceSpec.Dependency;
 import org.springframework.ide.eclipse.boot.core.initializr.InitializrUrl;
 import org.springframework.ide.eclipse.boot.test.util.TestResourcesUtil;
@@ -53,6 +55,17 @@ public class AddStartersTestHarness {
 		wizard.addModelLoader(() -> wizard.createInitializrModel(new NullProgressMonitor()));
 		// Wait for it to finish
 		waitForWizardJob();
+	}
+
+	protected ISpringBootProject getBootProject(AddStartersInitializrService service, String url, IProject project) throws Exception {
+		InitializrService initializr = service.getService(() -> url);
+		SpringBootCore core = new SpringBootCore(initializr);
+		return core.project(project);
+	}
+
+	protected String getProjectBootVersion(AddStartersInitializrService service, String url, IProject project) throws Exception {
+		ISpringBootProject bootProject = getBootProject(service, url, project);
+		return bootProject.getBootVersion();
 	}
 
 	protected void waitForWizardJob() throws InterruptedException {
