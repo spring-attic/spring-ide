@@ -111,7 +111,9 @@ implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentT
 	@Override
 	public synchronized void connect(ConnectMode mode) throws Exception {
 		if (!isConnected()) {
-			this.client.setValue(DefaultDockerClient.builder().uri(params.getUri()).build());
+			DefaultDockerClient c = DefaultDockerClient.builder().uri(params.getUri()).build();
+			c.info(); //ensure docker daemon is reachable.
+			this.client.setValue(c);
 		}
 	}
 
