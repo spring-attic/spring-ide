@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.docker.runtarget;
 
+import static org.eclipse.ui.plugin.AbstractUIPlugin.imageDescriptorFromPlugin;
+import static org.springframework.ide.eclipse.boot.dash.docker.runtarget.DockerRunTargetType.PLUGIN_ID;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.time.Duration;
@@ -26,7 +29,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.StyledString;
-import org.eclipse.swt.SWT;
 import org.mandas.docker.client.DockerClient;
 import org.mandas.docker.client.DockerClient.LogsParam;
 import org.mandas.docker.client.DockerClient.RemoveContainerParam;
@@ -52,8 +54,6 @@ import org.springframework.ide.eclipse.boot.dash.api.Styleable;
 import org.springframework.ide.eclipse.boot.dash.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.devtools.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.docker.jmx.JmxSupport;
-import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveDataCapableElement;
-import org.springframework.ide.eclipse.boot.dash.liveprocess.LiveDataConnectionManagementActions.ExecuteCommandAction;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.remote.RefreshStateTracker;
 import org.springframework.ide.eclipse.boot.util.RetryUtil;
@@ -67,11 +67,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
-import static org.eclipse.ui.plugin.AbstractUIPlugin.imageDescriptorFromPlugin;
-import static org.springframework.ide.eclipse.boot.dash.docker.runtarget.DockerRunTargetType.PLUGIN_ID;
-
 public class DockerContainer implements App, RunStateProvider, JmxConnectable, Styleable, PortConnectable, 
-	Deletable, ActualInstanceCount, DebuggableApp, ProjectRelatable, DevtoolsConnectable, LogSource, RunStateIconProvider, LiveDataCapableElement
+	Deletable, ActualInstanceCount, DebuggableApp, ProjectRelatable, DevtoolsConnectable, LogSource, RunStateIconProvider
 {
 
 	public static final Duration WAIT_BEFORE_KILLING = Duration.ofSeconds(10);
@@ -404,11 +401,6 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 	@Override
 	public String getConsoleDisplayName() {
 		return app.getName() + " - in container "+getStyledName(null).getString()+" @ "+getTarget().getName();
-	}
-
-	@Override
-	public boolean matchesLiveProcessCommand(ExecuteCommandAction action) {
-		return this.getProject().getName().equals(action.getProjectName());
 	}
 
 }
