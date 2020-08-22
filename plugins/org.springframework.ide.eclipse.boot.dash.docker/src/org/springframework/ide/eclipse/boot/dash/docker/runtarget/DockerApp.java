@@ -55,6 +55,7 @@ import org.springframework.ide.eclipse.boot.dash.api.AppContext;
 import org.springframework.ide.eclipse.boot.dash.api.Deletable;
 import org.springframework.ide.eclipse.boot.dash.api.DesiredInstanceCount;
 import org.springframework.ide.eclipse.boot.dash.api.LogConnection;
+import org.springframework.ide.eclipse.boot.dash.api.LogSource;
 import org.springframework.ide.eclipse.boot.dash.api.ProjectRelatable;
 import org.springframework.ide.eclipse.boot.dash.api.SystemPropertySupport;
 import org.springframework.ide.eclipse.boot.dash.console.LogType;
@@ -81,7 +82,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 @SuppressWarnings("restriction")
-public class DockerApp extends AbstractDisposable implements App, ChildBearing, Deletable, ProjectRelatable, DesiredInstanceCount, SystemPropertySupport {
+public class DockerApp extends AbstractDisposable implements App, ChildBearing, Deletable, ProjectRelatable, DesiredInstanceCount, SystemPropertySupport, LogSource {
 
 	private static final String JAVA_SE = "JavaSE-";
 	private static final String DOCKER_IO_LIBRARY = "docker.io/library/";
@@ -570,4 +571,10 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 		return getName() + " - image build output @ "+getTarget().getName();
 	}
 
+	@Override
+	public LogConnection connectLog(AppConsole logConsole, boolean includeHistory) {
+		// There is nothing to connect to because docker app only writes output directly to the console
+		// There is no streaming API to fetch output.
+		return null;
+	}
 }

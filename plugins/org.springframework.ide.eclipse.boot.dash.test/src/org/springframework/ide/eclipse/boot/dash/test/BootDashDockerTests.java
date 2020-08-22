@@ -96,6 +96,7 @@ import org.springframework.ide.eclipse.boot.dash.model.remote.RemoteJavaLaunchUt
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget.ConnectMode;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
+import org.springframework.ide.eclipse.boot.dash.views.AbstractBootDashElementsAction;
 import org.springframework.ide.eclipse.boot.dash.views.AddRunTargetAction;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
 import org.springframework.ide.eclipse.boot.dash.views.DeleteElementsAction;
@@ -322,6 +323,17 @@ public class BootDashDockerTests {
 			assertEquals(RunState.RUNNING, img.getRunState());
 			assertEquals(RunState.RUNNING, con.getRunState());
 		});
+
+		// PT 174387686 - Disable show console for images
+		AbstractBootDashElementsAction openConsoleAction = actions().getOpenConsoleAction();
+		harness.selection.setElements(dep);
+		assertTrue(openConsoleAction.isVisible());
+		assertTrue(openConsoleAction.isEnabled());
+		harness.selection.setElements(img);
+		assertFalse(openConsoleAction.isVisible());
+		harness.selection.setElements(con);
+		assertTrue(openConsoleAction.isVisible());
+		assertTrue(openConsoleAction.isEnabled());
 
 		assertConsoleName(dep, "webby - image build output @ unix:///var/run/docker.sock", false);
 		assertConsoleContains(dep, "Successfully built image 'docker.io/library/webby");

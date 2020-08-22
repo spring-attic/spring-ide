@@ -14,6 +14,8 @@ package org.springframework.ide.eclipse.boot.dash.api;
  * If an {@link App} implements this interface then it represents a source of 'streamed' log
  * output. I.e. it generates output over time in background and this output can be
  * displayed in boot dash console ui.
+ *
+ * This interface is also used as a indicator whether open console action is applicable to an element.
  */
 public interface LogSource {
 

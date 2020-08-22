@@ -21,6 +21,7 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
+import org.springframework.ide.eclipse.boot.dash.model.remote.GenericRemoteAppElement;
 
 public class OpenConsoleAction extends AbstractBootDashElementsAction {
 
@@ -73,5 +74,20 @@ public class OpenConsoleAction extends AbstractBootDashElementsAction {
 				}
 			}
 		}
+	}
+
+	@Override
+	public void updateVisibility() {
+    	BootDashElement element = getSingleSelectedElement();
+		boolean isVisible = false;
+		if (element != null) {
+			if (element instanceof GenericRemoteAppElement) {
+				isVisible = ((GenericRemoteAppElement) element).canWriteToConsole();
+			} else {
+				// Backward compatibility with CF. It is always visible for selected CF elements
+				isVisible = true;
+			}
+		}
+		this.setVisible(isVisible);
 	}
 }

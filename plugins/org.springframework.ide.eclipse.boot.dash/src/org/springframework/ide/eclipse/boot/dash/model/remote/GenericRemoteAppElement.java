@@ -15,6 +15,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.resources.IProject;
@@ -84,8 +85,6 @@ import org.springsource.ide.eclipse.commons.livexp.util.OldValueDisposer;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
-
-import java.util.concurrent.TimeoutException;
 
 public class GenericRemoteAppElement extends WrappingBootDashElement<String> implements Deletable, AppContext, Styleable, ElementStateListener, JmxConnectable, LiveDataCapableElement {
 
@@ -616,6 +615,11 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 			return ((JmxConnectable)data).getJmxUrl();
 		}
 		return null;
+	}
+
+	public boolean canWriteToConsole() {
+		App data = getAppData();
+		return data instanceof LogSource;
 	}
 
 	private LiveExpression<Set<String>> actuatorUrls = sumarizeFromChildren(new AppDataSummarizer<Set<String>>() {

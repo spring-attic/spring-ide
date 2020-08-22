@@ -402,5 +402,4 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 	public String getConsoleDisplayName() {
 		return app.getName() + " - in container "+getStyledName(null).getString()+" @ "+getTarget().getName();
 	}
-
 }
