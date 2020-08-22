@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2018 Pivotal, Inc.
+ * Copyright (c) 2015, 2020 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,12 +26,18 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.launching.JREContainerInitializer;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.JavaTypeUtil;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.FileUtil;
 
 public class JavaProjectUtil {
+
+	private static final String JAVA_SE = "JavaSE-";
+	private static final String JAVA_SE_11 = "JavaSE-11";
+
 
 	public static List<File> getNonSystemJarDependencies(IJavaProject jp, boolean reverse) {
 		try {
@@ -137,5 +143,48 @@ public class JavaProjectUtil {
 
 	public static IContainer getDefaultOutputFolder(IJavaProject jp) {
 		return JavaTypeUtil.getDefaultOutputFolder(jp);
+	}
+
+	public static boolean isJava9OrLater(IProject project) {
+		try {
+			IJavaProject jp = JavaCore.create(project);
+			IClasspathEntry[] cp = jp.getRawClasspath();
+			for (IClasspathEntry cpe : cp) {
+				if (cpe.getPath().segment(0).equals("org.eclipse.jdt.launching.JRE_CONTAINER")) {
+					String eeId = JREContainerInitializer.getExecutionEnvironmentId(cpe.getPath());
+					if (eeId.startsWith(JAVA_SE)) {
+						String version = eeId.substring(JAVA_SE.length());
+						if (version.contains(".")) {
+							return false;
+						} else {
+							return true;
+						}
+					} else {
+						return false;
+					}
+				}
+			}
+		} catch (Exception e) {
+			Log.log(e);
+		}
+		return true;
+	}
+
+	public static boolean isJava11(IProject project) {
+		try {
+			IJavaProject jp = JavaCore.create(project);
+			IClasspathEntry[] cp = jp.getRawClasspath();
+			for (IClasspathEntry cpe : cp) {
+				if (cpe.getPath().segment(0).equals("org.eclipse.jdt.launching.JRE_CONTAINER")) {
+					String eeId = JREContainerInitializer.getExecutionEnvironmentId(cpe.getPath());
+					if (JAVA_SE_11.equals(eeId)) {
+						return true;
+					}
+				}
+			}
+		} catch (Exception e) {
+			Log.log(e);
+		}
+		return false;
 	}
 }

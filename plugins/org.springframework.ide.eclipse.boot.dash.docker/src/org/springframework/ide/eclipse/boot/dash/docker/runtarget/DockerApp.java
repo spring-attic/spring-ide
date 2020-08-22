@@ -33,10 +33,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.internal.launching.JREContainerInitializer;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.mandas.docker.client.DockerClient;
@@ -69,6 +66,7 @@ import org.springframework.ide.eclipse.boot.dash.model.remote.RefreshStateTracke
 import org.springframework.ide.eclipse.boot.dash.util.LineBasedStreamGobler;
 import org.springframework.ide.eclipse.boot.launch.util.PortFinder;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
+import org.springframework.ide.eclipse.boot.util.JavaProjectUtil;
 import org.springsource.ide.eclipse.commons.core.util.OsUtils;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.StringUtils;
@@ -84,7 +82,6 @@ import com.google.common.collect.ImmutableSet;
 @SuppressWarnings("restriction")
 public class DockerApp extends AbstractDisposable implements App, ChildBearing, Deletable, ProjectRelatable, DesiredInstanceCount, SystemPropertySupport, LogSource {
 
-	private static final String JAVA_SE = "JavaSE-";
 	private static final String DOCKER_IO_LIBRARY = "docker.io/library/";
 	private static final String[] NO_STRINGS = new String[0];
 	private DockerClient client;
@@ -107,37 +104,11 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 	private static File initFile;
 
 	private final String DEBUG_JVM_ARGS(String debugPort) {
-		if (isJava9OrLater()) {
+		if (JavaProjectUtil.isJava9OrLater(project)) {
 			return "-Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n,address=*:"+debugPort;
 		} else {
 			return "-Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n,address="+debugPort;
 		}
-	}
-
-	private boolean isJava9OrLater() {
-		try {
-			IJavaProject jp = JavaCore.create(project);
-			IClasspathEntry[] cp = jp.getRawClasspath();
-			for (IClasspathEntry cpe : cp) {
-				System.out.println(cpe);
-				if (cpe.getPath().segment(0).equals("org.eclipse.jdt.launching.JRE_CONTAINER")) {
-					String eeId = JREContainerInitializer.getExecutionEnvironmentId(cpe.getPath());
-					if (eeId.startsWith(JAVA_SE)) {
-						String version = eeId.substring(JAVA_SE.length());
-						if (version.contains(".")) {
-							return false;
-						} else {
-							return true;
-						}
-					} else {
-						return false;
-					}
-				}
-			}
-		} catch (Exception e) {
-			Log.log(e);
-		}
-		return true;
 	}
 
 	public DockerApp(String name, DockerRunTarget target, DockerClient client) {

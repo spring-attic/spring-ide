@@ -28,6 +28,7 @@ import org.springframework.ide.eclipse.boot.dash.cf.client.CFCloudDomain;
 import org.springframework.ide.eclipse.boot.dash.cf.client.v2.CFPushArguments;
 import org.springframework.ide.eclipse.boot.dash.cf.client.v2.CFRoute;
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.DeploymentProperties;
+import org.springframework.ide.eclipse.boot.util.JavaProjectUtil;
 
 import com.google.common.collect.ImmutableList;
 
@@ -270,6 +271,12 @@ public class CloudApplicationDeploymentProperties implements DeploymentPropertie
 			env.putAll(app.getEnvAsMap());
 			env.remove("JAVA_OPTS");
 		}
+		
+		// PT 174076433 - Support deploying of Java 11 apps to CF
+		if (JavaProjectUtil.isJava11(project)) {
+			env.put("JBP_CONFIG_OPEN_JDK_JRE", "{ jre: { version: 11.+}}");
+		}
+
 		properties.setEnvironmentVariables(env);
 
 		properties.setInstances(app == null ? 1 : app.getInstances());
