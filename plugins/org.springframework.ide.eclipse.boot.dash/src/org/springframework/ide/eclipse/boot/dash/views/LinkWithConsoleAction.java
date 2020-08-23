@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
+import org.springframework.ide.eclipse.boot.dash.model.remote.GenericRemoteAppElement;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 
@@ -103,6 +104,31 @@ public class LinkWithConsoleAction extends AbstractBootDashElementsAction {
 				}
 			}
 		}
+	}
+
+	@Override
+	public void updateVisibility() {
+		this.setVisible(supportsConsole());
+	}
+
+	@Override
+	public void updateEnablement() {
+		this.setEnabled(supportsConsole());
+	}
+
+	protected boolean supportsConsole() {
+    	BootDashElement element = getSingleSelectedElement();
+		boolean supports = false;
+		if (element != null) {
+			if (element instanceof GenericRemoteAppElement) {
+				supports = ((GenericRemoteAppElement) element).canWriteToConsole();
+			} else {
+				// Backward compatibility with CF. Console action is enabled when a single CF element
+				// is selected
+				supports = true;
+			}
+		}
+		return supports;
 	}
 
 }

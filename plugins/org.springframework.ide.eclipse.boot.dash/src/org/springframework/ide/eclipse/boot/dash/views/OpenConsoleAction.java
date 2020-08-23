@@ -78,16 +78,26 @@ public class OpenConsoleAction extends AbstractBootDashElementsAction {
 
 	@Override
 	public void updateVisibility() {
+		this.setVisible(supportsConsole());
+	}
+
+	@Override
+	public void updateEnablement() {
+		this.setEnabled(supportsConsole());
+	}
+
+	protected boolean supportsConsole() {
     	BootDashElement element = getSingleSelectedElement();
-		boolean isVisible = false;
+		boolean supports = false;
 		if (element != null) {
 			if (element instanceof GenericRemoteAppElement) {
-				isVisible = ((GenericRemoteAppElement) element).canWriteToConsole();
+				supports = ((GenericRemoteAppElement) element).canWriteToConsole();
 			} else {
-				// Backward compatibility with CF. It is always visible for selected CF elements
-				isVisible = true;
+				// Backward compatibility with CF. Console action is enabled when a single CF element
+				// is selected
+				supports = true;
 			}
 		}
-		this.setVisible(isVisible);
+		return supports;
 	}
 }
