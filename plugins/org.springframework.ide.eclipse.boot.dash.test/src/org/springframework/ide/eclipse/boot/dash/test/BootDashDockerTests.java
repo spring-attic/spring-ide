@@ -324,16 +324,26 @@ public class BootDashDockerTests {
 			assertEquals(RunState.RUNNING, con.getRunState());
 		});
 
-		// PT 174387686 - Disable show console for images
+		// PT 174387686 - Disable show/link console context menu and tool bar actions for docker images
 		AbstractBootDashElementsAction openConsoleAction = actions().getOpenConsoleAction();
+		AbstractBootDashElementsAction linkWithConsoleAction = actions().getLinkWithConsoleAction();
 		harness.selection.setElements(dep);
 		assertTrue(openConsoleAction.isVisible());
 		assertTrue(openConsoleAction.isEnabled());
+		assertTrue(linkWithConsoleAction.isVisible());
+		assertTrue(linkWithConsoleAction.isEnabled());
+
 		harness.selection.setElements(img);
 		assertFalse(openConsoleAction.isVisible());
+		assertFalse(openConsoleAction.isEnabled());
+		assertFalse(linkWithConsoleAction.isVisible());
+		assertFalse(linkWithConsoleAction.isEnabled());
+
 		harness.selection.setElements(con);
 		assertTrue(openConsoleAction.isVisible());
 		assertTrue(openConsoleAction.isEnabled());
+		assertTrue(linkWithConsoleAction.isVisible());
+		assertTrue(linkWithConsoleAction.isEnabled());
 
 		assertConsoleName(dep, "webby - image build output @ unix:///var/run/docker.sock", false);
 		assertConsoleContains(dep, "Successfully built image 'docker.io/library/webby");
