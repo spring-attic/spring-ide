@@ -74,30 +74,28 @@ public abstract class LiveDataPropertiesSection<T> extends AbstractBdeProperties
 
 	@Override
 	public void dispose() {
-		super.dispose();
-		if (browser != null) {
+		if (browser != null && !browser.isDisposed()) {
 			browser.removeLocationListener(HYPER_LINK_LISTENER);
 		}
+		super.dispose();
 	}
 
 	public void refresh() {
-		if (!layout.topControl.isDisposed() && !browser.isDisposed()) {
-			this.data = fetchData();
+		this.data = fetchData();
 
-			if (data.hasFailed()) {
-				layout.topControl = this.missingInfo;
-				String newText = this.data.getErrorMessage().toHtml();
-				if (!newText.equals(browser.getText())) {
-					browser.setText(newText);
-				}
-			} else {
-				layout.topControl = this.dataControl;
+		if (data.hasFailed()) {
+			layout.topControl = this.missingInfo;
+			String newText = this.data.getErrorMessage().toHtml();
+			if (browser != null && !browser.isDisposed() && !newText.equals(browser.getText())) {
+				browser.setText(newText);
 			}
-
-			refreshDataControls();
-
-			SectionStackLayout.reflow(page);
+		} else {
+			layout.topControl = this.dataControl;
 		}
+
+		refreshDataControls();
+
+		SectionStackLayout.reflow(page);
 	}
 
 	protected abstract Control createSectionDataControls(Composite composite);
