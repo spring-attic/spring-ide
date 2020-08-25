@@ -14,10 +14,12 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Iterator;
 
 import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.compare.contentmergeviewer.TextMergeViewer;
 import org.eclipse.compare.internal.merge.DocumentMerger;
+import org.eclipse.compare.internal.merge.DocumentMerger.Diff;
 import org.eclipse.compare.internal.merge.DocumentMerger.IDocumentMergerInput;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.text.TextViewer;
@@ -132,24 +134,22 @@ public class PomMergeViewer extends TextMergeViewer {
 	protected void copy(boolean leftToRight) {
 		if (Boolean.TRUE.equals(getCompareConfiguration().getProperty(PomPlugin.POM_STRUCTURE_ADDITIONS_COMPARE_SETTING))) {
 			try {
-				// Execute: selectFirstDiff(true) - select the first diff at the top of the doc
-				Method selectFirstDiffMethod = TextMergeViewer.class.getDeclaredMethod("selectFirstDiff", boolean.class);
-				selectFirstDiffMethod.setAccessible(true);
-				selectFirstDiffMethod.invoke(this, true);
-				Method copyMethod = TextMergeViewer.class.getDeclaredMethod(leftToRight ? "copyDiffLeftToRight" : "copyDiffRightToLeft");
-				copyMethod.setAccessible(true);
-				Method navigateMethod = TextMergeViewer.class.getDeclaredMethod("navigate", boolean.class, boolean.class, boolean.class);
-				navigateMethod.setAccessible(true);
-				do {
-					// Execute: copyDiffLeftToRight()
-					copyMethod.invoke(this);
-					// Execute: navigate(true, false, false) - to navigate to the next diff until the end of the doc
-				} while (Boolean.FALSE.equals(navigateMethod.invoke(this, true, false, false)));
+				Method copyDiffMethod = TextMergeViewer.class.getDeclaredMethod("copy", Diff.class, boolean.class);
+				copyDiffMethod.setAccessible(true);
+				
+				for (Iterator<Diff> it = ((PomDocumentMerger)getDocumentMerger()).changesIterator(); it.hasNext();) {
+					Diff d = it.next();
+					copyDiffMethod.invoke(this, d, leftToRight);
+				}
+				
 				// Execute: update(false);
 				Method updateMethod = TextMergeViewer.class.getDeclaredMethod("update", boolean.class);
 				updateMethod.setAccessible(true);
 				updateMethod.invoke(this, false);
+				
 				// Execute: selectFirstDiff(true)
+				Method selectFirstDiffMethod = TextMergeViewer.class.getDeclaredMethod("selectFirstDiff", boolean.class);
+				selectFirstDiffMethod.setAccessible(true);				
 				selectFirstDiffMethod.invoke(this, true);
 			} catch (Exception e) {
 				Log.log(e);

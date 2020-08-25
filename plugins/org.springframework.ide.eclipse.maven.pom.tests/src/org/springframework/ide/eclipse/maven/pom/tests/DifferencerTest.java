@@ -655,6 +655,41 @@ public class DifferencerTest {
 		);
 	}
 	
+	@Test
+	public void pluginsDiff() throws Exception {
+		String xml1 = "<project>\n" + 
+				"  <groupId>org.eclipse.compare</groupId>\n" + 
+				"  <artifactId>org.eclipse.compare.examples.xml</artifactId>\n" + 
+				"	<build>\n" + 
+				"  		<finalName>start-site</finalName>\n" +
+				"		<plugins>\n" + 
+				"			<plugin>\n" + 
+				"				<groupId>org.apache.maven.plugins</groupId>\n" + 
+				"				<artifactId>maven-jar-plugin</artifactId>\n" + 
+				"			</plugin>\n" + 
+				"		</plugins>\n" + 
+				"	</build>\n" +
+				"</project>";
+		String xml2 = "<project>\n" +
+				"	<build>\n" + 
+				"		<plugins>\n" + 
+				"			<plugin>\n" + 
+				"				<groupId>org.apache.maven.plugins</groupId>\n" + 
+				"				<artifactId>maven-jar-plugin</artifactId>\n" + 
+				"			</plugin>\n" + 
+				"		</plugins>\n" + 
+				"	</build>\n" + 
+				"  <artifactId>org.eclipse.compare.examples.xml</artifactId>\n" + 
+				"  <groupId>org.eclipse.compare</groupId>\n" + 
+				"</project>";
+		
+		List<Difference> differences = calculateDiffs(xml1, xml2);
+		printDifferences(differences);
+		assertDiffs(differences,
+			rgt("  		<finalName>start-site</finalName>\n")
+		);
+	}
+	
 	private ExpectedDiff gap(String string) {
 		return new ExpectedDiff(Direction.NONE, string, string);
 	}

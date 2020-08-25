@@ -23,7 +23,7 @@ public class PomDocumentDiffer {
 	public static XmlDocumentDiffer create(IDocument document1, IDocument document2) {
 		return new XmlDocumentDiffer(document1, document2)
 				.idProvider(XmlSelectors.childrenOf("properties", "project", "parent", "dependency", "repository",
-						"pluginRepository", "plugin"), IdProviders.FROM_TAG_NAME)
+						"pluginRepository", "plugin", "build"), IdProviders.FROM_TAG_NAME)
 				.idProvider(XmlSelectors.tagName("dependency"), IdProviders.fromChildren("groupId", "artifactId"))
 				.idProvider(XmlSelectors.tagName("repository"), IdProviders.fromChildren("url"))
 				.idProvider(XmlSelectors.tagName("pluginRepository"), IdProviders.fromChildren("url"))
