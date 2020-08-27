@@ -17,7 +17,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.jface.resource.ImageDescriptor;
-import com.spotify.docker.client.DefaultDockerClient;
+import org.mandas.docker.client.DefaultDockerClient;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.docker.ui.DefaultDockerUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.docker.ui.DockerUserInteractions;
