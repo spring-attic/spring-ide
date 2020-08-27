@@ -24,8 +24,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.eclipse.core.resources.IProject;
-import org.mandas.docker.client.DefaultDockerClient;
-import org.mandas.docker.client.DockerClient;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.DebuggableTarget;
@@ -44,6 +42,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.OldValueDisposer;
 
+import com.github.dockerjava.api.DockerClient;
 import com.google.common.collect.ImmutableList;
 
 public class DockerRunTarget extends AbstractRunTarget<DockerTargetParams> 
@@ -120,8 +119,8 @@ implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentT
 	public synchronized void connect(ConnectMode mode) throws Exception {
 		if (!isConnected()) {
 			try {
-				DefaultDockerClient c = DefaultDockerClient.builder().uri(params.getUri()).build();
-				c.info(); //ensure docker daemon is reachable.
+				DockerClient c = DockerRunTargetType.createDockerClient(params.getUri());
+				c.infoCmd().exec(); //ensure docker daemon is reachable.
 				this.client.setValue(c);
 			} catch (Error e) {
 				DefaultDockerUserInteractions.openBundleWiringError(e);

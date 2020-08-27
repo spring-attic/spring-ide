@@ -20,11 +20,10 @@ import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
+import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.model.Container;
 import com.google.common.collect.ImmutableList;
-import org.mandas.docker.client.DockerClient;
-import org.mandas.docker.client.DockerClient.ListContainersParam;
-import org.mandas.docker.client.DockerClient.RemoveContainerParam;
-import org.mandas.docker.client.messages.Container;
+import com.google.common.collect.ImmutableMap;
 
 public class DockerDeployer extends AbstractDisposable {
 
@@ -66,16 +65,17 @@ public class DockerDeployer extends AbstractDisposable {
 			if (client != null) {
 				try {
 					List<App> images = app.fetchChildren();
-					for (Container container : client.listContainers(
-							ListContainersParam.allContainers(), 
-							ListContainersParam.withLabel(DockerApp.APP_NAME, d.getName())
-					)) {
-						client.removeContainer(container.id(), RemoveContainerParam.forceKill());
+					for (Container container : client.listContainersCmd()
+							.withShowAll(true)
+							.withLabelFilter(ImmutableMap.of(DockerApp.APP_NAME, d.getName()))
+							.exec()
+					) {
+						client.removeContainerCmd(container.getId()).withForce(true).exec();
 					}
 					for (App _img : images) {
 						DockerImage img = (DockerImage) _img;
 						try {
-							client.removeImage(img.getName(), /*force*/true, /*npPrune*/false);
+							client.removeImageCmd(img.getName()).withForce(true).withNoPrune(false).exec();
 						} catch (Exception e) {
 							Log.log(e);
 						}

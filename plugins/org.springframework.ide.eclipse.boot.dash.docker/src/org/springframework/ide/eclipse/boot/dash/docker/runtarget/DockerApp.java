@@ -36,15 +36,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.JavaRuntime;
-import org.mandas.docker.client.DockerClient;
-import org.mandas.docker.client.DockerClient.ListContainersParam;
-import org.mandas.docker.client.DockerClient.ListImagesParam;
-import org.mandas.docker.client.messages.Container;
-import org.mandas.docker.client.messages.ContainerConfig;
-import org.mandas.docker.client.messages.ContainerCreation;
-import org.mandas.docker.client.messages.HostConfig;
-import org.mandas.docker.client.messages.Image;
-import org.mandas.docker.client.messages.PortBinding;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.AppConsole;
 import org.springframework.ide.eclipse.boot.dash.api.AppConsoleProvider;
@@ -74,10 +65,19 @@ import org.springsource.ide.eclipse.commons.livexp.util.Log;
 import org.springsource.ide.eclipse.commons.livexp.util.OldValueDisposer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.command.CreateContainerCmd;
+import com.github.dockerjava.api.command.CreateContainerResponse;
+import com.github.dockerjava.api.model.Image;
+import com.github.dockerjava.api.model.PortBinding;
+import com.github.dockerjava.api.model.Ports.Binding;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+
+import com.github.dockerjava.api.model.Container;
+import com.github.dockerjava.api.model.ExposedPort;
 
 @SuppressWarnings("restriction")
 public class DockerApp extends AbstractDisposable implements App, ChildBearing, Deletable, ProjectRelatable, DesiredInstanceCount, SystemPropertySupport, LogSource {
@@ -141,15 +141,15 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 		Builder<App> builder = ImmutableList.builder();
 		if (client!=null) {
 			List<Image> images = JobUtil.interruptAfter(Duration.ofSeconds(15), 
-					() -> client.listImages(ListImagesParam.allImages())
+					() -> client.listImagesCmd().withShowAll(true).exec()
 			);
 			synchronized (this) {
 				Set<String> persistedImages = new HashSet<>(Arrays.asList(getPersistedImages()));
 				Set<String> existingImages = new HashSet<>();
 				for (Image image : images) {
-					if (persistedImages.contains(image.id())) {
+					if (persistedImages.contains(image.getId())) {
 						builder.add(new DockerImage(this, image));
-						existingImages.add(image.id());
+						existingImages.add(image.getId());
 					}
 				}
 				setPersistedImages(existingImages);
@@ -175,7 +175,10 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 				String currentSession = this.target.sessionId.getValue();
 				if (currentSession.equals(deployment.getSessionId())) {
 					RunState desiredRunState = deployment.getRunState();
-					List<Container> containers = client.listContainers(ListContainersParam.allContainers(), ListContainersParam.withLabel(APP_NAME, getName()));
+					List<Container> containers = client.listContainersCmd()
+							.withShowAll(true)
+							.withLabelFilter(ImmutableMap.of(APP_NAME, getName()))
+							.exec();
 					if (desiredRunState==RunState.INACTIVE) {
 						stop(containers);
 					} else if (desiredRunState.isActive()) {
@@ -207,7 +210,7 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 	private boolean isMatchingContainer(DockerDeployment d, Container c) {
 		String desiredBuildId = d.getBuildId();
 		Map<String, String> desiredProps = d.getSystemProperties();
-		return desiredBuildId.equals(c.labels().get(BUILD_ID)) && 
+		return desiredBuildId.equals(c.getLabels().get(BUILD_ID)) && 
 				desiredProps.equals(DockerContainer.getSystemProps(c));
 	}
 
@@ -215,7 +218,7 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 		RefreshStateTracker refreshTracker = this.refreshTracker.get();
 		refreshTracker.run("Stopping containers for app "+name, () -> {
 			for (Container container : containers) {
-				client.stopContainer(container.id(), STOP_WAIT_TIME_IN_SECONDS);
+				client.stopContainerCmd(container.getId()).withTimeout(STOP_WAIT_TIME_IN_SECONDS).exec();
 			}
 		});
 	}
@@ -258,29 +261,28 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 					.put(BUILD_ID, desiredBuildId)
 					.put(SYSTEM_PROPS, sysprops);
 			
-			ImmutableSet.Builder<String> exposedPorts = ImmutableSet.builder();
-			ImmutableMap.Builder<String, List<PortBinding>> portBindings = ImmutableMap.builder();
+			ImmutableSet.Builder<ExposedPort> exposedPorts = ImmutableSet.builder();
+			ImmutableList.Builder<PortBinding> portBindings = ImmutableList.builder();
 
-			ContainerConfig.Builder cb = ContainerConfig.builder()
-					.image(image);
+			CreateContainerCmd cb = client.createContainerCmd(image);
 			
 			int appLocalPort = PortFinder.findFreePort();
 			int appContainerPort = 8080;
 			
 			if (appLocalPort > 0) {
 				labels.put(APP_LOCAL_PORT, ""+appLocalPort);
-				portBindings.put("" + appContainerPort, ImmutableList.of(PortBinding.of("0.0.0.0", appLocalPort)));
-				exposedPorts.add(""+appContainerPort);
+				portBindings.add(new PortBinding(new Binding("0,0,0,0", ""+appLocalPort), ExposedPort.tcp(appContainerPort)));
+				exposedPorts.add(ExposedPort.tcp(appContainerPort));
 			}
 
 			StringBuilder javaOpts = new StringBuilder();
 
 			if (jmxUrl!=null) {
-				String jmxPort = ""+jmx.getPort();
-				labels.put(JMX_PORT, jmxPort);
-				
-				portBindings.put(jmxPort, ImmutableList.of(PortBinding.of("0.0.0.0", jmxPort)));
-				exposedPorts.add(jmxPort);
+				int jmxPort = jmx.getPort();
+				labels.put(JMX_PORT, ""+jmxPort);
+
+				portBindings.add(new PortBinding(new Binding("0.0.0.0", ""+jmxPort), ExposedPort.tcp(jmxPort)));
+				exposedPorts.add(ExposedPort.tcp(jmxPort));
 				
 				javaOpts.append(jmx.getJavaOpts());
 				javaOpts.append(" ");
@@ -288,13 +290,13 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 			
 			RunState desiredRunState = deployment.getRunState();
 			if (desiredRunState==RunState.DEBUGGING) {
-				String debugPort = ""+PortFinder.findFreePort();
-				labels.put(DockerApp.DEBUG_PORT, debugPort);
+				int debugPort = PortFinder.findFreePort();
+				labels.put(DockerApp.DEBUG_PORT, ""+debugPort);
 				
-				portBindings.put(debugPort, ImmutableList.of(PortBinding.of("0.0.0.0", debugPort)));
-				exposedPorts.add(debugPort);
+				portBindings.add(new PortBinding(new Binding("0.0.0.0", ""+debugPort), ExposedPort.tcp(debugPort)));
+				exposedPorts.add(ExposedPort.tcp(debugPort));
 				
-				javaOpts.append(DEBUG_JVM_ARGS(debugPort));
+				javaOpts.append(DEBUG_JVM_ARGS(""+debugPort));
 				console.write("Debug Port = "+debugPort, LogType.STDOUT);
 			}
 			
@@ -311,27 +313,24 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 						
 			String javaOptsStr = javaOpts.toString();
 			if (StringUtils.hasText(javaOptsStr)) {
-				cb.env("JAVA_OPTS="+javaOptsStr.trim());
+				cb.withEnv("JAVA_OPTS="+javaOptsStr.trim());
 				console.write("JAVA_OPTS="+javaOptsStr.trim(), LogType.STDOUT);
 			}
 			
-			cb.hostConfig(HostConfig.builder()
-					.portBindings(portBindings.build())
-					.build()
-			);
-			cb.exposedPorts(exposedPorts.build());
+			cb.withPortBindings(portBindings.build());
+			cb.withExposedPorts(exposedPorts.build().asList());
 
-			cb.labels(labels.build());
-			ContainerCreation c = client.createContainer(cb.build());
-			console.write("Container created: "+c.id(), LogType.STDOUT);
-			console.write("Starting container: "+c.id(), LogType.STDOUT);
+			cb.withLabels(labels.build());
+			CreateContainerResponse c = cb.exec();
+			console.write("Container created: "+c.getId(), LogType.STDOUT);
+			console.write("Starting container: "+c.getId(), LogType.STDOUT);
 			console.write("Ports: "+appLocalPort+"->"+appContainerPort, LogType.STDOUT);
 			
 			//Disabled show of console here. See: https://www.pivotaltracker.com/story/show/174316849
 			//appContext.showConsole(c.id());
 			
-			client.startContainer(c.id());
-			containerLogConnection.setValue(DockerContainer.connectLog(client, c.id(), console, true));
+			client.startContainerCmd(c.getId()).exec();
+			containerLogConnection.setValue(DockerContainer.connectLog(client, c.getId(), console, true));
 		}
 	}
 
@@ -376,10 +375,10 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 		if (imageTag.startsWith(DOCKER_IO_LIBRARY)) {
 			imageTag = imageTag.substring(DOCKER_IO_LIBRARY.length());
 		}
-		List<Image> images = client.listImages(ListImagesParam.byName(imageTag));
+		List<Image> images = client.listImagesCmd().withImageNameFilter(imageTag).exec();
 		
 		for (Image img : images) {
-			addPersistedImage(img.id());
+			addPersistedImage(img.getId());
 		}
 		
 		return imageTag;

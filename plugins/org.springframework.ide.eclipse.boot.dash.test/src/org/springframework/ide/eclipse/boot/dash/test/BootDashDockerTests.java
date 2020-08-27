@@ -53,15 +53,6 @@ import org.eclipse.swt.graphics.Color;
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
-import org.mandas.docker.client.DefaultDockerClient;
-import org.mandas.docker.client.DockerClient;
-import org.mandas.docker.client.DockerClient.ListContainersParam;
-import org.mandas.docker.client.DockerClient.ListImagesParam;
-import org.mandas.docker.client.DockerClient.RemoveContainerParam;
-import org.mandas.docker.client.exceptions.DockerException;
-import org.mandas.docker.client.messages.Container;
-import org.mandas.docker.client.messages.ContainerInfo;
-import org.mandas.docker.client.messages.Image;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.springframework.ide.eclipse.beans.ui.live.model.LiveBeansModel;
@@ -108,6 +99,10 @@ import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 
+import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.command.InspectContainerResponse;
+import com.github.dockerjava.api.model.Container;
+import com.github.dockerjava.api.model.Image;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
@@ -554,15 +549,13 @@ public class BootDashDockerTests {
 	}
 
 	private List<Container> listContainersWithId(String containerId)
-			throws DockerException, InterruptedException {
+			throws Exception {
 		return
-				client().listContainers(
-						ListContainersParam.allContainers(),
-						ListContainersParam.withLabel(DockerApp.APP_NAME)
-				)
-				.stream()
-				.filter(c -> c.id().equals(containerId))
-				.collect(Collectors.toList());
+				client().listContainersCmd()
+					.withShowAll(true)
+					.withIdFilter(ImmutableList.of(containerId))
+					.withLabelFilter(ImmutableList.of(DockerApp.APP_NAME))
+				.exec();
 	}
 
 	@Test
@@ -1054,9 +1047,7 @@ public class BootDashDockerTests {
 			assertNoImage(imageId);
 
 			assertTrue(
-				client().listContainers(
-					ListContainersParam.allContainers(), ListContainersParam.withLabel(DockerApp.APP_NAME)
-				)
+				client().listContainersCmd().withShowAll(true).exec()
 				.isEmpty()
 			);
 
@@ -1098,9 +1089,7 @@ public class BootDashDockerTests {
 
 			assertNoImage(imgId);
 			assertTrue(
-					client().listContainers(
-						ListContainersParam.allContainers(), ListContainersParam.withLabel(DockerApp.APP_NAME)
-					)
+					client().listContainersCmd().withShowAll(true).exec()
 					.isEmpty()
 			);
 		});
@@ -1133,10 +1122,10 @@ public class BootDashDockerTests {
 			assertEquals(sessionId, getSessionId(dep));
 
 			String containerId = con.getName();
-			client().stopContainer(containerId, 2);
+			client().stopContainerCmd(containerId).withTimeout(2).exec();
 			ACondition.waitFor("Container stopped", 5_000, () -> {
-				ContainerInfo info = client().inspectContainer(containerId);
-				String status = info.state().status();
+				InspectContainerResponse info = client().inspectContainerCmd(containerId).exec();
+				String status = info.getState().getStatus();
 				System.out.println("status = "+status);
 				assertEquals("exited", status);
 			});
@@ -1274,8 +1263,8 @@ public class BootDashDockerTests {
 	}
 
 	private void assertNoImage(String imageId) throws Exception {
-		for (Image img : client().listImages(ListImagesParam.allImages())) {
-			assertFalse(imageId.equals(img.id()));
+		for (Image img : client().listImagesCmd().withShowAll(true).exec()) {
+			assertFalse(imageId.equals(img.getId()));
 		}
 	}
 
@@ -1314,7 +1303,7 @@ public class BootDashDockerTests {
 
 	private DockerClient client() {
 		if (_client==null) {
-			_client = DefaultDockerClient.builder().uri(DEFAULT_DOCKER_URL).build();
+			_client = DockerRunTargetType.createDockerClient(DEFAULT_DOCKER_URL);
 		}
 		return _client;
 	}
@@ -1322,21 +1311,21 @@ public class BootDashDockerTests {
 	@After
 	public void tearDown() throws Exception {
 		try {
-			List<Container> cons = client().listContainers(
-					ListContainersParam.allContainers(),
-					ListContainersParam.withLabel(DockerApp.APP_NAME)
-			);
+			List<Container> cons = client().listContainersCmd()
+					.withShowAll(true)
+					.withLabelFilter(ImmutableList.of(DockerApp.APP_NAME))
+					.exec();
 			//Delete all 'our' containers
 			for (Container c : cons) {
-				String label = c.labels().getOrDefault(DockerApp.APP_NAME, "");
+				String label = c.getLabels().getOrDefault(DockerApp.APP_NAME, "");
 				assertTrue(StringUtil.hasText(label));
-				System.out.println("removing container: "+c.id());
-				client().removeContainer(c.id(), RemoveContainerParam.forceKill(), RemoveContainerParam.removeVolumes());
+				System.out.println("removing container: "+c.getId());
+				client().removeContainerCmd(c.getId()).withForce(true).withRemoveVolumes(true).exec();
 			}
-			//Delete all dangline images
-			for (Image img : client().listImages(ListImagesParam.danglingImages())) {
-				System.out.println("removing image: "+img.id());
-				client().removeImage(img.id(), /*force*/true, /*noPrune*/ false);
+			//Delete all dangling images
+			for (Image img : client().listImagesCmd().withDanglingFilter(true).exec()) {
+				System.out.println("removing image: "+img.getId());
+				client().removeImageCmd(img.getId()).withForce(true).withNoPrune(false).exec();
 			}
 		} finally {
 			if (_client!=null) {
