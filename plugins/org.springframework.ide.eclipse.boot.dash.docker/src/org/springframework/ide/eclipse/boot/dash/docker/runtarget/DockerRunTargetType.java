@@ -19,6 +19,7 @@ import java.util.concurrent.CompletableFuture;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.mandas.docker.client.DefaultDockerClient;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
+import org.springframework.ide.eclipse.boot.dash.docker.ui.DefaultDockerUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.docker.ui.DockerUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.docker.ui.SelectDockerDaemonDialog;
 import org.springframework.ide.eclipse.boot.dash.docker.ui.SelectDockerDaemonDialog.Model;
@@ -61,8 +62,12 @@ public class DockerRunTargetType extends AbstractRemoteRunTargetType<DockerTarge
 			if (existing.contains(uri)) {
 				ui().errorPopup("Duplicate Target", "A target with the same uri ("+uri+") already exists!");
 			} else {
-				DefaultDockerClient client = DefaultDockerClient.builder().uri(uri).build();
-				return new DockerRunTarget(this, new DockerTargetParams(uri), client);
+				try {
+					DefaultDockerClient client = DefaultDockerClient.builder().uri(uri).build();
+					return new DockerRunTarget(this, new DockerTargetParams(uri), client);
+				} catch (Error e) {
+					DefaultDockerUserInteractions.openBundleWiringError(e);
+				}
 			}
 		}
 		return null;
