@@ -36,15 +36,14 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.JavaRuntime;
-import org.mandas.docker.client.DockerClient;
-import org.mandas.docker.client.DockerClient.ListContainersParam;
-import org.mandas.docker.client.DockerClient.ListImagesParam;
-import org.mandas.docker.client.messages.Container;
-import org.mandas.docker.client.messages.ContainerConfig;
-import org.mandas.docker.client.messages.ContainerCreation;
-import org.mandas.docker.client.messages.HostConfig;
-import org.mandas.docker.client.messages.Image;
-import org.mandas.docker.client.messages.PortBinding;
+import com.spotify.docker.client.DockerClient.ListContainersParam;
+import com.spotify.docker.client.DockerClient.ListImagesParam;
+import com.spotify.docker.client.messages.Container;
+import com.spotify.docker.client.messages.ContainerConfig;
+import com.spotify.docker.client.messages.ContainerCreation;
+import com.spotify.docker.client.messages.HostConfig;
+import com.spotify.docker.client.messages.Image;
+import com.spotify.docker.client.messages.PortBinding;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.AppConsole;
 import org.springframework.ide.eclipse.boot.dash.api.AppConsoleProvider;
@@ -78,6 +77,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.spotify.docker.client.DockerClient;
 
 @SuppressWarnings("restriction")
 public class DockerApp extends AbstractDisposable implements App, ChildBearing, Deletable, ProjectRelatable, DesiredInstanceCount, SystemPropertySupport, LogSource {
