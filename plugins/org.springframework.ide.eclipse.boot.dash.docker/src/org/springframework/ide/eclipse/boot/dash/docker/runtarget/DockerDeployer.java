@@ -21,10 +21,10 @@ import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.common.collect.ImmutableList;
-import org.mandas.docker.client.DockerClient;
-import org.mandas.docker.client.DockerClient.ListContainersParam;
-import org.mandas.docker.client.DockerClient.RemoveContainerParam;
-import org.mandas.docker.client.messages.Container;
+import com.spotify.docker.client.DockerClient;
+import com.spotify.docker.client.DockerClient.ListContainersParam;
+import com.spotify.docker.client.DockerClient.RemoveContainerParam;
+import com.spotify.docker.client.messages.Container;
 
 public class DockerDeployer extends AbstractDisposable {
 

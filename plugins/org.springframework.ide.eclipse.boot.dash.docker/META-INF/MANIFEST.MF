@@ -16,14 +16,13 @@ Require-Bundle: org.springframework.ide.eclipse.boot.dash,
  org.yaml.snakeyaml,
  org.springframework.ide.eclipse.boot.launch,
  org.springsource.ide.eclipse.commons.core,
- org.glassfish.jersey.inject.jersey-hk2;bundle-version="2.30.1",
- org.mandas.docker-client;bundle-version="3.2.1",
  com.fasterxml.jackson.core.jackson-core,
  com.fasterxml.jackson.core.jackson-databind,
  org.springframework.ide.eclipse.editor.support,
  org.eclipse.jdt.launching,
  org.eclipse.jdt.core,
- org.apache.commons.io
+ org.apache.commons.io,
+ org.springframework.ide.eclipse.docker.client;bundle-version="3.9.14"
 Import-Package: org.eclipse.core.runtime,
  org.eclipse.core.runtime.jobs
 Export-Package: org.springframework.ide.eclipse.boot.dash.docker.runtarget,

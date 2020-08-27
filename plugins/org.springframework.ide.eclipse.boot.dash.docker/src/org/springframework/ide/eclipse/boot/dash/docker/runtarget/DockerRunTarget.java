@@ -24,8 +24,8 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.eclipse.core.resources.IProject;
-import org.mandas.docker.client.DefaultDockerClient;
-import org.mandas.docker.client.DockerClient;
+import com.spotify.docker.client.DefaultDockerClient;
+import com.spotify.docker.client.DockerClient;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.DebuggableTarget;
