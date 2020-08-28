@@ -68,6 +68,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.CreateContainerResponse;
+import com.github.dockerjava.api.exception.NotModifiedException;
 import com.github.dockerjava.api.model.Image;
 import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.api.model.Ports.Binding;
@@ -79,7 +80,6 @@ import com.google.common.collect.ImmutableSet;
 import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.ExposedPort;
 
-@SuppressWarnings("restriction")
 public class DockerApp extends AbstractDisposable implements App, ChildBearing, Deletable, ProjectRelatable, DesiredInstanceCount, SystemPropertySupport, LogSource {
 
 	private static final String DOCKER_IO_LIBRARY = "docker.io/library/";
@@ -218,9 +218,10 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 		RefreshStateTracker refreshTracker = this.refreshTracker.get();
 		refreshTracker.run("Stopping containers for app "+name, () -> {
 			for (Container container : containers) {
-				RunState state = DockerContainer.getRunState(container);
-				if (state!=RunState.INACTIVE) {
+				try {
 					client.stopContainerCmd(container.getId()).withTimeout(STOP_WAIT_TIME_IN_SECONDS).exec();
+				} catch (NotModifiedException e) {
+					//ignore... this isn't a real error, it means container was already stopped.
 				}
 			}
 		});
