@@ -669,8 +669,6 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 	private LiveExpression<Failable<LiveEnvModel>> liveEnv;
 	private LiveExpression<Failable<LiveBeansModel>> liveBeans;
 
-	static private int count = 0;
-
 	@Override
 	public Failable<ImmutableList<RequestMapping>> getLiveRequestMappings() {
 		synchronized (this) {
@@ -843,7 +841,6 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 
 	public void restartRemoteDevtoolsClient() {
 		refreshTracker.runAsync("(Re)starting remote devtools client", () -> {
-			System.out.println("starting devtools client " + (++count));
 			IProject project = getProject();
 			if (project!=null) {
 				DevtoolsUtil.disconnectDevtoolsClientsFor(this);
