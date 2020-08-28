@@ -275,7 +275,7 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 			
 			if (appLocalPort > 0) {
 				labels.put(APP_LOCAL_PORT, ""+appLocalPort);
-				portBindings.add(new PortBinding(new Binding("0,0,0,0", ""+appLocalPort), ExposedPort.tcp(appContainerPort)));
+				portBindings.add(new PortBinding(new Binding("0.0.0.0", ""+appLocalPort), ExposedPort.tcp(appContainerPort)));
 				exposedPorts.add(ExposedPort.tcp(appContainerPort));
 			}
 
