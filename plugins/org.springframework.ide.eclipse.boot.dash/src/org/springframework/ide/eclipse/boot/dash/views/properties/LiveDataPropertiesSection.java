@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.dash.views.properties;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTException;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.LocationListener;
@@ -74,8 +75,15 @@ public abstract class LiveDataPropertiesSection<T> extends AbstractBdeProperties
 
 	@Override
 	public void dispose() {
-		if (browser != null && !browser.isDisposed()) {
-			browser.removeLocationListener(HYPER_LINK_LISTENER);
+		try {
+			if (browser != null && !browser.isDisposed()) {
+				browser.removeLocationListener(HYPER_LINK_LISTENER);
+				browser = null;
+			}
+		} catch (SWTException e) {
+			//See: https://www.pivotaltracker.com/story/show/174560730
+			//Despite the 'isDisposed' check we still sometimes get a 'widget is disposed' exception.
+			//Not sure why... but it should be harmless to ignore this.
 		}
 		super.dispose();
 	}
