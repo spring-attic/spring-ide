@@ -12,8 +12,6 @@ package org.springframework.ide.eclipse.boot.wizard.github.auth;
 
 import java.net.URLConnection;
 
-import javax.ws.rs.client.Client;
-
 /**
  * Accesses github rest apis without any credentials.
  * Severe rate limits will be in effect, but for some use cases that may be ok.
@@ -21,11 +19,6 @@ import javax.ws.rs.client.Client;
  * @author Kris De Volder
  */
 public class NullCredentials extends Credentials {
-
-	@Override
-	public Client apply(Client client) {
-		return client;
-	}
 
 	@Override
 	public void apply(URLConnection conn) {
