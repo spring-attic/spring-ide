@@ -17,7 +17,6 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.jface.resource.ImageDescriptor;
-import com.spotify.docker.client.DefaultDockerClient;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.docker.ui.DefaultDockerUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.docker.ui.DockerUserInteractions;
@@ -30,6 +29,12 @@ import org.springframework.ide.eclipse.editor.support.util.HtmlSnippet;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.StringUtils;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
+
+import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.core.DefaultDockerClientConfig;
+import com.github.dockerjava.core.DockerClientImpl;
+import com.github.dockerjava.transport.DockerHttpClient;
+import com.github.dockerjava.zerodep.ZerodepDockerHttpClient;
 
 public class DockerRunTargetType extends AbstractRemoteRunTargetType<DockerTargetParams> {
 	
@@ -63,7 +68,7 @@ public class DockerRunTargetType extends AbstractRemoteRunTargetType<DockerTarge
 				ui().errorPopup("Duplicate Target", "A target with the same uri ("+uri+") already exists!");
 			} else {
 				try {
-					DefaultDockerClient client = DefaultDockerClient.builder().uri(uri).build();
+					DockerClient client = createDockerClient(uri);
 					return new DockerRunTarget(this, new DockerTargetParams(uri), client);
 				} catch (Error e) {
 					DefaultDockerUserInteractions.openBundleWiringError(e);
@@ -71,6 +76,16 @@ public class DockerRunTargetType extends AbstractRemoteRunTargetType<DockerTarge
 			}
 		}
 		return null;
+	}
+
+	public static DockerClient createDockerClient(String uri) {
+		DefaultDockerClientConfig conf = DefaultDockerClientConfig.createDefaultConfigBuilder().withDockerHost(uri).build();
+		
+		DockerHttpClient httpClient = new ZerodepDockerHttpClient.Builder()
+				.dockerHost(conf.getDockerHost())
+				.sslConfig(conf.getSSLConfig())
+				.build();
+		return DockerClientImpl.getInstance(conf, httpClient);
 	}
 
 	private String inputDockerUrl() {

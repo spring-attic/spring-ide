@@ -15,6 +15,7 @@ import static org.springframework.ide.eclipse.boot.dash.docker.runtarget.DockerR
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -24,12 +25,6 @@ import java.util.stream.Collectors;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.StyledString;
-import com.spotify.docker.client.DockerClient;
-import com.spotify.docker.client.DockerClient.ListContainersParam;
-import com.spotify.docker.client.DockerClient.RemoveContainerParam;
-import com.spotify.docker.client.exceptions.ImageNotFoundException;
-import com.spotify.docker.client.messages.Container;
-import com.spotify.docker.client.messages.Image;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.AppContext;
 import org.springframework.ide.eclipse.boot.dash.api.Deletable;
@@ -45,6 +40,10 @@ import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
 import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
+import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.exception.NotFoundException;
+import com.github.dockerjava.api.model.Container;
+import com.github.dockerjava.api.model.Image;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
@@ -71,7 +70,7 @@ public class DockerImage implements App, ChildBearing, Styleable, ProjectRelatab
 
 	@Override
 	public String getName() {
-		return image.id();
+		return image.getId();
 	}
 
 	@Override
@@ -85,10 +84,14 @@ public class DockerImage implements App, ChildBearing, Styleable, ProjectRelatab
 		DockerClient client = app.getClient();
 		if (client!=null) {
 			List<Container> containers = JobUtil.interruptAfter(Duration.ofSeconds(15), 
-					() -> client.listContainers(ListContainersParam.allContainers(), ListContainersParam.withLabel(DockerApp.APP_NAME, app.getName()))
+					() -> client.listContainersCmd()
+						.withShowAll(true)
+						.withLabelFilter(ImmutableMap.of(DockerApp.APP_NAME, app.getName()))
+						.exec()
 			);
+			//TODO: use 'ancestor' filter instead of this for loop to filter on image id
 			for (Container container : containers) {
-				if (container.imageId().equals(image.id())) {
+				if (container.getImageId().equals(image.getId())) {
 					builder.add(new DockerContainer(getTarget(), app, container));
 				}
 			}
@@ -121,7 +124,7 @@ public class DockerImage implements App, ChildBearing, Styleable, ProjectRelatab
 
 	@Override
 	public StyledString getStyledName(Stylers stylers) {
-		List<String> repoTags = image.repoTags();
+		List<String> repoTags = Arrays.asList(image.getRepoTags());
 		String repo = extractRepo(repoTags);
 		List<String> tags = extractTags(repoTags);
 		final StyledString result = new StyledString(repo);
@@ -165,7 +168,7 @@ public class DockerImage implements App, ChildBearing, Styleable, ProjectRelatab
 	}
 
 	private String getShortHash() {
-		String id = StringUtil.removePrefix(image.id(), "sha256:");
+		String id = StringUtil.removePrefix(image.getId(), "sha256:");
 		if (id.length() > 12) {
 			id = id.substring(0, 12);
 		}
@@ -174,7 +177,7 @@ public class DockerImage implements App, ChildBearing, Styleable, ProjectRelatab
 
 	@Override
 	public String toString() {
-		return "DockerImage("+image.id()+")";
+		return "DockerImage("+image.getId()+")";
 	}
 
 	@Override
@@ -209,21 +212,22 @@ public class DockerImage implements App, ChildBearing, Styleable, ProjectRelatab
 			rt.run("Deleting " + getShortHash(), () -> {
 				//Delete containers (if there are running containers, 'force' option on removeImage
 				// will not work.
-				for (Container container : client.listContainers(
-						ListContainersParam.allContainers(), 
-						ListContainersParam.filter("ancestor", image.id())
-				)) {
-					client.removeContainer(container.id(), RemoveContainerParam.forceKill());
+				for (Container container : client.listContainersCmd()
+						.withShowAll(true)
+						.withFilter("ancestor", ImmutableList.of(image.getId()))
+						.exec()
+				) {
+					client.removeContainerCmd(container.getId()).withForce(true).exec();
 				}
 				
 				
-				client.removeImage(getName(), /*force*/true, /*noPrune*/false);
+				client.removeImageCmd(getName()).withForce(true).withNoPrune(false).exec();
 
 				RetryUtil.until(100, DockerContainer.WAIT_BEFORE_KILLING.toMillis(),
-					exception -> exception instanceof ImageNotFoundException, 
+					exception -> exception instanceof NotFoundException, 
 					() -> {
 						try {
-							client.inspectImage(image.id());
+							client.inspectImageCmd(image.getId()).exec();
 						} catch (Exception e) {
 							return e;
 						}
