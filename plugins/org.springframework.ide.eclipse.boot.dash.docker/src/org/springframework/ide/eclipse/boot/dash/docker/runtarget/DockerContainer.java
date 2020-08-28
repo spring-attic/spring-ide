@@ -102,6 +102,10 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 
 	@Override
 	public RunState fetchRunState() {
+		return getRunState(container);
+	}
+
+	public static RunState getRunState(Container container) {
 		String state = container.getState();
 		if ("running".equals(state)) {
 			return (container.getLabels().get(DockerApp.DEBUG_PORT)!=null) 
