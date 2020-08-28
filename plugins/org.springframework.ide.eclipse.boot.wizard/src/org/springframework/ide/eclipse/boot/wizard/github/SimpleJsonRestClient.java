@@ -11,6 +11,7 @@
 package org.springframework.ide.eclipse.boot.wizard.github;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
@@ -63,10 +64,15 @@ public class SimpleJsonRestClient {
 		}
 
 		public WebTarget resolveTemplates(Map<String, Object> vars) {
-			for (Entry<String, Object> entry : vars.entrySet()) {
-				url = url.replace("{"+entry.getKey()+"}", URLEncoder.encode(entry.getValue().toString(), Charset.forName("UTF8")));
+			try {
+				for (Entry<String, Object> entry : vars.entrySet()) {
+					url = url.replace("{"+entry.getKey()+"}", URLEncoder.encode(entry.getValue().toString(), "UTF8"));
+				}
+				return this;
+			} catch (UnsupportedEncodingException e) {
+				//shouldn't be possible... but anyhow
+				throw ExceptionUtil.unchecked(e);
 			}
-			return this;
 		}
 
 		public Response get() {
