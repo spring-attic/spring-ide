@@ -10,16 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard.github.auth;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLConnection;
 import java.util.regex.Pattern;
-
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.client.ClientRequestFilter;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.ext.Provider;
 
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.ide.eclipse.boot.wizard.BootWizardActivator;
@@ -30,20 +23,6 @@ import org.springframework.ide.eclipse.boot.wizard.BootWizardActivator;
  * @author Kris De Volder
  */
 public class BasicAuthCredentials extends Credentials {
-
-	@Provider
-	public class BasicAuthFilter implements ClientRequestFilter {
-		@Override
-		public void filter(ClientRequestContext request) throws IOException {
-			if (matchHost(request.getUri().getHost())) {
-				MultivaluedMap<String, Object> headers = request.getHeaders();
-				if (!headers.containsKey("Authorization")) {
-					String authString = computeAuthString();
-					headers.add("Authorization", authString);
-				}
-			}
-		}
-	}
 
 	private final Pattern host;
 	private final String username;
@@ -65,11 +44,6 @@ public class BasicAuthCredentials extends Credentials {
 		byte[] encodedAuthorisation = Base64.encodeBase64(authorisation.getBytes("utf8"));
 		String authString = "Basic " + new String(encodedAuthorisation);
 		return authString;
-	}
-
-	@Override
-	public Client apply(Client rest) {
-		return rest.register(new BasicAuthFilter());
 	}
 
 	@Override

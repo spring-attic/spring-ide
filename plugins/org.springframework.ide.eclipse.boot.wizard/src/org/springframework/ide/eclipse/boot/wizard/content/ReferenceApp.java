@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.wizard.content;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -19,6 +20,7 @@ import org.springframework.ide.eclipse.boot.wizard.github.Repo;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.UIThreadDownloadDisallowed;
+import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 public class ReferenceApp extends GithubRepoContent {
 

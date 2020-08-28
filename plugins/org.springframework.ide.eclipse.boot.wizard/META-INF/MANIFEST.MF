@@ -47,15 +47,7 @@ Export-Package: org.springframework.ide.eclipse.boot.wizard,
  org.springframework.ide.eclipse.boot.wizard.starters,
  org.springframework.ide.eclipse.boot.wizard.util
 Bundle-Vendor: Pivotal Inc.
-Import-Package: javax.ws.rs;version="2.0.1",
- javax.ws.rs.client;version="2.0.1",
- javax.ws.rs.core;version="2.0.1",
- javax.ws.rs.ext;version="2.0.1",
- org.eclipse.core.runtime,
+Import-Package: org.eclipse.core.runtime,
  org.eclipse.core.runtime.jobs,
  org.eclipse.osgi.util,
- org.glassfish.jersey;version="2.30.0",
- org.glassfish.jersey.client;version="2.30.0",
- org.glassfish.jersey.inject.hk2;version="2.30.0",
- org.glassfish.jersey.jackson;version="2.30.0",
  org.osgi.framework

@@ -409,7 +409,7 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 		@Override
 		public void onError(Throwable e) {
 			try {
-				consoleErr.write(ExceptionUtil.getMessage(e).getBytes(Charset.forName("UTF8")+"\n"));
+				consoleErr.write((ExceptionUtil.getMessage(e)+"\n").getBytes("UTF8"));
 			} catch (Exception e1) {
 				Log.log(e1);
 			}
