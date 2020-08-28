@@ -33,7 +33,7 @@ public class SelectDockerDaemonDialog extends DialogWithSections {
 
 	public static class Model implements OkButtonHandler {
 		private static final String DEFAULT_UNIX_DOCKER_URL = "unix:///var/run/docker.sock";
-		private static final String DEFAULT_WINDOWS_DOCKER_URL = "http://localhost:2375";
+		private static final String DEFAULT_WINDOWS_DOCKER_URL = "tcp://localhost:2375";
 		
 		public final LiveVariable<Boolean> useLocalDaemon = new LiveVariable<>(true);
 		public final LiveExpression<Boolean> daemonUrlEnabled = useLocalDaemon.apply(local -> !local);
