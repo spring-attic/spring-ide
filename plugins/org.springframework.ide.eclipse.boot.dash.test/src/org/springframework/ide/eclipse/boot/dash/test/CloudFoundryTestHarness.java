@@ -251,7 +251,7 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 				"- name: "+appName+"\n" +
 				"  host: "+hostName+"\n" +
 				"  env:\n" +
-				"    JBP_CONFIG_OPEN_JDK_JRE: '{ \"jre\": { version: 11.+ } }'\n";
+				"    JBP_CONFIG_OPEN_JDK_JRE: '{ \"jre\": { version: 11.+ } }'\n" +
 				createServicesBlock(bindServices);
 
 		answerDeploymentPrompt(ui, new DeploymentAnswerer(yaml));
