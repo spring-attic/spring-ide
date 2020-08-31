@@ -40,3 +40,4 @@ Export-Package: org.springframework.ide.eclipse.quickfix.processors.tests,
  org.springframework.ide.eclipse.quickfix.tests,
  org.springframework.ide.eclipse.quickfix.ui.tests,
  org.springframework.ide.eclipse.quickfix.validator.tests
+Import-Package: javax.xml.bind

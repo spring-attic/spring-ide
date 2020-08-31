@@ -23,6 +23,9 @@ Import-Package: org.aopalliance.aop,
  org.springframework.core,
  org.springframework.core.convert,
  org.springframework.util,
- org.springframework.util.xml
+ org.springframework.util.xml,
+ javax.xml.bind,
+ javax.xml.bind.annotation,
+ javax.xml.bind.annotation.adapters
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: %providerName

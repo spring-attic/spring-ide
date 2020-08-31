@@ -13,10 +13,10 @@ package org.springframework.ide.eclipse.webflow.ui.graph.properties;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.gef.ui.actions.ActionRegistry;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;

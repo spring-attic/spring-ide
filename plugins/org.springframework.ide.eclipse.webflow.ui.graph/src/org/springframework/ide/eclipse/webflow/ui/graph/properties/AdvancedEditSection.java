@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.webflow.ui.graph.properties;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.gef.editparts.AbstractEditPart;
 import org.eclipse.gef.ui.actions.ActionRegistry;
-import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
