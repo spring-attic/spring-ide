@@ -394,7 +394,7 @@ public class CloudFoundryBootDashModelIntegrationTest {
 				"applications:\n" +
 				"- name: "+appName+"\n" +
 				"  path: "+zipFile.getAbsolutePath() + "\n" +
-				"  buildpack: staticfile_buildpack"
+				"  buildpack: staticfile_buildpack\n"
 		);
 		harness.answerDeploymentPrompt(ui(), manifestFile);
 		model.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
@@ -427,7 +427,9 @@ public class CloudFoundryBootDashModelIntegrationTest {
 				"applications:\n" +
 				"- name: "+appName+"\n" +
 				"  random-route: true\n" +
-				"  buildpack: java_buildpack"
+				"  buildpack: java_buildpack\n" +
+				"  env:\n" +
+				"    JBP_CONFIG_OPEN_JDK_JRE: '{ \"jre\": { version: 11.+ } }'\n"
 		);
 		harness.answerDeploymentPrompt(ui(), manifestFile);
 		model.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
@@ -465,7 +467,9 @@ public class CloudFoundryBootDashModelIntegrationTest {
 				"- name: "+appName+"\n" +
 				"  domain: "+CFAPPS_IO() + "\n" +
 				"  random-route: true\n" +
-				"  buildpack: java_buildpack"
+				"  buildpack: java_buildpack\n" +
+				"  env:\n" +
+				"    JBP_CONFIG_OPEN_JDK_JRE: '{ \"jre\": { version: 11.+ } }'\n"
 		);
 		harness.answerDeploymentPrompt(ui(), manifestFile);
 		model.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
@@ -498,6 +502,8 @@ public class CloudFoundryBootDashModelIntegrationTest {
 				"applications:\n" +
 				"- name: "+appName+"\n" +
 				"  buildpack: java_buildpack\n" +
+				"  env:\n" +
+				"    JBP_CONFIG_OPEN_JDK_JRE: '{ \"jre\": { version: 11.+ } }'\n" +
 				"  routes:\n" +
 				"  - route: " + appName + '.'+CFAPPS_IO()
 
@@ -532,6 +538,8 @@ public class CloudFoundryBootDashModelIntegrationTest {
 				"applications:\n" +
 				"- name: "+appName+"\n" +
 				"  buildpack: java_buildpack\n" +
+				"  env:\n" +
+				"    JBP_CONFIG_OPEN_JDK_JRE: '{ \"jre\": { version: 11.+ } }'\n" +
 				"  routes:\n" +
 				"  - route: " + appName + '.'+CFAPPS_IO() + "/myapppath"
 
