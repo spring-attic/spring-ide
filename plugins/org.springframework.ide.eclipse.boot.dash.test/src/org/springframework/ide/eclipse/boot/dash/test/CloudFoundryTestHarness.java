@@ -220,8 +220,9 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 	public void answerDeploymentPrompt(CfUserInteractions ui, final String appName, final String hostName) throws Exception {
 		final String yaml = "applications:\n" +
 				"- name: "+appName+"\n" +
-				"  host: "+hostName+"\n";
-
+				"  host: "+hostName+"\n" +
+				"  env:\n" +
+				"    JBP_CONFIG_OPEN_JDK_JRE: '{ \"jre\": { version: 11.+ } }'\n";
 		answerDeploymentPrompt(ui, new DeploymentAnswerer(yaml));
 	}
 
