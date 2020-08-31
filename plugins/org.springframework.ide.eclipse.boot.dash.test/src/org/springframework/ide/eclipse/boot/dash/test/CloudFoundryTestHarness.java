@@ -250,6 +250,8 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 		final String yaml = "applications:\n" +
 				"- name: "+appName+"\n" +
 				"  host: "+hostName+"\n" +
+				"  env:\n" +
+				"    JBP_CONFIG_OPEN_JDK_JRE: '{ \"jre\": { version: 11.+ } }'\n";
 				createServicesBlock(bindServices);
 
 		answerDeploymentPrompt(ui, new DeploymentAnswerer(yaml));
@@ -268,9 +270,13 @@ public class CloudFoundryTestHarness extends BootDashViewModelHarness {
 
 	private String createEnvBlock(Map<String, String> env) {
 		if (env==null || env.isEmpty()) {
-			return "";
+			return "  env:\n" +
+				   "    JBP_CONFIG_OPEN_JDK_JRE: '{ \"jre\": { version: 11.+ } }'\n";
 		}
-		StringBuilder buf = new StringBuilder("  env:\n");
+		StringBuilder buf = new StringBuilder(
+				"  env:\n" +
+				"    JBP_CONFIG_OPEN_JDK_JRE: '{ \"jre\": { version: 11.+ } }'\n"
+		);
 		for (Entry<String, String> e : env.entrySet()) {
 			buf.append("    "+e.getKey()+": "+e.getValue());
 		}
