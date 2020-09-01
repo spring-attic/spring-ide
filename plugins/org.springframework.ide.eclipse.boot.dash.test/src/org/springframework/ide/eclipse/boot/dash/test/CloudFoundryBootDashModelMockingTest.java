@@ -1273,7 +1273,9 @@ public class CloudFoundryBootDashModelMockingTest {
 				"applications:\n" +
 				"- name: "+appName+"\n" +
 				"  routes: \n" +
-				"  - route: tcp.domain.com:61001\n"
+				"  - route: tcp.domain.com:61001\n" +
+				"  env:\n" +
+				"    JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 11.+}}'\n"
 		);
 		harness.answerDeploymentPrompt(ui(), manifest);
 		target.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
@@ -1305,7 +1307,9 @@ public class CloudFoundryBootDashModelMockingTest {
 		IFile manifest = createFile(project, "manifest.yml",
 				"applications:\n" +
 				"- name: "+appName+"\n" +
-				"  random-route: true\n"
+				"  random-route: true\n" +
+				"  env:\n" +
+				"    JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 11.+}}'\n"
 		);
 		harness.answerDeploymentPrompt(ui(), manifest);
 		target.performDeployment(ImmutableSet.of(project), RunState.RUNNING);
@@ -1697,7 +1701,9 @@ public class CloudFoundryBootDashModelMockingTest {
 
 		String yaml = "applications:\n" +
 					  "- name: "+appName+"\n" +
-					  "  memory: 512M\n";
+					  "  memory: 512M\n" +
+					  "  env:\n" +
+					  "    JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 11.+}}'\n";
 		IFile manifestFile = createFile(project, "manifest.yml", yaml);
 
 		harness.answerDeploymentPrompt(ui(), manifestFile);
