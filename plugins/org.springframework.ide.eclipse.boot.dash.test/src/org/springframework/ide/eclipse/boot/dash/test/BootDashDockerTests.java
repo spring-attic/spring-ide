@@ -19,7 +19,6 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.bootVersionAtLeast;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withImportStrategy;
 import static org.springframework.ide.eclipse.boot.test.BootProjectTestHarness.withStarters;
@@ -36,7 +35,6 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.core.resources.IProject;
@@ -96,6 +94,7 @@ import org.springframework.ide.eclipse.boot.dash.views.RestartDevtoolsClientActi
 import org.springframework.ide.eclipse.boot.dash.views.RunStateAction;
 import org.springframework.ide.eclipse.boot.launch.devtools.BootDevtoolsClientLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.test.BootProjectTestHarness;
+import org.springframework.ide.eclipse.boot.test.util.TestBracketter;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 
@@ -112,6 +111,7 @@ public class BootDashDockerTests {
 	private static final String DEFAULT_DOCKER_URL = "unix:///var/run/docker.sock";
 
 	@Rule public LaunchCleanups launches = new LaunchCleanups();
+	@Rule public TestBracketter bracks = new TestBracketter();
 
 	@Test
 	public void testCreateDockerTarget() throws Exception {
