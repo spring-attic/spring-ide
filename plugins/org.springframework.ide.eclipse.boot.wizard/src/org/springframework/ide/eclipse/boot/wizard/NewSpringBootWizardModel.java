@@ -626,4 +626,8 @@ public class NewSpringBootWizardModel {
 		}
 		throw new NoSuchElementException("No dependency with id: "+id);
 	}
+
+	public RadioGroup getJavaVersion() {
+		return getRadioGroups().getGroup("javaVersion");
+	}
 }

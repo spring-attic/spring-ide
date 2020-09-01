@@ -34,6 +34,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jdt.internal.launching.StandardVM;
+import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.m2e.core.ui.internal.UpdateMavenProjectJob;
 import org.osgi.framework.Version;
@@ -171,6 +174,26 @@ public class BootProjectTestHarness {
 		};
 	}
 
+	public static WizardConfigurer withJavaVersion(String version) {
+		return new WizardConfigurer() {
+			@Override
+			public void apply(NewSpringBootWizardModel wizard) {
+				List<String> availableVersions = new ArrayList<>();
+				RadioGroup javaVersionRadio = wizard.getJavaVersion();
+				RadioInfo[] radios = javaVersionRadio.getRadios();
+				for (RadioInfo option : radios) {
+					if (option.getValue().equals(version)) {
+						javaVersionRadio.setValue(option);
+						return;
+					}
+					availableVersions.add(option.getValue());
+				}
+				fail("Java version '"+version+"' not found in "+availableVersions);
+			}
+		};
+
+	}
+
 	public static WizardConfigurer latestBootReleaseVersion() throws Exception {
 		return new WizardConfigurer() {
 			@Override
@@ -254,15 +277,14 @@ public class BootProjectTestHarness {
 		return merged;
 	}
 
-	public IProject createBootProject(final String projectName, final WizardConfigurer... extraConfs) throws Exception {
-		CodeSet.afterCreateHook = (File location) -> {
-			//This is a workaround for this bug: https://bugs.eclipse.org/bugs/show_bug.cgi?id=547409
-			File pom = new File(location, "pom.xml");
-			if (pom.exists()) {
-				String pomCotents = IOUtil.toString(new FileInputStream(pom)).replace("2.1.5.RELEASE", "2.1.4.RELEASE");
-				IOUtil.pipe(new ByteArrayInputStream(pomCotents.getBytes("UTF8")), pom);
-			}
-		};
+	public IProject createBootProject(final String projectName, final WizardConfigurer... _extraConfs) throws Exception {
+		List<WizardConfigurer> extraConfs = new ArrayList<>(Arrays.asList(_extraConfs));
+		StandardVM jvm = (StandardVM) JavaRuntime.getDefaultVMInstall();
+		String version = jvm.getJavaVersion();
+		if (version.startsWith("1.8.")) {
+			System.out.println("Warning! Workspace JRE is Java 8. Downgrading test project");
+			extraConfs.add(withJavaVersion("1.8"));
+		}
 		try {
 			RetryUtil.retryWhen("createBootProject("+projectName+")", 3, RetryUtil.errorWithMsg("Read timed out"), () -> {
 				final Job job = new Job("Create boot project '"+projectName+"'") {
