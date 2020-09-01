@@ -186,7 +186,10 @@ public class GithubClient {
 	 * See https://developer.github.com/v3/#pagination
 	 */
 	private static <T> String getNextPageUrl(Response response) {
-		List<String> linkHeader = response.getHeaders().get("Link");
+		List<String> linkHeader = response.getHeaders().get("link");
+		if (linkHeader==null) {
+			linkHeader = response.getHeaders().get("Link");
+		}
 		if (linkHeader!=null) {
 			//Example of header String:
 			//<https://api.github.com/organizations/4161866/repos?page=2>; rel="next", <https://api.github.com/organizations/4161866/repos?page=2>; rel="last"
