@@ -1967,7 +1967,9 @@ public class CloudFoundryBootDashModelMockingTest {
 		IProject project = projects.createBootProject("to-deploy", withStarters("web", "actuator"));
 		IFile manifest = createFile(project, "manifest.yml",
 				"applications:\n" +
-				"- name: "+appName+"\n"
+				"- name: "+appName+"\n" +
+				"  env:\n" +
+				"    JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 11.+}}'\n"
 		);
 		harness.answerDeploymentPrompt(ui(), manifest);
 		CloudFoundryBootDashModel model =  harness.createCfTarget(targetParams);
