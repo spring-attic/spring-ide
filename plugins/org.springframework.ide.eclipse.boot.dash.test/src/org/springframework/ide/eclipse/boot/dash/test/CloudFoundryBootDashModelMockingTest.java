@@ -874,7 +874,9 @@ public class CloudFoundryBootDashModelMockingTest {
 				"applications:\n" +
 				"- name: "+appName+"\n" +
 				"  random-route: true\n" +
-				"  domain: tcp.domain.com"
+				"  domain: tcp.domain.com\n" +
+				"  env:\n" +
+				"    JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 11.+}}'\n"
 		);
 		harness.answerDeploymentPrompt(ui(), manifest);
 		target.performDeployment(ImmutableSet.of(project), RunState.RUNNING);

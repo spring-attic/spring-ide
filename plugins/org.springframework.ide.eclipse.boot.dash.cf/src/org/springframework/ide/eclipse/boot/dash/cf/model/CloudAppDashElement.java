@@ -93,7 +93,9 @@ import reactor.core.Disposable;
  */
 public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> implements BootDashElement, Deletable, LogSink, LiveDataCapableElement, LegacyLogSource {
 
-	private static final boolean DEBUG = (""+Platform.getLocation()).contains("kdvolder");
+	private static final boolean DEBUG =
+			(""+Platform.getLocation()).contains("kdvolder");
+//			(""+Platform.getLocation()).contains("bamboo");
 
 	private static void debug(String string) {
 		if (DEBUG) {
@@ -127,17 +129,27 @@ public class CloudAppDashElement extends CloudDashElement<CloudAppIdentity> impl
 
 		@Override
 		protected RunState compute() {
+			debug("Compute baseRunState for "+CloudAppDashElement.this+" ...");
 			if (error.getValue()!=null) {
+				debug("error.getValue() => "+error.getValue());
+				debug("baseRunState for "+CloudAppDashElement.this+" => UNKNOWN");
 				return RunState.UNKNOWN;
 			}
 			if (startOperationTracker.inProgress.getValue()>0) {
+				debug("startOperationTracker.inProgress.getValue() => "+startOperationTracker.inProgress.getValue());
+				debug("baseRunState for "+CloudAppDashElement.this+" => STARTING");
 				return RunState.STARTING;
 			}
 			CFApplication app = appData.getValue();
+			debug("appData => "+app);
 			List<CFInstanceStats> instances = instanceData.getValue();
+			debug("instances.size() => "+(instances==null?null:instances.size()));
 			if (instances!=null && app!=null) {
-				return ApplicationRunningStateTracker.getRunState(app, instances);
+				RunState rs = ApplicationRunningStateTracker.getRunState(app, instances);
+				debug("baseRunState from instances => "+rs);
+				return rs;
 			}
+			debug("baseRunState for "+CloudAppDashElement.this+" => UNKNOWN");
 			return RunState.UNKNOWN;
 		}
 	};
