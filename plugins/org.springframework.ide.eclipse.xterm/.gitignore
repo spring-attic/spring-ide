@@ -1,0 +1,6 @@
+/target/
+/lib/
+/.settings/
+.DS_Store
+/**/.DS_Store
+.project
