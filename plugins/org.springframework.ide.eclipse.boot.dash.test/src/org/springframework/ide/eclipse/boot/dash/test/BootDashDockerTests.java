@@ -100,6 +100,7 @@ import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.InspectContainerResponse;
+import com.github.dockerjava.api.command.InspectImageResponse;
 import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.Image;
 import com.google.common.collect.ImmutableList;
@@ -510,6 +511,82 @@ public class BootDashDockerTests {
 			assertEquals(RunState.INACTIVE, img.getRunState());
 			assertEquals(RunState.INACTIVE, con.getRunState());
 		});
+	}
+
+	@Test
+	public void devtoolsAndDebug() throws Exception {
+		RemoteBootDashModel model = createDockerTarget();
+		Mockito.reset(ui());
+		IProject project = projects.createBootWebProject("webby", bootVersionAtLeast("2.3.0"));
+
+		BootProjectDashElement localElement = harness.waitForElement(2_000, project);
+		DeployToRemoteTargetAction<?,?> a = debugOnDockerAction();
+		harness.selection.setElements(localElement);
+		assertTrue(a.isEnabled());
+		a.run();
+
+		GenericRemoteAppElement dep = waitForDeployment(model, project);
+		GenericRemoteAppElement img = waitForChild(dep, d -> d instanceof DockerImage);
+		GenericRemoteAppElement con = waitForChild(img, d -> d instanceof DockerContainer);
+
+		ACondition.waitFor("all debugging", BUILD_IMAGE_TIMEOUT, () -> {
+			assertEquals(RunState.DEBUGGING, dep.getRunState());
+			assertEquals(RunState.DEBUGGING, img.getRunState());
+			assertEquals(RunState.DEBUGGING, con.getRunState());
+		});
+		ACondition.waitFor("remote debug launch", 5_000, () -> assertActiveDebugLaunch(con));
+
+		InspectContainerResponse containerInfo = client().inspectContainerCmd(con.getName()).exec();
+		String JAVA_OPTS = getEnv(containerInfo, "JAVA_OPTS");
+
+		String jmxPort = containerInfo.getConfig().getLabels().get(DockerApp.JMX_PORT);
+		String debugPort = containerInfo.getConfig().getLabels().get(DockerApp.DEBUG_PORT);
+		assertEquals(
+				"-Dcom.sun.management.jmxremote.ssl=false "+
+				"-Dcom.sun.management.jmxremote.authenticate=false "+
+				"-Dcom.sun.management.jmxremote.port="+jmxPort+" "+
+				"-Dcom.sun.management.jmxremote.rmi.port="+jmxPort+" "+
+				"-Djava.rmi.server.hostname=localhost "+
+				"-Dcom.sun.management.jmxremote.local.only=false "+
+				"-Dspring.jmx.enabled=true "+
+				"-Dspring.application.admin.enabled=true "+
+				"-Xdebug "+
+				"-Xrunjdwp:server=y,transport=dt_socket,suspend=n,address=*:"+debugPort,
+				JAVA_OPTS
+		);
+
+		ILaunch launch = assertActiveDebugLaunch(con);
+		ILaunchConfiguration conf = launch.getLaunchConfiguration();
+		assertEquals(IJavaLaunchConfigurationConstants.ID_REMOTE_JAVA_APPLICATION, conf.getType().getIdentifier());
+
+		assertEquals(con.getStyledName(null).toString(), conf.getName());
+		ACondition.waitFor("launch can terminate", 2_000, () -> {
+			assertTrue(launch.canTerminate());
+		});
+		launch.terminate();
+		ACondition.waitFor("launch termination", 5_000, () -> {
+			assertTrue(launch.isTerminated());
+		});
+
+		assertEquals(ImmutableSet.of(conf), con.getLaunchConfigs());
+
+		ACondition.waitFor("all stopped", BUILD_IMAGE_TIMEOUT, () -> {
+			assertEquals(RunState.INACTIVE, dep.getRunState());
+			assertEquals(RunState.INACTIVE, img.getRunState());
+			assertEquals(RunState.INACTIVE, con.getRunState());
+		});
+	}
+
+
+
+	private String getEnv(InspectContainerResponse imageInspect, String name) {
+		String[] envs = imageInspect.getConfig().getEnv();
+		for (String string : envs) {
+			if (string.startsWith(name+"=")) {
+				return string.substring(name.length()+1);
+			}
+		}
+		return null;
 	}
 
 	@Test
@@ -1094,7 +1171,6 @@ public class BootDashDockerTests {
 			);
 		});
 	}
-
 
 	@Test
 	public void noAutoStartForMismatchingSession() throws Exception {

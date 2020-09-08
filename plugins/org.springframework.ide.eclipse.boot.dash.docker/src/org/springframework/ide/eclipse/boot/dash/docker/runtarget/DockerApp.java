@@ -302,6 +302,7 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 				
 				javaOpts.append(DEBUG_JVM_ARGS(""+debugPort));
 				console.write("Debug Port = "+debugPort, LogType.STDOUT);
+				javaOpts.append(" ");
 			}
 			
 			if (!systemProperties.isEmpty()) {
