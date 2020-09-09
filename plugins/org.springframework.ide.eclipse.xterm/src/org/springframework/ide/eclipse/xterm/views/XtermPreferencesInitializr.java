@@ -11,7 +11,7 @@ public class XtermPreferencesInitializr extends AbstractPreferenceInitializer {
 
 	@Override
 	public void initializeDefaultPreferences() {
-		XtermPlugin.getDefault().getPreferenceStore().setDefault(XtermPlugin.PREFS_DEFAULT_SHELL_CMD, Platform.getOS() == Platform.OS_WIN32 ? "cmd.exe" : "/bin/bash --login");
+		XtermPlugin.getDefault().getPreferenceStore().setDefault(XtermPlugin.PREFS_DEFAULT_SHELL_CMD, Platform.OS_WIN32.equals(Platform.getOS()) ? "cmd.exe" : "/bin/bash --login");
 	}
 
 }
