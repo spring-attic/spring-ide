@@ -14,6 +14,7 @@ import org.springframework.ide.eclipse.boot.dash.di.EclipseBeanLoader.Contributi
 import org.springframework.ide.eclipse.boot.dash.docker.runtarget.DockerRunTargetType;
 import org.springframework.ide.eclipse.boot.dash.docker.ui.DefaultDockerUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.docker.ui.DockerUserInteractions;
+import org.springframework.ide.eclipse.boot.dash.docker.ui.ExtraDockerActions;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 
 public class DockerBootDashInjections implements Contribution {
@@ -22,6 +23,7 @@ public class DockerBootDashInjections implements Contribution {
 	public void applyBeanDefinitions(SimpleDIContext c) throws Exception {
 		c.def(DockerRunTargetType.class, DockerRunTargetType::new);
 		c.def(DockerUserInteractions.class, DefaultDockerUserInteractions::new);
+		c.defInstance(ExtraDockerActions.class, new ExtraDockerActions());
 	}
 
 }
