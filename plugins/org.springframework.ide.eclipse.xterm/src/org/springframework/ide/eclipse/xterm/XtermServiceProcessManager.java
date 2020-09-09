@@ -3,9 +3,8 @@ package org.springframework.ide.eclipse.xterm;
 import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -35,25 +34,29 @@ public class XtermServiceProcessManager {
 		Bundle bundle = XtermPlugin.getDefault().getBundle();
 		URL url = FileLocator.find(bundle, new Path("/lib/node_modules/node-xterm/terminal-server.js"), null);
 		url = FileLocator.toFileURL(url);
-		java.nio.file.Path pathToServerJs = Paths.get(url.getPath());
-		if (!Files.exists(pathToServerJs)) {
-			throw new IllegalStateException("Cannot find file " + pathToServerJs + ". Cannot start xterm service!");
+		try {
+			File serverJsFile = new File(url.toURI());
+			if (!serverJsFile.exists()) {
+				throw new IllegalStateException("Cannot find file " + serverJsFile + ". Cannot start xterm service!");
+			}
+			ProcessBuilder builder = new ProcessBuilder(
+					NodeJSManager.getNodeJsLocation().toString(),
+					serverJsFile.toString(),
+					"--server.port=" + port,
+					"--terminal.pty.shutdown=delay", // terminal pty process destroyed right after sockets closed
+					"--terminal.pty.shutdown-delay=5",
+					"--terminal.auto-shutdown.on=false", // terminal app can shutdown itself if not used 
+					"--terminal.auto-shutdown.delay=30" // terminal app shuts itself down in not used for 30 sec	
+			);
+			
+			File logFile = Platform.getStateLocation(XtermPlugin.getDefault().getBundle()).append("xterm-log.log").toFile();
+			builder.redirectError(logFile);
+			builder.redirectOutput(logFile);
+			
+			process = builder.start();
+		} catch (URISyntaxException e) {
+			throw new IllegalStateException(e);
 		}
-		ProcessBuilder builder = new ProcessBuilder(
-				NodeJSManager.getNodeJsLocation().toString(),
-				pathToServerJs.toString(),
-				"--server.port=" + port,
-				"--terminal.pty.shutdown=delay", // terminal pty process destroyed right after sockets closed
-				"--terminal.pty.shutdown-delay=5",
-				"--terminal.auto-shutdown.on=true", // terminal app can shutdown itself if not used 
-				"--terminal.auto-shutdown.delay=30" // terminal app shuts itself down in not used for 30 sec	
-		);
-		
-		File logFile = Platform.getStateLocation(XtermPlugin.getDefault().getBundle()).append("xterm-log.log").toFile();
-		builder.redirectError(logFile);
-		builder.redirectOutput(logFile);
-		
-		process = builder.start();
 	}
 	
 	synchronized private void waitUntilStarted() {
