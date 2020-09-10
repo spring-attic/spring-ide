@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.Duration;
+import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -36,16 +37,19 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.JavaRuntime;
+import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.AppConsole;
 import org.springframework.ide.eclipse.boot.dash.api.AppConsoleProvider;
 import org.springframework.ide.eclipse.boot.dash.api.AppContext;
 import org.springframework.ide.eclipse.boot.dash.api.Deletable;
 import org.springframework.ide.eclipse.boot.dash.api.DesiredInstanceCount;
+import org.springframework.ide.eclipse.boot.dash.api.DevtoolsConnectable;
 import org.springframework.ide.eclipse.boot.dash.api.LogConnection;
 import org.springframework.ide.eclipse.boot.dash.api.LogSource;
 import org.springframework.ide.eclipse.boot.dash.api.ProjectRelatable;
 import org.springframework.ide.eclipse.boot.dash.api.SystemPropertySupport;
+import org.springframework.ide.eclipse.boot.dash.api.TemporalBoolean;
 import org.springframework.ide.eclipse.boot.dash.console.LogType;
 import org.springframework.ide.eclipse.boot.dash.devtools.DevtoolsUtil;
 import org.springframework.ide.eclipse.boot.dash.docker.jmx.JmxSupport;
@@ -80,7 +84,7 @@ import com.google.common.collect.ImmutableSet;
 import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.ExposedPort;
 
-public class DockerApp extends AbstractDisposable implements App, ChildBearing, Deletable, ProjectRelatable, DesiredInstanceCount, SystemPropertySupport, LogSource {
+public class DockerApp extends AbstractDisposable implements App, ChildBearing, Deletable, ProjectRelatable, DesiredInstanceCount, SystemPropertySupport, LogSource, DevtoolsConnectable {
 
 	private static final String DOCKER_IO_LIBRARY = "docker.io/library/";
 	private static final String[] NO_STRINGS = new String[0];
@@ -100,6 +104,7 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 	public final CompletableFuture<RefreshStateTracker> refreshTracker = new CompletableFuture<>();
 	
 	private OldValueDisposer<LogConnection> containerLogConnection = new OldValueDisposer<>(this);
+	private AppContext context;
 	
 	private static File initFile;
 
@@ -157,7 +162,7 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 		}
 		return builder.build();
 	}
-
+	
 	@Override
 	public void delete() throws Exception {
 		target.deployments.remove(project.getName());
@@ -490,6 +495,7 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 	@Override
 	public void setContext(AppContext context) {
 		this.refreshTracker.complete(context.getRefreshTracker());
+		this.context = context;
 	}
 
 	@Override
@@ -551,5 +557,24 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 		// There is nothing to connect to because docker app only writes output directly to the console
 		// There is no streaming API to fetch output.
 		return null;
+	}
+
+	@Override
+	public TemporalBoolean isDevtoolsConnectable() {
+		return TemporalBoolean.NEVER;
+	}
+	
+	@Override
+	public String getDevtoolsSecret() {
+		DockerDeployment d = deployment();
+		if (d!=null) {
+			return d.getSystemProperties().getOrDefault(DevtoolsUtil.REMOTE_SECRET_PROP, null);
+		}
+		return null;
+	}
+
+	@Override
+	public boolean hasDevtoolsDependency() {
+		return context!=null && context.projectHasDevtoolsDependency();
 	}
 }

@@ -56,3 +56,4 @@ Import-Package: org.apache.commons.lang;version="2.6.0",
  org.eclipse.core.runtime.preferences,
  org.osgi.framework,
  org.osgi.service.prefs
+Automatic-Module-Name: org.springframework.ide.eclipse.boot

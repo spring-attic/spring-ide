@@ -25,12 +25,15 @@ import java.util.stream.Collectors;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.linuxtools.docker.core.IDockerImage;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.AppContext;
 import org.springframework.ide.eclipse.boot.dash.api.Deletable;
+import org.springframework.ide.eclipse.boot.dash.api.DevtoolsConnectable;
 import org.springframework.ide.eclipse.boot.dash.api.ProjectRelatable;
 import org.springframework.ide.eclipse.boot.dash.api.RunStateIconProvider;
 import org.springframework.ide.eclipse.boot.dash.api.Styleable;
+import org.springframework.ide.eclipse.boot.dash.api.TemporalBoolean;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.remote.ChildBearing;
 import org.springframework.ide.eclipse.boot.dash.model.remote.RefreshStateTracker;
@@ -44,23 +47,26 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.exception.NotFoundException;
 import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.Image;
+import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
 
 public class DockerImage implements App, ChildBearing, Styleable, ProjectRelatable, 
-	RunStateIconProvider, Deletable
+	RunStateIconProvider, Deletable, DevtoolsConnectable
 {
 	
 	private final DockerApp app;
 	private final Image image;
 	public final CompletableFuture<RefreshStateTracker> refreshTracker = new CompletableFuture<>();
+	private final Supplier<Boolean> hasDevtoolsDependency;
 
 	private static Map<RunState, ImageDescriptor> RUNSTATE_ICONS = null;
 
 	public DockerImage(DockerApp app, Image image) {
 		this.app = app;
 		this.image = image;
+		this.hasDevtoolsDependency = DockerContainer.hasDevtoolsDependency(image::getLabels);
 	}
 
 	@Override
@@ -236,5 +242,20 @@ public class DockerImage implements App, ChildBearing, Styleable, ProjectRelatab
 				);
 			});
 		}
+	}
+
+	@Override
+	public String getDevtoolsSecret() {
+		return null;
+	}
+
+	@Override
+	public boolean hasDevtoolsDependency() {
+		return this.hasDevtoolsDependency.get();
+	}
+	
+	@Override
+	public TemporalBoolean isDevtoolsConnectable() {
+		return TemporalBoolean.NEVER;
 	}
 }

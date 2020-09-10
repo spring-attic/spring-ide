@@ -27,4 +27,6 @@ public interface AppContext {
 	 */
 	RefreshStateTracker getRefreshTracker();
 
+	boolean projectHasDevtoolsDependency();
+
 }

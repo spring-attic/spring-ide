@@ -166,8 +166,9 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 	}
 
 	private LiveExpression<Boolean> hasDevtools = null;
+
 	@Override
-	public final boolean hasDevtoolsDependency() {
+	public final boolean projectHasDevtoolsDependency() {
 		if (hasDevtools==null) {
 			hasDevtools = new LiveExpression<Boolean>(false) {
 				@Override
@@ -186,6 +187,7 @@ public abstract class WrappingBootDashElement<T> extends AbstractDisposable impl
 			});
 			this.dependsOn(hasDevtools);
 			this.addDisposableChild(classpathListener);
+			this.addDisposableChild(hasDevtools);
 		}
 		return hasDevtools.getValue();
 	}

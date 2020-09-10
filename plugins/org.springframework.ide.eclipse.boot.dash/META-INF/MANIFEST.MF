@@ -85,3 +85,4 @@ Import-Package: org.eclipse.core.runtime,
  org.osgi.framework,
  org.osgi.service.prefs,
  org.yaml.snakeyaml
+Automatic-Module-Name: org.springframework.ide.eclipse.boot.dash

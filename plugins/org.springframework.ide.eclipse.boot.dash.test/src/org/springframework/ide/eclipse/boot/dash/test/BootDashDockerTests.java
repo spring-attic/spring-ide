@@ -111,7 +111,7 @@ public class BootDashDockerTests {
 	private static final int BUILD_IMAGE_TIMEOUT = 30_000;
 	private static final String DEFAULT_DOCKER_URL = "unix:///var/run/docker.sock";
 
-	@Rule public LaunchCleanups launches = new LaunchCleanups();
+//	@Rule public LaunchCleanups launches = new LaunchCleanups();
 	@Rule public TestBracketter bracks = new TestBracketter();
 
 	@Test
@@ -169,8 +169,8 @@ public class BootDashDockerTests {
 			assertNotNull(img.getRunStateImageDecoration());
 			assertNotNull(con.getRunStateImageDecoration());
 		});
-		harness.assertLabelContains("devtools", grey, dep);
-		harness.assertLabelContains("devtools", grey, img);
+		harness.assertLabelContains("devtools", green, dep); // green means... hasdependency and has secret.
+		harness.assertLabelContains("devtools", grey, img);  // grey means... hasdependency but not secret.
 		harness.assertLabelContains("devtools", green, con);
 
 		{
@@ -185,6 +185,7 @@ public class BootDashDockerTests {
 			});
 		}
 
+		harness.selection.setElements(con);
 		restartClient.run();
 		ACondition.waitFor("active devtools client", 10_000, () -> {
 			assertActiveDevtoolsClientLaunch(con);
@@ -192,7 +193,7 @@ public class BootDashDockerTests {
 			assertNotNull(img.getRunStateImageDecoration());
 			assertNotNull(con.getRunStateImageDecoration());
 
-			harness.assertLabelContains("devtools", grey, dep);
+			harness.assertLabelContains("devtools", green, dep);
 			harness.assertLabelContains("devtools", grey, img);
 			harness.assertLabelContains("devtools", green, con);
 		});
@@ -248,7 +249,7 @@ public class BootDashDockerTests {
 			assertTrue(restartClient.isVisible());
 			assertFalse(restartClient.isEnabled());
 
-			ACondition.waitFor("active devtools client", 10_000, () -> {
+			ACondition.waitFor("devtools client terminated", 10_000, () -> {
 				assertTrue(launch.isTerminated());
 				assertNull(dep.getRunStateImageDecoration());
 				assertNull(img.getRunStateImageDecoration());
@@ -259,9 +260,9 @@ public class BootDashDockerTests {
 				// text labels and colors
 				harness.assertLabelContains("devtools", grey, dep);
 				harness.assertLabelContains("devtools", grey, img);
-				harness.assertLabelContains("devtools", grey, img2);
+				harness.assertLabelNotContains("devtools", img2);
 				harness.assertLabelContains("devtools", green, con);
-				harness.assertLabelContains("devtools", grey, con2);
+				harness.assertLabelNotContains("devtools", con2);
 			});
 
 		} finally {
@@ -517,7 +518,8 @@ public class BootDashDockerTests {
 	public void devtoolsAndDebug() throws Exception {
 		RemoteBootDashModel model = createDockerTarget();
 		Mockito.reset(ui());
-		IProject project = projects.createBootWebProject("webby", bootVersionAtLeast("2.3.0"));
+		IProject project = projects.createBootWebProject("webby", bootVersionAtLeast("2.3.0"),
+				withStarters("devtools"));
 
 		BootProjectDashElement localElement = harness.waitForElement(2_000, project);
 		DeployToRemoteTargetAction<?,?> a = debugOnDockerAction();
@@ -541,6 +543,8 @@ public class BootDashDockerTests {
 
 		String jmxPort = containerInfo.getConfig().getLabels().get(DockerApp.JMX_PORT);
 		String debugPort = containerInfo.getConfig().getLabels().get(DockerApp.DEBUG_PORT);
+		String devtoolsSecret = getDevtoolsSecret(con);
+		assertNotNull(devtoolsSecret);
 		assertEquals(
 				"-Dcom.sun.management.jmxremote.ssl=false "+
 				"-Dcom.sun.management.jmxremote.authenticate=false "+
@@ -551,7 +555,9 @@ public class BootDashDockerTests {
 				"-Dspring.jmx.enabled=true "+
 				"-Dspring.application.admin.enabled=true "+
 				"-Xdebug "+
-				"-Xrunjdwp:server=y,transport=dt_socket,suspend=n,address=*:"+debugPort,
+				"-Xrunjdwp:server=y,transport=dt_socket,suspend=n,address=*:"+debugPort+" "+
+				"-Dspring.devtools.remote.secret="+devtoolsSecret,
+
 				JAVA_OPTS
 		);
 

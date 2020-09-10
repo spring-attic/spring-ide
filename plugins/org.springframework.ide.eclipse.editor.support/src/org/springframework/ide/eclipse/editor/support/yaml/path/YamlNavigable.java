@@ -10,9 +10,11 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.editor.support.yaml.path;
 
+import java.util.Map;
 import java.util.stream.Stream;
 
 import org.springframework.ide.eclipse.boot.util.Log;
+import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlFileAST;
 import org.springframework.ide.eclipse.editor.support.yaml.structure.YamlStructureParser.SNode;
 
 /**
@@ -48,5 +50,9 @@ public interface YamlNavigable<T> {
 			Log.log(e);
 			return Stream.empty();
 		}
+	}
+
+	static JavaObjectNav javaObject(Object obj) {
+		return new JavaObjectNav(obj);
 	}
 }

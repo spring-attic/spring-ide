@@ -14,10 +14,13 @@ import org.springframework.ide.eclipse.boot.core.ISpringBootProject;
 import org.springframework.ide.eclipse.boot.core.SpringBootCore;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.DevtoolsConnectable;
+import org.springframework.ide.eclipse.boot.dash.api.TemporalBoolean;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.remote.GenericRemoteAppElement;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
+
+import com.google.common.base.Objects;
 
 public class RestartDevtoolsClientAction extends AbstractBootDashElementsAction {
 
@@ -64,7 +67,7 @@ public class RestartDevtoolsClientAction extends AbstractBootDashElementsAction 
 	private boolean visibleForElement(BootDashElement e) {
 		if (e instanceof GenericRemoteAppElement) {
 			App data = ((GenericRemoteAppElement) e).getAppData();
-			return data instanceof DevtoolsConnectable;
+			return ((DevtoolsConnectable)data).isDevtoolsConnectable()!=TemporalBoolean.NEVER;
 		}
 		return false;
 	}
@@ -91,7 +94,7 @@ public class RestartDevtoolsClientAction extends AbstractBootDashElementsAction 
 				if (BootPropertyTester.fastHasDevTools(project)) {
 					App data = ((GenericRemoteAppElement)bde).getAppData();
 					if (data instanceof DevtoolsConnectable) {
-						return ((DevtoolsConnectable)data).getDevtoolsSecret()!=null;
+						return ((DevtoolsConnectable)data).isDevtoolsConnectable().isTrue();
 					}
 				}
 			}

@@ -117,7 +117,7 @@ public interface BootDashElement extends App, Taggable {
 	 */
 	Object getParent();
 	BootDashColumn[] getColumns();
-	boolean hasDevtoolsDependency();
+	boolean projectHasDevtoolsDependency();
 
 	String getUrl();
 
@@ -134,6 +134,7 @@ public interface BootDashElement extends App, Taggable {
 	default ImageDescriptor getCustomRunStateIcon() { return null; }
 	default Image getPropertiesTitleIconImage() { return null; }
 	default String getProtocol() { return "http"; }
-	default boolean isDevtoolsGreenColor() { return hasDevtoolsDependency(); }
+	default boolean isDevtoolsGreenColor() { return projectHasDevtoolsDependency(); }
 	default RefreshState getRefreshState() { return RefreshState.READY; }
+	default boolean hasDevtoolsDependency() { return projectHasDevtoolsDependency(); }
 }

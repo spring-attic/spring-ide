@@ -136,9 +136,7 @@ implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentT
 			d.setRunState(runOrDebug);
 			d.setSessionId(sessionId.getValue());
 			d.setBuildId(UUID.randomUUID().toString());
-			if (BootPropertyTester.hasDevtools(p)) {
-				d.setSystemProperty(DevtoolsUtil.REMOTE_SECRET_PROP, DevtoolsUtil.getSecret(p));
-			}
+			d.setSystemProperty(DevtoolsUtil.REMOTE_SECRET_PROP, DevtoolsUtil.getSecret(p));
 			deployments.createOrUpdate(d);
 		}
 	}

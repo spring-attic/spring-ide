@@ -32,6 +32,8 @@ import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IProcess;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
+import org.springframework.ide.eclipse.boot.dash.api.App;
+import org.springframework.ide.eclipse.boot.dash.api.DevtoolsConnectable;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
@@ -45,6 +47,7 @@ import org.springframework.ide.eclipse.boot.util.ProcessTracker;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 
 /**
@@ -326,13 +329,18 @@ public class DevtoolsUtil {
 		}
 	}
 
-	public static String getSecret(IProject project) throws CoreException {
-		String secret = project.getPersistentProperty(REMOTE_CLIENT_SECRET_PROPERTY);
-		if (secret == null) {
-			secret = RandomStringUtils.randomAlphabetic(20);
-			project.setPersistentProperty(REMOTE_CLIENT_SECRET_PROPERTY, secret);
+	public static String getSecret(IProject project) {
+		try {
+			String secret = project.getPersistentProperty(REMOTE_CLIENT_SECRET_PROPERTY);
+			if (secret == null) {
+				secret = RandomStringUtils.randomAlphabetic(20);
+				project.setPersistentProperty(REMOTE_CLIENT_SECRET_PROPERTY, secret);
+			}
+			return secret;
+		} catch (Exception e) {
+			Log.log(e);
+			return null;
 		}
-		return secret;
 	}
 
 	public static boolean isEnvVarSetupForRemoteClient(Map<String, String> envVars, String secret) {
@@ -380,7 +388,11 @@ public class DevtoolsUtil {
 	}
 
 	private static boolean wantsDevtools(GenericRemoteAppElement app) {
-		return app.getRunState().isActive() && app.hasDevtoolsDependency() && app.isDevtoolsGreenColor();
+		if (app.getRunState().isActive()) {
+			App data = app.getAppData();
+			return data instanceof DevtoolsConnectable && ((DevtoolsConnectable)data).isDevtoolsConnectable().isTrue();
+		}
+		return false;
 	}
 
 }

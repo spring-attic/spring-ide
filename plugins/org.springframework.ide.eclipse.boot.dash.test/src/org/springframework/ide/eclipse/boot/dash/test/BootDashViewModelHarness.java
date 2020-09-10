@@ -228,6 +228,13 @@ public class BootDashViewModelHarness {
 		assertContains(expectSnippet, getLabel(element));
 	}
 
+	public void assertLabelNotContains(String expectSnippet, GenericRemoteAppElement element) {
+		String label = getStyledLabel(element).getString();
+		if (label.contains(expectSnippet)) {
+			fail("Found unexpected '"+expectSnippet+"' in '"+label);
+		}
+	}
+
 	public void assertLabelContains(String expectSnippet, Color expectedColor, GenericRemoteAppElement element) {
 		StyledString label = getStyledLabel(element);
 		int snippetStart = label.getString().indexOf(expectSnippet);
@@ -321,5 +328,6 @@ public class BootDashViewModelHarness {
 	public BootProjectDashElement waitForElement(long timeout, IProject project) throws Exception {
 		return waitForCallable("Element for project "+project.getName(), timeout, () -> getElementFor(project));
 	}
+
 
 }

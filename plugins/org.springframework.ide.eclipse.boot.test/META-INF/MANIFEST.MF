@@ -39,3 +39,4 @@ Export-Package: org.springframework.ide.eclipse.boot.test,
 Import-Package: org.eclipse.core.runtime,
  org.eclipse.core.runtime.jobs,
  org.osgi.framework
+Automatic-Module-Name: org.springframework.ide.eclipse.boot.test

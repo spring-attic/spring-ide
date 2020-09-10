@@ -14,3 +14,4 @@ Require-Bundle: org.eclipse.ui,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Activator: org.springframework.ide.eclipse.boot.restart.RestartPlugin
 Bundle-ActivationPolicy: lazy
+Automatic-Module-Name: org.springframework.ide.eclipse.boot.restart

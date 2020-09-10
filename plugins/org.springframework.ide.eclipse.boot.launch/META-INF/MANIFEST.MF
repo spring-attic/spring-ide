@@ -41,3 +41,4 @@ Export-Package: org.springframework.ide.eclipse.boot.launch,
  org.springframework.ide.eclipse.boot.launch.properties,
  org.springframework.ide.eclipse.boot.launch.util
 Bundle-Activator: org.springframework.ide.eclipse.boot.launch.BootLaunchActivator
+Automatic-Module-Name: org.springframework.ide.eclipse.boot.launch

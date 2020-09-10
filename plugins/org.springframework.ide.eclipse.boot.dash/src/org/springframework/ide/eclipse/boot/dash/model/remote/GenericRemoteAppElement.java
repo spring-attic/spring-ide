@@ -865,6 +865,15 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 	}
 
 	@Override
+	public boolean hasDevtoolsDependency() {
+		App data = getAppData();
+		if (data instanceof DevtoolsConnectable) {
+			return ((DevtoolsConnectable) data).hasDevtoolsDependency();
+		}
+		return super.hasDevtoolsDependency();
+	}
+
+	@Override
 	public boolean isDevtoolsGreenColor() {
 		App data = getAppData();
 		if (data instanceof DevtoolsConnectable) {

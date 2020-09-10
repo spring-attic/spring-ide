@@ -16,33 +16,22 @@ import static org.springframework.ide.eclipse.boot.dash.docker.runtarget.DockerR
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.StyledString;
-
-import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.async.ResultCallback;
-import com.github.dockerjava.api.command.LogContainerCmd;
-import com.github.dockerjava.api.exception.NotFoundException;
-import com.github.dockerjava.api.model.Container;
-import com.github.dockerjava.api.model.Frame;
-import com.github.dockerjava.api.model.StreamType;
-
 import org.springframework.ide.eclipse.boot.dash.api.ActualInstanceCount;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.AppConsole;
@@ -65,14 +54,28 @@ import org.springframework.ide.eclipse.boot.dash.docker.jmx.JmxSupport;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.dash.model.remote.RefreshStateTracker;
 import org.springframework.ide.eclipse.boot.util.RetryUtil;
+import org.springframework.ide.eclipse.editor.support.yaml.path.JavaObjectNav;
+import org.springframework.ide.eclipse.editor.support.yaml.path.YamlNavigable;
+import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPath;
+import org.springframework.ide.eclipse.editor.support.yaml.path.YamlTraversal;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
-import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.StringUtils;
 import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.async.ResultCallback;
+import com.github.dockerjava.api.command.LogContainerCmd;
+import com.github.dockerjava.api.exception.NotFoundException;
+import com.github.dockerjava.api.model.Container;
+import com.github.dockerjava.api.model.Frame;
+import com.github.dockerjava.api.model.StreamType;
+import com.google.common.base.Predicate;
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
@@ -93,6 +96,24 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 		this.target = target;
 		this.app = app;
 		this.container = container;
+		this.hasDevtoolsDep = hasDevtoolsDependency(container::getLabels);
+	}
+
+	public static Supplier<Boolean> hasDevtoolsDependency(Supplier<Map<String,String>> labelsSupplier) {
+		return Suppliers.memoize(() ->{
+			Map<String, String> labels = labelsSupplier.get();
+			System.out.println(labels.keySet());
+			try {
+				Map bpmd = new ObjectMapper().readValue(labels.get("io.buildpacks.build.metadata"), Map.class);
+				Set<String> deps =  dependencyNamePath
+						.traverseAmbiguously(YamlNavigable.javaObject(bpmd))
+						.flatMap(JavaObjectNav::asStringMaybe).collect(Collectors.toSet());
+				return deps.contains("spring-boot-devtools");
+			} catch (Exception e) {
+				Log.log(e);
+			}
+			return false;
+		});
 	}
 
 	@Override
@@ -310,6 +331,51 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 		Map<String, String> sysprops = getSystemProps(container);
 		return sysprops.getOrDefault(DevtoolsUtil.REMOTE_SECRET_PROP, null);
 	}
+
+	private static final YamlTraversal dependencyNamePath = YamlPath.EMPTY
+			.thenValAt("bom")
+			.thenAnyChild()
+			.thenValAt("metadata")
+			.thenValAt("dependencies")
+			.thenAnyChild()
+			.thenValAt("name");
+
+	private Supplier<Boolean> hasDevtoolsDep;
+	
+	@Override
+	public boolean hasDevtoolsDependency() {
+		return this.hasDevtoolsDep.get();
+	}
+
+	// for debugging... keep in comments for now
+//	private void findNode(Object json, Predicate<String> test, String path) {
+//		if (json instanceof String) {
+//			if (test.apply((String) json)) {
+//				System.out.println(path+" = "+json);
+//			}
+//		} else if (json instanceof Map) {
+//			Map<String, ?> map = (Map<String, ?>) json; 
+//			for (Entry<String, ?> me : map.entrySet()) {
+//				findNode(me.getValue(), test, path+"."+escape(me.getKey()));
+//			}
+//		} else if (json instanceof List) {
+//			List<?> list = (List<?>) json;
+//			int index = 0;
+//			for (Object object : list) {
+//				findNode(object, test, path+"["+index+"]");
+//				index++;
+//			}
+//		}
+//		// TODO Auto-generated method stub
+//		
+//	}
+//
+//	private String escape(String path) {
+//		if (path.contains(".")) {
+//			return "["+path+"]";
+//		}
+//		return path;
+//	}
 
 	public Map<String,String> getSystemProps() {
 		return container!=null ? getSystemProps(container) : null;
