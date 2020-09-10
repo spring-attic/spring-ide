@@ -14,12 +14,15 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.buildship.core.GradleBuild;
 import org.eclipse.buildship.core.GradleCore;
+import org.eclipse.buildship.core.internal.workspace.NewProjectHandler;
+import org.eclipse.buildship.core.internal.workspace.SynchronizationJob;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -44,6 +47,7 @@ import com.google.common.base.Suppliers;
 
 import sts.model.plugin.StsToolingModel;
 
+@SuppressWarnings("restriction")
 public class GradleSpringBootProject extends SpringBootProject {
 
 	private static final String SPRING_BOOT_GROUP = "org.springframework.boot";
@@ -168,7 +172,12 @@ public class GradleSpringBootProject extends SpringBootProject {
 
 	@Override
 	public Job updateProjectConfiguration() {
-		throw new UnsupportedOperationException("Not implemented!");
+		return GradleCore.getWorkspace().getBuild(project).map(build -> {
+			SynchronizationJob job = new SynchronizationJob(NewProjectHandler.IMPORT_AND_MERGE,
+					Collections.singleton(build));
+			job.schedule();
+			return job;
+		}).orElse(null);
 	}
 
 	@Override

@@ -185,7 +185,11 @@ public class AddStartersWizardModel implements OkButtonHandler, Disposable {
 			ResourceCompareInput editorInput = comparison.getCompareEditorInput().getValue();
 			if (editorInput != null && editorInput.isSaveNeeded()) {
 				// This will save changes in the editor.
-				editorInput.okPressed();
+				if (editorInput.okPressed()) {
+					// Update project
+					ISpringBootProject bootProject = initializrModel.getValue().getProject();
+					bootProject.updateProjectConfiguration();
+				}
 			}
 		}
 	}
