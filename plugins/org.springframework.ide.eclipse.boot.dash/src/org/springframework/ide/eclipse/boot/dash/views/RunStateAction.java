@@ -30,7 +30,6 @@ import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
-import org.springframework.ide.eclipse.boot.dash.model.remote.GenericRemoteAppElement;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
 
 import com.google.common.base.Objects;
@@ -98,7 +97,7 @@ public abstract class RunStateAction extends AbstractBootDashElementsAction {
 	}
 
 	private static final ISchedulingRule SCEDULING_RULE = JobUtil.lightRule("RunStateAction.RULE");
-	protected final RunState goalState;
+	private final RunState goalState;
 	private ElementStateListener stateListener = null;
 
 	protected void configureJob(Job job) {
@@ -147,7 +146,7 @@ public abstract class RunStateAction extends AbstractBootDashElementsAction {
 	}
 
 	protected boolean isVisibleForElement(BootDashElement e) {
-		return e.getRunState() != null && e.supportedGoalStates().contains(goalState);
+		return e.getRunState() != null && e.supportedGoalStates().contains(getGoalState(e));
 	}
 
 	private boolean appliesTo(Collection<BootDashElement> selection) {
@@ -180,13 +179,13 @@ public abstract class RunStateAction extends AbstractBootDashElementsAction {
 	}
 
 	protected boolean goalStateAppliesTo(BootDashElement e) {
-		return e.supportedGoalStates().contains(goalState);
+		return e.supportedGoalStates().contains(getGoalState(e));
 	}
 
 
 	@Override
 	public String toString() {
-		return "RunStateAction("+goalState+")";
+		return "RunStateAction("+getGoalState()+")";
 	}
 
 	/**
@@ -206,7 +205,7 @@ public abstract class RunStateAction extends AbstractBootDashElementsAction {
 							if (appliesTo(el)) {
 								futures.add(CompletableFuture.runAsync(() -> {
 									try {
-										el.setGoalState(goalState);
+										el.setGoalState(getGoalState(el));
 										monitor.worked(1);
 									} catch (Exception e) {
 										monitor.worked(1);
@@ -236,6 +235,10 @@ public abstract class RunStateAction extends AbstractBootDashElementsAction {
 		return null;
 	}
 
+	protected RunState getGoalState(BootDashElement el) {
+		return getGoalState();
+	}
+
 	public final void run() {
 		Job job = createJob();
 		if (job!=null) {
@@ -246,7 +249,7 @@ public abstract class RunStateAction extends AbstractBootDashElementsAction {
 
 	@Override
 	public void dispose() {
-		debug("DISPOSE RunStateAction "+goalState);
+		debug("DISPOSE RunStateAction "+getGoalState());
 		super.dispose();
 		if (stateListener!=null) {
 			//Avoid leaking model listeners

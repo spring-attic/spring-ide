@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2019 Pivotal, Inc.
+ * Copyright (c) 2015, 2020 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -207,6 +207,11 @@ public class BootDashActions {
 
 		RunStateAction pauseAction = new RunStateAction(defaultActionParams().setDefinitionId("org.springframework.ide.eclipse.boot.dash.boot.dash.PauseAction"), RunState.PAUSED) {
 			@Override
+			protected boolean isVisibleForElement(BootDashElement e) {
+				return RunState.PAUSED != e.getRunState() && super.isVisibleForElement(e);
+			}
+
+			@Override
 			protected boolean currentStateAcceptable(RunState s) {
 				return s.isActive();
 			}
@@ -225,6 +230,23 @@ public class BootDashActions {
 			@Override
 			protected boolean currentStateAcceptable(RunState s) {
 				return s == RunState.PAUSED;
+			}
+
+			@Override
+			protected boolean isVisibleForElement(BootDashElement e) {
+				// Only show Resume action for elements that can be paused explicitly
+				return e.supportedGoalStates().contains(RunState.PAUSED) && super.isVisibleForElement(e);
+			}
+
+			@Override
+			protected RunState getGoalState(BootDashElement el) {
+				if (el.supportedGoalStates().contains(RunState.RUNNING)) {
+					return RunState.RUNNING;
+				}
+				if (el.supportedGoalStates().contains(RunState.DEBUGGING)) {
+					return RunState.DEBUGGING;
+				}
+				return super.getGoalState(el);
 			}
 
 			@Override
@@ -366,7 +388,7 @@ public class BootDashActions {
 							for (BootDashElement el : selecteds) {
 								monitor.subTask("Restarting: " + el.getName());
 								try {
-									el.restart(goalState, ui());
+									el.restart(getGoalState(), ui());
 								} catch (Exception e) {
 									return BootActivator.createErrorStatus(e);
 								}
