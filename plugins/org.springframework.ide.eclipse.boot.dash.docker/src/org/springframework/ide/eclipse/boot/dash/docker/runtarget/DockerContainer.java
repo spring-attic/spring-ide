@@ -212,7 +212,7 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 				try {
 					RefreshStateTracker rt = this.refreshTracker.get();
 					
-					if (goal == RunState.RUNNING) {
+					if (goal.isActive()) {
 						if (currentState==RunState.PAUSED) {
 							rt.run("Resuming " + getStyledName(null).getString(), () -> {
 								client.unpauseContainerCmd(container.getId()).exec();

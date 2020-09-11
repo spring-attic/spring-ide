@@ -191,7 +191,7 @@ public abstract class RunStateAction extends AbstractBootDashElementsAction {
 
 	/**
 	 * Subclass can override to define custom 'work' this action does when it is triggered.
-	 * Default implementation just calls 'setGoalState', on all selected / applicable elements.
+	 * Default implementation just calls 'setGoalState', on all selected / applicable elements.`
 	 */
 	protected Job createJob() {
 		final Collection<BootDashElement> selecteds = getSelectedElements();

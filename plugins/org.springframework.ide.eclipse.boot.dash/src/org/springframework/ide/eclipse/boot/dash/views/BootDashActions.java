@@ -221,7 +221,7 @@ public class BootDashActions {
 		pauseAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/suspend.gif"));
 		pauseAction.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/suspend_disabled.gif"));
 
-		RunStateAction resumeRunAction = new RunStateAction(defaultActionParams().setDefinitionId("org.springframework.ide.eclipse.boot.dash.boot.dash.ResumeAction"), RunState.RUNNING) {
+		RunStateAction resumeRunAction = new RunStateAction(defaultActionParams().setDefinitionId("org.springframework.ide.eclipse.boot.dash.boot.dash.ResumeRunAction"), RunState.RUNNING) {
 			@Override
 			protected boolean currentStateAcceptable(RunState s) {
 				return s == RunState.PAUSED;
@@ -232,12 +232,29 @@ public class BootDashActions {
 				return false;
 			}
 		};
-		resumeRunAction.setText("Resume");
+		resumeRunAction.setText("Resume (Running)");
 		resumeRunAction.setToolTipText("Resume previously suspended process(es) associated with the selected elements.");
 		resumeRunAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/resume.gif"));
 		resumeRunAction.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/resumed.gif"));
 
-		runStateActions = new RunStateAction[] { restartAction, rebugAction, stopAction, pauseAction, resumeRunAction };
+
+		RunStateAction resumeDebugAction = new RunStateAction(defaultActionParams().setDefinitionId("org.springframework.ide.eclipse.boot.dash.boot.dash.ResumeDebugAction"), RunState.DEBUGGING) {
+			@Override
+			protected boolean currentStateAcceptable(RunState s) {
+				return s == RunState.PAUSED;
+			}
+
+			@Override
+			public boolean showInToolbar() {
+				return false;
+			}
+		};
+		resumeDebugAction.setText("Resume (Debugging)");
+		resumeDebugAction.setToolTipText("Resume previously suspended process(es) associated with the selected elements.");
+		resumeDebugAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/resume.gif"));
+		resumeDebugAction.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/resumed.gif"));
+
+		runStateActions = new RunStateAction[] { restartAction, rebugAction, stopAction, pauseAction, resumeRunAction, resumeDebugAction };
 
 		openConfigAction = new OpenLaunchConfigAction(defaultActionParams().setDefinitionId("org.springframework.ide.eclipse.boot.dash.boot.dash.OpenLaunchConfigAction"));
 		openConsoleAction = new OpenConsoleAction(defaultActionParams());
