@@ -32,7 +32,7 @@ public class EnableJmxSshTunnelAction extends AbstractCloudAppDashElementsAction
 		super(params);
 		this.setText("Enable JMX Ssh Tunneling");
 		this.setToolTipText("Enables JMX on this app and creates an SSH Tunnel the next time the app is started.");
-		URL url = FileLocator.find(Platform.getBundle("org.springframework.ide.eclipse.boot.dash"), new Path("icons/link.gif"), null);
+		URL url = FileLocator.find(Platform.getBundle("org.springframework.ide.eclipse.boot.dash"), new Path("icons/link_to_editor.png"), null);
 		if (url != null) {
 			this.setImageDescriptor(ImageDescriptor.createFromURL(url));
 		}

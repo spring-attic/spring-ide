@@ -35,7 +35,7 @@ public class LinkWithConsoleAction extends AbstractBootDashElementsAction {
 		super(params);
 		this.setText("Link with Console");
 		this.setToolTipText("Link with Console");
-		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/link_with_console.gif"));
+		this.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/link_to_editor.png"));
 
 		selection.getElements().addListener(listener = new ValueListener<ImmutableSet<BootDashElement>>() {
 			public void gotValue(LiveExpression<ImmutableSet<BootDashElement>> exp, ImmutableSet<BootDashElement> selecteds) {
