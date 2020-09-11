@@ -63,6 +63,8 @@ public class PomDocumentMerger extends DocumentMerger {
 				.filter(differenceDirections(configuration.isMirrored() ? Direction.LEFT : Direction.RIGHT)
 						.and(ignorePath("project", "name"))
 						.and(ignorePath("project", "description"))
+						.and(ignorePath("project", "groupId"))
+						.and(ignorePath("project", "version"))
 						.and(ignorePath("project", "parent", "relativePath"))
 				)
 			.getDiffs();
