@@ -99,22 +99,7 @@ public class LocalServicesModel extends AbstractDisposable {
 			refresh();
 		});
 		hideCloudCliServices.onChange(this, (e, v) -> {
-			if (!hideCloudCliServices.getValue() && cloudCliInstall.getValue()==null) {
-				IBootInstall bootInstall = defaultBootInstall.getValue();
-				UserInteractions ui = viewModel.getContext().getUi();
-				if (bootInstall!=null) {
-					new AutoCloudCliInstaller(bootInstall).performInstall(ui);
-					if (cloudCliInstall.getValue()==null) {
-						//Installation was declined or failed... add filter back.
-						//See: https://www.pivotaltracker.com/story/show/154061574
-						viewerFilters.add(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES);
-					}
-					//Note: triggering refresh in this case should not be necessary because it should be triggered
-					// as needed by the change to cloudCliInstall
-				}
-			} else {
-				refresh();
-			}
+			refresh();
 		});
 	}
 
@@ -132,11 +117,16 @@ public class LocalServicesModel extends AbstractDisposable {
 		if (hideCloudCliServices.getValue()) {
 			cloudCliServices.getValue().forEach(bde -> bde.dispose());
 			cloudCliServices.replaceAll(Collections.emptySet());
+			buttons.replaceAll(Collections.emptySet());
 		} else {
 			new Job("Loading local cloud services") {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
+						if (cloudCliInstall.getValue() == null) {
+							buttons.add(enableCloudServicesButton);
+						}
+
 						refreshState.setValue(RefreshState.loading("Fetching Local Cloud Sevices..."));
 						List<LocalCloudServiceDashElement> newCloudCliservices = fetchLocalServices();
 						cloudCliServices.getValue().forEach(bde -> bde.dispose());

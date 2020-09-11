@@ -145,6 +145,10 @@ public class BootDashModelTest {
 
 	@Test public void testAutoInstallSpringCloudCLI() throws Exception {
 		assertTrue(model.getViewModel().getToggleFilters().getSelectedFilters().contains(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES));
+		assertNull(harness.getButton(model, ENABLE_CLOUD_CLI_BUTTON));
+		assertTrue(model.getViewModel().getToggleFilters().getSelectedFilters().contains(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES));
+		model.getViewModel().getToggleFilters().getSelectedFilters().remove(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES);
+		ACondition.waitFor("Cloud CLI Button to appear", 500, () -> harness.assertButton(model, ENABLE_CLOUD_CLI_BUTTON));
 
 		ButtonModel button = harness.assertButton(model, ENABLE_CLOUD_CLI_BUTTON);
 
@@ -180,32 +184,19 @@ public class BootDashModelTest {
 
 	@Test public void testAutoInstallSpringCloudCLIRejected() throws Exception {
 		assertTrue(model.getViewModel().getToggleFilters().getSelectedFilters().contains(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES));
+		assertNull(harness.getButton(model, ENABLE_CLOUD_CLI_BUTTON));
+		assertTrue(model.getViewModel().getToggleFilters().getSelectedFilters().contains(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES));
+		model.getViewModel().getToggleFilters().getSelectedFilters().remove(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES);
+		ACondition.waitFor("Cloud CLI Button to appear", 500, () -> harness.assertButton(model, ENABLE_CLOUD_CLI_BUTTON));
 
 		ButtonModel button = harness.assertButton(model, ENABLE_CLOUD_CLI_BUTTON);
 		when(ui().confirmOperation(contains("Confirm Installation of Spring Cloud CLI"), contains("will be installed into"))).thenReturn(false);
 		button.perform(ui());
 
 		harness.assertButton(model, ENABLE_CLOUD_CLI_BUTTON);
-		assertTrue(model.getViewModel().getToggleFilters().getSelectedFilters().contains(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES));
+		assertFalse(model.getViewModel().getToggleFilters().getSelectedFilters().contains(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES));
 
 		assertServiceElements(/*NONE*/);
-		verify(ui()).confirmOperation(anyString(), anyString());
-		verifyNoMoreInteractions(ui());
-	}
-
-	@Test public void testAutoInstallSpringCloudCLITriggeredByFilterChange() throws Exception {
-		LiveSetVariable<FilterChoice> selectedFilters = model.getViewModel().getToggleFilters().getSelectedFilters();
-		assertTrue(selectedFilters.contains(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES));
-		harness.assertButton(model, ENABLE_CLOUD_CLI_BUTTON);
-
-		when(ui().confirmOperation(contains("Confirm Installation of Spring Cloud CLI"), contains("will be installed into"))).thenReturn(true);
-		selectedFilters.remove(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES);
-
-		ACondition.waitFor("Local services to appear", MAVEN_BUILD_TIMEOUT, () -> {
-			assertServiceElements("dataflow", "zipkin", "eureka", "kafka", "h2", "configserver", "hystrixdashboard", "stubrunner");
-		});
-		assertNull(harness.getButton(model, ENABLE_CLOUD_CLI_BUTTON));
-
 		verify(ui()).confirmOperation(anyString(), anyString());
 		verifyNoMoreInteractions(ui());
 	}
@@ -221,6 +212,12 @@ public class BootDashModelTest {
 		assertEquals(cliVersion, customCliInstall.getVersion());
 		assertEquals(customCliInstall, context.getBootInstallManager().getDefaultInstall());
 		assertTrue(context.getBootInstallManager().getInstalls().contains(customCliInstall));
+
+		assertTrue(model.getViewModel().getToggleFilters().getSelectedFilters().contains(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES));
+		assertNull(harness.getButton(model, ENABLE_CLOUD_CLI_BUTTON));
+		assertTrue(model.getViewModel().getToggleFilters().getSelectedFilters().contains(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES));
+		model.getViewModel().getToggleFilters().getSelectedFilters().remove(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES);
+		ACondition.waitFor("Cloud CLI Button to appear", 500, () -> harness.assertButton(model, ENABLE_CLOUD_CLI_BUTTON));
 
 		when(ui().confirmOperation(contains("Confirm Installation of Spring Cloud CLI"), contains("will be installed into"))).thenReturn(true);
 		ButtonModel button = harness.assertButton(model, ENABLE_CLOUD_CLI_BUTTON);
@@ -249,9 +246,14 @@ public class BootDashModelTest {
 		assertEquals(customCliInstall, context.getBootInstallManager().getDefaultInstall());
 		assertTrue(context.getBootInstallManager().getInstalls().contains(customCliInstall));
 
+		assertTrue(model.getViewModel().getToggleFilters().getSelectedFilters().contains(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES));
+		assertNull(harness.getButton(model, ENABLE_CLOUD_CLI_BUTTON));
+		assertTrue(model.getViewModel().getToggleFilters().getSelectedFilters().contains(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES));
+		model.getViewModel().getToggleFilters().getSelectedFilters().remove(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES);
+		ACondition.waitFor("Cloud CLI Button to appear", 500, () -> harness.assertButton(model, ENABLE_CLOUD_CLI_BUTTON));
+
 		ButtonModel button = harness.assertButton(model, ENABLE_CLOUD_CLI_BUTTON);
 		button.perform(ui());
-		assertTrue(model.getViewModel().getToggleFilters().getSelectedFilters().contains(ToggleFiltersModel.FILTER_CHOICE_HIDE_LOCAL_SERVICES));
 		assertNotNull(harness.getButton(model, ENABLE_CLOUD_CLI_BUTTON));
 		verify(ui()).errorPopup(contains("Auto installation of Spring Cloud CLI not possible"), contains("Couldn't determine a compatible Spring Cloud CLI version"));
 		verifyNoMoreInteractions(ui());

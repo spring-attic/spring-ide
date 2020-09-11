@@ -14,9 +14,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.springsource.ide.eclipse.commons.livexp.ui.ProjectLocationSection.getDefaultProjectLocation;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -34,8 +32,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jdt.internal.launching.StandardVM;
-import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.IVMInstall2;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.m2e.core.ui.internal.UpdateMavenProjectJob;
@@ -54,7 +51,6 @@ import org.springframework.ide.eclipse.boot.wizard.importing.ImportConfiguration
 import org.springframework.ide.eclipse.boot.wizard.importing.ImportStrategies;
 import org.springframework.ide.eclipse.boot.wizard.importing.ImportStrategy;
 import org.springframework.ide.eclipse.boot.wizard.starters.AddStartersInitializrService;
-import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.frameworks.test.util.ACondition;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.tests.util.StsTestUtil;
@@ -279,7 +275,7 @@ public class BootProjectTestHarness {
 
 	public IProject createBootProject(final String projectName, final WizardConfigurer... _extraConfs) throws Exception {
 		List<WizardConfigurer> extraConfs = new ArrayList<>(Arrays.asList(_extraConfs));
-		StandardVM jvm = (StandardVM) JavaRuntime.getDefaultVMInstall();
+		IVMInstall2 jvm = (IVMInstall2) JavaRuntime.getDefaultVMInstall();
 		String version = jvm.getJavaVersion();
 		if (version.startsWith("1.8.")) {
 			System.out.println("Warning! Workspace JRE is Java 8. Downgrading test project");
