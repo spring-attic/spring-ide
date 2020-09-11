@@ -591,7 +591,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		}
 	}
 
-	private boolean addVisible(IMenuManager manager, IAction a) {
+	public static boolean addVisible(IMenuManager manager, IAction a) {
 		if (a!=null && isVisible(a)) {
 			manager.add(a);
 			return true;
@@ -599,7 +599,7 @@ public class BootDashUnifiedTreeSection extends PageSection implements MultiSele
 		return false;
 	}
 
-	private boolean isVisible(IAction a) {
+	public static boolean isVisible(IAction a) {
 		if (a instanceof AbstractBootDashAction) {
 			return ((AbstractBootDashAction) a).isVisible();
 		}

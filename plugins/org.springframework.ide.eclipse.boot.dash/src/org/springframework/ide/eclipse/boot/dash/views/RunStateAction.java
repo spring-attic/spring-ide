@@ -10,15 +10,27 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.views;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.MultiRule;
 import org.eclipse.swt.widgets.Display;
+import org.springframework.ide.eclipse.boot.core.BootActivator;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
+import org.springframework.ide.eclipse.boot.dash.model.remote.GenericRemoteAppElement;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.JobUtil;
 
 import com.google.common.base.Objects;
@@ -39,6 +51,9 @@ public abstract class RunStateAction extends AbstractBootDashElementsAction {
 		}
 	}
 
+	public boolean showInToolbar() {
+		return true;
+	}
 
 	protected static class BdeSchedulingRule implements ISchedulingRule {
 
@@ -122,12 +137,17 @@ public abstract class RunStateAction extends AbstractBootDashElementsAction {
 		 */
 		boolean visible = !getSelectedElements().isEmpty();
 		for (BootDashElement e : getSelectedElements()) {
-			if (e.getRunState() == null) {
+			boolean vis = isVisibleForElement(e);
+			if (!vis) {
 				visible = false;
 				break;
 			}
 		}
 		setVisible(visible);
+	}
+
+	protected boolean isVisibleForElement(BootDashElement e) {
+		return e.getRunState() != null && e.supportedGoalStates().contains(goalState);
 	}
 
 	private boolean appliesTo(Collection<BootDashElement> selection) {
@@ -170,9 +190,51 @@ public abstract class RunStateAction extends AbstractBootDashElementsAction {
 	}
 
 	/**
-	 * Subclass must override to define what 'work' this action does when it triggered.
+	 * Subclass can override to define custom 'work' this action does when it is triggered.
+	 * Default implementation just calls 'setGoalState', on all selected / applicable elements.
 	 */
-	protected abstract Job createJob();
+	protected Job createJob() {
+		final Collection<BootDashElement> selecteds = getSelectedElements();
+		if (!selecteds.isEmpty()) {
+			return new Job("Suspending " + selecteds.size() + " Boot Dash Elements") {
+				protected IStatus run(IProgressMonitor monitor) {
+					monitor.beginTask("Stopping " + selecteds.size() + " Elements", selecteds.size());
+					try {
+
+						List<CompletableFuture<Void>> futures = new ArrayList<>(selecteds.size());
+						for (BootDashElement el : selecteds) {
+							if (appliesTo(el)) {
+								futures.add(CompletableFuture.runAsync(() -> {
+									try {
+										el.setGoalState(goalState);
+										monitor.worked(1);
+									} catch (Exception e) {
+										monitor.worked(1);
+										throw new CompletionException(e);
+									}
+								}));
+							}
+						}
+						try {
+							CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()])).get(60, TimeUnit.SECONDS);
+						} catch (InterruptedException e) {
+							BootActivator.createErrorStatus(e);
+						} catch (ExecutionException e) {
+							BootActivator.createErrorStatus(e);
+						} catch (TimeoutException e) {
+							BootActivator.createErrorStatus(e);
+						}
+
+
+						return Status.OK_STATUS;
+					} finally {
+						monitor.done();
+					}
+				}
+			};
+		}
+		return null;
+	}
 
 	public final void run() {
 		Job job = createJob();
@@ -196,5 +258,6 @@ public abstract class RunStateAction extends AbstractBootDashElementsAction {
 	public RunState getGoalState() {
 		return goalState;
 	}
+
 
 }
