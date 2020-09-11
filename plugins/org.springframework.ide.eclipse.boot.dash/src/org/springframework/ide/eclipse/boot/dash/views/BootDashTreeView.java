@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuCreator;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
@@ -177,6 +178,9 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 	private void fillLocalPullDown(IMenuManager manager) {
 		for (RunStateAction a : actions.getRunStateActions()) {
 			manager.add(a);
+			//'addVisible' would be nice but doesm't work here. Probaly because the pulldown is only
+			// populated once rather than every time it shows:
+			//			BootDashUnifiedTreeSection.addVisible(manager, a);
 		}
 		manager.add(actions.getOpenBrowserAction());
 		manager.add(actions.getOpenNgrokAdminUi());
@@ -210,7 +214,9 @@ public class BootDashTreeView extends ViewPartWithSections implements ITabbedPro
 
 	private void fillLocalToolBar(IToolBarManager manager) {
 		for (RunStateAction a : actions.getRunStateActions()) {
-			manager.add(a);
+			if (a.showInToolbar()) {
+				manager.add(a);
+			}
 		}
 		manager.add(actions.getOpenBrowserAction());
 		manager.add(actions.getOpenConsoleAction());

@@ -19,14 +19,12 @@ import java.io.OutputStream;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.EnumSet;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -64,7 +62,6 @@ import org.springsource.ide.eclipse.commons.livexp.ui.Stylers;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallback;
@@ -73,7 +70,6 @@ import com.github.dockerjava.api.exception.NotFoundException;
 import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.Frame;
 import com.github.dockerjava.api.model.StreamType;
-import com.google.common.base.Predicate;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableMap;
@@ -194,17 +190,21 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 	
 	@Override
 	public EnumSet<RunState> supportedGoalStates() {
+		Set<RunState> supported = new HashSet<>();
+		supported.add(RunState.INACTIVE);
 		if (container.getLabels().get(DockerApp.DEBUG_PORT)!=null) {
-			return EnumSet.of(RunState.INACTIVE, RunState.DEBUGGING);
+			supported.add(RunState.DEBUGGING);
 		} else {
-			return EnumSet.of(RunState.INACTIVE, RunState.RUNNING);
+			supported.add(RunState.RUNNING);
 		}
+		supported.add(RunState.PAUSED);
+		return EnumSet.copyOf(supported);
 	}
 	
 	@Override
 	public void setGoalState(RunState goal) {
-		RunState runState = fetchRunState();
-		if (runState != goal) {
+		RunState currentState = fetchRunState();
+		if (currentState != goal) {
 
 			DockerRunTarget dockerTarget = getTarget();
 			DockerClient client = dockerTarget.getClient();
@@ -213,10 +213,17 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 					RefreshStateTracker rt = this.refreshTracker.get();
 					
 					if (goal == RunState.RUNNING) {
-						rt.run("Starting " + getShortHash(), () -> {
-							client.startContainerCmd(container.getId()).exec();
-							RetryUtil.until(100, 1000, runstate -> runstate.equals(RunState.RUNNING), this::fetchRunState);
-						});
+						if (currentState==RunState.PAUSED) {
+							rt.run("Resuming " + getStyledName(null).getString(), () -> {
+								client.unpauseContainerCmd(container.getId()).exec();
+								RetryUtil.until(100, 1000, runstate -> runstate.isActive(), this::fetchRunState);
+							});
+						} else {
+							rt.run("Starting " + getStyledName(null).getString(), () -> {
+								client.startContainerCmd(container.getId()).exec();
+								RetryUtil.until(100, 1000, runstate -> runstate.equals(RunState.RUNNING), this::fetchRunState);
+							});
+						}
 					} else if (goal == RunState.INACTIVE) {
 						rt.run("Stopping " + getShortHash(), () -> {
 							debug("Stopping  ");
@@ -226,6 +233,12 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 									runstate -> runstate.equals(RunState.INACTIVE), this::fetchRunState);
 							debug("Stopped  ");
 						});
+					} else if (goal == RunState.PAUSED) {
+						rt.run("Suspending "+getStyledName(null).getString(), () -> {
+							client.pauseContainerCmd(getName()).exec();
+						});
+						RetryUtil.until(100, WAIT_BEFORE_KILLING.toMillis(),
+								runstate -> runstate.equals(RunState.PAUSED), this::fetchRunState);
 					}
 				} catch (Exception e) {
 					Log.log(e);
@@ -233,7 +246,7 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 			}
 		}
 	}
-	
+		
 	private void debug(String message) {
 		if (DEBUG) {
 			System.out.println("DockerContainer " + getShortHash() + ": " + message);
@@ -366,7 +379,6 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 //				index++;
 //			}
 //		}
-//		// TODO Auto-generated method stub
 //		
 //	}
 //
@@ -571,4 +583,5 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 	public String getConsoleDisplayName() {
 		return app.getName() + " - in container "+getStyledName(null).getString()+" @ "+getTarget().getName();
 	}
+
 }

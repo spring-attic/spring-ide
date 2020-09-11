@@ -162,6 +162,14 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		children.dependsOn(refreshTracker.refreshState);
 	}
 
+	@Override
+	public void setGoalState(RunState s) {
+		App data = getAppData();
+		if (data!=null) {
+			data.setGoalState(s);
+		}
+	}
+
 	LiveExpression<RunState> baseRunState = new AsyncLiveExpression<RunState>(RunState.UNKNOWN) {
 		{
 			dependsOn(app);
