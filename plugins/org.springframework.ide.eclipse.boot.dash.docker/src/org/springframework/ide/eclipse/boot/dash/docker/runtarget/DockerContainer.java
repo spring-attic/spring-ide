@@ -80,7 +80,7 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 {
 
 	public static final Duration WAIT_BEFORE_KILLING = Duration.ofSeconds(10);
-	private static final boolean DEBUG = true;
+	private static final boolean DEBUG = false;
 	private final Container container;
 	private final DockerRunTarget target;
 	public final CompletableFuture<RefreshStateTracker> refreshTracker = new CompletableFuture<>();
