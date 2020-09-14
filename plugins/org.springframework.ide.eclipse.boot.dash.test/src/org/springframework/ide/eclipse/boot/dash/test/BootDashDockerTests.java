@@ -1351,7 +1351,7 @@ public class BootDashDockerTests {
 	}
 
 	private GenericRemoteAppElement waitForChild(GenericRemoteAppElement dep, Predicate<App> selector) throws Exception {
-		ACondition.waitFor("node to appear", 60_000, () -> {
+		ACondition.waitFor("node to appear", 120_000, () -> {
 			getChild(dep, selector);
 		});
 		return getChild(dep, selector);
