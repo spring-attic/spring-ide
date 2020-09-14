@@ -97,7 +97,7 @@ public abstract class RunStateAction extends AbstractBootDashElementsAction {
 	}
 
 	private static final ISchedulingRule SCEDULING_RULE = JobUtil.lightRule("RunStateAction.RULE");
-	private final RunState goalState;
+	final RunState goalState;
 	private ElementStateListener stateListener = null;
 
 	protected void configureJob(Job job) {
@@ -146,7 +146,7 @@ public abstract class RunStateAction extends AbstractBootDashElementsAction {
 	}
 
 	protected boolean isVisibleForElement(BootDashElement e) {
-		return e.getRunState() != null && e.supportedGoalStates().contains(getGoalState(e));
+		return e.getRunState() != null && e.supportedGoalStates().contains(goalState);
 	}
 
 	private boolean appliesTo(Collection<BootDashElement> selection) {
@@ -179,13 +179,13 @@ public abstract class RunStateAction extends AbstractBootDashElementsAction {
 	}
 
 	protected boolean goalStateAppliesTo(BootDashElement e) {
-		return e.supportedGoalStates().contains(getGoalState(e));
+		return e.supportedGoalStates().contains(goalState);
 	}
 
 
 	@Override
 	public String toString() {
-		return "RunStateAction("+getGoalState()+")";
+		return "RunStateAction("+goalState+")";
 	}
 
 	/**
@@ -205,7 +205,7 @@ public abstract class RunStateAction extends AbstractBootDashElementsAction {
 							if (appliesTo(el)) {
 								futures.add(CompletableFuture.runAsync(() -> {
 									try {
-										el.setGoalState(getGoalState(el));
+										el.setGoalState(goalState);
 										monitor.worked(1);
 									} catch (Exception e) {
 										monitor.worked(1);
@@ -233,10 +233,6 @@ public abstract class RunStateAction extends AbstractBootDashElementsAction {
 			};
 		}
 		return null;
-	}
-
-	protected RunState getGoalState(BootDashElement el) {
-		return getGoalState();
 	}
 
 	public final void run() {

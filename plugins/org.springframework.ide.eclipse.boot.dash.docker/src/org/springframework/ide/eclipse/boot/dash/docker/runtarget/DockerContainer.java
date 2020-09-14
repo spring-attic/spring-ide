@@ -98,7 +98,6 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 	public static Supplier<Boolean> hasDevtoolsDependency(Supplier<Map<String,String>> labelsSupplier) {
 		return Suppliers.memoize(() ->{
 			Map<String, String> labels = labelsSupplier.get();
-			System.out.println(labels.keySet());
 			try {
 				Map<?,?> bpmd = new ObjectMapper().readValue(labels.get("io.buildpacks.build.metadata"), Map.class);
 				Set<String> deps =  dependencyNamePath
@@ -224,13 +223,6 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 								RetryUtil.until(100, 1000, runstate -> runstate.equals(RunState.RUNNING), this::fetchRunState);
 							});
 						}
-					} else if (goal == RunState.DEBUGGING) {
-						if (currentState == RunState.PAUSED) {
-							rt.run("Resuming " + getStyledName(null).getString(), () -> {
-								client.unpauseContainerCmd(container.getId()).exec();
-								RetryUtil.until(100, 1000, runstate -> runstate.isActive(), this::fetchRunState);
-							});
-						}						
 					} else if (goal == RunState.INACTIVE) {
 						rt.run("Stopping " + getShortHash(), () -> {
 							debug("Stopping  ");

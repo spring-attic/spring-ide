@@ -26,11 +26,14 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaRuntime;
+import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.util.RetryUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+
+import org.eclipse.debug.core.Launch;
 
 public class RemoteJavaLaunchUtil {
 
@@ -54,6 +57,34 @@ public class RemoteJavaLaunchUtil {
 			 if (l!=null) {
 				 terminationListener().add(l, app);
 			 }
+		}
+	}
+
+	/**
+	 * When containerized apps are being 'suspended' while being debugged the debug connections
+	 * get confused. So 'Pause' action should disconnect debuggers from these apps.
+	 * @param app
+	 */
+	public static void disconnectRelatedLaunches(GenericRemoteAppElement app) {
+		ILaunchManager lm = DebugPlugin.getDefault().getLaunchManager();
+		for (ILaunch _l : lm.getLaunches()) {
+			try {
+				if (_l instanceof Launch) {
+					Launch l = (Launch) _l;
+					ILaunchConfiguration conf = l.getLaunchConfiguration();
+					if (conf!=null) {
+						if (app.getName().equals(conf.getAttribute(APP_NAME, ((String)null)))) {
+							if (!l.isTerminated()) {
+								if (((Launch)l).canDisconnect()) {
+									l.disconnect();
+								}
+							}
+						}
+					}
+				}
+			} catch (Exception e) {
+				Log.log(e);
+			}
 		}
 	}
 

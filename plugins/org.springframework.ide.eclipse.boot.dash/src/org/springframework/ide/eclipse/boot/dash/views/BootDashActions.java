@@ -239,17 +239,6 @@ public class BootDashActions {
 			}
 
 			@Override
-			protected RunState getGoalState(BootDashElement el) {
-				if (el.supportedGoalStates().contains(RunState.RUNNING)) {
-					return RunState.RUNNING;
-				}
-				if (el.supportedGoalStates().contains(RunState.DEBUGGING)) {
-					return RunState.DEBUGGING;
-				}
-				return super.getGoalState(el);
-			}
-
-			@Override
 			public boolean showInToolbar() {
 				return false;
 			}
@@ -388,7 +377,7 @@ public class BootDashActions {
 							for (BootDashElement el : selecteds) {
 								monitor.subTask("Restarting: " + el.getName());
 								try {
-									el.restart(getGoalState(), ui());
+									el.restart(goalState, ui());
 								} catch (Exception e) {
 									return BootActivator.createErrorStatus(e);
 								}

@@ -166,6 +166,9 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 	public void setGoalState(RunState s) {
 		App data = getAppData();
 		if (data!=null) {
+			if (s==RunState.PAUSED) {
+				RemoteJavaLaunchUtil.disconnectRelatedLaunches(this);
+			}
 			data.setGoalState(s);
 		}
 	}
@@ -656,11 +659,6 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		}
 
 	});
-	{
-		actuatorUrls.onChange((e, v) -> {
-			System.out.println(getName()+" actuatorUrl = "+getActuatorUrls().getValue());
-		});
-	}
 	public LiveExpression<Set<String>> getActuatorUrls() {
 		return actuatorUrls;
 	}
