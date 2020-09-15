@@ -30,6 +30,7 @@ import org.springframework.ide.eclipse.boot.dash.cf.routes.RouteBuilder;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.NodeUtil;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlASTProvider;
 import org.springframework.ide.eclipse.editor.support.yaml.ast.YamlFileAST;
+import org.springframework.ide.eclipse.editor.support.yaml.path.YamlPath;
 import org.springframework.ide.eclipse.editor.support.yaml.path.YamlTraversal;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.nodes.Node;
@@ -294,7 +295,7 @@ public class RouteBuilderTest {
 		IDocument doc = new Document(manifestText);
 		YamlASTProvider parser = new YamlASTProvider(new Yaml());
 		YamlFileAST ast = parser.getAST(doc);
-		List<Node> names = YamlTraversal.EMPTY
+		List<Node> names = YamlPath.EMPTY
 				.thenAnyChild()
 				.thenValAt("applications")
 				.thenAnyChild()

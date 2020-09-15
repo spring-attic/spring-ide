@@ -81,8 +81,6 @@ public interface YamlTraversal {
 	/////////////////////////////////////////////////
 	// Creating/composing traversals
 
-	YamlTraversal EMPTY = YamlPath.EMPTY;
-
 	default YamlTraversal then(YamlTraversal other) {
 		if (this.isEmpty()) {
 			return other;
