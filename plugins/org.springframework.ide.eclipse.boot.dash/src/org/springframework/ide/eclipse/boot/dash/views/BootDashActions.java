@@ -205,7 +205,7 @@ public class BootDashActions {
 		stopAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/stop.png"));
 		stopAction.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/stop_disabled.png"));
 
-		RunStateAction pauseAction = new RunStateAction(defaultActionParams().setDefinitionId("org.springframework.ide.eclipse.boot.dash.boot.dash.PauseAction"), RunState.PAUSED) {
+		RunStateAction pauseAction = new RunStateAction(defaultActionParams(), RunState.PAUSED) {
 			@Override
 			protected boolean isVisibleForElement(BootDashElement e) {
 				return RunState.PAUSED != e.getRunState() && super.isVisibleForElement(e);
@@ -226,7 +226,7 @@ public class BootDashActions {
 		pauseAction.setImageDescriptor(BootDashActivator.getImageDescriptor("icons/suspend.gif"));
 		pauseAction.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/suspend_disabled.gif"));
 
-		RunStateAction resumeRunAction = new RunStateAction(defaultActionParams().setDefinitionId("org.springframework.ide.eclipse.boot.dash.boot.dash.ResumeRunAction"), RunState.RUNNING) {
+		RunStateAction resumeRunAction = new RunStateAction(defaultActionParams(), RunState.RUNNING) {
 			@Override
 			protected boolean currentStateAcceptable(RunState s) {
 				return s == RunState.PAUSED;
@@ -249,7 +249,7 @@ public class BootDashActions {
 		resumeRunAction.setDisabledImageDescriptor(BootDashActivator.getImageDescriptor("icons/resumed.gif"));
 
 
-		RunStateAction resumeDebugAction = new RunStateAction(defaultActionParams().setDefinitionId("org.springframework.ide.eclipse.boot.dash.boot.dash.ResumeDebugAction"), RunState.DEBUGGING) {
+		RunStateAction resumeDebugAction = new RunStateAction(defaultActionParams(), RunState.DEBUGGING) {
 			@Override
 			protected boolean currentStateAcceptable(RunState s) {
 				return s == RunState.PAUSED;
