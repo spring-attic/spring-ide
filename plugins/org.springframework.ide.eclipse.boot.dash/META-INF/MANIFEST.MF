@@ -49,7 +49,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.e4.ui.css.swt.theme,
  org.eclipse.lsp4e,
  org.eclipse.lsp4j,
- com.google.gson
+ com.google.gson,
+ org.eclipse.jdt.debug
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .

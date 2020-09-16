@@ -26,16 +26,27 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaRuntime;
+import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.util.RetryUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
+
+import org.eclipse.jdt.internal.debug.core.hcr.JavaHotCodeReplaceManager;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 import org.eclipse.debug.core.Launch;
 
+@SuppressWarnings("restriction")
 public class RemoteJavaLaunchUtil {
+
+	public static final String DISABLE_HCR_LAUNCH_ATTRIBUTE = "disable.hcr"; //$NON-NLS-1$
+		//should be same value as org.eclipse.jdt.internal.debug.core.hcr.JavaHotCodeReplaceManager.DISABLE_HCR_LAUNCH_ATTRIBUTE
+		//We don't refer to that constant directly because it will only exist in Eclipse 4.18 (assuming PR is accepted)
+		//See: https://github.com/eclipse/eclipse.jdt.debug/pull/28
+		//In the mean time, we can already set this attrbute, it will do no harm (has no effect).
+
 
 	public static void cleanupOldLaunchConfigs(Collection<GenericRemoteAppElement> existinginElements) {
 		//TODO: implement this and find a good place and time to call it from.
@@ -54,6 +65,9 @@ public class RemoteJavaLaunchUtil {
 	public synchronized static void synchronizeWith(GenericRemoteAppElement app) {
 		if (isDebuggable(app)) {
 			 ILaunch l = ensureDebuggerAttached(app);
+			 if (app.hasDevtoolsDependency()) {
+				 l.setAttribute(DISABLE_HCR_LAUNCH_ATTRIBUTE, "true");
+			 }
 			 if (l!=null) {
 				 terminationListener().add(l, app);
 			 }
