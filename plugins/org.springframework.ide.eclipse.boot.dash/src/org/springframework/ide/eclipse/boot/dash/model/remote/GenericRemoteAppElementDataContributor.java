@@ -55,6 +55,8 @@ public class GenericRemoteAppElementDataContributor implements Contributor, Elem
 			}
 			System.out.println("<<< remote jmx apps");
 		});
+		remoteApps.refresh(); //need one initial manual refresh because registering for 
+						// boot dash element changes only triggers when something changes.
 	}
 
 	private void collectFrom(ObservableSet<BootDashElement> childrenExp, ImmutableSet.Builder<RemoteAppData> allApps) {
