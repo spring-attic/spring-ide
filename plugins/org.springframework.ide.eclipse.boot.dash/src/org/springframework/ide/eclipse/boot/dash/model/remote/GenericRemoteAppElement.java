@@ -351,7 +351,6 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		baseRunState.dependsOn(model.refreshCount());
 		addDisposableChild(this.childFactory);
 		this.parent = parent;
-		System.out.println("New GenericRemoteAppElement instances = " +instances.incrementAndGet());
 
 		app.dependsOn(model.getRunTarget().getClientExp());
 		app.dependsOn(getBootDashModel().refreshCount());
@@ -380,7 +379,6 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 		});
 
 		onDispose(d -> {
-			System.out.println("Dispose GenericRemoteAppElement instances = " +instances.decrementAndGet());
 			model.removeElementStateListener(this);
 		});
 
