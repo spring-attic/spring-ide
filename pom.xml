@@ -220,10 +220,6 @@
 		
 		<!-- import statics -->
 		<module>plugins/org.springframework.ide.eclipse.imports</module>
-		
-		<!-- CFT integration -->
-		<module>plugins/org.springframework.ide.eclipse.cft</module>
-		<module>features/org.springframework.ide.eclipse.cft.feature</module>
 
 		<!-- AERI integration -->
 		<module>plugins/org.springframework.ide.eclipse.aeri</module>
@@ -245,7 +241,6 @@
 		<module>features/org.springframework.ide.eclipse.data.feature.source</module>
         <module>features/org.springframework.ide.eclipse.boot.feature.source</module>
         <module>features/org.springframework.ide.eclipse.boot.dash.feature.source</module>
-        <module>features/org.springframework.ide.eclipse.cft.feature.source</module>
         <module>features/org.springframework.ide.eclipse.aeri.feature.source</module>
         <module>features/org.springframework.ide.eclipse.xml.namespaces.feature.source</module>
         
@@ -285,11 +280,6 @@
 		  			<id>groovy</id>
 		  			<layout>p2</layout>
 		  			<url>https://dist.springsource.org/snapshot/GRECLIPSE/e4.7/</url>
-				</repository>
-				<repository>
-					<id>cft</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/cft/1.1.1/</url>
 				</repository>
 				<repository>
 		  			<id>buildship2-for-testing</id>
@@ -339,11 +329,6 @@
 		  			<id>groovy</id>
 		  			<layout>p2</layout>
 		  			<url>https://dist.springsource.org/snapshot/GRECLIPSE/e4.7/</url>
-				</repository>
-				<repository>
-					<id>cft</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/cft/1.1.1/</url>
 				</repository>
 				<repository>
 		  			<id>buildship2-for-testing</id>
@@ -398,11 +383,6 @@
 		  			<id>groovy</id>
 		  			<layout>p2</layout>
 		  			<url>https://dist.springsource.org/snapshot/GRECLIPSE/e4.7/</url>
-				</repository>
-				<repository>
-					<id>cft</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/cft/1.1.1/</url>
 				</repository>
 				<repository>
 		  			<id>buildship2-for-testing</id>
@@ -477,16 +457,6 @@
 			<layout>p2</layout>
 			<url>https://dl.bintray.com/jetbrains/kotlin/eclipse-plugin/0.8.13</url>
 		</repository>
-
-        <!-- temporary to provide a older version of reactor-core bundle to cft.
-             Not sure how to properly handle this but CFT needs a old bundle while we need a newer one.
-             This site allows cft to find the dependency it needs.
-             If CFT is updated to use same version as us then we can remove this again -->
- 		<!-- <repository>
- 			<id>p2-thirdparty-bundles</id>
- 			<layout>p2</layout>
- 			<url>https://dist.springsource.com/release/TOOLS/third-party/misc-p2-repo/3.9.4.201805082144</url>
- 		</repository> -->
  		
 <!-- 		<repository> -->
 <!-- 			<id>yedit</id> -->
