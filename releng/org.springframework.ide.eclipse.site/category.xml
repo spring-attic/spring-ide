@@ -101,12 +101,6 @@
 		</feature>
 
 		<feature
-			url="features/org.springframework.ide.eclipse.cft.feature_3.9.15.qualifier.jar"
-			id="org.springframework.ide.eclipse.cft.feature" version="3.9.15.qualifier">
-			<category name="Extensions / Spring IDE" />
-		</feature>	
-
-		<feature
 			url="features/org.springframework.ide.eclipse.aeri.feature_3.9.15.qualifier.jar"
 			id="org.springframework.ide.eclipse.aeri.feature" version="3.9.15.qualifier">
 			<category name="Extensions / Spring IDE" />
