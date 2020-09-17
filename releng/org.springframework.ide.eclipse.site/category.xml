@@ -207,13 +207,7 @@
 			url="features/org.springframework.ide.eclipse.data.feature.source_3.9.15.qualifier.jar"
 			id="org.springframework.ide.eclipse.data.feature.source" version="3.9.15.qualifier">
 			<category name="Resources / Spring IDE" />
-		</feature>		
-
-		<feature
-			url="features/org.springframework.ide.eclipse.cft.feature.source_3.9.15.qualifier.jar"
-			id="org.springframework.ide.eclipse.cft.feature.source" version="3.9.15.qualifier">
-			<category name="Resources / Spring IDE" />
-		</feature>		
+		</feature>			
 
 		<feature
 			url="features/org.springframework.ide.eclipse.aeri.feature.source_3.9.15.qualifier.jar"
