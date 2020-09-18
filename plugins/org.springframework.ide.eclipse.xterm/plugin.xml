@@ -164,7 +164,7 @@
    <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer
-            class="org.springframework.ide.eclipse.xterm.views.XtermPreferencesInitializr">
+            class="org.springframework.ide.eclipse.xterm.views.XtermPreferencesInitializer">
       </initializer>
    </extension>
    <extension

@@ -52,6 +52,7 @@ public class TerminalView extends ViewPart {
 			case XtermPlugin.SELECTION_COLOR:
 			case XtermPlugin.CURSOR_COLOR:
 			case XtermPlugin.CURSOR_ACCENT_COLOR:
+			case XtermPlugin.FONT:
 				refresh();
 				break;
 			default:

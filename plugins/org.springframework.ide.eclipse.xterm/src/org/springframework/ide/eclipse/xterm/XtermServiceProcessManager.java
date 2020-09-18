@@ -32,7 +32,8 @@ public class XtermServiceProcessManager {
 	synchronized void startProcess() throws IOException {
 		port = findFreePort();
 		Bundle bundle = XtermPlugin.getDefault().getBundle();
-		URL url = FileLocator.find(bundle, new Path("/lib/node_modules/node-xterm/terminal-server.js"), null);
+//		URL url = FileLocator.find(bundle, new Path("/lib/node_modules/node-xterm/terminal-server.js"), null);
+		URL url = FileLocator.find(bundle, new Path("/lib/terminal-server.js"), null);
 		url = FileLocator.toFileURL(url);
 		try {
 			File serverJsFile = new File(url.toURI());
@@ -45,7 +46,7 @@ public class XtermServiceProcessManager {
 					"--server.port=" + port,
 					"--terminal.pty.shutdown=delay", // terminal pty process destroyed right after sockets closed
 					"--terminal.pty.shutdown-delay=5",
-					"--terminal.auto-shutdown.on=false", // terminal app can shutdown itself if not used 
+					"--terminal.auto-shutdown.on=true", // terminal app can shutdown itself if not used 
 					"--terminal.auto-shutdown.delay=30" // terminal app shuts itself down in not used for 30 sec	
 			);
 			
