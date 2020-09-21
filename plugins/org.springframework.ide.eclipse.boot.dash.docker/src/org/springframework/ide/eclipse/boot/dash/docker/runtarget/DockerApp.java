@@ -14,7 +14,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.Duration;
-import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -37,7 +36,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.JavaRuntime;
-import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.api.AppConsole;
 import org.springframework.ide.eclipse.boot.dash.api.AppConsoleProvider;
@@ -73,16 +71,17 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.exception.NotModifiedException;
+import com.github.dockerjava.api.model.Container;
+import com.github.dockerjava.api.model.ExposedPort;
+import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.Image;
+import com.github.dockerjava.api.model.Network;
 import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.api.model.Ports.Binding;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-
-import com.github.dockerjava.api.model.Container;
-import com.github.dockerjava.api.model.ExposedPort;
 
 public class DockerApp extends AbstractDisposable implements App, ChildBearing, Deletable, ProjectRelatable, DesiredInstanceCount, SystemPropertySupport, LogSource, DevtoolsConnectable {
 
@@ -242,7 +241,7 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 			if (!project.isAccessible()) {
 				throw new IllegalStateException("The project '"+project.getName()+"' is not accessible");
 			}
-			console.write("Deploying Docker app " + getName() +  + BootDashLabels.ELLIPSIS, LogType.STDOUT);
+			console.write("Deploying Docker app " + getName() + BootDashLabels.ELLIPSIS, LogType.STDOUT);
 			return build(console);
 		});
 		
@@ -256,6 +255,7 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 		if (client==null) {
 			console.write("Cannot start container... Docker client is disconnected!", LogType.STDERROR);
 		} else {
+			Network network = target.ensureNetwork();
 			console.write("Running container with '"+image+"'", LogType.STDOUT);
 			JmxSupport jmx = new JmxSupport();
 			String jmxUrl = jmx.getJmxUrl();
@@ -274,6 +274,9 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 			ImmutableList.Builder<PortBinding> portBindings = ImmutableList.builder();
 
 			CreateContainerCmd cb = client.createContainerCmd(image);
+//			cb.withHostName(getName());
+//			cb.withNetworkMode("bridge");
+//			cb.withAliases(getName());
 			
 			int appLocalPort = PortFinder.findFreePort();
 			int appContainerPort = 8080;
@@ -327,14 +330,20 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 				console.write("JAVA_OPTS="+javaOptsStr.trim(), LogType.STDOUT);
 			}
 			
-			cb.withPortBindings(portBindings.build());
+			cb.withHostConfig(new HostConfig()
+					.withPortBindings(portBindings.build())
+					.withNetworkMode(network.getName())
+			);
 			cb.withExposedPorts(exposedPorts.build().asList());
-
+			String networkAlias = getName();
+			cb.withAliases(networkAlias);
 			cb.withLabels(labels.build());
 			CreateContainerResponse c = cb.exec();
 			console.write("Container created: "+c.getId(), LogType.STDOUT);
 			console.write("Starting container: "+c.getId(), LogType.STDOUT);
 			console.write("Ports: "+appLocalPort+"->"+appContainerPort, LogType.STDOUT);
+			console.write("Container Network: "+ network.getName(), LogType.STDOUT);
+			console.write("Network alias: "+networkAlias , LogType.STDOUT);
 			
 			//Disabled show of console here. See: https://www.pivotaltracker.com/story/show/174316849
 			//appContext.showConsole(c.id());

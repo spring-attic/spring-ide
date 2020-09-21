@@ -11,8 +11,6 @@
 package org.springframework.ide.eclipse.boot.dash.model.remote;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -23,22 +21,16 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.core.Launch;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaRuntime;
-import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
-import org.springframework.ide.eclipse.boot.dash.model.RunState;
 import org.springframework.ide.eclipse.boot.util.RetryUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
-
-import org.eclipse.jdt.internal.debug.core.hcr.JavaHotCodeReplaceManager;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
-import org.eclipse.debug.core.Launch;
-
-@SuppressWarnings("restriction")
 public class RemoteJavaLaunchUtil {
 
 	public static final String DISABLE_HCR_LAUNCH_ATTRIBUTE = "disable.hcr"; //$NON-NLS-1$
@@ -50,10 +42,6 @@ public class RemoteJavaLaunchUtil {
 
 	public static void cleanupOldLaunchConfigs(Collection<GenericRemoteAppElement> existinginElements) {
 		//TODO: implement this and find a good place and time to call it from.
-		Set<String> validIds = new HashSet<>();
-		for (GenericRemoteAppElement el : existinginElements) {
-
-		}
 	}
 
 	public static final String APP_NAME = "sts.boot.dash.element.name";

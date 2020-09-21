@@ -53,6 +53,22 @@
 							<overWriteIfNewer>true</overWriteIfNewer>
 						</configuration>
 					</execution>
+					<execution>
+						<id>copy-dependencies-sources</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<classifier>sources</classifier>
+							<includeScope>compile</includeScope>
+							<includeScope>runtime</includeScope>
+							<outputDirectory>${project.build.directory}/dependency-sources</outputDirectory>
+							<overWriteReleases>false</overWriteReleases>
+							<overWriteSnapshots>false</overWriteSnapshots>
+							<overWriteIfNewer>true</overWriteIfNewer>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 		</plugins>

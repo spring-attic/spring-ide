@@ -20,6 +20,7 @@ import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashC
 import static org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn.TAGS;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -43,11 +44,15 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.OldValueDisposer;
 
 import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.command.CreateNetworkResponse;
+import com.github.dockerjava.api.model.Network;
 import com.google.common.collect.ImmutableList;
 
 public class DockerRunTarget extends AbstractRunTarget<DockerTargetParams> 
 implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentTarget, DebuggableTarget {
 
+	private static final String DOCKER_NETWORK_NAME = "sts-bootdash";
+	
 	final LiveVariable<DockerClient> client;
 	LiveExpression<String> sessionId;
 	
@@ -162,5 +167,28 @@ implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentT
 	@Override
 	public boolean isDebuggingSupported() {
 		return true;
+	}
+
+	public synchronized Network ensureNetwork() {
+		DockerClient client = this.client.getValue();
+		if (client!=null) {
+			Network network = getNetwork(client, DOCKER_NETWORK_NAME);
+			if (network!=null) {
+				return network;
+			}
+			client.createNetworkCmd().withName(DOCKER_NETWORK_NAME).withDriver("bridge").exec();
+			return getNetwork(client, DOCKER_NETWORK_NAME);
+		}
+		return null;
+	}
+
+	private Network getNetwork(DockerClient client, String name) {
+		List<Network> networks = client.listNetworksCmd().withNameFilter(DOCKER_NETWORK_NAME).exec();
+		for (Network network : networks) {
+			if (network.getName().equals(name)) {
+				return network;
+			}
+		}
+		return null;
 	}
 }
