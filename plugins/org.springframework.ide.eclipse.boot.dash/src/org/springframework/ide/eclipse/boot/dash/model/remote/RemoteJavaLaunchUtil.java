@@ -33,10 +33,10 @@ import com.google.common.collect.ImmutableSet;
 
 public class RemoteJavaLaunchUtil {
 
-	public static final String DISABLE_HCR_LAUNCH_ATTRIBUTE = "disable.hcr"; //$NON-NLS-1$
-		//should be same value as org.eclipse.jdt.internal.debug.core.hcr.JavaHotCodeReplaceManager.DISABLE_HCR_LAUNCH_ATTRIBUTE
+	public static final String DISABLE_HCR_LAUNCH_ATTRIBUTE = "org.eclipse.jdt.debug.disable.hcr"; //$NON-NLS-1$
+		//should be same value as org.eclipse.jdt.debug.core.JDIDebugModel.DISABLE_HCR_LAUNCH_ATTRIBUTE
 		//We don't refer to that constant directly because it will only exist in Eclipse 4.18 (assuming PR is accepted)
-		//See: https://github.com/eclipse/eclipse.jdt.debug/pull/28
+		//See: https://git.eclipse.org/r/c/jdt/eclipse.jdt.debug/+/169601
 		//In the mean time, we can already set this attrbute, it will do no harm (has no effect).
 
 
