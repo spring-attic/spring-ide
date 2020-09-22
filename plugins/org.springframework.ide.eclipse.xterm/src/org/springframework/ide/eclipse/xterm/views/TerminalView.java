@@ -64,7 +64,7 @@ public class TerminalView extends ViewPart {
 	@Override
 	public void createPartControl(Composite parent) {
 		PlatformUI.getWorkbench().getThemeManager().addPropertyChangeListener(PROPERTY_LISTENER);
-		browser = new Browser(parent, SWT.NONE);
+		browser = new Browser(parent, SWT.CHROMIUM);
 		makeActions();
 		contributeToActionBars();
 		navigateToTerminal(terminalId, null, ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString());
