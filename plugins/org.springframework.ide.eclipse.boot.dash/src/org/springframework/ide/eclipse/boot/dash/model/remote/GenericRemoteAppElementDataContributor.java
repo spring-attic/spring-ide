@@ -15,8 +15,8 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStateListener;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashViewModel;
-import org.springframework.ide.eclipse.boot.dash.remoteapps.RemoteBootAppsDataHolder.Contributor;
-import org.springframework.ide.eclipse.boot.dash.remoteapps.RemoteBootAppsDataHolder.RemoteAppData;
+import org.springsource.ide.eclipse.commons.boot.ls.remoteapps.RemoteBootAppsDataHolder.Contributor;
+import org.springsource.ide.eclipse.commons.boot.ls.remoteapps.RemoteBootAppsDataHolder.RemoteAppData;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 
@@ -55,7 +55,7 @@ public class GenericRemoteAppElementDataContributor implements Contributor, Elem
 			}
 			System.out.println("<<< remote jmx apps");
 		});
-		remoteApps.refresh(); //need one initial manual refresh because registering for 
+		remoteApps.refresh(); //need one initial manual refresh because registering for
 						// boot dash element changes only triggers when something changes.
 	}
 

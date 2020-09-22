@@ -28,12 +28,12 @@ import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.remote.GenericRemoteAppElementDataContributor;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
-import org.springframework.ide.eclipse.boot.dash.remoteapps.RemoteBootAppsDataHolder;
 import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions;
 import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions.UIContext;
 import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
 import org.springframework.ide.eclipse.boot.pstore.IScopedPropertyStore;
 import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
+import org.springsource.ide.eclipse.commons.boot.ls.remoteapps.RemoteBootAppsDataHolder;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
@@ -59,7 +59,6 @@ public class DefaultBootDashModelContext extends BootDashModelContext {
 		injections.defInstance(UIContext.class, UIContext.DEFAULT);
 		injections.defInstance(UserInteractions.class, new DefaultUserInteractions(injections));
 		injections.def(BootDashViewModel.class, BootDashViewModel::new);
-		injections.def(RemoteBootAppsDataHolder.class, RemoteBootAppsDataHolder::new);
 		injections.def(BootDashModelContext.class, DefaultBootDashModelContext::new);
 		injections.defInstance(RunTargetType.class, RunTargetTypes.LOCAL);
 		injections.def(CloudAppLogManager.class, CloudAppLogManager::new);

@@ -27,7 +27,6 @@ import org.osgi.framework.BundleListener;
 import org.springframework.ide.eclipse.boot.dash.api.Deletable;
 import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.devtools.DevtoolsPortRefresher;
-import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
 import org.springframework.ide.eclipse.boot.dash.model.local.LocalServicesModel;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchConfRunStateTracker;
 import org.springframework.ide.eclipse.boot.dash.util.LaunchConfigurationTracker;
@@ -44,6 +43,7 @@ import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ProjectCha
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveSets;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;

@@ -15,67 +15,38 @@ import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 
 import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
-import com.google.common.collect.Sets;
 
 import static org.springsource.ide.eclipse.commons.livexp.core.LiveSets.EMPTY_SET;
+
+import org.springframework.ide.eclipse.boot.dash.model.ButtonModel;
 
 /**
  * @author Kris De Volder
  */
 public class LiveSets {
 
-	public static <T> ObservableSet<T> emptySet(Class<T> t) {
-		return org.springsource.ide.eclipse.commons.livexp.core.LiveSets.emptySet(t);
-	}
-
-	public static <R, A extends R, B extends R> ObservableSet<R> union(ObservableSet<A> e1, ObservableSet<B> e2) {
-		return org.springsource.ide.eclipse.commons.livexp.core.LiveSets.union(e1, e2);
-	}
-
+	/**
+	 * @deprecated Use {@link org.springsource.ide.eclipse.commons.livexp.core.LiveSets#filter(ObservableSet<S>,Class<T>)} instead
+	 */
 	public static <S,T> ObservableSet<T> filter(final ObservableSet<S> source, final Class<T> retainType) {
-		ObservableSet<T> filtered = new ObservableSet<T>() {
-			@SuppressWarnings("unchecked")
-			@Override
-			protected ImmutableSet<T> compute() {
-				return (ImmutableSet<T>) ImmutableSet.copyOf(
-					Sets.filter(source.getValue(), new Predicate<S>() {
-						@Override
-						public boolean apply(S input) {
-							return retainType.isAssignableFrom(input.getClass());
-						}
-					})
-				);
-			}
-		};
-		filtered.dependsOn(source);
-		return filtered;
+		return org.springsource.ide.eclipse.commons.livexp.core.LiveSets.filter(source, retainType);
 	}
 
+	/**
+	 * @deprecated Use {@link org.springsource.ide.eclipse.commons.livexp.core.LiveSets#singletonOrEmpty(LiveExpression<T>)} instead
+	 */
 	public static <T> ObservableSet<T> singletonOrEmpty(final LiveExpression<T> exp) {
-		return new ObservableSet<T>() {
-			{
-				dependsOn(exp);
-			}
-			protected ImmutableSet<T> compute() {
-				T val = exp.getValue();
-				if (val==null) {
-					return ImmutableSet.of();
-				} else {
-					return ImmutableSet.of(val);
-				}
-			}
-		};
+		return org.springsource.ide.eclipse.commons.livexp.core.LiveSets.singletonOrEmpty(exp);
 	}
 
+	/**
+	 * @deprecated Use {@link org.springsource.ide.eclipse.commons.livexp.core.LiveSets#map(ObservableSet<A>,AsyncMode,AsyncMode,Function<A, R>)} instead
+	 */
 	@SuppressWarnings("unchecked")
 	public static <A,R> ObservableSet<R> map(ObservableSet<A> input, AsyncMode asyncRefresh, AsyncMode asyncEvents, Function<A, R> function) {
-		if (input==EMPTY_SET) {
-			return EMPTY_SET;
-		}
-		return new MapSet<>(input, asyncRefresh, asyncEvents, function);
+		return org.springsource.ide.eclipse.commons.livexp.core.LiveSets.map(input, asyncRefresh, asyncEvents,
+				function);
 	}
 
 	/**
@@ -84,7 +55,7 @@ public class LiveSets {
 	 * The resulting set is synchronously updated when the input set changes.
 	 */
 	public static <A,R> ObservableSet<R> mapSync(ObservableSet<A> input, Function<A, R> function) {
-		return map(input, AsyncMode.SYNC, AsyncMode.SYNC, function);
+		return org.springsource.ide.eclipse.commons.livexp.core.LiveSets.map(input, AsyncMode.SYNC, AsyncMode.SYNC, function);
 	}
 
 	/**

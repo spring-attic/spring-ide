@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.Assert;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveSets;
 
 /**
  * Represents a selection of zero or more elements of type T in some UI component.
@@ -25,7 +26,7 @@ import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 public final class MultiSelection<T> {
 
 	public static <T> MultiSelection<T> empty(Class<T> type) {
-		return new MultiSelection<T>(type, LiveSets.emptySet(type));
+		return new MultiSelection<>(type, LiveSets.emptySet(type));
 	}
 
 	/**
@@ -33,7 +34,7 @@ public final class MultiSelection<T> {
 	 */
 	public static <T> MultiSelection<T> singletonOrEmpty(Class<T> type,
 			LiveExpression<T> singleSelection) {
-		return new MultiSelection<T>(type, LiveSets.singletonOrEmpty(singleSelection));
+		return new MultiSelection<>(type, org.springsource.ide.eclipse.commons.livexp.core.LiveSets.singletonOrEmpty(singleSelection));
 	}
 
 
@@ -66,7 +67,7 @@ public final class MultiSelection<T> {
 			return converted;
 		} else {
 			//Selection may contain objects that are not instances of retainType.
-			return from(retainType, LiveSets.filter(getElements(), retainType));
+			return from(retainType, org.springsource.ide.eclipse.commons.livexp.core.LiveSets.filter(getElements(), retainType));
 		}
 	}
 

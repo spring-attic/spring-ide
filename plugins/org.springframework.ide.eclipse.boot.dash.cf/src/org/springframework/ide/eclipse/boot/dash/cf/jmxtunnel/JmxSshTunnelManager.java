@@ -17,8 +17,8 @@ import java.util.UUID;
 
 import org.springframework.ide.eclipse.boot.dash.cf.debug.SshTunnel;
 import org.springframework.ide.eclipse.boot.dash.cf.model.CloudAppDashElement;
-import org.springframework.ide.eclipse.boot.dash.remoteapps.RemoteBootAppsDataHolder.RemoteAppData;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
+import org.springsource.ide.eclipse.commons.boot.ls.remoteapps.RemoteBootAppsDataHolder.RemoteAppData;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 

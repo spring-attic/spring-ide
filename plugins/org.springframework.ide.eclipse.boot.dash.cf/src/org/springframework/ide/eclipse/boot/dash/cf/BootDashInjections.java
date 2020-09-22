@@ -28,8 +28,8 @@ import org.springframework.ide.eclipse.boot.dash.di.EclipseBeanLoader.Contributi
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.labels.BootDashLabels;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultBootDashModelContext;
-import org.springframework.ide.eclipse.boot.dash.remoteapps.RemoteBootAppsDataHolder;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashActions;
+import org.springsource.ide.eclipse.commons.boot.ls.remoteapps.RemoteBootAppsDataHolder;
 
 /**
  * Contributes bean definitions to {@link DefaultBootDashModelContext}

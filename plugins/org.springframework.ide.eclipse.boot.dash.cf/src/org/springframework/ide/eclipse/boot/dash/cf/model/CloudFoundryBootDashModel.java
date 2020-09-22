@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.dash.cf.model;
 
+import org.springsource.ide.eclipse.commons.livexp.core.LiveSets;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -85,7 +87,6 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlFil
 import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlInput;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel.Result;
-import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
 import org.springframework.ide.eclipse.boot.dash.model.AsyncDeletable;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;

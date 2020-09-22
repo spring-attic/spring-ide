@@ -60,7 +60,7 @@ public class CloudDashApplications extends AbstractDisposable {
 				return new CloudAppDashElement(model, appName, model.getPropertyStore());
 			}
 		};
-		applications = LiveSets.map(appNames, AsyncMode.SYNC, AsyncMode.ASYNC, new Function<String, CloudAppDashElement>() {
+		applications = org.springsource.ide.eclipse.commons.livexp.core.LiveSets.map(appNames, AsyncMode.SYNC, AsyncMode.ASYNC, new Function<String, CloudAppDashElement>() {
 			@Override
 			public CloudAppDashElement apply(String appName) {
 				return factory.createOrGet(appName);

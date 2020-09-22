@@ -20,7 +20,6 @@ import org.springframework.ide.eclipse.beans.ui.live.model.TypeLookup;
 import org.springframework.ide.eclipse.beans.ui.live.model.TypeLookupImpl;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
-import org.springframework.ide.eclipse.boot.dash.livexp.LiveSets;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
 import org.springframework.ide.eclipse.boot.dash.util.Utils;
@@ -29,6 +28,7 @@ import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager.ClasspathListener;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveSets;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 

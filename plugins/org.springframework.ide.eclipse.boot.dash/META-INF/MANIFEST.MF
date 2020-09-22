@@ -50,7 +50,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.lsp4e,
  org.eclipse.lsp4j,
  com.google.gson,
- org.eclipse.jdt.debug
+ org.eclipse.jdt.debug,
+ org.springsource.ide.eclipse.commons.boot.ls
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
@@ -74,7 +75,6 @@ Export-Package: org.springframework.ide.eclipse.boot.dash,
  org.springframework.ide.eclipse.boot.dash.model.remote,
  org.springframework.ide.eclipse.boot.dash.model.runtargettypes,
  org.springframework.ide.eclipse.boot.dash.ngrok,
- org.springframework.ide.eclipse.boot.dash.remoteapps,
  org.springframework.ide.eclipse.boot.dash.util,
  org.springframework.ide.eclipse.boot.dash.util.template,
  org.springframework.ide.eclipse.boot.dash.views,
