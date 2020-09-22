@@ -72,7 +72,7 @@ public class XtermPlugin extends AbstractUIPlugin {
 			try {
 				return  serviceManager.serviceUrl();
 			} catch (Throwable t) {
-				throw new IllegalStateException("Cannot determine URL for the Xterm service!");
+				throw new IllegalStateException(t);
 			}
 		});
 	}

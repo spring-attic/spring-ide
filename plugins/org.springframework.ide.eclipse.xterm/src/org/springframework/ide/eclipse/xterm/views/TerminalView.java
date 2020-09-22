@@ -79,14 +79,14 @@ public class TerminalView extends ViewPart {
 			try {
 				String serviceUrl = XtermPlugin.getDefault().xtermUrl().get(10, TimeUnit.SECONDS);
 				if (Display.getCurrent() != null) {
-					if (browser != null && !browser.isDisposed()) {
+					if (browser != null && !browser.isDisposed() && terminalId.equals(TerminalView.this.terminalId)) {
 						browser.setUrl(createUrl(serviceUrl, terminalId, cmd, cwd));
 					}
 				} else {
 					Display display = PlatformUI.getWorkbench().getDisplay();
 					if (display != null && !display.isDisposed()) {
 						display.asyncExec(() -> {
-							if (browser != null && !browser.isDisposed()) {
+							if (browser != null && !browser.isDisposed() && terminalId.equals(TerminalView.this.terminalId)) {
 								String url = createUrl(serviceUrl, terminalId, cmd, cwd);
 								browser.setUrl(url);
 							}
