@@ -1,5 +1,6 @@
 package org.springframework.ide.eclipse.xterm.bootdash;
 
+import org.eclipse.core.runtime.Platform;
 import org.springframework.ide.eclipse.boot.dash.api.App;
 import org.springframework.ide.eclipse.boot.dash.docker.runtarget.DockerContainer;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashElement;
@@ -21,7 +22,11 @@ public class OpenDockerTerminal extends AbstractBootDashElementsAction {
 	public void run() {
 		DockerContainer c = getDockerContainer();
 		String id = c.getName();
-		XtermPlugin.getDefault().openTerminalView("/usr/local/bin/docker exec -it "+id+" /bin/bash", null);
+		if (Platform.OS_WIN32.equals(Platform.getOS())) {
+			XtermPlugin.getDefault().openTerminalView("docker exec -it "+id+" /bin/bash", null);
+		} else {
+			XtermPlugin.getDefault().openTerminalView("/usr/local/bin/docker exec -it "+id+" /bin/bash", null);
+		}
 	}
 
 
