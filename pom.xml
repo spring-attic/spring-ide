@@ -299,7 +299,7 @@
 				<repository>
 					<id>sts4</id>
 					<layout>p2</layout>
-					<url>https://dist.springsource.com/snapshot/TOOLS/sts4-language-servers/${dist.pathpostfix}</url>
+					<url>https://dist.springsource.com/${dist.type}/TOOLS/sts4-language-servers/${dist.pathpostfix}</url>
 				</repository>
 			</repositories>
 		</profile>
@@ -353,7 +353,7 @@
 				<repository>
 					<id>sts4</id>
 					<layout>p2</layout>
-					<url>https://dist.springsource.com/snapshot/TOOLS/sts4-language-servers/${dist.pathpostfix}</url>
+					<url>https://dist.springsource.com/${dist.type}/TOOLS/sts4-language-servers/${dist.pathpostfix}</url>
 				</repository>
 			</repositories>
 		</profile>
@@ -412,7 +412,7 @@
 				<repository>
 					<id>sts4</id>
 					<layout>p2</layout>
-					<url>https://dist.springsource.com/snapshot/TOOLS/sts4-language-servers/${dist.pathpostfix}</url>
+					<url>https://dist.springsource.com/${dist.type}/TOOLS/sts4-language-servers/${dist.pathpostfix}</url>
 				</repository>
 			</repositories>
 		</profile>
