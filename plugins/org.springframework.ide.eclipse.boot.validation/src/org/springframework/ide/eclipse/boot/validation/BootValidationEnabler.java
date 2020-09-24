@@ -22,10 +22,10 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaProject;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
-import org.springframework.ide.eclipse.boot.pstore.IScopedPropertyStore;
-import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
-import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
 import org.springsource.ide.eclipse.commons.core.SpringCoreUtils;
+import org.springsource.ide.eclipse.commons.core.pstore.IScopedPropertyStore;
+import org.springsource.ide.eclipse.commons.core.pstore.PropertyStoreApi;
+import org.springsource.ide.eclipse.commons.core.pstore.PropertyStores;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
