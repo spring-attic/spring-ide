@@ -28,7 +28,7 @@ import org.springframework.ide.eclipse.boot.dash.model.BootProjectDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.LaunchConfDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.ToggleFiltersModel;
 import org.springframework.ide.eclipse.boot.dash.model.ToggleFiltersModel.FilterChoice;
-import org.springframework.ide.eclipse.boot.pstore.InMemoryPropertyStore;
+import org.springsource.ide.eclipse.commons.core.pstore.InMemoryPropertyStore;
 import org.springsource.ide.eclipse.commons.livexp.util.Filter;
 
 import com.google.common.collect.ImmutableSet;

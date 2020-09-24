@@ -27,7 +27,7 @@ import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.ide.eclipse.boot.pstore.PropertyFileStore;
+import org.springsource.ide.eclipse.commons.core.pstore.PropertyFileStore;
 import org.springsource.ide.eclipse.commons.core.util.OsUtils;
 
 import com.google.common.collect.ImmutableMap;

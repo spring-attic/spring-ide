@@ -13,7 +13,7 @@ package org.springframework.ide.eclipse.boot.dash.test.mocks;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.ide.eclipse.boot.pstore.IScopedPropertyStore;
+import org.springsource.ide.eclipse.commons.core.pstore.IScopedPropertyStore;
 
 /**
  * A memory-backed {@link IScopedPropertyStore} suitable for testing.
@@ -22,7 +22,7 @@ import org.springframework.ide.eclipse.boot.pstore.IScopedPropertyStore;
  */
 public class MockScopedPropertyStore<T> implements IScopedPropertyStore<T> {
 
-	private Map<Key,String> store = new HashMap<Key,String>();
+	private Map<Key,String> store = new HashMap<>();
 
 	@Override
 	public String get(T element, String key) {
