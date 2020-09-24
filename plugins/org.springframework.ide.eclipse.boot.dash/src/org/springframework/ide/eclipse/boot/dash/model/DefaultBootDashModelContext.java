@@ -29,12 +29,12 @@ import org.springframework.ide.eclipse.boot.dash.metadata.PropertyStoreFactory;
 import org.springframework.ide.eclipse.boot.dash.model.remote.GenericRemoteAppElementDataContributor;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RunTargetTypes;
 import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions;
-import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions.UIContext;
-import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
-import org.springframework.ide.eclipse.boot.pstore.IScopedPropertyStore;
-import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
 import org.springsource.ide.eclipse.commons.boot.ls.remoteapps.RemoteBootAppsDataHolder;
+import org.springsource.ide.eclipse.commons.core.pstore.IPropertyStore;
+import org.springsource.ide.eclipse.commons.core.pstore.IScopedPropertyStore;
+import org.springsource.ide.eclipse.commons.core.pstore.PropertyStores;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
+import org.springsource.ide.eclipse.commons.livexp.ui.UIContext;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 /**

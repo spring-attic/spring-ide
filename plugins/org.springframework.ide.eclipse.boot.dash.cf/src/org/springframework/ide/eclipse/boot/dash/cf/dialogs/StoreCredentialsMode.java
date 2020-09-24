@@ -19,8 +19,8 @@ import org.springframework.ide.eclipse.boot.dash.cf.client.CFCredentials;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.CannotAccessPropertyException;
-import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
 import org.springframework.ide.eclipse.boot.util.Log;
+import org.springsource.ide.eclipse.commons.core.pstore.IPropertyStore;
 import org.springsource.ide.eclipse.commons.livexp.ui.Ilabelable;
 
 public enum StoreCredentialsMode implements Ilabelable {

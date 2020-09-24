@@ -16,7 +16,7 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.springframework.ide.eclipse.boot.core.BootPropertyTester;
-import org.springframework.ide.eclipse.boot.pstore.IScopedPropertyStore;
+import org.springsource.ide.eclipse.commons.core.pstore.IScopedPropertyStore;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 
 import com.google.common.collect.ImmutableSet;

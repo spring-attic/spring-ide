@@ -19,8 +19,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.springframework.ide.eclipse.boot.dash.cf.client.SshHost;
-import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
 import org.springframework.ide.eclipse.boot.dash.util.LogSink;
+import org.springsource.ide.eclipse.commons.livexp.core.AbstractDisposable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import net.schmizz.keepalive.KeepAliveProvider;

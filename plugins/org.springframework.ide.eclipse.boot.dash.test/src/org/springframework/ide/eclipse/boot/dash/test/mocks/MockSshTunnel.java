@@ -12,8 +12,8 @@ package org.springframework.ide.eclipse.boot.dash.test.mocks;
 
 import org.springframework.ide.eclipse.boot.dash.cf.client.SshHost;
 import org.springframework.ide.eclipse.boot.dash.cf.debug.SshTunnel;
-import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
 import org.springframework.ide.eclipse.boot.dash.util.LogSink;
+import org.springsource.ide.eclipse.commons.livexp.core.AbstractDisposable;
 
 public class MockSshTunnel extends AbstractDisposable implements SshTunnel {
 

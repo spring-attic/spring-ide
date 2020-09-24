@@ -30,7 +30,7 @@ import org.springframework.ide.eclipse.boot.dash.model.remote.RefreshStateTracke
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget;
 import org.springframework.ide.eclipse.boot.dash.model.runtargettypes.RemoteRunTarget.ConnectMode;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
-import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
+import org.springsource.ide.eclipse.commons.core.pstore.IPropertyStore;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 

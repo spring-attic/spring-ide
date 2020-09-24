@@ -50,10 +50,10 @@ import org.springframework.ide.eclipse.boot.dash.util.MenuUtil;
 import org.springframework.ide.eclipse.boot.dash.util.ToolbarPulldownContributionItem;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashUnifiedTreeSection;
 import org.springframework.ide.eclipse.boot.dash.views.sections.TagSearchSection;
-import org.springframework.ide.eclipse.boot.dash.views.sections.ViewPartWithSections;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;
 import org.springsource.ide.eclipse.commons.livexp.ui.IPageSection;
+import org.springsource.ide.eclipse.commons.livexp.ui.ViewPartWithSections;
 
 import com.google.common.collect.ImmutableSet;
 

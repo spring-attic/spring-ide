@@ -19,8 +19,8 @@ import java.util.Set;
 import org.springframework.ide.eclipse.boot.dash.cf.client.v2.DefaultClientRequestsV2;
 import org.springframework.ide.eclipse.boot.dash.console.IApplicationLogConsole;
 import org.springframework.ide.eclipse.boot.dash.console.LogMessage;
-import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
+import org.springsource.ide.eclipse.commons.livexp.core.AbstractDisposable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 import reactor.core.Disposable;

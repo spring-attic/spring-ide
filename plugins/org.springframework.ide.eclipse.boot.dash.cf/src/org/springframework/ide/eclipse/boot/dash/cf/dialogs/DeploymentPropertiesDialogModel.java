@@ -47,9 +47,9 @@ import org.springframework.ide.eclipse.boot.dash.cf.deployment.AppNameAnnotation
 import org.springframework.ide.eclipse.boot.dash.cf.deployment.ApplicationManifestHandler;
 import org.springframework.ide.eclipse.boot.dash.cf.deployment.CloudApplicationDeploymentProperties;
 import org.springframework.ide.eclipse.boot.dash.cf.deployment.CloudData;
-import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.launch.properties.EmbeddedEditor;
+import org.springsource.ide.eclipse.commons.livexp.core.AbstractDisposable;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValidationResult;

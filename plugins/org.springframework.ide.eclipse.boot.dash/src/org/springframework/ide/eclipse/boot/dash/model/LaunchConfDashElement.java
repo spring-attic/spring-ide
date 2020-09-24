@@ -19,8 +19,8 @@ import org.springframework.ide.eclipse.boot.dash.api.Deletable;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
-import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
-import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
+import org.springsource.ide.eclipse.commons.core.pstore.IPropertyStore;
+import org.springsource.ide.eclipse.commons.core.pstore.PropertyStores;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 

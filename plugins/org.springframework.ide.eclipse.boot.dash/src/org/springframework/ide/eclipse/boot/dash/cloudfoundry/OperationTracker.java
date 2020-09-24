@@ -16,9 +16,9 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
-import org.springframework.ide.eclipse.boot.dash.livexp.LiveCounter;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
 import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.CancelationToken;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveCounter;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 

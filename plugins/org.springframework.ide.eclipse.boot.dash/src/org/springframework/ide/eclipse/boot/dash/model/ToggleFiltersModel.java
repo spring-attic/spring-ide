@@ -14,11 +14,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
-import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
-import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
-import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
+import org.springsource.ide.eclipse.commons.core.pstore.IPropertyStore;
+import org.springsource.ide.eclipse.commons.core.pstore.PropertyStoreApi;
+import org.springsource.ide.eclipse.commons.core.pstore.PropertyStores;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ValueListener;

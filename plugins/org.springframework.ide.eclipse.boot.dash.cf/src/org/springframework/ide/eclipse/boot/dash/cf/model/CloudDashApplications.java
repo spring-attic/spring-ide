@@ -15,8 +15,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.ide.eclipse.boot.dash.livexp.DisposingFactory;
-import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
 import org.springsource.ide.eclipse.commons.livexp.core.AsyncLiveExpression.AsyncMode;
+import org.springsource.ide.eclipse.commons.livexp.core.AbstractDisposable;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 import org.springsource.ide.eclipse.commons.livexp.core.ObservableSet;
 

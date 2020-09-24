@@ -21,9 +21,10 @@ import org.springframework.ide.eclipse.boot.dash.util.template.Template;
 import org.springframework.ide.eclipse.boot.dash.util.template.TemplateEnv;
 import org.springframework.ide.eclipse.boot.dash.util.template.Templates;
 import org.springframework.ide.eclipse.boot.dash.views.sections.BootDashColumn;
-import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
-import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
-import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
+import org.springsource.ide.eclipse.commons.core.pstore.IPropertyStore;
+import org.springsource.ide.eclipse.commons.core.pstore.PropertyStoreApi;
+import org.springsource.ide.eclipse.commons.core.pstore.PropertyStores;
+import org.springsource.ide.eclipse.commons.livexp.core.AbstractDisposable;
 
 public abstract class AbstractRunTarget<Params> extends AbstractDisposable implements RunTarget<Params>, TemplateEnv {
 

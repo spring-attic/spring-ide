@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import org.springframework.ide.eclipse.boot.dash.api.App;
-import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
+import org.springsource.ide.eclipse.commons.livexp.core.AbstractDisposable;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 
 import com.github.dockerjava.api.DockerClient;

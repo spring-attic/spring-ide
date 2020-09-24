@@ -23,7 +23,7 @@ import org.eclipse.ui.PlatformUI;
 import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.docker.ui.SelectDockerDaemonDialog.Model;
-import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions.UIContext;
+import org.springsource.ide.eclipse.commons.livexp.ui.UIContext;
 
 public class DefaultDockerUserInteractions implements DockerUserInteractions {
 

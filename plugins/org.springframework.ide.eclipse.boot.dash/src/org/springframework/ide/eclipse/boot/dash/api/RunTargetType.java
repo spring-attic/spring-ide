@@ -17,8 +17,8 @@ import org.springframework.ide.eclipse.boot.dash.model.MissingLiveInfoMessages;
 import org.springframework.ide.eclipse.boot.dash.model.Nameable;
 import org.springframework.ide.eclipse.boot.dash.model.RunTarget;
 import org.springframework.ide.eclipse.boot.dash.util.template.Templates;
-import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
-import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
+import org.springsource.ide.eclipse.commons.core.pstore.IPropertyStore;
+import org.springsource.ide.eclipse.commons.core.pstore.PropertyStoreApi;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSetVariable;
 
 /**

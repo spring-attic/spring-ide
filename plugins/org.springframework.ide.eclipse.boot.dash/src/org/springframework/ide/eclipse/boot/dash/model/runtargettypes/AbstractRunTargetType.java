@@ -14,9 +14,9 @@ import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
 import org.springframework.ide.eclipse.boot.dash.model.UserInteractions;
-import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
-import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
-import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
+import org.springsource.ide.eclipse.commons.core.pstore.IPropertyStore;
+import org.springsource.ide.eclipse.commons.core.pstore.PropertyStoreApi;
+import org.springsource.ide.eclipse.commons.core.pstore.PropertyStores;
 
 /**
  * @author Kris De Volder

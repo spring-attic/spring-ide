@@ -32,9 +32,9 @@ import org.springframework.ide.eclipse.boot.dash.cloudfoundry.deployment.YamlInp
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel;
 import org.springframework.ide.eclipse.boot.dash.dialogs.ManifestDiffDialogModel.Result;
-import org.springframework.ide.eclipse.boot.dash.views.DefaultUserInteractions.UIContext;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.IOUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
+import org.springsource.ide.eclipse.commons.livexp.ui.UIContext;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
 
 public class DefaultCfUserInteractions implements CfUserInteractions {

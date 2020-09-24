@@ -20,7 +20,7 @@ import org.mockito.Mockito;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFApplication;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFOrganization;
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFServiceInstance;
-import org.springframework.ide.eclipse.boot.dash.livexp.LiveCounter;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveCounter;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;

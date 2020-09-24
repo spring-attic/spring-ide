@@ -12,7 +12,7 @@ package org.springframework.ide.eclipse.boot.dash.cf.model;
 
 import org.springframework.ide.eclipse.boot.dash.cf.client.CFServiceInstance;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModelContext;
-import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
+import org.springsource.ide.eclipse.commons.core.pstore.IPropertyStore;
 
 public class CloudDashElementFactory {
 

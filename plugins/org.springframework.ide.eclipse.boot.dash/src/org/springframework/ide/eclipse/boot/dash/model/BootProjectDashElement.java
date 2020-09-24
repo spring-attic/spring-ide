@@ -21,10 +21,10 @@ import org.springframework.ide.eclipse.boot.dash.model.BootDashModel.ElementStat
 import org.springframework.ide.eclipse.boot.dash.util.CollectionUtils;
 import org.springframework.ide.eclipse.boot.dash.util.DebugUtil;
 import org.springframework.ide.eclipse.boot.launch.util.BootLaunchUtils;
-import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
-import org.springframework.ide.eclipse.boot.pstore.IScopedPropertyStore;
-import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
 import org.springframework.ide.eclipse.boot.util.Log;
+import org.springsource.ide.eclipse.commons.core.pstore.IPropertyStore;
+import org.springsource.ide.eclipse.commons.core.pstore.IScopedPropertyStore;
+import org.springsource.ide.eclipse.commons.core.pstore.PropertyStores;
 import org.springsource.ide.eclipse.commons.livexp.core.DisposeListener;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveSets;

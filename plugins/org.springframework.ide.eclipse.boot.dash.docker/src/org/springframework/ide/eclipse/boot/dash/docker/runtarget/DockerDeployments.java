@@ -15,10 +15,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.ide.eclipse.boot.dash.livexp.LiveCounter;
-import org.springframework.ide.eclipse.boot.dash.model.AbstractDisposable;
-import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
+import org.springsource.ide.eclipse.commons.core.pstore.PropertyStoreApi;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.StringUtils;
+import org.springsource.ide.eclipse.commons.livexp.core.AbstractDisposable;
+import org.springsource.ide.eclipse.commons.livexp.core.LiveCounter;
 import org.springsource.ide.eclipse.commons.livexp.core.OnDispose;
 import org.springsource.ide.eclipse.commons.livexp.util.Log;
 import org.yaml.snakeyaml.Yaml;

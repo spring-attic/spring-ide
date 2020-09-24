@@ -73,9 +73,9 @@ import org.springframework.ide.eclipse.boot.dash.util.CancelationTokens.Cancelat
 import org.springframework.ide.eclipse.boot.dash.util.LogSink;
 import org.springframework.ide.eclipse.boot.dash.util.Utils;
 import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManager;
-import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
-import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
-import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
+import org.springsource.ide.eclipse.commons.core.pstore.IPropertyStore;
+import org.springsource.ide.eclipse.commons.core.pstore.PropertyStoreApi;
+import org.springsource.ide.eclipse.commons.core.pstore.PropertyStores;
 import org.springsource.ide.eclipse.commons.core.util.StringUtil;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;

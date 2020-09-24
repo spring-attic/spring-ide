@@ -34,8 +34,8 @@ import org.springframework.ide.eclipse.boot.dash.views.BootDashModelConsoleManag
 import org.springframework.ide.eclipse.boot.dash.views.BootDashTreeView;
 import org.springframework.ide.eclipse.boot.dash.views.LocalElementConsoleManager;
 import org.springframework.ide.eclipse.boot.launch.BootLaunchConfigurationDelegate;
-import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
-import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
+import org.springsource.ide.eclipse.commons.core.pstore.IPropertyStore;
+import org.springsource.ide.eclipse.commons.core.pstore.PropertyStores;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ClasspathListenerManager.ClasspathListener;
 import org.springsource.ide.eclipse.commons.frameworks.core.workspace.ProjectChangeListenerManager;

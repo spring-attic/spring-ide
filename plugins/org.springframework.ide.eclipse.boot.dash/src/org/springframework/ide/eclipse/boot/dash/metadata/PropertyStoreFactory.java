@@ -16,8 +16,8 @@ import org.springframework.ide.eclipse.boot.dash.BootDashActivator;
 import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.model.DefaultSecuredCredentialsStore;
 import org.springframework.ide.eclipse.boot.dash.model.SecuredCredentialsStore;
-import org.springframework.ide.eclipse.boot.pstore.IScopedPropertyStore;
-import org.springframework.ide.eclipse.boot.pstore.PreferenceBasedStore;
+import org.springsource.ide.eclipse.commons.core.pstore.IScopedPropertyStore;
+import org.springsource.ide.eclipse.commons.core.pstore.PreferenceBasedStore;
 
 public class PropertyStoreFactory {
 

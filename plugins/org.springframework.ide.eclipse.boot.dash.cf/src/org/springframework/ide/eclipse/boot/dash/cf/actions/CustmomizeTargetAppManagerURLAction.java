@@ -16,7 +16,7 @@ import org.springframework.ide.eclipse.boot.dash.cf.dialogs.CustomizeAppsManager
 import org.springframework.ide.eclipse.boot.dash.cf.model.CloudFoundryBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
 import org.springframework.ide.eclipse.boot.dash.model.BootDashModel;
-import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
+import org.springsource.ide.eclipse.commons.core.pstore.PropertyStoreApi;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 public class CustmomizeTargetAppManagerURLAction extends AbstractCloudDashModelAction{

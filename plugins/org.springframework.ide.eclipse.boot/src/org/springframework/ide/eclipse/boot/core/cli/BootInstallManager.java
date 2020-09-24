@@ -29,15 +29,15 @@ import org.springframework.ide.eclipse.boot.core.cli.install.IBootInstall;
 import org.springframework.ide.eclipse.boot.core.cli.install.ZippedBootInstall;
 import org.springframework.ide.eclipse.boot.util.Log;
 import org.springsource.ide.eclipse.commons.core.preferences.StsProperties;
+import org.springsource.ide.eclipse.commons.core.pstore.IPropertyStore;
+import org.springsource.ide.eclipse.commons.core.pstore.PropertyStoreApi;
+import org.springsource.ide.eclipse.commons.core.pstore.PropertyStores;
 import org.springsource.ide.eclipse.commons.frameworks.core.downloadmanager.DownloadManager;
 import org.springsource.ide.eclipse.commons.frameworks.core.util.ArrayEncoder;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveVariable;
 import org.springsource.ide.eclipse.commons.livexp.ui.Disposable;
 import org.springsource.ide.eclipse.commons.livexp.util.ExceptionUtil;
-import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
-import org.springframework.ide.eclipse.boot.pstore.PropertyStoreApi;
-import org.springframework.ide.eclipse.boot.pstore.PropertyStores;
 
 /**
  * Manages the boot installations that are configured in this workspace.

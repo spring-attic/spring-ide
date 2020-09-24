@@ -19,8 +19,8 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.springframework.ide.eclipse.boot.core.cli.BootInstallManager;
 import org.springframework.ide.eclipse.boot.dash.api.RunTargetType;
 import org.springframework.ide.eclipse.boot.dash.di.SimpleDIContext;
-import org.springframework.ide.eclipse.boot.pstore.IPropertyStore;
-import org.springframework.ide.eclipse.boot.pstore.IScopedPropertyStore;
+import org.springsource.ide.eclipse.commons.core.pstore.IPropertyStore;
+import org.springsource.ide.eclipse.commons.core.pstore.IScopedPropertyStore;
 import org.springsource.ide.eclipse.commons.livexp.core.LiveExpression;
 
 /**
