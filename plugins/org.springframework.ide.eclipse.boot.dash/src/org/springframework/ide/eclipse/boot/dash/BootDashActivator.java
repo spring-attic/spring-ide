@@ -135,7 +135,7 @@ public class BootDashActivator extends AbstractUIPlugin {
 
 	private final Supplier<BootDashModelContext> context = Suppliers.memoize(() -> DefaultBootDashModelContext.create());
 
-	public BootDashViewModel getModel() {
+	public synchronized BootDashViewModel getModel() {
 		if (model==null) {
 			model = context.get().injections.getBean(BootDashViewModel.class);
 
