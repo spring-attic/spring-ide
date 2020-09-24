@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.hamcrest.Matcher;
 import org.junit.Test;
+import org.mockito.hamcrest.MockitoHamcrest;
 import org.springframework.ide.eclipse.boot.dash.model.AbstractLaunchConfigurationsDashElement;
 import org.springframework.ide.eclipse.boot.dash.model.LocalBootDashModel;
 import org.springframework.ide.eclipse.boot.dash.model.LocalRunTarget;
@@ -257,7 +258,7 @@ public class AbstractLaunchConfigurationsDashElementTest extends Mocks {
 
 		when(element.guessMainTypes()).thenReturn(new IType[] {fooType, barType});
 		when(ui.chooseMainType(
-				argThat(arrayContaining(fooType, barType)),
+				MockitoHamcrest.argThat(arrayContaining(fooType, barType)),
 				any(String.class),
 				any(String.class)
 		)).thenReturn(barType);
@@ -344,11 +345,11 @@ public class AbstractLaunchConfigurationsDashElementTest extends Mocks {
 		Object untyped = iterMatcher;
 		@SuppressWarnings("unchecked")
 		Matcher<List<T>> listMatcher = (Matcher<List<T>>) untyped;
-		return argThat(listMatcher);
+		return MockitoHamcrest.argThat(listMatcher);
 	}
 
 	public static String stringContains(String... strings) {
-		return argThat(stringContainsInOrder(Arrays.asList(strings)));
+		return MockitoHamcrest.argThat(stringContainsInOrder(Arrays.asList(strings)));
 	}
 
 }
