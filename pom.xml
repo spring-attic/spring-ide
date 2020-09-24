@@ -101,6 +101,7 @@
 		<module>plugins/org.springframework.ide.eclipse.docker.client</module>
 		<module>plugins/org.springframework.ide.eclipse.boot.dash.docker</module>
         <module>plugins/org.springframework.ide.eclipse.xterm</module>
+        <module>plugins/org.springframework.ide.eclipse.xterm.macosx.x86_64</module>
 		<module>plugins/org.springframework.ide.eclipse.boot.dash.test</module>
 		<module>plugins/org.springframework.ide.eclipse.boot.launch</module>
 		<module>plugins/org.springframework.ide.eclipse.boot.launch.livebean</module>

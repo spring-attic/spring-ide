@@ -32,8 +32,8 @@ public class XtermServiceProcessManager {
 	synchronized void startProcess() throws IOException {
 		port = findFreePort();
 		Bundle bundle = XtermPlugin.getDefault().getBundle();
-//		URL url = FileLocator.find(bundle, new Path("/lib/node_modules/node-xterm/terminal-server.js"), null);
-		URL url = FileLocator.find(bundle, new Path("/lib/terminal-server.js"), null);
+		URL url = FileLocator.find(bundle, new Path("/lib/node_modules/node-xterm/terminal-server.js"), null);
+//		URL url = FileLocator.find(bundle, new Path("/lib/terminal-server.js"), null);
 //		URL url = FileLocator.find(bundle, new Path("/lib/node-xterm-macos"), null);
 //		URL url = FileLocator.find(bundle, new Path("/lib/node-xterm-win.exe"), null);
 		url = FileLocator.toFileURL(url);
