@@ -296,6 +296,11 @@
 					<layout>p2</layout>
 					<url>https://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}</url>
 				</repository>
+				<repository>
+					<id>sts4</id>
+					<layout>p2</layout>
+					<url>https://dist.springsource.com/snapshot/TOOLS/sts4-language-servers/${dist.pathpostfix}</url>
+				</repository>
 			</repositories>
 		</profile>
 
@@ -344,6 +349,11 @@
 					<id>eclipse-integration-commons</id>
 					<layout>p2</layout>
 					<url>https://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}</url>
+				</repository>
+				<repository>
+					<id>sts4</id>
+					<layout>p2</layout>
+					<url>https://dist.springsource.com/snapshot/TOOLS/sts4-language-servers/${dist.pathpostfix}</url>
 				</repository>
 			</repositories>
 		</profile>
@@ -398,6 +408,11 @@
 					<id>eclipse-integration-commons</id>
 					<layout>p2</layout>
 					<url>https://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}</url>
+				</repository>
+				<repository>
+					<id>sts4</id>
+					<layout>p2</layout>
+					<url>https://dist.springsource.com/snapshot/TOOLS/sts4-language-servers/${dist.pathpostfix}</url>
 				</repository>
 			</repositories>
 		</profile>
