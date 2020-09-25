@@ -1,341 +1,221 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-
-		<!-- Core features -->
-		<feature
-			url="features/org.springframework.ide.eclipse.feature_3.9.15.qualifier.jar"
-			id="org.springframework.ide.eclipse.feature" version="3.9.15.qualifier">
-			<category name="Core / Spring IDE" />
-		</feature>
-
-		<!-- Extensions features -->
-		<feature
-			url="features/org.springframework.ide.eclipse.boot.feature_3.9.15.qualifier.jar"
-			id="org.springframework.ide.eclipse.boot.feature" version="3.9.15.qualifier">
-			<category name="Extensions / Spring IDE" />
-		</feature>
-
-		<feature
-			url="features/org.springframework.ide.eclipse.boot.dash.feature_3.9.15.qualifier.jar"
-			id="org.springframework.ide.eclipse.boot.dash.feature" version="3.9.15.qualifier">
-			<category name="Extensions / Spring IDE" />
-		</feature>
-
-		<feature
-			url="features/org.springframework.ide.eclipse.xml.namespaces.feature_3.9.15.qualifier.jar"
-			id="org.springframework.ide.eclipse.xml.namespaces.feature" version="3.9.15.qualifier">
-			<category name="Extensions / Spring IDE" />
-		</feature>
-		
-		<feature
-			url="features/org.springframework.ide.eclipse.aop.feature_3.9.15.qualifier.jar"
-			id="org.springframework.ide.eclipse.aop.feature" version="3.9.15.qualifier">
-			<category name="Extensions / Spring IDE" />
-		</feature>
-
-		<feature
-			url="features/org.springframework.ide.eclipse.osgi.feature_3.9.15.qualifier.jar"
-			id="org.springframework.ide.eclipse.osgi.feature" version="3.9.15.qualifier">
-			<category name="Extensions / Spring IDE" />
-		</feature>
-
-		<feature
-			url="features/org.springframework.ide.eclipse.security.feature_3.9.15.qualifier.jar"
-			id="org.springframework.ide.eclipse.security.feature" version="3.9.15.qualifier">
-			<category name="Extensions / Spring IDE" />
-		</feature>
-
-		<feature
-			url="features/org.springframework.ide.eclipse.webflow.feature_3.9.15.qualifier.jar"
-			id="org.springframework.ide.eclipse.webflow.feature" version="3.9.15.qualifier">
-			<category name="Extensions / Spring IDE" />
-		</feature>
-
-		<feature
-			url="features/org.springframework.ide.eclipse.batch.feature_3.9.15.qualifier.jar"
-			id="org.springframework.ide.eclipse.batch.feature" version="3.9.15.qualifier">
-			<category name="Extensions / Spring IDE" />
-		</feature>
-
-		<feature
-			url="features/org.springframework.ide.eclipse.integration.feature_3.9.15.qualifier.jar"
-			id="org.springframework.ide.eclipse.integration.feature" version="3.9.15.qualifier">
-			<category name="Extensions / Spring IDE" />
-		</feature>	
-
-		<feature
-			url="features/org.springframework.ide.eclipse.roo.feature_3.9.15.qualifier.jar"
-			id="org.springframework.ide.eclipse.roo.feature" version="3.9.15.qualifier">
-			<category name="Extensions / Spring IDE" />
-		</feature>	
-
-		<feature
-			url="features/org.springframework.ide.eclipse.maven.feature_3.9.15.qualifier.jar"
-			id="org.springframework.ide.eclipse.maven.feature" version="3.9.15.qualifier">
-			<category name="Extensions / Spring IDE" />
-		</feature>	
-
-		<feature
-			url="features/org.springframework.ide.eclipse.data.feature_3.9.15.qualifier.jar"
-			id="org.springframework.ide.eclipse.data.feature" version="3.9.15.qualifier">
-			<category name="Extensions / Spring IDE" />
-		</feature>	
-
-		<feature
-			url="features/org.springframework.ide.eclipse.autowire.feature_3.9.15.qualifier.jar"
-			id="org.springframework.ide.eclipse.autowire.feature" version="3.9.15.qualifier">
-			<category name="Extensions / Spring IDE" />
-		</feature>
-
-		<!-- Integration features -->
-		<feature
-			url="features/org.springframework.ide.eclipse.ajdt.feature_3.9.15.qualifier.jar"
-			id="org.springframework.ide.eclipse.ajdt.feature" version="3.9.15.qualifier">
-			<category name="Integrations / Spring IDE" />
-		</feature>
-
-		<feature
-			url="features/org.springframework.ide.eclipse.mylyn.feature_3.9.15.qualifier.jar"
-			id="org.springframework.ide.eclipse.mylyn.feature" version="3.9.15.qualifier">
-			<category name="Integrations / Spring IDE" />
-		</feature>
-
-		<feature
-			url="features/org.springframework.ide.eclipse.aeri.feature_3.9.15.qualifier.jar"
-			id="org.springframework.ide.eclipse.aeri.feature" version="3.9.15.qualifier">
-			<category name="Extensions / Spring IDE" />
-		</feature>	
-
-		<!-- Resources features -->
-		<feature
-			url="features/org.springframework.ide.eclipse.feature.source_3.9.15.qualifier.jar"
-			id="org.springframework.ide.eclipse.feature.source" version="3.9.15.qualifier">
-			<category name="Resources / Spring IDE" />
-		</feature>
-
-		<feature
-			url="features/org.springframework.ide.eclipse.boot.feature.source_3.9.15.qualifier.jar"
-			id="org.springframework.ide.eclipse.boot.feature.source" version="3.9.15.qualifier">
-			<category name="Resources / Spring IDE" />
-		</feature>
-
-		<feature
-			url="features/org.springframework.ide.eclipse.boot.dash.feature.source_3.9.15.qualifier.jar"
-			id="org.springframework.ide.eclipse.boot.dash.feature.source" version="3.9.15.qualifier">
-			<category name="Resources / Spring IDE" />
-		</feature>
-
-		<feature
-			url="features/org.springframework.ide.eclipse.xml.namespaces.feature.source_3.9.15.qualifier.jar"
-			id="org.springframework.ide.eclipse.xml.namespaces.feature.source" version="3.9.15.qualifier">
-			<category name="Resources / Spring IDE" />
-		</feature>
-		
-		<feature
-			url="features/org.springframework.ide.eclipse.aop.feature.source_3.9.15.qualifier.jar"
-			id="org.springframework.ide.eclipse.aop.feature.source" version="3.9.15.qualifier">
-			<category name="Resources / Spring IDE" />
-		</feature>
-
-		<feature
-			url="features/org.springframework.ide.eclipse.batch.feature.source_3.9.15.qualifier.jar"
-			id="org.springframework.ide.eclipse.batch.feature.source" version="3.9.15.qualifier">
-			<category name="Resources / Spring IDE" />
-		</feature>
-
-		<feature
-			url="features/org.springframework.ide.eclipse.osgi.feature.source_3.9.15.qualifier.jar"
-			id="org.springframework.ide.eclipse.osgi.feature.source" version="3.9.15.qualifier">
-			<category name="Resources / Spring IDE" />
-		</feature>
-
-		<feature
-			url="features/org.springframework.ide.eclipse.security.feature.source_3.9.15.qualifier.jar"
-			id="org.springframework.ide.eclipse.security.feature.source" version="3.9.15.qualifier">
-			<category name="Resources / Spring IDE" />
-		</feature>
-
-		<feature
-			url="features/org.springframework.ide.eclipse.webflow.feature.source_3.9.15.qualifier.jar"
-			id="org.springframework.ide.eclipse.webflow.feature.source" version="3.9.15.qualifier">
-			<category name="Resources / Spring IDE" />
-		</feature>
-
-		<feature
-			url="features/org.springframework.ide.eclipse.autowire.feature.source_3.9.15.qualifier.jar"
-			id="org.springframework.ide.eclipse.autowire.feature.source" version="3.9.15.qualifier">
-			<category name="Resources / Spring IDE" />
-		</feature>
-
-		<feature
-			url="features/org.springframework.ide.eclipse.ajdt.feature.source_3.9.15.qualifier.jar"
-			id="org.springframework.ide.eclipse.ajdt.feature.source" version="3.9.15.qualifier">
-			<category name="Resources / Spring IDE" />
-		</feature>
-
-		<feature
-			url="features/org.springframework.ide.eclipse.mylyn.feature.source_3.9.15.qualifier.jar"
-			id="org.springframework.ide.eclipse.mylyn.feature.source" version="3.9.15.qualifier">
-			<category name="Resources / Spring IDE" />
-		</feature>
-
-		<feature
-			url="features/org.springframework.ide.eclipse.integration.feature.source_3.9.15.qualifier.jar"
-			id="org.springframework.ide.eclipse.integration.feature.source" version="3.9.15.qualifier">
-			<category name="Resources / Spring IDE" />
-		</feature>		
-
-		<feature
-			url="features/org.springframework.ide.eclipse.roo.feature.source_3.9.15.qualifier.jar"
-			id="org.springframework.ide.eclipse.roo.feature.source" version="3.9.15.qualifier">
-			<category name="Resources / Spring IDE" />
-		</feature>		
-
-		<feature
-			url="features/org.springframework.ide.eclipse.maven.feature.source_3.9.15.qualifier.jar"
-			id="org.springframework.ide.eclipse.maven.feature.source" version="3.9.15.qualifier">
-			<category name="Resources / Spring IDE" />
-		</feature>
-
-		<feature
-			url="features/org.springframework.ide.eclipse.data.feature.source_3.9.15.qualifier.jar"
-			id="org.springframework.ide.eclipse.data.feature.source" version="3.9.15.qualifier">
-			<category name="Resources / Spring IDE" />
-		</feature>			
-
-		<feature
-			url="features/org.springframework.ide.eclipse.aeri.feature.source_3.9.15.qualifier.jar"
-			id="org.springframework.ide.eclipse.aeri.feature.source" version="3.9.15.qualifier">
-			<category name="Resources / Spring IDE" />
-		</feature>		
-
-		<category-def name="Core / Spring IDE" label="Core / Spring IDE" />
-		<category-def name="Extensions / Spring IDE" label="Extensions / Spring IDE" />
-		<category-def name="Integrations / Spring IDE" label="Integrations / Spring IDE" />
-		<category-def name="Resources / Spring IDE" label="Resources / Spring IDE" />
-		
-		<bundle id="org.springsource.ide.eclipse.commons.content.core" version="0.0.0"/>
-		<bundle id="org.springsource.ide.eclipse.commons.core" version="0.0.0"/>
-		<bundle id="org.springsource.ide.eclipse.commons.frameworks.core" version="0.0.0"/>
-		<bundle id="org.springsource.ide.eclipse.commons.frameworks.ui" version="0.0.0"/>
-		<bundle id="org.springsource.ide.eclipse.commons.ui" version="0.0.0"/>
-		<bundle id="org.springsource.ide.eclipse.commons.livexp" version="0.0.0"/>
-		<bundle id="org.springsource.ide.eclipse.commons.jdk_tools" version="0.0.0"/>
-
-		<bundle id="org.springframework.ide.eclipse.beans.ui.live" version="0.0.0"/>
-
-		<bundle id="io.projectreactor.reactor-core" version="0.0.0"/>
-		<bundle id="io.projectreactor.reactor-core.source" version="0.0.0"/>
-		<bundle id="org.reactivestreams.reactive-streams" version="0.0.0"/>
-		<bundle id="org.reactivestreams.reactive-streams.source" version="0.0.0"/>
-
-	    <bundle id="org.bouncycastle.bcpg" version="0.0.0"/>
-	    <bundle id="org.bouncycastle.bcpg.source" version="0.0.0"/>
-	    <bundle id="org.bouncycastle.bcpkix" version="0.0.0"/>
-	    <bundle id="org.bouncycastle.bcpkix.source" version="0.0.0"/>
-	    <bundle id="org.bouncycastle.bcprov" version="0.0.0"/>
-	    <bundle id="org.bouncycastle.bcprov.source" version="0.0.0"/>
-	    <bundle id="com.hierynomus.sshj" version="0.0.0"/>
-	    <bundle id="com.hierynomus.sshj.source" version="0.0.0"/>
-	    <bundle id="com.jcraft.jzlib" version="0.0.0"/>
-	    <bundle id="com.jcraft.jzlib.source" version="0.0.0"/>
-	    <bundle id="net.i2p.crypto.eddsa" version="0.0.0"/>
-	    <bundle id="net.i2p.crypto.eddsa.source" version="0.0.0"/>
-
-		<bundle id="com.google.protobuf" version="0.0.0"/>
-
-		<bundle id="org.eclipse.lsp4e" version="0.0.0"/>
-		<bundle id="org.eclipse.zest.core" version="0.0.0"/>
-		<bundle id="org.eclipse.zest.layouts" version="0.0.0"/>
-		<bundle id="com.google.gson" version="0.0.0"/>
-		<bundle id="org.eclipse.lsp4j" version="0.0.0"/>
-		<bundle id="org.eclipse.lsp4j.jsonrpc" version="0.0.0"/>
-		<bundle id="org.eclipse.xtext.xbase.lib" version="0.0.0"/>
-
-		<bundle id="com.fasterxml.jackson.core.jackson-annotations" version="0.0.0"/>
-		<bundle id="com.fasterxml.jackson.core.jackson-core" version="0.0.0"/>
-		<bundle id="com.fasterxml.jackson.core.jackson-databind" version="0.0.0"/>
-
-		<bundle id="org.aspectj.runtime" version="0.0.0"/>
-		<bundle id="org.aspectj.runtime.source" version="0.0.0"/>
-		<bundle id="org.aspectj.weaver" version="0.0.0"/>
-<!--		<bundle id="org.eclipse.weaver.source" version="0.0.0"/> -->
-
-		<bundle id="javax.activation" version="0.0.0"/>
-		<bundle id="javax.activation.source" version="0.0.0"/>
-		<bundle id="javax.annotation" version="0.0.0"/>
-		<bundle id="javax.annotation.source" version="0.0.0"/>
-		<bundle id="javax.el" version="0.0.0"/>
-		<bundle id="javax.el.source" version="0.0.0"/>
-		<bundle id="javax.inject" version="0.0.0"/>
-		<bundle id="javax.inject.source" version="0.0.0"/>
-		<bundle id="javax.jms" version="0.0.0"/>
-		<bundle id="javax.jms.source" version="0.0.0"/>
-		<bundle id="javax.validation" version="0.0.0"/>
-		<bundle id="javax.validation.source" version="0.0.0"/>
-		<bundle id="javax.ws.rs" version="0.0.0"/>
-		<bundle id="javax.xml.ws" version="0.0.0"/>
-		<bundle id="javax.xml.bind" version="0.0.0"/>
-		<bundle id="javax.xml.bind.source" version="0.0.0"/>
-		<bundle id="javax.xml.stream" version="0.0.0"/>
-		<bundle id="org.json" version="0.0.0"/>
-		<bundle id="edu.emory.mathcs.backport" version="0.0.0"/>
-		<bundle id="edu.emory.mathcs.backport.source" version="0.0.0"/>
-		<bundle id="org.aopalliance" version="0.0.0"/>
-		
-		<bundle id="org.apache.commons.codec" version="0.0.0"/>
-		<bundle id="org.apache.commons.codec.source" version="0.0.0"/>
-		<bundle id="org.apache.commons.collections" version="0.0.0"/>
-		<bundle id="org.apache.commons.collections.source" version="0.0.0"/>
-		<bundle id="org.apache.commons.io" version="0.0.0"/>
-		<bundle id="org.apache.commons.io.source" version="0.0.0"/>
-		<bundle id="org.apache.commons.logging" version="0.0.0"/>
-		<bundle id="org.apache.commons.logging.source" version="0.0.0"/>
-		<bundle id="org.apache.httpcomponents.httpclient" version="0.0.0"/>
-		<bundle id="org.apache.httpcomponents.httpclient.source" version="0.0.0"/>
-		<bundle id="org.apache.httpcomponents.httpcore" version="0.0.0"/>
-		<bundle id="org.apache.httpcomponents.httpcore.source" version="0.0.0"/>
-		
-		<bundle id="org.codehaus.jackson.core" version="0.0.0"/>
-		<bundle id="org.codehaus.jackson.core.source" version="0.0.0"/>
-		<bundle id="org.codehaus.jackson.mapper" version="0.0.0"/>
-		<bundle id="org.codehaus.jackson.mapper.source" version="0.0.0"/>
-
-		<bundle id="org.objectweb.asm" version="0.0.0"/>
-		<bundle id="org.objectweb.asm.source" version="0.0.0"/>
-
-		<bundle id="org.yaml.snakeyaml" version="0.0.0"/>
-		<bundle id="org.dadacoalition.yedit" version="0.0.0"/>
-
-		<bundle id="org.springframework.aop" version="0.0.0"/>
-		<bundle id="org.springframework.aop.source" version="0.0.0"/>
-		<bundle id="org.springframework.beans" version="0.0.0"/>
-		<bundle id="org.springframework.beans.source" version="0.0.0"/>
-		<bundle id="org.springframework.context" version="0.0.0"/>
-		<bundle id="org.springframework.context.source" version="0.0.0"/>
-		<bundle id="org.springframework.context.support" version="0.0.0"/>
-		<bundle id="org.springframework.context.support.source" version="0.0.0"/>
-		<bundle id="org.springframework.core" version="0.0.0"/>
-		<bundle id="org.springframework.core.source" version="0.0.0"/>
-		<bundle id="org.springframework.data.core" version="0.0.0"/>
-		<bundle id="org.springframework.data.core.source" version="0.0.0"/>
-		<bundle id="org.springframework.expression" version="0.0.0"/>
-		<bundle id="org.springframework.expression.source" version="0.0.0"/>
-		<bundle id="org.springframework.jdbc" version="0.0.0"/>
-		<bundle id="org.springframework.jdbc.source" version="0.0.0"/>
-		<bundle id="org.springframework.jms" version="0.0.0"/>
-		<bundle id="org.springframework.jms.source" version="0.0.0"/>
-		<bundle id="org.springframework.orm" version="0.0.0"/>
-		<bundle id="org.springframework.orm.source" version="0.0.0"/>
-		<bundle id="org.springframework.oxm" version="0.0.0"/>
-		<bundle id="org.springframework.oxm.source" version="0.0.0"/>
-		<bundle id="org.springframework.transaction" version="0.0.0"/>
-		<bundle id="org.springframework.transaction.source" version="0.0.0"/>
-		<bundle id="org.springframework.web" version="0.0.0"/>
-		<bundle id="org.springframework.web.source" version="0.0.0"/>
-		<bundle id="org.springframework.web.servlet" version="0.0.0"/>
-		<bundle id="org.springframework.web.servlet.source" version="0.0.0"/>
-		<bundle id="com.springsource.util.common" version="0.0.0"/>
-		<bundle id="com.springsource.util.common.source" version="0.0.0"/>
-		
+   <feature url="features/org.springframework.ide.eclipse.feature_3.9.15.qualifier.jar" id="org.springframework.ide.eclipse.feature" version="3.9.15.qualifier">
+      <category name="Core / Spring IDE"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse.boot.feature_3.9.15.qualifier.jar" id="org.springframework.ide.eclipse.boot.feature" version="3.9.15.qualifier">
+      <category name="Extensions / Spring IDE"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse.boot.dash.feature_3.9.15.qualifier.jar" id="org.springframework.ide.eclipse.boot.dash.feature" version="3.9.15.qualifier">
+      <category name="Extensions / Spring IDE"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse.xml.namespaces.feature_3.9.15.qualifier.jar" id="org.springframework.ide.eclipse.xml.namespaces.feature" version="3.9.15.qualifier">
+      <category name="Extensions / Spring IDE"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse.aop.feature_3.9.15.qualifier.jar" id="org.springframework.ide.eclipse.aop.feature" version="3.9.15.qualifier">
+      <category name="Extensions / Spring IDE"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse.osgi.feature_3.9.15.qualifier.jar" id="org.springframework.ide.eclipse.osgi.feature" version="3.9.15.qualifier">
+      <category name="Extensions / Spring IDE"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse.security.feature_3.9.15.qualifier.jar" id="org.springframework.ide.eclipse.security.feature" version="3.9.15.qualifier">
+      <category name="Extensions / Spring IDE"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse.webflow.feature_3.9.15.qualifier.jar" id="org.springframework.ide.eclipse.webflow.feature" version="3.9.15.qualifier">
+      <category name="Extensions / Spring IDE"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse.batch.feature_3.9.15.qualifier.jar" id="org.springframework.ide.eclipse.batch.feature" version="3.9.15.qualifier">
+      <category name="Extensions / Spring IDE"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse.integration.feature_3.9.15.qualifier.jar" id="org.springframework.ide.eclipse.integration.feature" version="3.9.15.qualifier">
+      <category name="Extensions / Spring IDE"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse.roo.feature_3.9.15.qualifier.jar" id="org.springframework.ide.eclipse.roo.feature" version="3.9.15.qualifier">
+      <category name="Extensions / Spring IDE"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse.maven.feature_3.9.15.qualifier.jar" id="org.springframework.ide.eclipse.maven.feature" version="3.9.15.qualifier">
+      <category name="Extensions / Spring IDE"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse.data.feature_3.9.15.qualifier.jar" id="org.springframework.ide.eclipse.data.feature" version="3.9.15.qualifier">
+      <category name="Extensions / Spring IDE"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse.autowire.feature_3.9.15.qualifier.jar" id="org.springframework.ide.eclipse.autowire.feature" version="3.9.15.qualifier">
+      <category name="Extensions / Spring IDE"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse.ajdt.feature_3.9.15.qualifier.jar" id="org.springframework.ide.eclipse.ajdt.feature" version="3.9.15.qualifier">
+      <category name="Integrations / Spring IDE"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse.mylyn.feature_3.9.15.qualifier.jar" id="org.springframework.ide.eclipse.mylyn.feature" version="3.9.15.qualifier">
+      <category name="Integrations / Spring IDE"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse.aeri.feature_3.9.15.qualifier.jar" id="org.springframework.ide.eclipse.aeri.feature" version="3.9.15.qualifier">
+      <category name="Extensions / Spring IDE"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse.feature.source_3.9.15.qualifier.jar" id="org.springframework.ide.eclipse.feature.source" version="3.9.15.qualifier">
+      <category name="Resources / Spring IDE"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse.boot.feature.source_3.9.15.qualifier.jar" id="org.springframework.ide.eclipse.boot.feature.source" version="3.9.15.qualifier">
+      <category name="Resources / Spring IDE"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse.boot.dash.feature.source_3.9.15.qualifier.jar" id="org.springframework.ide.eclipse.boot.dash.feature.source" version="3.9.15.qualifier">
+      <category name="Resources / Spring IDE"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse.xml.namespaces.feature.source_3.9.15.qualifier.jar" id="org.springframework.ide.eclipse.xml.namespaces.feature.source" version="3.9.15.qualifier">
+      <category name="Resources / Spring IDE"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse.aop.feature.source_3.9.15.qualifier.jar" id="org.springframework.ide.eclipse.aop.feature.source" version="3.9.15.qualifier">
+      <category name="Resources / Spring IDE"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse.batch.feature.source_3.9.15.qualifier.jar" id="org.springframework.ide.eclipse.batch.feature.source" version="3.9.15.qualifier">
+      <category name="Resources / Spring IDE"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse.osgi.feature.source_3.9.15.qualifier.jar" id="org.springframework.ide.eclipse.osgi.feature.source" version="3.9.15.qualifier">
+      <category name="Resources / Spring IDE"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse.security.feature.source_3.9.15.qualifier.jar" id="org.springframework.ide.eclipse.security.feature.source" version="3.9.15.qualifier">
+      <category name="Resources / Spring IDE"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse.webflow.feature.source_3.9.15.qualifier.jar" id="org.springframework.ide.eclipse.webflow.feature.source" version="3.9.15.qualifier">
+      <category name="Resources / Spring IDE"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse.autowire.feature.source_3.9.15.qualifier.jar" id="org.springframework.ide.eclipse.autowire.feature.source" version="3.9.15.qualifier">
+      <category name="Resources / Spring IDE"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse.ajdt.feature.source_3.9.15.qualifier.jar" id="org.springframework.ide.eclipse.ajdt.feature.source" version="3.9.15.qualifier">
+      <category name="Resources / Spring IDE"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse.mylyn.feature.source_3.9.15.qualifier.jar" id="org.springframework.ide.eclipse.mylyn.feature.source" version="3.9.15.qualifier">
+      <category name="Resources / Spring IDE"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse.integration.feature.source_3.9.15.qualifier.jar" id="org.springframework.ide.eclipse.integration.feature.source" version="3.9.15.qualifier">
+      <category name="Resources / Spring IDE"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse.roo.feature.source_3.9.15.qualifier.jar" id="org.springframework.ide.eclipse.roo.feature.source" version="3.9.15.qualifier">
+      <category name="Resources / Spring IDE"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse.maven.feature.source_3.9.15.qualifier.jar" id="org.springframework.ide.eclipse.maven.feature.source" version="3.9.15.qualifier">
+      <category name="Resources / Spring IDE"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse.data.feature.source_3.9.15.qualifier.jar" id="org.springframework.ide.eclipse.data.feature.source" version="3.9.15.qualifier">
+      <category name="Resources / Spring IDE"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse.aeri.feature.source_3.9.15.qualifier.jar" id="org.springframework.ide.eclipse.aeri.feature.source" version="3.9.15.qualifier">
+      <category name="Resources / Spring IDE"/>
+   </feature>
+   <feature url="features/org.springframework.ide.eclipse.xterm.feature_3.9.15.qualifier.jar" id="org.springframework.ide.eclipse.xterm.feature" version="3.9.15.qualifier">
+      <category name="Extensions / Spring IDE"/>
+   </feature>
+   <bundle id="org.springsource.ide.eclipse.commons.content.core" version="0.0.0"/>
+   <bundle id="org.springsource.ide.eclipse.commons.core" version="0.0.0"/>
+   <bundle id="org.springsource.ide.eclipse.commons.frameworks.core" version="0.0.0"/>
+   <bundle id="org.springsource.ide.eclipse.commons.frameworks.ui" version="0.0.0"/>
+   <bundle id="org.springsource.ide.eclipse.commons.ui" version="0.0.0"/>
+   <bundle id="org.springsource.ide.eclipse.commons.livexp" version="0.0.0"/>
+   <bundle id="org.springsource.ide.eclipse.commons.jdk_tools" version="0.0.0"/>
+   <bundle id="org.springframework.ide.eclipse.beans.ui.live" version="0.0.0"/>
+   <bundle id="io.projectreactor.reactor-core" version="0.0.0"/>
+   <bundle id="io.projectreactor.reactor-core.source" version="0.0.0"/>
+   <bundle id="org.reactivestreams.reactive-streams" version="0.0.0"/>
+   <bundle id="org.reactivestreams.reactive-streams.source" version="0.0.0"/>
+   <bundle id="org.bouncycastle.bcpg" version="0.0.0"/>
+   <bundle id="org.bouncycastle.bcpg.source" version="0.0.0"/>
+   <bundle id="org.bouncycastle.bcpkix" version="0.0.0"/>
+   <bundle id="org.bouncycastle.bcpkix.source" version="0.0.0"/>
+   <bundle id="org.bouncycastle.bcprov" version="0.0.0"/>
+   <bundle id="org.bouncycastle.bcprov.source" version="0.0.0"/>
+   <bundle id="com.hierynomus.sshj" version="0.0.0"/>
+   <bundle id="com.hierynomus.sshj.source" version="0.0.0"/>
+   <bundle id="com.jcraft.jzlib" version="0.0.0"/>
+   <bundle id="com.jcraft.jzlib.source" version="0.0.0"/>
+   <bundle id="net.i2p.crypto.eddsa" version="0.0.0"/>
+   <bundle id="net.i2p.crypto.eddsa.source" version="0.0.0"/>
+   <bundle id="com.google.protobuf" version="0.0.0"/>
+   <bundle id="org.eclipse.lsp4e" version="0.0.0"/>
+   <bundle id="org.eclipse.zest.core" version="0.0.0"/>
+   <bundle id="org.eclipse.zest.layouts" version="0.0.0"/>
+   <bundle id="com.google.gson" version="0.0.0"/>
+   <bundle id="org.eclipse.lsp4j" version="0.0.0"/>
+   <bundle id="org.eclipse.lsp4j.jsonrpc" version="0.0.0"/>
+   <bundle id="org.eclipse.xtext.xbase.lib" version="0.0.0"/>
+   <bundle id="com.fasterxml.jackson.core.jackson-annotations" version="0.0.0"/>
+   <bundle id="com.fasterxml.jackson.core.jackson-core" version="0.0.0"/>
+   <bundle id="com.fasterxml.jackson.core.jackson-databind" version="0.0.0"/>
+   <bundle id="org.aspectj.runtime" version="0.0.0"/>
+   <bundle id="org.aspectj.runtime.source" version="0.0.0"/>
+   <bundle id="org.aspectj.weaver" version="0.0.0"/>
+   <bundle id="javax.activation" version="0.0.0"/>
+   <bundle id="javax.activation.source" version="0.0.0"/>
+   <bundle id="javax.annotation" version="0.0.0"/>
+   <bundle id="javax.annotation.source" version="0.0.0"/>
+   <bundle id="javax.el" version="0.0.0"/>
+   <bundle id="javax.el.source" version="0.0.0"/>
+   <bundle id="javax.inject" version="0.0.0"/>
+   <bundle id="javax.inject.source" version="0.0.0"/>
+   <bundle id="javax.jms" version="0.0.0"/>
+   <bundle id="javax.jms.source" version="0.0.0"/>
+   <bundle id="javax.validation" version="0.0.0"/>
+   <bundle id="javax.validation.source" version="0.0.0"/>
+   <bundle id="javax.ws.rs" version="0.0.0"/>
+   <bundle id="javax.xml.ws" version="0.0.0"/>
+   <bundle id="javax.xml.bind" version="0.0.0"/>
+   <bundle id="javax.xml.bind.source" version="0.0.0"/>
+   <bundle id="javax.xml.stream" version="0.0.0"/>
+   <bundle id="org.json" version="0.0.0"/>
+   <bundle id="edu.emory.mathcs.backport" version="0.0.0"/>
+   <bundle id="edu.emory.mathcs.backport.source" version="0.0.0"/>
+   <bundle id="org.aopalliance" version="0.0.0"/>
+   <bundle id="org.apache.commons.codec" version="0.0.0"/>
+   <bundle id="org.apache.commons.codec.source" version="0.0.0"/>
+   <bundle id="org.apache.commons.collections" version="0.0.0"/>
+   <bundle id="org.apache.commons.collections.source" version="0.0.0"/>
+   <bundle id="org.apache.commons.io" version="0.0.0"/>
+   <bundle id="org.apache.commons.io.source" version="0.0.0"/>
+   <bundle id="org.apache.commons.logging" version="0.0.0"/>
+   <bundle id="org.apache.commons.logging.source" version="0.0.0"/>
+   <bundle id="org.apache.httpcomponents.httpclient" version="0.0.0"/>
+   <bundle id="org.apache.httpcomponents.httpclient.source" version="0.0.0"/>
+   <bundle id="org.apache.httpcomponents.httpcore" version="0.0.0"/>
+   <bundle id="org.apache.httpcomponents.httpcore.source" version="0.0.0"/>
+   <bundle id="org.codehaus.jackson.core" version="0.0.0"/>
+   <bundle id="org.codehaus.jackson.core.source" version="0.0.0"/>
+   <bundle id="org.codehaus.jackson.mapper" version="0.0.0"/>
+   <bundle id="org.codehaus.jackson.mapper.source" version="0.0.0"/>
+   <bundle id="org.objectweb.asm" version="0.0.0"/>
+   <bundle id="org.objectweb.asm.source" version="0.0.0"/>
+   <bundle id="org.yaml.snakeyaml" version="0.0.0"/>
+   <bundle id="org.dadacoalition.yedit" version="0.0.0"/>
+   <bundle id="org.springframework.aop" version="0.0.0"/>
+   <bundle id="org.springframework.aop.source" version="0.0.0"/>
+   <bundle id="org.springframework.beans" version="0.0.0"/>
+   <bundle id="org.springframework.beans.source" version="0.0.0"/>
+   <bundle id="org.springframework.context" version="0.0.0"/>
+   <bundle id="org.springframework.context.source" version="0.0.0"/>
+   <bundle id="org.springframework.context.support" version="0.0.0"/>
+   <bundle id="org.springframework.context.support.source" version="0.0.0"/>
+   <bundle id="org.springframework.core" version="0.0.0"/>
+   <bundle id="org.springframework.core.source" version="0.0.0"/>
+   <bundle id="org.springframework.data.core" version="0.0.0"/>
+   <bundle id="org.springframework.data.core.source" version="0.0.0"/>
+   <bundle id="org.springframework.expression" version="0.0.0"/>
+   <bundle id="org.springframework.expression.source" version="0.0.0"/>
+   <bundle id="org.springframework.jdbc" version="0.0.0"/>
+   <bundle id="org.springframework.jdbc.source" version="0.0.0"/>
+   <bundle id="org.springframework.jms" version="0.0.0"/>
+   <bundle id="org.springframework.jms.source" version="0.0.0"/>
+   <bundle id="org.springframework.orm" version="0.0.0"/>
+   <bundle id="org.springframework.orm.source" version="0.0.0"/>
+   <bundle id="org.springframework.oxm" version="0.0.0"/>
+   <bundle id="org.springframework.oxm.source" version="0.0.0"/>
+   <bundle id="org.springframework.transaction" version="0.0.0"/>
+   <bundle id="org.springframework.transaction.source" version="0.0.0"/>
+   <bundle id="org.springframework.web" version="0.0.0"/>
+   <bundle id="org.springframework.web.source" version="0.0.0"/>
+   <bundle id="org.springframework.web.servlet" version="0.0.0"/>
+   <bundle id="org.springframework.web.servlet.source" version="0.0.0"/>
+   <bundle id="com.springsource.util.common" version="0.0.0"/>
+   <bundle id="com.springsource.util.common.source" version="0.0.0"/>
+   <category-def name="Core / Spring IDE" label="Core / Spring IDE"/>
+   <category-def name="Extensions / Spring IDE" label="Extensions / Spring IDE"/>
+   <category-def name="Integrations / Spring IDE" label="Integrations / Spring IDE"/>
+   <category-def name="Resources / Spring IDE" label="Resources / Spring IDE"/>
 </site>

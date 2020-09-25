@@ -92,7 +92,13 @@
 		id="org.springframework.ide.eclipse.data.feature" version="3.9.15.qualifier">
 		<category name="Extensions / Spring IDE" />
 	</feature>
-	
+
+	<feature 
+		url="features/org.springframework.ide.eclipse.xterm.feature_3.9.15.qualifier.jar"
+		id="org.springframework.ide.eclipse.xterm.feature" version="3.9.15.qualifier">
+      	<category name="Extensions (Incubation) / Spring IDE"/>
+   	</feature>
+
 	<!-- Extensions (Incubation) features -->	
 	<feature
 		url="features/org.springframework.ide.eclipse.autowire.feature_3.9.15.qualifier.jar"
@@ -100,12 +106,6 @@
 		<category name="Extensions (Incubation) / Spring IDE" />
 	</feature>
 	
-	<feature 
-		url="features/org.springframework.ide.eclipse.xterm.feature_3.9.15.qualifier.jar"
-		id="org.springframework.ide.eclipse.xterm.feature" version="3.9.15.qualifier">
-      	<category name="Extensions (Incubation) / Spring IDE"/>
-   	</feature>
-
 	<!-- Integration features -->
 	<feature
 		url="features/org.springframework.ide.eclipse.ajdt.feature_3.9.15.qualifier.jar"
