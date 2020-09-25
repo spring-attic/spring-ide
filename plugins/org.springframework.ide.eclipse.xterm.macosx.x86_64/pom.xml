@@ -14,11 +14,28 @@
 
 	<properties>
 		<tycho-version>1.5.1</tycho-version>
-		<archive-url>https://drive.google.com/uc?export=download&amp;id=10qjwVQbdF7uVxwjaLTLyfU5iE6BiFiPy</archive-url>
+		<archive-url>https://drive.google.com/uc?export=download&amp;id=1Qsb9MUGS0NNVJetlI_ptMX3sK86IacZo</archive-url>
 	</properties>
 
 	<build>
 		<plugins>
+					
+			<plugin>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>3.1.0</version>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>${project.basedir}</directory>
+							<includes>
+								<include>**/lib/**</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+					</filesets>
+				</configuration>				
+    		</plugin>
+		
 			<plugin>
 				<groupId>com.googlecode.maven-download-plugin</groupId>
 				<artifactId>download-maven-plugin</artifactId>
@@ -54,24 +71,7 @@
 						</environment>
 					</environments>
 				</configuration>
-			</plugin>
-			
-			<plugin>
-				<artifactId>maven-clean-plugin</artifactId>
-				<configuration>
-					<filesets>
-						<fileset>
-							<directory>lib</directory>
-							<includes>
-								<include>**/*</include>
-							</includes>
-							<followSymlinks>false</followSymlinks>
-						</fileset>
-					</filesets>
-				</configuration>				
-    		</plugin>
-
-			
+			</plugin>			
 
 		</plugins>
 	</build>
