@@ -1,6 +1,8 @@
 package org.springframework.ide.eclipse.xterm;
+import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
@@ -67,12 +69,12 @@ public class XtermPlugin extends AbstractUIPlugin {
 		}
 	}
 	
-	public CompletableFuture<String> xtermUrl() {
+	public CompletableFuture<String> xtermUrl(long timeout) {
 		return CompletableFuture.supplyAsync(() -> {
 			try {
-				return  serviceManager.serviceUrl();
+				return  serviceManager.serviceUrl(Duration.ofSeconds(10));
 			} catch (Throwable t) {
-				throw new IllegalStateException(t);
+				throw new CompletionException(t);
 			}
 		});
 	}

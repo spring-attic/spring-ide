@@ -1,7 +1,7 @@
 package org.springframework.ide.eclipse.xterm.views;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
 
@@ -9,6 +9,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -28,6 +29,10 @@ import org.springframework.ide.eclipse.boot.core.SimpleUriBuilder;
 import org.springframework.ide.eclipse.xterm.XtermPlugin;
 
 public class TerminalView extends ViewPart {
+	
+	private static final String DEFAULT_TERMINAL_ID = "default";
+	private static String ERROR_DIALOG_TITLE = "Error Opening Xterm";
+	private static String ERROR_DIALOG_MESSAGE = "Failed to determine if Xterm service is running.\n";
 
 	/**
 	 * The ID of the view as specified by the extension.
@@ -40,7 +45,7 @@ public class TerminalView extends ViewPart {
 
 	private Browser browser;
 	
-	private String terminalId = "default";
+	private String terminalId = DEFAULT_TERMINAL_ID;
 	
 	private final IPropertyChangeListener PROPERTY_LISTENER = new IPropertyChangeListener() {
 
@@ -67,7 +72,10 @@ public class TerminalView extends ViewPart {
 		browser = new Browser(parent, SWT.CHROMIUM);
 		makeActions();
 		contributeToActionBars();
-		navigateToTerminal(terminalId, null, ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString());
+		// Secondary id is present only for non-default Terminal views which are initialized with #startTerminal(...) call
+		if (getViewSite().getSecondaryId() == null) {
+			navigateToTerminal(terminalId, null, ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString());
+		}
 	}
 	
 	public CompletableFuture<Void> refresh() {
@@ -77,7 +85,7 @@ public class TerminalView extends ViewPart {
 	private CompletableFuture<Void> navigateToTerminal(final String terminalId, final String cmd, final String cwd) {
 		return CompletableFuture.runAsync(() -> {
 			try {
-				String serviceUrl = XtermPlugin.getDefault().xtermUrl().get(10, TimeUnit.SECONDS);
+				String serviceUrl = XtermPlugin.getDefault().xtermUrl(10_000).get();
 				if (Display.getCurrent() != null) {
 					if (browser != null && !browser.isDisposed() && terminalId.equals(TerminalView.this.terminalId)) {
 						browser.setUrl(createUrl(serviceUrl, terminalId, cmd, cwd));
@@ -93,8 +101,25 @@ public class TerminalView extends ViewPart {
 						});
 					}
 				}
-			} catch (Exception e) {
+			} catch (ExecutionException e) {
 				// TODO show error page in the browser
+				XtermPlugin.log(e);
+				if (e.getCause() != null) {
+					StringBuilder errorMessage = new StringBuilder(ERROR_DIALOG_MESSAGE);
+					errorMessage.append('\n');
+					errorMessage.append(e.getCause().getMessage());
+					if (Display.getCurrent() != null) {
+						MessageDialog.openError(Display.getCurrent().getActiveShell(), ERROR_DIALOG_TITLE, errorMessage.toString());
+					} else {
+						Display display = PlatformUI.getWorkbench().getDisplay();
+						if (display != null && !display.isDisposed()) {
+							display.asyncExec(() -> 
+								MessageDialog.openError(Display.getCurrent().getActiveShell(), ERROR_DIALOG_TITLE, errorMessage.toString())
+							);
+						}
+					}
+				}
+			} catch (InterruptedException e) {
 				XtermPlugin.log(e);
 			}
 		});

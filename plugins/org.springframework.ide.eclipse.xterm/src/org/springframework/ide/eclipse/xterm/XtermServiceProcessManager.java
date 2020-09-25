@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.time.Duration;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -62,14 +64,14 @@ public class XtermServiceProcessManager {
 		}
 	}
 	
-	synchronized private void waitUntilStarted() {
+	synchronized private void waitUntilStarted(Duration timeout) throws TimeoutException, InterruptedException {
+		long start = System.currentTimeMillis();
+		long timeoutMillis = timeout.toMillis();
 		do {
-			try {
-				Thread.sleep(150);
-			} catch (InterruptedException e) {
-				XtermPlugin.log(e);
-				this.port = INVALID_PORT;
+			if (System.currentTimeMillis() - start > timeoutMillis) {
+				throw new TimeoutException("Timed out waiting for Xterm service to start");
 			}
+			Thread.sleep(150);
 		} while (!isStarted(port));
 	}
 	
@@ -109,14 +111,19 @@ public class XtermServiceProcessManager {
 		process = null;
 	}
 	
-	synchronized String serviceUrl() throws IOException {
+	synchronized String serviceUrl(Duration timeout) throws Exception {
 		if (port == INVALID_PORT && process != null && process.isAlive()) {
 			process.destroy();
 			process = null;
 		}
 		if (process == null || !process.isAlive()) {
 			startProcess();
-			waitUntilStarted();
+			try {
+				waitUntilStarted(timeout);
+			} catch (Exception e) {
+				this.port = INVALID_PORT;
+				throw e;
+			}
 		}
 		return "http://localhost:" + port;
 	}
