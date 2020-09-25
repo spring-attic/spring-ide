@@ -442,7 +442,7 @@
 				<repository>
 					<id>chromium-binaries</id>
 					<layout>p2</layout>
-					<url>http://dl.maketechnology.io/chromium-cef/rls/repository</url>
+					<url>https://dl.maketechnology.io/chromium-cef/rls/repository</url>
 				</repository>
 			</repositories>
 		</profile>
