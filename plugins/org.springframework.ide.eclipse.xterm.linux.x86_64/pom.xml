@@ -10,11 +10,11 @@
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 	<packaging>eclipse-plugin</packaging>
-	<artifactId>org.springframework.ide.eclipse.xterm.macosx.x86_64</artifactId>
+	<artifactId>org.springframework.ide.eclipse.xterm.linux.x86_64</artifactId>
 
 	<properties>
 		<tycho-version>1.5.1</tycho-version>
-		<archive-url>https://drive.google.com/uc?export=download&amp;id=10qjwVQbdF7uVxwjaLTLyfU5iE6BiFiPy</archive-url>
+		<archive-url>https://drive.google.com/uc?export=download&amp;id=1PSwchZ-HhGNQ67Gr6ucq17h56s0GhUWI</archive-url>
 	</properties>
 
 	<build>
@@ -24,7 +24,7 @@
 				<artifactId>download-maven-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>fetch-node-xterm-macosx</id>
+						<id>fetch-node-xterm-linux</id>
 						<phase>generate-resources</phase>
 						<goals>
 							<goal>wget</goal>
@@ -47,8 +47,8 @@
 					<pomDependencies>ignore</pomDependencies>
 					<environments>
 						<environment>
-							<os>macosx</os>
-							<ws>cocoa</ws>
+							<os>linux</os>
+							<ws>gtk</ws>
 							<arch>x86_64</arch>
 						</environment>
 					</environments>
