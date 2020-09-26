@@ -7,7 +7,7 @@
       plugin="org.springframework.ide.eclipse">
 
    <description>
-     %description
+      %description
    </description>
 
    <copyright>
@@ -19,8 +19,9 @@
    </license>
 
    <requires>
-      <import feature="com.make.chromium.cef.feature" version="0.4.0.202005172227"/>
-      <import feature="org.springframework.ide.eclipse.boot.dash.feature" version="3.9.15.qualifier"/>
+      <import feature="com.make.chromium.cef.feature"/>
+      <import feature="org.eclipse.wildwebdeveloper.embedder.node.feature" version="0.1.1" match="greaterOrEqual"/>
+      <import feature="org.springframework.ide.eclipse.boot.dash.feature"/>
    </requires>
 
    <plugin

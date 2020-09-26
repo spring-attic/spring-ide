@@ -25,6 +25,8 @@ public class XtermServiceProcessManager {
 	
 	private static final int INVALID_PORT = -1;
 	
+	private static final String NODEJS_SYSTEM_PROPERTY = "org.springframework.xterm.nodejs";
+	
 	private HttpClient httpClient = HttpClientBuilder.create().build();
 	
 	private Process process;
@@ -44,8 +46,17 @@ public class XtermServiceProcessManager {
 			if (!serverJsFile.exists()) {
 				throw new IllegalStateException("Cannot find file " + serverJsFile + ". Cannot start xterm service!");
 			}
+			File nodeJs = null;
+			if (System.getProperty(NODEJS_SYSTEM_PROPERTY) != null) {
+				nodeJs = new File(System.getProperty(NODEJS_SYSTEM_PROPERTY));
+			} else {
+				nodeJs = NodeJSManager.getNodeJsLocation();
+			}
+			if (!nodeJs.exists()) {
+				throw new IllegalStateException("Cannot find NodeJS executable at '" + nodeJs + "'. Cannot start xterm service!");
+			}
 			ProcessBuilder builder = new ProcessBuilder(
-					NodeJSManager.getNodeJsLocation().toString(),
+					nodeJs.toString(),
 					serverJsFile.toString(),
 					"--server.port=" + port,
 					"--terminal.pty.shutdown=delay", // terminal pty process destroyed right after sockets closed
