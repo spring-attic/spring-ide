@@ -144,7 +144,7 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 	public List<App> fetchChildren() throws Exception {
 		Builder<App> builder = ImmutableList.builder();
 		if (client!=null) {
-			List<Image> images = JobUtil.interruptAfter(Duration.ofSeconds(15), 
+			List<Image> images = JobUtil.interruptAfter(Duration.ofSeconds(200), 
 					() -> client.listImagesCmd().withShowAll(true).exec()
 			);
 			synchronized (this) {
@@ -420,7 +420,9 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 				command.addAll(ImmutableList.of("CMD", "/C", "gradlew.bat", "bootBuildImage", "-x", "test"));
 			} 
 		} else {
-			if (Files.exists(directory.toPath().resolve("mvnw"))) {
+			if (Files.exists(directory.toPath().resolve("sts-docker-build.sh"))) {
+				command.addAll(ImmutableList.of("./sts-docker-build.sh"));
+			} else if (Files.exists(directory.toPath().resolve("mvnw"))) {
 				command.addAll(ImmutableList.of("./mvnw", "spring-boot:build-image", "-DskipTests"));
 			} else if (Files.exists(directory.toPath().resolve("gradlew"))) {
 				isMaven = false;
@@ -428,7 +430,7 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 			}	
 		}
 		if (command.isEmpty()) {
-			throw new IllegalStateException("Neither Gradle nor Maven wrapper was found!");
+			throw new IllegalStateException("Neither sts-docker-build.sh nor Gradle/Maven wrapper was found!");
 		}
 		boolean wantsDevtools = deployment().getSystemProperties().getOrDefault(DevtoolsUtil.REMOTE_SECRET_PROP, null)!=null;
 		if (wantsDevtools) {

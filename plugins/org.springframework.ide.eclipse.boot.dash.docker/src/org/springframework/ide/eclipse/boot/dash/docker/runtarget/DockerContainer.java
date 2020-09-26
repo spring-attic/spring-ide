@@ -131,6 +131,8 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 			return RunState.INACTIVE;
 		} else if ("paused".equals(state)) {
 			return RunState.PAUSED;
+		} else if ("created".equals(state)) {
+			return RunState.STARTING;
 		}
 		return RunState.UNKNOWN;
 	}
