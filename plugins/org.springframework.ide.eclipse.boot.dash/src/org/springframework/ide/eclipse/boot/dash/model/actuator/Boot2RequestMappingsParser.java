@@ -30,10 +30,10 @@ public class Boot2RequestMappingsParser implements RequestMappingsParser {
 			JSONArray rmArray = null;
 			if (mappings.has("dispatcherServlets")) {
 				// Regular Web starter endpoints RMs JMX beans format
-				rmArray = mappings.getJSONObject("dispatcherServlets").getJSONArray("dispatcherServlet");
+				rmArray = mappings.getJSONObject("dispatcherServlets").optJSONArray("dispatcherServlet");
 			} else if (mappings.has("dispatcherHandlers")) {
 				// WebFlux endpoints RMs JMX bean format
-				rmArray = mappings.getJSONObject("dispatcherHandlers").getJSONArray("webHandler");
+				rmArray = mappings.getJSONObject("dispatcherHandlers").optJSONArray("webHandler");
 			}
 
 			if (rmArray != null) {
