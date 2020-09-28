@@ -85,6 +85,8 @@ import com.google.common.collect.ImmutableSet;
 
 public class DockerApp extends AbstractDisposable implements App, ChildBearing, Deletable, ProjectRelatable, DesiredInstanceCount, SystemPropertySupport, LogSource, DevtoolsConnectable {
 
+	
+	
 	private static final String DOCKER_IO_LIBRARY = "docker.io/library/";
 	private static final String[] NO_STRINGS = new String[0];
 	private DockerClient client;
@@ -144,7 +146,7 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 	public List<App> fetchChildren() throws Exception {
 		Builder<App> builder = ImmutableList.builder();
 		if (client!=null) {
-			List<Image> images = JobUtil.interruptAfter(Duration.ofSeconds(200), 
+			List<Image> images = JobUtil.interruptAfter(Duration.ofSeconds(15), 
 					() -> client.listImagesCmd().withShowAll(true).exec()
 			);
 			synchronized (this) {

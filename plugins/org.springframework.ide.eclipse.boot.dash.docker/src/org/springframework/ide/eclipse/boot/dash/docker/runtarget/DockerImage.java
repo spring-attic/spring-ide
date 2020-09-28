@@ -92,14 +92,12 @@ public class DockerImage implements App, ChildBearing, Styleable, ProjectRelatab
 			List<Container> containers = JobUtil.interruptAfter(Duration.ofSeconds(15), 
 					() -> client.listContainersCmd()
 						.withShowAll(true)
+						.withAncestorFilter(ImmutableList.of(image.getId()))
 						.withLabelFilter(ImmutableMap.of(DockerApp.APP_NAME, app.getName()))
 						.exec()
 			);
-			//TODO: use 'ancestor' filter instead of this for loop to filter on image id
 			for (Container container : containers) {
-				if (container.getImageId().equals(image.getId())) {
-					builder.add(new DockerContainer(getTarget(), app, container));
-				}
+				builder.add(new DockerContainer(getTarget(), app, container));
 			}
 		}
 		return builder.build();

@@ -7,8 +7,8 @@
 	<classpathentry exported="true" kind="lib" path="dependency/commons-lang-2.6.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependency/docker-java-api-3.2.5.jar" sourcepath="/home/kdvolder/.m2/repository/com/github/docker-java/docker-java-api/3.2.5/docker-java-api-3.2.5-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependency/docker-java-core-3.2.5.jar" sourcepath="/home/kdvolder/.m2/repository/com/github/docker-java/docker-java-core/3.2.5/docker-java-core-3.2.5-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependency/docker-java-transport-3.2.5.jar"/>
-	<classpathentry exported="true" kind="lib" path="dependency/docker-java-transport-zerodep-3.2.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependency/docker-java-transport-3.2.5.jar" sourcepath="/home/kdvolder/.m2/repository/com/github/docker-java/docker-java-transport/3.2.5/docker-java-transport-3.2.5-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="dependency/docker-java-transport-zerodep-3.2.5.jar" sourcepath="/home/kdvolder/.m2/repository/com/github/docker-java/docker-java-transport-zerodep/3.2.5/docker-java-transport-zerodep-3.2.5-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependency/guava-19.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependency/jackson-annotations-2.11.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="dependency/jackson-core-2.11.2.jar"/>

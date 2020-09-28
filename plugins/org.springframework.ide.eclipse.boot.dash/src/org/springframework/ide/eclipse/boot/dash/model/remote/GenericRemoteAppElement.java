@@ -149,8 +149,8 @@ public class GenericRemoteAppElement extends WrappingBootDashElement<String> imp
 					}
 				}
 				return builder.build();
-			} catch (TimeoutException e) {
-				//ignore, expected error
+//			} catch (TimeoutException e) {
+//				//ignore, expected error
 			} catch (Exception e) {
 				Log.log(e);
 			}
