@@ -351,7 +351,7 @@ public class DockerApp extends AbstractDisposable implements App, ChildBearing, 
 			//appContext.showConsole(c.id());
 			
 			client.startContainerCmd(c.getId()).exec();
-			containerLogConnection.setValue(DockerContainer.connectLog(client, c.getId(), console, true));
+			containerLogConnection.setValue(DockerContainer.connectLog(target, c.getId(), console, true));
 		}
 	}
 

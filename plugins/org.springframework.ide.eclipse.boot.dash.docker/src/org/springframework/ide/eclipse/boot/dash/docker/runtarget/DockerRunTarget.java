@@ -132,6 +132,19 @@ implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentT
 			}
 		}
 	}
+	
+	/**
+	 * Obtain a client instance for 'exclusive' use. This creates a new client instance which only belongs 
+	 * to whoever called this method.  It is the responsibility of the caller
+	 * to close the instance when it is no longer in use.
+	 */
+	public DockerClient getDedicatedClientInstance() {
+		if (isConnected()) {
+			return DockerRunTargetType.createDockerClient(params.getUri());
+		}
+		return null;
+	}
+	
 
 	@Override
 	public void performDeployment(Set<IProject> projects, RunState runOrDebug) throws Exception {
@@ -191,4 +204,5 @@ implements RemoteRunTarget<DockerClient, DockerTargetParams>, ProjectDeploymentT
 		}
 		return null;
 	}
+
 }

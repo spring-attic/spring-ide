@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IProject;
@@ -410,12 +411,14 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 
 	@Override
 	public LogConnection connectLog(AppConsole logConsole, boolean includeHistory) {
-		DockerClient client = target.getClient();
-		if (client != null) {
-			return connectLog(client, container.getId(), logConsole, includeHistory);
-		}
-		return null;
+		return connectLog(target, container.getId(), logConsole, includeHistory);
 	}
+	
+	/**
+	 * For debugging purposes. Keep track of number of active log handlers. So we
+	 * can log this info and check whether log handlers are closed properly.
+	 */
+	private static AtomicInteger activeLogHandlers = new AtomicInteger();
 	
 	private static class LogHandler implements ResultCallback<Frame>{
 
@@ -439,9 +442,13 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 
 		private final CompletableFuture<Closeable> closeable = new CompletableFuture<Closeable>();
 
-		public LogHandler(AppConsole console) {
+		private DockerClient dedicatedClient;
+
+		public LogHandler(DockerClient dedicatedClient, AppConsole console) {
+			this.dedicatedClient = dedicatedClient;
 			consoleOut = console.getOutputStream(LogType.APP_OUT);
 			consoleErr = console.getOutputStream(LogType.APP_OUT);
+			Log.info("Creating log handler. Now active: "+activeLogHandlers.incrementAndGet());
 		}
 
 		@Override
@@ -460,6 +467,12 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 				try {
 					consoleErr.close();
 				} catch (IOException e) {
+				}
+				try {
+					Log.info("Closing log handler. Now active: "+activeLogHandlers.decrementAndGet());
+					dedicatedClient.close();
+				} catch (IOException e) {
+					//ignore
 				}
 			}
 		}
@@ -502,63 +515,26 @@ public class DockerContainer implements App, RunStateProvider, JmxConnectable, S
 		}
 	}
 	
-	public static LogConnection connectLog(DockerClient client, String containerId, AppConsole console, boolean includeHistory) {
-		LogContainerCmd cmd = client.logContainerCmd(containerId)
-				.withStdOut(true).withStdErr(true).withFollowStream(true);
-		
-		if (!includeHistory) {
-			cmd = cmd.withSince((int)Instant.now().getEpochSecond());
+	public static LogConnection connectLog(DockerRunTarget target, String containerId, AppConsole console, boolean includeHistory) {
+		DockerClient client = target.getDedicatedClientInstance();
+		//Uses a dedicated client for log streaming because java docker client will eventually run out of connections in connection pool
+		//otherwise. 
+		//See: 
+		//  - https://www.pivotaltracker.com/n/projects/1346850
+		//  - https://github.com/docker-java/docker-java/issues/1466
+		if (client!=null) {
+			LogContainerCmd cmd = client.logContainerCmd(containerId)
+					.withStdOut(true).withStdErr(true).withFollowStream(true);
+			
+			if (!includeHistory) {
+				cmd = cmd.withSince((int)Instant.now().getEpochSecond());
+			}
+			
+			LogHandler logHandler = cmd.exec(new LogHandler(client, console));
+			return logHandler.connection;
 		}
-		
-		LogHandler logHandler = cmd.exec(new LogHandler(console));
-		return logHandler.connection;
+		return null;
 	}
-//			
-//			LogStream appOutput = client.logs(containerId, logParams.toArray(new LogsParam[logParams.size()]));
-//			return new LogConnection() {
-//
-//				private boolean isClosed = false;
-//				private OutputStream consoleOut = console.getOutputStream(LogType.APP_OUT);
-//				private OutputStream consoleErr = console.getOutputStream(LogType.APP_OUT);
-//				
-//				{
-//					JobUtil.runQuietlyInJob("Tracking output for docker container "+containerId, mon -> {
-//						try {
-//							appOutput.attach(consoleOut, consoleErr);
-//						} finally {
-//							isClosed = true;
-//						}
-//					});
-//
-//				}
-//				
-//				@Override
-//				public void dispose() {
-//					try {
-//						appOutput.close(); 
-//							//Warning... appOutput.close seems to have no effect. This seems like the right way to disconnect from
-//							// docker log stream... but it doesn't work.
-//							//So we also close the consoleOut as a 'backup plan'. When later on more messages are streamed then the
-//							// closed console output stream will throw an IOExcption. Since this is called as a 'callback' from
-//							// appOutput.attach. that interrupts the job running appOutput.attach(consoleOut, consoleErr); and allows
-//							// it to terminate as it should, when connection is closed.
-//						consoleOut.close();
-//						consoleErr.close();
-//					} catch (IOException e) {
-//						Log.log(e);
-//					}
-//				}
-//				
-//				@Override
-//				public boolean isClosed() {
-//					return isClosed;
-//				}
-//			};
-//		} catch (Exception e) {
-//			Log.log(e);
-//		}			
-//		return null;
-//	}
 
 	@Override
 	public ImageDescriptor getRunStateIcon(RunState runState) {
