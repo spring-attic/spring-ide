@@ -42,7 +42,7 @@ public class BootPreferences implements IPreferenceChangeListener {
 	public static final String PREF_BOOT_FAST_STARTUP_DEFAULT = "org.springframework.ide.eclipse.boot.DefaultFastStartup";
 	public static final String PREF_BOOT_FAST_STARTUP_REMIND_MESSAGE = "org.springframework.ide.eclipse.boot.FastStartupRemindMessage";
 	public static final String PREF_BOOT_FAST_STARTUP_JVM_ARGS = "org.springframework.ide.eclipse.boot.FastStartupJvmArgs";
-	public static final String BOOT_FAST_STARTUP_DEFAULT_JVM_ARGS = "-noverify -XX:TieredStopAtLevel=1";
+	public static final String BOOT_FAST_STARTUP_DEFAULT_JVM_ARGS = "-XX:TieredStopAtLevel=1";
 
 	// Boot Preference Page ID
 	public static final String BOOT_PREFERENCE_PAGE_ID = "org.springframework.ide.eclipse.boot.ui.preferences.BootPreferencePage";
