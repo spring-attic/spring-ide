@@ -43,7 +43,7 @@ public class XtermServiceProcessManager {
 		url = FileLocator.toFileURL(url);
 		try {
 			File serverJsFile = new File(url.toURI());
-			if (!serverJsFile.exists()) {
+			if (serverJsFile == null || !serverJsFile.exists()) {
 				throw new IllegalStateException("Cannot find file " + serverJsFile + ". Cannot start xterm service!");
 			}
 			File nodeJs = null;
@@ -52,7 +52,7 @@ public class XtermServiceProcessManager {
 			} else {
 				nodeJs = NodeJSManager.getNodeJsLocation();
 			}
-			if (!nodeJs.exists()) {
+			if (nodeJs == null || !nodeJs.exists()) {
 				throw new IllegalStateException("Cannot find NodeJS executable at '" + nodeJs + "'. Cannot start xterm service!");
 			}
 			ProcessBuilder builder = new ProcessBuilder(
