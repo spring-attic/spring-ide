@@ -21,7 +21,6 @@
    <requires>
       <import feature="com.make.chromium.cef.feature"/>
       <import feature="org.eclipse.wildwebdeveloper.embedder.node.feature" version="0.1.1" match="greaterOrEqual"/>
-      <import feature="org.springframework.ide.eclipse.boot.dash.feature"/>
    </requires>
 
    <plugin
