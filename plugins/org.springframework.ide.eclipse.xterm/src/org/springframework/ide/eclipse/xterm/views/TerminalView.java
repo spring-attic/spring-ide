@@ -31,7 +31,10 @@ import org.eclipse.swt.graphics.RGBA;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.themes.ITheme;
@@ -39,9 +42,12 @@ import org.springframework.ide.eclipse.xterm.XtermPlugin;
 
 public class TerminalView extends ViewPart {
 	
+	private static final String CWD_PARAM = "cwd";
+	private static final String CMD_PARAM = "cmd";
+	private static final String TERMINAL_ID_PARAM = "terminal";
 	private static final String DEFAULT_TERMINAL_ID = "default";
-	private static String ERROR_DIALOG_TITLE = "Error Opening Xterm";
-	private static String ERROR_DIALOG_MESSAGE = "Failed to determine if Xterm service is running.\n";
+	private static final String ERROR_DIALOG_TITLE = "Error Opening Xterm";
+	private static final String ERROR_DIALOG_MESSAGE = "Failed to determine if Xterm service is running.\n";
 
 	/**
 	 * The ID of the view as specified by the extension.
@@ -55,6 +61,12 @@ public class TerminalView extends ViewPart {
 	private Browser browser;
 	
 	private String terminalId = DEFAULT_TERMINAL_ID;
+
+	private String cmd;
+	
+	private String cwd;
+	
+	private boolean isNewView;
 	
 	private final IPropertyChangeListener PROPERTY_LISTENER = new IPropertyChangeListener() {
 
@@ -81,12 +93,50 @@ public class TerminalView extends ViewPart {
 		browser = new Browser(parent, SWT.CHROMIUM);
 		makeActions();
 		contributeToActionBars();
-		// Secondary id is present only for non-default Terminal views which are initialized with #startTerminal(...) call
-		if (getViewSite().getSecondaryId() == null) {
-			navigateToTerminal(terminalId, null, ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString());
+		if (isNewView) {
+			// Non-default Xterm views are initialized with #startTerminal(...) call which will use Xterm service with the right parameters
+			if (isDefault()) {
+				navigateToTerminal(terminalId, null, ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString());
+			}
+		} else {
+			navigateToTerminal(terminalId, cmd, cwd == null ? ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString() : cwd);
 		}
 	}
 	
+	private boolean isDefault() {
+		// Secondary id is present only for non-default Terminal views
+		return getViewSite().getSecondaryId() == null;
+	}
+	
+	@Override
+	public void saveState(IMemento memento) {
+		if (terminalId != null) {
+			memento.putString(TERMINAL_ID_PARAM, terminalId);
+			if (cmd != null) {
+				memento.putString(CMD_PARAM, cmd);
+			}
+			if (cwd != null) {
+				memento.putString(CWD_PARAM, cwd);
+			}
+		}
+		super.saveState(memento);
+	}
+
+	@Override
+	public void init(IViewSite site, IMemento memento) throws PartInitException {
+		super.init(site, memento);
+		isNewView = memento == null;
+		if (memento != null) {
+			terminalId = memento.getString(TERMINAL_ID_PARAM);
+			if (terminalId == null) {
+				terminalId = DEFAULT_TERMINAL_ID;
+			} else {
+				cmd = memento.getString(CMD_PARAM);
+				cwd = memento.getString(CWD_PARAM);
+			}
+		}
+	}
+
 	public CompletableFuture<Void> refresh() {
 		return navigateToTerminal(terminalId, null, ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString());
 	}
@@ -136,6 +186,8 @@ public class TerminalView extends ViewPart {
 	
 	public CompletableFuture<Void> startTerminal(String terminalId, String cmd, String cwd) {
 		this.terminalId = terminalId;
+		this.cmd = cmd;
+		this.cwd = cwd;
 		return navigateToTerminal(terminalId, cmd, cwd);
 	}
 	
@@ -158,13 +210,13 @@ public class TerminalView extends ViewPart {
 		urlBuilder.addParameter("fontSize", String.valueOf(font.getFontData()[0].getHeight()));
 		
 		if (cmd != null && !cmd.isEmpty()) {
-			urlBuilder.addParameter("cmd", cmd);
+			urlBuilder.addParameter(CMD_PARAM, cmd);
 		} else {
-			urlBuilder.addParameter("cmd",
+			urlBuilder.addParameter(CMD_PARAM,
 					XtermPlugin.getDefault().getPreferenceStore().getString(XtermPlugin.PREFS_DEFAULT_SHELL_CMD));
 		}
 		if (cwd != null && !cwd.isEmpty()) {
-			urlBuilder.addParameter("cwd", cwd);
+			urlBuilder.addParameter(CWD_PARAM, cwd);
 		}
 		
 		return urlBuilder.toString();
