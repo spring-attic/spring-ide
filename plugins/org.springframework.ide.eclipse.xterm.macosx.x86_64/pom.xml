@@ -14,7 +14,7 @@
 
 	<properties>
 		<tycho-version>1.5.1</tycho-version>
-		<archive-url>https://drive.google.com/uc?export=download&amp;id=1Qsb9MUGS0NNVJetlI_ptMX3sK86IacZo</archive-url>
+		<archive-url>https://dist.springsource.com/release/TOOLS/node-xterm/node-xterm-0.0.2-macosx-x86_64.zip</archive-url>
 	</properties>
 
 	<build>
