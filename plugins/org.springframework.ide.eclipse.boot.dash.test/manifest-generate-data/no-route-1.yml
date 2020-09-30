@@ -1,5 +1,0 @@
----
-applications:
-- name: app
-  memory: 512M
-  no-route: true

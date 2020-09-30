@@ -1,8 +1,0 @@
----
-domains:
-- springsource.org
-- spring.framework
-applications:
-- name: app
-  host: my-app
-  domain: spring.io

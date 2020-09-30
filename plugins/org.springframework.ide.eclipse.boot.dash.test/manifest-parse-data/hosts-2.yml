@@ -1,4 +1,0 @@
----
-host: my-app
-applications:
-- name: app

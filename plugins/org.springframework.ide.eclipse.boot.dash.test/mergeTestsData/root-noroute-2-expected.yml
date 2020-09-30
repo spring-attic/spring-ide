@@ -1,7 +1,0 @@
----
-applications:
-- name: another-app
-  host: my-app
-- name: app
-  no-route: true
-  memory: 2048M

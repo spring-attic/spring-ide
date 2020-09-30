@@ -1,6 +1,0 @@
----
-applications:
-- name: app
-  host: my-app
-  domain: spring.io
-  command: mycommand

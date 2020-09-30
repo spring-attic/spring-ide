@@ -1,7 +1,0 @@
----
-applications:
-- name: app
-  no-route: true
-  host: my-app
-  domains:
-  - springsource.org 

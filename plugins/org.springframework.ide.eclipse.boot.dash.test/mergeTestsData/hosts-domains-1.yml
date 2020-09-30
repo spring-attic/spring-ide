@@ -1,5 +1,0 @@
----
-applications:
-- name: app
-  memory: 2048M
-  no-hostname: true

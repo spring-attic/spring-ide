@@ -1,5 +1,0 @@
----
-host: my-super-app
-applications:
-- name: app
-  host: my-app

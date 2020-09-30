@@ -1,6 +1,0 @@
----
-applications:
-- name: app
-  no-route: true
-  memory: 2048M
-  

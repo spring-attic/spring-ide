@@ -1,5 +1,0 @@
----
-no-hostname: true
-applications:
-- name: app
-  host: my-app

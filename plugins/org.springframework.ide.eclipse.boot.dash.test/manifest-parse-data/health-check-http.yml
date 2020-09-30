@@ -1,7 +1,0 @@
----
-applications:
-- name: app
-  health-check-type: http
-  health-check-http-endpoint: /testhealth
-  routes: 
-    - route: my-route.springsource.org

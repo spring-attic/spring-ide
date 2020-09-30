@@ -89,36 +89,12 @@
 
 	<modules>
 
-		<!-- gradle -->
-		<module>plugins/org.springframework.ide.eclipse.buildship30</module>
-
 		<!-- boot -->
-		<module>plugins/org.springframework.ide.eclipse.boot</module>
-		<module>plugins/org.springframework.ide.eclipse.boot.test</module>
-		<module>plugins/org.springframework.ide.eclipse.boot.dash</module>
-		<module>plugins/org.springframework.ide.eclipse.boot.dash.azure</module>
-		<module>plugins/org.springframework.ide.eclipse.boot.dash.cf</module>
-		<module>plugins/org.springframework.ide.eclipse.docker.client</module>
-		<module>plugins/org.springframework.ide.eclipse.boot.dash.docker</module>
-		<module>plugins/org.springframework.ide.eclipse.boot.dash.test</module>
-		<module>plugins/org.springframework.ide.eclipse.boot.launch</module>
 		<module>plugins/org.springframework.ide.eclipse.boot.launch.livebean</module>
-		<module>plugins/org.springframework.ide.eclipse.boot.launch.test</module>
-		<module>plugins/org.springframework.ide.eclipse.boot.refactoring</module>
-		<module>plugins/org.springframework.ide.eclipse.boot.refactoring.test</module>
 		<module>plugins/org.springframework.ide.eclipse.boot.properties.editor</module>
 		<module>plugins/org.springframework.ide.eclipse.boot.properties.editor.yaml</module>
 		<module>plugins/org.springframework.ide.eclipse.boot.properties.editor.test</module>
-		<module>plugins/org.springframework.ide.eclipse.boot.templates</module>
-		<module>plugins/org.springframework.ide.eclipse.boot.validation</module>
-		<module>plugins/org.springframework.ide.eclipse.editor.support</module>
-        <module>plugins/org.springsource.ide.eclipse.commons.cloudfoundry.client.v2</module> <!--TODO: move to commons -->
-		<module>plugins/org.springframework.ide.eclipse.boot.wizard</module>
-		<module>plugins/org.springframework.ide.eclipse.boot.restart</module>
-		<module>plugins/org.springframework.ide.eclipse.maven.pom</module>
-		<module>plugins/org.springframework.ide.eclipse.maven.pom.tests</module>
         <module>features/org.springframework.ide.eclipse.boot.feature</module>
-        <module>features/org.springframework.ide.eclipse.boot.dash.feature</module>
         
 		<!-- core -->
 		<module>plugins/org.springframework.ide.eclipse</module>
@@ -126,10 +102,8 @@
 		<module>plugins/org.springframework.ide.eclipse.core</module>
 		<module>plugins/org.springframework.ide.eclipse.beans.core</module>
 		<module>plugins/org.springframework.ide.eclipse.beans.core.tests</module>
-		<module>plugins/org.springframework.ide.eclipse.xml.namespaces</module>
 		<module>plugins/org.springframework.ide.eclipse.xml.namespaces.tests</module>
 		<module>plugins/org.springframework.ide.eclipse.xml.namespaces.manager</module>
-        <module>features/org.springframework.ide.eclipse.xml.namespaces.feature</module>
 		<!--
 		<module>plugins/org.springframework.ide.eclipse.beans.core.groovy.tests</module>
 		 -->
@@ -138,7 +112,6 @@
 		<module>plugins/org.springframework.ide.eclipse.beans.ui</module>
 		<module>plugins/org.springframework.ide.eclipse.beans.ui.editor</module>
 		<module>plugins/org.springframework.ide.eclipse.beans.ui.graph</module>
-		<module>plugins/org.springframework.ide.eclipse.beans.ui.live</module>
 		<module>plugins/org.springframework.ide.eclipse.beans.ui.livegraph</module>
 		<module>plugins/org.springframework.ide.eclipse.beans.ui.refactoring</module>
 		<module>plugins/org.springframework.ide.eclipse.beans.ui.search</module>
@@ -218,9 +191,6 @@
 		<module>plugins/org.springframework.ide.eclipse.maven</module>
 		<module>features/org.springframework.ide.eclipse.maven.feature</module>
 		
-		<!-- import statics -->
-		<module>plugins/org.springframework.ide.eclipse.imports</module>
-
 		<!-- AERI integration -->
 		<module>plugins/org.springframework.ide.eclipse.aeri</module>
 		<module>features/org.springframework.ide.eclipse.aeri.feature</module>
@@ -240,9 +210,7 @@
 		<module>features/org.springframework.ide.eclipse.roo.feature.source</module>
 		<module>features/org.springframework.ide.eclipse.data.feature.source</module>
         <module>features/org.springframework.ide.eclipse.boot.feature.source</module>
-        <module>features/org.springframework.ide.eclipse.boot.dash.feature.source</module>
         <module>features/org.springframework.ide.eclipse.aeri.feature.source</module>
-        <module>features/org.springframework.ide.eclipse.xml.namespaces.feature.source</module>
         
 		<!-- site -->
 		<module>releng/org.springframework.ide.eclipse.site</module>
@@ -353,7 +321,7 @@
 				<repository>
 					<id>sts4</id>
 					<layout>p2</layout>
-					<url>https://dist.springsource.com/${dist.type}/TOOLS/sts4-language-servers/${dist.pathpostfix}</url>
+					<url>https://dist.springsource.com/${dist.type}/TOOLS/sts4/${dist.pathpostfix}/e4.16</url>
 				</repository>
 			</repositories>
 		</profile>
@@ -412,7 +380,7 @@
 				<repository>
 					<id>sts4</id>
 					<layout>p2</layout>
-					<url>https://dist.springsource.com/${dist.type}/TOOLS/sts4-language-servers/${dist.pathpostfix}</url>
+					<url>https://dist.springsource.com/${dist.type}/TOOLS/sts4/${dist.pathpostfix}/e4.17</url>
 				</repository>
 			</repositories>
 		</profile>

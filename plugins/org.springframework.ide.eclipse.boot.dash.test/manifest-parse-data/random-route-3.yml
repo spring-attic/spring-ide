@@ -1,4 +1,0 @@
----
-applications:
-- name: app
-  random-route: true

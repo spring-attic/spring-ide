@@ -1,5 +1,0 @@
----
-applications:
-- name: app
-  host: test-app
-  domain: springsource.org
