@@ -219,60 +219,6 @@
 	<profiles>
 	
 		<profile>
-			<id>e415</id>
-			<properties>
-				<p2.repository.name>Spring IDE for Eclipse 4.15</p2.repository.name>
-			</properties>
-			<repositories>
-				<repository>
-					<id>2020-03</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/releases/2020-03/</url>
-				</repository>
-				<repository>
-					<id>orbit</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/tools/orbit/downloads/drops/R20200224183213/repository</url>
-				</repository>
-				<repository>
-					<id>ajdt</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/tools/ajdt/410/dev/update</url>
-				</repository>
-				<repository>
-					<id>swtbot</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/technology/swtbot/releases/latest/</url>
-				</repository>
-				<repository>
-		  			<id>groovy</id>
-		  			<layout>p2</layout>
-		  			<url>https://dist.springsource.org/snapshot/GRECLIPSE/e4.7/</url>
-				</repository>
-				<repository>
-		  			<id>buildship2-for-testing</id>
-		  			<layout>p2</layout>
-		  			<url>https://download.eclipse.org/buildship/updates/e48/releases/2.x</url>
-				</repository>
-				<repository>
-		  			<id>buildship3-for-testing</id>
-		  			<layout>p2</layout>
-		  			<url>https://download.eclipse.org/buildship/updates/e413/releases/3.x/</url>
-				</repository>
-				<repository>
-					<id>eclipse-integration-commons</id>
-					<layout>p2</layout>
-					<url>https://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}</url>
-				</repository>
-				<repository>
-					<id>sts4</id>
-					<layout>p2</layout>
-					<url>https://dist.springsource.com/${dist.type}/TOOLS/sts4-language-servers/${dist.pathpostfix}</url>
-				</repository>
-			</repositories>
-		</profile>
-
-		<profile>
 			<id>e416</id>
 			<properties>
 				<p2.repository.name>Spring IDE for Eclipse 4.16</p2.repository.name>
@@ -338,11 +284,6 @@
 					<url>https://download.eclipse.org/releases/2020-09/</url>
 				</repository>
 				<repository>
-					<id>2020-09-staging</id>
-					<layout>p2</layout>
-					<url>https://download.eclipse.org/staging/2020-09/</url>
-				</repository>
-				<repository>
 					<id>orbit</id>
 					<layout>p2</layout>
 					<url>https://download.eclipse.org/tools/orbit/downloads/drops/R20200831200620/repository</url>
@@ -381,6 +322,65 @@
 					<id>sts4</id>
 					<layout>p2</layout>
 					<url>https://dist.springsource.com/${dist.type}/TOOLS/sts4/${dist.pathpostfix}/e4.17</url>
+				</repository>
+			</repositories>
+		</profile>
+
+		<profile>
+			<id>e418</id>
+			<properties>
+				<p2.repository.name>Spring IDE for Eclipse 4.18</p2.repository.name>
+			</properties>
+			<repositories>
+				<repository>
+					<id>2020-09</id>
+					<layout>p2</layout>
+					<url>https://download.eclipse.org/releases/2020-12/</url>
+				</repository>
+				<repository>
+					<id>2020-09-staging</id>
+					<layout>p2</layout>
+					<url>https://download.eclipse.org/staging/2020-12/</url>
+				</repository>
+				<repository>
+					<id>orbit</id>
+					<layout>p2</layout>
+					<url>https://download.eclipse.org/tools/orbit/downloads/drops/S20200826182026/repository</url>
+				</repository>
+				<repository>
+					<id>ajdt</id>
+					<layout>p2</layout>
+					<url>https://download.eclipse.org/tools/ajdt/410/dev/update</url>
+				</repository>
+				<repository>
+					<id>swtbot</id>
+					<layout>p2</layout>
+					<url>https://download.eclipse.org/technology/swtbot/releases/latest/</url>
+				</repository>
+				<repository>
+		  			<id>groovy</id>
+		  			<layout>p2</layout>
+		  			<url>https://dist.springsource.org/snapshot/GRECLIPSE/e4.7/</url>
+				</repository>
+				<repository>
+		  			<id>buildship2-for-testing</id>
+		  			<layout>p2</layout>
+		  			<url>https://download.eclipse.org/buildship/updates/e48/releases/2.x</url>
+				</repository>
+				<repository>
+		  			<id>buildship3-for-testing</id>
+		  			<layout>p2</layout>
+		  			<url>https://download.eclipse.org/buildship/updates/e413/releases/3.x/</url>
+				</repository>
+				<repository>
+					<id>eclipse-integration-commons</id>
+					<layout>p2</layout>
+					<url>https://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}</url>
+				</repository>
+				<repository>
+					<id>sts4</id>
+					<layout>p2</layout>
+					<url>https://dist.springsource.com/${dist.type}/TOOLS/sts4/${dist.pathpostfix}/e4.18</url>
 				</repository>
 			</repositories>
 		</profile>
