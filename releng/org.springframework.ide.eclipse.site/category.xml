@@ -181,15 +181,24 @@
 		<category-def name="Resources / Spring IDE" label="Resources / Spring IDE" />
 		
 		<bundle id="org.springsource.ide.eclipse.commons.boot.ls" version="0.0.0"/>
+		<bundle id="org.springsource.ide.eclipse.commons.boot.ls.source" version="0.0.0"/>
 		<bundle id="org.springsource.ide.eclipse.commons.content.core" version="0.0.0"/>
+		<bundle id="org.springsource.ide.eclipse.commons.content.core.source" version="0.0.0"/>
 		<bundle id="org.springsource.ide.eclipse.commons.core" version="0.0.0"/>
+		<bundle id="org.springsource.ide.eclipse.commons.core.source" version="0.0.0"/>
 		<bundle id="org.springsource.ide.eclipse.commons.frameworks.core" version="0.0.0"/>
+		<bundle id="org.springsource.ide.eclipse.commons.frameworks.core.source" version="0.0.0"/>
 		<bundle id="org.springsource.ide.eclipse.commons.frameworks.ui" version="0.0.0"/>
+		<bundle id="org.springsource.ide.eclipse.commons.frameworks.ui.source" version="0.0.0"/>
 		<bundle id="org.springsource.ide.eclipse.commons.ui" version="0.0.0"/>
+		<bundle id="org.springsource.ide.eclipse.commons.ui.source" version="0.0.0"/>
 		<bundle id="org.springsource.ide.eclipse.commons.livexp" version="0.0.0"/>
+		<bundle id="org.springsource.ide.eclipse.commons.livexp.source" version="0.0.0"/>
 		<bundle id="org.springsource.ide.eclipse.commons.jdk_tools" version="0.0.0"/>
+		<bundle id="org.springsource.ide.eclipse.commons.jdk_tools.source" version="0.0.0"/>
 
 		<bundle id="org.springframework.ide.eclipse.beans.ui.live" version="0.0.0"/>
+		<bundle id="org.springframework.ide.eclipse.beans.ui.live.source" version="0.0.0"/>
 
 		<bundle id="io.projectreactor.reactor-core" version="0.0.0"/>
 		<bundle id="io.projectreactor.reactor-core.source" version="0.0.0"/>
