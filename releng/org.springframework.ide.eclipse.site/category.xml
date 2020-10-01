@@ -99,18 +99,17 @@
 			id="org.springframework.ide.eclipse.boot.feature.source" version="0.0.0">
 			<category name="Resources / Spring IDE" />
 		</feature>
-<!--
+
 		<feature
 			id="org.springframework.ide.eclipse.boot.dash.feature.source" version="0.0.0">
 			<category name="Resources / Spring IDE" />
 		</feature>
--->
-<!--
+
 		<feature
 			id="org.springframework.ide.eclipse.xml.namespaces.feature.source" version="0.0.0">
 			<category name="Resources / Spring IDE" />
 		</feature>
--->	
+
 		<feature
 			id="org.springframework.ide.eclipse.aop.feature.source" version="0.0.0">
 			<category name="Resources / Spring IDE" />
@@ -181,6 +180,7 @@
 		<category-def name="Integrations / Spring IDE" label="Integrations / Spring IDE" />
 		<category-def name="Resources / Spring IDE" label="Resources / Spring IDE" />
 		
+		<bundle id="org.springsource.ide.eclipse.commons.boot.ls" version="0.0.0"/>
 		<bundle id="org.springsource.ide.eclipse.commons.content.core" version="0.0.0"/>
 		<bundle id="org.springsource.ide.eclipse.commons.core" version="0.0.0"/>
 		<bundle id="org.springsource.ide.eclipse.commons.frameworks.core" version="0.0.0"/>
