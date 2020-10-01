@@ -183,7 +183,6 @@
 		<bundle id="org.springsource.ide.eclipse.commons.boot.ls" version="0.0.0"/>
 		<bundle id="org.springsource.ide.eclipse.commons.boot.ls.source" version="0.0.0"/>
 		<bundle id="org.springsource.ide.eclipse.commons.content.core" version="0.0.0"/>
-		<bundle id="org.springsource.ide.eclipse.commons.content.core.source" version="0.0.0"/>
 		<bundle id="org.springsource.ide.eclipse.commons.core" version="0.0.0"/>
 		<bundle id="org.springsource.ide.eclipse.commons.core.source" version="0.0.0"/>
 		<bundle id="org.springsource.ide.eclipse.commons.frameworks.core" version="0.0.0"/>
