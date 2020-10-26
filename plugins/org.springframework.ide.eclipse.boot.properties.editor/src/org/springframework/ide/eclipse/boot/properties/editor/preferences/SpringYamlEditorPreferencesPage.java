@@ -35,7 +35,8 @@ public class SpringYamlEditorPreferencesPage extends AbstractProblemSeverityPref
 
 	@Override
 	protected String getEnableProjectPreferencesKey() {
-		return util.ENABLE_PROJECT_PREFERENCES(EditorType.YAML);
+		//TODO: replace PreferenceConstants.severityUtils with super.util
+		return PreferenceConstants.severityUtils.ENABLE_PROJECT_PREFERENCES(EditorType.YAML);
 	}
 
 	@Override
