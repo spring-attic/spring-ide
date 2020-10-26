@@ -29,6 +29,7 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.springframework.ide.eclipse.boot.properties.editor.DocumentContextFinder;
 import org.springframework.ide.eclipse.boot.properties.editor.IReconcileTrigger;
 import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEditorPlugin;
+import org.springframework.ide.eclipse.boot.properties.editor.preferences.PreferenceConstants;
 import org.springframework.ide.eclipse.editor.support.preferences.ProblemSeverityPreferencesUtil;
 import org.springframework.ide.eclipse.editor.support.reconcile.IReconcileEngine;
 import org.springframework.ide.eclipse.editor.support.reconcile.ReconcileStrategy;
@@ -95,7 +96,7 @@ public class SpringPropertiesReconcileStrategy extends ReconcileStrategy impleme
 
 	@Override
 	public void propertyChange(PropertyChangeEvent event) {
-		if (event.getProperty().startsWith(ProblemSeverityPreferencesUtil.PREFERENCE_PREFIX)) {
+		if (event.getProperty().startsWith(PreferenceConstants.severityUtils.PREFERENCE_PREFIX)) {
 			fReconcileTrigger.forceReconcile();
 		}
 	}

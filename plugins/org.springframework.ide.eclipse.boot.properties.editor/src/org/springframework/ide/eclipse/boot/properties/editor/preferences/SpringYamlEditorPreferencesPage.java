@@ -16,7 +16,6 @@ import org.springframework.ide.eclipse.boot.properties.editor.SpringPropertiesEd
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType;
 import org.springframework.ide.eclipse.editor.support.preferences.AbstractProblemSeverityPreferencesPage;
 import org.springframework.ide.eclipse.editor.support.preferences.EditorType;
-import org.springframework.ide.eclipse.editor.support.preferences.ProblemSeverityPreferencesUtil;
 import org.springframework.ide.eclipse.editor.support.reconcile.ProblemType;
 
 import com.google.common.collect.ImmutableList;
@@ -26,13 +25,17 @@ import com.google.common.collect.ImmutableList;
  */
 public class SpringYamlEditorPreferencesPage extends AbstractProblemSeverityPreferencesPage {
 
+	public SpringYamlEditorPreferencesPage() {
+		super(PreferenceConstants.severityUtils);
+	}
+
 	protected List<ProblemType> getProblemTypes() {
 		return ImmutableList.copyOf(SpringPropertiesProblemType.FOR_YAML);
 	}
 
 	@Override
 	protected String getEnableProjectPreferencesKey() {
-		return ProblemSeverityPreferencesUtil.ENABLE_PROJECT_PREFERENCES(EditorType.YAML);
+		return util.ENABLE_PROJECT_PREFERENCES(EditorType.YAML);
 	}
 
 	@Override

@@ -23,6 +23,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.springframework.ide.eclipse.boot.properties.editor.metadata.PropertyInfo;
+import org.springframework.ide.eclipse.boot.properties.editor.preferences.PreferenceConstants;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.IgnoreProblemTypeInProjectQuickfix;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.IgnoreProblemTypeInWorkspaceQuickfix;
 import org.springframework.ide.eclipse.boot.properties.editor.quickfix.ReplaceDeprecatedPropertyQuickfix;
@@ -132,7 +133,7 @@ public class SpringPropertyProblem implements ReconcileProblem, FixableProblem {
 	}
 
 	public List<ICompletionProposal> getQuickfixes(QuickfixContext context) {
-		List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>(2);
+		List<ICompletionProposal> proposals = new ArrayList<>(2);
 
 		addProvidedFixes(context, proposals);
 		addUnknownPropertyFixes(context, proposals);
@@ -152,7 +153,7 @@ public class SpringPropertyProblem implements ReconcileProblem, FixableProblem {
 		SpringPropertiesProblemType problemType = getType();
 		EditorType editorType = problemType.getEditorType();
 		proposals.add(new IgnoreProblemTypeInProjectQuickfix(context, problemType));
-		if (!ProblemSeverityPreferencesUtil.projectPreferencesEnabled(projectPrefs, editorType)) {
+		if (!PreferenceConstants.severityUtils.projectPreferencesEnabled(projectPrefs, editorType)) {
 			//Workspace wide settings are only effective projectPrefs are still disabled. If project prefs
 			// are already enabled then setting global pref will have no effect!
 			proposals.add(new IgnoreProblemTypeInWorkspaceQuickfix(context.getWorkspacePreferences(), getType()));

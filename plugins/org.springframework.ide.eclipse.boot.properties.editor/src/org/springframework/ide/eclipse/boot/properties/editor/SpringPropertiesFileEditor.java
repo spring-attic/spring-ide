@@ -22,6 +22,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.ui.IEditorInput;
+import org.springframework.ide.eclipse.boot.properties.editor.preferences.PreferenceConstants;
 import org.springframework.ide.eclipse.boot.properties.editor.util.Listener;
 import org.springframework.ide.eclipse.boot.properties.editor.util.SpringPropertiesIndexManager;
 import org.springframework.ide.eclipse.editor.support.preferences.ProblemSeverityPreferencesUtil;
@@ -75,7 +76,7 @@ public class SpringPropertiesFileEditor extends PropertiesFileEditor implements 
 
 	@Override
 	public void propertyChange(PropertyChangeEvent event) {
-		if (event.getProperty().startsWith(ProblemSeverityPreferencesUtil.PREFERENCE_PREFIX)) {
+		if (event.getProperty().startsWith(PreferenceConstants.severityUtils.PREFERENCE_PREFIX)) {
 			if (fSourceViewerConf!=null) {
 				fSourceViewerConf.forceReconcile();
 			}

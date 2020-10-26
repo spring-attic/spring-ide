@@ -15,8 +15,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.springframework.ide.eclipse.editor.support.preferences.ProblemSeverityPreferencesUtil.getSeverity;
 import static org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity.IGNORE;
+
+import static org.springframework.ide.eclipse.boot.properties.editor.preferences.PreferenceConstants.severityUtils;
 
 import java.util.EnumSet;
 
@@ -41,13 +42,13 @@ public class IgnoreProblemTypeInProjectQuickfixTests extends TestCase {
 			IgnoreProblemTypeInWorkspaceQuickfix quickfix = new IgnoreProblemTypeInWorkspaceQuickfix(prefs, problemType);
 
 			//Check situation before test (if these check fail, test may be vacuous)
-			assertNotEquals(IGNORE, getSeverity(prefs, problemType));
+			assertNotEquals(IGNORE, severityUtils.getSeverity(prefs, problemType));
 
 			//The test
 			quickfix.apply(document);
 
 			//Verify expectations
-			assertEquals(IGNORE, getSeverity(prefs, problemType));
+			assertEquals(IGNORE, severityUtils.getSeverity(prefs, problemType));
 			verify(prefs).save(); // save was called ...
 			assertFalse(prefs.needsSaving()); // ... after storing stuffs (not before :-)
 

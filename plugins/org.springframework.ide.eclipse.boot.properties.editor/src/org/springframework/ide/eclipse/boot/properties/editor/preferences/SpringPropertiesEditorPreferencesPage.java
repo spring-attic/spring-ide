@@ -27,13 +27,17 @@ import com.google.common.collect.ImmutableList;
  */
 public class SpringPropertiesEditorPreferencesPage extends AbstractProblemSeverityPreferencesPage {
 
+	public SpringPropertiesEditorPreferencesPage() {
+		super(PreferenceConstants.severityUtils);
+	}
+
 	protected List<ProblemType> getProblemTypes() {
 		return ImmutableList.copyOf(SpringPropertiesProblemType.FOR_PROPERTIES);
 	}
 
 	@Override
 	protected String getEnableProjectPreferencesKey() {
-		return ProblemSeverityPreferencesUtil.ENABLE_PROJECT_PREFERENCES(EditorType.PROP);
+		return util.ENABLE_PROJECT_PREFERENCES(EditorType.PROP);
 	}
 
 	@Override

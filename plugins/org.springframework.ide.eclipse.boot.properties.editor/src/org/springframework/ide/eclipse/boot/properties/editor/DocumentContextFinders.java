@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
+import org.springframework.ide.eclipse.boot.properties.editor.preferences.PreferenceConstants;
 import org.springframework.ide.eclipse.editor.support.preferences.EditorType;
 import org.springframework.ide.eclipse.editor.support.preferences.PreferencesBasedSeverityProvider;
 import org.springframework.ide.eclipse.editor.support.reconcile.SeverityProvider;
@@ -43,7 +44,7 @@ public class DocumentContextFinders {
 				if (p!=null) {
 					projectPrefs = new ScopedPreferenceStore(new ProjectScope(p), SpringPropertiesEditorPlugin.PLUGIN_ID);
 				}
-				return new PreferencesBasedSeverityProvider(
+				return new PreferencesBasedSeverityProvider(PreferenceConstants.severityUtils,
 						projectPrefs,
 						new ScopedPreferenceStore(InstanceScope.INSTANCE, SpringPropertiesEditorPlugin.PLUGIN_ID),
 						editorType

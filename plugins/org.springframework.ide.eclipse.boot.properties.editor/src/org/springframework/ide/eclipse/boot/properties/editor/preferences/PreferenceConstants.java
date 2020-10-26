@@ -10,11 +10,15 @@
  *******************************************************************************/
 package org.springframework.ide.eclipse.boot.properties.editor.preferences;
 
+import org.springframework.ide.eclipse.editor.support.preferences.ProblemSeverityPreferencesUtil;
+
 public class PreferenceConstants {
 
 	public static final String AUTO_CONFIGURE_APT_M2E_PREF = "org.springframework.ide.eclipse.apt.autoconfigure.m2e";
 	public static final boolean AUTO_CONFIGURE_APT_M2E_DEFAULT = true;
 	public static final String AUTO_CONFIGURE_APT_GRADLE_PREF = "org.springframework.ide.eclipse.apt.autoconfigure.gradle";
 	public static final boolean AUTO_CONFIGURE_APT_GRADLE_DEFAULT = true;
+
+	public static final ProblemSeverityPreferencesUtil severityUtils = new ProblemSeverityPreferencesUtil("spring.properties.editor.problem.");
 
 }

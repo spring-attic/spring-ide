@@ -30,6 +30,8 @@ import org.springframework.ide.eclipse.editor.support.preferences.ProblemSeverit
 import org.springframework.ide.eclipse.editor.support.reconcile.QuickfixContext;
 import org.springframework.ide.eclipse.editor.support.util.UserInteractions;
 
+import static org.springframework.ide.eclipse.boot.properties.editor.preferences.PreferenceConstants.severityUtils;
+
 import junit.framework.TestCase;
 
 /**
@@ -113,7 +115,7 @@ public class QuickfixCreationTests extends TestCase {
 		UserInteractions ui = mock(UserInteractions.class);
 		QuickfixContext context = mockQuickFixContext("foo", workspacePrefs, projectPrefs, ui);
 
-		ProblemSeverityPreferencesUtil.enableProjectPrefs(projectPrefs, editorType, true);
+		severityUtils.enableProjectPrefs(projectPrefs, editorType, true);
 
 		List<ICompletionProposal> fixes = problem.getQuickfixes(context);
 

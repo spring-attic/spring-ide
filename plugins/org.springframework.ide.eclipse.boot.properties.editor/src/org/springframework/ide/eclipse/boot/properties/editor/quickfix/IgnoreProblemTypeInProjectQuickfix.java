@@ -20,11 +20,14 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.springframework.ide.eclipse.boot.properties.editor.preferences.PreferenceConstants;
 import org.springframework.ide.eclipse.boot.properties.editor.reconciling.SpringPropertiesProblemType;
 import org.springframework.ide.eclipse.editor.support.preferences.EditorType;
 import org.springframework.ide.eclipse.editor.support.preferences.ProblemSeverityPreferencesUtil;
 import org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity;
 import org.springframework.ide.eclipse.editor.support.reconcile.QuickfixContext;
+
+import static org.springframework.ide.eclipse.boot.properties.editor.preferences.PreferenceConstants.severityUtils;
 
 /**
  * Quickfix proposal to change a particular problem type's severity to 'Ignore' in
@@ -50,20 +53,20 @@ public class IgnoreProblemTypeInProjectQuickfix implements ICompletionProposal {
 	@Override
 	public void apply(IDocument document) {
 		EditorType et = problemType.getEditorType();
-		if (!projectPreferencesEnabled(projectPrefs, et)) {
+		if (!severityUtils.projectPreferencesEnabled(projectPrefs, et)) {
 			//Tricky: if project preferences are not yet enabled, enabling them may 'revert' some
 			//globally changed preferences back to their default values.
 			//Avoid that confusing behavior by copying the preferences that would change from workspace to project level.
 			for (SpringPropertiesProblemType problemType : SpringPropertiesProblemType.FOR(et)) {
-				ProblemSeverity currentEffectiveValue = getSeverity(workspacePrefs, problemType);
-				ProblemSeverity currentProjectValue = getSeverity(projectPrefs, problemType);
+				ProblemSeverity currentEffectiveValue = severityUtils.getSeverity(workspacePrefs, problemType);
+				ProblemSeverity currentProjectValue = severityUtils.getSeverity(projectPrefs, problemType);
 				if (!currentEffectiveValue.equals(currentProjectValue)) {
-					ProblemSeverityPreferencesUtil.setSeverity(projectPrefs, problemType, currentEffectiveValue);
+					severityUtils.setSeverity(projectPrefs, problemType, currentEffectiveValue);
 				}
 			}
-			enableProjectPrefs(projectPrefs, et, true);
+			severityUtils.enableProjectPrefs(projectPrefs, et, true);
 		}
-		setSeverity(projectPrefs, problemType, ProblemSeverity.IGNORE);
+		severityUtils.setSeverity(projectPrefs, problemType, ProblemSeverity.IGNORE);
 		save(projectPrefs);
 	}
 

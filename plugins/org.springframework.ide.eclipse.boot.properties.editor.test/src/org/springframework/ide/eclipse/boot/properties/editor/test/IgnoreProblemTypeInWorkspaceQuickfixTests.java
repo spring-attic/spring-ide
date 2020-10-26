@@ -16,10 +16,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-import static org.springframework.ide.eclipse.editor.support.preferences.ProblemSeverityPreferencesUtil.enableProjectPrefs;
-import static org.springframework.ide.eclipse.editor.support.preferences.ProblemSeverityPreferencesUtil.getSeverity;
-import static org.springframework.ide.eclipse.editor.support.preferences.ProblemSeverityPreferencesUtil.projectPreferencesEnabled;
-import static org.springframework.ide.eclipse.editor.support.preferences.ProblemSeverityPreferencesUtil.setSeverity;
+import static org.springframework.ide.eclipse.boot.properties.editor.preferences.PreferenceConstants.severityUtils;
 import static org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity.IGNORE;
 import static org.springframework.ide.eclipse.editor.support.reconcile.ProblemSeverity.WARNING;
 
@@ -48,8 +45,8 @@ public class IgnoreProblemTypeInWorkspaceQuickfixTests extends TestCase {
 			IDocument document = mock(IDocument.class);
 
 			//Check situation before test (if these check fail, test may be vacuous)
-			assertNotEquals(IGNORE, getSeverity(projectPrefs, problemType));
-			enableProjectPrefs(projectPrefs, editorType, true);
+			assertNotEquals(IGNORE, severityUtils.getSeverity(projectPrefs, problemType));
+			severityUtils.enableProjectPrefs(projectPrefs, editorType, true);
 
 			// Enable spies (do this only now to not spy on test setup itself)
 			projectPrefs = spy(projectPrefs);
@@ -66,12 +63,12 @@ public class IgnoreProblemTypeInWorkspaceQuickfixTests extends TestCase {
 			quickfix.apply(document);
 
 			//Verify expectations
-			assertEquals(IGNORE, getSeverity(projectPrefs, problemType));
+			assertEquals(IGNORE, severityUtils.getSeverity(projectPrefs, problemType));
 			for (SpringPropertiesProblemType pt : SpringPropertiesProblemType.FOR(editorType)) {
 				if (pt==problemType) {
-					assertEquals(IGNORE, getSeverity(projectPrefs, pt));
+					assertEquals(IGNORE, severityUtils.getSeverity(projectPrefs, pt));
 				} else {
-					assertEquals(pt.getDefaultSeverity(), getSeverity(projectPrefs, pt));
+					assertEquals(pt.getDefaultSeverity(), severityUtils.getSeverity(projectPrefs, pt));
 				}
 			}
 
@@ -91,14 +88,14 @@ public class IgnoreProblemTypeInWorkspaceQuickfixTests extends TestCase {
 
 			// The thing that matters is... if workspacePrefs are no longer at default.
 			for (SpringPropertiesProblemType pt : SpringPropertiesProblemType.FOR(editorType)) {
-				setSeverity(workspacePrefs, pt, WARNING);
+				severityUtils.setSeverity(workspacePrefs, pt, WARNING);
 			}
 
 			IDocument document = mock(IDocument.class);
 
 			//Check situation before test (if these check fail, test may be vacuous)
-			assertNotEquals(IGNORE, getSeverity(projectPrefs, problemType));
-			assertFalse(projectPreferencesEnabled(projectPrefs, editorType));
+			assertNotEquals(IGNORE, severityUtils.getSeverity(projectPrefs, problemType));
+			assertFalse(severityUtils.projectPreferencesEnabled(projectPrefs, editorType));
 
 			// Enable spies (do this only now to not spy on test setup itself)
 			projectPrefs = spy(projectPrefs);
@@ -115,13 +112,13 @@ public class IgnoreProblemTypeInWorkspaceQuickfixTests extends TestCase {
 			quickfix.apply(document);
 
 			//Verify expectations
-			assertTrue(projectPreferencesEnabled(projectPrefs, editorType));
-			assertEquals(IGNORE, getSeverity(projectPrefs, problemType));
+			assertTrue(severityUtils.projectPreferencesEnabled(projectPrefs, editorType));
+			assertEquals(IGNORE, severityUtils.getSeverity(projectPrefs, problemType));
 			for (SpringPropertiesProblemType pt : SpringPropertiesProblemType.FOR(editorType)) {
 				if (pt==problemType) {
-					assertEquals(IGNORE, getSeverity(projectPrefs, pt));
+					assertEquals(IGNORE, severityUtils.getSeverity(projectPrefs, pt));
 				} else {
-					assertEquals(getSeverity(workspacePrefs, pt), getSeverity(projectPrefs, pt));
+					assertEquals(severityUtils.getSeverity(workspacePrefs, pt), severityUtils.getSeverity(projectPrefs, pt));
 				}
 			}
 
