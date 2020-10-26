@@ -37,7 +37,8 @@ public class SpringPropertiesEditorPreferencesPage extends AbstractProblemSeveri
 
 	@Override
 	protected String getEnableProjectPreferencesKey() {
-		return util.ENABLE_PROJECT_PREFERENCES(EditorType.PROP);
+		//TODO: replace PreferenceConstants.severityUtils with super.util
+		return PreferenceConstants.severityUtils.ENABLE_PROJECT_PREFERENCES(EditorType.PROP);
 	}
 
 	@Override
