@@ -72,7 +72,7 @@
 		<dist.key>IDE</dist.key>
 		<dist.type>snapshot</dist.type>
 		<dist.pathpostfix>nightly</dist.pathpostfix>
-		<dist.path>${dist.type}/${dist.key}/${dist.pathpostfix}</dist.path>
+		<dist.path>${dist.type}/${dist.key}/${dist.pathpostfix}/${dist.path.target}</dist.path>
 		<dist.bucket>dist.springframework.org</dist.bucket>
 		<dist.properties>dist.properties</dist.properties>
 
@@ -225,6 +225,7 @@
 			<id>e416</id>
 			<properties>
 				<p2.repository.name>Spring IDE for Eclipse 4.16</p2.repository.name>
+				<dist.path.target>e4.16</dist.path.target>
 			</properties>
 			<repositories>
 				<repository>
@@ -279,6 +280,7 @@
 			<id>e417</id>
 			<properties>
 				<p2.repository.name>Spring IDE for Eclipse 4.17</p2.repository.name>
+				<dist.path.target>e4.17</dist.path.target>
 			</properties>
 			<repositories>
 				<repository>
@@ -333,6 +335,7 @@
 			<id>e418</id>
 			<properties>
 				<p2.repository.name>Spring IDE for Eclipse 4.18</p2.repository.name>
+				<dist.path.target>e4.18</dist.path.target>
 			</properties>
 			<repositories>
 				<repository>
