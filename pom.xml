@@ -87,7 +87,7 @@
 <!--		<test.vmargs>${test.osvmargs} -Dspring.initializr.json.url=https://start.spring.io</test.vmargs> -->
 
 		<!-- STS4 release version to be used -->
-		<sts4-release-version>4.8.1.RELEASE</sts4-release-version>
+		<sts4-release-version>4.9.0.RELEASE</sts4-release-version>
 	</properties>
 
 	<modules>
@@ -268,16 +268,16 @@
 					<layout>p2</layout>
 					<url>https://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}</url>
 				</repository>
-<!--				<repository>
-					<id>sts4</id>
-					<layout>p2</layout>
-					<url>https://dist.springsource.com/release/TOOLS/sts4/update/${sts4-release-version}/e4.16</url>
-				</repository> -->
 				<repository>
 					<id>sts4</id>
 					<layout>p2</layout>
-					<url>https://dist.springsource.com/snapshot/TOOLS/sts4/nightly/e4.16</url>
+					<url>https://dist.springsource.com/release/TOOLS/sts4/update/${sts4-release-version}/e4.16</url>
 				</repository>
+<!--				<repository>
+					<id>sts4</id>
+					<layout>p2</layout>
+					<url>https://dist.springsource.com/snapshot/TOOLS/sts4/nightly/e4.16</url>
+				</repository> -->
 			</repositories>
 		</profile>
 
@@ -328,16 +328,16 @@
 					<layout>p2</layout>
 					<url>https://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}</url>
 				</repository>
-<!--				<repository>
-					<id>sts4</id>
-					<layout>p2</layout>
-					<url>https://dist.springsource.com/release/TOOLS/sts4/update/${sts4-release-version}/e4.17</url>
-				</repository> -->
 				<repository>
 					<id>sts4</id>
 					<layout>p2</layout>
-					<url>https://dist.springsource.com/snapshot/TOOLS/sts4/nightly/e4.17</url>
+					<url>https://dist.springsource.com/release/TOOLS/sts4/update/${sts4-release-version}/e4.17</url>
 				</repository>
+<!--				<repository>
+					<id>sts4</id>
+					<layout>p2</layout>
+					<url>https://dist.springsource.com/snapshot/TOOLS/sts4/nightly/e4.17</url>
+				</repository> -->
 			</repositories>
 		</profile>
 
@@ -393,16 +393,16 @@
 					<layout>p2</layout>
 					<url>https://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}</url>
 				</repository>
-<!--				<repository>
-					<id>sts4</id>
-					<layout>p2</layout>
-					<url>https://dist.springsource.com/release/TOOLS/sts4/update/${sts4-release-version}/e4.18</url>
-				</repository> -->
 				<repository>
 					<id>sts4</id>
 					<layout>p2</layout>
-					<url>https://dist.springsource.com/snapshot/TOOLS/sts4/nightly/e4.18</url>
+					<url>https://dist.springsource.com/release/TOOLS/sts4/update/${sts4-release-version}/e4.18</url>
 				</repository>
+<!--				<repository>
+					<id>sts4</id>
+					<layout>p2</layout>
+					<url>https://dist.springsource.com/snapshot/TOOLS/sts4/nightly/e4.18</url>
+				</repository> -->
 			</repositories>
 		</profile>
 
