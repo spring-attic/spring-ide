@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Spring Configuration Editor Tests
 Bundle-SymbolicName: org.springframework.ide.eclipse.config.tests;singleton:=true
-Bundle-Version: 3.9.15.qualifier
+Bundle-Version: 3.9.16.qualifier
 Bundle-Vendor: Spring IDE Developers
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Require-Bundle: org.junit;bundle-version="4.8.0",
