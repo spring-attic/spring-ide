@@ -87,7 +87,7 @@
 <!--		<test.vmargs>${test.osvmargs} -Dspring.initializr.json.url=https://start.spring.io</test.vmargs> -->
 
 		<!-- STS4 release version to be used -->
-		<sts4-release-version>4.9.0.RELEASE</sts4-release-version>
+		<sts4-release-version>4.10.0.RELEASE</sts4-release-version>
 	</properties>
 
 	<modules>
@@ -268,16 +268,16 @@
 					<layout>p2</layout>
 					<url>https://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}</url>
 				</repository>
-<!--				<repository>
-					<id>sts4</id>
-					<layout>p2</layout>
-					<url>https://dist.springsource.com/release/TOOLS/sts4/update/${sts4-release-version}/e4.18</url>
-				</repository> -->
 				<repository>
 					<id>sts4</id>
 					<layout>p2</layout>
-					<url>https://dist.springsource.com/snapshot/TOOLS/sts4/nightly/e4.18</url>
+					<url>https://dist.springsource.com/release/TOOLS/sts4/update/${sts4-release-version}/e4.18</url>
 				</repository>
+<!--				<repository>
+					<id>sts4</id>
+					<layout>p2</layout>
+					<url>https://dist.springsource.com/snapshot/TOOLS/sts4/nightly/e4.18</url>
+				</repository> -->
 			</repositories>
 		</profile>
 
@@ -301,7 +301,7 @@
 				<repository>
 					<id>orbit</id>
 					<layout>p2</layout>
-					<url>https://download.eclipse.org/tools/orbit/downloads/drops/S20210216215844/repository</url>
+					<url>https://download.eclipse.org/tools/orbit/downloads/drops/R20210223232630/repository</url>
 				</repository>
 				<repository>
 					<id>ajdt</id>
@@ -333,16 +333,16 @@
 					<layout>p2</layout>
 					<url>https://dist.springsource.com/${dist.type}/TOOLS/eclipse-integration-commons/${dist.pathpostfix}</url>
 				</repository>
-<!--				<repository>
-					<id>sts4</id>
-					<layout>p2</layout>
-					<url>https://dist.springsource.com/release/TOOLS/sts4/update/${sts4-release-version}/e4.19</url>
-				</repository> -->
 				<repository>
 					<id>sts4</id>
 					<layout>p2</layout>
-					<url>https://dist.springsource.com/snapshot/TOOLS/sts4/nightly/e4.19</url>
+					<url>https://dist.springsource.com/release/TOOLS/sts4/update/${sts4-release-version}/e4.19</url>
 				</repository>
+<!--				<repository>
+					<id>sts4</id>
+					<layout>p2</layout>
+					<url>https://dist.springsource.com/snapshot/TOOLS/sts4/nightly/e4.19</url>
+				</repository> -->
 			</repositories>
 		</profile>
 
