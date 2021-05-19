@@ -276,6 +276,8 @@ public ${String} ${get}(${}) {
             id="org.springframework.ide.eclipse.quickfix.jdt.AddImportsQuickFixProcessor">
       </quickFixProcessor>
   </extension>
+
+<!--
   <extension
         point="org.eclipse.ui.workbench.texteditor.hyperlinkDetectors">
      <hyperlinkDetector
@@ -287,6 +289,6 @@ public ${String} ${get}(${}) {
            targetId="org.eclipse.jdt.ui.javaCode">
      </hyperlinkDetector>
   </extension>
- 
+-->
 
 </plugin>
