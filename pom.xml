@@ -64,8 +64,7 @@
 
 		<!-- Signing -->
 		<signing.skip>true</signing.skip>
-		<signing.alias>pivotal</signing.alias>
-		<signing.keystore>~/.keytool/pivotal.jks</signing.keystore>
+		<signing.alias>vmware</signing.alias>
 
 		<dist.name>Spring IDE</dist.name>
 		<dist.project>spring-ide</dist.project>
