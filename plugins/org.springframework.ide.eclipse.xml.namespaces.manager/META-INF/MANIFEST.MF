@@ -38,7 +38,7 @@ DynamicImport-Package: org.apache.xerces.*,
  org.springframework.core.*;version="[4.0.0,4.4.0)",
  org.springframework.util.*;version="[4.0.0,4.4.0)"
 Bundle-Activator: org.springframework.ide.eclipse.xml.namespaces.manager.SpringXmlNamespacesManagerPlugin
-Bundle-Version: 3.9.17.qualifier
+Bundle-Version: 3.9.18.qualifier
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.google.guava,
  org.springframework.ide.eclipse.xml.namespaces;bundle-version="3.9.9"
