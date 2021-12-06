@@ -88,7 +88,7 @@
 <!--		<test.vmargs>${test.osvmargs} -Dspring.initializr.json.url=https://start.spring.io</test.vmargs> -->
 
 		<!-- STS4 release version to be used -->
-		<sts4-release-version>4.12.1.RELEASE</sts4-release-version>
+		<sts4-release-version>4.13.0.RELEASE</sts4-release-version>
 	</properties>
 
 	<modules>
@@ -492,7 +492,7 @@
 				<repository>
 					<id>orbit</id>
 					<layout>p2</layout>
-					<url>https://download.eclipse.org/tools/orbit/downloads/drops/S20211020204107/repository</url>
+					<url>https://download.eclipse.org/tools/orbit/downloads/drops/R20211122181901/repository</url>
 				</repository>
 				<repository>
 					<id>ajdt</id>
