@@ -226,6 +226,8 @@
 		<bundle id="javax.inject.source" version="0.0.0"/>
 		<bundle id="javax.jms" version="0.0.0"/>
 		<bundle id="javax.jms.source" version="0.0.0"/>
+		<bundle id="javax.servlet" version="0.0.0"/>
+		<bundle id="javax.servlet.source" version="0.0.0"/>
 		<bundle id="javax.validation" version="0.0.0"/>
 		<bundle id="javax.validation.source" version="0.0.0"/>
 		<bundle id="javax.ws.rs" version="0.0.0"/>
