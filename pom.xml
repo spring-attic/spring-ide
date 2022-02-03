@@ -88,7 +88,7 @@
 <!--		<test.vmargs>${test.osvmargs} -Dspring.initializr.json.url=https://start.spring.io</test.vmargs> -->
 
 		<!-- STS4 release version to be used -->
-		<sts4-release-version>4.13.0.RELEASE</sts4-release-version>
+		<sts4-release-version>4.13.1.RELEASE</sts4-release-version>
 	</properties>
 
 	<modules>
