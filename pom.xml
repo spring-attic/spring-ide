@@ -533,7 +533,7 @@
 		</profile>
 
 		<profile>
-			<id>e422</id>
+			<id>e423</id>
 			<properties>
 				<p2.repository.name>Spring IDE for Eclipse 4.23</p2.repository.name>
 				<dist.path.target>e4.23</dist.path.target>
@@ -592,7 +592,7 @@
 <!--				<repository>
 					<id>sts4</id>
 					<layout>p2</layout>
-					<url>https://dist.springsource.com/snapshot/TOOLS/sts4/nightly/e4.22</url>
+					<url>https://dist.springsource.com/snapshot/TOOLS/sts4/nightly/e4.23</url>
 				</repository> -->
 			</repositories>
 		</profile>
